@@ -3592,6 +3592,7 @@
  "lint.reason.over_limit": "más ficheros que lint.api.max_files_per_repo",
  "lint.help_remote": "Lee los ficheros de workflow de un repositorio desde GitHub (sin clon); se puede repetir.",
  "lint.remote_failed": "{name}: no se pudo leer ({reason}).",
+ "lint.path_unread": "{name}: no se pudo comprobar ({reason}); no cuenta como limpio.",
  "lint.remote_bad_name": "No es un nombre de repositorio (usa PROPIETARIO/REPO): {name}",
  "doctor.t.access": "El acceso puede leer la cuenta u organización",
  "doctor.f.access": "Un 403 o un 404 en una organización suele ser una de estas causas: el token no está autorizado para su inicio de sesión único SAML (autorízalo en Configure SSO en la página del token), le falta el alcance repo o read:org (o, en un token de grano fino, un permiso de lectura), o los repositorios son privados y el acceso no los ve. El detalle dice cuál.",
@@ -4519,5 +4520,8 @@
  "cli.screens_action": "screens: list o urls",
  "cli.screens_head": "{n} tipos de pantalla ({wall})",
  "cli.screens_wall_on": "pantallas de pared activadas",
- "cli.screens_wall_off": "pantallas de pared desactivadas"
+ "cli.screens_wall_off": "pantallas de pared desactivadas",
+ "cfg.f.startup.resume_max_age_hours": "Mostrar el último cuadro tras reiniciar (horas)",
+ "cfg.h.startup.resume_max_age_hours": "Horas. Tras un reinicio la página muestra al instante el último cuadro del monitor, marcado con su edad, mientras el primer ciclo lee GitHub y lo sustituye. El cuadro se guarda en last_picture.json junto al monitor después de cada ciclo; uno más viejo que esto no se muestra. 0 = el cuadro ni se guarda ni se muestra y se borra el fichero viejo.",
+ "ui.resumed": "Datos de hace {mins} min ({time}); leyendo GitHub…"
 }

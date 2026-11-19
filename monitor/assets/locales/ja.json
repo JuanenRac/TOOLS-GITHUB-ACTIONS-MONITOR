@@ -3592,6 +3592,7 @@
  "lint.reason.over_limit": "lint.api.max_files_per_repo を超えるファイル数",
  "lint.help_remote": "リポジトリのワークフローファイルを GitHub から読み取ります(クローン不要)。複数回指定できます。",
  "lint.remote_failed": "{name}:読み取れませんでした({reason})。",
+ "lint.path_unread": "{name}:確認できませんでした({reason})。問題なしとは数えません。",
  "lint.remote_bad_name": "リポジトリ名ではありません(OWNER/REPO の形式で指定): {name}",
  "doctor.t.access": "ログインでアカウントまたは組織を読み取れる",
  "doctor.f.access": "組織に対する 403 や 404 は、通常次のいずれかです。トークンが SAML シングルサインオンに対して承認されていない(トークンのページの Configure SSO で承認)、スコープ repo または read:org(細粒度トークンでは読み取り権限)が足りない、リポジトリが非公開でログインから見えない。詳細にどれかが示されます。",
@@ -4519,5 +4520,8 @@
  "cli.screens_action": "screens: list または urls",
  "cli.screens_head": "{n} 種類の画面（{wall}）",
  "cli.screens_wall_on": "壁画面はオン",
- "cli.screens_wall_off": "壁画面はオフ"
+ "cli.screens_wall_off": "壁画面はオフ",
+ "cfg.f.startup.resume_max_age_hours": "再起動後に最後の画面を表示する(時間)",
+ "cfg.h.startup.resume_max_age_hours": "時間。再起動後、最初のサイクルが GitHub を読んで置き換えるまでの間、モニターの最後の画面を経過時間付きですぐに表示します。画面は各サイクルの後にモニターの隣の last_picture.json に保存され、これより古いものは表示されません。0 = 画面を保存も表示もせず、古いファイルは削除されます。",
+ "ui.resumed": "{mins} 分前のデータ({time})。GitHub を読み込み中…"
 }

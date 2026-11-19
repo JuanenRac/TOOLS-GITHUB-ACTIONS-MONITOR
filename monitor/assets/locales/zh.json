@@ -3592,6 +3592,7 @@
  "lint.reason.over_limit": "文件数超过 lint.api.max_files_per_repo",
  "lint.help_remote": "从 GitHub 读取仓库的工作流文件(无需克隆);可重复使用。",
  "lint.remote_failed": "{name}:无法读取({reason})。",
+ "lint.path_unread": "{name}:无法检查({reason});不算作干净。",
  "lint.remote_bad_name": "不是仓库名称(请使用 OWNER/REPO): {name}",
  "doctor.t.access": "该登录可以读取账号或组织",
  "doctor.f.access": "对组织出现 403 或 404,通常是以下原因之一:令牌未获其 SAML 单点登录授权(在令牌页面的 Configure SSO 中授权),缺少 repo 或 read:org 权限范围(细粒度令牌则缺少读取权限),或者仓库是私有的而该登录看不到。详情会指出是哪一种。",
@@ -4519,5 +4520,8 @@
  "cli.screens_action": "screens：list 或 urls",
  "cli.screens_head": "{n} 种屏幕（{wall}）",
  "cli.screens_wall_on": "墙屏已开启",
- "cli.screens_wall_off": "墙屏已关闭"
+ "cli.screens_wall_off": "墙屏已关闭",
+ "cfg.f.startup.resume_max_age_hours": "重启后显示最后一幅画面(小时)",
+ "cfg.h.startup.resume_max_age_hours": "小时。重启后,在第一个周期读取 GitHub 并替换之前,页面会立即显示监视器的最后一幅画面并标明其时间。每个周期结束后,画面保存在监视器旁的 last_picture.json 中;比此更旧的不会显示。0 = 不保存也不显示画面,并删除旧文件。",
+ "ui.resumed": "{mins} 分钟前的数据({time});正在读取 GitHub…"
 }

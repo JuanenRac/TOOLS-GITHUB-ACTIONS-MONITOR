@@ -3592,6 +3592,7 @@
  "lint.reason.over_limit": "mehr Dateien als lint.api.max_files_per_repo",
  "lint.help_remote": "Liest die Workflow-Dateien eines Repositorys von GitHub (ohne Klon); wiederholbar.",
  "lint.remote_failed": "{name}: konnte nicht gelesen werden ({reason}).",
+ "lint.path_unread": "{name}: konnte nicht geprüft werden ({reason}); es gilt nicht als sauber.",
  "lint.remote_bad_name": "Kein Repository-Name (OWNER/REPO verwenden): {name}",
  "doctor.t.access": "Der Zugang kann das Konto oder die Organisation lesen",
  "doctor.f.access": "Ein 403 oder 404 bei einer Organisation hat meist eine dieser Ursachen: Das Token ist für das SAML-Single-Sign-on nicht autorisiert (unter Configure SSO auf der Token-Seite freigeben), ihm fehlt der Scope repo oder read:org (bei einem fein abgestuften Token eine Leseberechtigung), oder die Repositories sind privat und der Zugang sieht sie nicht. Die Angabe nennt, welche.",
@@ -4519,5 +4520,8 @@
  "cli.screens_action": "screens: list oder urls",
  "cli.screens_head": "{n} Arten von Bildschirmen ({wall})",
  "cli.screens_wall_on": "Wandbildschirme an",
- "cli.screens_wall_off": "Wandbildschirme aus"
+ "cli.screens_wall_off": "Wandbildschirme aus",
+ "cfg.f.startup.resume_max_age_hours": "Letztes Bild nach einem Neustart zeigen (Stunden)",
+ "cfg.h.startup.resume_max_age_hours": "Stunden. Nach einem Neustart zeigt die Seite sofort das letzte Bild des Monitors, mit seinem Alter gekennzeichnet, während der erste Zyklus GitHub liest und es ersetzt. Das Bild wird nach jedem Zyklus in last_picture.json neben dem Monitor aufbewahrt; ein älteres wird nicht gezeigt. 0 = das Bild wird weder aufbewahrt noch gezeigt, und eine alte Datei wird gelöscht.",
+ "ui.resumed": "Daten von vor {mins} Min. ({time}); GitHub wird gelesen…"
 }
