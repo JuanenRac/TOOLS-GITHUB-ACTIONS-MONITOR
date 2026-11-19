@@ -169,13 +169,14 @@ class OverHttp(unittest.TestCase):
 class TheSkills(unittest.TestCase):
     def test_the_skill_for_outside_tools_names_the_typed_client_and_the_commands(self):
         text = (HERE / "skills" / "external" / "SKILL.md").read_text(encoding="utf-8") + (HERE / "skills" / "external" / "references" / "connect.md").read_text(encoding="utf-8")
-        for word in ("/api/v1/me", "/api/v1/openapi.json", "api openapi", "api me", "api.v1_enabled"):
+        for word in ("/api/v1/me", "/api/v1/openapi.json", "api openapi", "api me", "api contract-check", "api_contract_suite.py", "cli.prefer_v1", "api.v1_enabled"):
             self.assertIn(word, text, word)
         for name in ("external", "internal"):
             refs_text = (HERE / "skills" / name / "references" / "api.md").read_text(encoding="utf-8")
             for route in api_v1.OWN_ROUTES[:2]:
                 self.assertIn(f"`{route}`", refs_text, (name, route))
             self.assertIn("api.experimental_routes", refs_text, name)
+            self.assertIn("`cli.prefer_v1`", (HERE / "skills" / name / "references" / "settings.md").read_text(encoding="utf-8"), name)
 
 
 if __name__ == "__main__":
