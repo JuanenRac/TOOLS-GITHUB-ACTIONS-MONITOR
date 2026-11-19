@@ -185,7 +185,7 @@ LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-toke
 
 LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language", "runs_per_repo", "cold_runs_per_repo", "hot_hours", "stuck_minutes", "refresh_seconds", "cold_refresh_seconds")   # what a first lite start copies from actions_monitor.json
 HOT_FORCED = set()    # repositories a webhook event touched: they are read again in the next cycle
-HIDDEN = {"hidden": 0, "discovered": 0, "names": []}      # repositories of the account that the ecosystem filter leaves out, and how many the account has
+HIDDEN = {"hidden": 0, "discovered": 0, "names": [], "reasons": {}}      # repositories of the account that the ecosystem filter leaves out, and how many the account has
 
 
 def lite_inheritance(source):
@@ -668,7 +668,9 @@ def watched_repos(config, force=False):
                         announce_discovery(found, config)
                 DISCOVERED["snapshot"] = snapshot
                 items = [dict(item, isArchived=bool(item.get("isArchived"))) for item in data if not item.get("isArchived") or not rules["skip_archived"]]
-                DISCOVERED["names"] = sorted(discovery.lifecycle(items, config.get("discovery") or {}, fork_ci_answers(config, rules, items)))
+                answers = fork_ci_answers(config, rules, items)
+                DISCOVERED["names"] = sorted(discovery.lifecycle(items, config.get("discovery") or {}, answers))
+                DISCOVERED["reasons"] = discovery.exclusions(items, config.get("discovery") or {}, answers)
                 DISCOVERED["at"] = time.time()
         known = toolconfig.ecosystem_names(config)
         wanted_eco = config["ecosystems"]
@@ -678,6 +680,7 @@ def watched_repos(config, force=False):
         kept = set(names)
         left_out = [n for n in DISCOVERED["names"] if n not in kept]
         HIDDEN["discovered"], HIDDEN["hidden"], HIDDEN["names"] = len(DISCOVERED["names"]), len(left_out), left_out[:50]
+        HIDDEN["reasons"] = dict(DISCOVERED.get("reasons") or {})
         if discovery.settings(config)["suggest_groups"]:
             DISCOVERY["suggestions"] = discovery.suggest_groups([n for n in DISCOVERED["names"] if ecosystem_of(n) in ("other", "rest")], taken=set(known))
     skip = set(config["exclude"])
@@ -4016,7 +4019,7 @@ def discovery_payload():
     config = LIVE_CONFIG or toolconfig.raw_config()
     with LOCK:
         data = STATE.get("data") or {}
-    box = discovery.box(toolconfig.github_owner(config), len(data.get("repos") or []), HIDDEN["discovered"], HIDDEN["names"])
+    box = discovery.box(toolconfig.github_owner(config), len(data.get("repos") or []), HIDDEN["discovered"], HIDDEN["names"], HIDDEN["reasons"])
     from github_actions_monitor.data_pipeline import orgs
     organisations = orgs.view(toolconfig.raw_config(), lambda endpoint: gh_read(endpoint, retries=0), state_dir() / ("orgs_state_lite.json" if LITE["on"] else "orgs_state.json"), offline=True) if not DEMO["on"] else {"enabled": False, "orgs": [], "checked_at": 0}      # offline=True: it shows what the cycle read, it never reads
     return {**box, "events": list(reversed(DISCOVERY["events"]))[:20], "suggestions": DISCOVERY["suggestions"], "settings": discovery.settings(config), "owner_kind": FORKS["kind"], "forks": {k: FORKS[k] for k in ("checked", "kept", "left", "waiting")}, "demo": DEMO["on"], "organizations": organisations}

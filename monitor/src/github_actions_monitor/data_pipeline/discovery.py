@@ -7,7 +7,7 @@
   suggest_groups(unclassified, ...)  a prefix shared by three or more repositories that no group claims -> a suggested group; NEVER applied without a confirmation
   auto_frequency(...)                the hot / cold intervals the real activity asks for, inside the quota budget
   box(...)                           the "owner / watched / hidden" figures of the Basic tab
-Settings (all in the `discovery` block of the configuration): events (on), suggest_groups (on), auto_frequency (off), hide (a list of fork, empty, private: repositories of that kind are left out),
+Settings (all in the `discovery` block of the configuration): events (on), suggest_groups (on), auto_frequency (off), hide (a list of fork, empty, private, public: repositories of that kind are left out),
 skip_archived (on: archived repositories are left out), fork_policy (what to do with forks: show = all of them, skip = none, skip_unless_ci = only the ones that have a CI of their own,
 auto = skip_unless_ci with a window that depends on the kind of account), fork_ci_days (a fork counts as maintained when its CI ran this many days ago; 0 = an enabled workflow is enough),
 fork_checks_per_pass (how many forks are asked about in one listing), min_keep_pct (a listing that comes back empty, or with fewer than this percentage of the repositories of the last good one,
@@ -31,7 +31,7 @@ def settings(config):
     block = config.get("discovery") if isinstance(config, dict) and isinstance(config.get("discovery"), dict) else {}
     out = {key: block.get(key, default) is True for key, default in DEFAULTS.items() if isinstance(default, bool)}
     hide = block.get("hide")
-    out["hide"] = [w for w in hide if w in ("fork", "empty", "private")] if isinstance(hide, list) else []
+    out["hide"] = [w for w in hide if w in ("fork", "empty", "private", "public")] if isinstance(hide, list) else []
     out["fork_policy"] = block.get("fork_policy") if block.get("fork_policy") in FORK_POLICIES else DEFAULTS["fork_policy"]
     for key, low, high in (("fork_ci_days", 0, 365), ("fork_checks_per_pass", 1, 500), ("min_keep_pct", 0, 100)):
         value = block.get(key)
@@ -71,19 +71,40 @@ def diff(previous, current):
     return events
 
 
+def _reason(item, cfg, fork_ci):
+    """Why a repository of the listing is left out of the watch (archived, empty, private, public, fork) or None when it stays. A visibility that was not read (no `isPrivate` field) is never a reason."""
+    hide, policy = cfg["hide"], cfg["fork_policy"]
+    if item.get("isArchived") and cfg["skip_archived"]:
+        return "archived"
+    if "empty" in hide and item.get("isEmpty"):
+        return "empty"
+    if "private" in hide and item.get("isPrivate") is True:
+        return "private"
+    if "public" in hide and item.get("isPrivate") is False:
+        return "public"
+    if item.get("isFork") and (policy == "skip" or (policy in ("skip_unless_ci", "auto") and fork_ci.get(item["name"]) is not True)):
+        return "fork"
+    return None
+
+
 def lifecycle(items, rules, fork_ci=None):
     """`items` is [{"name", "isArchived", "isFork", "isEmpty", "isPrivate"}]; returns the names that stay. `fork_ci` is {name: True | False | None} (a fork with a CI of its own, without,
     not known yet): with the policy skip_unless_ci or auto only the forks answered True stay."""
     cfg = settings({"discovery": rules})
-    hide, policy, fork_ci = cfg["hide"], cfg["fork_policy"], fork_ci or {}
-    keep = []
+    fork_ci = fork_ci or {}
+    return [item["name"] for item in items if _reason(item, cfg, fork_ci) is None]
+
+
+def exclusions(items, rules, fork_ci=None):
+    """{reason: how many} for the repositories the lifecycle rules leave out (archived, empty, private, public, fork): the figure the Basic tab shows, so a repository left out by a filter is counted and never read as clean."""
+    cfg = settings({"discovery": rules})
+    fork_ci = fork_ci or {}
+    out = {}
     for item in items:
-        if (item.get("isArchived") and cfg["skip_archived"]) or ("empty" in hide and item.get("isEmpty")) or ("private" in hide and item.get("isPrivate")):
-            continue
-        if item.get("isFork") and (policy == "skip" or (policy in ("skip_unless_ci", "auto") and fork_ci.get(item["name"]) is not True)):
-            continue
-        keep.append(item["name"])
-    return keep
+        why = _reason(item, cfg, fork_ci)
+        if why:
+            out[why] = out.get(why, 0) + 1
+    return out
 
 
 def owner_kind(reader, owner):
@@ -170,8 +191,8 @@ def auto_frequency(config, runs_last_24h, repos, calls_per_hour_budget):
     return max(10, min(3600, hot)), max(60, min(86400, cold))
 
 
-def box(owner, watched, discovered, hidden_names):
-    return {"owner": owner, "watched": watched, "discovered": discovered, "hidden": len(hidden_names), "hidden_names": list(hidden_names)[:50]}
+def box(owner, watched, discovered, hidden_names, reasons=None):
+    return {"owner": owner, "watched": watched, "discovered": discovered, "hidden": len(hidden_names), "hidden_names": list(hidden_names)[:50], "excluded": {k: int(v) for k, v in sorted((reasons or {}).items())}}
 
 
 KEY_RE = re.compile(r"^[a-z0-9_]{1,40}\Z")
