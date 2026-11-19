@@ -15,6 +15,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Les verrous entre processus sont vérifiés dans le conteneur** : les contrôles du conteneur gagnent E9, qui démarre plusieurs processus de l'image sur un même volume partagé et compte ce qu'ils écrivent sous le verrou du système d'exploitation et sous le fichier verrou, de sorte qu'une mise à jour perdue apparaîtrait dans la preuve du workflow ; le test du fichier verrou s'exécute désormais aussi sous Windows.
+
 - **Le journal des prompts et l'origine des chiffres d'un modèle, dans la page** : sous l'IA dans les Réglages, une carte « Journal des prompts » montre les 20 dernières entrées (déjà nettoyées des secrets et de vos mots cachés) et vide le journal avec un bouton, pour un administrateur sur cet ordinateur ; le tableau des modèles a une colonne « Origine » (la page, le fichier `config/ai_models.json` ou le fournisseur) pour voir d'où vient chaque chiffre. Les deux dans les huit langues.
 
 - **Deux questions de plus pour l'assistant, toutes deux en lecture seule** : « la situation d'un dépôt » (`explain_repo`, d'après ses exécutions et ses alertes ouvertes) et « quoi faire en premier » (`prioritize`, les alertes ouvertes, l'état et le score mis en ordre avec leurs identifiants) s'ajoutent aux trois existantes ; elles utilisent les mêmes quatre outils, limites et budget quotidien de l'IA, et il n'y a toujours pas de discussion libre.

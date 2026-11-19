@@ -16,6 +16,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- **The locks between processes are checked inside the container**: the container checks gain E9, which starts several processes of the image against one shared volume and counts what they write under the lock of the operating system and under the lock file, so a lost update would show in the evidence of the workflow; the test of the lock file now runs on Windows too.
+
 - **The record of prompts and the origin of the figures of a model, in the page**: under the AI in Settings, a card "Record of prompts" shows the last 20 entries (already cleaned of secrets and of your hidden words) and empties the record with a button, for an administrator on this computer; the table of models has a column "Origin" (the page, the file `config/ai_models.json` or the provider) so you can see where each figure comes from. Both in the eight languages.
 
 - **Two more questions for the assistant, both read-only**: "the situation of a repository" (`explain_repo`, from its runs and its open alerts) and "what to do first" (`prioritize`, the open alerts, the status and the score put in order with their ids) join the three that existed; they use the same four tools, limits and daily budget of the AI, and there is still no free chat.

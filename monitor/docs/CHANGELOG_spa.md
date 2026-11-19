@@ -15,6 +15,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Añadido
 
+- **Los candados entre procesos se comprueban dentro del contenedor**: las comprobaciones del contenedor ganan E9, que arranca varios procesos de la imagen contra un mismo volumen compartido y cuenta lo que escriben bajo el candado del sistema operativo y bajo el fichero candado, de modo que una actualización perdida se vería en la evidencia del workflow; la prueba del fichero candado también se ejecuta ya en Windows.
+
 - **El registro de prompts y el origen de las cifras de un modelo, en la página**: bajo la IA en Ajustes, una tarjeta «Registro de prompts» muestra las últimas 20 entradas (ya limpias de secretos y de tus palabras ocultas) y vacía el registro con un botón, para un administrador en este equipo; la tabla de modelos tiene una columna «Origen» (la página, el fichero `config/ai_models.json` o el proveedor) para ver de dónde sale cada cifra. Ambas en los ocho idiomas.
 
 - **Dos preguntas más para el asistente, ambas de solo lectura**: «la situación de un repositorio» (`explain_repo`, a partir de sus ejecuciones y sus alertas abiertas) y «qué hacer primero» (`prioritize`, las alertas abiertas, el estado y la puntuación puestos en orden con sus ids) se suman a las tres que había; usan las mismas cuatro herramientas, límites y presupuesto diario de la IA, y sigue sin haber chat libre.
