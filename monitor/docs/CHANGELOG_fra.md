@@ -17,6 +17,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Une section sur ce que le moniteur fait gagner et un guide pour le mesurer** : le README, dans les huit langues, dit désormais, comme une estimation et non une mesure, que le moniteur fait gagner environ 85-95 % du temps de surveillance de la CI et de tri des échecs et environ 15-25 % de la productivité globale d'une équipe, avec un tableau par tâche, les hypothèses qui le fondent et les cas où le gain est plus faible ; le guide PRODUCTIVITY donne la méthode du calcul et comment mesurer le gain dans votre propre usage.
+
 - **Quand GitHub refuse une action de la page, elle dit maintenant pourquoi** : la réponse de `/api/gh-action/confirm` porte `reason` (`forbidden` : le jeton n'a pas la permission d'écriture sur Actions ; `not_found` : inexistant ou dépôt privé que le jeton ne voit pas, GitHub répond 404 dans les deux cas ; `method`, `conflict`, `invalid`) et la page l'affiche dans les huit langues à côté du refus, au lieu d'un simple « GitHub l'a refusé ».
 - **L'avis des dépôts sans données regroupe la même erreur** : quand de nombreux dépôts échouent avec le même message, la page affiche UN avis, « N dépôts : <erreur> », et les noms restent derrière un repli, au lieu de la première erreur d'une longue liste.
 - **Le journal des accès est tourné et écrit sous le verrou du système d'exploitation**, et les tests qui lisent un refus du serveur libèrent leur connexion : le superviseur et les comptes qui écrivent le même fichier ne peuvent plus perdre une ligne pendant que l'un le déplace.

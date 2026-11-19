@@ -17,6 +17,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Hinzugefügt
 
+- **Ein Abschnitt darüber, was der Monitor spart, und eine Anleitung zum Messen**: Das README sagt nun in den acht Sprachen, als Schätzung und nicht als Messung, dass der Monitor etwa 85-95 % der Zeit für Beobachtung der CI und Sichtung von Fehlern und etwa 15-25 % der Gesamtproduktivität eines Teams spart, mit einer Tabelle nach Aufgaben, den zugrunde liegenden Annahmen und den Fällen, in denen die Ersparnis kleiner ist; die Anleitung PRODUCTIVITY beschreibt die Rechenmethode und wie man die Ersparnis in der eigenen Nutzung misst.
+
 - **Lehnt GitHub eine Aktion der Seite ab, nennt sie jetzt den Grund**: Die Antwort von `/api/gh-action/confirm` enthält `reason` (`forbidden`: das Token hat keine Schreibberechtigung für Actions; `not_found`: nicht vorhanden oder ein privates Repository, das das Token nicht sieht, GitHub antwortet in beiden Fällen mit 404; `method`, `conflict`, `invalid`), und die Seite zeigt ihn in den acht Sprachen neben der Ablehnung statt eines nackten „GitHub hat abgelehnt“.
 - **Der Hinweis auf Repositories ohne Daten fasst denselben Fehler zusammen**: Schlagen viele Repositories mit derselben Meldung fehl, zeigt die Seite EINEN Hinweis „N Repositories: <Fehler>“, die Namen liegen hinter einer Aufklappung, statt des ersten Fehlers einer langen Liste.
 - **Das Zugriffsprotokoll wird unter der Sperre des Betriebssystems rotiert und geschrieben**, und die Tests, die eine Ablehnung des Servers lesen, geben ihre Verbindung frei: Der Supervisor und die Konten, die dieselbe Datei schreiben, können keine Zeile mehr verlieren, während einer sie verschiebt.

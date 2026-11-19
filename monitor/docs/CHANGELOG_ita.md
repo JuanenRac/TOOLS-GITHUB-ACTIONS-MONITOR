@@ -17,6 +17,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Aggiunto
 
+- **Una sezione su cosa fa risparmiare il monitor e una guida per misurarlo**: il README, nelle otto lingue, dice ora, come stima e non come misura, che il monitor fa risparmiare circa l'85-95 % del tempo di sorveglianza della CI e di smistamento dei guasti e circa il 15-25 % della produttività complessiva di un team, con una tabella per attività, le ipotesi su cui si basa e i casi in cui il risparmio è minore; la guida PRODUCTIVITY descrive il metodo del calcolo e come misurare il risparmio nel proprio uso.
+
 - **Quando GitHub rifiuta un'azione della pagina, ora dice perché**: la risposta di `/api/gh-action/confirm` porta `reason` (`forbidden`: il token non ha il permesso di scrittura su Actions; `not_found`: inesistente o repository privato che il token non vede, GitHub risponde 404 in entrambi i casi; `method`, `conflict`, `invalid`) e la pagina lo mostra nelle otto lingue accanto al rifiuto, invece di un semplice «GitHub l'ha rifiutato».
 - **L'avviso dei repository senza dati raggruppa lo stesso errore**: quando molti repository falliscono con lo stesso messaggio, la pagina mostra UN avviso, «N repository: <errore>», e i nomi restano dietro un'espansione, invece del primo errore di un lungo elenco.
 - **Il registro degli accessi viene ruotato e scritto sotto il blocco del sistema operativo**, e i test che leggono un rifiuto del server rilasciano la loro connessione: il supervisore e gli account che scrivono lo stesso file non possono più perdere una riga mentre uno lo sposta.
