@@ -52,9 +52,9 @@ class Coverage(unittest.TestCase):
         self.assertEqual(sl.a2_full_sample({"R": merged}, {"runs_per_repo": 8}), [])
 
     def test_the_settings_keep_safe_defaults_and_ignore_nonsense(self):
-        self.assertEqual(sampling.settings({}), {"default_branch_probe": False, "min_coverage_minutes": 30, "api_budget_per_hour": 0})
+        self.assertEqual(sampling.settings({}), {"default_branch_probe": False, "active_probe": False, "min_coverage_minutes": 30, "api_budget_per_hour": 0})
         self.assertEqual(sampling.settings({"sampling": {"default_branch_probe": "yes", "min_coverage_minutes": -3, "api_budget_per_hour": True}}),
-                         {"default_branch_probe": False, "min_coverage_minutes": 30, "api_budget_per_hour": 0})
+                         {"default_branch_probe": False, "active_probe": False, "min_coverage_minutes": 30, "api_budget_per_hour": 0})
 
 
 class Budget(unittest.TestCase):

@@ -3445,6 +3445,8 @@
  "ci.lane_branch": "ramo {branch}",
  "cfg.f.sampling.default_branch_probe": "Segunda vista ao ramo predefinido",
  "cfg.h.sampling.default_branch_probe": "Quando a lista de execuções de um repositório está cheia, mais um pedido obtém os push para o ramo predefinido (sem pull requests), para que as execuções que decidem o vermelho em main não sejam empurradas para fora por pull requests e agendamentos. Custa um pedido por repositório cheio e por leitura; desativado por predefinição.",
+ "cfg.f.sampling.active_probe": "Ver as execuções ainda em curso",
+ "cfg.h.sampling.active_probe": "Quando a lista de execuções de um repositório está cheia, dois pedidos leves pedem as execuções ainda em curso e as que estão em fila, para que uma execução longa que começou antes da janela da lista não se perca nem seja mostrada como terminada. Custa dois pedidos por repositório cheio e leitura; desativado por defeito.",
  "cfg.f.sampling.min_coverage_minutes": "Cobertura baixa abaixo de",
  "cfg.h.sampling.min_coverage_minutes": "Uma lista de execuções cheia que recua menos do que estes minutos é marcada como cobertura baixa em vez de parecer completa. 0 desativa a marca.",
  "cfg.f.sampling.api_budget_per_hour": "Orçamento de pedidos por hora",

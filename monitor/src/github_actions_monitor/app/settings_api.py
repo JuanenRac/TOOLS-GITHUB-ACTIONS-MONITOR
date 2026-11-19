@@ -277,6 +277,7 @@ _f(_T_POLL, "pagination", "pagination.job_pages", "int", (1, 20), unit="", resta
 _f(_T_POLL, "pagination", "pagination.collab_pages", "int", (1, 20), unit="", restart=False)
 _f(_T_POLL, "pagination", "pagination.cursor_pages", "int", (0, 20), unit="", restart=False)
 _f(_T_POLL, "sampling", "sampling.default_branch_probe", "bool", restart=False)
+_f(_T_POLL, "sampling", "sampling.active_probe", "bool", restart=False)
 _f(_T_POLL, "sampling", "sampling.min_coverage_minutes", "int", (0, 10080), unit="min", restart=False)
 _f(_T_POLL, "sampling", "sampling.api_budget_per_hour", "int", (0, 100000), unit="calls", restart=False)
 # --- Sentinel

@@ -1092,6 +1092,7 @@
     }
   },
   "sampling": {
+    "active_probe": false,
     "api_budget_per_hour": 0,
     "default_branch_probe": false,
     "min_coverage_minutes": 30

@@ -3445,6 +3445,8 @@
  "ci.lane_branch": "分支 {branch}",
  "cfg.f.sampling.default_branch_probe": "对默认分支再看一次",
  "cfg.h.sampling.default_branch_probe": "当仓库的运行列表已满时,再发出一次请求,获取默认分支的推送(不含拉取请求),使决定 main 是否为红色的运行不会被拉取请求和定时任务挤出。每个已满的仓库每次读取多花一次请求;默认关闭。",
+ "cfg.f.sampling.active_probe": "单独查看仍在运行的运行",
+ "cfg.h.sampling.active_probe": "当某个仓库的运行列表已满时,用两个轻量请求分别获取仍在进行和排队中的运行,避免在列表窗口之前开始的长时间运行被丢失或显示为已结束。每个已满仓库每次读取消耗两个请求;默认关闭。",
  "cfg.f.sampling.min_coverage_minutes": "覆盖不足的界限",
  "cfg.h.sampling.min_coverage_minutes": "已满的运行列表若回溯的时间少于该分钟数,将标记为覆盖不足,而不是看起来完整。0 表示关闭标记。",
  "cfg.f.sampling.api_budget_per_hour": "每小时请求预算",
