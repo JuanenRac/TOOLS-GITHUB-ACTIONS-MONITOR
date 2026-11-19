@@ -512,7 +512,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 </div>
 <div class="tab" id="t-al" role="tabpanel" aria-labelledby="n-al">
 <section id="asst-box" hidden><h2 data-i18n="ui.asst_title"></h2><div class="body"><p class="mut" data-i18n="ui.asst_intro"></p>
-<div class="row" role="group" data-i18n-aria="ui.asst_title"><label><span data-i18n="ui.asst_action"></span> <select id="asst-action"><option value="explain_alert" data-i18n="ui.asst_a_explain_alert"></option><option value="summarize_week" data-i18n="ui.asst_a_summarize_week"></option><option value="why_slow" data-i18n="ui.asst_a_why_slow"></option></select></label>
+<div class="row" role="group" data-i18n-aria="ui.asst_title"><label><span data-i18n="ui.asst_action"></span> <select id="asst-action"><option value="explain_alert" data-i18n="ui.asst_a_explain_alert"></option><option value="summarize_week" data-i18n="ui.asst_a_summarize_week"></option><option value="why_slow" data-i18n="ui.asst_a_why_slow"></option><option value="explain_repo" data-i18n="ui.asst_a_explain_repo"></option><option value="prioritize" data-i18n="ui.asst_a_prioritize"></option></select></label>
 <label id="asst-alert-l"><span data-i18n="ui.asst_alert"></span> <select id="asst-alert"></select></label><label id="asst-repo-l"><span data-i18n="ui.asst_repo"></span> <select id="asst-repo"></select></label>
 <button type="button" id="asst-go" data-i18n="ui.asst_ask"></button></div>
 <div id="asst-out" role="status" aria-live="polite"></div></div></section>
@@ -1699,11 +1699,11 @@ async function assistantTick(){
   rp.innerHTML=`<option value="">${esc(T("ui.asst_pick"))}</option>`+[...new Set((ALERTS&&ALERTS.alerts||[]).map(a=>a.repo).filter(Boolean))].sort().map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
   al.value=keepA;rp.value=keepR;assistantShape();
 }
-function assistantShape(){const a=$("asst-action").value;$("asst-alert-l").hidden=a!=="explain_alert";$("asst-repo-l").hidden=a==="explain_alert"||a==="summarize_week"}
+function assistantShape(){const a=$("asst-action").value;$("asst-alert-l").hidden=a!=="explain_alert";$("asst-repo-l").hidden=a==="explain_alert"||a==="summarize_week"||a==="prioritize"}
 $("asst-action").addEventListener("change",assistantShape);
 $("asst-go").addEventListener("click",async()=>{
   const out=$("asst-out"),action=$("asst-action").value,sel=$("asst-alert"),body={action};
-  if(action==="explain_alert"){body.alert=sel.value;const o=sel.selectedOptions[0];body.repo=o?o.dataset.repo||"":""}else if(action==="why_slow")body.repo=$("asst-repo").value;
+  if(action==="explain_alert"){body.alert=sel.value;const o=sel.selectedOptions[0];body.repo=o?o.dataset.repo||"":""}else if(action==="why_slow"||action==="explain_repo")body.repo=$("asst-repo").value;
   out.className="mut";out.textContent=T("ui.asst_busy");$("asst-go").disabled=true;
   try{
     const r=await fetch("/api/assistant/ask?"+qlang(),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});const j=await r.json();
@@ -2173,7 +2173,7 @@ async function cfgExtras(){
       all.filter(m=>!q||m.id.toLowerCase().includes(q)).slice(0,300).forEach(m=>{const o=document.createElement("option");o.value=m.id;o.textContent=m.id+(m.context?" · "+m.context:"");sel.appendChild(o)})};
     const rows=(table)=>{const box=$("md-table");box.innerHTML="";if(!table||!table.length)return;
       const t=document.createElement("table");t.className="tbl";const h=t.createTHead().insertRow();
-      ["ui.ai_col_model","ui.ai_col_context","ui.ai_col_in","ui.ai_col_out","ui.ai_col_tools","ui.ai_col_calls_limit","ui.ai_col_cost_limit","ui.ai_col_tested",""].forEach(k=>{const c=document.createElement("th");c.textContent=k?T(k):"";h.appendChild(c)});
+      ["ui.ai_col_model","ui.ai_col_context","ui.ai_col_in","ui.ai_col_out","ui.ai_col_tools","ui.ai_col_calls_limit","ui.ai_col_cost_limit","ui.ai_col_tested","ui.ai_col_origin",""].forEach(k=>{const c=document.createElement("th");c.textContent=k?T(k):"";h.appendChild(c)});
       table.forEach(r=>{const tr=t.insertRow(),cells={};
         const c0=tr.insertCell();c0.textContent=r.provider+"/"+r.model;
         const num=(f)=>{const c=tr.insertCell(),i=document.createElement("input");i.type="number";i.min="0";i.step="any";i.style.width="8em";i.value=r[f]==null?"":r[f];i.placeholder=unknown();i.title=r[f+"_source"]||"";c.appendChild(i);cells[f]=i};
@@ -2181,6 +2181,7 @@ async function cfgExtras(){
         const ct=tr.insertCell(),sel=document.createElement("select");[["",unknown()],["true","✓"],["false","✗"]].forEach(([v,l])=>{const o=document.createElement("option");o.value=v;o.textContent=l;sel.appendChild(o)});sel.value=r.tools==null?"":String(r.tools);ct.appendChild(sel);
         num("daily_limit");num("cost_limit");
         const ctd=tr.insertCell();ctd.textContent=r.tested?(r.tested.ok?"✓ ":"✗ ")+(r.tested.at||""):"";
+        const cor=tr.insertCell();cor.textContent=[...new Set(["context","in_per_mtok","out_per_mtok","tools","daily_limit","cost_limit"].map(f=>r[f+"_source"]).filter(s=>s&&s!=="unknown"))].map(s=>T("ui.ai_src_"+s)).join(", ");
         const cb=tr.insertCell(),b=document.createElement("button");b.type="button";b.textContent=T("ui.ai_save_row");
         b.addEventListener("click",async()=>{const v={context:cells.context.value,in_per_mtok:cells.in_per_mtok.value,out_per_mtok:cells.out_per_mtok.value,daily_limit:cells.daily_limit.value,cost_limit:cells.cost_limit.value,tools:sel.value===""?"":sel.value==="true"};
           try{const j=await post("/api/ai/models/data",{label:r.provider,model:r.model,values:v});b.textContent=j.ok?T("ui.ai_saved"):(j.error||"")}catch(e){b.textContent=String(e)}});
@@ -2200,6 +2201,21 @@ async function cfgExtras(){
     $("md-test").addEventListener("click",async()=>{const m=$("md-sel").value,el=document.getElementById("cfg-ai-model");$("md-test-out").textContent="…";
       try{const j=await post("/api/ai/models/test",{model:m||(el?el.value:"")});$("md-test-out").textContent=j.ok?T("ui.ai_model_test_ok",{ms:j.ms,tin:j.tokens_in,tout:j.tokens_out,est:j.tokens_estimated?T("ui.ai_estimated"):"",cost:j.cost==null?unknown():j.cost,answer:j.answer||""}):(j.error||"");read();budget()}catch(e){$("md-test-out").textContent=String(e)}});
     read();budget();
+  }
+  if(ai&&!ai.querySelector(".pl-extra")){
+    /* the local record of prompts (ai.prompt_log.enabled): see the last ones, already cleaned of secrets, and empty it; read and clear are for the administrator */
+    const pl=document.createElement("div");pl.className="cfg-group pl-extra";
+    pl.innerHTML=`<h3 id="pl-h"></h3><div class="help" id="pl-help"></div><div class="inl"><button type="button" id="pl-show"></button> <button type="button" id="pl-clear"></button> <span id="pl-state" class="mut" role="status"></span></div><div id="pl-list"></div>`;
+    ai.appendChild(pl);$("pl-h").textContent=T("ui.pl_h");$("pl-help").textContent=T("ui.pl_help");$("pl-show").textContent=T("ui.pl_show");$("pl-clear").textContent=T("ui.pl_clear");
+    $("pl-show").addEventListener("click",async()=>{const box=$("pl-list");box.innerHTML="";$("pl-state").textContent="…";
+      try{const r=await fetch("/api/ai/prompts",{cache:"no-store"});if(!r.ok){$("pl-state").textContent=T("ui.pl_denied");return}const j=await r.json();
+        if(!j.enabled){$("pl-state").textContent=T("ui.pl_off");return}
+        const list=j.entries||[];$("pl-state").textContent=list.length?T("ui.pl_count",{n:list.length,keep:j.keep}):T("ui.pl_empty");
+        list.slice(0,20).forEach(x=>{const d=document.createElement("details"),s=document.createElement("summary");
+          s.textContent=[new Date((x.at||0)*1000).toLocaleString(),x.kind,x.model,x.ok?"":T("ui.pl_failed")].filter(Boolean).join(" · ");d.appendChild(s);
+          const p=document.createElement("pre");p.textContent=(x.prompt||"")+"\n---\n"+(x.reply||"");d.appendChild(p);box.appendChild(d)})}catch(e){$("pl-state").textContent=String(e)}});
+    $("pl-clear").addEventListener("click",async()=>{if(!await askConfirm(T("ui.pl_confirm"),{danger:true}))return;
+      try{const r=await fetch("/api/ai/prompts/clear",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});const j=await r.json();$("pl-list").innerHTML="";$("pl-state").textContent=r.ok?T("ui.pl_cleared",{n:j.removed||0}):T("ui.pl_denied")}catch(e){$("pl-state").textContent=String(e)}});
   }
   if(ai&&!ai.querySelector(".sk-extra")){
     /* the two skills of the monitor (skills/): copy the core or download the whole skill with its references */
