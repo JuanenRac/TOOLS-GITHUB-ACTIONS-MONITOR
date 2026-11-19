@@ -38,8 +38,13 @@ def own_config():
     return cfg
 
 
+def clean_env():
+    """The environment of the child without the MONITOR_* folders the test suite points at (the child must read the folders of the test installation, as a person's updater does)."""
+    return {k: v for k, v in os.environ.items() if not k.startswith("MONITOR_")}
+
+
 def run_tool(*args):
-    done = subprocess.run([sys.executable, "-I", str(TOOL), *args], capture_output=True, text=True, timeout=240, env={**os.environ, "MONITOR_TEST_HOOKS": ""}, creationflags=0x08000000 if os.name == "nt" else 0)
+    done = subprocess.run([sys.executable, "-I", str(TOOL), *args], capture_output=True, text=True, timeout=240, env=clean_env(), creationflags=0x08000000 if os.name == "nt" else 0)
     return done.returncode, done.stdout + done.stderr
 
 
@@ -79,14 +84,117 @@ class Hook(unittest.TestCase):
             self.assertEqual(up.source.kind, "github")
 
 
-def port_busy(port=8765):
-    import socket
-    with socket.socket() as sock:
-        sock.settimeout(0.5)
-        return sock.connect_ex(("127.0.0.1", port)) == 0
+STUB = """import http.server, json, os, sys
+from pathlib import Path
+from github_actions_monitor.tool_version import TOOL_VERSION
+port = int(sys.argv[sys.argv.index("--port") + 1])
 
 
-@unittest.skipIf(port_busy(), "a monitor is running on port 8765 of this computer: the updater refuses to work on top of it (the CI has the port free)")
+class Handler(http.server.BaseHTTPRequestHandler):
+    def do_GET(self):
+        body = json.dumps({"ok": True, "version": TOOL_VERSION}).encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, *args):
+        pass
+
+
+Path(os.environ["STUB_PID_FILE"]).write_text(str(os.getpid()))
+http.server.HTTPServer(("127.0.0.1", port), Handler).serve_forever()
+"""
+
+
+def stub_files():
+    """A monitor reduced to what the updater looks at: it answers /api/health with the version of the files it started from."""
+    return {"src/github_actions_monitor/__main__.py": STUB.encode()}
+
+
+def stop_pid_file(pid_file):
+    """Stops the process a stub monitor wrote its number to (it was started by the updater, not by the test)."""
+    try:
+        pid = int(Path(pid_file).read_text())
+    except (OSError, ValueError):
+        return
+    if os.name == "nt":
+        subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"], capture_output=True, creationflags=0x08000000)
+    else:
+        import signal
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except OSError:
+            pass
+
+
+def reap(proc):
+    if proc.poll() is None:
+        proc.kill()
+    proc.wait(timeout=20)
+
+
+def health_version(port, wait=20):
+    import time
+    import urllib.request
+    end = time.time() + wait
+    while time.time() < end:
+        try:
+            with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/health", timeout=2) as reply:
+                return json.loads(reply.read())["version"]
+        except (OSError, ValueError, KeyError):
+            time.sleep(0.3)
+    return None
+
+
+class Restart(unittest.TestCase):
+    """The part after the files: --start brings the new version up and checks /api/health, and --handover waits for the monitor that asked for the update to stop. Both with a real second process."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.pid_file = Path(self.tmp.name) / "stub.pid"
+        self.addCleanup(stop_pid_file, self.pid_file)
+        self.cfg = own_config()
+        self.root = base.make_install(Path(self.tmp.name) / "inst", "2.0.8", cfg=self.cfg)
+        base.write_tree(self.root, stub_files())
+        self.zip = base.build_zip(Path(self.tmp.name) / "m.zip", "2.9.9", extra=stub_files())
+        self.env = dict(clean_env(), STUB_PID_FILE=str(self.pid_file))
+
+    def apply(self, *more):
+        return subprocess.run([sys.executable, "-I", str(TOOL), "apply", "--dir", str(self.root), "--to", "2.9.9", "--zip", str(self.zip), "--yes", "--backups", str(Path(self.tmp.name) / "backups"), "--json", *more],
+                              capture_output=True, text=True, timeout=240, env=self.env, creationflags=0x08000000 if os.name == "nt" else 0)
+
+    def test_start_brings_up_the_new_version_and_checks_its_health(self):
+        done = self.apply("--start")
+        self.assertEqual(done.returncode, 0, (done.stdout + done.stderr)[-1500:])
+        self.assertEqual(health_version(self.cfg["ports"]["complete"]), "2.9.9")
+
+    def test_handover_waits_for_the_running_monitor_to_stop_then_starts_the_new_one(self):
+        import threading
+        old = subprocess.Popen([sys.executable, "-m", "github_actions_monitor", "--port", str(self.cfg["ports"]["complete"])], cwd=str(self.root), env=dict(self.env, PYTHONPATH=str(self.root / "src")),
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=0x08000000 if os.name == "nt" else 0)
+        self.addCleanup(reap, old)
+        self.assertEqual(health_version(self.cfg["ports"]["complete"]), "2.0.8")
+        timer = threading.Timer(2.0, old.kill)       # the monitor that asked stops itself right after it starts the updater
+        timer.start()
+        self.addCleanup(timer.cancel)
+        done = self.apply("--start", "--handover")
+        self.assertEqual(done.returncode, 0, (done.stdout + done.stderr)[-1500:])
+        self.assertEqual(health_version(self.cfg["ports"]["complete"]), "2.9.9")
+
+    def test_a_running_monitor_blocks_the_update_when_no_handover_is_asked(self):
+        old = subprocess.Popen([sys.executable, "-m", "github_actions_monitor", "--port", str(self.cfg["ports"]["complete"])], cwd=str(self.root), env=dict(self.env, PYTHONPATH=str(self.root / "src")),
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=0x08000000 if os.name == "nt" else 0)
+        self.addCleanup(reap, old)
+        self.assertEqual(health_version(self.cfg["ports"]["complete"]), "2.0.8")
+        before = base.tree_hash(self.root)
+        done = self.apply()
+        self.assertNotEqual(done.returncode, 0)
+        self.assertEqual(base.tree_hash(self.root), before)
+
+
 class TwoProcesses(unittest.TestCase):
     def test_a_real_process_applies_the_zip_and_a_second_one_goes_back(self):
         with tempfile.TemporaryDirectory() as tmp:
