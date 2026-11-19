@@ -125,7 +125,7 @@ DEFAULTS = {
                 "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64, "group_map": True,
                 "menu": True, "menu_target": "new", "menu_max_windows": 4, "menu_rotate_seconds": 20, "menu_tv_scale": 1.5},   # the wall screens /screen/overview, /screen/now and /screen/sentinels (docs/SCREENS.md, screens.py): read only, from what the monitor already holds
     "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "on_warning": True, "on_resolved": True, "on_report": True, "on_lesson": True, "on_sentinel": True, "on_stuck": True, "on_score_drop": True, "on_info": True, "on_live_recovered": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False, "theme": "classic", "quiet_enabled": False, "quiet_from_hour": 22, "quiet_to_hour": 7},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
-    "updates": {"check": True},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
+    "updates": {"check": True, "systemd_helper": False},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
     "airgapped": False,            # True: nothing is requested from the network except GitHub's data you asked for; the update check is off
     "open_browser": True,
     "modes": {"start": "normal", "default_minutes": 60},     # normal | fast | turbo: see modes.py; the presets can be edited under modes.fast / modes.turbo
@@ -156,7 +156,7 @@ DEFAULTS = {
     "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
     "pagination": {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3, "cursor_pages": 3},      # pages of 100 followed when a list is full, and said when something is cut (paging.py)
     "sampling": {"default_branch_probe": False, "active_probe": False, "min_coverage_minutes": 30, "api_budget_per_hour": 0},      # how much of a repository the list of runs shows, a second look at the default branch, a budget of requests (sampling.py)
-    "savings": {"webhook_first": False, "webhook_window_minutes": 60, "webhook_full_minutes": 360, "feeds": {"enabled": False, "method": "atom", "max_age_minutes": 240}},      # read less: OFF (savings.py)
+    "savings": {"webhook_first": False, "webhook_live_per_repo": False, "webhook_window_minutes": 60, "webhook_full_minutes": 360, "feeds": {"enabled": False, "method": "atom", "max_age_minutes": 240}},      # read less: OFF (savings.py)
     "logs": {"failed_step": {"enabled": False, "lines": 12, "max_bytes": 2000, "max_per_minute": 10}},      # the log of the failed step in the page: OFF, one press of a button, steplog.py
     "reports": {"workflow_hygiene": {"enabled": False}, "queue": {"enabled": False}, "release_view": {"enabled": False}, "supply_chain": {"enabled": False}, "max_calls_per_cycle": 4},      # four optional reports, all OFF (reports.py)
     "lessons": {"enabled": True, "allow_write": False, "retention_days": 180, "max_entries": 5000, "brief_max_bytes": 3000, "recurring_from": 2},      # the book of failures and the library of lessons (lessons.py): local, read only; writing a lesson is OFF
@@ -893,7 +893,7 @@ def refresh_runs(repos, config, progress=None):
         elif hot:
             todo.append((repo, config["cold_runs_per_repo"] if lite else tuned(config, "runs_per_repo")))
         elif not only_hot and now - entry["at"] > tuned(config, "cold_refresh_seconds"):
-            if spare_by_webhook(entry, config, now):      # savings.webhook_first (off by default): the slow turn passes with no call
+            if spare_by_webhook(entry, config, now, repo):      # savings.webhook_first (off by default): the slow turn passes with no call
                 continue
             slow.append((repo, entry))
     if slow:
@@ -961,12 +961,12 @@ def red_repos_of(repos):
 HEADS_PENDING = {}      # repo -> the newest commit seen BEFORE its read, stored with the read (savings.feeds)
 
 
-def spare_by_webhook(entry, config, now):
+def spare_by_webhook(entry, config, now, repo=None):
     """True when the webhook is alive and the slow turn of this cold repository may pass without a call (savings.webhook_first). The repository keeps its runs; the full read still comes
     at the intervals `savings` sets."""
     from github_actions_monitor.data_pipeline import savings
     try:
-        if savings.quiet_by_webhook(config, entry, now):
+        if savings.quiet_by_webhook(config, entry, now, repo):
             savings.count_webhook()
             entry["at"] = now
             return True
@@ -2925,7 +2925,7 @@ class Handler(BaseHTTPRequestHandler):
                     apply_live_event(record, LIVE_CONFIG or DEFAULTS)
                 if repo:
                     webhook.note_accepted()      # the coverage indicator counts it
-                    __import__("github_actions_monitor.data_pipeline.savings", fromlist=["_"]).note_webhook()      # the webhook is alive: savings.webhook_first may stretch the slow turn of the cold repositories
+                    __import__("github_actions_monitor.data_pipeline.savings", fromlist=["_"]).note_webhook(repo=repo)      # the webhook is alive: savings.webhook_first may stretch the slow turn of the cold repositories
                     webhook_settle(repo)
                 self.json_reply(answer, code)
             except Exception:
@@ -4168,11 +4168,11 @@ def handle_updates_post(path, request, who, config):
         if path.endswith("/plan"):
             return {"ok": True, "plan": updates.plan(target, policy)}
         if path.endswith("/apply"):
-            answer = updates.apply(target, policy, request.get("confirm"), edition, lang, lite=LITE["on"], demo=DEMO["on"])
+            answer = updates.apply(target, policy, request.get("confirm"), edition, lang, lite=LITE["on"], demo=DEMO["on"], helper=updates.helper_on(toolconfig.raw_config()))
             _audit_plain("update_apply", who, target, {"from": answer.get("from")}, "ok")
             return {"ok": True, **answer}
         if path.endswith("/rollback"):
-            answer = updates.rollback(request.get("confirm"), edition, lang, lite=LITE["on"], demo=DEMO["on"])
+            answer = updates.rollback(request.get("confirm"), edition, lang, lite=LITE["on"], demo=DEMO["on"], helper=updates.helper_on(toolconfig.raw_config()))
             _audit_plain("update_rollback", who, "previous", None, "ok")
             return {"ok": True, **answer}
     except updates.UpdatesError as error:

@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "1f1cfaa2ae6aedea70cb0e82462eaeefde3a3e36b8cd24113b6bd8f5af79253b",
+ "digest": "0868630eea488db79dd77c1b5b456e40a5af657d5a9d8d2e886c056260532899",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -155,6 +155,11 @@
     "default": false
    },
    {
+    "key": "savings.webhook_live_per_repo",
+    "kind": "bool",
+    "default": false
+   },
+   {
     "key": "screens.menu",
     "kind": "bool",
     "default": true
@@ -220,6 +225,14 @@
     ]
    },
    {
+    "key": "sentinels.collab.deadline_s",
+    "kind": "int",
+    "bounds": [
+     0,
+     600
+    ]
+   },
+   {
     "key": "sentinels.delivery.deadline_s",
     "kind": "int",
     "bounds": [
@@ -251,6 +264,11 @@
      168
     ],
     "default": 12
+   },
+   {
+    "key": "updates.systemd_helper",
+    "kind": "bool",
+    "default": false
    }
   ],
   "removed": [],

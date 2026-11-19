@@ -36,7 +36,7 @@ I bot sono esclusi. I valori predefiniti sono lenti di proposito: una bozza che 
 
 ## Quanto costa
 
-Un giro legge al massimo `max_repos_per_tick` repository, con due richieste condizionali ciascuno (un repository invariato non consuma quota) e fino a sei dettagli di pull request per giro. Si ferma finché la quota è sotto `min_rate_remaining`. Lo stato è in `collab_state.json` (nella cartella dell'account se ce ne sono più d'uno): un riavvio non annuncia nulla due volte.
+Un giro legge al massimo `max_repos_per_tick` repository, con due richieste condizionali ciascuno (un repository invariato non consuma quota) e fino a sei dettagli di pull request per giro. Si ferma finché la quota è sotto `min_rate_remaining`. Lo stato è in `collab_state.json` (nella cartella dell'account se ce ne sono più d'uno): un riavvio non annuncia nulla due volte. Un giro smette anche di iniziare nuovi repository dopo `sentinels.collab.deadline_s` secondi (30 per impostazione predefinita; 0 = nessun tetto): quelli non raggiunti aspettano il giro successivo e lo stato li elenca per nome come `unchecked` (con `round_cut`) invece di contarli come zero avvisi.
 
 ## Meno rumore: ignorare e silenziare
 

@@ -188,7 +188,7 @@ def note_accepted(now=None):
 
 def coverage(config, now=None):
     """How much of the time the events cover the state, as a small read-only record: {"state": "off" | "waiting" | "live" | "quiet", "last_age_seconds", "last_hour", "window_minutes", "watching_seconds",
-    "fallback": "poll"}. `live` = the last event is newer than `savings.webhook_window_minutes`; `quiet` = it is older (nothing arrived for a while, which is also what a lost tunnel looks like); `waiting` =
+    "fallback": "poll"[, "live_repos"]}. `live` = the last event is newer than `savings.webhook_window_minutes`; `quiet` = it is older (nothing arrived for a while, which is also what a lost tunnel looks like); `waiting` =
     switched on and nothing yet. The polling is always the fallback: it reads whatever the events did not tell, so a missed delivery never leaves the state wrong for longer than one slow turn."""
     from github_actions_monitor.data_pipeline import savings
     from github_actions_monitor.util import clock
@@ -206,6 +206,8 @@ def coverage(config, now=None):
     age = max(0, int(now - times[-1]))
     out["last_age_seconds"] = age
     out["state"] = "live" if age <= window * 60 else "quiet"
+    if savings.settings(config or {})["webhook_live_per_repo"]:
+        out["live_repos"] = savings.live_repos(config, now)      # only with savings.webhook_live_per_repo: the repositories that had an event of their own in the window
     return out
 
 

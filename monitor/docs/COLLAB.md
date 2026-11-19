@@ -36,7 +36,7 @@ Bots are left out. The defaults are slow on purpose: a draft that waits for mont
 
 ## What it costs
 
-A round reads at most `max_repos_per_tick` repositories, two conditional requests each (a repository that did not change costs no allowance) and up to six pull request details per round. It stops while the allowance is below `min_rate_remaining`. The state is kept in `collab_state.json` (inside the folder of the account when there are several), so a restart announces nothing twice.
+A round reads at most `max_repos_per_tick` repositories, two conditional requests each (a repository that did not change costs no allowance) and up to six pull request details per round. It stops while the allowance is below `min_rate_remaining`. The state is kept in `collab_state.json` (inside the folder of the account when there are several), so a restart announces nothing twice. A round also stops starting new repositories after `sentinels.collab.deadline_s` seconds (30 by default; 0 = no ceiling): the ones not reached wait for the next round and the status lists them by name as `unchecked` (with `round_cut`) instead of counting them as zero alerts.
 
 ## Less noise: ignore and silence
 

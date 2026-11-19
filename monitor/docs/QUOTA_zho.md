@@ -77,6 +77,7 @@ GitHub 为每个账户提供有限的 **API 调用配额**,由使用它的所有
 这两种方式**默认关闭**，只作用于安静的仓库(其最近的运行都已结束且为绿色)。正在运行、为红色或被事件触及的仓库照常读取。
 
 - `savings.webhook_first`：只要传入 webhook 保持活跃(在最近 `savings.webhook_window_minutes` 分钟内送达过事件)，安静的仓库就不会在其慢速轮次中被读取：有事情发生时 GitHub 会通知。每隔 `savings.webhook_full_minutes` 分钟仍会完整读取一次。没有活跃的 webhook 时一切照旧。
+- `savings.webhook_live_per_repo`:把“在线”的判断细化到每个仓库。只有在最近 `savings.webhook_window_minutes` 分钟内收到过自己事件的安静仓库才会跳过缓慢读取;webhook 从未配置或已失效的仓库照常读取,其他仓库则被节省。它节省的读取更少,Webhook 面板会统计自身在线的仓库。默认关闭;需与 `savings.webhook_first` 一起使用。
 - `savings.feeds.enabled`：在用 API 读取安静的仓库之前，先向不消耗配额的来源询问其默认分支的最新提交——提交的公开 Atom 订阅源、`git ls-remote`，或二者之一(`savings.feeds.method`：`atom`、`git`、`auto`)。如果它就是上次完整读取时的提交，仓库保持现状。每隔 `savings.feeds.max_age_minutes` 分钟无论如何都会完整读取一次。仅限公开仓库：对于私有仓库、出错或异常响应，仓库照常用 API 读取。离开本机的只有发往 github.com 的 GET 请求，绝不含密码，也不写入任何内容。监视器处于隔离网络(air-gapped)时不使用。
 
 代价：在安静的仓库上，没有推送而开始的运行(定时任务、重新运行)要到下一次完整读取时才会被发现，而不是立刻。配额标签页(状态)显示自监视器启动以来每种方式节省的读取次数(每次约相当于一次 API 调用)：条件读取、GraphQL、优先 webhook、Atom 订阅源、git 和中央面板。

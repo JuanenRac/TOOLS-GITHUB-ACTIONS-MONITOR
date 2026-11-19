@@ -153,6 +153,9 @@ _add("sev.info", "info", "info", "Info", "info", "info", "情報", "信息", "in
 _add("dir.upgrade", "update", "actualización", "Aktualisierung", "mise à jour", "aggiornamento", "更新", "升级", "atualização")
 _add("dir.downgrade", "DOWNGRADE", "VUELTA A UNA VERSIÓN ANTERIOR", "DOWNGRADE", "RETOUR À UNE VERSION ANTÉRIEURE", "RITORNO A UNA VERSIONE PRECEDENTE", "ダウングレード", "降级", "REGRESSO A UMA VERSÃO ANTERIOR")
 _add("dir.same", "same version (reinstall)", "misma versión (reinstalar)", "gleiche Version (neu installieren)", "même version (réinstaller)", "stessa versione (reinstalla)", "同じバージョン（再インストール）", "相同版本（重新安装）", "mesma versão (reinstalar)")
+_add("c.systemd", "The user service {unit} is stopped and started again by this update (systemctl --user); nothing needs the administrator.", "El servicio de usuario {unit} se detiene y se vuelve a arrancar con esta actualización (systemctl --user); no hace falta el administrador.", "Der Benutzerdienst {unit} wird von diesem Update angehalten und wieder gestartet (systemctl --user); der Administrator wird nicht gebraucht.", "Le service utilisateur {unit} est arrêté puis redémarré par cette mise à jour (systemctl --user) ; l'administrateur n'est pas nécessaire.", "Il servizio utente {unit} viene fermato e riavviato da questo aggiornamento (systemctl --user); non serve l'amministratore.", "ユーザーサービス {unit} はこの更新で停止され再起動されます（systemctl --user）。管理者権限は不要です。", "此次更新会停止并重新启动用户服务 {unit}（systemctl --user），无需管理员权限。", "O serviço de utilizador {unit} é parado e arrancado de novo por esta atualização (systemctl --user); não é preciso o administrador.")
+_add("c.systemd_stop", "systemctl --user could not stop {unit} ({why}): the update was not started.", "systemctl --user no pudo detener {unit} ({why}): la actualización no se inició.", "systemctl --user konnte {unit} nicht anhalten ({why}): das Update wurde nicht gestartet.", "systemctl --user n'a pas pu arrêter {unit} ({why}) : la mise à jour n'a pas démarré.", "systemctl --user non ha potuto fermare {unit} ({why}): l'aggiornamento non è partito.", "systemctl --user が {unit} を停止できませんでした（{why}）。更新は開始されませんでした。", "systemctl --user 无法停止 {unit}（{why}）：更新未开始。", "systemctl --user não conseguiu parar {unit} ({why}): a atualização não começou.")
+_add("c.systemd_start", "systemctl --user could not start {unit} ({why}).", "systemctl --user no pudo arrancar {unit} ({why}).", "systemctl --user konnte {unit} nicht starten ({why}).", "systemctl --user n'a pas pu démarrer {unit} ({why}).", "systemctl --user non ha potuto avviare {unit} ({why}).", "systemctl --user が {unit} を起動できませんでした（{why}）。", "systemctl --user 无法启动 {unit}（{why}）。", "systemctl --user não conseguiu arrancar {unit} ({why}).")
 _add("c.handover", "The monitor on port {port} stops by itself, the update is applied and it starts again; if it does not start, the previous version comes back.", "El monitor del puerto {port} se detiene solo, se aplica la actualización y vuelve a arrancar; si no arranca, vuelve la versión anterior.", "Der Monitor auf Port {port} beendet sich selbst, das Update wird eingespielt und er startet neu; startet er nicht, kommt die vorherige Version zurück.", "Le moniteur du port {port} s'arrête de lui-même, la mise à jour est appliquée et il redémarre ; s'il ne démarre pas, la version précédente revient.", "Il monitor sulla porta {port} si ferma da solo, l'aggiornamento viene applicato e riparte; se non parte, torna la versione precedente.", "ポート {port} のモニターは自動的に停止し、更新が適用されて再起動します。起動しない場合は以前のバージョンに戻ります。", "端口 {port} 上的监视器会自行停止，应用更新后重新启动；若无法启动，则恢复到之前的版本。", "O monitor da porta {port} para sozinho, a atualização é aplicada e volta a arrancar; se não arrancar, regressa a versão anterior.")
 _add("c.running", "The monitor is running on port {port}: stop it before updating.", "El monitor está en marcha en el puerto {port}: páralo antes de actualizar.", "Der Monitor läuft auf Port {port}: beende ihn vor dem Update.", "Le moniteur tourne sur le port {port} : arrêtez-le avant de mettre à jour.", "Il monitor è in esecuzione sulla porta {port}: fermalo prima di aggiornare.", "モニターがポート {port} で稼働中です。更新前に停止してください。", "监视器正在端口 {port} 运行：更新前请先停止。", "O monitor está em execução na porta {port}: pare-o antes de atualizar.")
 _add("c.sha", "The SHA-256 of the zip does not match the published one: nothing was changed.", "El SHA-256 del zip no coincide con el publicado: no se cambió nada.", "Der SHA-256 des Zips stimmt nicht mit dem veröffentlichten überein: nichts wurde geändert.", "Le SHA-256 du zip ne correspond pas à celui publié : rien n'a été modifié.", "Lo SHA-256 dello zip non corrisponde a quello pubblicato: nulla è stato modificato.", "zipのSHA-256が公開値と一致しません。何も変更していません。", "zip 的 SHA-256 与发布值不符：未做任何更改。", "O SHA-256 do zip não coincide com o publicado: nada foi alterado.")
@@ -474,6 +477,44 @@ def in_container(env=None):
 def under_service(env=None):
     env = os.environ if env is None else env
     return bool(env.get("INVOCATION_ID") or env.get("JOURNAL_STREAM") or Path("/etc/systemd/system/github-actions-monitor.service").exists())
+
+
+UNIT_RE = re.compile(r"^[A-Za-z0-9_.@:-]{1,100}\.service\Z")
+
+
+def user_unit(env=None, cgroup=None):
+    """The name of the systemd USER unit (`systemctl --user`) this process runs under, or '' when it is not one: not systemd, a system unit (that would need the administrator, which the helper never uses),
+    or a name that is not a plain unit name. `cgroup` = the text of /proc/self/cgroup (given by the tests)."""
+    env = os.environ if env is None else env
+    if os.name == "nt" or not env.get("INVOCATION_ID"):
+        return ""
+    if cgroup is None:
+        try:
+            cgroup = Path("/proc/self/cgroup").read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            return ""
+    for line in cgroup.splitlines():
+        parts = [p for p in line.split(":", 2)[-1].split("/") if p]
+        if any(p.startswith("user@") and p.endswith(".service") for p in parts):
+            units = [p for p in parts if p.endswith(".service") and not p.startswith("user@")]
+            if units and UNIT_RE.match(units[-1]):
+                return units[-1]
+    return ""
+
+
+SYSTEMCTL = {"run": None}      # the tests put a double here
+
+
+def systemctl_user(action, unit, timeout=30):
+    """(exit code, last words of the output) of `systemctl --user stop|start|is-active UNIT`. Never anything else, never sudo, never a unit name that is not a plain one."""
+    if action not in ("stop", "start", "is-active") or not UNIT_RE.match(str(unit or "")):
+        return 1, "refused"
+    run = SYSTEMCTL["run"] or subprocess.run
+    try:
+        done = run(["systemctl", "--user", action, unit], capture_output=True, text=True, timeout=timeout, stdin=subprocess.DEVNULL)
+    except (OSError, subprocess.SubprocessError) as error:
+        return 1, str(error)[:160] or type(error).__name__
+    return done.returncode, ((done.stdout or "") + (done.stderr or "")).strip()[-160:]
 
 
 def ports_of(cfg):
@@ -1324,6 +1365,8 @@ class Updater:
             add("same_vm", "info", version=to)
         if inst["mode"] == "docker" and not opts.get("allow_container"):
             add("container", "block")
+        if opts.get("systemd_unit"):
+            add("systemd", "info", unit=opts["systemd_unit"])
         if self.pending():
             add("pending", "block", backup=self.pending().name)
         if self.lock_state():
@@ -1331,7 +1374,7 @@ class Updater:
         for edition, state in inst["running"].items():
             if state.get("open"):
                 if state.get("ours"):
-                    if opts.get("handover"):
+                    if opts.get("handover") or opts.get("systemd_unit"):
                         add("handover", "info", port=state["port"])       # the monitor that asks for the update stops by itself (see handover_wait)
                     else:
                         add("running", "block", port=state["port"])
@@ -1430,7 +1473,12 @@ class Updater:
         if confirm is not None and not confirm(plan):
             report.update(code=NOT_CONFIRMED, error="not confirmed")
             return report
-        if opts.get("handover") and not self.handover_wait(opts):
+        if opts.get("systemd_unit"):
+            code, why = systemctl_user("stop", opts["systemd_unit"])
+            if code != 0:
+                report.update(code=BLOCKED, error=tr("c.systemd_stop", unit=opts["systemd_unit"], why=why or "?"))
+                return report
+        if (opts.get("handover") or opts.get("systemd_unit")) and not self.handover_wait(opts):
             report.update(code=BLOCKED, error=tr("c.running", port=next((s["port"] for s in self.detect()["running"].values() if s.get("open") and s.get("ours")), 0)))
             return report
         return self._execute(plan, opts, report)
@@ -1664,14 +1712,24 @@ class Updater:
         env["PYTHONPATH"] = str(self.root / "src") + os.pathsep + env.get("PYTHONPATH", "")
         logs = self.folders()["logs"]
         logs.mkdir(parents=True, exist_ok=True)
+        unit = opts.get("systemd_unit")
+        if unit:      # the manager starts it, with its own environment and its own log: this process only waits for it
+            code, why = systemctl_user("start", unit)
+            if code != 0:
+                raise RuntimeError(tr("c.systemd_start", unit=unit, why=why or "?"))
+            journal["monitor_started"] = True
+            return self._wait_started(port, to, holder, opts)
         log = open(logs / "updater_start.log", "ab")
         # CREATE_NEW_PROCESS_GROUP | CREATE_NO_WINDOW: a hidden console that the git and gh calls of the monitor inherit (a process without a console would give each of them a window of its own)
         kwargs = {"creationflags": 0x00000200 | 0x08000000} if os.name == "nt" else {"start_new_session": True}
         holder["proc"] = subprocess.Popen([sys.executable, "-m", module, "--no-browser", "--port", str(port)], cwd=str(self.root), env=env, stdout=log, stderr=log, stdin=subprocess.DEVNULL, **kwargs)
         journal["monitor_started"] = True
+        return self._wait_started(port, to, holder, opts)
+
+    def _wait_started(self, port, to, holder, opts):
         deadline = time.time() + float(opts.get("start_timeout", 90))
         while time.time() < deadline:
-            if holder["proc"].poll() is not None:
+            if holder["proc"] is not None and holder["proc"].poll() is not None:
                 raise RuntimeError("the monitor stopped right after starting (see logs/updater_start.log)")
             state = self.probe(port)
             if state.get("ours"):
@@ -1728,13 +1786,18 @@ class Updater:
                 return entry
         return None
 
-    def go_back(self, restore_data=None, confirm=None, handover=False):
+    def go_back(self, restore_data=None, confirm=None, handover=False, systemd_unit=None):
         report = {"ok": False, "code": OK, "error": None}
         entry = self.previous()
         if not entry:
             report.update(code=USAGE, error=tr("r.no_previous"))
             return report
-        if handover:
+        if systemd_unit:
+            code, why = systemctl_user("stop", systemd_unit)
+            if code != 0:
+                report.update(code=BLOCKED, error=tr("c.systemd_stop", unit=systemd_unit, why=why or "?"))
+                return report
+        if handover or systemd_unit:
             self.handover_wait({})
         inst = self.detect()
         for edition, state in inst["running"].items():
@@ -1753,9 +1816,9 @@ class Updater:
         self.restore(bk, restore_data=restore_data)
         self._history({"result": "manual_rollback", "from": entry["to"], "to": entry["from"], "undid": entry["backup"], "backup": entry["backup"]}, folders)
         report.update(ok=True, to=entry["from"], backup=str(bk), data=restore_data)
-        if handover:
+        if handover or systemd_unit:
             with contextlib.suppress(BaseException):      # the monitor that was stopped for the return comes back in the version that was restored
-                self._start({"editions": self.detect(probing=False)["editions"]}, entry["from"], {"steps": {}}, {"proc": None}, {"start_timeout": 60})
+                self._start({"editions": self.detect(probing=False)["editions"]}, entry["from"], {"steps": {}}, {"proc": None}, {"start_timeout": 60, "systemd_unit": systemd_unit})
         return report
 
     # --- the configuration alone (containers, volumes)
@@ -2336,6 +2399,7 @@ def build_parser():
     parser.add_argument("--adopt-new-defaults", action="store_true")
     parser.add_argument("--start", action="store_true")
     parser.add_argument("--handover", action="store_true", help="the monitor that started this process stops by itself: wait for it, apply, start it again (a failed start brings the previous version back)")
+    parser.add_argument("--systemd-unit", metavar="UNIT", help="the systemd USER service that runs the monitor (`systemctl --user`): stop it before applying and start it after, instead of starting the monitor itself. Never sudo; a system service is not touched")
     parser.add_argument("--status-file", help="write the progress of apply/rollback to this JSON file (the page of the monitor reads it)")
     parser.add_argument("--edition", choices=("complete", "lite"))
     parser.add_argument("--allow-downgrade", action="store_true")
@@ -2353,7 +2417,8 @@ def build_parser():
 
 def options_of(args):
     policy = "keep_old" if args.keep_old_defaults else ("adopt_new" if args.adopt_new_defaults else "conservative")
-    return {"policy": policy, "dry_run": args.dry_run, "start": args.start, "handover": args.handover, "edition": args.edition, "allow_downgrade": args.allow_downgrade, "allow_container": args.allow_container}
+    return {"policy": policy, "dry_run": args.dry_run, "start": args.start, "handover": args.handover, "edition": args.edition, "allow_downgrade": args.allow_downgrade, "allow_container": args.allow_container,
+            "systemd_unit": args.systemd_unit if args.systemd_unit and UNIT_RE.match(args.systemd_unit) else None}
 
 
 def default_root(args):
@@ -2470,7 +2535,7 @@ def main(argv=None, out=None, inp=input):
         if command == "rollback":
             restore = {"yes": True, "no": False, "auto": None}[args.restore_data]
             status = StatusFile(args.status_file, "rollback") if args.status_file else None
-            report = updater.go_back(restore, None if args.yes else (lambda entry: inp(tr("btn.rollback") + f" ({entry['to']} -> {entry['from']})? " + tr("p.confirm")).strip().lower() in ("yes", "y", "si", "sí", "ja", "oui", "sì", "sim", "是", "はい")), handover=args.handover)
+            report = updater.go_back(restore, None if args.yes else (lambda entry: inp(tr("btn.rollback") + f" ({entry['to']} -> {entry['from']})? " + tr("p.confirm")).strip().lower() in ("yes", "y", "si", "sí", "ja", "oui", "sì", "sim", "是", "はい")), handover=args.handover, systemd_unit=args.systemd_unit if args.systemd_unit and UNIT_RE.match(args.systemd_unit) else None)
             if status is not None:
                 status.finish(tr("r.back_ok", to=report.get("to"), backup=report.get("backup")) if report.get("ok") else str(report.get("error")), report)
             if args.json:

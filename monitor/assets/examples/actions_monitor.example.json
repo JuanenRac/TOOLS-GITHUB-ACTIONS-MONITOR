@@ -283,6 +283,7 @@
     "collab": {
       "enabled": false,
       "refresh_seconds": 600,
+      "deadline_s": 30,
       "max_repos_per_tick": 10,
       "min_rate_remaining": 1000,
       "repos": "all",
@@ -699,7 +700,8 @@
     "theme": "classic"
   },
   "updates": {
-    "check": true
+    "check": true,
+    "systemd_helper": false
   },
   "airgapped": false,
   "open_browser": true,
@@ -1103,6 +1105,7 @@
       "method": "atom"
     },
     "webhook_first": false,
+    "webhook_live_per_repo": false,
     "webhook_full_minutes": 360,
     "webhook_window_minutes": 60
   },
