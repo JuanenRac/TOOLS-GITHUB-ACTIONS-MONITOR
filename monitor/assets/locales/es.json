@@ -4365,5 +4365,10 @@
  "ui.pl_confirm": "¿Vaciar el registro de prompts?",
  "ui.pl_count": "{n} entradas (guarda las últimas {keep}).",
  "ui.pl_denied": "Solo un administrador en este equipo puede hacerlo.",
- "ui.pl_failed": "sin respuesta"
+ "ui.pl_failed": "sin respuesta",
+ "cfg.t.ai.assistant.enabled": "Verás: un panel de preguntas fijas en la pestaña Alertas, respondidas por tu IA con los datos que tiene el monitor. Coste: una llamada a la IA por pregunta, dentro del presupuesto diario de la IA; no se escribe nada ni se llama a GitHub.",
+ "cfg.t.ai.prompt_log.enabled": "Verás: en Ajustes, una tarjeta con los últimos prompts enviados a la IA y sus respuestas, limpios de secretos. Coste: un pequeño fichero local; solo un administrador puede leerlo o vaciarlo.",
+ "cfg.t.ai.similar.enabled": "Verás: «explica esta alerta» también lista alertas parecidas, halladas comparando palabras. Coste: ninguno de la IA ni de GitHub; solo lee lo que el monitor ya tiene.",
+ "cfg.t.ai.airgapped": "Verás: la IA rechaza toda dirección que no sea este equipo o una dirección privada que listes, antes de abrir ninguna conexión. Coste: ninguno; un modelo en la nube deja de funcionar mientras está activo.",
+ "cfg.t.api.v1_enabled": "Verás: la API de lectura para clientes bajo /api/v1/ (auto la abre cuando el monitor funciona como servicio). Coste: ninguno; solo lee y sigue los mismos roles que la página."
 }
