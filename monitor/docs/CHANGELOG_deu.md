@@ -15,6 +15,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Hinzugefügt
 
+- **Das Update der Seite wird mit echten Prozessen von Anfang bis Ende getestet**: ein Test kann den Updater der Seite auf ein lokales Zip richten (`MONITOR_TEST_HOOKS=1` mit `MONITOR_TEST_UPDATE_ZIP`; ohne beides ändert sich nichts, und das Zip durchläuft dieselben Prüfungen von Inhalt, Mitgliedern und SHA-256 wie jedes andere), und neue Tests wenden es in einem zweiten Prozess an, gehen mit dem Rollback zurück und prüfen, dass Version, Dateien und Daten wie vorher zurückkehren, dass `--start` die neue Version hochfährt und ihre Gesundheit prüft und dass `--handover` wartet, bis der laufende Monitor stoppt, bevor der neue startet.
+
 - **Das Protokoll der Prompts und die Herkunft der Zahlen eines Modells, auf der Seite**: unter der KI in den Einstellungen zeigt eine Karte „Protokoll der Prompts“ die letzten 20 Einträge (schon von Geheimnissen und Ihren versteckten Wörtern befreit) und leert das Protokoll mit einer Schaltfläche, für einen Administrator an diesem Rechner; die Tabelle der Modelle hat eine Spalte „Herkunft“ (die Seite, die Datei `config/ai_models.json` oder der Anbieter), damit man sieht, woher jede Zahl stammt. Beides in den acht Sprachen.
 
 - **Zwei weitere Fragen für den Assistenten, beide nur lesend**: „die Lage eines Repositorys“ (`explain_repo`, aus seinen Läufen und offenen Meldungen) und „was zuerst zu tun ist“ (`prioritize`, die offenen Meldungen, der Status und die Bewertung mit ihren Ids in eine Reihenfolge gebracht) kommen zu den drei bestehenden hinzu; sie nutzen dieselben vier Werkzeuge, Grenzen und das Tagesbudget der KI, und einen freien Chat gibt es weiterhin nicht.

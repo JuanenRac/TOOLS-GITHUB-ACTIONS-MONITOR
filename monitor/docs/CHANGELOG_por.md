@@ -15,6 +15,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Adicionado
 
+- **A atualização da página é testada de ponta a ponta com processos reais**: um teste pode apontar o atualizador da página para um zip local (`MONITOR_TEST_HOOKS=1` com `MONITOR_TEST_UPDATE_ZIP`; sem as duas coisas nada muda, e o zip passa pelas mesmas verificações de conteúdo, membros e SHA-256 que qualquer outro), e novos testes aplicam-no num segundo processo, voltam atrás com a reversão e verificam que a versão, os ficheiros e os dados regressam como estavam, que `--start` levanta a versão nova e verifica a sua saúde, e que `--handover` espera que o monitor em execução pare antes de arrancar o novo.
+
 - **O registo de prompts e a origem dos números de um modelo, na página**: por baixo da IA nas Definições, um cartão «Registo de prompts» mostra as últimas 20 entradas (já limpas de segredos e das suas palavras ocultas) e esvazia o registo com um botão, para um administrador neste computador; a tabela de modelos tem uma coluna «Origem» (a página, o ficheiro `config/ai_models.json` ou o fornecedor) para ver de onde vem cada número. Ambos nos oito idiomas.
 
 - **Mais duas perguntas para o assistente, ambas só de leitura**: «a situação de um repositório» (`explain_repo`, a partir das suas execuções e dos seus alertas abertos) e «o que fazer primeiro» (`prioritize`, os alertas abertos, o estado e a pontuação postos em ordem com os seus ids) juntam-se às três que existiam; usam as mesmas quatro ferramentas, limites e orçamento diário da IA, e continua a não haver chat livre.

@@ -16,6 +16,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- **The update of the page is tested end to end with real processes**: a test can point the updater of the page at a local zip (`MONITOR_TEST_HOOKS=1` with `MONITOR_TEST_UPDATE_ZIP`; without both nothing changes, and the zip goes through the same checks of contents, members and SHA-256 as any other), and new tests apply it in a second process, go back with the rollback and check that the version, the files and the data return as they were, that `--start` brings the new version up and checks its health, and that `--handover` waits for the running monitor to stop before it starts the new one.
+
 - **The record of prompts and the origin of the figures of a model, in the page**: under the AI in Settings, a card "Record of prompts" shows the last 20 entries (already cleaned of secrets and of your hidden words) and empties the record with a button, for an administrator on this computer; the table of models has a column "Origin" (the page, the file `config/ai_models.json` or the provider) so you can see where each figure comes from. Both in the eight languages.
 
 - **Two more questions for the assistant, both read-only**: "the situation of a repository" (`explain_repo`, from its runs and its open alerts) and "what to do first" (`prioritize`, the open alerts, the status and the score put in order with their ids) join the three that existed; they use the same four tools, limits and daily budget of the AI, and there is still no free chat.

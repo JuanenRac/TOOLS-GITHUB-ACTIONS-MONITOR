@@ -15,6 +15,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **La mise à jour de la page est testée de bout en bout avec de vrais processus** : un test peut pointer l'outil de mise à jour de la page vers un zip local (`MONITOR_TEST_HOOKS=1` avec `MONITOR_TEST_UPDATE_ZIP` ; sans les deux rien ne change, et le zip passe par les mêmes contrôles de contenu, de membres et de SHA-256 que tout autre), et de nouveaux tests l'appliquent dans un second processus, reviennent en arrière avec le retour et vérifient que la version, les fichiers et les données reviennent comme avant, que `--start` démarre la nouvelle version et contrôle sa santé, et que `--handover` attend l'arrêt du moniteur en marche avant de lancer le nouveau.
+
 - **Le journal des prompts et l'origine des chiffres d'un modèle, dans la page** : sous l'IA dans les Réglages, une carte « Journal des prompts » montre les 20 dernières entrées (déjà nettoyées des secrets et de vos mots cachés) et vide le journal avec un bouton, pour un administrateur sur cet ordinateur ; le tableau des modèles a une colonne « Origine » (la page, le fichier `config/ai_models.json` ou le fournisseur) pour voir d'où vient chaque chiffre. Les deux dans les huit langues.
 
 - **Deux questions de plus pour l'assistant, toutes deux en lecture seule** : « la situation d'un dépôt » (`explain_repo`, d'après ses exécutions et ses alertes ouvertes) et « quoi faire en premier » (`prioritize`, les alertes ouvertes, l'état et le score mis en ordre avec leurs identifiants) s'ajoutent aux trois existantes ; elles utilisent les mêmes quatre outils, limites et budget quotidien de l'IA, et il n'y a toujours pas de discussion libre.

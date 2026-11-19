@@ -15,6 +15,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Aggiunto
 
+- **L'aggiornamento della pagina viene testato da un capo all'altro con processi reali**: un test può puntare l'aggiornatore della pagina a uno zip locale (`MONITOR_TEST_HOOKS=1` con `MONITOR_TEST_UPDATE_ZIP`; senza entrambi non cambia nulla, e lo zip passa per gli stessi controlli di contenuto, membri e SHA-256 di qualsiasi altro), e nuovi test lo applicano in un secondo processo, tornano indietro con il ripristino e verificano che versione, file e dati tornino com'erano, che `--start` avvii la nuova versione e ne controlli la salute, e che `--handover` attenda l'arresto del monitor in esecuzione prima di avviare quello nuovo.
+
 - **Il registro dei prompt e l'origine delle cifre di un modello, nella pagina**: sotto l'IA in Impostazioni, una scheda «Registro dei prompt» mostra le ultime 20 voci (già ripulite dai segreti e dalle tue parole nascoste) e svuota il registro con un pulsante, per un amministratore su questo computer; la tabella dei modelli ha una colonna «Origine» (la pagina, il file `config/ai_models.json` o il fornitore) per vedere da dove viene ogni cifra. Entrambi nelle otto lingue.
 
 - **Altre due domande per l'assistente, entrambe di sola lettura**: «la situazione di un repository» (`explain_repo`, dalle sue esecuzioni e dai suoi avvisi aperti) e «cosa fare per primo» (`prioritize`, gli avvisi aperti, lo stato e il punteggio messi in ordine con i loro id) si aggiungono alle tre esistenti; usano gli stessi quattro strumenti, limiti e budget giornaliero dell'IA, e non c'è ancora una chat libera.
