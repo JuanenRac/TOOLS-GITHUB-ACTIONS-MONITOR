@@ -132,11 +132,12 @@ class TheSettings(unittest.TestCase):
         self.assertEqual(screenmenu.menu_settings({"screens": {"menu_tv_scale": True}})["menu_tv_scale"], 1.5)
         self.assertEqual(screenmenu.menu_settings({"screens": "x"}), CFG)
 
-    def test_they_are_settings_of_the_page_with_the_same_defaults_as_the_template(self):
-        from github_actions_monitor.app import actions_monitor
+    def test_they_are_settings_of_the_page_with_the_same_defaults_as_the_example(self):
+        example = json.loads((HERE / "assets" / "examples" / "actions_monitor.example.json").read_text(encoding="utf-8"))["screens"]
         for key, value in CFG.items():
             self.assertIn("screens." + key, settings_api.META)
-            self.assertEqual(actions_monitor.DEFAULTS["screens"][key], value, key)
+            self.assertEqual(example[key], value, key)
+            self.assertEqual(screenmenu.DEFAULTS[key], value, key)
 
     def test_the_menu_changes_nothing_so_none_of_its_settings_is_secure_or_needs_a_restart(self):
         for key in CFG:

@@ -17,7 +17,7 @@ from github_actions_monitor.app import screens
 
 SCHEMA = 1
 TARGETS = ("new", "same")
-DEFAULTS = {"menu": True, "menu_target": "new", "menu_max_windows": 4, "menu_rotate_seconds": 20, "menu_tv_scale": 1.5}
+DEFAULTS = {key: screens.DEFAULTS[key] for key in ("menu", "menu_target", "menu_max_windows", "menu_rotate_seconds", "menu_tv_scale")}
 LANGS = ("en", "es", "de", "fr", "it", "ja", "zh", "pt")
 #: the views the page opens with ?view= (the same names as the VIEWS of the page) that make sense as a kiosk
 VIEWS = ("now", "alerts", "charts", "repos", "sentinel", "sentinel-ci", "sentinel-collab", "sentinel-security", "sentinel-delivery", "sentinel-supply", "sentinel-trend", "sentinel-yesterday", "team", "fleet", "reports", "lessons", "live")
@@ -58,13 +58,9 @@ def _clean(config):
 
 
 def menu_settings(config):
-    """The settings of the menu from the configuration, each one inside its range (a value that is not valid is the default)."""
-    block, d = _clean(config), DEFAULTS
-    scale = block.get("menu_tv_scale")
-    scale = d["menu_tv_scale"] if isinstance(scale, bool) or not isinstance(scale, (int, float)) else round(max(0.5, min(3.0, float(scale))), 2)
-    return {"menu": screens._flag(block.get("menu"), d["menu"]), "menu_target": screens._choice(block.get("menu_target"), TARGETS, d["menu_target"]),
-            "menu_max_windows": screens._int(block.get("menu_max_windows"), 1, 9, d["menu_max_windows"]), "menu_rotate_seconds": screens._int(block.get("menu_rotate_seconds"), 5, 300, d["menu_rotate_seconds"]),
-            "menu_tv_scale": scale}
+    """The settings of the menu from the configuration, each one inside its range (a value that is not valid is the default); they are part of screens.settings."""
+    cfg = screens.settings(config)
+    return {key: cfg[key] for key in DEFAULTS}
 
 
 def _spec(name, cfg, entry):

@@ -2439,10 +2439,10 @@ function scrmPlan(e,details){
   per.forEach((list,k)=>list.forEach((w,i)=>{w.rect=scrmTile(rects[k],i,list.length,layout)}));return wins}
 function scrmLabel(p,v){return v===""?T("ui.scrm_v_default"):(T("ui.scrm_v_"+v)!=="ui.scrm_v_"+v?T("ui.scrm_v_"+v):(T("ui.scrm_v_"+p.name+"_"+v)!=="ui.scrm_v_"+p.name+"_"+v?T("ui.scrm_v_"+p.name+"_"+v):v))}
 function scrmControl(e,p){
-  const id=`scrm-${e.id}-${p.name}`,v=scrmVal(e,p),tip=esc(T("ui.scrm_ph_"+p.name));let c;
-  if(p.kind==="choice")c=`<select id="${id}" data-id="${e.id}" data-p="${p.name}" title="${tip}">`+p.choices.map(o=>`<option value="${esc(o)}"${String(v)===o?" selected":""}>${esc(scrmLabel(p,o))}</option>`).join("")+"</select>";
-  else if(p.kind==="int"||p.kind==="float")c=`<input id="${id}" type="number" data-id="${e.id}" data-p="${p.name}" min="${p.min}" max="${p.max}" step="${p.kind==="float"?"0.1":"1"}" value="${esc(v)}" title="${tip}">`;
-  else c=`<input id="${id}" type="text" data-id="${e.id}" data-p="${p.name}" maxlength="${p.max_length||200}" value="${esc(v)}" title="${tip}" autocomplete="off" spellcheck="false">`;
+  const id=`scrm-${e.id}-${esc(p.name)}`,v=scrmVal(e,p),tip=esc(T("ui.scrm_ph_"+p.name));let c;
+  if(p.kind==="choice")c=`<select id="${id}" data-id="${e.id}" data-p="${esc(p.name)}" title="${tip}">`+p.choices.map(o=>`<option value="${esc(o)}"${String(v)===o?" selected":""}>${esc(scrmLabel(p,o))}</option>`).join("")+"</select>";
+  else if(p.kind==="int"||p.kind==="float")c=`<input id="${id}" type="number" data-id="${e.id}" data-p="${esc(p.name)}" min="${p.min}" max="${p.max}" step="${p.kind==="float"?"0.1":"1"}" value="${esc(v)}" title="${tip}">`;
+  else c=`<input id="${id}" type="text" data-id="${e.id}" data-p="${esc(p.name)}" maxlength="${p.max_length||200}" value="${esc(v)}" title="${tip}" autocomplete="off" spellcheck="false">`;
   return `<label title="${tip}"><span>${esc(T("ui.scrm_p_"+p.name))}</span>${c}</label>`}
 function scrmCard(e){
   const off=!e.available,why=e.reason==="wall_off"?T("ui.scrm_off_wall"):e.reason==="edition"?T("ui.scrm_off_edition"):"";
@@ -2453,7 +2453,7 @@ function scrmCard(e){
     `<button type="button" data-act="copy" data-id="${e.id}" title="${esc(T("ui.scrm_copy_tip"))}">${esc(T("ui.scrm_copy"))}</button></div>`+(multi?`<pre class="scrm-pre" id="scrm-w-${e.id}"></pre>`:"")+`</section>`}
 function scrmRefresh(e){
   const a=$("scrm-a-"+e.id);if(!a)return;
-  if(e.id==="multi"){const wins=scrmPlan(e,null);a.textContent=wins.map(w=>w.url).join("  ");$("scrm-w-multi").textContent=wins.map(w=>`msedge --kiosk "${location.origin}${w.url}" --window-position=${w.rect.left},${w.rect.top}`).join("\n")+"\n"+T("ui.scrm_kiosk_help")}
+  if(e.id==="multi"){const wins=scrmPlan(e,null);a.textContent=wins.map(w=>w.url).join("  ");$("scrm-w-multi").textContent=wins.map(w=>`msedge --kiosk "${location.origin}${esc(w.url)}" --window-position=${w.rect.left},${w.rect.top}`).join("\n")+"\n"+T("ui.scrm_kiosk_help")}
   else a.textContent=scrmUrl(e)}
 function scrmNote(t){$("scrm-msg").textContent=t||""}
 function scrmGo(url){const abs=location.origin+url;if(SCRM.target==="same"){location.href=abs;return}const w=window.open(abs,"_blank","noopener");if(!w)scrmNote(T("ui.scrm_blocked",{n:1}))}
