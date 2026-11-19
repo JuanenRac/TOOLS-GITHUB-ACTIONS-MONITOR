@@ -280,4 +280,4 @@ def brief_lines(now=None):
 
 
 def reason_text(reason):
-    return i18n.t("ai.chain_" + reason) if reason in ("model_calls", "model_cost", "cost", "retired", "not_allowed", "auth", "model_not_found", "quota", "slow", "config", "error", "no_text") else reason
+    return i18n.t("ai.chain_" + reason) if reason in ("model_calls", "model_cost", "cost", "retired", "not_allowed", "auth", "model_not_found", "quota", "slow", "config", "error", "no_text", "airgap") else reason

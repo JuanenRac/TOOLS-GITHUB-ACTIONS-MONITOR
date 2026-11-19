@@ -15,3 +15,7 @@ The core of this skill (`SKILL.md`) is put in the prompt when `ai.skill` is on, 
 ## Which model answers
 
 The person (not you) chooses the model: `ai.model`, a different one for a kind of question (`ai.tasks.<task>.model`) and a chain of fallbacks (`ai.fallback`). When your first model cannot answer, another one may be asked in its place, so do not assume which model you are or how large your context is; use what the prompt gives you. The monitor reads the list of models from the provider, shows what the provider says about each one (a figure it does not say stays unknown) and keeps a budget of calls and estimated cost per model; when a budget is spent nobody asks you more that day. None of this is yours to change.
+
+## Air-gapped mode
+
+With `ai.airgapped` on (or the general `airgapped` switch) you only run on this computer or on a private address the person declared in `ai.airgap_hosts`: a call to anything else is refused before it starts and the chain never falls back to a cloud model. If every model is refused the answer is the refusal, not a guess: say that the mode forbids it. `ai.redact.extra_terms` are words of the person that arrive already hidden as `[hidden]`; do not try to guess them.

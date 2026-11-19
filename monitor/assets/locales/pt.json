@@ -4289,5 +4289,22 @@
  "ui.asst_err_argument": "Escolha primeiro o alerta ou o repositório.",
  "ui.asst_err_role": "O seu perfil não pode usar essa ferramenta.",
  "ui.asst_err_unavailable": "O assistente não conseguiu responder.",
- "ui.cfg_u_tokens": "tokens"
+ "ui.cfg_u_tokens": "tokens",
+ "ui.cfg_b_privacy": "Privacidade e isolamento",
+ "cfg.f.ai.airgapped": "Modo isolado da IA",
+ "cfg.h.ai.airgapped": "Desligado. Ligado = a IA só fala com um modelo deste computador ou de um endereço privado que declare abaixo; qualquer endereço da internet e qualquer serviço na nuvem é recusado antes de abrir uma ligação. O interruptor geral de isolamento também o liga. Só se altera a partir deste computador.",
+ "cfg.f.ai.airgap_hosts": "Endereços privados permitidos",
+ "cfg.h.ai.airgap_hosts": "Só usado no modo isolado: nomes ou endereços da sua própria rede (192.168.1.20, gpu.lan) onde corre um modelo; um por linha. Este computador é sempre permitido; um endereço público é recusado mesmo que conste da lista.",
+ "cfg.f.ai.redact.extra_terms": "Palavras sempre ocultas",
+ "cfg.h.ai.redact.extra_terms": "Palavras (um servidor, um projeto) substituídas por [hidden] em qualquer texto antes de a IA o ver, seja qual for a capitalização. Somam-se aos segredos que o monitor já oculta; nunca os substituem.",
+ "ai.airgap_cloud_provider": "O modo isolado está ligado: este fornecedor é um serviço da internet e é recusado.",
+ "ai.airgap_host_not_allowed": "O modo isolado está ligado: {host} não está neste computador nem na lista de endereços privados que declarou.",
+ "ai.airgap_no_address": "O modo isolado está ligado: o fornecedor não tem um endereço que se possa verificar.",
+ "ai.doc_egress_ok": "O modo isolado está ligado e este fornecedor está neste computador ou num endereço que declarou.",
+ "ai.doc_egress_blocked": "O modo isolado está ligado e recusa este fornecedor: {why}",
+ "ai.chain_airgap": "recusado pelo modo isolado",
+ "cfg.f.ai.similar.enabled": "Alertas parecidos",
+ "cfg.h.ai.similar.enabled": "Desligado. Ligado = «explicar este alerta» também lista os alertas que se lhe parecem (abertos e resolvidos de que o feed se lembra), encontrados por uma comparação simples de palavras: sem modelo, sem embeddings, só com os dados desta conta.",
+ "cfg.f.ai.similar.max": "Máximo de alertas parecidos",
+ "cfg.h.ai.similar.max": "O máximo de alertas parecidos listados junto a uma explicação."
 }
