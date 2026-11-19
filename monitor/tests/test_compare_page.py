@@ -73,7 +73,7 @@ class ReadApiV1(unittest.TestCase):
         threading.Thread(target=server.serve_forever, daemon=True).start()
         self.addCleanup(server.server_close)
         self.addCleanup(server.shutdown)
-        config = {"compare": {"enabled": True, "min_runs_per_window": 5}, "api": {"v1_enabled": True}}
+        config = {"compare": {"enabled": True, "min_runs_per_window": 5}, "api": {"v1_enabled": True, "experimental_routes": True}}      # /api/compare is not frozen yet: experimental under the prefix
         with mock.patch.object(runtime, "process_storage", return_value=(storage, "alpha")), mock.patch.object(actions_monitor.toolconfig, "raw_config", return_value=config), \
                 mock.patch("time.time", return_value=NOW), mock.patch.dict(actions_monitor.LITE, {"on": False}), mock.patch.dict(actions_monitor.DEMO, {"on": False}):
             with urllib.request.urlopen(f"http://127.0.0.1:{server.server_address[1]}/api/v1/compare?days=workdays", timeout=10) as answer:

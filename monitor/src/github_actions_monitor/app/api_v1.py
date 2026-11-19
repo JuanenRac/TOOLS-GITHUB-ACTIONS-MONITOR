@@ -31,7 +31,7 @@ CURSOR_MAX_LENGTH = 512
 ALPHABET_RE = re.compile(r"^[A-Za-z0-9_-]+\Z")
 ERROR_SLUGS = {400: "bad_request", 401: "unauthorized", 403: "forbidden", 404: "not_found", 429: "rate_limited", 500: "server_error"}
 MODES = ("auto", "on", "off")
-DEFAULTS = {"v1_enabled": "auto", "default_limit": 50, "max_limit": 200, "cursor_ttl_seconds": 900, "gzip_min_bytes": 1024}
+DEFAULTS = {"v1_enabled": "auto", "experimental_routes": False, "default_limit": 50, "max_limit": 200, "cursor_ttl_seconds": 900, "gzip_min_bytes": 1024}
 BOUNDS = {"default_limit": (1, 1000), "max_limit": (1, 1000), "cursor_ttl_seconds": (30, 86400), "gzip_min_bytes": (0, 10_000_000)}
 
 #: what each own route promises. `required` is in every item of the full answer; `compact` is the short list of `profile=compact` (always a subset of `required`).
@@ -55,6 +55,8 @@ def settings(config):
         out["v1_enabled"] = "on" if mode else "off"
     elif isinstance(mode, str) and mode in MODES:
         out["v1_enabled"] = mode
+    if isinstance(block.get("experimental_routes"), bool):
+        out["experimental_routes"] = block["experimental_routes"]
     for key, (low, high) in BOUNDS.items():
         value = block.get(key)
         if isinstance(value, int) and not isinstance(value, bool) and low <= value <= high:

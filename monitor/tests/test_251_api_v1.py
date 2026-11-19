@@ -55,6 +55,7 @@ class TheRules(unittest.TestCase):
 
     def test_the_program_defaults_and_the_example_file_are_the_same_as_the_module(self):
         self.assertEqual(actions_monitor.DEFAULTS["api"], api_v1.DEFAULTS)
+        self.assertIs(api_v1.DEFAULTS["experimental_routes"], False)
         example = json.loads((HERE / "assets" / "examples" / "actions_monitor.example.json").read_text(encoding="utf-8"))
         self.assertEqual(example["api"], api_v1.DEFAULTS)
 
@@ -263,12 +264,13 @@ class TheServer(unittest.TestCase):
 
     def test_the_openapi_is_served(self):
         status, body, _ = self.get(self.serve(), "/api/v1/openapi.json")
-        self.assertEqual((status, sorted(body["paths"])), (200, ["/api/v1/me", "/api/v1/repos"]))
+        self.assertEqual(status, 200)
+        self.assertTrue({"/api/v1/me", "/api/v1/repos", "/api/v1/openapi.json", "/api/v1/health", "/api/v1/alerts"} <= set(body["paths"]))
 
 
 class TheSurface(unittest.TestCase):
     def test_the_settings_are_in_the_schema_with_texts_in_eight_languages(self):
-        keys = ["api." + k for k in ("v1_enabled", "default_limit", "max_limit", "cursor_ttl_seconds", "gzip_min_bytes")]
+        keys = ["api." + k for k in ("v1_enabled", "experimental_routes", "default_limit", "max_limit", "cursor_ttl_seconds", "gzip_min_bytes")]
         for key in keys:
             self.assertIn(key, settings_api.META)
         for lang in ("en", "es", "de", "fr", "it", "ja", "zh", "pt"):

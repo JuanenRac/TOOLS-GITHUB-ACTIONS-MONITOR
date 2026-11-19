@@ -48,12 +48,13 @@ from github_actions_monitor.tool_version import TOOL_VERSION
 from github_actions_monitor.security import netguard
 
 EXIT_OK, EXIT_USAGE, EXIT_DOWN, EXIT_AUTH, EXIT_DEGRADED, EXIT_ALERTS = 0, 1, 2, 3, 4, 5
-COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "score", "team", "ai-hook", "credential", "lessons", "briefs", "install-skill", "gh-token", "ai", "backup", "update", "compare")
+COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "score", "team", "ai-hook", "credential", "lessons", "briefs", "api", "install-skill", "gh-token", "ai", "backup", "update", "compare")
 BACKUP_ACTIONS = ("create", "verify", "restore", "status", "list")
 SKILL_ACTIONS = ("internal", "external")
 AI_ACTIONS = ("models", "doctor", "test")
 LESSONS_ACTIONS = ("list", "brief", "failures", "close")
 BRIEFS_ACTIONS = ("index", "show", "all")
+API_ACTIONS = ("openapi", "me")
 AI_HOOK_ACTIONS = ("install", "status", "uninstall")
 CREDENTIAL_ACTIONS = ("replace", "reload")
 LITE_COMMANDS = ("status", "doctor", "health", "check", "briefs")
@@ -432,6 +433,25 @@ def cmd_briefs(ctx):
     return answer, lines, EXIT_OK
 
 
+def cmd_api(ctx):
+    """api [openapi | me]: the read API for clients (`/api/v1/`, see docs/API.md). `openapi` prints the OpenAPI document of every frozen route (redirect it to a file); `me` says who the monitor takes this
+    client for (mode, user, role and what the session may do). Read only; a monitor whose API is closed (`api.v1_enabled`) is told in one line."""
+    action = ctx["action"] or "me"
+    if action not in API_ACTIONS:
+        raise CliError(EXIT_USAGE, i18n.t("cli.api_action"))
+    try:
+        answer = fetch(ctx["base"], "/api/v1/openapi.json" if action == "openapi" else "/api/v1/me", {"lang": i18n.language()} if action == "me" else None, ctx["timeout"], ctx["token"])
+    except CliError as error:
+        if error.code == EXIT_DEGRADED:      # the monitor answers 404 while the prefix is closed
+            raise CliError(EXIT_DEGRADED, i18n.t("cli.api_closed")) from None
+        raise
+    if action == "openapi":
+        return answer, [json.dumps(answer, ensure_ascii=False, indent=1)], EXIT_OK
+    can = answer.get("capabilities") or {}
+    line = i18n.t("cli.api_me", mode=answer.get("mode") or "-", user=answer.get("user") or "-", role=answer.get("role") or "-", contract=answer.get("contract") or "-")
+    return answer, [line, i18n.t("cli.api_can", things=", ".join(k for k in ("read", "write", "admin") if can.get(k)) or "-")], EXIT_OK
+
+
 def _post_ai(ctx, path, payload):
     """One local-only POST of the AI models family; 403 = the monitor refuses (not this computer or no token), 404 = this monitor has no such route."""
     status, answer = post_json(ctx["base"], path, payload, max(ctx["timeout"], 30.0), ctx["token"])
@@ -744,7 +764,7 @@ def cmd_credential(ctx):
     return {"action": action, "ok": ok, **shown}, [line], EXIT_OK if ok else EXIT_DEGRADED
 
 
-HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "compare": cmd_compare, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "briefs": cmd_briefs, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai}
+HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "compare": cmd_compare, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "briefs": cmd_briefs, "api": cmd_api, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai}
 
 
 def cmd_update(rest):
@@ -765,7 +785,7 @@ def cmd_update(rest):
 def build_parser():
     ap = argparse.ArgumentParser(prog="monitor_cli.py", description=i18n.t("cli.description"), epilog=i18n.t("cli.epilog"), formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", choices=COMMANDS, help=i18n.t("cli.help_command"))
-    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + BRIEFS_ACTIONS + SKILL_ACTIONS + AI_ACTIONS + BACKUP_ACTIONS, default=None, help=i18n.t("cli.help_ai_action"))
+    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + BRIEFS_ACTIONS + API_ACTIONS + SKILL_ACTIONS + AI_ACTIONS + BACKUP_ACTIONS, default=None, help=i18n.t("cli.help_ai_action"))
     ap.add_argument("file", nargs="?", default="", help=i18n.t("cli.help_file"))
     ap.add_argument("--json", action="store_true", help=i18n.t("cli.help_json"))
     for name in ("assistant", "cursor", "generic"):

@@ -21,6 +21,7 @@
 | `alerts` | gli avvisi di tutte le sentinelle in un elenco: `--sentinel ci\|collab\|security\|supply\|delivery`, `--level info\|warning\|error`, `--muted show\|hide\|only` | no |
 | `score` | il punteggio dell'account: numero, lettera, tendenza, parti, copertura e scomposizione per repository; `--compare` lo confronta con lo storico della finestra | no |
 | `compare` | questo periodo rispetto al precedente: le cifre con variazione e direzione, chi peggiora o migliora; `--window 7\|30d`, `--days all\|workdays\|weekend`, `--baseline previous\|year_ago`, `--format table\|json\|ndjson\|csv`; uscita 4 se una cifra ha pochi dati, 5 con `--fail-on` se una peggiora | no |
+| `api` | l'API di lettura per i client: `api openapi` stampa il documento OpenAPI di ogni rotta congelata (reindirizzalo a un file), `api me` dice chi il monitor crede sia questo client (modalità, utente, ruolo, cosa può fare la sessione, versione del contratto); un monitor con `api.v1_enabled` chiuso lo dice | no |
 | `team` | la salute dei repository in classifica, prima quelli che richiedono una persona; `--severity warn\|bad` tiene i peggiori e `--repo owner/name` dà il dettaglio di uno | no |
 | `live` | lo stato del ricevitore del webhook e gli ultimi eventi | no |
 | `ai` | `ai models [--refresh]` elenca i modelli del provider IA con i dati di ciascuno; `ai test --provider NOME --model NOME` ne prova uno con un testo sintetico (latenza, token, costo stimato); `ai doctor` dice perché un'IA non risponde, senza stampare una chiave | no |
