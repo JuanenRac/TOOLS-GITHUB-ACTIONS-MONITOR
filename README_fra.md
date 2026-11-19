@@ -65,6 +65,20 @@
 - **Avis de nouvelle version** : un badge discret quand une version plus récente est publiée ; il ne lit la page publique des versions qu'une fois par jour, n'installe jamais rien et peut être désactivé (toujours désactivé sur une installation isolée).
 - **Quotas pour tout compte** : offre, minutes facturables (les dépôts publics ne coûtent rien), quota de l'API lu dans les en-têtes de GitHub, concurrence et jobs proches de la limite de 6 heures ; les chiffres sont dans un fichier modifiable.
 
+## Ce qu'il fait gagner
+
+Utiliser le moniteur plutôt que de consulter Actions à la main fait gagner du temps. C'est une **estimation, pas une mesure** : environ **85-95 % du temps passé à surveiller la CI et à trier les échecs** et, par conséquent, environ **15-25 % de la productivité globale d'une équipe** qui travaille sur de nombreux dépôts. Elle suppose que, sans le moniteur, quelqu'un ouvre l'onglet Actions de chaque dépôt pour voir ce qui est rouge et lit chaque journal en échec pour trouver la cause, que des échecs surviennent chaque semaine et que la surveillance et le tri occupent environ un sixième à un tiers du temps de travail (les deux chiffres ne concordent que sous cette hypothèse). Avec peu de dépôts, ou si personne ne surveille à la main aujourd'hui, le gain est bien plus faible.
+
+| Tâche | Sans le moniteur | Avec le moniteur | Gain estimé |
+| --- | --- | --- | --- |
+| Surveiller chaque workflow de chaque dépôt | Ouvrir sans cesse l'onglet Actions de chaque dépôt | Une page et une liste d'alertes qui se mettent à jour seules | 85-95 % |
+| Décider ce qui est vraiment rouge | Comparer les exécutions à l'œil (les exécutions annulées et ignorées cachent des échecs) | Une règle : la dernière exécution terminée de chaque workflow sur la branche par défaut | 85-95 % |
+| Trouver la cause d'une exécution en échec | Ouvrir l'exécution, le job et le journal | L'alerte nomme déjà le workflow et l'échec, avec les leçons qui correspondent | 85-95 % |
+| Apprendre un échec à temps | S'en apercevoir plus tard, ou quand quelqu'un le dit | Alertes, notifications et un résumé pour les outils d'IA | 85-95 % |
+| Ne pas répéter une erreur connue, sécurité, hygiène et versions prêtes | Dépend de la mémoire et de revues manuelles | Bibliothèque de leçons et sentinelles | Non chiffré |
+
+Méthode, hypothèses et comment le mesurer dans votre propre usage: [`monitor/docs/PRODUCTIVITY_fra.md`](monitor/docs/PRODUCTIVITY_fra.md).
+
 ## En un coup d'œil
 
 | | |
@@ -343,6 +357,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/AUDIT_PACKAGE_fra.md`](monitor/docs/AUDIT_PACKAGE_fra.md): Dossier pour l'auditeur
 - [`monitor/docs/LARGE_ACCOUNTS_fra.md`](monitor/docs/LARGE_ACCOUNTS_fra.md): Grands comptes : des centaines de dépôts
 - [`monitor/docs/ORGANIZATIONS_fra.md`](monitor/docs/ORGANIZATIONS_fra.md): Organisations et grands comptes
+- [`monitor/docs/PRODUCTIVITY_fra.md`](monitor/docs/PRODUCTIVITY_fra.md): ce que le moniteur fait gagner : une estimation, ses hypothèses et comment la mesurer
 
 ## Contribuer
 

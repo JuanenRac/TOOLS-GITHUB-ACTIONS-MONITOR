@@ -65,6 +65,20 @@
 - **Avviso di nuova versione**: un badge discreto quando esce una versione più recente; legge la pagina pubblica dei rilasci una volta al giorno, non installa mai nulla e si può spegnere (sempre spento in un'installazione isolata).
 - **Quote per ogni account**: piano, minuti fatturabili (i repository pubblici non costano), quota dell'API letta dalle intestazioni di GitHub, concorrenza e job vicini al limite di 6 ore; le cifre stanno in un file modificabile.
 
+## Cosa fa risparmiare
+
+Usare il monitor invece di controllare Actions a mano fa risparmiare tempo. È una **stima, non una misura**: circa l'**85-95 % del tempo dedicato a sorvegliare la CI e a smistare i guasti** e, di conseguenza, circa il **15-25 % della produttività complessiva di un team** che lavora su molti repository. Presuppone che, senza il monitor, qualcuno apra la scheda Actions di ogni repository per vedere cosa è rosso e legga ogni log fallito per trovare la causa, che i guasti si verifichino ogni settimana e che sorveglianza e smistamento occupino da un sesto a un terzo del tempo di lavoro (le due cifre concordano solo con questa ipotesi). Con pochi repository, o se oggi nessuno controlla a mano, il risparmio è molto minore.
+
+| Attività | Senza il monitor | Con il monitor | Risparmio stimato |
+| --- | --- | --- | --- |
+| Sorvegliare ogni workflow di ogni repository | Aprire di continuo la scheda Actions di ogni repository | Una pagina e un elenco di avvisi che si aggiornano da soli | 85-95 % |
+| Decidere cosa è davvero rosso | Confrontare le esecuzioni a occhio (quelle annullate e saltate nascondono i guasti) | Una regola: l'ultima esecuzione terminata di ogni workflow sul ramo predefinito | 85-95 % |
+| Trovare la causa di un'esecuzione fallita | Aprire l'esecuzione, il job e il log | L'avviso nomina già il workflow e il guasto, con le lezioni corrispondenti | 85-95 % |
+| Accorgersi in tempo di un guasto | Accorgersene dopo, o quando qualcuno lo dice | Avvisi, notifiche e un riepilogo per gli strumenti di IA | 85-95 % |
+| Non ripetere un errore noto, sicurezza, igiene e versioni pronte | Dipende dalla memoria e da revisioni manuali | Biblioteca di lezioni e sentinelle | Non quantificato |
+
+Metodo, ipotesi e come misurarlo nel proprio uso: [`monitor/docs/PRODUCTIVITY_ita.md`](monitor/docs/PRODUCTIVITY_ita.md).
+
 ## In breve
 
 | | |
@@ -343,6 +357,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/AUDIT_PACKAGE_ita.md`](monitor/docs/AUDIT_PACKAGE_ita.md): Pacchetto per il revisore
 - [`monitor/docs/LARGE_ACCOUNTS_ita.md`](monitor/docs/LARGE_ACCOUNTS_ita.md): Account grandi: centinaia di repository
 - [`monitor/docs/ORGANIZATIONS_ita.md`](monitor/docs/ORGANIZATIONS_ita.md): Organizzazioni e account grandi
+- [`monitor/docs/PRODUCTIVITY_ita.md`](monitor/docs/PRODUCTIVITY_ita.md): cosa fa risparmiare il monitor: una stima, le sue ipotesi e come misurarla
 
 ## Contribuire
 
