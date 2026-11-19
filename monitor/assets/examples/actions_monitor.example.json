@@ -648,6 +648,7 @@
   },
   "api": {
     "v1_enabled": "auto",
+    "experimental_routes": false,
     "default_limit": 50,
     "max_limit": 200,
     "cursor_ttl_seconds": 900,

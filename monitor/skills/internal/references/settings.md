@@ -121,6 +121,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `analytics.steps` | `-` | analytics | Time per step |
 | `api.cursor_ttl_seconds` | `900` | advanced | Seconds a page cursor lives |
 | `api.default_limit` | `50` | advanced | Items per page |
+| `api.experimental_routes` | `false` | advanced | Routes that are not frozen in /api/v1/ |
 | `api.gzip_min_bytes` | `1024` | advanced | Smallest answer to compress (bytes) |
 | `api.max_limit` | `200` | advanced | Most items per page |
 | `api.v1_enabled` | `"auto"` | advanced | Read API under /api/v1/ |

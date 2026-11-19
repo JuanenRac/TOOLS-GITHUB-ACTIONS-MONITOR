@@ -23,6 +23,7 @@ The monitor watches the GitHub Actions of a person's repositories on their compu
 
 - Files only: read `ai/INDEX.json` first (it says where everything is, never assume a path), then `ai/ALERTS_BRIEF.md`, `ai/ai_alerts.jsonl`, `ai/LESSONS.md`.
 - HTTP only: `GET /api/ai/brief`, `/api/ai/alerts?since=SECONDS`, `/api/ai/state`, `/api/ai/lessons`, `/api/ai/failures` (`references/api.md`; in the network mode send the access token or a session).
+- A typed client: the read API under `/api/v1/` (`/api/v1/me` says who you are and what you may do, `/api/v1/openapi.json` describes every frozen route; a route the contract does not freeze is experimental and answers 404 there); `monitor_cli.py api openapi` and `api me` do the same from the command line.
 - Command line: `python bin/monitor_cli.py` (`references/cli.md`), for example `lessons brief --repo NAME` before a push.
 - MCP: `python bin/mcp_server.py` (read only; `--allow-ack` to acknowledge, `--allow-lessons` to write lessons).
 - Stream: `GET /api/ai/stream` (server-sent events), when `ai_alerts.stream.enabled` is on. Details in `references/protocol.md`.

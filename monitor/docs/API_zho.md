@@ -29,7 +29,7 @@
 - 设置 `api.v1_enabled`(设置、高级、只读 API v1):`auto`(默认)在监视器作为服务运行时(团队模式的账户、Docker 镜像、systemd 单元)响应,一人一台电脑时保持关闭;`on` 始终开启;`off` 始终关闭(旧的 true 和 false 相当于 on 和 off)。响应时,每条读取路由也会在 `/api/v1/` 下提供(例如 `/api/v1/alerts`):相同的响应和相同的角色,另加头 `X-API-Version: 1`。关闭时、在精简版中以及对任何其他版本号,该前缀返回 404。
 - `/api/v1/me`:谁在请求:`mode`(`individual` 或 `team`)、`authenticated`、`user`,以及团队会话的 `role` 和 `accounts`(没有会话时为 null)、该会话可做的事(`capabilities`:`read`、`write`、`admin` 和 `v1_write`,因前缀只读,`v1_write` 始终为 false)、列表的 `limits`、监视器版本和契约版本(`contract`,`1.0`:每增加一个键就增长,从不丢失键)。
 - `/api/v1/repos`:监视器正在监视的仓库,每个一行(`repo`、`ecosystem`、`state`、`risk`、`runs_24h`、`failures_24h`、`red_workflows`、`stuck_runs`、`alerts`、`last_run_at`)。过滤参数 `state`、`ecosystem` 和 `q`;`limit`(默认 `api.default_limit`,最多 `api.max_limit`);`cursor`(上一页的 `next_cursor`,带签名,在 `api.cursor_ttl_seconds` 内有效);`fields=a,b` 或 `profile=compact` 可得到更短的行。客户端接受时,响应用 gzip 压缩。
-- `/api/v1/openapi.json`:这两条路由的轻量 OpenAPI 3 描述。
+- `/api/v1/openapi.json`:整个已冻结只读 API 的 OpenAPI 3 描述,由契约(`docs/schemas/api_contract.json`)生成,从不手写:每条已冻结路由及其承诺的键和类型、`x-lite`(精简版的响应)和 `x-local-only`。契约未冻结的路由是实验性的:它们在 `/api/v1/` 下返回 404,也不在文档中,除非开启 `api.experimental_routes`(此时以 `x-experimental` 列出)。`/api/` 下的旧路由永远不变。用 `python bin/monitor_cli.py api openapi` 下载。
 - 两条自有路由以 `{"error": "bad_request", "code": "api.bad_cursor", "message": "..."}` 的形式返回错误:`error` 和 `code` 稳定,`message` 跟随 `?lang=` 的语言。代码:api.bad_cursor、api.bad_limit、api.unknown_field、api.bad_profile, api.server_error。一切均为只读:`/api/v1/` 下没有任何写入。其形状已冻结在契约的 `v1_endpoints` 部分,可用 `python tools/check_api_contract.py --v1` 针对开启了 `api.v1_enabled` 的监视器进行检查。
 
 ## 数据流
