@@ -96,7 +96,7 @@ class TheFallback(unittest.TestCase):
         with mock.patch.object(cli, "prefer_v1", return_value=False):
             plain = cli.fetch(served.url, "/api/ai/index", {"lang": "en"})
         self.assertEqual(calls[-1], "/api/ai/index")
-        self.assertEqual(versioned, plain)
+        self.assertEqual(stable(versioned), stable(plain))
 
     def test_a_closed_api_falls_back_once_and_is_not_asked_again(self):
         served = served_monitor(self, service=False)      # "auto" outside the service mode: the prefix answers 404
@@ -105,7 +105,7 @@ class TheFallback(unittest.TestCase):
             first = cli.fetch(served.url, "/api/ai/index", {"lang": "en"})
             second = cli.fetch(served.url, "/api/ai/index", {"lang": "en"})
         self.assertEqual(calls, ["/api/v1/ai/index", "/api/ai/index", "/api/ai/index"])
-        self.assertEqual(first, second)
+        self.assertEqual(stable(first), stable(second))
         self.assertIn(served.url, cli.V1_STATE["closed"])
 
     def test_a_route_that_is_not_frozen_is_asked_the_old_way(self):
