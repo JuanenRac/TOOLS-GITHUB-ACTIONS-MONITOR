@@ -65,6 +65,20 @@
 - **Notice of a newer version**: a discreet badge when a newer release is published; it only reads the public releases page once a day, never installs anything and can be switched off (always off when air-gapped).
 - **Quotas for every account**: plan, billable minutes (public repositories cost none), allowance of the API read from GitHub's headers, concurrency and jobs near the 6-hour limit; the figures are in an editable file.
 
+## What it saves
+
+Using the monitor instead of checking Actions by hand saves time. This is an **estimate, not a measurement**: about **85-95 % of the time spent watching CI and triaging failures** and, as a result, about **15-25 % of the overall productivity of a team** that works on many repositories. It assumes that, without the monitor, someone opens the Actions tab of each repository to see what is red and reads each failed log to find the cause, that failures happen every week, and that watching and triage take roughly a sixth to a third of the working time (the two figures only agree under that assumption). With few repositories, or if nobody watches by hand today, the saving is much smaller.
+
+| Task | Without the monitor | With the monitor | Estimated saving |
+| --- | --- | --- | --- |
+| Watching every workflow of every repository | Open the Actions tab of each repository, again and again | One page and one list of alerts that update by themselves | 85-95 % |
+| Deciding what is really red | Compare runs by eye (cancelled and skipped runs hide failures) | One rule: the last finished run of each workflow on the default branch | 85-95 % |
+| Finding the cause of a failed run | Open the run, the job and the log | The alert already names the workflow and the failure, with the lessons that match it | 85-95 % |
+| Learning of a failure in time | Notice it later, or when someone tells you | Alerts, notifications and a brief for AI tools | 85-95 % |
+| Not repeating a known mistake, security, hygiene and releases ready | Depends on memory and manual reviews | Library of lessons and sentinels | Not quantified |
+
+Method, assumptions and how to measure it in your own use: [`monitor/docs/PRODUCTIVITY.md`](monitor/docs/PRODUCTIVITY.md).
+
 ## At a glance
 
 | | |
@@ -346,6 +360,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/AUDIT_PACKAGE.md`](monitor/docs/AUDIT_PACKAGE.md): Package for the auditor
 - [`monitor/docs/LARGE_ACCOUNTS.md`](monitor/docs/LARGE_ACCOUNTS.md): Large accounts: hundreds of repositories
 - [`monitor/docs/ORGANIZATIONS.md`](monitor/docs/ORGANIZATIONS.md): Organizations and big accounts
+- [`monitor/docs/PRODUCTIVITY.md`](monitor/docs/PRODUCTIVITY.md): what the monitor saves: an estimate, its assumptions and how to measure it
 
 ## Contributing
 
