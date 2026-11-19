@@ -4124,6 +4124,7 @@
  "ui.upd_back_confirm": "回到 {to}？监视器自行停止，上次更新的文件将被之前的副本替换（数据格式变化时数据也会恢复），然后监视器重新启动。",
  "ui.upd_verified_yes": "与 SHA256SUMS 一致",
  "ui.upd_verified_no": "未验证：该发布没有 SHA256SUMS",
+ "ui.upd_trust": "该检查将 zip 与 SHA256SUMS 进行比对，二者来自同一个 GitHub 发布：它能发现损坏或不完整的下载，但发现不了在源头被替换的发布。对发布的信任取决于 GitHub 以及您在那里的账户。",
  "ui.upd_progress": "进度",
  "ui.upd_restarting": "监视器正在重启；此页面会自动重新连接。",
  "ui.upd_done": "更新已完成。",

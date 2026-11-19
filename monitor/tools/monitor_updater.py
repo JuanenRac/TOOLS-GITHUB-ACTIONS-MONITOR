@@ -1189,6 +1189,7 @@ class Updater:
         self.probe = probe or (lambda port: probe_port(port))
         self._releases = None
         self._staged = {}
+        self._downloads = []
         if lang:
             set_language(lang)
 
@@ -1238,7 +1239,8 @@ class Updater:
 
     # --- download, verify, unpack
     def prepare(self, release):
-        cache = self.backups / "downloads" / release["version"]
+        cache = self.backups / "downloads" / f"{release['version']}_{secrets.token_hex(3)}"      # one folder per call: two updaters at once must not write the same SHA256SUMS or zip
+        self._downloads.append(cache)
         zip_path, expected, how = self.source.fetch_zip(release, cache)
         actual = sha256_file(zip_path)
         return {"zip": zip_path, "expected": expected, "actual": actual, "sha_ok": expected is None or expected == actual, "verified": how if expected else None, "size": zip_path.stat().st_size}
@@ -1259,8 +1261,13 @@ class Updater:
             if within(stage, self.backups / "_staging"):
                 shutil.rmtree(str(stage), ignore_errors=True)
         self._staged.clear()
-        with contextlib.suppress(OSError):
-            (self.backups / "_staging").rmdir()
+        for folder in self._downloads:
+            if within(folder, self.backups / "downloads"):
+                shutil.rmtree(str(folder), ignore_errors=True)
+        self._downloads.clear()
+        for leftover in ("_staging", "downloads"):
+            with contextlib.suppress(OSError):
+                (self.backups / leftover).rmdir()
 
     # --- pending work
     def pending(self):

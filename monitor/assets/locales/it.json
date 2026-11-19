@@ -4124,6 +4124,7 @@
  "ui.upd_back_confirm": "Tornare a {to}? Il monitor si ferma da solo, i file dell'ultimo aggiornamento vengono sostituiti dalla copia fatta prima (e i tuoi dati se il formato è cambiato) e il monitor riparte.",
  "ui.upd_verified_yes": "SHA256SUMS coincide",
  "ui.upd_verified_no": "NON verificato: la release non ha SHA256SUMS",
+ "ui.upd_trust": "Il controllo confronta lo zip con SHA256SUMS ed entrambi provengono dalla stessa release di GitHub: rileva un download danneggiato o incompleto, non una release sostituita all'origine. La fiducia nella release poggia su GitHub e sul tuo account lì.",
  "ui.upd_progress": "Avanzamento",
  "ui.upd_restarting": "Il monitor si sta riavviando; questa pagina si riconnette da sola.",
  "ui.upd_done": "L'aggiornamento è terminato.",

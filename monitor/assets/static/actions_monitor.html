@@ -2656,13 +2656,23 @@ async function updLoad(){
   const s=await updJ("status");if(s&&s.installed!==undefined){UPD.st=s;if(s.progress&&s.progress.running&&!UPD.poll)updPoll()}else if(!UPD.expect)UPD.st=null;
   updTop();updVers();updProg();updHist()
 }
+function updStreamClose(){if(UPD.es){try{UPD.es.close()}catch(e){}UPD.es=null}}
+function updStream(){
+  if(UPD.es)return true;if(typeof EventSource==="undefined")return false;
+  let es;try{es=new EventSource("/api/updates/stream")}catch(e){return false}
+  UPD.es=es;
+  es.addEventListener("progress",ev=>{try{const j=JSON.parse(ev.data);UPD.last=j.kind?j:null;if(UPD.st)UPD.st.progress=j;if(j.running)updProg()}catch(e){}});
+  es.addEventListener("bye",()=>{updStreamClose();updPoll()});      /* one request decides: finished, still running (time was up) or restarting */
+  es.onerror=()=>{updStreamClose();updPoll()};
+  return true
+}
 function updPoll(){
   clearTimeout(UPD.poll);UPD.poll=setTimeout(async()=>{
     UPD.poll=null;const j=await updJ("progress");
     if(j===null||j.running===undefined){UPD.st=null;updTop();updPoll();return}      /* the monitor is restarting: keep asking */
     const was=UPD.expect;UPD.last=j.kind?j:null;
     if(UPD.st)UPD.st.progress=j;
-    if(j.running){updProg();updPoll();return}
+    if(j.running){updProg();if(!updStream())updPoll();return}      /* a stream (server-sent events) when the browser has one; asking every 1.5 s otherwise, and while the monitor restarts */
     UPD.expect=false;await updLoad();
     if(was&&j.report&&j.report.ok)setTimeout(()=>location.reload(),2500)      /* the new version brings a new page */
   },1500)
@@ -2673,7 +2683,7 @@ async function updApply(target){
   const plan=pl.plan;
   if(plan.blocked){UPD.note=updErr("blocked")+" "+plan.checks.filter(c=>c.severity==="block").map(c=>c.text).join(" ");updTop();return}
   const changes=(plan.config||[]).reduce((n,e)=>n+(e.changes||[]).length,0);
-  const text=T("ui.upd_confirm",{from:plan.installed,to:plan.target,verified:T(plan.verified?"ui.upd_verified_yes":"ui.upd_verified_no"),backups:plan.backups||"",changes:changes});
+  const text=T("ui.upd_confirm",{from:plan.installed,to:plan.target,verified:T(plan.verified?"ui.upd_verified_yes":"ui.upd_verified_no"),backups:plan.backups||"",changes:changes})+"\n\n"+T("ui.upd_trust");
   if(!await askConfirm(text,{danger:true}))return;
   const r=await updJ("apply",{target:plan.target,confirm:true});
   if(!r||!r.ok){UPD.note=updErr(r&&r.status||"network");updTop();return}

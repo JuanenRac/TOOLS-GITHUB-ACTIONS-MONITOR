@@ -11,11 +11,13 @@
 import contextlib
 import logging
 import os
+import random
 import threading
 import time
 from pathlib import Path
 
 STALE = 30.0
+WINDOWS_MIN_WAIT = 45.0      # the least os_lock waits on Windows when the caller asked for 5 s or more
 RESCUED = []      # the lock files taken over from a process that was gone: (name, pid); read by the tests and by the doctor
 _LOCKS = {}
 _GUARD = threading.Lock()
@@ -66,6 +68,24 @@ def pid_alive(pid):
 MIN_AGE = 1.0      # a lock younger than this is not opened to read its pid: a live owner lets go of it in milliseconds, and on Windows a file that is open for reading cannot be deleted by its owner
 
 
+RELEASED = -1      # written into a lock file its owner could not delete: the owner is done with it, so the next process may take it over after MIN_AGE instead of after 10x STALE
+
+
+def _mark_released(lock_file):
+    """The owner is done but the delete was refused (Windows, a reader holds the file open): say so inside the file, so it is not taken for a live owner's."""
+    try:
+        fd = os.open(str(lock_file), os.O_WRONLY | os.O_TRUNC)
+    except OSError:
+        return False
+    try:
+        os.write(fd, str(RELEASED).encode("ascii"))
+        return True
+    except OSError:
+        return False
+    finally:
+        os.close(fd)
+
+
 def _owner_gone(lock_file):
     """The pid written in the lock file, when its process is gone (None when it is alive, unknown, not written yet or too recent to look at)."""
     try:
@@ -75,6 +95,8 @@ def _owner_gone(lock_file):
         pid = int(text)
     except (OSError, ValueError):
         return None
+    if pid == RELEASED:
+        return pid
     return pid if pid_alive(pid) is False else None
 
 
@@ -137,7 +159,10 @@ def _unlock(fd):
 
 @contextlib.contextmanager
 def os_lock(path, timeout=10.0):
-    """Excludes other threads and other processes while the block runs, with a lock of the operating system on `<path>.oslock`. Raises TimeoutError when it cannot be taken in `timeout` seconds."""
+    """Excludes other threads and other processes while the block runs, with a lock of the operating system on `<path>.oslock`. Raises TimeoutError when it cannot be taken in `timeout` seconds
+    (on Windows the wait is never shorter than WINDOWS_MIN_WAIT: a machine under load makes a polled lock take far longer than the same lock on Linux, and a fixed 10 s gave up on a live holder)."""
+    if os.name == "nt":
+        timeout = max(timeout, WINDOWS_MIN_WAIT) if timeout >= 5.0 else timeout      # a deliberate short wait (a try-lock of 1 s) stays short
     lock_file = Path(str(path) + ".oslock")
     lock_file.parent.mkdir(parents=True, exist_ok=True)
     with path_lock(path):
@@ -153,7 +178,7 @@ def os_lock(path, timeout=10.0):
                 except OSError:
                     if time.monotonic() > deadline:
                         raise TimeoutError(lock_file.name) from None
-                    time.sleep(0.02)
+                    time.sleep(0.01 + random.random() * 0.03)      # jitter: processes that poll in step keep missing each other's free moment
             try:
                 yield
             finally:
@@ -201,4 +226,5 @@ def process_lock(path, timeout=10.0):
             yield
         finally:
             os.close(fd)
-            release(lock_file)
+            if not release(lock_file):
+                _mark_released(lock_file)

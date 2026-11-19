@@ -4124,6 +4124,7 @@
  "ui.upd_back_confirm": "Voltar a {to}? O monitor para sozinho, os ficheiros da última atualização são substituídos pela cópia feita antes (e os seus dados, se o formato mudou) e o monitor arranca de novo.",
  "ui.upd_verified_yes": "SHA256SUMS coincide",
  "ui.upd_verified_no": "SEM verificar: a versão não tem SHA256SUMS",
+ "ui.upd_trust": "A verificação compara o zip com SHA256SUMS e ambos vêm da mesma versão do GitHub: deteta uma transferência danificada ou incompleta, não uma versão substituída na origem. A confiança na versão assenta no GitHub e na sua própria conta aí.",
  "ui.upd_progress": "Progresso",
  "ui.upd_restarting": "O monitor está a reiniciar; esta página volta a ligar-se sozinha.",
  "ui.upd_done": "A atualização terminou.",
