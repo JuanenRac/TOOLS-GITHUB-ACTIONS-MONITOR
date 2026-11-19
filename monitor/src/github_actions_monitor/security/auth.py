@@ -28,6 +28,7 @@ from pathlib import Path
 
 from github_actions_monitor.security import private_io
 from github_actions_monitor.storage import base as storage_base
+from github_actions_monitor.storage import locks
 
 ROLES = ("viewer", "maintainer", "admin")
 RANK = {role: index for index, role in enumerate(ROLES)}
@@ -480,15 +481,16 @@ def audit(cfg, action, user="", role="", address="", path="", result="ok", code=
     target = audit_path()
     try:
         with _lock:
-            try:
-                if target.exists() and target.stat().st_size > AUDIT_MAX_BYTES:
-                    os.replace(target, target.with_name(target.name + ".1"))
-            except OSError:      # a reader keeps the file open (Windows): the event is still appended to the current file and the rotation is tried again at the next one
-                pass
             private_io.private_dir(target.parent)
-            with private_io.open_append(target) as handle:
-                handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
-    except OSError:
+            with locks.os_lock(target, 5.0):      # the supervisor and the accounts write the same file: rotation and append are ONE step for every process, so no line goes to a file another process is moving
+                try:
+                    if target.exists() and target.stat().st_size > AUDIT_MAX_BYTES:
+                        os.replace(target, target.with_name(target.name + ".1"))
+                except OSError:      # a reader keeps the file open (Windows): the event is still appended to the current file and the rotation is tried again at the next one
+                    pass
+                with private_io.open_append(target) as handle:
+                    handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    except (OSError, TimeoutError):
         pass      # the audit never stops a request
 
 

@@ -86,6 +86,16 @@ def permission(scope, have):
     return scope in have or (scope == "workflow" and "repo" in have and "workflow" in have) or (scope == "repo" and "repo" in have)
 
 
+REASONS = {"403": "forbidden", "404": "not_found", "405": "method", "409": "conflict", "422": "invalid"}
+
+
+def reason_of(err):
+    """Why GitHub refused, in words the page can explain: forbidden (the token has no Actions write permission), not_found (a private repository the token cannot see, or no such item: GitHub answers 404 for both),
+    method, conflict, invalid (the inputs did not validate). "" when the answer carries none of those codes."""
+    found = re.search(r"\b(403|404|405|409|422)\b", err or "")
+    return REASONS[found.group(1)] if found else ""
+
+
 def log(entry, path=None):
     line = {"at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), **{k: entry[k] for k in ("action", "repo", "number", "ok", "status") if k in entry}}
     try:
@@ -112,6 +122,9 @@ def execute(config, plan_id, run_gh, log_file=None):
         if code == 0:
             result = {"ok": True, "status": "done"}
         else:
-            result = {"ok": False, "status": "refused" if re.search(r"\b(403|404|405|409|422)\b", err or "") else "error", "detail": secretstore.redact((err or "").strip()[:200], secretstore.APPLIED["token"])}
+            why = reason_of(err)
+            result = {"ok": False, "status": "refused" if why else "error", "detail": secretstore.redact((err or "").strip()[:200], secretstore.APPLIED["token"])}
+            if why:
+                result["reason"] = why
     log({**item, **result}, log_file)
     return result

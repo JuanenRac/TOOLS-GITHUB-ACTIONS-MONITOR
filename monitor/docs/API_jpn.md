@@ -73,7 +73,7 @@ curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/re
 | `/api/discovery` | 検出が見つけたもの: アカウントと表示・非表示のリポジトリのボックス、最近のイベント、提案されたグループ、その設定、フォーク、組織。 |
 | `/api/discovery/group` | POST。提案されたグループをエコシステムのファイルに追加し、ファイルのコピーを残します。 |
 | `/api/gh-action/plan` | POST、このコンピューター。GitHub に送られる内容(再実行、キャンセル、ディスパッチ、マージ)を準備します。まだ何も送られません。 |
-| `/api/gh-action/confirm` | POST、このコンピューター。確認後に、計画どおりの内容を GitHub に送ります。記録されます。 |
+| `/api/gh-action/confirm` | POST、このコンピューター。確認後に、計画どおりの内容を GitHub に送ります。記録されます。 GitHub が拒否した場合、応答には `reason`(forbidden、not_found、method、conflict、invalid のいずれか)が付きます。 |
 | `/api/github-token` | このコンピューターのみ。GitHub トークンの保管状態(方式と保存の有無)。値は決して返しません。 |
 | `/api/help/search` | 単語でヘルプのトピックを検索し、一致したものを返します。 |
 | `/api/help/topic` | ページの言語での、ヘルプのトピック 1 件(`id=`)の本文。 |

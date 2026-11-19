@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4688_passing-brightgreen.svg" alt="4688 tests">
+  <img src="https://img.shields.io/badge/Tests-4694_passing-brightgreen.svg" alt="4694 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -96,7 +96,7 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 4688 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **测试** | 4694 个测试方法(`python -m unittest discover -s monitor/tests`) |
 | **设置** | 728 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
