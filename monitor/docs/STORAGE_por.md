@@ -35,6 +35,8 @@ Escolhe-se na configuração da conta (ou do monitor): `"storage": {"backend": "
 - O esquema tem versão (`schema_version`). Cada migração corre numa única transação, juntamente com a subida da versão, pelo que uma interrompida deixa a base como estava e repete-se no arranque seguinte. Uma base escrita por uma versão mais recente é recusada, nunca é revertida.
 - Um elemento danificado ou em falta lê-se como vazio: o monitor arranca com o que houver no disco.
 
+Cada registo que o monitor guarda (o estado dos sentinelas, os silêncios, o estado do feed, o aviso de atualização) leva `schema_version` no início do seu objeto. Um registo anterior à marca lê-se como versão 0, como sempre. Um registo de uma versão MAIS NOVA do que a que o programa entende nunca é lido a meio: fica de lado, o programa parte dos valores por omissão para esse registo e o ficheiro é nomeado na lista de degradados (`records.newer`), pelo que uma descida de versão diz que ficheiro não entendeu em vez de o ler mal.
+
 ## Mover dados e cópias de segurança
 
 ```

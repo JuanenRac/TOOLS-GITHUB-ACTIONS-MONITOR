@@ -3443,6 +3443,8 @@
  "ci.lane_branch": "branche {branch}",
  "cfg.f.sampling.default_branch_probe": "Second regard sur la branche par défaut",
  "cfg.h.sampling.default_branch_probe": "Quand la liste des exécutions d'un dépôt est pleine, une requête de plus demande les push vers sa branche par défaut (sans pull requests), afin que les exécutions qui décident du rouge sur main ne soient pas chassées par les pull requests et les planifications. Coûte une requête par dépôt plein et par lecture ; désactivé par défaut.",
+ "cfg.f.sampling.active_probe": "Regarder les exécutions encore en cours",
+ "cfg.h.sampling.active_probe": "Quand la liste des exécutions d'un dépôt est pleine, deux requêtes légères demandent les exécutions encore en cours et celles en file d'attente, pour qu'une longue exécution commencée avant la fenêtre de la liste ne soit ni perdue ni affichée comme terminée. Coûte deux requêtes par dépôt plein et par lecture ; désactivé par défaut.",
  "cfg.f.sampling.min_coverage_minutes": "Couverture faible en dessous de",
  "cfg.h.sampling.min_coverage_minutes": "Une liste d'exécutions pleine qui remonte moins que ce nombre de minutes est marquée couverture faible au lieu de paraître complète. 0 désactive la marque.",
  "cfg.f.sampling.api_budget_per_hour": "Budget de requêtes par heure",
@@ -3592,6 +3594,7 @@
  "lint.reason.over_limit": "plus de fichiers que lint.api.max_files_per_repo",
  "lint.help_remote": "Lit les fichiers de workflow d'un dépôt depuis GitHub (sans clone) ; répétable.",
  "lint.remote_failed": "{name} : lecture impossible ({reason}).",
+ "lint.path_unread": "{name} : n'a pas pu être vérifié ({reason}) ; il ne compte pas comme propre.",
  "lint.remote_bad_name": "Pas un nom de dépôt (utilisez PROPRIÉTAIRE/DÉPÔT) : {name}",
  "doctor.t.access": "L'accès peut lire le compte ou l'organisation",
  "doctor.f.access": "Un 403 ou un 404 sur une organisation vient en général de l'une de ces causes : le jeton n'est pas autorisé pour son authentification unique SAML (autorisez-le via Configure SSO sur la page du jeton), il manque la portée repo ou read:org (ou, pour un jeton à granularité fine, une permission de lecture), ou les dépôts sont privés et l'accès ne les voit pas. Le détail dit laquelle.",
@@ -4519,5 +4522,8 @@
  "cli.screens_action": "screens : list ou urls",
  "cli.screens_head": "{n} types d'écran ({wall})",
  "cli.screens_wall_on": "écrans muraux activés",
- "cli.screens_wall_off": "écrans muraux désactivés"
+ "cli.screens_wall_off": "écrans muraux désactivés",
+ "cfg.f.startup.resume_max_age_hours": "Afficher la dernière image après un redémarrage (heures)",
+ "cfg.h.startup.resume_max_age_hours": "Heures. Après un redémarrage, la page affiche aussitôt la dernière image du moniteur, marquée de son âge, pendant que le premier cycle lit GitHub et la remplace. L'image est conservée dans last_picture.json à côté du moniteur après chaque cycle ; une image plus ancienne n'est pas affichée. 0 = l'image n'est ni conservée ni affichée, et un ancien fichier est supprimé.",
+ "ui.resumed": "Données d'il y a {mins} min ({time}) ; lecture de GitHub…"
 }

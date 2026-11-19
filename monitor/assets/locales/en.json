@@ -3443,6 +3443,8 @@
  "ci.lane_branch": "branch {branch}",
  "cfg.f.sampling.default_branch_probe": "Second look at the default branch",
  "cfg.h.sampling.default_branch_probe": "When the list of runs of a repository is full, one more request asks for the pushes to its default branch (pull requests left out), so the runs that decide red on main are not pushed out by pull requests and schedules. Costs one request per full repository per read; off by default.",
+ "cfg.f.sampling.active_probe": "Look at the runs still going",
+ "cfg.h.sampling.active_probe": "When the list of runs of a repository is full, two light requests ask for the runs that are still in progress and the runs that are queued, so a long run that started before the window of the list is not lost or shown as finished. Costs two requests per full repository per read; off by default.",
  "cfg.f.sampling.min_coverage_minutes": "Low coverage below",
  "cfg.h.sampling.min_coverage_minutes": "A full list of runs that reaches back less than this many minutes is marked low coverage instead of looking complete. 0 turns the mark off.",
  "cfg.f.sampling.api_budget_per_hour": "Request budget per hour",
@@ -3592,6 +3594,7 @@
  "lint.reason.over_limit": "more files than lint.api.max_files_per_repo",
  "lint.help_remote": "Read the workflow files of a repository from GitHub (no clone); can be repeated.",
  "lint.remote_failed": "{name}: could not be read ({reason}).",
+ "lint.path_unread": "{name}: could not be checked ({reason}); it does not count as clean.",
  "lint.remote_bad_name": "Not a repository name (use OWNER/REPO): {name}",
  "doctor.t.access": "The login can read the account or organization",
  "doctor.f.access": "A 403 or a 404 on an organization usually means one of these: the token is not authorised for its SAML single sign-on (authorise it under Configure SSO on the token page), it lacks the scope repo or read:org (or, for a fine-grained token, a read permission), or the repositories are private and the login cannot see them. The detail names which one.",
@@ -4519,5 +4522,8 @@
  "cli.screens_action": "screens: list or urls",
  "cli.screens_head": "{n} kinds of screen ({wall})",
  "cli.screens_wall_on": "wall screens on",
- "cli.screens_wall_off": "wall screens off"
+ "cli.screens_wall_off": "wall screens off",
+ "cfg.f.startup.resume_max_age_hours": "Show the last picture after a restart (hours)",
+ "cfg.h.startup.resume_max_age_hours": "Hours. After a restart the page shows the last picture of the monitor at once, marked with its age, while the first cycle reads GitHub and replaces it. The picture is kept in last_picture.json next to the monitor after every cycle; one older than this is not shown. 0 = the picture is neither kept nor shown, and an old file is deleted.",
+ "ui.resumed": "Data from {mins} min ago ({time}); reading GitHub…"
 }

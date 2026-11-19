@@ -451,6 +451,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `runners.model.thirdparty_usd_per_minute` | `0.0` | advanced | Price of a third-party minute |
 | `runners.scope` | `"owner"` | advanced | Where to look |
 | `runs_per_repo` | `20` | polling | Runs read per hot repository |
+| `sampling.active_probe` | `false` | polling | Look at the runs still going |
 | `sampling.api_budget_per_hour` | `0` | polling | Request budget per hour |
 | `sampling.default_branch_probe` | `false` | polling | Second look at the default branch |
 | `sampling.min_coverage_minutes` | `30` | polling | Low coverage below |
@@ -699,6 +700,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sound.server_beep` (secure) | `false` | general | Beep of this computer (page closed) |
 | `sound.theme` | `"classic"` | general | Theme of the sounds |
 | `sound.volume` | `40` | general | Volume of the page |
+| `startup.resume_max_age_hours` | `12` | basic | Show the last picture after a restart (hours) |
 | `stuck_minutes` | `120` | polling | A build is stuck after |
 | `targets_file` | `-` | paths | Build targets file |
 | `tools_dir` | `-` | paths | Folder of the local signing tools |
