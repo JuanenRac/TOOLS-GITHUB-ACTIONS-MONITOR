@@ -639,6 +639,7 @@ class ChildRedirect(unittest.TestCase):
             "from github_actions_monitor.app import actions_monitor as am, settings_api, toolconfig\n"
             "from github_actions_monitor.data_pipeline import etagcache, analytics, events\n"
             "from github_actions_monitor.sentinels import sentinel_ai, sentinel_local\n"
+            "from github_actions_monitor.integrations import ai_prompt_log\n"
             "root = Path(t) / 'accounts' / 'alpha'\n"
             "account_child.redirect('alpha')\n"
             "bad = []\n"

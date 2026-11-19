@@ -76,6 +76,7 @@
  ],
  "unfrozen": [
   {"path": "/api/ai/stream", "reason": "a stream of server-sent events, not a JSON document"},
+  {"path": "/api/ai/prompts", "reason": "the local record of prompts and answers of the AI (an administrator only; empty and off until ai.prompt_log.enabled is turned on), a view of a file of this computer and not part of the read API"},
   {"path": "/api/assistant", "reason": "the description of the optional assistant (off by default, so the route answers 404 until it is turned on): its fixed actions, its closed list of tools and its limits; it spends nothing and grows with the assistant"},
   {"path": "/api/screens/data", "reason": "what the wall screens draw: a closed list of fields that follows the screen asked for (?screen=overview|now|sentinels) and is made for those pages, not for other readers"},
  {"path": "/api/screens/logo", "reason": "the image of the logo of the organization (PNG, JPEG, WebP or SVG), not a JSON document"},

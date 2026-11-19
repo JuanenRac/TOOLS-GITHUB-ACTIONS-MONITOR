@@ -47,7 +47,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.model_cost_limit_daily` | `-` | ai | Estimated cost per model per day |
 | `ai.model_daily_limit` | `-` | ai | Calls per model per day |
 | `ai.ollama_url` | `-` | ai | Ollama address |
+| `ai.prompt_log.enabled` (secure) | `-` | ai | Local record of prompts |
+| `ai.prompt_log.keep` | `-` | ai | Prompts kept |
 | `ai.provider` (secure) | `"none"` | ai | AI service |
+| `ai.redact.extra_patterns` (secure) | `-` | ai | Patterns to always hide |
 | `ai.redact.extra_terms` (secure) | `-` | ai | Words to always hide |
 | `ai.similar.enabled` | `-` | ai | Similar alerts |
 | `ai.similar.max` | `-` | ai | Most similar alerts |
@@ -587,6 +590,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinel.surface.max_repos_per_tick` | `-` | surface | Repositories per surface cycle |
 | `sentinel.surface.min_rate_factor` | `-` | surface | Allowance factor to start A10 |
 | `sentinel.surface.refresh_seconds` | `-` | surface | Surface read of GitHub |
+| `sentinel.trend_green_pct` | `-` | sentinel | Line of green workflows |
+| `sentinel.trend_health` | `-` | sentinel | Line of the health |
+| `sentinel.trend_quota_pct` | `-` | sentinel | Line of the API quota used |
 | `sentinel.workers` | `-` | sentinel | Sentinel parallel requests |
 | `sentinels.collab.enabled` | `-` | sentinel | Collab sentinel on |
 | `sentinels.collab.max_repos_per_tick` | `-` | sentinel | Repositories per round |

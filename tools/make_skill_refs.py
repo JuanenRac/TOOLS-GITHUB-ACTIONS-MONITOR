@@ -52,6 +52,8 @@ NOTES = {
     "/api/ai/models/refresh": ("POST", "read the list of models from the provider now: one request, inside the daily cap (this computer only)"),
     "/api/ai/models/test": ("POST", "try one model with a synthetic text: latency, tokens, estimated cost and a sample answer (this computer only)"),
     "/api/ai/presets": ("GET", "the presets of AI providers (address, name of the variable of the key, example models, privacy); data only, never a key"),
+    "/api/ai/prompts": ("GET", "administrator only: the local record of the cleaned prompts and answers of the AI of the monitor (newest first); empty unless `ai.prompt_log.enabled` is on"),
+    "/api/ai/prompts/clear": ("POST", "administrator only: empties the local record of prompts (the number of lines removed is the answer)"),
     "/api/ai/lessons": ("GET,POST", "GET: the lessons that apply now, the repeated failures and the library (`?fmt=md|brief&repo=`); POST: write a lesson (switch, administrator, confirmation)"),
     "/api/ai/index": ("GET", "the master index of the briefs: one entry per tab with its signals and the routes of its raw data (machine readable, no secret)"),
     "/api/ai/briefs": ("GET", "the brief of one tab (`?tab=sent`, `&lang=xx`): the signals the tab draws and where its raw data live; read only, no secret"),
@@ -168,6 +170,7 @@ SIGNAL_NOTES = {
     "quota": "the allowance of the API: low, used up or fine",
     "quota.trend": "who spends the allowance (the monitor or other tools)",
     "quota.accounting": "conditional reads answered 304 and reads spared",
+    "trend.daily": "the daily trend of the CI sentinel: a row per series with its last figure, the change against yesterday and 7 days ago and the days without a figure; always level info",
     "connection": "online or offline since",
     "health.refresh": "how old the data is (stale means the picture is old)",
     "health.mode": "the working mode (normal, fast, turbo, low)",
@@ -296,7 +299,9 @@ def files_md():
         lines.append(f"| `{name}` | ai/ | {purpose} | {kind} | {when} |")
     extra = (("failures.jsonl", "data/", "the book of failures, one line per failure (schema 1)", "jsonl", "when a failure opens"),
              ("lessons.json", "config/", "the library of lessons you edit", "json", "by hand or `POST /api/ai/lessons`"),
-             ("lessons_rules.json", "config/", "the rules that file a failure under a category", "json", "by hand"))
+             ("lessons_rules.json", "config/", "the rules that file a failure under a category", "json", "by hand"),
+             ("ai_models.json", "config/", "the table of models you keep by hand (context, prices, tools, limits) and the models you retired; read at every call", "json", "by hand"),
+             ("ai_prompts.jsonl", "logs/", "the local record of prompts and answers of the AI (only with `ai.prompt_log.enabled`; an administrator reads it, it is not in the backup)", "jsonl", "when the AI is asked"))
     for name, folder, purpose, kind, when in extra:
         lines.append(f"| `{name}` | {folder} | {purpose} | {kind} | {when} |")
     return "\n".join(lines) + "\n"
@@ -316,7 +321,7 @@ def tabs_md():
     page = (MON / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
     tabs = sorted(set(re.findall(r'data-tab="([a-z]+)"', page)))
     names = {"now": "Right now (runs, one row per repository)", "al": "Alerts (every sentinel in one list, silences)", "sci": "CI sentinel (panels A1-A13 and the lint of the workflows; address #sentinel-ci; only while sentinel.enabled is on)", "scol": "Collab sentinel (issues and pull requests; address #sentinel-collab; only while sentinels.collab.enabled is on)", "ssec": "Security sentinel (what GitHub says is open or missing; address #sentinel-security; only while sentinels.security.enabled is on)", "team": "Team health (the repositories that need a person first; address #team-health)", "fleet": "Fleet (hundreds of repositories grouped and paged; address #fleet)", "trep": "Scheduled reports (the files written on a schedule; address #team-reports)", "rep": "Reports (the optional reports; address #reports)", "les": "Lessons (lessons from the failures; address #lessons)", "sent": "Summary of the sentinels (report and trends; address #sentinel; present while any sentinel is on)",
-             "charts": "Charts and history", "repos": "Repositories", "team": "Team (health of the repositories ranked by risk, with filters and the detail of each)", "hist": "History of runs", "syvt": "Yesterday vs today (what appeared, what was solved and what stays since the last saved report of the CI sentinel; address #sentinel-yesterday)", "strend": "Daily trend (18 series from the history of the CI sentinel: a card with the value now, the change against yesterday and 7 days ago and a sparkline, a large chart with 7/30/60 days, threshold, marks, comparison and CSV/JSON; address #sentinel-trend; see references/cards-and-trend.md)", "sdel": "Delivery sentinel (one card per signal: releases, tags, changelog and version files against what is built; address #sentinel-delivery; only while sentinels.delivery.enabled is on)", "ssup": "Supply chain sentinel (one card per signal: unpinned actions, moving branches and wide permissions of the workflow files; address #sentinel-supply; only while sentinels.supply.enabled is on)", "upd": "Updates (the updater of the monitor: versions, notes, update with a copy first, restart and the way back; address #updates; Complete only)", "cfg": "Settings (tabs Basic, General ... AI, Quota ...)", "interface": "Interface"}
+             "charts": "Charts and history", "repos": "Repositories", "team": "Team (health of the repositories ranked by risk, with filters and the detail of each)", "hist": "History of runs", "syvt": "Yesterday vs today (what appeared, what was solved and what stays since the last saved report of the CI sentinel; address #sentinel-yesterday)", "strend": "Daily trend (25 series and the minutes of each repository from the history of the CI sentinel: a card with the value now, the change against yesterday and 7 days ago and a sparkline, a large chart with 7/30/60 days in lines or bars, threshold lines set in Settings, marks of updates, incidents and releases, comparison, copy as an image and CSV/JSON; address #sentinel-trend; see references/cards-and-trend.md)", "sdel": "Delivery sentinel (one card per signal: releases, tags, changelog and version files against what is built; address #sentinel-delivery; only while sentinels.delivery.enabled is on)", "ssup": "Supply chain sentinel (one card per signal: unpinned actions, moving branches and wide permissions of the workflow files; address #sentinel-supply; only while sentinels.supply.enabled is on)", "upd": "Updates (the updater of the monitor: versions, notes, update with a copy first, restart and the way back; address #updates; Complete only)", "cfg": "Settings (tabs Basic, General ... AI, Quota ...)", "interface": "Interface"}
     lines = ["# Tabs of the page", "", "Generated from the page. The same data is in the endpoints; an AI does not need the page.", ""]
     lines += [f"- `{t}`: {names.get(t, t)}" for t in tabs]
     lines += ["", "Screens: `/screen/1` to `/screen/3` show the tabs chosen in `ui.screenN_tabs`."]

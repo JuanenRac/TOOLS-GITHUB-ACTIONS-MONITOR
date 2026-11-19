@@ -42,6 +42,7 @@ from github_actions_monitor.sentinels import readiness
 from github_actions_monitor.data_pipeline import paging
 from github_actions_monitor.data_pipeline import redrule
 from github_actions_monitor.data_pipeline import fork_ci
+from github_actions_monitor.data_pipeline import trend_day
 from github_actions_monitor.data_pipeline import upstream
 from github_actions_monitor.sentinels import roadmap_a9
 from github_actions_monitor.sentinels import sentinel_ai
@@ -78,6 +79,7 @@ DEFAULTS = {
     "audit_files": dict(DEFAULT_AUDIT_FILES),
     "enabled": True, "refresh_seconds": 900, "alerts_hot_seconds": 900, "alerts_cold_seconds": 3600,
     "hygiene_seconds": 21600, "max_calls_per_tick": 70, "budget_per_hour": 600, "workers": 8,
+    "trend_green_pct": 90, "trend_health": 70, "trend_quota_pct": 80,      # the lines of the daily trend: share of green workflows and health below which the line is crossed, share of the API quota above which it is
     "candidate_days": 2.0, "pending_sign_hours": 24, "notify_command": [], "candidate_min_entries": 1, "stale_pr_days": 7, "hot_hours": 3,
     "required_files": [["README.md"], ["LICENSE", "LICENSE.md", "LICENSE.txt", "LICENSE-APACHE", "LICENSE-MIT", "COPYING"], ["CHANGELOG.md"], ["SECURITY.md"]],
     # hygiene (A6): how strict it is. ruleset_mode "name" = a ruleset whose name matches ruleset_names (patterns, ACTIVE) must exist (the old rule); "effective" (the default) = the default
@@ -593,7 +595,8 @@ def trend(history, key):
 
 
 # the series of the daily trend that arrived with the rich trend: they come from the snapshot that is already in memory (no call to GitHub); a day saved before they existed has no value (None), not a zero
-EXTRA_SERIES = ("stuck", "ci_green_pct", "ci_repos_ok", "issues_open", "prs_old", "unsigned", "health", "ready", "quota_used_pct", "minutes24", "sev_critical", "sev_high")
+EXTRA_SERIES = ("stuck", "ci_green_pct", "ci_repos_ok", "issues_open", "prs_old", "unsigned", "health", "ready", "quota_used_pct", "minutes24", "sev_critical", "sev_high",
+                "sev_medium", "sev_low", "dur_avg", "dur_p95", "queue_avg", "flaky", "artifact_mb")
 
 
 def _num(value):
@@ -610,7 +613,8 @@ def daily_extras(snap):
     stale = a4.get("stale_days")
     scores = [h["score"] for h in (a11.get("health") or []) if isinstance(h, dict) and _num(h.get("score")) is not None]
     limit, left = _num(rate.get("limit")), _num(rate.get("remaining"))
-    sev = a3.get("severity") or {}
+    sev = a3.get("severity_all") or a3.get("severity") or {}
+    day = a7.get("day") or {}
     return {"stuck": len(a1.get("stuck") or []),
             "ci_green_pct": round(100.0 * (1 - red / checked), 1) if checked else None,
             "ci_repos_ok": max(0, int(snap.get("repos") or 0) - len(bad_repos)),
@@ -622,6 +626,9 @@ def daily_extras(snap):
             "quota_used_pct": round(100.0 * (1 - left / limit), 1) if limit and left is not None else None,
             "minutes24": _num(a7.get("total24")),
             "sev_critical": _num(sev.get("critical")), "sev_high": _num(sev.get("high")),
+            "sev_medium": _num(sev.get("medium")) if "medium" in sev else None, "sev_low": _num(sev.get("low")) if "low" in sev else None,
+            "dur_avg": _num(day.get("dur_avg")), "dur_p95": _num(day.get("dur_p95")), "queue_avg": _num(day.get("queue_avg")), "flaky": _num(day.get("flaky")), "artifact_mb": _num(day.get("artifact_mb")),
+            "min_repo": day.get("min_repo") if isinstance(day.get("min_repo"), dict) else None,
             "version": TOOL_VERSION}
 
 
@@ -942,10 +949,11 @@ def compute_snapshot(inp):
         "a3": {"rows": rows, "codeql_total": sum(t["codeql"] or 0 for t in totals.values()), "dependabot_total": sum(t["dependabot"] or 0 for t in totals.values()),
                "dependency_alerts_off": sorted(r for r, i in info.items() if i.get("vuln_enabled") is False),
                "secret_total": sum(t["secret"] or 0 for t in totals.values()), "secret_repos": [r for r, t in sorted(totals.items()) if t["secret"]],
-               "high_repos": [r for r, t in sorted(totals.items()) if sev_high(t["sev"])], "severity": sev_total,
+               "high_repos": [r for r, t in sorted(totals.items()) if sev_high(t["sev"])], "severity": sev_total, "severity_all": trend_day.severities(totals),
                "new": new or {}, "new_total": (sum(new.values()) if new is not None else None), "has_reference": new is not None,
                "codeql": codeql_list[:200], "unavailable": len(unavailable), "alerts_checked": sum(1 for a in alerts.values() if a.get("at")),
-               "trend": {**{k: trend(inp["history"], k) for k in ("codeql", "dependabot", "secret", "prs", "red", "candidates")}, **{k: trend_gaps(inp["history"], k) for k in EXTRA_SERIES}, "versions": [(inp["history"].get("days") or {}).get(d, {}).get("version") for d in sorted(inp["history"].get("days") or {})]}},
+               "trend": {**{k: trend(inp["history"], k) for k in ("codeql", "dependabot", "secret", "prs", "red", "candidates")}, **{k: trend_gaps(inp["history"], k) for k in EXTRA_SERIES}, "min_repo": trend_day.repo_series(inp["history"]), "releases": trend_day.release_marks(inp["history"]),
+                         "thresholds": {"ci_green_pct": cfg.get("trend_green_pct", 90), "health": cfg.get("trend_health", 70), "quota_used_pct": cfg.get("trend_quota_pct", 80)}, "versions": [(inp["history"].get("days") or {}).get(d, {}).get("version") for d in sorted(inp["history"].get("days") or {})]}},
         "a4": {"dependabot": dep_prs, "other": sum(1 for p in prs_all if not p["dependabot"] and not (bots_apart and p["bot"])), "other_bots": sum(1 for p in prs_all if not p["dependabot"] and p["bot"]),
                "stale_days": cfg["stale_pr_days"]},
         "tool_version": TOOL_VERSION,
@@ -955,7 +963,8 @@ def compute_snapshot(inp):
                "days": cfg["candidate_days"]},
         "a6": {"rows": hyg_rows, "pending": pending, "unknown": sum(1 for r in hyg_rows if r["unknown"]), "forks_idle": sorted(idle)},
         "a7": {"rows": sorted(({"repo": r, **v} for r, v in mins.items()), key=lambda x: -x["min24"]), "total24": sum(v["min24"] for v in mins.values()),
-               "total7d": sum(v["min7d"] for v in mins.values()), "api": inp.get("api"), "budget": minutes_budget(mins, eco, cfg)},
+               "total7d": sum(v["min7d"] for v in mins.values()), "api": inp.get("api"), "budget": minutes_budget(mins, eco, cfg),
+               "day": trend_day.build(runs_by_repo, now, inp.get("surface_raw"), totals, mins), "release_days": trend_day.release_days(releases)},
         "a8": inp.get("audits") or {"audits": {}, "rounds": {}, "files": []},
         "a9": inp.get("roadmaps") or {"boards": [], "level": "unknown"},
     }
@@ -1739,6 +1748,7 @@ class Sentinel:
             with self.lock:
                 update_history(self.history, today, {"codeql": t["codeql"], "dependabot": t["dependabot"], "secret": t["secret"], "prs": t["prs"],
                                                       "red": t["red"], "candidates": t["candidates"], **daily_extras(snap)}, per_repo)
+                trend_day.merge_releases(self.history.get("days") or {}, (snap.get("a7") or {}).get("release_days"))
                 self._save(HISTORY_FILE, self.history)
 
     def loop(self):
