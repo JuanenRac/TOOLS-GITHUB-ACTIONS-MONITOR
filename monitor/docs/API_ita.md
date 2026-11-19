@@ -73,7 +73,7 @@ Queste route servono la pagina e gli strumenti di questo computer. Non fanno par
 | `/api/discovery` | Cosa ha trovato la scoperta: il riquadro con l'account e i repository mostrati e nascosti, gli ultimi eventi, i gruppi suggeriti, le sue impostazioni, i fork e le organizzazioni. |
 | `/api/discovery/group` | POST. Aggiunge un gruppo suggerito al file degli ecosistemi, conservando una copia del file. |
 | `/api/gh-action/plan` | POST, questo computer. Prepara ciò che verrebbe inviato a GitHub (una riesecuzione, un annullamento, un dispatch o un merge); ancora non si invia nulla. |
-| `/api/gh-action/confirm` | POST, questo computer. Invia a GitHub ciò che diceva il piano, dopo la tua conferma; viene registrato. |
+| `/api/gh-action/confirm` | POST, questo computer. Invia a GitHub ciò che diceva il piano, dopo la tua conferma; viene registrato. Se GitHub rifiuta, la risposta porta `reason`: forbidden, not_found, method, conflict o invalid. |
 | `/api/github-token` | Solo questo computer. Lo stato dell'archivio del token di GitHub (il sistema e se ce n'è uno salvato); mai il suo valore. |
 | `/api/help/search` | Cerca una parola negli argomenti di aiuto e restituisce quelli che corrispondono. |
 | `/api/help/topic` | Il testo di un argomento di aiuto (`id=`) nella lingua della pagina. |
