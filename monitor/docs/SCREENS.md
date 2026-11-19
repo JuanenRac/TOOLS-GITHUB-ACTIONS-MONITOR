@@ -111,6 +111,11 @@ The language of a screen is decided in this order: `?lang=xx` in the address; th
 | `screens.logo_corner` | top-right (default), top-left, bottom-right or bottom-left. |
 | `screens.logo_max_width`, `screens.logo_max_height` | Largest size of the logo in pixels at 1920 x 1080 (160 x 64 by default; it grows with the screen). |
 | `screens.group_map` | On by default. Shows the map of the fleet by groups on the overview screen (the grouping of the Fleet view). Off: only the four tiles. |
+| `screens.menu` | On by default. The Screens button in the top bar. Off: the button disappears; the screens keep working at their own addresses. |
+| `screens.menu_target` | new (default): a screen opens in a new window or tab; same: in the tab you are in. |
+| `screens.menu_max_windows` | Most windows that a multi-monitor set opens at once (4 by default; 1 to 9). |
+| `screens.menu_rotate_seconds` | Seconds per screen in the turning presets of the menu (20 by default; 5 to 300). |
+| `screens.menu_tv_scale` | The `?scale=` of the TV preset (1.5 by default; 0.5 to 3). |
 
 ### Theme of the screens
 
@@ -145,6 +150,29 @@ The data come from `/api/screens/data?screen=overview` (or `now`, `sentinels`): 
 1. Choose one address for each monitor, for example `/screen/overview?monitor=1`, `/screen/now?monitor=2` and `/screen/sentinels?monitor=3`; or open one window with `?rotate=20`.
 2. Open each one in Chrome or Edge in kiosk mode: `msedge --kiosk "http://this-computer:8765/screen/now?monitor=2" --edge-kiosk-type=fullscreen` or `chrome --kiosk "http://this-computer:8765/screen/now?monitor=2"`; with `--app=ADDRESS` instead of `--kiosk` the window has no bars. Without kiosk mode, the discreet button at the foot of the page asks for full screen.
 3. From another computer use the network mode: the access token of a viewer is enough, because these pages never write.
+
+## Screens menu
+
+The **Screens** button in the top bar (the icon of two monitors) opens a menu with every kind of screen the monitor has, so nobody has to remember the addresses. It only navigates: it opens addresses, writes nothing and reads nothing from GitHub. It is on by default and `screens.menu` turns it off.
+
+| Screen | Address | What it is |
+|---|---|---|
+| Dashboard | `/` | The whole page, for a person at a desk. `?repo=` filters the repositories. |
+| Kiosk | `/?chrome=0&view=now` | One view without header, tabs or filters, for a monitor nobody touches. The view is a parameter. |
+| Team view | `/?chrome=0&view=team` | The team view as a kiosk (complete edition). |
+| Tab screens 1 to 3 | `/screen/1`, `/screen/2`, `/screen/3` | The tabs set for each monitor of a desk; `?tabs=`, `?orient=` and `?rotate=` change them for one window. |
+| Wall screens | `/screen/overview`, `/screen/now`, `/screen/sentinels` | The three wall screens above. |
+| Wall that turns | `/screen/overview?rotate=20` | One window that turns through the three and jumps to a new red. |
+| TV | `/screen/overview?theme=contrast&density=large&scale=1.5&rotate=20` | The turning wall for a screen seen from far away. |
+| Several monitors | one address per window | A set of windows, one per monitor (see below). |
+
+Each card shows the parameters that address accepts (theme, density, refresh, scale, language, rotation, repository filter...), each one with its own help text, and the address that results. **Open** opens it in a new window or tab, or in the tab you are in, as `screens.menu_target` says; **Copy address** puts the full address on the clipboard to open it on another computer (no token is ever part of it: in the network mode that computer signs in as usual). The wall screens answer 404 while `screens.enabled` is off, so their cards say so instead of opening an empty page; the team view is not in the lite edition.
+
+### Several monitors
+
+Choose how many windows (at most `screens.menu_max_windows`), the layout (in a row, in a column or in a grid) and what each window shows (the three wall screens in turn, walls that turn by themselves, or the tab screens). **Open all windows** opens one window per monitor. In a browser with the Window Management API (Chrome and Edge ask for the permission *window management*) each window is placed on its own monitor, ordered as the layout says; with more windows than monitors they share a monitor in tiles. Without it the windows open where the browser puts them and the card lists one kiosk command per window (`msedge --kiosk ADDRESS --window-position=X,Y`) to start them by hand. The browser must allow pop-ups for the monitor's address.
+
+The same catalogue is read by tools: `GET /api/screens/menu`, `monitor_cli.py screens [list|urls]` and the MCP tool `screens_menu`. All three are read only.
 
 ## Pictures
 

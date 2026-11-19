@@ -48,12 +48,13 @@ from github_actions_monitor.tool_version import TOOL_VERSION
 from github_actions_monitor.security import netguard
 
 EXIT_OK, EXIT_USAGE, EXIT_DOWN, EXIT_AUTH, EXIT_DEGRADED, EXIT_ALERTS = 0, 1, 2, 3, 4, 5
-COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "score", "team", "ai-hook", "credential", "lessons", "briefs", "api", "install-skill", "gh-token", "ai", "backup", "update", "compare")
+COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "score", "team", "ai-hook", "credential", "lessons", "briefs", "api", "install-skill", "gh-token", "ai", "backup", "update", "compare", "screens")
 BACKUP_ACTIONS = ("create", "verify", "restore", "status", "list")
 SKILL_ACTIONS = ("internal", "external")
 AI_ACTIONS = ("models", "doctor", "test")
 LESSONS_ACTIONS = ("list", "brief", "failures", "close")
 BRIEFS_ACTIONS = ("index", "show", "all")
+SCREENS_ACTIONS = ("list", "urls")
 API_ACTIONS = ("openapi", "me", "contract-check")
 AI_HOOK_ACTIONS = ("install", "status", "uninstall")
 CREDENTIAL_ACTIONS = ("replace", "reload")
@@ -447,6 +448,22 @@ def cmd_lessons(ctx):
     return answer, lines, EXIT_OK
 
 
+def cmd_screens(ctx):
+    """screens [list | urls]: the Screens menu of the page, from `/api/screens/menu`: every kind of screen (the page, kiosks, tab screens, the wall screens, the TV, a set of monitors) and whether it can be opened here.
+    `urls` prints the full address of each one (the address of the monitor plus its path and default parameters), ready to paste into a kiosk command. Read only: it opens nothing and carries no token."""
+    action = ctx["action"] or "list"
+    if action not in SCREENS_ACTIONS:
+        raise CliError(EXIT_USAGE, i18n.t("cli.screens_action"))
+    answer = fetch(ctx["base"], "/api/screens/menu", None, ctx["timeout"], ctx["token"])
+    rows = answer.get("entries") or []
+    lines = [i18n.t("cli.screens_head", n=len(rows), wall=i18n.t("cli.screens_wall_on" if answer.get("wall_enabled") else "cli.screens_wall_off"))]
+    base = str(ctx["base"]).rstrip("/")
+    for row in rows:
+        mark = "" if row.get("available", True) else "(-) "
+        lines.append(f"  {row.get('id', '?'):<13} {mark}{(base + row.get('url', '')) if action == 'urls' else row.get('path', '')}")
+    return answer, lines, EXIT_OK
+
+
 def cmd_briefs(ctx):
     """briefs [index | show TAB | all]: the catalogued briefs the AI tools read, one per tab of the page (`/api/ai/index` and `/api/ai/briefs`). Read only, the same in both editions; the monitor cleans
     every text and a brief carries no secret. `index` lists them, `show TAB` prints the signals of one tab, `all` prints every brief in one document."""
@@ -831,7 +848,7 @@ def cmd_credential(ctx):
     return {"action": action, "ok": ok, **shown}, [line], EXIT_OK if ok else EXIT_DEGRADED
 
 
-HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "compare": cmd_compare, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "briefs": cmd_briefs, "api": cmd_api, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai}
+HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "compare": cmd_compare, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "briefs": cmd_briefs, "screens": cmd_screens, "api": cmd_api, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai}
 
 
 def cmd_update(rest):
@@ -852,7 +869,7 @@ def cmd_update(rest):
 def build_parser():
     ap = argparse.ArgumentParser(prog="monitor_cli.py", description=i18n.t("cli.description"), epilog=i18n.t("cli.epilog"), formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", choices=COMMANDS, help=i18n.t("cli.help_command"))
-    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + BRIEFS_ACTIONS + API_ACTIONS + SKILL_ACTIONS + AI_ACTIONS + BACKUP_ACTIONS, default=None, help=i18n.t("cli.help_ai_action"))
+    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + BRIEFS_ACTIONS + API_ACTIONS + SKILL_ACTIONS + AI_ACTIONS + BACKUP_ACTIONS + SCREENS_ACTIONS, default=None, help=i18n.t("cli.help_ai_action"))
     ap.add_argument("file", nargs="?", default="", help=i18n.t("cli.help_file"))
     ap.add_argument("--json", action="store_true", help=i18n.t("cli.help_json"))
     for name in ("assistant", "cursor", "generic"):

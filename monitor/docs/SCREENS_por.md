@@ -111,6 +111,11 @@ O idioma de um ecrã decide-se por esta ordem: `?lang=xx` no endereço; depois o
 | `screens.logo_corner` | top-right (por omissão), top-left, bottom-right ou bottom-left. |
 | `screens.logo_max_width`, `screens.logo_max_height` | Tamanho máximo do logótipo em píxeis a 1920 x 1080 (160 x 64 por omissão; cresce com o ecrã). |
 | `screens.group_map` | Ativado por predefinição. Mostra o mapa da frota por grupos no ecrã geral (o agrupamento da vista de frota). Desativado: só os quatro mosaicos. |
+| `screens.menu` | Ativado por predefinição. O botão Ecrãs da barra superior. Desativado: o botão desaparece; os ecrãs continuam a funcionar nos seus próprios endereços. |
+| `screens.menu_target` | new (predefinição): um ecrã abre numa nova janela ou separador; same: no separador atual. |
+| `screens.menu_max_windows` | Máximo de janelas que um conjunto multiecrã abre de uma vez (4 por predefinição; de 1 a 9). |
+| `screens.menu_rotate_seconds` | Segundos por ecrã nas predefinições rotativas do menu (20 por predefinição; de 5 a 300). |
+| `screens.menu_tv_scale` | O `?scale=` da predefinição de TV (1,5 por predefinição; de 0,5 a 3). |
 
 ### Tema dos ecrãs
 
@@ -145,6 +150,29 @@ Os dados vêm de `/api/screens/data?screen=overview` (ou `now`, `sentinels`): um
 1. Escolha um endereço para cada monitor, por exemplo `/screen/overview?monitor=1`, `/screen/now?monitor=2` e `/screen/sentinels?monitor=3`; ou abra uma única janela com `?rotate=20`.
 2. Abra cada um no Chrome ou no Edge em modo quiosque: `msedge --kiosk "http://este-computador:8765/screen/now?monitor=2" --edge-kiosk-type=fullscreen` ou `chrome --kiosk "http://este-computador:8765/screen/now?monitor=2"`; com `--app=ENDEREÇO` em vez de `--kiosk` a janela não tem barras. Sem modo quiosque, o botão discreto no fim da página pede o ecrã inteiro.
 3. A partir de outro computador use o modo de rede: basta o token de acesso de um visualizador, porque estas páginas nunca escrevem.
+
+## Menu Ecrãs
+
+O botão **Ecrãs** da barra superior (o ícone de dois monitores) abre um menu com todos os tipos de ecrã que o monitor tem, para que ninguém tenha de decorar os endereços. Apenas navega: abre endereços, não escreve nada e não lê nada do GitHub. Está ativado por predefinição e `screens.menu` desativa-o.
+
+| Ecrã | Endereço | O que é |
+|---|---|---|
+| Painel | `/` | A página completa, para uma pessoa à secretária. `?repo=` filtra os repositórios. |
+| Quiosque | `/?chrome=0&view=now` | Uma vista sem cabeçalho, separadores nem filtros, para um monitor que ninguém toca. A vista é um parâmetro. |
+| Vista de equipa | `/?chrome=0&view=team` | A vista de equipa como quiosque (edição completa). |
+| Ecrãs de separadores 1 a 3 | `/screen/1`, `/screen/2`, `/screen/3` | Os separadores definidos para cada monitor de uma secretária; `?tabs=`, `?orient=` e `?rotate=` alteram-nos para uma janela. |
+| Ecrãs de parede | `/screen/overview`, `/screen/now`, `/screen/sentinels` | Os três ecrãs de parede descritos acima. |
+| Parede rotativa | `/screen/overview?rotate=20` | Uma janela que roda pelos três e salta para um novo vermelho. |
+| TV | `/screen/overview?theme=contrast&density=large&scale=1.5&rotate=20` | A parede rotativa para um ecrã visto de longe. |
+| Vários monitores | um endereço por janela | Um conjunto de janelas, uma por monitor (ver abaixo). |
+
+Cada cartão mostra os parâmetros que esse endereço aceita (tema, densidade, atualização, escala, idioma, rotação, filtro de repositórios...), cada um com o seu próprio texto de ajuda, e o endereço resultante. **Abrir** abre-o numa nova janela ou separador, ou no separador atual, conforme `screens.menu_target`; **Copiar endereço** coloca o endereço completo na área de transferência para o abrir noutro computador (nunca inclui um token: no modo de rede esse computador inicia sessão como de costume). Os ecrãs de parede respondem 404 enquanto `screens.enabled` está desativado, por isso o seu cartão di-lo em vez de abrir uma página vazia; a vista de equipa não existe na edição lite.
+
+### Vários monitores
+
+Escolha quantas janelas (no máximo `screens.menu_max_windows`), a distribuição (em fila, em coluna ou em grelha) e o que cada janela mostra (os três ecrãs de parede por turnos, paredes que rodam sozinhas ou os ecrãs de separadores). **Abrir todas as janelas** abre uma janela por monitor. Num navegador com a API de gestão de janelas (o Chrome e o Edge pedem a permissão *gestão de janelas*) cada janela é colocada no seu próprio monitor, ordenados como a distribuição indica; com mais janelas do que monitores partilham um monitor em mosaico. Sem ela, as janelas abrem onde o navegador as põe e o cartão lista um comando de quiosque por janela (`msedge --kiosk ENDEREÇO --window-position=X,Y`) para as iniciar à mão. O navegador tem de permitir as janelas pop-up para o endereço do monitor.
+
+O mesmo catálogo é lido pelas ferramentas: `GET /api/screens/menu`, `monitor_cli.py screens [list|urls]` e a ferramenta MCP `screens_menu`. As três são só de leitura.
 
 ## Imagens
 

@@ -37,7 +37,7 @@ endpoints of the running monitor. Do not assume a fixed path: the folders can be
 
 ## Tools that already know this folder
 
-- `python bin/mcp_server.py` is a read-only MCP server over standard input and output (tools `alerts_open`, `get_red_repos`, `get_run_failure`, `get_quota`, `briefs_index`, `brief_tab`, ...).
+- `python bin/mcp_server.py` is a read-only MCP server over standard input and output (tools `alerts_open`, `get_red_repos`, `get_run_failure`, `get_quota`, `briefs_index`, `brief_tab`, `screens_menu`, ...).
 - `python bin/monitor_cli.py ai-hook install` registers `bin/ai_hook.py` as a gate script of an AI tool: it hands the closed summary of the brief to the AI at the start of a session.
 - `python bin/monitor_cli.py status` and `python bin/read_report.py` show the same facts to a person.
 

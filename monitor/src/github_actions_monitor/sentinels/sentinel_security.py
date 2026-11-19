@@ -29,7 +29,7 @@ from urllib.parse import quote
 from datetime import datetime, timezone
 
 from github_actions_monitor.data_pipeline import etagcache
-from github_actions_monitor.data_pipeline import events
+from github_actions_monitor.data_pipeline import events, paging
 from github_actions_monitor import i18n
 from github_actions_monitor.sentinels import sentinel_base
 from github_actions_monitor.app import toolconfig
@@ -187,6 +187,7 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
         self.lock = threading.RLock()
         self.state = load_state(STATE_FILE)
         self.calls, self.errors, self.paused = [], {}, False
+        self.last_link = ""
         self.feed = events.Feed(events.EVENTS_FILE, events.STATE_FILE)
 
     @property
@@ -210,6 +211,7 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
     def fetch(self, endpoint, etag=""):
         """(status, parsed body or None, etag): a conditional read. 304 = unchanged; 403/404/451 are answers, not failures (the feature is off or may not be read). Anything else raises."""
         self._count()
+        self.last_link = ""
         run = (self.ctx or {}).get("run_gh")
         if run is None:
             data = self.ctx["gh"]("api", endpoint, retries=1)
@@ -229,7 +231,18 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
         except ValueError:
             raise RuntimeError("the answer of the API is not valid JSON") from None
         tag = headers.get("etag", "")
+        self.last_link = headers.get("link", "")      # the cursor of the next page, for the lists that reject ?page=
         return 200, data, (tag if etagcache.ETAG_RE.match(tag) else "")
+
+    def more_pages(self, endpoint_first):
+        """The items of the next pages of a list that hands out a cursor in the Link header (paging.follow_cursor), up to `pagination.cursor_pages` more pages; {"items", "pages", "cut"}."""
+        pages = paging.settings(self.config)["cursor_pages"]
+        link = self.last_link
+
+        def read(endpoint):
+            status, body, _tag = self.fetch(endpoint, "")
+            return (body if status == 200 else None), self.last_link
+        return paging.follow_cursor(read, link, pages)
 
     def scope(self):
         repos = list(self.ctx["repos_fn"]())
@@ -316,7 +329,13 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
                     continue
                 status, body = read(key, f"repos/{owner}/{repo}/{endpoint}?state=open&per_page={PER_PAGE}")
                 if status == 200 and isinstance(body, list):
-                    facts[kind] = {"items": [i for i in body if isinstance(i, dict)][:PER_PAGE]}
+                    items = [i for i in body if isinstance(i, dict)][:PER_PAGE]
+                    cut = False
+                    if paging.next_link(self.last_link):
+                        more = self.more_pages(endpoint)
+                        items += [i for i in more["items"] if isinstance(i, dict)]
+                        cut = more["cut"]
+                    facts[kind] = {"items": items, "cut": cut}
                     unread.pop(kind, None)
                 elif status == 200:      # a 200 that is not a list is not a reading
                     unavailable[key] = 0
