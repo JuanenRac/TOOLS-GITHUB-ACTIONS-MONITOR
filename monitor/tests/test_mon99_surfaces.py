@@ -166,6 +166,8 @@ def settings_checks():
         return all(f"`{key}`" in d or any(key.startswith(p + ".") for p in pats) for d, pats in zip(docs, patterns))
 
     def in_example(key):
+        if key in settings_api.STATUS_KEYS:      # computed and read-only: it is shown, never written in a file
+            return True
         node = example
         for part in key.split("."):
             if not isinstance(node, dict) or part not in node:

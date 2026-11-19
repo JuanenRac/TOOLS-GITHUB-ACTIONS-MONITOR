@@ -67,7 +67,7 @@ class ConditionalReads(unittest.TestCase):
         cache = self.cache()
         self.assertEqual(cache.fetch("e", lambda args: next(answers))[0], [1])
         self.assertEqual(cache.fetch("e", lambda args: next(answers))[0], [2])
-        self.assertEqual(cache.entries["e"]["etag"], '"b"')
+        self.assertEqual(cache.entries[cache.key_of("e")]["etag"], '"b"')
         with self.assertRaises(RuntimeError):
             cache.fetch("e", lambda args: next(answers))
 
@@ -85,14 +85,14 @@ class ConditionalReads(unittest.TestCase):
         first = etagcache.EtagCache(path)
         first.fetch("e", lambda args: (0, response(200, '"a"', "[3]"), ""))
         self.assertTrue(first.save())
-        self.assertEqual(etagcache.EtagCache(path).entries["e"]["data"], [3])
+        self.assertEqual(etagcache.EtagCache(path).entries[first.key_of("e")]["data"], [3])
         path.write_text("{broken", encoding="utf-8")
         self.assertEqual(etagcache.EtagCache(path).entries, {})
 
     def test_an_etag_that_does_not_look_like_one_is_not_stored(self):
         cache = self.cache()
         cache.fetch("e", lambda args: (0, response(200, "<script>", "[]"), ""))
-        self.assertNotIn("e", cache.entries)
+        self.assertNotIn(cache.key_of("e"), cache.entries)
 
 
 class Resilience(unittest.TestCase):
@@ -668,6 +668,7 @@ class Endpoints160(unittest.TestCase):
             with urllib.request.urlopen(request, timeout=5) as answer:
                 return answer.status, json.loads(answer.read())
         except urllib.error.HTTPError as error:
+            error.close()      # the answer of a refusal holds its socket: release it
             return error.code, None
 
     def test_health_is_local_only_and_calls_nothing(self):

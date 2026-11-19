@@ -123,6 +123,9 @@ def _extra_metrics(out, extra, eco, per_repo):
         out.add("etag_saved_total", "Reads answered with 304 Not Modified (no quota used) since the cache was created.", _int(etag.get("saved")), kind="counter")
         out.add("etag_entries", "Endpoints held in the conditional-read cache.", _int(etag.get("entries")))
         out.add("etag_invalid_total", "Cache entries thrown away because they were damaged (the read was made again in full).", _int(etag.get("invalid")), kind="counter")
+        out.add("etag_no_etag_total", "Full answers that came without an ETag (a proxy that strips the header turns the cache into plain reads).", _int(etag.get("no_etag")), kind="counter")
+        out.add("etag_skipped_total", "Reads made in full on purpose because they describe a state still in motion or a list with running work.", (_int(etag.get("skipped_stateful")) or 0) + (_int(etag.get("skipped_active")) or 0), kind="counter")
+        out.add("etag_refused_total", "Reads not made because a refusal (404 or 403) was remembered for a short time.", _int(etag.get("denied_hits")), kind="counter")
     if "offline" in extra:
         out.add("offline", "1 while the monitor has no connection to GitHub and shows the last picture.", 1 if extra["offline"] else 0)
     if "live_events" in extra:

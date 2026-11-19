@@ -35,6 +35,8 @@ Si sceglie nella configurazione dell'account (o del monitor): `"storage": {"back
 - Lo schema è versionato (`schema_version`). Ogni migrazione gira in un'unica transazione insieme all'aumento di versione: una interrotta lascia il database com'era e riparte al prossimo avvio. Un database scritto da una versione più recente viene rifiutato, mai retrocesso.
 - Un elemento danneggiato o mancante si legge come vuoto: il monitor parte con ciò che c'è sul disco.
 
+Ogni record che il monitor conserva (lo stato delle sentinelle, i silenzi, lo stato del feed, l'avviso di aggiornamento) porta `schema_version` all'inizio del suo oggetto. Un record precedente al contrassegno si legge come versione 0, come sempre. Un record di una versione PIÙ RECENTE di quella che il programma comprende non viene mai letto a metà: viene messo da parte, il programma riparte dai valori predefiniti per quel record e il file viene nominato nell'elenco dei degradi (`records.newer`); un ritorno a una versione precedente dice quindi quale file non ha capito invece di leggerlo male.
+
 ## Spostare i dati e copie di sicurezza
 
 ```

@@ -22,6 +22,7 @@ Optional rules (off until `lint.rules.<rule>.enabled` is true):
   no_timeout         a job without `timeout-minutes` (a stuck job runs for six hours; a call of a reusable workflow carries the limit of the called one)
   secrets_inherit    `secrets: inherit` in a call of a reusable workflow (the called workflow receives every secret of the caller)
   own_action_main    a `uses:` of an action of your own account that follows a branch (`@main`, `@master`) instead of a tag or a commit
+  permissions_top    no `permissions:` block at the top of the file even though the jobs have their own (a job added later would get the broader default token)
 
 `unpinned_uses` tells an action of your own account (`lint.own_owners`, plus `github_owner`) from one of a third party in the `kind` of the finding; `lint.unpinned_own` can lower the own ones to
 information (`info`) or leave them out (`ignore`); the default (`same`) treats them like the rest.
@@ -46,9 +47,9 @@ SHA_RE = re.compile(r"^[0-9a-f]{40}\Z")
 USES_RE = re.compile(r"^\s*-?\s*uses:\s*['\"]?([^'\"\s#]+)")
 SEVERITIES = ("info", "warn", "bad")
 EXIT_NOT_READ = 2      # `--remote` could not read a repository (or its name is not OWNER/REPO): never "clean"
-RULES = ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "own_action_main")
-DEFAULT_SEVERITY = {"unpinned_uses": "warn", "permissions": "warn", "secrets_in_clear": "bad", "injection": "warn", "pr_target": "bad", "no_timeout": "warn", "secrets_inherit": "warn", "own_action_main": "info"}
-OPTIONAL = ("no_timeout", "secrets_inherit", "own_action_main")      # off until the person switches them on: a new rule never adds findings by itself
+RULES = ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "own_action_main", "permissions_top")
+DEFAULT_SEVERITY = {"unpinned_uses": "warn", "permissions": "warn", "secrets_in_clear": "bad", "injection": "warn", "pr_target": "bad", "no_timeout": "warn", "secrets_inherit": "warn", "own_action_main": "info", "permissions_top": "info"}
+OPTIONAL = ("no_timeout", "secrets_inherit", "own_action_main", "permissions_top")      # off until the person switches them on: a new rule never adds findings by itself
 OWN_MODES = ("same", "info", "ignore")
 OWNER_RE = re.compile(r"^[A-Za-z0-9-]{1,39}\Z")
 MOVING_REFS = ("main", "master", "develop", "dev", "trunk", "head")
@@ -230,6 +231,8 @@ def lint_text(text, name="workflow.yml", rules=None):
         add("permissions", 1, "missing")
     if pr_target and checks_out_pr:
         add("pr_target", 1, "")
+    if not has_permissions and has_job_permissions and any(re.match(r"^jobs\s*:", l) for l in lines):
+        add("permissions_top", 1, "")
     if (rules.get("no_timeout") or {}).get("enabled", False):
         for start, job in jobs_without_timeout(lines):
             add("no_timeout", start, job)
@@ -264,18 +267,27 @@ def workflow_files(path):
         return []
 
 
-def lint_path(path, rules=None, root=None):
-    """The findings of every workflow file under `path`; file names are shown relative to `root` when given."""
-    out = []
+def lint_path_status(path, rules=None, root=None):
+    """(findings, problems) of every workflow file under `path`; file names are shown relative to `root` when given. A file that cannot be read is skipped and named in `problems` as
+    (file, reason): one bad file never stops the others and never reads as a clean one. A path that does not exist gives ([], [(path, "not_found")]), never a clean bill of health."""
+    out, problems = [], []
+    if not Path(path).exists():
+        return out, [(str(path), "not_found")]
     for file in workflow_files(path):
         try:
             with open(file, "r", encoding="utf-8", errors="replace") as handle:
                 text = handle.read(MAX_TEXT)
-        except OSError:
+        except OSError as error:
+            problems.append((str(file), type(error).__name__))
             continue
         label = str(file.relative_to(root)).replace("\\", "/") if root and Path(root) in file.parents else file.name
         out += lint_text(text, label, rules)
-    return out
+    return out, problems
+
+
+def lint_path(path, rules=None, root=None):
+    """The findings of every workflow file under `path` (see lint_path_status for the files that could not be read)."""
+    return lint_path_status(path, rules, root)[0]
 
 
 def ignored(repo, finding, patterns):
@@ -362,9 +374,13 @@ def main(argv=None):
     if args.lang:
         i18n.set_language(args.lang)
     findings = []
-    for path in args.paths or ([] if args.remote else ["."]):
-        findings += lint_path(path)
     unread = 0
+    for path in args.paths or ([] if args.remote else ["."]):
+        found, problems = lint_path_status(path)
+        findings += found
+        for name, reason in problems:      # a path that is not there, or a file that cannot be read, is said and is never a clean one
+            print(i18n.t("lint.path_unread", name=name, reason=i18n.t("lint.reason." + ("not_found" if reason == "not_found" else "error"))), file=sys.stderr)
+            unread += 1
     for name in args.remote or []:
         found, failure = lint_remote_status(name)
         findings += found

@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4592_passing-brightgreen.svg" alt="4592 tests">
+  <img src="https://img.shields.io/badge/Tests-4760_passing-brightgreen.svg" alt="4760 tests">
 </p>
 
 > Watches the workflows of every repository you own and tells you, on one local page, what is red, what is stuck and what is waiting for you.
@@ -65,6 +65,20 @@
 - **Notice of a newer version**: a discreet badge when a newer release is published; it only reads the public releases page once a day, never installs anything and can be switched off (always off when air-gapped).
 - **Quotas for every account**: plan, billable minutes (public repositories cost none), allowance of the API read from GitHub's headers, concurrency and jobs near the 6-hour limit; the figures are in an editable file.
 
+## What it saves
+
+Using the monitor instead of checking Actions by hand saves time. This is an **estimate, not a measurement**: about **85-95 % of the time spent watching CI and triaging failures** and, as a result, about **15-25 % of the overall productivity of a team** that works on many repositories. It assumes that, without the monitor, someone opens the Actions tab of each repository to see what is red and reads each failed log to find the cause, that failures happen every week, and that watching and triage take roughly a sixth to a third of the working time (the two figures only agree under that assumption). With few repositories, or if nobody watches by hand today, the saving is much smaller.
+
+| Task | Without the monitor | With the monitor | Estimated saving |
+| --- | --- | --- | --- |
+| Watching every workflow of every repository | Open the Actions tab of each repository, again and again | One page and one list of alerts that update by themselves | 85-95 % |
+| Deciding what is really red | Compare runs by eye (cancelled and skipped runs hide failures) | One rule: the last finished run of each workflow on the default branch | 85-95 % |
+| Finding the cause of a failed run | Open the run, the job and the log | The alert already names the workflow and the failure, with the lessons that match it | 85-95 % |
+| Learning of a failure in time | Notice it later, or when someone tells you | Alerts, notifications and a brief for AI tools | 85-95 % |
+| Not repeating a known mistake, security, hygiene and releases ready | Depends on memory and manual reviews | Library of lessons and sentinels | Not quantified |
+
+Method, assumptions and how to measure it in your own use: [`monitor/docs/PRODUCTIVITY.md`](monitor/docs/PRODUCTIVITY.md).
+
 ## At a glance
 
 | | |
@@ -82,8 +96,8 @@
 | | |
 |---|---|
 | **Maturity** | functional |
-| **Tests** | 4592 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Settings** | 713 settings, all with help |
+| **Tests** | 4760 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Settings** | 733 settings, all with help |
 | **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
 | **Tested in the CI on** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -346,6 +360,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/AUDIT_PACKAGE.md`](monitor/docs/AUDIT_PACKAGE.md): Package for the auditor
 - [`monitor/docs/LARGE_ACCOUNTS.md`](monitor/docs/LARGE_ACCOUNTS.md): Large accounts: hundreds of repositories
 - [`monitor/docs/ORGANIZATIONS.md`](monitor/docs/ORGANIZATIONS.md): Organizations and big accounts
+- [`monitor/docs/PRODUCTIVITY.md`](monitor/docs/PRODUCTIVITY.md): what the monitor saves: an estimate, its assumptions and how to measure it
 
 ## Contributing
 

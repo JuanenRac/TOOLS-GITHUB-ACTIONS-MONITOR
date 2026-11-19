@@ -11,6 +11,8 @@ A busy repository can start hundreds of runs an hour, so the newest 20-100 runs 
   second probe `sampling.default_branch_probe` (off by default): a repository whose sample is full also asks for `branch=<default>&event=push&exclude_pull_requests=true`, one more
                request, so the runs that decide "red on main" are not pushed out of the sample by pull requests and schedules. The runs that only came from the probe are marked
                `probe` and never make a list "full".
+  active probe `sampling.active_probe` (off by default): a repository whose sample is full also asks for the runs that are `in_progress` and the runs that are `queued` (two light
+               requests), so a run that is still going but is older than the sample is not shown as finished or lost. The runs that only came from this probe are marked `probe`.
   budget       `sampling.api_budget_per_hour` (0 = no budget): requests for run lists per hour. Past it the monitor goes on in order: repositories with a red workflow first, the
                others wait (a tenth of the budget is always kept for the red ones). `estimate_per_hour` tells, from the number of repositories and the intervals, what a setup will
                spend, so a large account is warned before it runs out of allowance.
@@ -29,7 +31,7 @@ def _int(block, key, low, high, default):
 
 def settings(config):
     block = config.get("sampling") if isinstance(config, dict) and isinstance(config.get("sampling"), dict) else {}
-    return {"default_branch_probe": block.get("default_branch_probe") is True, "min_coverage_minutes": _int(block, "min_coverage_minutes", 0, 10080, 30),
+    return {"default_branch_probe": block.get("default_branch_probe") is True, "active_probe": block.get("active_probe") is True, "min_coverage_minutes": _int(block, "min_coverage_minutes", 0, 10080, 30),
             "api_budget_per_hour": _int(block, "api_budget_per_hour", 0, 100000, 0)}
 
 

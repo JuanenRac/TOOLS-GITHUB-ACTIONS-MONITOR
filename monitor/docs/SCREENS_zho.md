@@ -111,6 +111,11 @@
 | `screens.logo_corner` | top-right（默认）、top-left、bottom-right 或 bottom-left。 |
 | `screens.logo_max_width`、`screens.logo_max_height` | 标志在 1920 x 1080 下的最大尺寸，单位为像素（默认 160 x 64；随屏幕放大）。 |
 | `screens.group_map` | 默认开启。在总览屏幕上按分组显示车队地图(与车队视图相同的分组方式)。关闭后只显示四个方块。 |
+| `screens.menu` | 默认开启。顶部栏的“屏幕”按钮。关闭:按钮消失;各屏幕仍可在自己的地址上使用。 |
+| `screens.menu_target` | new(默认):屏幕在新窗口或新标签页中打开;same:在当前标签页中打开。 |
+| `screens.menu_max_windows` | 多显示器组合一次最多打开的窗口数(默认 4;1 到 9)。 |
+| `screens.menu_rotate_seconds` | 菜单轮播预设中每个屏幕的秒数(默认 20;5 到 300)。 |
+| `screens.menu_tv_scale` | 电视预设的 `?scale=`(默认 1.5;0.5 到 3)。 |
 
 ### 屏幕主题
 
@@ -145,6 +150,29 @@
 1. 为每台显示器选一个地址，例如 `/screen/overview?monitor=1`、`/screen/now?monitor=2` 和 `/screen/sentinels?monitor=3`；或者打开一个带 `?rotate=20` 的窗口。
 2. 在 Chrome 或 Edge 的展示模式下分别打开：`msedge --kiosk "http://这台电脑:8765/screen/now?monitor=2" --edge-kiosk-type=fullscreen` 或 `chrome --kiosk "http://这台电脑:8765/screen/now?monitor=2"`；用 `--app=地址` 代替 `--kiosk` 则窗口没有工具栏。不使用展示模式时，页面底部不显眼的按钮可请求全屏。
 3. 从另一台电脑访问时使用网络模式：查看者的访问令牌就够了，因为这些页面从不写入。
+
+## 屏幕菜单
+
+顶部栏的**屏幕**按钮(两台显示器的图标)会打开一个菜单,列出监视器拥有的每一种屏幕,无需记住地址。它只做导航:只打开地址,不写入任何内容,也不从 GitHub 读取任何内容。默认开启,可用 `screens.menu` 关闭。
+
+| 屏幕 | 地址 | 说明 |
+|---|---|---|
+| 仪表板 | `/` | 供坐在桌前的人使用的完整页面。`?repo=` 用于筛选仓库。 |
+| 展台 | `/?chrome=0&view=now` | 没有页眉、标签页和筛选器的单个视图,适合无人操作的显示器。视图是一个参数。 |
+| 团队视图 | `/?chrome=0&view=team` | 展台模式的团队视图(完整版)。 |
+| 标签页屏幕 1 到 3 | `/screen/1`、`/screen/2`、`/screen/3` | 为桌面上每台显示器设置的标签页;`?tabs=`、`?orient=` 和 `?rotate=` 可为单个窗口更改。 |
+| 墙屏 | `/screen/overview`、`/screen/now`、`/screen/sentinels` | 上文所述的三个墙屏。 |
+| 轮播墙屏 | `/screen/overview?rotate=20` | 一个窗口轮播这三个屏幕,并跳转到新出现的红色。 |
+| 电视 | `/screen/overview?theme=contrast&density=large&scale=1.5&rotate=20` | 为远距离观看的屏幕准备的轮播墙屏。 |
+| 多显示器 | 每个窗口一个地址 | 一组窗口,每台显示器一个(见下)。 |
+
+每张卡片显示该地址接受的参数(主题、密度、刷新、缩放、语言、轮播、仓库筛选等),每个参数都有自己的帮助文字,以及最终得到的地址。**打开**按 `screens.menu_target` 在新窗口/新标签页或当前标签页中打开;**复制地址**把完整地址放入剪贴板,以便在另一台电脑上打开(从不包含令牌:在网络模式下,那台电脑照常登录)。`screens.enabled` 关闭时,墙屏返回 404,所以它们的卡片会如实说明,而不是打开空白页;精简版中没有团队视图。
+
+### 多显示器
+
+选择窗口数(最多 `screens.menu_max_windows`)、布局(按行、按列或网格)以及每个窗口显示的内容(依次显示三个墙屏、自动轮播的墙屏,或标签页屏幕)。**打开所有窗口**会为每台显示器打开一个窗口。在支持 Window Management API 的浏览器中(Chrome 和 Edge 会请求*窗口管理*权限),每个窗口会放到各自的显示器上,顺序按布局确定;窗口多于显示器时,它们在同一台显示器上平铺。没有该 API 时,窗口会在浏览器放置的位置打开,卡片会为每个窗口列出一条展台命令(`msedge --kiosk 地址 --window-position=X,Y`),供手动启动。浏览器必须允许监视器地址的弹出窗口。
+
+工具也读取同一份目录:`GET /api/screens/menu`、`monitor_cli.py screens [list|urls]` 和 MCP 工具 `screens_menu`。三者都是只读的。
 
 ## 图片
 

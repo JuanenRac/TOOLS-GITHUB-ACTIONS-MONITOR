@@ -114,6 +114,7 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/screens/logo` | GET, POST | viewer | the logo of the organization for the wall screens: GET returns the image itself with its real type; POST uploads it as the body of the request (PNG, JPEG, WebP or SVG, at most 1 MB, the type is checked by the first bytes and an SVG with scripts or links is refused; it is kept in the data folder, never in the configuration; an administrator, a session token) |
 | `/api/screens/logo/info` | GET | viewer | whether a logo was uploaded: `present`, `kind`, `bytes` and the `tag` that goes in the address of the image |
 | `/api/screens/logo/remove` | POST | admin | removes the logo of the organization (an administrator) |
+| `/api/screens/menu` | GET | viewer | the Screens menu of the page: every kind of screen (the page, kiosks, tab screens, the wall screens, the TV, a set of monitors) with its address, the parameters it accepts and whether it can be opened here; navigation only |
 | `/api/sentinel` | GET | viewer | the snapshot of the Sentinel (checks A1-A13) |
 | `/api/sentinel/ai` | GET | viewer | the AI explanation of a failed build or a CodeQL alert (a person asks; cached) |
 | `/api/sentinel/collab` | GET | viewer | issues and pull requests that need a person |

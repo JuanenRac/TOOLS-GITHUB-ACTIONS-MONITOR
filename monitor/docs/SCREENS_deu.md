@@ -111,6 +111,11 @@ Die Sprache einer Anzeige wird in dieser Reihenfolge bestimmt: `?lang=xx` in der
 | `screens.logo_corner` | top-right (Standard), top-left, bottom-right oder bottom-left. |
 | `screens.logo_max_width`, `screens.logo_max_height` | Größte Größe des Logos in Pixeln bei 1920 x 1080 (Standard 160 x 64; es wächst mit dem Bildschirm). |
 | `screens.group_map` | Standardmäßig an. Zeigt auf dem Übersichtsbildschirm die Karte der Flotte nach Gruppen (die Gruppierung der Flottenansicht). Aus: nur die vier Kacheln. |
+| `screens.menu` | Standardmäßig an. Die Schaltfläche Bildschirme in der oberen Leiste. Aus: Die Schaltfläche verschwindet; die Bildschirme laufen weiter unter ihren eigenen Adressen. |
+| `screens.menu_target` | new (Standard): Ein Bildschirm öffnet sich in einem neuen Fenster oder Tab; same: im aktuellen Tab. |
+| `screens.menu_max_windows` | Höchstzahl Fenster, die ein Mehrbildschirm-Satz auf einmal öffnet (Standard 4; 1 bis 9). |
+| `screens.menu_rotate_seconds` | Sekunden je Bildschirm in den rotierenden Voreinstellungen des Menüs (Standard 20; 5 bis 300). |
+| `screens.menu_tv_scale` | Das `?scale=` der Fernseher-Voreinstellung (Standard 1,5; 0,5 bis 3). |
 
 ### Design der Anzeigen
 
@@ -145,6 +150,29 @@ Die Daten kommen von `/api/screens/data?screen=overview` (oder `now`, `sentinels
 1. Wählen Sie für jeden Monitor eine Adresse, zum Beispiel `/screen/overview?monitor=1`, `/screen/now?monitor=2` und `/screen/sentinels?monitor=3`; oder öffnen Sie ein einziges Fenster mit `?rotate=20`.
 2. Öffnen Sie jede in Chrome oder Edge im Kioskmodus: `msedge --kiosk "http://dieser-rechner:8765/screen/now?monitor=2" --edge-kiosk-type=fullscreen` oder `chrome --kiosk "http://dieser-rechner:8765/screen/now?monitor=2"`; mit `--app=ADRESSE` statt `--kiosk` hat das Fenster keine Leisten. Ohne Kioskmodus bittet die unauffällige Schaltfläche am Seitenende um Vollbild.
 3. Von einem anderen Rechner aus verwenden Sie den Netzwerkmodus: Das Zugriffstoken eines Betrachters genügt, weil diese Seiten nie schreiben.
+
+## Menü Bildschirme
+
+Die Schaltfläche **Bildschirme** in der oberen Leiste (das Symbol mit zwei Monitoren) öffnet ein Menü mit jeder Art von Bildschirm, die der Monitor hat, damit sich niemand die Adressen merken muss. Es navigiert nur: Es öffnet Adressen, schreibt nichts und liest nichts von GitHub. Es ist standardmäßig an und `screens.menu` schaltet es aus.
+
+| Bildschirm | Adresse | Was es ist |
+|---|---|---|
+| Dashboard | `/` | Die ganze Seite, für eine Person am Schreibtisch. `?repo=` filtert die Repositories. |
+| Kiosk | `/?chrome=0&view=now` | Eine Ansicht ohne Kopfzeile, Tabs und Filter, für einen Monitor, den niemand anfasst. Die Ansicht ist ein Parameter. |
+| Teamansicht | `/?chrome=0&view=team` | Die Teamansicht als Kiosk (vollständige Ausgabe). |
+| Tab-Bildschirme 1 bis 3 | `/screen/1`, `/screen/2`, `/screen/3` | Die für jeden Monitor eines Schreibtischs festgelegten Tabs; `?tabs=`, `?orient=` und `?rotate=` ändern sie für ein Fenster. |
+| Wandbildschirme | `/screen/overview`, `/screen/now`, `/screen/sentinels` | Die drei oben beschriebenen Wandbildschirme. |
+| Rotierende Wand | `/screen/overview?rotate=20` | Ein Fenster, das durch die drei rotiert und zu einem neuen Rot springt. |
+| Fernseher | `/screen/overview?theme=contrast&density=large&scale=1.5&rotate=20` | Die rotierende Wand für einen Bildschirm, der aus der Ferne gesehen wird. |
+| Mehrere Monitore | eine Adresse je Fenster | Ein Satz Fenster, eines je Monitor (siehe unten). |
+
+Jede Karte zeigt die Parameter, die diese Adresse annimmt (Thema, Dichte, Aktualisierung, Maßstab, Sprache, Rotation, Repository-Filter ...), jeden mit eigenem Hilfetext, und die entstehende Adresse. **Öffnen** öffnet sie in einem neuen Fenster oder Tab oder im aktuellen Tab, wie `screens.menu_target` sagt; **Adresse kopieren** legt die vollständige Adresse in die Zwischenablage, um sie auf einem anderen Rechner zu öffnen (nie mit Token: Im Netzwerkmodus meldet sich jener Rechner wie üblich an). Die Wandbildschirme antworten mit 404, solange `screens.enabled` aus ist; ihre Karte sagt das, statt eine leere Seite zu öffnen; die Teamansicht gibt es in der Lite-Ausgabe nicht.
+
+### Mehrere Monitore
+
+Wählen Sie die Zahl der Fenster (höchstens `screens.menu_max_windows`), die Anordnung (in einer Reihe, einer Spalte oder einem Raster) und was jedes Fenster zeigt (die drei Wandbildschirme der Reihe nach, von selbst rotierende Wände oder die Tab-Bildschirme). **Alle Fenster öffnen** öffnet ein Fenster je Monitor. In einem Browser mit der Window-Management-API (Chrome und Edge fragen nach der Berechtigung *Fensterverwaltung*) wird jedes Fenster auf seinen eigenen Monitor gesetzt, in der Reihenfolge der Anordnung; bei mehr Fenstern als Monitoren teilen sie sich einen Monitor als Kacheln. Ohne sie öffnen sich die Fenster dort, wo der Browser sie hinsetzt, und die Karte listet je Fenster einen Kiosk-Befehl (`msedge --kiosk ADRESSE --window-position=X,Y`) zum manuellen Start. Der Browser muss Pop-ups für die Adresse des Monitors erlauben.
+
+Denselben Katalog lesen Werkzeuge: `GET /api/screens/menu`, `monitor_cli.py screens [list|urls]` und das MCP-Werkzeug `screens_menu`. Alle drei sind nur lesend.
 
 ## Bilder
 

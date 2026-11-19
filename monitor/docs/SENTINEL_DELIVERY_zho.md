@@ -34,7 +34,7 @@
 
 ## 成本
 
-每轮最多读取 `sentinels.delivery.max_repos_per_tick` 个仓库（默认 10），最多进行 `sentinels.delivery.max_calls_per_tick` 次调用（60）：发布一次、标签一次、CHANGELOG 一次（如果你列了多个路径且前面的不存在则更多），每个版本文件一次。已关闭的信号完全不读取。最久未读取的优先，有未关闭警报的稍微提前；每 `sentinels.delivery.refresh_seconds` 一个周期（默认一小时）。没有条件请求：成本由这些设置限定，而不是靠 304 应答。当剩余额度低于 `sentinels.delivery.min_rate_remaining` 时哨兵暂停。它的状态（`delivery_state.json`）保存未关闭的警报，所以重启不会重复宣告任何内容，首次查看某个仓库也不会写入事件。
+每轮最多读取 `sentinels.delivery.max_repos_per_tick` 个仓库（默认 10），最多进行 `sentinels.delivery.max_calls_per_tick` 次调用（60）：发布一次、标签一次、CHANGELOG 一次（如果你列了多个路径且前面的不存在则更多），每个版本文件一次。已关闭的信号完全不读取。最久未读取的优先，有未关闭警报的稍微提前；每 `sentinels.delivery.refresh_seconds` 一个周期（默认一小时）。没有条件请求：成本由这些设置限定，而不是靠 304 应答。当剩余额度低于 `sentinels.delivery.min_rate_remaining` 时哨兵暂停。它的状态（`delivery_state.json`）保存未关闭的警报，所以重启不会重复宣告任何内容，首次查看某个仓库也不会写入事件。 一轮在 `sentinels.delivery.deadline_s` 秒后(默认 30;0 = 无上限)也不再开始新的仓库:没轮到的等待下一轮,状态会把它们按名称列为 `unchecked`(并带有 `round_cut`),而不是算作零告警。
 
 ## 事件、通知与评分
 

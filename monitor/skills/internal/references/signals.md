@@ -22,8 +22,11 @@ the repository, a link, how old it is and the next step. `GET /api/sentinel/pane
 | `now.runs` | running, queued and stuck runs (level act when a run is stuck) |
 | `quota` | the allowance of the API: low, used up or fine |
 | `quota.accounting` | conditional reads answered 304 and reads spared |
+| `quota.etag` | health of the conditional reads: share answered 304, answers without ETag, reads made in full on purpose |
 | `quota.trend` | who spends the allowance (the monitor or other tools) |
 | `repos.errors` | repositories read without data |
+| `repos.listing` | the listing of the account came back empty or far smaller and the last good one is kept |
+| `schema.drift` | values of status or conclusion that GitHub sent and the monitor does not know, and runs left out for lacking a number |
 | `sentinel.` | the panel `` of the Sentinel: ui._title |
 | `sentinel.a1` | the panel `a1` of the Sentinel: A1 · Stuck or failed builds |
 | `sentinel.a10` | the panel `a10` of the Sentinel: A10 · Actions and releases surface |

@@ -22,6 +22,7 @@ do not use up the GitHub allowance shared with the agents.
 """
 from github_actions_monitor.app import api_spec, api_v1
 from github_actions_monitor.app import degraded
+from github_actions_monitor.app import lastpicture
 from github_actions_monitor.app import cycle_watch
 import argparse
 import hmac
@@ -46,14 +47,14 @@ from github_actions_monitor.data_pipeline import analytics
 from github_actions_monitor.data_pipeline import activity
 from github_actions_monitor.data_pipeline import fork_ci
 from github_actions_monitor.data_pipeline import discovery
-from github_actions_monitor.data_pipeline import etagcache
+from github_actions_monitor.data_pipeline import etagcache, knownstates
 from github_actions_monitor.data_pipeline import graphql_checks
 from github_actions_monitor import i18n
 from github_actions_monitor.security import auth_http
 from github_actions_monitor.security import envguard
 from github_actions_monitor.security import localguard
 from github_actions_monitor.app import modes
-from github_actions_monitor.app import orglogo, screens
+from github_actions_monitor.app import orglogo, screenmenu, screens
 from github_actions_monitor.util import exclusive
 from github_actions_monitor.util import platform_compat
 from github_actions_monitor.util import ports
@@ -92,7 +93,8 @@ DEFAULTS = {
     "discover_limit": 1000,        # the most repositories listed for the account
     "show_unclassified": True,     # repositories that no ecosystem claims are shown in an automatic group "Unclassified" instead of disappearing
     "stuck_minutes": 120,
-    "alerts": {"silences": [], "service": {"enabled": False, "failures": 3, "rate_percent": 0, "workflows": []}, "group": {"by_commit": False, "min": 3}, "digest": {"minutes": 0, "threshold": 10}},      # what reaches the channels when there are many alerts (alertflow.py): all off or empty
+    "workspace_root": "", "audit_dir": "", "signed_dir": "",      # "" = look for them (the environment, then the folder that holds the repositories): workspace.py
+    "alerts": {"silences_expire_days": 0, "silences": [], "service": {"enabled": False, "failures": 3, "rate_percent": 0, "workflows": []}, "group": {"by_commit": False, "min": 3}, "digest": {"minutes": 0, "threshold": 10}},      # what reaches the channels when there are many alerts (alertflow.py): all off or empty
     "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group", "workflow_run", "repository_dispatch"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "dormant_repos": True, "forks_need_own_ci": True, "fork_own_ci_days": 90, "red_ages": True, "red_age_days": 30, "disabled_apart": True, "dependabot_alerts": True, "copilot_alerts": False, "extra_branches": [], "rerun_timing": False, "group": {"reusable": False, "min": 2}, "failed_jobs": {"enabled": False, "max_per_cycle": 4, "group_by": "auto"},
            "stuck": {"learned": False, "percentile": 95, "margin": 2.0, "min_samples": 3, "min_minutes": 30, "max_minutes": 720, "queue_minutes": 0, "workflow_minutes": [], "runner_minutes": [], "awaiting_stuck": True, "ghost_enabled": True, "ghost_days": 7}},      # which runs may make a branch red (redrule.py)
     "watchdog_minutes": 10,      # a refresh cycle that runs longer than this is dumped to the log and restarted in a new thread (0 = off)
@@ -108,7 +110,9 @@ DEFAULTS = {
     "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30, "max_bad_per_minute": 120, "max_verified_per_minute": 120, "reject_stale": False, "persist_deliveries": True},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
     "chatops": {"enabled": False, "slack": {"enabled": False, "signing_secret_env": "MONITOR_SLACK_SIGNING_SECRET"}, "discord": {"enabled": False, "public_key_env": "MONITOR_DISCORD_PUBLIC_KEY"}, "allowed_teams": [], "allowed_channels": [], "allowed_users": [],
                 "allowed_words": ["help", "status", "alerts", "red", "queue", "score"], "max_rows": 8, "show_repo_names": "all", "links": True, "max_age_seconds": 300, "rate_per_user_per_minute": 6, "rate_per_channel_per_minute": 20, "rate_per_minute": 60},   # read only commands from Slack and Discord, see chatops/inbound.py (off by default; the proofs are only in the environment)
-    "cache": {"etag": {"enabled": True, "ttl_hours": 24}},   # conditional reads: a 304 answer costs no quota (etagcache.py)
+    "config_check": {"strict": False},      # OFF: a key nobody reads, a wrong type or a number out of range is named at the start; ON: the monitor refuses to start (configcheck.py)
+    "cache": {"etag": {"enabled": True, "ttl_hours": 24, "skip_stateful": True, "revalidate_active": True}, "negative_ttl_s": 300},   # conditional reads: a 304 answer costs no quota; a refusal is remembered for negative_ttl_s seconds (etagcache.py)
+    "startup": {"resume_max_age_hours": 12},   # the last picture is shown at once after a restart, with its age (lastpicture.py); 0 = off
     "display": {"timezone": "local", "blink_red_tiles": True},   # blink_red_tiles: the red tiles and red items of the bar blink softly until the cause is solved; zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
     "modes": {"auto_low": True, "auto_low_enter": 1000, "auto_low_exit": 2500, "low": {"refresh_seconds": 240, "cold_refresh_seconds": 1800, "runs_per_repo": 10, "hot_hours": 2}},      # see modes.py: only what is shown in the Quota tab
     "extra_reader": {"enabled": False, "file": "", "any_folder": False},      # a second read-only account: only the PATH of the file with its token (readpool.py)
@@ -118,9 +122,10 @@ DEFAULTS = {
     "ui": {"orientation": "auto", "rotate_seconds": 0, "screen1_tabs": "", "screen1_orientation": "auto", "screen2_tabs": "", "screen2_orientation": "auto", "screen3_tabs": "", "screen3_orientation": "auto", "now_sort": "ecosystem", "alerts_sort": "server", "theme": "auto"},   # the screens (docs/SCREENS.md): the orientation of the page, and which tabs each /screen/N shows
     "screens": {"enabled": False, "blink": True, "blink_calm_minutes": 30, "rotate_seconds": 0, "default_theme": "inherit", "default_density": "normal", "refresh_seconds": 10, "burn_in_protection": True, "night_dim": False, "night_dim_from_hour": 22, "night_dim_to_hour": 7, "show_repo_names": "public", "sound": False,
                 "theme_overview": "inherit", "theme_now": "inherit", "theme_sentinels": "inherit", "mode": "three", "rotate_every_seconds": 20, "alert_hold_seconds": 30, "logo_overview": True, "logo_now": False, "logo_sentinels": False,
-                "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64, "group_map": True},   # the wall screens /screen/overview, /screen/now and /screen/sentinels (docs/SCREENS.md, screens.py): read only, from what the monitor already holds
+                "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64, "group_map": True,
+                "menu": True, "menu_target": "new", "menu_max_windows": 4, "menu_rotate_seconds": 20, "menu_tv_scale": 1.5},   # the wall screens /screen/overview, /screen/now and /screen/sentinels (docs/SCREENS.md, screens.py): read only, from what the monitor already holds
     "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "on_warning": True, "on_resolved": True, "on_report": True, "on_lesson": True, "on_sentinel": True, "on_stuck": True, "on_score_drop": True, "on_info": True, "on_live_recovered": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False, "theme": "classic", "quiet_enabled": False, "quiet_from_hour": 22, "quiet_to_hour": 7},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
-    "updates": {"check": True},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
+    "updates": {"check": True, "systemd_helper": False},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
     "airgapped": False,            # True: nothing is requested from the network except GitHub's data you asked for; the update check is off
     "open_browser": True,
     "modes": {"start": "normal", "default_minutes": 60},     # normal | fast | turbo: see modes.py; the presets can be edited under modes.fast / modes.turbo
@@ -149,9 +154,9 @@ DEFAULTS = {
     "fleet": {"page_size": 50, "group_by": "ecosystem", "sort": "risk", "labels": [], "saved_filters": []},      # the fleet view of the Team tab (health/fleet.py)
     "network": {"use_proxy": False, "etag": True, "graphql_checks": False, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
     "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
-    "pagination": {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3},      # pages of 100 followed when a list is full, and said when something is cut (paging.py)
-    "sampling": {"default_branch_probe": False, "min_coverage_minutes": 30, "api_budget_per_hour": 0},      # how much of a repository the list of runs shows, a second look at the default branch, a budget of requests (sampling.py)
-    "savings": {"webhook_first": False, "webhook_window_minutes": 60, "webhook_full_minutes": 360, "feeds": {"enabled": False, "method": "atom", "max_age_minutes": 240}},      # read less: OFF (savings.py)
+    "pagination": {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3, "cursor_pages": 3},      # pages of 100 followed when a list is full, and said when something is cut (paging.py)
+    "sampling": {"default_branch_probe": False, "active_probe": False, "min_coverage_minutes": 30, "api_budget_per_hour": 0},      # how much of a repository the list of runs shows, a second look at the default branch, a budget of requests (sampling.py)
+    "savings": {"webhook_first": False, "webhook_live_per_repo": False, "webhook_window_minutes": 60, "webhook_full_minutes": 360, "feeds": {"enabled": False, "method": "atom", "max_age_minutes": 240}},      # read less: OFF (savings.py)
     "logs": {"failed_step": {"enabled": False, "lines": 12, "max_bytes": 2000, "max_per_minute": 10}},      # the log of the failed step in the page: OFF, one press of a button, steplog.py
     "reports": {"workflow_hygiene": {"enabled": False}, "queue": {"enabled": False}, "release_view": {"enabled": False}, "supply_chain": {"enabled": False}, "max_calls_per_cycle": 4},      # four optional reports, all OFF (reports.py)
     "lessons": {"enabled": True, "allow_write": False, "retention_days": 180, "max_entries": 5000, "brief_max_bytes": 3000, "recurring_from": 2},      # the book of failures and the library of lessons (lessons.py): local, read only; writing a lesson is OFF
@@ -223,6 +228,7 @@ VISIBILITY = {"known": set(), "at": 0.0}  # the repositories whose visibility (p
 QUOTA_ALERTS = None
 DISCOVERED = {"at": 0.0, "names": [], "snapshot": {}}
 FORKS = {"known": {}, "kind": None, "kind_at": 0.0, "checked": 0, "kept": 0, "left": 0, "waiting": 0}      # fork_policy: what is known about the CI of each fork (memory only)
+LISTING = {"suspect": False, "verdict": "ok", "before": 0, "now": 0, "at": 0.0}      # the last verdict on the listing of the account (discovery.listing_verdict)
 DISCOVERY = {"events": [], "suggestions": []}   # what the last listing of the account brought (memory only)
 HOT_ONLY = {"on": False, "until": 0.0}   # "only hot" switch (memory only): cold repositories are not refreshed until `until` (one long cycle)
 V1_SECRET = os.urandom(32)                # signs the cursors of /api/v1/repos; a new one at every start (a cursor lives minutes)
@@ -455,6 +461,30 @@ def run_gh(args, timeout=40):
         return 1, "", "timeout"
 
 
+def report_config_problems(config):
+    """Names what the configuration file has that nobody reads (a typo), a value of the wrong type and a number out of range, one line each. False when `config_check.strict` is on and there is something
+    to say (the monitor must not start); True otherwise. A check that itself fails never stops the start."""
+    from github_actions_monitor.app import configcheck
+    try:
+        found = configcheck.check(toolconfig.raw_config())
+        strict = configcheck.settings(toolconfig.raw_config())["strict"]
+    except Exception as error:   # noqa: BLE001 - a notice never stops the start
+        degraded.note("start.configcheck", error)
+        return True
+    for item in found[:20]:
+        close = item["hint"]
+        print(i18n.t("mon.config_" + item["problem"], path=item["path"], hint=(" - " + i18n.t("mon.config_did_you_mean", name=close)) if close else ""), flush=True)
+    if found and strict:
+        print(i18n.t("mon.config_strict", n=len(found)), flush=True)
+        return False
+    return True
+
+
+def credential_fingerprint():
+    """The short fingerprint of the credential `gh` runs with (the stored token, else the own login of `gh`): the key of every entry of the conditional-read cache (etagcache.py)."""
+    return etagcache.fingerprint(((secretstore.gh_kwargs().get("env") or {}).get("GH_TOKEN")) or "")
+
+
 def gh_read(endpoint, retries=2):
     """A GET read of the API: conditional (ETag) when the cache is on, else a plain `gh api`. Raises like gh()."""
     cache = ETAG["cache"]
@@ -528,18 +558,34 @@ def watched_repos(config, force=False):
             except Exception:   # an older gh without those fields: the plain listing, as before
                 data = gh("repo", "list", toolconfig.github_owner(config), "--limit", limit, "--no-archived", "--json", "name") or []
             rules = discovery.settings(config)
-            PRIVATE.clear()
-            PRIVATE.update(item["name"] for item in data if item.get("isPrivate"))
-            VISIBILITY["known"] = {item["name"] for item in data if "isPrivate" in item}      # the plain listing of an older gh has no such field: nothing is known then
-            snapshot = {item["name"]: {"archived": bool(item.get("isArchived"))} for item in data}
-            if rules["events"]:
-                found = discovery.diff(DISCOVERED.get("snapshot"), snapshot)
-                if found:
-                    announce_discovery(found, config)
-            DISCOVERED["snapshot"] = snapshot
-            items = [dict(item, isArchived=bool(item.get("isArchived"))) for item in data if not item.get("isArchived") or not rules["skip_archived"]]
-            DISCOVERED["names"] = sorted(discovery.lifecycle(items, config.get("discovery") or {}, fork_ci_answers(config, rules, items)))
-            DISCOVERED["at"] = time.time()
+            before = len(DISCOVERED.get("snapshot") or {})
+            verdict = discovery.listing_verdict(before, len(data), rules["min_keep_pct"])
+            if verdict != "ok":      # an empty listing, or one that lost most of the repositories, is read once more before it is believed
+                try:
+                    again = gh("repo", "list", toolconfig.github_owner(config), "--limit", limit, "--json", "name,isArchived,isFork,isPrivate,isEmpty", retries=0) or []
+                except AuthError:
+                    raise
+                except Exception:   # noqa: BLE001 - the second look failed: the last good listing stays
+                    again = []
+                if discovery.listing_verdict(before, len(again), rules["min_keep_pct"]) == "ok":
+                    data, verdict = again, "ok"
+            if verdict != "ok":
+                LISTING.update({"suspect": True, "verdict": verdict, "before": before, "now": len(data), "at": time.time()})      # the last good listing stays; the doctor of the brief says so
+                DISCOVERED["at"] = time.time() - max(0, config["discover_refresh_seconds"] - 300)      # asked again in five minutes, not in the next cycle
+            else:
+                LISTING.update({"suspect": False, "verdict": "ok", "before": before, "now": len(data), "at": time.time()})
+                PRIVATE.clear()
+                PRIVATE.update(item["name"] for item in data if item.get("isPrivate"))
+                VISIBILITY["known"] = {item["name"] for item in data if "isPrivate" in item}      # the plain listing of an older gh has no such field: nothing is known then
+                snapshot = {item["name"]: {"archived": bool(item.get("isArchived"))} for item in data}
+                if rules["events"]:
+                    found = discovery.diff(DISCOVERED.get("snapshot"), snapshot)
+                    if found:
+                        announce_discovery(found, config)
+                DISCOVERED["snapshot"] = snapshot
+                items = [dict(item, isArchived=bool(item.get("isArchived"))) for item in data if not item.get("isArchived") or not rules["skip_archived"]]
+                DISCOVERED["names"] = sorted(discovery.lifecycle(items, config.get("discovery") or {}, fork_ci_answers(config, rules, items)))
+                DISCOVERED["at"] = time.time()
         known = toolconfig.ecosystem_names(config)
         wanted_eco = config["ecosystems"]
         allowed = set(known if wanted_eco in ("all", None) else wanted_eco)
@@ -650,10 +696,31 @@ def fetch_runs(repo, per_page):
     return parse_runs(repo, data), None
 
 
+def fetch_active(repo, runs):
+    """The runs of the repository that are still `in_progress` or `queued`, asked for on their own (sampling.active_probe) and joined to a full list: a long run that started before the
+    window of the sample is not lost. A failed request leaves the list as it was."""
+    for status in ("in_progress", "queued"):
+        try:
+            BUDGET.record(1)
+            data = gh_read(f"repos/{toolconfig.github_owner()}/{repo}/actions/runs?status={status}&per_page=100")
+        except AuthError:
+            raise
+        except Exception:   # noqa: BLE001 - the look at the active runs is extra: the first list stands
+            continue
+        runs, added = sampling.merge_probe(runs, parse_runs(repo, data))
+        SAMPLE_INFO.setdefault(repo, {})["probe"] = SAMPLE_INFO.get(repo, {}).get("probe", 0) + added
+    return runs
+
+
 def fetch_sampled(repo, per_page, config):
     """The list of runs of a repository; with sampling.default_branch_probe on and a full list, one more request for the pushes to the default branch, joined to it (sampling.py)."""
     runs, error = fetch_runs(repo, per_page)
-    if error or len(runs) < per_page or not sampling.settings(config)["default_branch_probe"]:
+    wanted = sampling.settings(config)
+    if error or len(runs) < per_page or not (wanted["default_branch_probe"] or wanted["active_probe"]):
+        return runs, error
+    if wanted["active_probe"]:
+        runs = fetch_active(repo, runs)
+    if not wanted["default_branch_probe"]:
         return runs, error
     branch = (repo_meta([repo]).get(repo) or {}).get("branch") or redrule.guess_default_branch(runs)
     if not branch or not BRANCH_RE.match(branch):
@@ -674,6 +741,9 @@ def parse_runs(repo, data):
     runs = []
     allowance = [TIMING_PER_READ]      # the requests for the duration of a re-run this reading of this repository may make: its own count, not one shared with the other threads of the cycle
     for run in data.get("workflow_runs", []):
+        knownstates.observe(run)
+        if not knownstates.is_well_formed(run):      # a run that is not an object or has no number is left out; the page goes on with the others
+            continue
         full_path = str(run.get("path") or "").split("@")[0]
         queued, seconds, begun = run_times(run)
         if (run.get("run_attempt") or 1) > 1 and run.get("status") == "completed":
@@ -823,7 +893,7 @@ def refresh_runs(repos, config, progress=None):
         elif hot:
             todo.append((repo, config["cold_runs_per_repo"] if lite else tuned(config, "runs_per_repo")))
         elif not only_hot and now - entry["at"] > tuned(config, "cold_refresh_seconds"):
-            if spare_by_webhook(entry, config, now):      # savings.webhook_first (off by default): the slow turn passes with no call
+            if spare_by_webhook(entry, config, now, repo):      # savings.webhook_first (off by default): the slow turn passes with no call
                 continue
             slow.append((repo, entry))
     if slow:
@@ -849,10 +919,12 @@ def refresh_runs(repos, config, progress=None):
         todo = [item for item in todo if item[0] not in batched]
     limit = sampling.settings(config)["api_budget_per_hour"]
     probing = sampling.settings(config)["default_branch_probe"]
+    watching = sampling.settings(config)["active_probe"]
 
     def price(item):      # a repository whose last list was full (or never read) also gets the second look at the pushes to its default branch: two requests
         held = RUN_CACHE.get(item[0])
-        return 2 if probing and (held is None or len(held.get("runs") or []) >= item[1]) else 1
+        full = held is None or len(held.get("runs") or []) >= item[1]
+        return 1 + (1 if probing and full else 0) + (2 if watching and full else 0)
     todo, waiting = sampling.plan(todo, red_repos_of([r for r, _n in todo]) if limit else set(), limit, BUDGET.used(), price)      # a spent budget: the repositories with red first, the others wait
     SAMPLING_STATE["dropped"] = [item[0] for item in waiting]
     for start in range(0, len(todo), 40):  # chunks, so the page can show the first results while the rest loads
@@ -889,12 +961,12 @@ def red_repos_of(repos):
 HEADS_PENDING = {}      # repo -> the newest commit seen BEFORE its read, stored with the read (savings.feeds)
 
 
-def spare_by_webhook(entry, config, now):
+def spare_by_webhook(entry, config, now, repo=None):
     """True when the webhook is alive and the slow turn of this cold repository may pass without a call (savings.webhook_first). The repository keeps its runs; the full read still comes
     at the intervals `savings` sets."""
     from github_actions_monitor.data_pipeline import savings
     try:
-        if savings.quiet_by_webhook(config, entry, now):
+        if savings.quiet_by_webhook(config, entry, now, repo):
             savings.count_webhook()
             entry["at"] = now
             return True
@@ -1068,7 +1140,7 @@ def sampling_summary(config, repos, meta):
     cfg = sampling.settings(config)
     low = sorted(r for r in repos if ((meta.get(r) or {}).get("coverage") or {}).get("low"))
     waiting = [r for r in SAMPLING_STATE["dropped"] if r in set(repos)]
-    estimate = sampling.estimate_per_hour(len(repos), config.get("refresh_seconds") or 45, config.get("cold_refresh_seconds") or 600, probe=cfg["default_branch_probe"])
+    estimate = sampling.estimate_per_hour(len(repos), config.get("refresh_seconds") or 45, config.get("cold_refresh_seconds") or 600, probe=cfg["default_branch_probe"] or cfg["active_probe"])
     return {"low": low[:50], "low_count": len(low), "estimate_per_hour": estimate, "budget_per_hour": cfg["api_budget_per_hour"], "used_last_hour": BUDGET.used(),
             "waiting": waiting[:50], "waiting_count": len(waiting), "probe": cfg["default_branch_probe"], "min_coverage_minutes": cfg["min_coverage_minutes"]}
 
@@ -1197,7 +1269,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
         "quota_block": rate_block_state(rate), "min_rate": config["min_rate_remaining"], "paused_quota": bool(rate and rate["remaining"] < config["min_rate_remaining"]),
         "refresh_seconds": config["refresh_seconds"], "hot_only": hot_only_state(),
         "offline": LINK.state(), "etag": ETAG["cache"].stats() if ETAG["cache"] else None, "graphql": graphql_checks.stats(config),
-        "hidden": HIDDEN["hidden"], "discovered": HIDDEN["discovered"], "hidden_names": HIDDEN["names"],
+        "listing": dict(LISTING), "drift": knownstates.drift(), "hidden": HIDDEN["hidden"], "discovered": HIDDEN["discovered"], "hidden_names": HIDDEN["names"],
         "figures": figures, "repo_meta": meta, "sampling": sampling_summary(config, repos, meta), "activity": activity_view, "forks_idle": idle_forks[:200], "forks_idle_all": idle_forks, "aged_reds": aged_rows[:100], "quiet_reds": quiet_rows[:100],
     }
 
@@ -2146,6 +2218,11 @@ def run_cycle(config, generation):
     with LOCK:
         STATE["data"], STATE["error"], STATE["hint"] = data, None, None
         STATE["complete"] = True
+    if not LITE["on"]:
+        try:      # the picture is kept for the next start; a disk that refuses it never stops the cycle
+            lastpicture.save(state_dir(), data, config)
+        except Exception as error:   # noqa: BLE001
+            degraded.note("loop.last_picture", error)
     WATCH.phase("log")
     write_cycle_log(data)
     WATCH.phase("extras")
@@ -2298,7 +2375,7 @@ def render_page():
     """actions_monitor.html with the catalogues of the interface (keys "ui.*") for the 8 languages and the default language inlined."""
     page = (paths.STATIC / "actions_monitor.html").read_text(encoding="utf-8")
     data = {"default": i18n.language(), "langs": list(i18n.LANGS), "names": i18n.NATIVE_NAMES, "html": i18n.HTML_LANG, "locale": i18n.BROWSER_LOCALE, "catalogues": i18n.ui_catalogues(),
-            "ecosystems": {**{"other": i18n.t("ui.eco_other")}, **{key: item["label"] for key, item in toolconfig.ecosystems().items()}}, "owner": toolconfig.github_owner(), "tz": tzdisplay.setting(), "screens": {k: v for k, v in (toolconfig.raw_config().get("ui") or {}).items() if k in DEFAULTS["ui"] and k != "theme"}, "theme": screens.global_theme(toolconfig.raw_config()), "blink": (toolconfig.raw_config().get("display") or {}).get("blink_red_tiles", True) is not False, "sound": {k: v for k, v in __import__("github_actions_monitor.integrations.soundalert", fromlist=["_"]).settings(toolconfig.raw_config()).items() if k != "server_beep"}, "host": github_host(), "lite": LITE["on"], "network": localguard.public_state(), "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
+            "ecosystems": {**{"other": i18n.t("ui.eco_other")}, **{key: item["label"] for key, item in toolconfig.ecosystems().items()}}, "owner": toolconfig.github_owner(), "tz": tzdisplay.setting(), "screens": {k: v for k, v in (toolconfig.raw_config().get("ui") or {}).items() if k in DEFAULTS["ui"] and k != "theme"}, "theme": screens.global_theme(toolconfig.raw_config()), "screen_menu": {k: v for k, v in screenmenu.menu_settings(toolconfig.raw_config()).items() if k in ("menu", "menu_target", "menu_max_windows")}, "blink": (toolconfig.raw_config().get("display") or {}).get("blink_red_tiles", True) is not False, "sound": {k: v for k, v in __import__("github_actions_monitor.integrations.soundalert", fromlist=["_"]).settings(toolconfig.raw_config()).items() if k != "server_beep"}, "host": github_host(), "lite": LITE["on"], "network": localguard.public_state(), "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     return page.replace("/*I18N_DATA*/null", blob, 1)
 
@@ -2869,7 +2946,7 @@ class Handler(BaseHTTPRequestHandler):
                     apply_live_event(record, LIVE_CONFIG or DEFAULTS)
                 if repo:
                     webhook.note_accepted()      # the coverage indicator counts it
-                    __import__("github_actions_monitor.data_pipeline.savings", fromlist=["_"]).note_webhook()      # the webhook is alive: savings.webhook_first may stretch the slow turn of the cold repositories
+                    __import__("github_actions_monitor.data_pipeline.savings", fromlist=["_"]).note_webhook(repo=repo)      # the webhook is alive: savings.webhook_first may stretch the slow turn of the cold repositories
                     webhook_settle(repo)
                 self.json_reply(answer, code)
             except Exception:
@@ -3210,6 +3287,11 @@ class Handler(BaseHTTPRequestHandler):
                 self.wfile.write(data)
             except CLIENT_GONE:
                 DISCONNECTS[0] += 1
+            return
+        if path == "/api/screens/menu":      # the Screens menu of the page (docs/SCREENS.md): the catalogue of every kind of screen with its address and parameters; navigation only, nothing is read from GitHub
+            if not self.guard():
+                return
+            self.json_reply(screenmenu.payload(toolconfig.raw_config(), LITE["on"]))
             return
         if path == "/api/screens/logo/info":
             if not self.guard():
@@ -4109,11 +4191,11 @@ def handle_updates_post(path, request, who, config):
         if path.endswith("/plan"):
             return {"ok": True, "plan": updates.plan(target, policy)}
         if path.endswith("/apply"):
-            answer = updates.apply(target, policy, request.get("confirm"), edition, lang, lite=LITE["on"], demo=DEMO["on"])
+            answer = updates.apply(target, policy, request.get("confirm"), edition, lang, lite=LITE["on"], demo=DEMO["on"], helper=updates.helper_on(toolconfig.raw_config()))
             _audit_plain("update_apply", who, target, {"from": answer.get("from")}, "ok")
             return {"ok": True, **answer}
         if path.endswith("/rollback"):
-            answer = updates.rollback(request.get("confirm"), edition, lang, lite=LITE["on"], demo=DEMO["on"])
+            answer = updates.rollback(request.get("confirm"), edition, lang, lite=LITE["on"], demo=DEMO["on"], helper=updates.helper_on(toolconfig.raw_config()))
             _audit_plain("update_rollback", who, "previous", None, "ok")
             return {"ok": True, **answer}
     except updates.UpdatesError as error:
@@ -4593,13 +4675,19 @@ def main():
     using_example = toolconfig.catalog_in_example(config)
     if using_example:
         print(i18n.t("mon.catalog_example", names=", ".join(using_example)))
+    if not report_config_problems(config):
+        return 1
     global AUTOSAVE
     LIVE_CONFIG.update(config)
     if not LITE["on"] and not CHILD["account"]:      # an account process bound its storage when it was redirected; the lite edition has no database
         from github_actions_monitor.storage import runtime as storage_runtime
         storage_runtime.bind(config)
     etag_cfg = ((config.get("cache") or {}).get("etag") or {}) if isinstance(config.get("cache"), dict) else {}
-    ETAG["cache"] = etagcache.EtagCache(ttl_hours=etag_cfg.get("ttl_hours", 24) if isinstance(etag_cfg.get("ttl_hours"), int) else 24, enabled=etag_cfg.get("enabled", True) is True and (config.get("network") or {}).get("etag", True) is not False)      # network.etag is the switch of the Quota tab; cache.etag.enabled stays as it was
+    cache_cfg = config.get("cache") if isinstance(config.get("cache"), dict) else {}
+    negative = cache_cfg.get("negative_ttl_s", 300)
+    ETAG["cache"] = etagcache.EtagCache(ttl_hours=etag_cfg.get("ttl_hours", 24) if isinstance(etag_cfg.get("ttl_hours"), int) else 24, enabled=etag_cfg.get("enabled", True) is True and (config.get("network") or {}).get("etag", True) is not False,      # network.etag is the switch of the Quota tab; cache.etag.enabled stays as it was
+                                        negative_ttl=negative if isinstance(negative, int) and not isinstance(negative, bool) else 300, skip_stateful=etag_cfg.get("skip_stateful", True) is not False,
+                                        revalidate_active=etag_cfg.get("revalidate_active", True) is not False, identity=credential_fingerprint)
     acfg = analytics.settings(config)
     if not LITE["on"]:
         ANALYTICS["store"] = analytics.Store(keep_days=acfg["keep_days"], max_samples=acfg["max_samples"])
@@ -4612,6 +4700,15 @@ def main():
         print(banner_mode_line(MODE.name, "" if ok else why), flush=True)
     degraded.attach(state_dir() / ("degraded_lite.json" if LITE["on"] else "degraded.json"))
     degraded.set_writer(degraded_line)
+    if not LITE["on"]:
+        try:      # the page shows the last picture with its age while the first cycle reads GitHub
+            resumed = lastpicture.load(state_dir(), config)
+            if resumed is not None:
+                with LOCK:
+                    if STATE["data"] is None:
+                        STATE["data"] = resumed
+        except Exception as error:   # noqa: BLE001
+            degraded.note("loop.last_picture", error)
     start_loop(config)
     if started_blind:
         announce_credential("credential_blind", config)

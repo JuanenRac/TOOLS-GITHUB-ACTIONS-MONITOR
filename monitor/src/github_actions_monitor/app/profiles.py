@@ -17,7 +17,7 @@ ORDER = ("owner_team", "open_source_org", "solo_developer")
 _STRICT = {
     "sentinel.hygiene.ruleset_mode": "name", "sentinel.hygiene.skip": [], "sentinel.hygiene.community_fallback": False,
     "discovery.skip_archived": True, "discovery.fork_policy": "show",
-    "lint.unpinned_own": "same", "lint.rules.no_timeout.enabled": False, "lint.rules.secrets_inherit.enabled": False, "lint.rules.own_action_main.enabled": False,
+    "lint.unpinned_own": "same", "lint.rules.no_timeout.enabled": False, "lint.rules.secrets_inherit.enabled": False, "lint.rules.own_action_main.enabled": False, "lint.rules.permissions_top.enabled": False,
     "sentinel.surface.checks.release_assets.require_sha256": True, "sentinel.surface.checks.release_assets.require_signature": True, "sentinel.surface.checks.release_assets.allow_empty": False,
     "sentinel.surface.checks.tag_vs_version.prerelease_ok": False,
     "sentinel.bots_apart": False,
@@ -29,7 +29,7 @@ PRESETS = {
         **_STRICT,
         "sentinel.hygiene.ruleset_mode": "effective", "sentinel.hygiene.skip": ["label"], "sentinel.hygiene.community_fallback": True,
         "discovery.fork_policy": "auto",
-        "lint.unpinned_own": "info", "lint.rules.no_timeout.enabled": True, "lint.rules.secrets_inherit.enabled": True, "lint.rules.own_action_main.enabled": True,
+        "lint.unpinned_own": "info", "lint.rules.no_timeout.enabled": True, "lint.rules.secrets_inherit.enabled": True, "lint.rules.own_action_main.enabled": True, "lint.rules.permissions_top.enabled": True,
         "sentinel.surface.checks.release_assets.require_signature": False, "sentinel.surface.checks.release_assets.allow_empty": True,
         "sentinel.surface.checks.tag_vs_version.prerelease_ok": True,
         "sentinel.bots_apart": True,

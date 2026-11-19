@@ -73,7 +73,7 @@ Diese Routen bedienen die Seite und die Werkzeuge dieses Rechners. Sie gehören 
 | `/api/discovery` | Was die Entdeckung fand: der Kasten mit Konto sowie angezeigten und ausgeblendeten Repositories, die letzten Ereignisse, die vorgeschlagenen Gruppen, ihre Einstellungen, die Forks und die Organisationen. |
 | `/api/discovery/group` | POST. Fügt eine vorgeschlagene Gruppe der Ökosystem-Datei hinzu und behält eine Kopie der Datei. |
 | `/api/gh-action/plan` | POST, dieser Rechner. Bereitet vor, was an GitHub gesendet würde (Wiederholung, Abbruch, Dispatch oder Merge); noch wird nichts gesendet. |
-| `/api/gh-action/confirm` | POST, dieser Rechner. Sendet an GitHub, was der Plan sagte, nach Ihrer Bestätigung; wird protokolliert. |
+| `/api/gh-action/confirm` | POST, dieser Rechner. Sendet an GitHub, was der Plan sagte, nach Ihrer Bestätigung; wird protokolliert. Lehnt GitHub ab, enthält die Antwort `reason`: forbidden, not_found, method, conflict oder invalid. |
 | `/api/github-token` | Nur dieser Rechner. Der Zustand des Speichers für das GitHub-Token (das Backend und ob eines gespeichert ist); nie sein Wert. |
 | `/api/help/search` | Durchsucht die Hilfethemen mit einem Wort und liefert die Treffer. |
 | `/api/help/topic` | Der Text eines Hilfethemas (`id=`) in der Sprache der Seite. |

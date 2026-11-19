@@ -146,6 +146,21 @@ class Linter(unittest.TestCase):
         self.assertEqual([x[1] for x in got if x[0] == "secrets_inherit"], [20])
         self.assertEqual([x[1] for x in got if x[0] == "own_action_main"], [10])      # thirdparty/lint@main is not an own action
 
+    def test_permissions_top_is_about_the_top_of_the_file_only(self):
+        per_job = WORKFLOW.replace("permissions:\n  contents: read\n", "").replace("  test:\n", "  test:\n    permissions:\n      contents: read\n")
+        self.assertNotIn("permissions_top", {r for r, *_ in found(per_job, settings())})      # off by default
+        on = settings(rules={"permissions_top": {"enabled": True}})
+        self.assertEqual([x for x in found(per_job, on) if x[0] == "permissions_top"], [("permissions_top", 1, "", "info")])
+        self.assertEqual([x for x in found(WORKFLOW, on) if x[0] == "permissions_top"], [])      # a block at the top: nothing to say
+        none_at_all = WORKFLOW.replace("permissions:\n  contents: read\n", "")
+        names = [x[0] for x in found(none_at_all, on)]
+        self.assertIn("permissions", names)      # nothing anywhere is the older rule's finding
+        self.assertNotIn("permissions_top", names)
+        silenced = per_job.replace("name: CI", "# monitor-lint: ignore permissions_top because the jobs say it\nname: CI")
+        self.assertEqual([x for x in found(silenced, on) if x[0] == "permissions_top"], [])
+        sev = settings(rules={"permissions_top": {"enabled": True, "severity": "warn"}})
+        self.assertEqual([x[3] for x in found(per_job, sev) if x[0] == "permissions_top"], ["warn"])
+
     def test_severity_and_silencing_follow_the_usual_rules(self):
         cfg = settings(rules={"secrets_inherit": {"enabled": True, "severity": "bad"}})
         self.assertEqual([x[3] for x in found(WORKFLOW, cfg) if x[0] == "secrets_inherit"], ["bad"])

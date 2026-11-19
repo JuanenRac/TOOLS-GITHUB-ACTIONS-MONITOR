@@ -28,6 +28,7 @@ TOKEN_RE = re.compile(r"^(?:gh[pousr]_[A-Za-z0-9_]{20,255}|github_pat_[A-Za-z0-9
 KINDS = ("runs", "security", "issues", "history", "discovery", "other")
 SOURCES = ("user", "app", "extra")
 PREFERENCES = ("auto",) + SOURCES
+POOL_DEFAULTS = {"prefer": {kind: "auto" for kind in KINDS}, "reserve": {source: 0 for source in SOURCES}}      # `readpool.prefer.<kind>` and `readpool.reserve.<source>`: the spread of always and no reserve
 KIND_RE = (("security", re.compile(r"code-scanning|dependabot|secret-scanning|vulnerab|security-advisor", re.I)), ("runs", re.compile(r"actions/|/runs?\b|/workflows?\b|check-runs|check-suites", re.I)),
            ("issues", re.compile(r"/issues\b|/pulls?\b", re.I)), ("history", re.compile(r"/releases?\b|/commits?\b|/tags\b|/compare/|/contents/|/git/", re.I)),
            ("discovery", re.compile(r"^(?:orgs|search|users)/|/repos\?|^repositories|^orgs/[^/]+/repos", re.I)))
@@ -93,8 +94,8 @@ def pool_settings(config):
     block = (config or {}).get("readpool") if isinstance((config or {}).get("readpool"), dict) else {}
     prefer = block.get("prefer") if isinstance(block.get("prefer"), dict) else {}
     reserve = block.get("reserve") if isinstance(block.get("reserve"), dict) else {}
-    return {"prefer": {k: prefer[k] if prefer.get(k) in PREFERENCES else "auto" for k in KINDS},
-            "reserve": {s: reserve[s] if isinstance(reserve.get(s), int) and not isinstance(reserve.get(s), bool) and 0 <= reserve[s] <= 4000 else 0 for s in SOURCES}}
+    return {"prefer": {k: prefer[k] if prefer.get(k) in PREFERENCES else POOL_DEFAULTS["prefer"][k] for k in KINDS},
+            "reserve": {s: reserve[s] if isinstance(reserve.get(s), int) and not isinstance(reserve.get(s), bool) and 0 <= reserve[s] <= 4000 else POOL_DEFAULTS["reserve"][s] for s in SOURCES}}
 
 
 def kind_of(args):

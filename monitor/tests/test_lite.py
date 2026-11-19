@@ -114,6 +114,7 @@ class LiteServer(unittest.TestCase):
             with urllib.request.urlopen(request, timeout=5) as answer:
                 return answer.status, answer.read()
         except urllib.error.HTTPError as error:
+            error.close()      # the answer of a refusal holds its socket: release it
             return error.code, b""
 
     def test_the_sentinel_and_its_neighbours_do_not_exist_in_lite(self):

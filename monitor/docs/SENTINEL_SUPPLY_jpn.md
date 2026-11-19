@@ -37,7 +37,7 @@ CI、コラボ、セキュリティに続く4つ目の監視です。GitHub に�
 
 ## コスト
 
-1回の巡回で読むのは最大 `sentinels.supply.max_repos_per_tick` 個のリポジトリ（既定 10）、呼び出しは最大 `sentinels.supply.max_calls_per_tick` 回（60）です。リポジトリのワークフロー一覧に1回、新規または変更されたファイルごとに1回で、SHA が変わらないファイルは再読込しません。最後に読んでから最も長いものが先で、未解決のアラートがあるものは少し早めです。周期は `sentinels.supply.refresh_seconds` ごと（既定は1時間）。残りの API 枠が `sentinels.supply.min_rate_remaining` を下回る間は一時停止します。状態（`supply_state.json`）は未解決のアラートを保持するので、再起動しても再通知されず、リポジトリの最初の確認ではイベントを書きません。`sentinels.supply.max_files_per_repo` は1つのリポジトリで読むファイル数を制限し、超えたリポジトリは一部だけ読まれ、部分的として数えられます。
+1回の巡回で読むのは最大 `sentinels.supply.max_repos_per_tick` 個のリポジトリ（既定 10）、呼び出しは最大 `sentinels.supply.max_calls_per_tick` 回（60）です。リポジトリのワークフロー一覧に1回、新規または変更されたファイルごとに1回で、SHA が変わらないファイルは再読込しません。最後に読んでから最も長いものが先で、未解決のアラートがあるものは少し早めです。周期は `sentinels.supply.refresh_seconds` ごと（既定は1時間）。残りの API 枠が `sentinels.supply.min_rate_remaining` を下回る間は一時停止します。状態（`supply_state.json`）は未解決のアラートを保持するので、再起動しても再通知されず、リポジトリの最初の確認ではイベントを書きません。`sentinels.supply.max_files_per_repo` は1つのリポジトリで読むファイル数を制限し、超えたリポジトリは一部だけ読まれ、部分的として数えられます。 ラウンドは `sentinels.supply.deadline_s` 秒(既定 30、0 = 上限なし)を過ぎると新しいリポジトリを始めません。届かなかったものは次のラウンドを待ち、状態にはアラート 0 件ではなく `unchecked`(と `round_cut`)として名前付きで一覧されます。
 
 ## 指摘を無視する
 
