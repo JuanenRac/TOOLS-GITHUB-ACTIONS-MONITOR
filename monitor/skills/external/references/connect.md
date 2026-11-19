@@ -18,6 +18,16 @@ This skill does not depend on one assistant or one model. A tool that talks to t
 
 If your tool can do several, prefer the cheapest for the quota: files or the brief first, the stream second, a command or a request last. Never poll faster than every 60 seconds.
 
+## The tools of the MCP server
+
+`python bin/mcp_server.py` answers `tools/list` with these tools; all of them only read, apart from the two that change the local state of the feed or of the library and need a flag.
+
+- Alerts: `get_alerts` (the open alerts of the feed), `alerts_open` (the same with age, failing step and the red repository they fall together under), `get_red_repos`, `get_run_failure` (the failed steps of one run), `alert_diagnose` and `diagnose` (the failing step and the last lines of the log of one alert), `alert_ack`, `ack_alert` and `act` (acknowledge an alert; only with `--allow-ack`, the local state of the feed and nothing else).
+- State: `monitor_state` and `signals` (everything the monitor says, as signals), `sentinel_panels` (the panels of the Sentinel tab as data), `get_quota` (the allowance and the minutes), `get_score` (the score with its parts).
+- Lessons: `lessons_brief` (read it before a push), `lessons_apply`, `lessons_recurring`, `lesson_propose` (checks a lesson and writes nothing; it is written only with `--allow-lessons` and `lessons.allow_write`).
+- Briefs: `briefs_index` (one catalogued brief per tab) and `brief_tab` (the brief of one tab, or `all`).
+- The read API for clients: `api_me` (who the monitor takes you for), `api_openapi` (the document of every frozen route, or one with `path`) and `api_contract_check` (the contract suite).
+
 ## Installing the instructions
 
 `python bin/monitor_cli.py install-skill external --dest FOLDER` copies this skill into the folder where your tool reads its skills or rules. Any tool that reads Markdown files can use it, and nothing in it names an assistant. `GET /api/skills` and `GET /api/skills?name=external&all=1` give the same text over HTTP.
