@@ -342,6 +342,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/HEALTH_spa.md`](monitor/docs/HEALTH_spa.md): La salud de un repositorio y del equipo: de qué se compone, la pestaña Equipo, los enlaces directos y la API
 - [`monitor/docs/REPORT_SCHEDULE_spa.md`](monitor/docs/REPORT_SCHEDULE_spa.md): Informes programados: la puntuación, lo que ha cambiado, los repositorios que necesitan a una persona y las alertas abiertas en HTML y Markdown, el horario y los ficheros
 - [`monitor/docs/CLI_spa.md`](monitor/docs/CLI_spa.md): la línea de comandos como cliente del monitor
+- [`monitor/docs/CLI_OPERATOR_spa.md`](monitor/docs/CLI_OPERATOR_spa.md): la línea de comandos para el operador: formatos, watch, completions y códigos de salida
+- [`monitor/docs/KIOSK_spa.md`](monitor/docs/KIOSK_spa.md): el monitor en una TV o una pared
 - [`monitor/docs/ACCOUNTS_spa.md`](monitor/docs/ACCOUNTS_spa.md): varias cuentas, un proceso para cada una
 - [`monitor/docs/QUOTAS_spa.md`](monitor/docs/QUOTAS_spa.md): cuotas y planes de GitHub
 - [`monitor/docs/MODES_spa.md`](monitor/docs/MODES_spa.md): modos de trabajo: normal, rápido y turbo
