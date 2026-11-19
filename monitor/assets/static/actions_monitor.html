@@ -2214,7 +2214,7 @@ async function cfgExtras(){
         list.slice(0,20).forEach(x=>{const d=document.createElement("details"),s=document.createElement("summary");
           s.textContent=[new Date((x.at||0)*1000).toLocaleString(),x.kind,x.model,x.ok?"":T("ui.pl_failed")].filter(Boolean).join(" · ");d.appendChild(s);
           const p=document.createElement("pre");p.textContent=(x.prompt||"")+"\n---\n"+(x.reply||"");d.appendChild(p);box.appendChild(d)})}catch(e){$("pl-state").textContent=String(e)}});
-    $("pl-clear").addEventListener("click",async()=>{if(!confirm(T("ui.pl_confirm")))return;
+    $("pl-clear").addEventListener("click",async()=>{if(!await askConfirm(T("ui.pl_confirm"),{danger:true}))return;
       try{const r=await fetch("/api/ai/prompts/clear",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});const j=await r.json();$("pl-list").innerHTML="";$("pl-state").textContent=r.ok?T("ui.pl_cleared",{n:j.removed||0}):T("ui.pl_denied")}catch(e){$("pl-state").textContent=String(e)}});
   }
   if(ai&&!ai.querySelector(".sk-extra")){
