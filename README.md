@@ -310,6 +310,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COMPLETE_TEAM.md`](monitor/docs/COMPLETE_TEAM.md): Complete edition for a team
 - [`monitor/docs/API.md`](monitor/docs/API.md): The API for clients
 - [`monitor/docs/API_V1.md`](monitor/docs/API_V1.md): The read API v1, step by step
+- [`monitor/docs/ASSISTANT.md`](monitor/docs/ASSISTANT.md): The assistant: fixed read-only questions to your AI
 - [`monitor/docs/NOTIFICATIONS.md`](monitor/docs/NOTIFICATIONS.md): notifications and the adapter contract
 - [`monitor/docs/SKILLS.md`](monitor/docs/SKILLS.md): the two skills for AIs, how they are made and how to install them
 - [`monitor/docs/EXTRAS.md`](monitor/docs/EXTRAS.md): optional extras - the log of the failed step and a read-only token of the GitHub App
