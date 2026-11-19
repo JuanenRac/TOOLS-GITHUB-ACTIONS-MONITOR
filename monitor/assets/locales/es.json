@@ -3443,6 +3443,8 @@
  "ci.lane_branch": "rama {branch}",
  "cfg.f.sampling.default_branch_probe": "Segunda mirada a la rama por defecto",
  "cfg.h.sampling.default_branch_probe": "Cuando la lista de ejecuciones de un repositorio está llena, una petición más pide los push a su rama por defecto (sin pull requests), para que las ejecuciones que deciden el rojo en main no las desplacen los pull requests ni las programadas. Cuesta una petición por repositorio lleno y lectura; desactivado por defecto.",
+ "cfg.f.sampling.active_probe": "Mirar las ejecuciones aún en curso",
+ "cfg.h.sampling.active_probe": "Cuando la lista de ejecuciones de un repositorio está llena, dos peticiones ligeras piden las ejecuciones aún en curso y las que están en cola, para que una ejecución larga que empezó antes de la ventana de la lista no se pierda ni se muestre como terminada. Cuesta dos peticiones por repositorio lleno y lectura; desactivado por defecto.",
  "cfg.f.sampling.min_coverage_minutes": "Cobertura baja por debajo de",
  "cfg.h.sampling.min_coverage_minutes": "Una lista de ejecuciones llena que remonta menos de estos minutos se marca como cobertura baja en vez de parecer completa. 0 desactiva la marca.",
  "cfg.f.sampling.api_budget_per_hour": "Presupuesto de peticiones por hora",
@@ -3592,6 +3594,7 @@
  "lint.reason.over_limit": "más ficheros que lint.api.max_files_per_repo",
  "lint.help_remote": "Lee los ficheros de workflow de un repositorio desde GitHub (sin clon); se puede repetir.",
  "lint.remote_failed": "{name}: no se pudo leer ({reason}).",
+ "lint.path_unread": "{name}: no se pudo comprobar ({reason}); no cuenta como limpio.",
  "lint.remote_bad_name": "No es un nombre de repositorio (usa PROPIETARIO/REPO): {name}",
  "doctor.t.access": "El acceso puede leer la cuenta u organización",
  "doctor.f.access": "Un 403 o un 404 en una organización suele ser una de estas causas: el token no está autorizado para su inicio de sesión único SAML (autorízalo en Configure SSO en la página del token), le falta el alcance repo o read:org (o, en un token de grano fino, un permiso de lectura), o los repositorios son privados y el acceso no los ve. El detalle dice cuál.",
@@ -4413,6 +4416,9 @@
  "cfg.f.updates.systemd_helper": "Actualizar desde la página bajo un servicio de usuario de systemd",
  "cfg.h.updates.systemd_helper": "Cuando el monitor corre como servicio de USUARIO de systemd, el menú Actualizaciones puede aplicar una actualización: la actualización detiene ese servicio, reemplaza los ficheros y lo vuelve a arrancar con systemctl --user. Nunca usa sudo ni toca un servicio del sistema. Apagado: bajo un gestor de servicios la actualización se hace desde la línea de comandos.",
  "cfg.t.updates.systemd_helper": "Verás: el menú Actualizaciones ofrece Aplicar y Volver atrás cuando el monitor corre como servicio de usuario de systemd. Coste: ninguno; el monitor se detiene lo que dure la actualización y el servicio vuelve solo, con la versión anterior si la nueva no arranca.",
+ "cfg.f.savings.webhook_live_per_repo": "Webhook vivo por repositorio",
+ "cfg.h.savings.webhook_live_per_repo": "Juzga el webhook repositorio a repositorio: un repositorio tranquilo se libra de su lectura lenta solo si ha llegado un evento suyo hace poco. Un repositorio cuyo webhook nunca se montó o se rompió se lee como siempre. Ahorra menos lecturas. Funciona junto con Webhook primero.",
+ "cfg.t.savings.webhook_live_per_repo": "Verás: con Webhook primero encendido, solo los repositorios que enviaron un evento suyo hace poco se saltan su lectura lenta; el panel del Webhook también los cuenta. Coste: ninguno; así se ahorran menos llamadas.",
  "cfg.f.screens.menu": "Menú Pantallas en la barra superior",
  "cfg.h.screens.menu": "Activado por defecto. Muestra el botón Pantallas en la barra superior: un menú que lista todos los tipos de pantalla (la página, los quioscos, las pantallas de pared, la TV y los conjuntos multipantalla), construye sus direcciones y las abre. Solo navega: no cambia nada ni lee nada de GitHub. Desactivado: el botón desaparece; las pantallas siguen funcionando en sus propias direcciones.",
  "cfg.f.screens.menu_target": "Dónde abre el menú Pantallas una pantalla",
@@ -4522,5 +4528,8 @@
  "cli.screens_action": "screens: list o urls",
  "cli.screens_head": "{n} tipos de pantalla ({wall})",
  "cli.screens_wall_on": "pantallas de pared activadas",
- "cli.screens_wall_off": "pantallas de pared desactivadas"
+ "cli.screens_wall_off": "pantallas de pared desactivadas",
+ "cfg.f.startup.resume_max_age_hours": "Mostrar el último cuadro tras reiniciar (horas)",
+ "cfg.h.startup.resume_max_age_hours": "Horas. Tras un reinicio la página muestra al instante el último cuadro del monitor, marcado con su edad, mientras el primer ciclo lee GitHub y lo sustituye. El cuadro se guarda en last_picture.json junto al monitor después de cada ciclo; uno más viejo que esto no se muestra. 0 = el cuadro ni se guarda ni se muestra y se borra el fichero viejo.",
+ "ui.resumed": "Datos de hace {mins} min ({time}); leyendo GitHub…"
 }

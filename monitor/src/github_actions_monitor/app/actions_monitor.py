@@ -22,6 +22,7 @@ do not use up the GitHub allowance shared with the agents.
 """
 from github_actions_monitor.app import api_spec, api_v1
 from github_actions_monitor.app import degraded
+from github_actions_monitor.app import lastpicture
 from github_actions_monitor.app import cycle_watch
 import argparse
 import hmac
@@ -111,6 +112,7 @@ DEFAULTS = {
                 "allowed_words": ["help", "status", "alerts", "red", "queue", "score"], "max_rows": 8, "show_repo_names": "all", "links": True, "max_age_seconds": 300, "rate_per_user_per_minute": 6, "rate_per_channel_per_minute": 20, "rate_per_minute": 60},   # read only commands from Slack and Discord, see chatops/inbound.py (off by default; the proofs are only in the environment)
     "config_check": {"strict": False},      # OFF: a key nobody reads, a wrong type or a number out of range is named at the start; ON: the monitor refuses to start (configcheck.py)
     "cache": {"etag": {"enabled": True, "ttl_hours": 24, "skip_stateful": True, "revalidate_active": True}, "negative_ttl_s": 300},   # conditional reads: a 304 answer costs no quota; a refusal is remembered for negative_ttl_s seconds (etagcache.py)
+    "startup": {"resume_max_age_hours": 12},   # the last picture is shown at once after a restart, with its age (lastpicture.py); 0 = off
     "display": {"timezone": "local", "blink_red_tiles": True},   # blink_red_tiles: the red tiles and red items of the bar blink softly until the cause is solved; zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
     "modes": {"auto_low": True, "auto_low_enter": 1000, "auto_low_exit": 2500, "low": {"refresh_seconds": 240, "cold_refresh_seconds": 1800, "runs_per_repo": 10, "hot_hours": 2}},      # see modes.py: only what is shown in the Quota tab
     "extra_reader": {"enabled": False, "file": "", "any_folder": False},      # a second read-only account: only the PATH of the file with its token (readpool.py)
@@ -153,8 +155,8 @@ DEFAULTS = {
     "network": {"use_proxy": False, "etag": True, "graphql_checks": False, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
     "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
     "pagination": {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3, "cursor_pages": 3},      # pages of 100 followed when a list is full, and said when something is cut (paging.py)
-    "sampling": {"default_branch_probe": False, "min_coverage_minutes": 30, "api_budget_per_hour": 0},      # how much of a repository the list of runs shows, a second look at the default branch, a budget of requests (sampling.py)
-    "savings": {"webhook_first": False, "webhook_window_minutes": 60, "webhook_full_minutes": 360, "feeds": {"enabled": False, "method": "atom", "max_age_minutes": 240}},      # read less: OFF (savings.py)
+    "sampling": {"default_branch_probe": False, "active_probe": False, "min_coverage_minutes": 30, "api_budget_per_hour": 0},      # how much of a repository the list of runs shows, a second look at the default branch, a budget of requests (sampling.py)
+    "savings": {"webhook_first": False, "webhook_live_per_repo": False, "webhook_window_minutes": 60, "webhook_full_minutes": 360, "feeds": {"enabled": False, "method": "atom", "max_age_minutes": 240}},      # read less: OFF (savings.py)
     "logs": {"failed_step": {"enabled": False, "lines": 12, "max_bytes": 2000, "max_per_minute": 10}},      # the log of the failed step in the page: OFF, one press of a button, steplog.py
     "reports": {"workflow_hygiene": {"enabled": False}, "queue": {"enabled": False}, "release_view": {"enabled": False}, "supply_chain": {"enabled": False}, "max_calls_per_cycle": 4},      # four optional reports, all OFF (reports.py)
     "lessons": {"enabled": True, "allow_write": False, "retention_days": 180, "max_entries": 5000, "brief_max_bytes": 3000, "recurring_from": 2},      # the book of failures and the library of lessons (lessons.py): local, read only; writing a lesson is OFF
@@ -694,10 +696,31 @@ def fetch_runs(repo, per_page):
     return parse_runs(repo, data), None
 
 
+def fetch_active(repo, runs):
+    """The runs of the repository that are still `in_progress` or `queued`, asked for on their own (sampling.active_probe) and joined to a full list: a long run that started before the
+    window of the sample is not lost. A failed request leaves the list as it was."""
+    for status in ("in_progress", "queued"):
+        try:
+            BUDGET.record(1)
+            data = gh_read(f"repos/{toolconfig.github_owner()}/{repo}/actions/runs?status={status}&per_page=100")
+        except AuthError:
+            raise
+        except Exception:   # noqa: BLE001 - the look at the active runs is extra: the first list stands
+            continue
+        runs, added = sampling.merge_probe(runs, parse_runs(repo, data))
+        SAMPLE_INFO.setdefault(repo, {})["probe"] = SAMPLE_INFO.get(repo, {}).get("probe", 0) + added
+    return runs
+
+
 def fetch_sampled(repo, per_page, config):
     """The list of runs of a repository; with sampling.default_branch_probe on and a full list, one more request for the pushes to the default branch, joined to it (sampling.py)."""
     runs, error = fetch_runs(repo, per_page)
-    if error or len(runs) < per_page or not sampling.settings(config)["default_branch_probe"]:
+    wanted = sampling.settings(config)
+    if error or len(runs) < per_page or not (wanted["default_branch_probe"] or wanted["active_probe"]):
+        return runs, error
+    if wanted["active_probe"]:
+        runs = fetch_active(repo, runs)
+    if not wanted["default_branch_probe"]:
         return runs, error
     branch = (repo_meta([repo]).get(repo) or {}).get("branch") or redrule.guess_default_branch(runs)
     if not branch or not BRANCH_RE.match(branch):
@@ -870,7 +893,7 @@ def refresh_runs(repos, config, progress=None):
         elif hot:
             todo.append((repo, config["cold_runs_per_repo"] if lite else tuned(config, "runs_per_repo")))
         elif not only_hot and now - entry["at"] > tuned(config, "cold_refresh_seconds"):
-            if spare_by_webhook(entry, config, now):      # savings.webhook_first (off by default): the slow turn passes with no call
+            if spare_by_webhook(entry, config, now, repo):      # savings.webhook_first (off by default): the slow turn passes with no call
                 continue
             slow.append((repo, entry))
     if slow:
@@ -896,10 +919,12 @@ def refresh_runs(repos, config, progress=None):
         todo = [item for item in todo if item[0] not in batched]
     limit = sampling.settings(config)["api_budget_per_hour"]
     probing = sampling.settings(config)["default_branch_probe"]
+    watching = sampling.settings(config)["active_probe"]
 
     def price(item):      # a repository whose last list was full (or never read) also gets the second look at the pushes to its default branch: two requests
         held = RUN_CACHE.get(item[0])
-        return 2 if probing and (held is None or len(held.get("runs") or []) >= item[1]) else 1
+        full = held is None or len(held.get("runs") or []) >= item[1]
+        return 1 + (1 if probing and full else 0) + (2 if watching and full else 0)
     todo, waiting = sampling.plan(todo, red_repos_of([r for r, _n in todo]) if limit else set(), limit, BUDGET.used(), price)      # a spent budget: the repositories with red first, the others wait
     SAMPLING_STATE["dropped"] = [item[0] for item in waiting]
     for start in range(0, len(todo), 40):  # chunks, so the page can show the first results while the rest loads
@@ -936,12 +961,12 @@ def red_repos_of(repos):
 HEADS_PENDING = {}      # repo -> the newest commit seen BEFORE its read, stored with the read (savings.feeds)
 
 
-def spare_by_webhook(entry, config, now):
+def spare_by_webhook(entry, config, now, repo=None):
     """True when the webhook is alive and the slow turn of this cold repository may pass without a call (savings.webhook_first). The repository keeps its runs; the full read still comes
     at the intervals `savings` sets."""
     from github_actions_monitor.data_pipeline import savings
     try:
-        if savings.quiet_by_webhook(config, entry, now):
+        if savings.quiet_by_webhook(config, entry, now, repo):
             savings.count_webhook()
             entry["at"] = now
             return True
@@ -1115,7 +1140,7 @@ def sampling_summary(config, repos, meta):
     cfg = sampling.settings(config)
     low = sorted(r for r in repos if ((meta.get(r) or {}).get("coverage") or {}).get("low"))
     waiting = [r for r in SAMPLING_STATE["dropped"] if r in set(repos)]
-    estimate = sampling.estimate_per_hour(len(repos), config.get("refresh_seconds") or 45, config.get("cold_refresh_seconds") or 600, probe=cfg["default_branch_probe"])
+    estimate = sampling.estimate_per_hour(len(repos), config.get("refresh_seconds") or 45, config.get("cold_refresh_seconds") or 600, probe=cfg["default_branch_probe"] or cfg["active_probe"])
     return {"low": low[:50], "low_count": len(low), "estimate_per_hour": estimate, "budget_per_hour": cfg["api_budget_per_hour"], "used_last_hour": BUDGET.used(),
             "waiting": waiting[:50], "waiting_count": len(waiting), "probe": cfg["default_branch_probe"], "min_coverage_minutes": cfg["min_coverage_minutes"]}
 
@@ -2172,6 +2197,11 @@ def run_cycle(config, generation):
     with LOCK:
         STATE["data"], STATE["error"], STATE["hint"] = data, None, None
         STATE["complete"] = True
+    if not LITE["on"]:
+        try:      # the picture is kept for the next start; a disk that refuses it never stops the cycle
+            lastpicture.save(state_dir(), data, config)
+        except Exception as error:   # noqa: BLE001
+            degraded.note("loop.last_picture", error)
     WATCH.phase("log")
     write_cycle_log(data)
     WATCH.phase("extras")
@@ -2895,7 +2925,7 @@ class Handler(BaseHTTPRequestHandler):
                     apply_live_event(record, LIVE_CONFIG or DEFAULTS)
                 if repo:
                     webhook.note_accepted()      # the coverage indicator counts it
-                    __import__("github_actions_monitor.data_pipeline.savings", fromlist=["_"]).note_webhook()      # the webhook is alive: savings.webhook_first may stretch the slow turn of the cold repositories
+                    __import__("github_actions_monitor.data_pipeline.savings", fromlist=["_"]).note_webhook(repo=repo)      # the webhook is alive: savings.webhook_first may stretch the slow turn of the cold repositories
                     webhook_settle(repo)
                 self.json_reply(answer, code)
             except Exception:
@@ -4643,6 +4673,15 @@ def main():
         print(banner_mode_line(MODE.name, "" if ok else why), flush=True)
     degraded.attach(state_dir() / ("degraded_lite.json" if LITE["on"] else "degraded.json"))
     degraded.set_writer(degraded_line)
+    if not LITE["on"]:
+        try:      # the page shows the last picture with its age while the first cycle reads GitHub
+            resumed = lastpicture.load(state_dir(), config)
+            if resumed is not None:
+                with LOCK:
+                    if STATE["data"] is None:
+                        STATE["data"] = resumed
+        except Exception as error:   # noqa: BLE001
+            degraded.note("loop.last_picture", error)
     start_loop(config)
     if started_blind:
         announce_credential("credential_blind", config)

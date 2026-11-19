@@ -126,6 +126,7 @@ _G_GENERAL, _G_POLL, _G_SENT, _G_SURF, _G_READY, _G_PATHS, _G_OUT, _G_AI = _T_GE
 # --- Basic: what a new user may want to change first
 _f("basic", "start", "open_browser", "bool")
 _f("basic", "start", "config_check.strict", "bool")
+_f("basic", "start", "startup.resume_max_age_hours", "int", (0, 168))
 _f("basic", "updates", "updates.check", "bool", restart=False)
 _f("basic", "updates", "updates.systemd_helper", "bool", restart=False)
 _f("basic", "network", "airgapped", "bool", restart=False, secure=True)
@@ -277,6 +278,7 @@ _f(_T_POLL, "pagination", "pagination.job_pages", "int", (1, 20), unit="", resta
 _f(_T_POLL, "pagination", "pagination.collab_pages", "int", (1, 20), unit="", restart=False)
 _f(_T_POLL, "pagination", "pagination.cursor_pages", "int", (0, 20), unit="", restart=False)
 _f(_T_POLL, "sampling", "sampling.default_branch_probe", "bool", restart=False)
+_f(_T_POLL, "sampling", "sampling.active_probe", "bool", restart=False)
 _f(_T_POLL, "sampling", "sampling.min_coverage_minutes", "int", (0, 10080), unit="min", restart=False)
 _f(_T_POLL, "sampling", "sampling.api_budget_per_hour", "int", (0, 100000), unit="calls", restart=False)
 # --- Sentinel
@@ -795,6 +797,7 @@ _f(_T_AI, "lessons", "lessons.max_entries", "int", (100, 100000), restart=False,
 _f(_T_AI, "lessons", "lessons.brief_max_bytes", "int", (500, 20000), restart=False, unit="")
 _f(_T_AI, "lessons", "lessons.recurring_from", "int", (2, 20), restart=False, unit="")
 _f("quota", "savings", "savings.webhook_first", "bool", restart=False)
+_f("quota", "savings", "savings.webhook_live_per_repo", "bool", restart=False)
 _f("quota", "savings", "savings.webhook_window_minutes", "int", (5, 1440), restart=False)
 _f("quota", "savings", "savings.webhook_full_minutes", "int", (30, 10080), restart=False)
 _f("quota", "savings", "savings.feeds.enabled", "bool", restart=False, secure=True)

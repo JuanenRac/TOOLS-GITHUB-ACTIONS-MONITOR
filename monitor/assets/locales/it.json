@@ -3443,6 +3443,8 @@
  "ci.lane_branch": "branch {branch}",
  "cfg.f.sampling.default_branch_probe": "Seconda occhiata al ramo predefinito",
  "cfg.h.sampling.default_branch_probe": "Quando l'elenco delle esecuzioni di un repository è pieno, una richiesta in più chiede i push sul ramo predefinito (senza pull request), così le esecuzioni che decidono il rosso su main non vengono spinte fuori da pull request e pianificazioni. Costa una richiesta per repository pieno e per lettura; disattivato per impostazione predefinita.",
+ "cfg.f.sampling.active_probe": "Guardare le esecuzioni ancora in corso",
+ "cfg.h.sampling.active_probe": "Quando l'elenco delle esecuzioni di un repository è pieno, due richieste leggere chiedono le esecuzioni ancora in corso e quelle in coda, così un'esecuzione lunga iniziata prima della finestra dell'elenco non si perde né appare come terminata. Costa due richieste per repository pieno e per lettura; disattivato per impostazione predefinita.",
  "cfg.f.sampling.min_coverage_minutes": "Copertura bassa sotto",
  "cfg.h.sampling.min_coverage_minutes": "Un elenco di esecuzioni pieno che risale per meno di questi minuti viene segnato come copertura bassa invece di sembrare completo. 0 disattiva il segno.",
  "cfg.f.sampling.api_budget_per_hour": "Budget di richieste all'ora",
@@ -3592,6 +3594,7 @@
  "lint.reason.over_limit": "più file di lint.api.max_files_per_repo",
  "lint.help_remote": "Legge i file di workflow di un repository da GitHub (senza clone); ripetibile.",
  "lint.remote_failed": "{name}: non è stato possibile leggerlo ({reason}).",
+ "lint.path_unread": "{name}: non è stato possibile verificarlo ({reason}); non conta come pulito.",
  "lint.remote_bad_name": "Non è un nome di repository (usa PROPRIETARIO/REPO): {name}",
  "doctor.t.access": "L'accesso può leggere l'account o l'organizzazione",
  "doctor.f.access": "Un 403 o un 404 su un'organizzazione di solito ha una di queste cause: il token non è autorizzato per il suo single sign-on SAML (autorizzalo in Configure SSO nella pagina del token), manca lo scope repo o read:org (o, per un token a grana fine, un permesso di lettura), oppure i repository sono privati e l'accesso non li vede. Il dettaglio dice quale.",
@@ -4413,6 +4416,9 @@
  "cfg.f.updates.systemd_helper": "Aggiornare dalla pagina sotto un servizio utente systemd",
  "cfg.h.updates.systemd_helper": "Quando il monitor gira come servizio UTENTE di systemd, il menu Aggiornamenti può applicare un aggiornamento: l'aggiornamento ferma quel servizio, sostituisce i file e lo riavvia con systemctl --user. Non usa mai sudo e non tocca mai un servizio di sistema. Spento: sotto un gestore di servizi l'aggiornamento si fa dalla riga di comando.",
  "cfg.t.updates.systemd_helper": "Vedrai: il menu Aggiornamenti offre Applica e Torna indietro quando il monitor gira come servizio utente systemd. Costo: nessuno; il monitor si ferma per la durata dell'aggiornamento e il servizio torna da solo, con la versione precedente se la nuova non si avvia.",
+ "cfg.f.savings.webhook_live_per_repo": "Webhook attivo per repository",
+ "cfg.h.savings.webhook_live_per_repo": "Giudica il webhook repository per repository: un repository tranquillo evita la lettura lenta solo se di recente è arrivato un evento suo. Un repository il cui webhook non è mai stato configurato o si è rotto viene letto come sempre. Risparmia meno letture. Funziona insieme a «Prima il webhook».",
+ "cfg.t.savings.webhook_live_per_repo": "Vedrai: con «Prima il webhook» attivo, solo i repository che hanno inviato di recente un evento proprio saltano la lettura lenta; anche il pannello Webhook li conta. Costo: nessuno; si risparmiano meno chiamate.",
  "cfg.f.screens.menu": "Menu Schermi nella barra superiore",
  "cfg.h.screens.menu": "Attivo per impostazione predefinita. Mostra il pulsante Schermi nella barra superiore: un menu che elenca ogni tipo di schermo (la pagina, i chioschi, gli schermi a parete, la TV e gli insiemi multischermo), costruisce i loro indirizzi e li apre. Fa solo da navigazione: non cambia nulla e non legge nulla da GitHub. Disattivato: il pulsante scompare; gli schermi continuano a funzionare ai loro indirizzi.",
  "cfg.f.screens.menu_target": "Dove il menu Schermi apre uno schermo",
@@ -4522,5 +4528,8 @@
  "cli.screens_action": "screens: list o urls",
  "cli.screens_head": "{n} tipi di schermo ({wall})",
  "cli.screens_wall_on": "schermi a parete attivi",
- "cli.screens_wall_off": "schermi a parete disattivati"
+ "cli.screens_wall_off": "schermi a parete disattivati",
+ "cfg.f.startup.resume_max_age_hours": "Mostra l'ultima immagine dopo un riavvio (ore)",
+ "cfg.h.startup.resume_max_age_hours": "Ore. Dopo un riavvio la pagina mostra subito l'ultima immagine del monitor, con la sua età, mentre il primo ciclo legge GitHub e la sostituisce. L'immagine viene conservata in last_picture.json accanto al monitor dopo ogni ciclo; una più vecchia non viene mostrata. 0 = l'immagine non viene né conservata né mostrata e un vecchio file viene eliminato.",
+ "ui.resumed": "Dati di {mins} min fa ({time}); lettura di GitHub…"
 }

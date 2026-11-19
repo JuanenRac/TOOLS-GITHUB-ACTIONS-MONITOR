@@ -3443,6 +3443,8 @@
  "ci.lane_branch": "ブランチ {branch}",
  "cfg.f.sampling.default_branch_probe": "デフォルトブランチの二度目の確認",
  "cfg.h.sampling.default_branch_probe": "リポジトリの実行一覧がいっぱいのとき、デフォルトブランチへのプッシュ(プルリクエストを除く)をもう1回問い合わせ、main の赤を決める実行がプルリクエストやスケジュールに押し出されないようにします。満杯のリポジトリごと、読み取りごとに1リクエスト。既定ではオフです。",
+ "cfg.f.sampling.active_probe": "実行中の run を別に確認",
+ "cfg.h.sampling.active_probe": "リポジトリの run 一覧がいっぱいのとき、軽量なリクエストを 2 回送って実行中の run と待機中の run を取得し、一覧の範囲より前に始まった長い run が失われたり完了と表示されたりしないようにします。一覧がいっぱいのリポジトリごと・読み取りごとに 2 リクエストかかります。既定はオフです。",
  "cfg.f.sampling.min_coverage_minutes": "カバー範囲が狭い基準",
  "cfg.h.sampling.min_coverage_minutes": "実行一覧が満杯でも、この分数より短い期間しかさかのぼれない場合は、完全に見せかけずカバー範囲が狭いと表示します。0 で表示オフ。",
  "cfg.f.sampling.api_budget_per_hour": "1時間あたりのリクエスト予算",
@@ -3592,6 +3594,7 @@
  "lint.reason.over_limit": "lint.api.max_files_per_repo を超えるファイル数",
  "lint.help_remote": "リポジトリのワークフローファイルを GitHub から読み取ります(クローン不要)。複数回指定できます。",
  "lint.remote_failed": "{name}:読み取れませんでした({reason})。",
+ "lint.path_unread": "{name}:確認できませんでした({reason})。問題なしとは数えません。",
  "lint.remote_bad_name": "リポジトリ名ではありません(OWNER/REPO の形式で指定): {name}",
  "doctor.t.access": "ログインでアカウントまたは組織を読み取れる",
  "doctor.f.access": "組織に対する 403 や 404 は、通常次のいずれかです。トークンが SAML シングルサインオンに対して承認されていない(トークンのページの Configure SSO で承認)、スコープ repo または read:org(細粒度トークンでは読み取り権限)が足りない、リポジトリが非公開でログインから見えない。詳細にどれかが示されます。",
@@ -4413,6 +4416,9 @@
  "cfg.f.updates.systemd_helper": "systemd のユーザーサービス下でページから更新する",
  "cfg.h.updates.systemd_helper": "モニターが systemd の「ユーザー」サービスとして動いている場合、更新メニューから更新を適用できます。更新はそのサービスを停止し、ファイルを置き換え、systemctl --user で再び起動します。sudo は使わず、システムサービスには触れません。オフの場合、サービスマネージャーの下ではコマンドラインで更新します。",
  "cfg.t.updates.systemd_helper": "表示される内容: モニターが systemd のユーザーサービスとして動いているとき、更新メニューに「適用」と「戻す」が表示されます。コスト: なし。更新の間モニターは停止し、サービスは自動的に戻ります。新しいバージョンが起動しなければ前のバージョンで戻ります。",
+ "cfg.f.savings.webhook_live_per_repo": "リポジトリごとの Webhook 稼働",
+ "cfg.h.savings.webhook_live_per_repo": "Webhook をリポジトリごとに判断します。静かなリポジトリは、最近そのリポジトリ自身のイベントが届いた場合にだけ低速の読み取りを省略します。Webhook が未設定または故障しているリポジトリは通常どおり読み取られます。節約できる読み取りは少なくなります。「Webhook を優先」と併用します。",
+ "cfg.t.savings.webhook_live_per_repo": "表示される内容: 「Webhook を優先」がオンのとき、最近自身のイベントを送ったリポジトリだけが低速の読み取りを省略し、Webhook パネルもその数を表示します。コスト: なし。ただし節約できる呼び出しは減ります。",
  "cfg.f.screens.menu": "上部バーの画面メニュー",
  "cfg.h.screens.menu": "既定ではオンです。上部バーに「画面」ボタンを表示します。ページ、キオスク、壁画面、テレビ、マルチモニターのセットなど、すべての種類の画面を一覧にし、アドレスを組み立てて開くメニューです。移動するだけで、何も変更せず、GitHub からも何も読みません。オフにするとボタンは消えますが、画面は各自のアドレスで動き続けます。",
  "cfg.f.screens.menu_target": "画面メニューで画面を開く場所",
@@ -4522,5 +4528,8 @@
  "cli.screens_action": "screens: list または urls",
  "cli.screens_head": "{n} 種類の画面（{wall}）",
  "cli.screens_wall_on": "壁画面はオン",
- "cli.screens_wall_off": "壁画面はオフ"
+ "cli.screens_wall_off": "壁画面はオフ",
+ "cfg.f.startup.resume_max_age_hours": "再起動後に最後の画面を表示する(時間)",
+ "cfg.h.startup.resume_max_age_hours": "時間。再起動後、最初のサイクルが GitHub を読んで置き換えるまでの間、モニターの最後の画面を経過時間付きですぐに表示します。画面は各サイクルの後にモニターの隣の last_picture.json に保存され、これより古いものは表示されません。0 = 画面を保存も表示もせず、古いファイルは削除されます。",
+ "ui.resumed": "{mins} 分前のデータ({time})。GitHub を読み込み中…"
 }

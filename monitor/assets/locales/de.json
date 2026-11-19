@@ -3443,6 +3443,8 @@
  "ci.lane_branch": "Branch {branch}",
  "cfg.f.sampling.default_branch_probe": "Zweiter Blick auf den Standard-Branch",
  "cfg.h.sampling.default_branch_probe": "Ist die Liste der Läufe eines Repositorys voll, fragt eine weitere Anfrage die Pushes auf den Standard-Branch ab (ohne Pull Requests), damit die Läufe, die über Rot auf main entscheiden, nicht von Pull Requests und Zeitplänen verdrängt werden. Kostet eine Anfrage pro vollem Repository und Lesevorgang; standardmäßig aus.",
+ "cfg.f.sampling.active_probe": "Noch laufende Runs gesondert abfragen",
+ "cfg.h.sampling.active_probe": "Ist die Liste der Runs eines Repositorys voll, fragen zwei leichte Anfragen die noch laufenden und die wartenden Runs ab, damit ein langer Run, der vor dem Fenster der Liste begann, nicht verloren geht oder als beendet erscheint. Kostet zwei Anfragen pro vollem Repository und Lesevorgang; standardmäßig aus.",
  "cfg.f.sampling.min_coverage_minutes": "Geringe Abdeckung unter",
  "cfg.h.sampling.min_coverage_minutes": "Eine volle Liste von Läufen, die weniger als diese Minuten zurückreicht, wird als geringe Abdeckung markiert, statt vollständig zu wirken. 0 schaltet die Markierung aus.",
  "cfg.f.sampling.api_budget_per_hour": "Anfragenbudget pro Stunde",
@@ -3592,6 +3594,7 @@
  "lint.reason.over_limit": "mehr Dateien als lint.api.max_files_per_repo",
  "lint.help_remote": "Liest die Workflow-Dateien eines Repositorys von GitHub (ohne Klon); wiederholbar.",
  "lint.remote_failed": "{name}: konnte nicht gelesen werden ({reason}).",
+ "lint.path_unread": "{name}: konnte nicht geprüft werden ({reason}); es gilt nicht als sauber.",
  "lint.remote_bad_name": "Kein Repository-Name (OWNER/REPO verwenden): {name}",
  "doctor.t.access": "Der Zugang kann das Konto oder die Organisation lesen",
  "doctor.f.access": "Ein 403 oder 404 bei einer Organisation hat meist eine dieser Ursachen: Das Token ist für das SAML-Single-Sign-on nicht autorisiert (unter Configure SSO auf der Token-Seite freigeben), ihm fehlt der Scope repo oder read:org (bei einem fein abgestuften Token eine Leseberechtigung), oder die Repositories sind privat und der Zugang sieht sie nicht. Die Angabe nennt, welche.",
@@ -4413,6 +4416,9 @@
  "cfg.f.updates.systemd_helper": "Über die Seite unter einem systemd-Benutzerdienst aktualisieren",
  "cfg.h.updates.systemd_helper": "Läuft der Monitor als systemd-BENUTZERDIENST, darf das Menü Updates ein Update einspielen: Das Update hält diesen Dienst an, ersetzt die Dateien und startet ihn mit systemctl --user wieder. Es nutzt nie sudo und fasst nie einen Systemdienst an. Aus: unter einem Dienstmanager wird das Update über die Kommandozeile gemacht.",
  "cfg.t.updates.systemd_helper": "Sie sehen: Das Menü Updates bietet Einspielen und Zurück an, wenn der Monitor als systemd-Benutzerdienst läuft. Kosten: keine; der Monitor steht für die Dauer des Updates still, und der Dienst kommt von selbst zurück, mit der vorherigen Version, falls die neue nicht startet.",
+ "cfg.f.savings.webhook_live_per_repo": "Webhook aktiv je Repository",
+ "cfg.h.savings.webhook_live_per_repo": "Beurteilt den Webhook Repository für Repository: Ein ruhiges Repository spart sich sein langsames Lesen nur, wenn kürzlich ein eigenes Ereignis ankam. Ein Repository, dessen Webhook nie eingerichtet wurde oder ausfiel, wird wie immer gelesen. Es spart weniger Lesevorgänge. Wirkt zusammen mit Webhook zuerst.",
+ "cfg.t.savings.webhook_live_per_repo": "Sie sehen: Bei eingeschaltetem Webhook zuerst überspringen nur die Repositorys ihr langsames Lesen, die kürzlich ein eigenes Ereignis gesendet haben; das Webhook-Panel zählt sie ebenfalls. Kosten: keine; es werden dadurch weniger Aufrufe gespart.",
  "cfg.f.screens.menu": "Menü Bildschirme in der oberen Leiste",
  "cfg.h.screens.menu": "Standardmäßig an. Zeigt die Schaltfläche Bildschirme in der oberen Leiste: ein Menü, das jede Art von Bildschirm auflistet (die Seite, Kioske, die Wandbildschirme, den Fernseher und die Mehrbildschirm-Sätze), ihre Adressen baut und sie öffnet. Es navigiert nur: Es ändert nichts und liest nichts von GitHub. Aus: Die Schaltfläche verschwindet; die Bildschirme laufen weiter unter ihren eigenen Adressen.",
  "cfg.f.screens.menu_target": "Wo das Menü Bildschirme einen Bildschirm öffnet",
@@ -4522,5 +4528,8 @@
  "cli.screens_action": "screens: list oder urls",
  "cli.screens_head": "{n} Arten von Bildschirmen ({wall})",
  "cli.screens_wall_on": "Wandbildschirme an",
- "cli.screens_wall_off": "Wandbildschirme aus"
+ "cli.screens_wall_off": "Wandbildschirme aus",
+ "cfg.f.startup.resume_max_age_hours": "Letztes Bild nach einem Neustart zeigen (Stunden)",
+ "cfg.h.startup.resume_max_age_hours": "Stunden. Nach einem Neustart zeigt die Seite sofort das letzte Bild des Monitors, mit seinem Alter gekennzeichnet, während der erste Zyklus GitHub liest und es ersetzt. Das Bild wird nach jedem Zyklus in last_picture.json neben dem Monitor aufbewahrt; ein älteres wird nicht gezeigt. 0 = das Bild wird weder aufbewahrt noch gezeigt, und eine alte Datei wird gelöscht.",
+ "ui.resumed": "Daten von vor {mins} Min. ({time}); GitHub wird gelesen…"
 }

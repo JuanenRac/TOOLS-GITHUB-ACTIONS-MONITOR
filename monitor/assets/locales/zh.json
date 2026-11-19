@@ -3443,6 +3443,8 @@
  "ci.lane_branch": "分支 {branch}",
  "cfg.f.sampling.default_branch_probe": "对默认分支再看一次",
  "cfg.h.sampling.default_branch_probe": "当仓库的运行列表已满时,再发出一次请求,获取默认分支的推送(不含拉取请求),使决定 main 是否为红色的运行不会被拉取请求和定时任务挤出。每个已满的仓库每次读取多花一次请求;默认关闭。",
+ "cfg.f.sampling.active_probe": "单独查看仍在运行的运行",
+ "cfg.h.sampling.active_probe": "当某个仓库的运行列表已满时,用两个轻量请求分别获取仍在进行和排队中的运行,避免在列表窗口之前开始的长时间运行被丢失或显示为已结束。每个已满仓库每次读取消耗两个请求;默认关闭。",
  "cfg.f.sampling.min_coverage_minutes": "覆盖不足的界限",
  "cfg.h.sampling.min_coverage_minutes": "已满的运行列表若回溯的时间少于该分钟数,将标记为覆盖不足,而不是看起来完整。0 表示关闭标记。",
  "cfg.f.sampling.api_budget_per_hour": "每小时请求预算",
@@ -3592,6 +3594,7 @@
  "lint.reason.over_limit": "文件数超过 lint.api.max_files_per_repo",
  "lint.help_remote": "从 GitHub 读取仓库的工作流文件(无需克隆);可重复使用。",
  "lint.remote_failed": "{name}:无法读取({reason})。",
+ "lint.path_unread": "{name}:无法检查({reason});不算作干净。",
  "lint.remote_bad_name": "不是仓库名称(请使用 OWNER/REPO): {name}",
  "doctor.t.access": "该登录可以读取账号或组织",
  "doctor.f.access": "对组织出现 403 或 404,通常是以下原因之一:令牌未获其 SAML 单点登录授权(在令牌页面的 Configure SSO 中授权),缺少 repo 或 read:org 权限范围(细粒度令牌则缺少读取权限),或者仓库是私有的而该登录看不到。详情会指出是哪一种。",
@@ -4413,6 +4416,9 @@
  "cfg.f.updates.systemd_helper": "在 systemd 用户服务下通过页面更新",
  "cfg.h.updates.systemd_helper": "当监视器作为 systemd 的用户服务运行时，更新菜单可以应用更新：更新会停止该服务、替换文件，并用 systemctl --user 再次启动它。它从不使用 sudo，也从不触碰系统服务。关闭时：在服务管理器下通过命令行更新。",
  "cfg.t.updates.systemd_helper": "你会看到：当监视器作为 systemd 用户服务运行时，更新菜单会提供“应用”和“回退”。成本：无；更新期间监视器会停止，服务随后自动恢复，如果新版本无法启动，则以之前的版本恢复。",
+ "cfg.f.savings.webhook_live_per_repo": "按仓库判断 Webhook 是否在线",
+ "cfg.h.savings.webhook_live_per_repo": "逐个仓库判断 webhook：安静的仓库只有在最近收到它自己的事件时，才会跳过缓慢读取。webhook 从未配置或已失效的仓库照常读取。节省的读取更少。需与“优先使用 Webhook”一起使用。",
+ "cfg.t.savings.webhook_live_per_repo": "你会看到：开启“优先使用 Webhook”后，只有最近发送过自己事件的仓库才会跳过缓慢读取；Webhook 面板也会统计它们。成本：无；节省的调用会更少。",
  "cfg.f.screens.menu": "顶部栏的屏幕菜单",
  "cfg.h.screens.menu": "默认开启。在顶部栏显示“屏幕”按钮：一个菜单，列出所有类型的屏幕（页面、展台、墙屏、电视和多显示器组合），生成它们的地址并打开。它只做导航：不修改任何内容，也不从 GitHub 读取任何内容。关闭：按钮消失；各屏幕仍可在自己的地址上使用。",
  "cfg.f.screens.menu_target": "屏幕菜单打开屏幕的位置",
@@ -4522,5 +4528,8 @@
  "cli.screens_action": "screens：list 或 urls",
  "cli.screens_head": "{n} 种屏幕（{wall}）",
  "cli.screens_wall_on": "墙屏已开启",
- "cli.screens_wall_off": "墙屏已关闭"
+ "cli.screens_wall_off": "墙屏已关闭",
+ "cfg.f.startup.resume_max_age_hours": "重启后显示最后一幅画面(小时)",
+ "cfg.h.startup.resume_max_age_hours": "小时。重启后,在第一个周期读取 GitHub 并替换之前,页面会立即显示监视器的最后一幅画面并标明其时间。每个周期结束后,画面保存在监视器旁的 last_picture.json 中;比此更旧的不会显示。0 = 不保存也不显示画面,并删除旧文件。",
+ "ui.resumed": "{mins} 分钟前的数据({time});正在读取 GitHub…"
 }

@@ -707,6 +707,9 @@
   "config_check": {
     "strict": false
   },
+  "startup": {
+    "resume_max_age_hours": 12
+  },
   "modes": {
     "start": "normal",
     "default_minutes": 60,
@@ -1089,6 +1092,7 @@
     }
   },
   "sampling": {
+    "active_probe": false,
     "api_budget_per_hour": 0,
     "default_branch_probe": false,
     "min_coverage_minutes": 30
@@ -1100,6 +1104,7 @@
       "method": "atom"
     },
     "webhook_first": false,
+    "webhook_live_per_repo": false,
     "webhook_full_minutes": 360,
     "webhook_window_minutes": 60
   },
