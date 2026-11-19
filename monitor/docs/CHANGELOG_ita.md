@@ -15,6 +15,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Aggiunto
 
+- **Una regola opzionale del linter per un workflow senza blocco `permissions:` in cima al file**: `permissions_top` (spenta finché `lint.rules.permissions_top.enabled` non è attivo, informativa di default, `lint.rules.permissions_top.severity`) indica i file i cui job impostano permessi propri mentre il file non ne imposta, così un job aggiunto dopo riceverebbe il token di default, più ampio. Non dice nulla se il file non ha permessi da nessuna parte (lo fa già la regola `permissions`). Etichetta, aiuto e documentazione esistono in otto lingue.
+
 - **L'aggiornamento della pagina viene testato da un capo all'altro con processi reali**: un test può puntare l'aggiornatore della pagina a uno zip locale (`MONITOR_TEST_HOOKS=1` con `MONITOR_TEST_UPDATE_ZIP`; senza entrambi non cambia nulla, e lo zip passa per gli stessi controlli di contenuto, membri e SHA-256 di qualsiasi altro), e nuovi test lo applicano in un secondo processo, tornano indietro con il ripristino e verificano che versione, file e dati tornino com'erano, che `--start` avvii la nuova versione e ne controlli la salute, e che `--handover` attenda l'arresto del monitor in esecuzione prima di avviare quello nuovo.
 
 - **I blocchi tra processi vengono verificati dentro il container**: i controlli del container ottengono E9, che avvia più processi dell'immagine contro un unico volume condiviso e conta ciò che scrivono sotto il blocco del sistema operativo e sotto il file di blocco, così un aggiornamento perso si vedrebbe nell'evidenza del workflow; il test del file di blocco ora gira anche su Windows.

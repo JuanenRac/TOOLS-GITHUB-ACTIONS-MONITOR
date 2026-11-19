@@ -1523,6 +1523,7 @@
  "lint.rule.no_timeout": "a job without timeout-minutes",
  "lint.rule.own_action_main": "an action of your own follows a branch (@main)",
  "lint.rule.permissions": "no permissions block, or write-all",
+ "lint.rule.permissions_top": "no permissions block at the top, only in the jobs",
  "lint.rule.pr_target": "pull_request_target checks out the code of the PR",
  "lint.rule.secrets_in_clear": "looks like a secret written in the file",
  "lint.rule.secrets_inherit": "secrets: inherit passes every secret on",
