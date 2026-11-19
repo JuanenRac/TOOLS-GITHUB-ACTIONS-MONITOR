@@ -15,6 +15,7 @@ import time
 import audit_lib as lib
 
 SUBNET = "172.29.77.0/24"
+PROXY_IP = "172.29.77.250"      # the fixed address the Compose file gives Caddy (MONITOR_PROXY_IP): the only one whose X-Forwarded-For the monitor believes
 CLIENT_A, CLIENT_B, CLIENT_C, CLIENT_D = "172.29.77.50", "172.29.77.51", "172.29.77.52", "172.29.77.53"
 SITE = "audit.test"
 
@@ -69,7 +70,7 @@ class Stack:
             path.chmod(0o644)
             names.append(name)
         self.env = {"MONITOR_GITHUB_OWNER": "audit-owner", "MONITOR_IMAGE": self.image, "MONITOR_SITE": SITE, "MONITOR_PUBLIC_HOST": SITE, "MONITOR_SECURE_COOKIE": "1",
-                    "MONITOR_TRUSTED_PROXY": "1" if trusted is True else ("0" if trusted == "off" else ""), "MONITOR_TRUSTED_PROXIES": SUBNET if trusted is True else "", "MONITOR_SUBNET": SUBNET, "MONITOR_PORT": "8765",
+                    "MONITOR_TRUSTED_PROXY": "1" if trusted is True else ("0" if trusted == "off" else ""), "MONITOR_TRUSTED_PROXIES": PROXY_IP if trusted is True else "", "MONITOR_SUBNET": SUBNET, "MONITOR_PROXY_IP": PROXY_IP, "MONITOR_PORT": "8765",
                     "AUDIT_CADDY_IMAGE": lib.CADDY_IMAGE}
         (self.deploy / ".env").write_text("".join("%s=%s\n" % kv for kv in self.env.items()), encoding="utf-8", newline="\n")
         env_lines = ["      FAKE_GH_GOOD: /fake/good"] + ["      %s: %s" % (k, json.dumps(v)) for k, v in (extra_env or {}).items()]
