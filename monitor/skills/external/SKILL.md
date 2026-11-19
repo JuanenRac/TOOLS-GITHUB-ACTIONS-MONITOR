@@ -51,5 +51,6 @@ Read `GET /api/ai/lessons?fmt=brief&repo=NAME` (or `lessons brief --repo NAME`):
 - `references/protocol.md`: the link between a monitor and your session (arm the stream, relay the brief, act without waiting).
 - `references/learning-cycle.md`: record, classify, repetition, guard, close of a round.
 - `references/scenarios.md`: step by step for a real red, a transient red, low quota, a degraded monitor, a repeated failure, a new lesson, no network, several screens.
+- `references/cards-and-trend.md`: the cards of each sentinel panel by alert code and the series of the daily trend, and how to read them (brief, API, command line).
 - `references/security.md`: prompt injection, secrets, minimum permissions, audit of what you write.
 - `references/api.md`, `references/cli.md`, `references/settings.md`, `references/files.md`, `references/roles.md`, `references/tabs.md`, `references/signals.md` (every signal id and every panel of the Sentinel): generated from the code.
