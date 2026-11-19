@@ -33,6 +33,17 @@ What a script, a wall screen or a mobile client can rely on. From 2.0.0 the read
 - `python tools/api_contract_suite.py` is the contract suite for outside clients (only the standard library, only reads): give it the address of a server (`--url`) and a token of read (`--token-file`) and it takes the document the server serves as the description of what to check: the shape of every route that needs no parameter, the header `X-API-Version`, the error envelope and its stable codes, the pages and their cursors, `fields` and `profile=compact`, gzip and that nothing can be written under the prefix. It prints one line per check and `API_CONTRACT=PASS` or `API_CONTRACT=FAIL` (`--json` for a document); the exit code is 0, 1 or 2 (nothing answers). `python bin/monitor_cli.py api contract-check` runs it against the monitor of the command line.
 - The two own routes answer an error as `{"error": "bad_request", "code": "api.bad_cursor", "message": "..."}`: `error` and `code` are stable, `message` follows the language of `?lang=`. Codes: api.bad_cursor, api.bad_limit, api.unknown_field, api.bad_profile, api.server_error. Everything is read only: there is no write under `/api/v1/`. The shape is frozen in the section `v1_endpoints` of the contract and is checked with `python tools/check_api_contract.py --v1` against a monitor that has `api.v1_enabled` on.
 
+### Examples with curl
+
+The token is the access token of the network mode (or use a session of the team mode); without a network mode no token is needed from the same computer. A client follows `next_cursor` until it is `null`, and reads `/api/v1/me` first to know the version of the contract and what the session may do.
+
+```
+curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/me
+curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?state=bad&limit=20&profile=compact"
+curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/openapi.json -o openapi.json
+curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?limit=50&cursor=THE_NEXT_CURSOR"
+```
+
 ## Streams
 
 - `GET /api/ai/stream` (the alerts) and `GET /api/live-events/stream` (the events of the webhook, `live.sse.enabled`) are server-sent events, read only and off by default; see [AI_ALERTS.md](AI_ALERTS.md) and [WEBHOOK.md](WEBHOOK.md).

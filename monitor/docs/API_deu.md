@@ -33,6 +33,17 @@ Worauf sich ein Skript, ein Wandbildschirm oder ein mobiler Client verlassen kan
 - `python tools/api_contract_suite.py` ist die Vertragssuite für externe Clients (nur die Standardbibliothek, nur lesend): Gib ihr die Adresse eines Servers (`--url`) und ein Lese-Token (`--token-file`); sie nimmt das vom Server gelieferte Dokument als Beschreibung dessen, was zu prüfen ist: die Form jeder Route ohne Parameter, den Header `X-API-Version`, den Fehlerumschlag und seine stabilen Codes, die Seiten und ihre Cursor, `fields` und `profile=compact`, gzip und dass sich unter dem Präfix nichts schreiben lässt. Sie gibt eine Zeile je Prüfung und `API_CONTRACT=PASS` oder `API_CONTRACT=FAIL` aus (`--json` für ein Dokument); der Exit-Code ist 0, 1 oder 2 (nichts antwortet). `python bin/monitor_cli.py api contract-check` startet sie gegen den Monitor der Befehlszeile.
 - Die beiden eigenen Routen antworten einen Fehler als `{"error": "bad_request", "code": "api.bad_cursor", "message": "..."}`: `error` und `code` sind stabil, `message` folgt der Sprache von `?lang=`. Codes: api.bad_cursor, api.bad_limit, api.unknown_field, api.bad_profile, api.server_error. Alles ist nur lesend: unter `/api/v1/` gibt es kein Schreiben. Die Form ist im Abschnitt `v1_endpoints` des Vertrags eingefroren und wird mit `python tools/check_api_contract.py --v1` gegen einen Monitor mit eingeschaltetem `api.v1_enabled` geprüft.
 
+### Beispiele mit curl
+
+Das Token ist das Zugriffstoken des Netzwerkmodus (oder nutze eine Sitzung des Teammodus); ohne Netzwerkmodus braucht man vom selben Rechner kein Token. Ein Client folgt `next_cursor`, bis es `null` ist, und liest zuerst `/api/v1/me`, um die Version des Vertrags und die Rechte der Sitzung zu kennen.
+
+```
+curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/me
+curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?state=bad&limit=20&profile=compact"
+curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/openapi.json -o openapi.json
+curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?limit=50&cursor=THE_NEXT_CURSOR"
+```
+
 ## Streams
 
 - `GET /api/ai/stream` (die Meldungen) und `GET /api/live-events/stream` (die Ereignisse des Webhooks, `live.sse.enabled`) sind Server-Sent Events, nur lesend und standardmäßig aus; siehe [AI_ALERTS_deu.md](AI_ALERTS_deu.md) und [WEBHOOK_deu.md](WEBHOOK_deu.md).

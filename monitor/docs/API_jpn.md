@@ -33,6 +33,17 @@
 - `python tools/api_contract_suite.py` は外部クライアント向けの契約スイートです(標準ライブラリのみ、読み取りのみ)。サーバーのアドレス(`--url`)と読み取り用トークン(`--token-file`)を渡すと、サーバーが提供する文書を検査内容の記述として使い、パラメーター不要の各ルートの形、ヘッダー `X-API-Version`、エラーの封筒と安定したコード、ページとカーソル、`fields` と `profile=compact`、gzip、プレフィックス配下に何も書き込めないことを確認します。検査ごとに1行と `API_CONTRACT=PASS` または `API_CONTRACT=FAIL` を出力し(`--json` で1つの文書)、終了コードは 0、1、2(応答なし)です。`python bin/monitor_cli.py api contract-check` はコマンドラインのモニターに対して実行します。
 - 2つの独自ルートは、エラーを `{"error": "bad_request", "code": "api.bad_cursor", "message": "..."}` の形で返します。`error` と `code` は安定しており、`message` は `?lang=` の言語に従います。コードは api.bad_cursor、api.bad_limit、api.unknown_field、api.bad_profile, api.server_error。すべて読み取り専用で、`/api/v1/` の下に書き込みはありません。形は契約の `v1_endpoints` セクションで固定されており、`api.v1_enabled` をオンにしたモニターに対して `python tools/check_api_contract.py --v1` で確認できます。
 
+### curl の例
+
+トークンはネットワークモードのアクセストークンです(またはチームモードのセッションを使います)。ネットワークモードでなければ、同じコンピューターからはトークンは不要です。クライアントは `next_cursor` が `null` になるまでたどり、最初に `/api/v1/me` を読んで契約のバージョンとセッションができることを確認します。
+
+```
+curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/me
+curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?state=bad&limit=20&profile=compact"
+curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/openapi.json -o openapi.json
+curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?limit=50&cursor=THE_NEXT_CURSOR"
+```
+
 ## ストリーム
 
 - `GET /api/ai/stream`（アラート）と `GET /api/live-events/stream`（Webhook のイベント、`live.sse.enabled`）はサーバー送信イベントで、読み取り専用、初期状態は無効です。[AI_ALERTS_jpn.md](AI_ALERTS_jpn.md) と [WEBHOOK_jpn.md](WEBHOOK_jpn.md) を参照してください。

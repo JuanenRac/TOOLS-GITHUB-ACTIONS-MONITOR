@@ -33,6 +33,17 @@ Ce sur quoi un script, un écran mural ou un client mobile peut compter. Depuis 
 - `python tools/api_contract_suite.py` est la suite de contrat pour les clients externes (seulement la bibliothèque standard, seulement en lecture) : donnez-lui l'adresse d'un serveur (`--url`) et un jeton de lecture (`--token-file`) ; elle prend le document que sert le serveur comme description de ce qu'il faut vérifier : la forme de chaque route sans paramètre, l'en-tête `X-API-Version`, l'enveloppe d'erreur et ses codes stables, les pages et leurs curseurs, `fields` et `profile=compact`, gzip et que rien ne peut être écrit sous le préfixe. Elle affiche une ligne par vérification et `API_CONTRACT=PASS` ou `API_CONTRACT=FAIL` (`--json` pour un document) ; le code de sortie est 0, 1 ou 2 (rien ne répond). `python bin/monitor_cli.py api contract-check` la lance contre le moniteur de la ligne de commande.
 - Les deux routes propres répondent une erreur sous la forme `{"error": "bad_request", "code": "api.bad_cursor", "message": "..."}` : `error` et `code` sont stables, `message` suit la langue de `?lang=`. Codes : api.bad_cursor, api.bad_limit, api.unknown_field, api.bad_profile, api.server_error. Tout est en lecture seule : il n'y a aucune écriture sous `/api/v1/`. La forme est figée dans la section `v1_endpoints` du contrat et se vérifie avec `python tools/check_api_contract.py --v1` sur un moniteur dont `api.v1_enabled` est activé.
 
+### Exemples avec curl
+
+Le jeton est le jeton d'accès du mode réseau (ou utilisez une session du mode équipe) ; sans mode réseau, aucun jeton n'est nécessaire depuis le même ordinateur. Un client suit `next_cursor` jusqu'à ce qu'il vaille `null` et lit d'abord `/api/v1/me` pour connaître la version du contrat et ce que la session peut faire.
+
+```
+curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/me
+curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?state=bad&limit=20&profile=compact"
+curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/openapi.json -o openapi.json
+curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?limit=50&cursor=THE_NEXT_CURSOR"
+```
+
 ## Flux
 
 - `GET /api/ai/stream` (les alertes) et `GET /api/live-events/stream` (les événements du webhook, `live.sse.enabled`) sont des événements envoyés par le serveur, en lecture seule et éteints par défaut ; voir [AI_ALERTS_fra.md](AI_ALERTS_fra.md) et [WEBHOOK_fra.md](WEBHOOK_fra.md).
