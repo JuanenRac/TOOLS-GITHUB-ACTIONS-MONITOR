@@ -346,6 +346,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/HEALTH.md`](monitor/docs/HEALTH.md): The health of a repository and of the team: what it is made of, the Team tab, the deep links and the API
 - [`monitor/docs/REPORT_SCHEDULE.md`](monitor/docs/REPORT_SCHEDULE.md): Scheduled reports: the score, what changed, the repositories that need a person and the open alerts as HTML and Markdown, the schedule and the files
 - [`monitor/docs/CLI.md`](monitor/docs/CLI.md): the command line as a client of the monitor
+- [`monitor/docs/CLI_OPERATOR.md`](monitor/docs/CLI_OPERATOR.md): the command line for the operator: formats, watch, completions and exit codes
+- [`monitor/docs/KIOSK.md`](monitor/docs/KIOSK.md): the monitor on a TV or a wall
 - [`monitor/docs/ACCOUNTS.md`](monitor/docs/ACCOUNTS.md): several accounts, one process each
 - [`monitor/docs/QUOTAS.md`](monitor/docs/QUOTAS.md): quotas and plans of GitHub
 - [`monitor/docs/MODES.md`](monitor/docs/MODES.md): working modes: normal, fast and turbo

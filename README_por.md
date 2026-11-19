@@ -342,6 +342,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/HEALTH_por.md`](monitor/docs/HEALTH_por.md): A saúde de um repositório e da equipa: de que é feita, o separador Equipa, as ligações diretas e a API
 - [`monitor/docs/REPORT_SCHEDULE_por.md`](monitor/docs/REPORT_SCHEDULE_por.md): Relatórios agendados: a pontuação, o que mudou, os repositórios que precisam de uma pessoa e os alertas abertos em HTML e Markdown, o horário e os ficheiros
 - [`monitor/docs/CLI_por.md`](monitor/docs/CLI_por.md): a linha de comandos como cliente do monitor
+- [`monitor/docs/CLI_OPERATOR_por.md`](monitor/docs/CLI_OPERATOR_por.md): a linha de comandos para o operador: formatos, watch, completions e códigos de saída
+- [`monitor/docs/KIOSK_por.md`](monitor/docs/KIOSK_por.md): o monitor numa TV ou numa parede
 - [`monitor/docs/ACCOUNTS_por.md`](monitor/docs/ACCOUNTS_por.md): várias contas, um processo cada
 - [`monitor/docs/QUOTAS_por.md`](monitor/docs/QUOTAS_por.md): quotas e planos do GitHub
 - [`monitor/docs/MODES_por.md`](monitor/docs/MODES_por.md): modos de trabalho: normal, rápido e turbo
