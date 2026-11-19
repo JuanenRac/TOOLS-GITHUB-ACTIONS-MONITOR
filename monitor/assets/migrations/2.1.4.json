@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "7a4df0c9bbbd0fe8c4c0c7ef5a39dab80c189115411eb8bc77cedea06a1a7cf7",
+ "digest": "0868630eea488db79dd77c1b5b456e40a5af657d5a9d8d2e886c056260532899",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -222,6 +222,14 @@
     "bounds": [
      1,
      100
+    ]
+   },
+   {
+    "key": "sentinels.collab.deadline_s",
+    "kind": "int",
+    "bounds": [
+     0,
+     600
     ]
    },
    {

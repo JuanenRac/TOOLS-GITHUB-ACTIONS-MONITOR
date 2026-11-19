@@ -36,7 +36,7 @@ Bots werden ausgelassen. Die Standardwerte sind absichtlich langsam: Ein Entwurf
 
 ## Was es kostet
 
-Eine Runde liest höchstens `max_repos_per_tick` Repositories, je zwei bedingte Anfragen (ein unverändertes Repository kostet kein Kontingent) und bis zu sechs Pull-Request-Details pro Runde. Sie pausiert, solange das Kontingent unter `min_rate_remaining` liegt. Der Zustand liegt in `collab_state.json` (im Ordner des Kontos, wenn es mehrere gibt); ein Neustart meldet also nichts doppelt.
+Eine Runde liest höchstens `max_repos_per_tick` Repositories, je zwei bedingte Anfragen (ein unverändertes Repository kostet kein Kontingent) und bis zu sechs Pull-Request-Details pro Runde. Sie pausiert, solange das Kontingent unter `min_rate_remaining` liegt. Der Zustand liegt in `collab_state.json` (im Ordner des Kontos, wenn es mehrere gibt); ein Neustart meldet also nichts doppelt. Eine Runde beginnt außerdem nach `sentinels.collab.deadline_s` Sekunden keine neuen Repositorys mehr (Standard 30; 0 = kein Limit): Die nicht erreichten warten auf die nächste Runde, und der Status führt sie namentlich als `unchecked` (mit `round_cut`) auf, statt sie als null Alarme zu zählen.
 
 ## Weniger Lärm: ignorieren und stummschalten
 

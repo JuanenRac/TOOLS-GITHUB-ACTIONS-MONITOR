@@ -36,7 +36,7 @@ Los bots se dejan fuera. Los valores por defecto son lentos a propósito: un bor
 
 ## Lo que cuesta
 
-Una ronda lee como mucho `max_repos_per_tick` repositorios, con dos peticiones condicionales cada uno (un repositorio que no cambió no gasta cuota) y hasta seis detalles de pull request por ronda. Se detiene mientras la cuota esté por debajo de `min_rate_remaining`. El estado se guarda en `collab_state.json` (dentro de la carpeta de la cuenta si hay varias), así que un reinicio no anuncia nada dos veces.
+Una ronda lee como mucho `max_repos_per_tick` repositorios, con dos peticiones condicionales cada uno (un repositorio que no cambió no gasta cuota) y hasta seis detalles de pull request por ronda. Se detiene mientras la cuota esté por debajo de `min_rate_remaining`. El estado se guarda en `collab_state.json` (dentro de la carpeta de la cuenta si hay varias), así que un reinicio no anuncia nada dos veces. Una ronda también deja de empezar repositorios nuevos pasados `sentinels.collab.deadline_s` segundos (30 por defecto; 0 = sin tope): los que no se alcanzan esperan a la ronda siguiente y el estado los lista por nombre como `unchecked` (con `round_cut`) en lugar de contarlos como cero alertas.
 
 ## Menos ruido: ignorar y silenciar
 
