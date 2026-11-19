@@ -309,6 +309,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COMPLETE_SERVICE_zho.md`](monitor/docs/COMPLETE_SERVICE_zho.md): 作为服务运行的完整版
 - [`monitor/docs/COMPLETE_TEAM_zho.md`](monitor/docs/COMPLETE_TEAM_zho.md): 面向团队的完整版
 - [`monitor/docs/API_zho.md`](monitor/docs/API_zho.md): 面向客户端的 API
+- [`monitor/docs/API_V1_zho.md`](monitor/docs/API_V1_zho.md): 只读 API v1 分步指南
 - [`monitor/docs/NOTIFICATIONS_zho.md`](monitor/docs/NOTIFICATIONS_zho.md): 通知与适配器约定
 - [`monitor/docs/AI_zho.md`](monitor/docs/AI_zho.md): AI 助手:提供方、安全与操作
 - [`monitor/docs/ANALYTICS_zho.md`](monitor/docs/ANALYTICS_zho.md): 分析、条件读取与连接丢失

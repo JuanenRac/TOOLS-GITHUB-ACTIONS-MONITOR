@@ -309,6 +309,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COMPLETE_SERVICE_spa.md`](monitor/docs/COMPLETE_SERVICE_spa.md): Edición completa como servicio
 - [`monitor/docs/COMPLETE_TEAM_spa.md`](monitor/docs/COMPLETE_TEAM_spa.md): Edición completa para un equipo
 - [`monitor/docs/API_spa.md`](monitor/docs/API_spa.md): La API para clientes
+- [`monitor/docs/API_V1_spa.md`](monitor/docs/API_V1_spa.md): La API de lectura v1, paso a paso
 - [`monitor/docs/NOTIFICATIONS_spa.md`](monitor/docs/NOTIFICATIONS_spa.md): notificaciones y el contrato de los adaptadores
 - [`monitor/docs/AI_spa.md`](monitor/docs/AI_spa.md): el asistente de IA: proveedores, seguridad y acciones
 - [`monitor/docs/ANALYTICS_spa.md`](monitor/docs/ANALYTICS_spa.md): analítica, lecturas condicionales y conexión perdida

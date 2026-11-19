@@ -309,6 +309,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COMPLETE_SERVICE_jpn.md`](monitor/docs/COMPLETE_SERVICE_jpn.md): サービスとしての完全版
 - [`monitor/docs/COMPLETE_TEAM_jpn.md`](monitor/docs/COMPLETE_TEAM_jpn.md): チームで使う完全版
 - [`monitor/docs/API_jpn.md`](monitor/docs/API_jpn.md): クライアント向け API
+- [`monitor/docs/API_V1_jpn.md`](monitor/docs/API_V1_jpn.md): 読み取り API v1 をステップごとに
 - [`monitor/docs/NOTIFICATIONS_jpn.md`](monitor/docs/NOTIFICATIONS_jpn.md): 通知とアダプターの取り決め
 - [`monitor/docs/AI_jpn.md`](monitor/docs/AI_jpn.md): AI アシスタント:プロバイダー、安全性、アクション
 - [`monitor/docs/ANALYTICS_jpn.md`](monitor/docs/ANALYTICS_jpn.md): 分析、条件付き読み取り、接続の喪失

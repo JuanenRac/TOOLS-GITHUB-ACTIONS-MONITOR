@@ -309,6 +309,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COMPLETE_SERVICE_ita.md`](monitor/docs/COMPLETE_SERVICE_ita.md): Edizione completa come servizio
 - [`monitor/docs/COMPLETE_TEAM_ita.md`](monitor/docs/COMPLETE_TEAM_ita.md): Edizione completa per una squadra
 - [`monitor/docs/API_ita.md`](monitor/docs/API_ita.md): L'API per i client
+- [`monitor/docs/API_V1_ita.md`](monitor/docs/API_V1_ita.md): L'API di lettura v1, passo dopo passo
 - [`monitor/docs/NOTIFICATIONS_ita.md`](monitor/docs/NOTIFICATIONS_ita.md): notifiche e contratto degli adattatori
 - [`monitor/docs/AI_ita.md`](monitor/docs/AI_ita.md): l'assistente IA: provider, sicurezza e azioni
 - [`monitor/docs/ANALYTICS_ita.md`](monitor/docs/ANALYTICS_ita.md): analisi, letture condizionali e connessione persa
