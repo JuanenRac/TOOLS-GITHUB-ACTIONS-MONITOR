@@ -3721,7 +3721,7 @@
  "ui.tab_rep": "Informes",
  "ui.scr_open": "Abrir la pantalla de pared: {name}",
  "cfg.f.api.v1_enabled": "API de lectura en /api/v1/",
- "cfg.h.api.v1_enabled": "Desactivado por defecto. Activado: cada ruta de lectura se sirve también bajo /api/v1/ (la misma respuesta, los mismos roles y además la cabecera X-API-Version) y se añaden tres rutas: /api/v1/me (quién pregunta, con el rol y las cuentas de la sesión), /api/v1/repos (los repositorios en páginas) y /api/v1/openapi.json. Solo lectura: por ahí no se puede cambiar nada. Desactivado: todo el prefijo responde 404.",
+ "cfg.h.api.v1_enabled": "auto (por defecto): la API de lectura está activa cuando el monitor corre como servicio (una cuenta del modo equipo, la imagen de Docker, la unidad de systemd) y apagada para una persona en un solo equipo. on: siempre. off: nunca (todo el prefijo responde 404). Activa, cada ruta de lectura se sirve también bajo /api/v1/ (la misma respuesta, los mismos roles y además la cabecera X-API-Version) y se añaden tres rutas: /api/v1/me (quién pregunta, con el rol, las cuentas y lo que puede hacer la sesión), /api/v1/repos (los repositorios en páginas) y /api/v1/openapi.json. Solo lectura: por ahí no se puede cambiar nada.",
  "cfg.f.api.default_limit": "Elementos por página",
  "cfg.h.api.default_limit": "Por defecto 50. Cuántos elementos devuelve una lista de la API cuando el cliente no pide un número con limit=. No puede superar el máximo de abajo.",
  "cfg.f.api.max_limit": "Máximo de elementos por página",

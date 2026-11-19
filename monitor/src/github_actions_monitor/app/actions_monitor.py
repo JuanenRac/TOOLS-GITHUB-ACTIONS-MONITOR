@@ -140,7 +140,7 @@ DEFAULTS = {
                           "large_labels": [], "self_labels": [], "queue_warn_minutes": 20, "runaway_runs_per_hour": 20, "runaway_ignore_events": ["pull_request", "pull_request_target"],
                           "thirdparty_usd_per_minute": 0.0, "alerts": True, "alert_level": "warning"}},      # OFF: kinds of runner, queue and cost by kind, runaway workflows, self-hosted queues (runner_model.py)
     "upstream": {"enabled": False, "refresh_hours": 12, "requests_per_hour": 6, "forks_per_request": 8, "news_days": 7, "notify": False, "repos": []},      # OFF: follow the original repository of each fork, its CI and its latest release (data_pipeline/upstream.py)
-    "api": {"v1_enabled": False, "default_limit": 50, "max_limit": 200, "cursor_ttl_seconds": 900, "gzip_min_bytes": 1024},      # OFF: the read API under /api/v1/ (app/api_v1.py)
+    "api": {"v1_enabled": "auto", "default_limit": 50, "max_limit": 200, "cursor_ttl_seconds": 900, "gzip_min_bytes": 1024},      # auto = on in the service mode, off for one person at one computer: the read API under /api/v1/ (app/api_v1.py)
     "compare": {"enabled": False, "default_window_days": 7, "default_days_filter": "all", "workdays": ["1", "2", "3", "4", "5"], "min_runs_per_window": 20, "min_days_of_history": 14, "min_resolved": 3, "min_snapshots": 12, "min_repo_runs": 3, "top_changes": 10, "include_in_report": False, "cache_seconds": 60},      # OFF: this period against the one before (compare/): read only, from the ledger and the snapshots of the score
     "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
     "organizations": {"discover": False},                                    # OFF: list the organisations of the login (orgs.py)
@@ -3000,13 +3000,13 @@ class Handler(BaseHTTPRequestHandler):
                 self.handle_get()
 
     def v1_enter(self):
-        """The prefix `/api/v1/` (app/api_v1.py): 404 while `api.v1_enabled` is off, in the lite edition and for any other version. A route that already exists is served under its old path (so the
+        """The prefix `/api/v1/` (app/api_v1.py): 404 while `api.v1_enabled` is off (or "auto" outside the service mode), in the lite edition and for any other version. A route that already exists is served under its old path (so the
         same roles and the same gate apply to it); the three own routes (me, repos, openapi.json) keep theirs and are answered by `handle_v1`."""
         path = self.path.split("?")[0]
         version, rest = api_v1.route_of(path)
         if version is None:
             return True
-        if LITE["on"] or version != api_v1.API_VERSION or not api_v1.settings(toolconfig.raw_config())["v1_enabled"]:
+        if LITE["on"] or version != api_v1.API_VERSION or not api_v1.enabled(api_v1.settings(toolconfig.raw_config()), service_mode()):
             self.send_response(404)
             self.end_headers()
             return False

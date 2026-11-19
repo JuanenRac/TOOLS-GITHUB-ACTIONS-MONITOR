@@ -128,7 +128,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `api.default_limit` | `50` | advanced | Items per page |
 | `api.gzip_min_bytes` | `1024` | advanced | Smallest answer to compress (bytes) |
 | `api.max_limit` | `200` | advanced | Most items per page |
-| `api.v1_enabled` | `false` | advanced | Read API under /api/v1/ |
+| `api.v1_enabled` | `"auto"` | advanced | Read API under /api/v1/ |
 | `audit_dir` | `-` | paths | Folder of audit files |
 | `audit_log.enabled` (secure) | `-` | sentinel | Log of actions on |
 | `audit_log.keep_generations` (secure) | `-` | sentinel | Rotated files kept |

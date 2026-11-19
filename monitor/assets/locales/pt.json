@@ -3721,7 +3721,7 @@
  "ui.tab_rep": "Relatórios",
  "ui.scr_open": "Abrir o ecrã de parede: {name}",
  "cfg.f.api.v1_enabled": "API de leitura em /api/v1/",
- "cfg.h.api.v1_enabled": "Desativado por predefinição. Ativado: cada rota de leitura é servida também em /api/v1/ (a mesma resposta, os mesmos papéis e ainda o cabeçalho X-API-Version) e acrescentam-se três rotas: /api/v1/me (quem pergunta, com o papel e as contas da sessão), /api/v1/repos (os repositórios em páginas) e /api/v1/openapi.json. Só leitura: por aí não se pode alterar nada. Desativado: todo o prefixo responde 404.",
+ "cfg.h.api.v1_enabled": "auto (predefinição): a API de leitura está ativa quando o monitor corre como serviço (uma conta do modo equipa, a imagem Docker, a unidade systemd) e desativada para uma pessoa num só computador. on: sempre. off: nunca (todo o prefixo responde 404). Ativa, cada rota de leitura é servida também em /api/v1/ (a mesma resposta, os mesmos papéis e ainda o cabeçalho X-API-Version) e juntam-se três rotas: /api/v1/me (quem pergunta, com o papel, as contas e o que a sessão pode fazer), /api/v1/repos (os repositórios em páginas) e /api/v1/openapi.json. Só de leitura: por aí não se pode alterar nada.",
  "cfg.f.api.default_limit": "Itens por página",
  "cfg.h.api.default_limit": "Predefinição 50. Quantos itens devolve uma lista da API quando o cliente não pede um número com limit=. Não pode ultrapassar o máximo abaixo.",
  "cfg.f.api.max_limit": "Máximo de itens por página",

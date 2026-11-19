@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "eb83ae7a3006460c5ced1000d7671b9d8396792041450ad9a3380aa95da10f60",
+ "digest": "da1846398aa3645fa938610af13747fa36bf6a01b601dc06bd379c3d74f01eee",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -47,7 +47,24 @@
    }
   ],
   "removed": [],
-  "changed": []
+  "changed": [
+   {
+    "key": "api.v1_enabled",
+    "old": {
+     "kind": "bool",
+     "default": false
+    },
+    "new": {
+     "kind": "enum",
+     "bounds": [
+      "auto",
+      "on",
+      "off"
+     ],
+     "default": "auto"
+    }
+   }
+  ]
  },
  "manual": {}
 }
