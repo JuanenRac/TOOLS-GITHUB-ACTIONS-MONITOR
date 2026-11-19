@@ -484,14 +484,10 @@ def cmd_briefs(ctx):
 
 def _contract_check(ctx):
     """api contract-check: the contract suite for clients (tools/api_contract_suite.py, only reads) against the monitor of this command line. Exit 0 when every check passes, 4 when one fails."""
-    import importlib.util
-    from github_actions_monitor.util.paths import ROOT
-    path = ROOT / "tools" / "api_contract_suite.py"
-    if not path.is_file():
+    from github_actions_monitor.app import api_spec
+    module = api_spec.contract_suite()
+    if module is None:
         raise CliError(EXIT_USAGE, i18n.t("cli.api_no_suite"))
-    spec = importlib.util.spec_from_file_location("api_contract_suite", path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
     try:
         report = module.run(module.Client(ctx["base"], ctx["token"], ctx["timeout"]))
     except OSError:
@@ -499,7 +495,7 @@ def _contract_check(ctx):
     failed = report.failed
     lines = [("PASS " if row["ok"] else "FAIL ") + row["check"] + ("" if row["ok"] else ": " + row["detail"]) for row in report.rows]
     lines.append(i18n.t("cli.api_suite_total", ok=len(report.rows) - len(failed), n=len(report.rows)))
-    return {"ok": not failed, "checks": len(report.rows), "failed": len(failed), "rows": report.rows}, lines, EXIT_DEGRADED if failed else EXIT_OK
+    return api_spec.suite_summary(report), lines, EXIT_DEGRADED if failed else EXIT_OK
 
 
 def cmd_api(ctx):
