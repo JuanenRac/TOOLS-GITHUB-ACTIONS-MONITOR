@@ -17,6 +17,11 @@
 
 - **按仓库判断 webhook 的可选开关**：开启 `savings.webhook_live_per_repo`（默认关闭，需与 `savings.webhook_first` 一起使用）后，安静的仓库只有在最近 `savings.webhook_window_minutes` 分钟内收到过它自己的事件时，才会跳过缓慢读取。webhook 从未配置或已失效的仓库照常读取，其他仓库则被节省；节省的读取更少。Webhook 面板会统计自身在线的仓库（`live_repos`）。标签、帮助、提示和指南均提供八种语言。
 
+- 顶部栏新增“屏幕”菜单,列出监视器拥有的每一种屏幕(页面、展台、标签页屏幕、三个墙屏、轮播墙屏、电视预设以及多显示器组合),并给出说明、每个地址接受的参数(主题、密度、刷新、缩放、语言、轮播、仓库筛选)、完整地址的复制,以及在新窗口或同一标签页中打开的选择;对多显示器,它按所选布局为每台显示器打开一个窗口,浏览器具备 Window Management API 时把每个窗口放到各自的显示器上,否则列出展台命令
+
+- “屏幕”菜单的目录也可由工具读取:`GET /api/screens/menu`、命令行的新命令 `screens`(`screens list`、`screens urls`)以及 MCP 工具 `screens_menu`;三者都只读
+
+- 新增五项“屏幕”菜单设置:`screens.menu`(默认开启,只做导航)、`screens.menu_target`(新窗口或同一标签页)、`screens.menu_max_windows`、`screens.menu_rotate_seconds` 和 `screens.menu_tv_scale`,每项在设置中都有帮助说明
 - **针对文件顶层没有 `permissions:` 块的工作流的可选 lint 规则**：`permissions_top`（在 `lint.rules.permissions_top.enabled` 开启前关闭，默认级别为信息，可用 `lint.rules.permissions_top.severity` 调整）会指出这样的文件：作业设置了自己的权限，而文件本身没有设置，之后新增的作业就会得到范围更宽的默认令牌。若文件任何地方都没有权限，它不作提示（较早的 `permissions` 规则已处理）。标签、帮助和文档均提供八种语言。
 
 - **用真实进程对页面的更新做端到端测试**：测试可以让页面的更新器指向本地 zip（`MONITOR_TEST_HOOKS=1` 加 `MONITOR_TEST_UPDATE_ZIP`；缺少任何一个都不会有变化，并且该 zip 与其他 zip 一样要通过内容、成员和 SHA-256 的检查），新的测试在第二个进程中应用它，用回滚退回，并检查版本、文件和数据恢复如初，`--start` 会启动新版本并检查其健康状态，`--handover` 会等待正在运行的监视器停止后再启动新的。

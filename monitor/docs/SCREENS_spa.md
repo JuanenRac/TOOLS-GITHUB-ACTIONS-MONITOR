@@ -111,6 +111,11 @@ El idioma de una pantalla se decide en este orden: `?lang=xx` en la dirección; 
 | `screens.logo_corner` | top-right (por defecto), top-left, bottom-right o bottom-left. |
 | `screens.logo_max_width`, `screens.logo_max_height` | Tamaño máximo del logo en píxeles a 1920 x 1080 (160 x 64 por defecto; crece con la pantalla). |
 | `screens.group_map` | Activado por defecto. Muestra el mapa de la flota por grupos en la pantalla general (la agrupación de la vista de flota). Desactivado: solo las cuatro casillas. |
+| `screens.menu` | Activado por defecto. El botón Pantallas de la barra superior. Desactivado: el botón desaparece; las pantallas siguen funcionando en sus propias direcciones. |
+| `screens.menu_target` | new (por defecto): una pantalla se abre en una ventana o pestaña nueva; same: en la pestaña en la que estás. |
+| `screens.menu_max_windows` | Máximo de ventanas que un conjunto multipantalla abre de una vez (4 por defecto; de 1 a 9). |
+| `screens.menu_rotate_seconds` | Segundos por pantalla en los preajustes que rotan del menú (20 por defecto; de 5 a 300). |
+| `screens.menu_tv_scale` | El `?scale=` del preajuste de TV (1,5 por defecto; de 0,5 a 3). |
 
 ### Tema de las pantallas
 
@@ -145,6 +150,29 @@ Los datos salen de `/api/screens/data?screen=overview` (o `now`, `sentinels`): u
 1. Elige una dirección para cada monitor, por ejemplo `/screen/overview?monitor=1`, `/screen/now?monitor=2` y `/screen/sentinels?monitor=3`; o abre una sola ventana con `?rotate=20`.
 2. Abre cada una en Chrome o Edge en modo quiosco: `msedge --kiosk "http://este-equipo:8765/screen/now?monitor=2" --edge-kiosk-type=fullscreen` o `chrome --kiosk "http://este-equipo:8765/screen/now?monitor=2"`; con `--app=DIRECCIÓN` en lugar de `--kiosk` la ventana no tiene barras. Sin modo quiosco, el botón discreto del pie de la página pide la pantalla completa.
 3. Desde otro equipo usa el modo red: basta el token de acceso de un visor, porque estas páginas nunca escriben.
+
+## Menú Pantallas
+
+El botón **Pantallas** de la barra superior (el icono de dos monitores) abre un menú con todos los tipos de pantalla que tiene el monitor, para que nadie tenga que recordar las direcciones. Solo navega: abre direcciones, no escribe nada y no lee nada de GitHub. Está activado por defecto y `screens.menu` lo desactiva.
+
+| Pantalla | Dirección | Qué es |
+|---|---|---|
+| Panel | `/` | La página completa, para una persona en su mesa. `?repo=` filtra los repositorios. |
+| Quiosco | `/?chrome=0&view=now` | Una vista sin cabecera, pestañas ni filtros, para un monitor que nadie toca. La vista es un parámetro. |
+| Vista de equipo | `/?chrome=0&view=team` | La vista de equipo como quiosco (edición completa). |
+| Pantallas de pestañas 1 a 3 | `/screen/1`, `/screen/2`, `/screen/3` | Las pestañas fijadas para cada monitor de una mesa; `?tabs=`, `?orient=` y `?rotate=` las cambian para una ventana. |
+| Pantallas de pared | `/screen/overview`, `/screen/now`, `/screen/sentinels` | Las tres pantallas de pared de arriba. |
+| Pared que rota | `/screen/overview?rotate=20` | Una ventana que rota por las tres y salta a un rojo nuevo. |
+| TV | `/screen/overview?theme=contrast&density=large&scale=1.5&rotate=20` | La pared que rota para una pantalla vista de lejos. |
+| Varios monitores | una dirección por ventana | Un conjunto de ventanas, una por monitor (ver abajo). |
+
+Cada tarjeta muestra los parámetros que admite esa dirección (tema, densidad, actualización, escala, idioma, rotación, filtro de repositorios...), cada uno con su propio texto de ayuda, y la dirección resultante. **Abrir** la abre en una ventana o pestaña nueva, o en la pestaña en la que estás, según `screens.menu_target`; **Copiar dirección** pone la dirección completa en el portapapeles para abrirla en otro ordenador (nunca incluye ningún token: en el modo de red ese ordenador inicia sesión como siempre). Las pantallas de pared responden 404 mientras `screens.enabled` está desactivado, así que su tarjeta lo dice en lugar de abrir una página vacía; la vista de equipo no está en la edición lite.
+
+### Varios monitores
+
+Elige cuántas ventanas (como máximo `screens.menu_max_windows`), la distribución (en fila, en columna o en cuadrícula) y qué muestra cada ventana (las tres pantallas de pared por turno, paredes que rotan solas o las pantallas de pestañas). **Abrir todas las ventanas** abre una ventana por monitor. En un navegador con la API de gestión de ventanas (Chrome y Edge piden el permiso *gestión de ventanas*) cada ventana se coloca en su propio monitor, ordenados como indica la distribución; con más ventanas que monitores comparten monitor en mosaico. Sin ella, las ventanas se abren donde las pone el navegador y la tarjeta lista un comando de quiosco por ventana (`msedge --kiosk DIRECCIÓN --window-position=X,Y`) para iniciarlas a mano. El navegador debe permitir las ventanas emergentes para la dirección del monitor.
+
+El mismo catálogo lo leen las herramientas: `GET /api/screens/menu`, `monitor_cli.py screens [list|urls]` y la herramienta MCP `screens_menu`. Las tres son de solo lectura.
 
 ## Imágenes
 

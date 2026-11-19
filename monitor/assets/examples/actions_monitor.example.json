@@ -1043,6 +1043,11 @@
     "webhook_window_minutes": 60
   },
   "screens": {
+    "menu": true,
+    "menu_target": "new",
+    "menu_max_windows": 4,
+    "menu_rotate_seconds": 20,
+    "menu_tv_scale": 1.5,
     "alert_hold_seconds": 30,
     "blink": true,
     "blink_calm_minutes": 30,

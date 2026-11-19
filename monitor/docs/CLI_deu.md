@@ -27,6 +27,7 @@
 | `ai` | `ai models [--refresh]` listet die Modelle des KI-Anbieters mit den Daten jedes Modells; `ai test --provider NAME --model NAME` testet eines mit einem synthetischen Text (Latenz, Tokens, geschätzte Kosten); `ai doctor` sagt, warum eine KI nicht antwortet, ohne einen Schlüssel auszugeben | nein |
 | `lessons` | was die Fehler dieser CI gelehrt haben: `lessons list`, `lessons brief --repo NAME` (vor einem Push lesen), `lessons failures`, `lessons close` | nein |
 | `briefs` | die Briefs der Tabs, die KI-Werkzeuge lesen: `briefs index`, `briefs show TAB`, `briefs all` | ja |
+| `screens` | das Menü Bildschirme der Seite: `screens list` (jede Art von Bildschirm und ob er geöffnet werden kann) und `screens urls` (die vollständigen Adressen, bereit für einen Kiosk-Befehl) | nein |
 | `credential` | ein anderer GitHub-Zugang für ein Konto, während alles läuft: `credential replace\|reload [--account ID] [--new-token-file DATEI\|-]`; gibt nie ein Token aus | nein |
 | `install-skill` | kopiert einen Skill des Monitors (`internal` oder `external`) in den Ordner, aus dem ein KI-Werkzeug seine Skills liest: `install-skill external --dest ORDNER`; der Monitor muss nicht laufen | nein |
 | `gh-token` | gibt ein einstündiges Installations-Token der GitHub-App aus, damit die Lesezugriffe eines Werkzeugs das Kontingent der App verbrauchen (nur mit `github_app.share_reads` an); ohne `--json` ausführen | nein |
