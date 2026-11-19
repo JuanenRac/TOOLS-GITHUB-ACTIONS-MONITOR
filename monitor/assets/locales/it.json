@@ -4330,5 +4330,14 @@
  "cfg.h.sentinel.trend_health": "Stato di salute medio (da 0 a 100) sotto il quale si supera la linea dell'andamento giornaliero. 70 di default. Cambia solo la linea disegnata nel grafico, mai un avviso. Si applica dopo un riavvio.",
  "cfg.f.sentinel.trend_quota_pct": "Linea della quota API usata",
  "cfg.h.sentinel.trend_quota_pct": "Quota API usata (%) oltre la quale si supera la linea dell'andamento giornaliero. 80 di default. Cambia solo la linea disegnata nel grafico, mai un avviso. Si applica dopo un riavvio.",
- "ui.cfg_b_trend": "Andamento giornaliero"
+ "ui.cfg_b_trend": "Andamento giornaliero",
+ "cfg.f.ai.redact.extra_patterns": "Modelli da nascondere sempre",
+ "cfg.h.ai.redact.extra_patterns": "Spento (vuoto). Uno per riga; un modello descrive una parola intera e ha solo tre caratteri jolly: * (qualsiasi sequenza di caratteri), ? (un carattere) e # (una cifra), per esempio deploy-* o *.nome-corp. Non è un'espressione regolare, quindi non può bloccare il monitor. Almeno 3 caratteri normali, al massimo 80.",
+ "cfg.f.ai.prompt_log.enabled": "Registro locale dei prompt",
+ "cfg.h.ai.prompt_log.enabled": "Spento. Acceso = ogni domanda inviata all'IA e la sua risposta vengono scritte, già ripulite da segreti e dalle tue parole nascoste, in ai_prompts.jsonl nella cartella dei registri, perché un amministratore le legga o le svuoti. Non è nel backup né nello zip. Una risposta dalla cache non viene scritta.",
+ "cfg.f.ai.prompt_log.keep": "Prompt conservati",
+ "cfg.h.ai.prompt_log.keep": "Quante delle righe più recenti conserva il registro; le più vecchie vengono scartate.",
+ "ui.cfg_u_lines": "righe",
+ "ai.doc_model_retired": "Il modello {model} è nel tuo elenco di modelli ritirati (config/ai_models.json): viene saltato e risponde il successivo della catena.",
+ "ai.doc_model_use": "Usa {use} al suo posto."
 }

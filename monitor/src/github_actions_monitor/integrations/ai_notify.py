@@ -21,7 +21,7 @@ import time
 from pathlib import Path
 
 from github_actions_monitor.integrations import ai_alerts
-from github_actions_monitor.security import envguard, private_io
+from github_actions_monitor.security import envguard, glob_patterns, private_io
 from github_actions_monitor.sentinels import sentinel_ai
 from github_actions_monitor.storage import locks
 
@@ -54,9 +54,14 @@ def label_of(config, cfg):
     return "command" if cfg["command"] else sentinel_ai.ai_config(config)["provider"]
 
 
-def payload(alert):
-    """{field: redacted text} for the closed list; nothing else of the alert is ever read."""
-    return {key: ai_alerts.redact(str(alert.get(key))) if alert.get(key) is not None else "" for key in FIELDS}
+def payload(alert, redact=None):
+    """{field: redacted text} for the closed list; nothing else of the alert is ever read. `redact` is the block `ai.redact` (the words and the patterns the owner always hides): the notice hides them
+    like every other text that reaches a model."""
+    redact = redact if isinstance(redact, dict) else {}
+
+    def clean(value):
+        return glob_patterns.hide(sentinel_ai.hide_terms(ai_alerts.redact(str(value)), redact.get("extra_terms")), redact.get("extra_patterns"))
+    return {key: clean(alert.get(key)) if alert.get(key) is not None else "" for key in FIELDS}
 
 
 def _paths(config):
@@ -195,7 +200,7 @@ def notify(config, alert, now=None, transport=None, runner=None):
             if reason:
                 return {"sent": False, "reason": "daily_cap" if reason == "daily_cap" else "budget_" + reason, "reply": ""}
         label = label_of(config, cfg)
-        data = payload(alert)
+        data = payload(alert, sentinel_ai.ai_config(config)["redact"])
         text = json.dumps(data, ensure_ascii=False)
         if cfg["command"]:
             raw = (runner or _command)(cfg["command"], text, cfg["timeout_seconds"])

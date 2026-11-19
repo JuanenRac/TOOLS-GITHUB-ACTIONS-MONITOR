@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "a655dd0f07251b0acb7bbddcf33079e47b0d43a90f4460a0d82d1ca78706945c",
+ "digest": "aa2bd148cf32e22f3699921f049680c687b3125c278c9b755346e87d9791fd83",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -38,6 +38,22 @@
    },
    {
     "key": "ai.assistant.tools",
+    "kind": "names"
+   },
+   {
+    "key": "ai.prompt_log.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "ai.prompt_log.keep",
+    "kind": "int",
+    "bounds": [
+     10,
+     5000
+    ]
+   },
+   {
+    "key": "ai.redact.extra_patterns",
     "kind": "names"
    },
    {

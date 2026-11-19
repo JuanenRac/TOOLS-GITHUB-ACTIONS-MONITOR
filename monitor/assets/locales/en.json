@@ -4330,5 +4330,14 @@
  "cfg.h.sentinel.trend_health": "Mean health (0 to 100) under which the line of the daily trend is crossed. 70 by default. Only changes the line drawn in the chart, never an alert. Applies after a restart.",
  "cfg.f.sentinel.trend_quota_pct": "Line of the API quota used",
  "cfg.h.sentinel.trend_quota_pct": "Share of the API quota used (%) above which the line of the daily trend is crossed. 80 by default. Only changes the line drawn in the chart, never an alert. Applies after a restart.",
- "ui.cfg_b_trend": "Daily trend"
+ "ui.cfg_b_trend": "Daily trend",
+ "cfg.f.ai.redact.extra_patterns": "Patterns to always hide",
+ "cfg.h.ai.redact.extra_patterns": "Off (empty). One per line; a pattern describes a whole word and has only three wildcards: * (any run of characters), ? (one character) and # (one digit), for example deploy-* or *.corp-name. It is not a regular expression, so it cannot make the monitor hang. At least 3 plain characters, 80 at most.",
+ "cfg.f.ai.prompt_log.enabled": "Local record of prompts",
+ "cfg.h.ai.prompt_log.enabled": "Off. On = every question sent to the AI and its answer are written, already cleaned of secrets and of your hidden words, to ai_prompts.jsonl in the folder of the logs, for an administrator to read or empty. It is not in the backup or in the zip. A cached answer is not written.",
+ "cfg.f.ai.prompt_log.keep": "Prompts kept",
+ "cfg.h.ai.prompt_log.keep": "How many of the newest lines the record keeps; older ones are dropped.",
+ "ui.cfg_u_lines": "lines",
+ "ai.doc_model_retired": "The model {model} is in your list of retired models (config/ai_models.json): it is skipped and the next of the chain answers.",
+ "ai.doc_model_use": "Use {use} instead."
 }

@@ -4330,5 +4330,14 @@
  "cfg.h.sentinel.trend_health": "Saúde média (0 a 100) abaixo da qual se cruza a linha da tendência diária. 70 por omissão. Só altera a linha desenhada no gráfico, nunca um alerta. Aplica-se após reiniciar.",
  "cfg.f.sentinel.trend_quota_pct": "Linha da quota de API usada",
  "cfg.h.sentinel.trend_quota_pct": "Percentagem da quota de API usada (%) acima da qual se cruza a linha da tendência diária. 80 por omissão. Só altera a linha desenhada no gráfico, nunca um alerta. Aplica-se após reiniciar.",
- "ui.cfg_b_trend": "Tendência diária"
+ "ui.cfg_b_trend": "Tendência diária",
+ "cfg.f.ai.redact.extra_patterns": "Padrões a ocultar sempre",
+ "cfg.h.ai.redact.extra_patterns": "Desligado (vazio). Um por linha; um padrão descreve uma palavra inteira e só tem três carateres universais: * (qualquer sequência de carateres), ? (um caráter) e # (um dígito), por exemplo deploy-* ou *.nome-corp. Não é uma expressão regular, por isso não pode bloquear o monitor. Pelo menos 3 carateres normais, 80 no máximo.",
+ "cfg.f.ai.prompt_log.enabled": "Registo local de prompts",
+ "cfg.h.ai.prompt_log.enabled": "Desligado. Ligado = cada pergunta enviada à IA e a sua resposta são escritas, já limpas de segredos e das suas palavras ocultas, em ai_prompts.jsonl na pasta dos registos, para um administrador as ler ou esvaziar. Não vai na cópia de segurança nem no zip. Uma resposta da cache não é escrita.",
+ "cfg.f.ai.prompt_log.keep": "Prompts guardados",
+ "cfg.h.ai.prompt_log.keep": "Quantas das linhas mais recentes o registo guarda; as mais antigas são descartadas.",
+ "ui.cfg_u_lines": "linhas",
+ "ai.doc_model_retired": "O modelo {model} está na sua lista de modelos retirados (config/ai_models.json): é ignorado e responde o seguinte da cadeia.",
+ "ai.doc_model_use": "Use {use} em vez dele."
 }

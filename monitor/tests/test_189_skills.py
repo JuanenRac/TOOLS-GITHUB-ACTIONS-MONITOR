@@ -75,7 +75,7 @@ class NothingIsLeftOut(unittest.TestCase):
     def test_every_endpoint_command_setting_file_and_tab_of_the_code_is_named_in_both_skills(self):
         page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         tabs = set(re.findall(r'data-tab="([a-z]+)"', page))
-        files = {row[0] for row in ai_index.FILES} | {"failures.jsonl", "lessons.json", "lessons_rules.json"}
+        files = {row[0] for row in ai_index.FILES} | {"failures.jsonl", "lessons.json", "lessons_rules.json", "ai_models.json", "ai_prompts.jsonl"}
         for name in skills.names():
             text = corpus(name)
             missing = [p for p in make_skill_refs.endpoints() if f"`{p}`" not in text]

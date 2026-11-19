@@ -4330,5 +4330,14 @@
  "cfg.h.sentinel.trend_health": "Mittlere Gesundheit (0 bis 100), unter der die Linie des Tagestrends unterschritten wird. Standard 70. Ändert nur die im Diagramm gezeichnete Linie, nie einen Alarm. Gilt nach einem Neustart.",
  "cfg.f.sentinel.trend_quota_pct": "Linie der genutzten API-Quote",
  "cfg.h.sentinel.trend_quota_pct": "Anteil der genutzten API-Quote (%), über dem die Linie des Tagestrends überschritten wird. Standard 80. Ändert nur die im Diagramm gezeichnete Linie, nie einen Alarm. Gilt nach einem Neustart.",
- "ui.cfg_b_trend": "Tagestrend"
+ "ui.cfg_b_trend": "Tagestrend",
+ "cfg.f.ai.redact.extra_patterns": "Muster, die immer verborgen werden",
+ "cfg.h.ai.redact.extra_patterns": "Aus (leer). Eines pro Zeile; ein Muster beschreibt ein ganzes Wort und kennt nur drei Platzhalter: * (beliebige Zeichenfolge), ? (ein Zeichen) und # (eine Ziffer), zum Beispiel deploy-* oder *.firmen-name. Es ist kein regulärer Ausdruck und kann den Monitor daher nicht blockieren. Mindestens 3 normale Zeichen, höchstens 80.",
+ "cfg.f.ai.prompt_log.enabled": "Lokales Prompt-Protokoll",
+ "cfg.h.ai.prompt_log.enabled": "Aus. An = jede an die KI gesendete Frage und ihre Antwort werden, bereits von Geheimnissen und Ihren verborgenen Wörtern bereinigt, in ai_prompts.jsonl im Ordner der Protokolle gespeichert, damit ein Administrator sie lesen oder leeren kann. Nicht in der Sicherung und nicht im Zip. Eine Antwort aus dem Zwischenspeicher wird nicht geschrieben.",
+ "cfg.f.ai.prompt_log.keep": "Gespeicherte Prompts",
+ "cfg.h.ai.prompt_log.keep": "Wie viele der neuesten Zeilen das Protokoll behält; ältere entfallen.",
+ "ui.cfg_u_lines": "Zeilen",
+ "ai.doc_model_retired": "Das Modell {model} steht in Ihrer Liste zurückgezogener Modelle (config/ai_models.json): es wird übersprungen und das nächste der Kette antwortet.",
+ "ai.doc_model_use": "Verwenden Sie stattdessen {use}."
 }

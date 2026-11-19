@@ -4330,5 +4330,14 @@
  "cfg.h.sentinel.trend_health": "Salud media (0 a 100) por debajo de la cual se cruza la línea de la tendencia diaria. 70 por defecto. Solo cambia la línea dibujada en la gráfica, nunca una alerta. Se aplica tras reiniciar.",
  "cfg.f.sentinel.trend_quota_pct": "Línea de la cuota de API usada",
  "cfg.h.sentinel.trend_quota_pct": "Porcentaje de la cuota de API usada (%) por encima del cual se cruza la línea de la tendencia diaria. 80 por defecto. Solo cambia la línea dibujada en la gráfica, nunca una alerta. Se aplica tras reiniciar.",
- "ui.cfg_b_trend": "Tendencia diaria"
+ "ui.cfg_b_trend": "Tendencia diaria",
+ "cfg.f.ai.redact.extra_patterns": "Patrones que siempre se ocultan",
+ "cfg.h.ai.redact.extra_patterns": "Apagado (vacío). Uno por línea; un patrón describe una palabra entera y solo tiene tres comodines: * (cualquier tramo de caracteres), ? (un carácter) y # (un dígito), por ejemplo deploy-* o *.nombre-corp. No es una expresión regular, así que no puede colgar el monitor. Al menos 3 caracteres normales, 80 como máximo.",
+ "cfg.f.ai.prompt_log.enabled": "Registro local de prompts",
+ "cfg.h.ai.prompt_log.enabled": "Apagado. Encendido = cada pregunta enviada a la IA y su respuesta se escriben, ya limpias de secretos y de tus palabras ocultas, en ai_prompts.jsonl de la carpeta de registros, para que un administrador las lea o las vacíe. No va en la copia de seguridad ni en el zip. Una respuesta de la caché no se escribe.",
+ "cfg.f.ai.prompt_log.keep": "Prompts guardados",
+ "cfg.h.ai.prompt_log.keep": "Cuántas de las líneas más recientes conserva el registro; las más antiguas se descartan.",
+ "ui.cfg_u_lines": "líneas",
+ "ai.doc_model_retired": "El modelo {model} está en tu lista de modelos retirados (config/ai_models.json): se salta y responde el siguiente de la cadena.",
+ "ai.doc_model_use": "Usa {use} en su lugar."
 }

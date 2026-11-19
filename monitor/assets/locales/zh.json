@@ -4330,5 +4330,14 @@
  "cfg.h.sentinel.trend_health": "平均健康度 (0 到 100) 低于此值即越过每日趋势的基准线。默认 70。只改变图表中的线，不影响任何警报。重启后生效。",
  "cfg.f.sentinel.trend_quota_pct": "已用 API 配额基准线",
  "cfg.h.sentinel.trend_quota_pct": "已用 API 配额占比 (%) 高于此值即越过每日趋势的基准线。默认 80。只改变图表中的线，不影响任何警报。重启后生效。",
- "ui.cfg_b_trend": "每日趋势"
+ "ui.cfg_b_trend": "每日趋势",
+ "cfg.f.ai.redact.extra_patterns": "始终隐藏的模式",
+ "cfg.h.ai.redact.extra_patterns": "关闭(空)。每行一个;模式描述整个单词,只有三个通配符:*(任意一串字符)、?(一个字符)和 #(一个数字),例如 deploy-* 或 *.corp-name。它不是正则表达式,因此不会让监视器卡死。至少 3 个普通字符,最多 80 个。",
+ "cfg.f.ai.prompt_log.enabled": "提示词本地记录",
+ "cfg.h.ai.prompt_log.enabled": "关闭。开启 = 发送给 AI 的每个问题及其回答(已去除机密和您隐藏的词)会写入日志文件夹中的 ai_prompts.jsonl,供管理员查看或清空。它不在备份和 zip 中。来自缓存的回答不会写入。",
+ "cfg.f.ai.prompt_log.keep": "保留的提示词数",
+ "cfg.h.ai.prompt_log.keep": "记录保留的最新行数;更早的会被丢弃。",
+ "ui.cfg_u_lines": "行",
+ "ai.doc_model_retired": "模型 {model} 在您的已退役模型列表(config/ai_models.json)中:它会被跳过,由链中的下一个模型回答。",
+ "ai.doc_model_use": "请改用 {use}。"
 }

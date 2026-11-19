@@ -4330,5 +4330,14 @@
  "cfg.h.sentinel.trend_health": "日次トレンドの基準線を下回る平均の健全性 (0〜100)。既定は 70。グラフの線だけを変え、アラートには影響しません。再起動後に反映されます。",
  "cfg.f.sentinel.trend_quota_pct": "使用済み API クォータの基準線",
  "cfg.h.sentinel.trend_quota_pct": "日次トレンドの基準線を上回る API クォータの使用率 (%)。既定は 80。グラフの線だけを変え、アラートには影響しません。再起動後に反映されます。",
- "ui.cfg_b_trend": "日次トレンド"
+ "ui.cfg_b_trend": "日次トレンド",
+ "cfg.f.ai.redact.extra_patterns": "常に隠すパターン",
+ "cfg.h.ai.redact.extra_patterns": "オフ(空)。1行に1つ。パターンは単語全体を表し、ワイルドカードは3つだけです: *(任意の文字列)、?(1文字)、#(1桁の数字)。例: deploy-* や *.corp-name。正規表現ではないため、モニターが固まることはありません。通常の文字を3文字以上、80文字まで。",
+ "cfg.f.ai.prompt_log.enabled": "プロンプトのローカル記録",
+ "cfg.h.ai.prompt_log.enabled": "オフ。オン = AIに送ったすべての質問とその回答を、秘密や隠す単語を除去した状態でログフォルダーの ai_prompts.jsonl に書き込み、管理者が読んだり空にしたりできます。バックアップにもzipにも含まれません。キャッシュからの回答は書き込まれません。",
+ "cfg.f.ai.prompt_log.keep": "保持するプロンプト数",
+ "cfg.h.ai.prompt_log.keep": "記録が保持する最新の行数。古いものは破棄されます。",
+ "ui.cfg_u_lines": "行",
+ "ai.doc_model_retired": "モデル {model} は廃止モデルの一覧(config/ai_models.json)に載っています。スキップされ、チェーンの次のモデルが応答します。",
+ "ai.doc_model_use": "代わりに {use} を使ってください。"
 }

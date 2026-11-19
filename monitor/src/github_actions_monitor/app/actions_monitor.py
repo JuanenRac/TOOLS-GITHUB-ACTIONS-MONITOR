@@ -1515,7 +1515,7 @@ def panel_list(lang=None):
 # references of the skills for the AIs (tools/make_skill_refs.py) read the same ones, so the table an AI reads cannot disagree with the code.
 AI_MODEL_POST = ("/api/ai/models/refresh", "/api/ai/models/test", "/api/ai/models/data", "/api/ai/doctor")      # the list of models of the provider, the test of one model, the table of data, the doctor
 THIS_COMPUTER_ACTIONS = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test") + AI_MODEL_POST
-THIS_COMPUTER_ADVANCED = ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures",
+THIS_COMPUTER_ADVANCED = ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures", "/api/ai/prompts/clear",
                           "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run", "/api/ops/backup", "/api/ops/purge",
                           "/api/updates/check", "/api/updates/plan", "/api/updates/apply", "/api/updates/rollback")
 THIS_COMPUTER_POST = THIS_COMPUTER_ACTIONS + THIS_COMPUTER_ADVANCED
@@ -3338,6 +3338,12 @@ class Handler(BaseHTTPRequestHandler):
                 self.end_headers()
                 return
             self.json_reply(assistant.describe(cfg))
+        elif path == "/api/ai/prompts":      # read only, administrator: the local record of the cleaned prompts and answers (off by default; it only exists while `ai.prompt_log.enabled` is on)
+            if not self.guard():
+                return
+            from github_actions_monitor.integrations import ai_prompt_log
+            from github_actions_monitor.sentinels import sentinel_ai
+            self.json_reply(ai_prompt_log.read(sentinel_ai.ai_config(toolconfig.raw_config()), 100))
         elif path == "/api/ai/budget":      # read only: the calls and the estimated cost of today for each model, the limits and the last failures of a main model
             if not self.guard():
                 return
@@ -4113,6 +4119,9 @@ def handle_advanced_post(path, request, who=""):
         snapshot, alerts, team = report_gather()
         done = report_service.run(config, report_account(), snapshot, alerts, team)
         return {"ok": True, "files": done["files"], "at": done["at"]}
+    if path == "/api/ai/prompts/clear":      # the local record of prompts is emptied (admin)
+        from github_actions_monitor.integrations import ai_prompt_log
+        return {"ok": True, "removed": ai_prompt_log.clear()}
     if path == "/api/ai/ack":
         from github_actions_monitor.integrations import ai_alerts
         return {"ok": ai_alerts.ack(config, request.get("id"))}

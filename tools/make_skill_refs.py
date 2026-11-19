@@ -52,6 +52,8 @@ NOTES = {
     "/api/ai/models/refresh": ("POST", "read the list of models from the provider now: one request, inside the daily cap (this computer only)"),
     "/api/ai/models/test": ("POST", "try one model with a synthetic text: latency, tokens, estimated cost and a sample answer (this computer only)"),
     "/api/ai/presets": ("GET", "the presets of AI providers (address, name of the variable of the key, example models, privacy); data only, never a key"),
+    "/api/ai/prompts": ("GET", "administrator only: the local record of the cleaned prompts and answers of the AI of the monitor (newest first); empty unless `ai.prompt_log.enabled` is on"),
+    "/api/ai/prompts/clear": ("POST", "administrator only: empties the local record of prompts (the number of lines removed is the answer)"),
     "/api/ai/lessons": ("GET,POST", "GET: the lessons that apply now, the repeated failures and the library (`?fmt=md|brief&repo=`); POST: write a lesson (switch, administrator, confirmation)"),
     "/api/ai/index": ("GET", "the master index of the briefs: one entry per tab with its signals and the routes of its raw data (machine readable, no secret)"),
     "/api/ai/briefs": ("GET", "the brief of one tab (`?tab=sent`, `&lang=xx`): the signals the tab draws and where its raw data live; read only, no secret"),
@@ -297,7 +299,9 @@ def files_md():
         lines.append(f"| `{name}` | ai/ | {purpose} | {kind} | {when} |")
     extra = (("failures.jsonl", "data/", "the book of failures, one line per failure (schema 1)", "jsonl", "when a failure opens"),
              ("lessons.json", "config/", "the library of lessons you edit", "json", "by hand or `POST /api/ai/lessons`"),
-             ("lessons_rules.json", "config/", "the rules that file a failure under a category", "json", "by hand"))
+             ("lessons_rules.json", "config/", "the rules that file a failure under a category", "json", "by hand"),
+             ("ai_models.json", "config/", "the table of models you keep by hand (context, prices, tools, limits) and the models you retired; read at every call", "json", "by hand"),
+             ("ai_prompts.jsonl", "logs/", "the local record of prompts and answers of the AI (only with `ai.prompt_log.enabled`; an administrator reads it, it is not in the backup)", "jsonl", "when the AI is asked"))
     for name, folder, purpose, kind, when in extra:
         lines.append(f"| `{name}` | {folder} | {purpose} | {kind} | {when} |")
     return "\n".join(lines) + "\n"

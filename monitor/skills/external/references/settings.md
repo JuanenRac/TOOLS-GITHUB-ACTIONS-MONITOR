@@ -47,7 +47,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.model_cost_limit_daily` | `-` | ai | Estimated cost per model per day |
 | `ai.model_daily_limit` | `-` | ai | Calls per model per day |
 | `ai.ollama_url` | `-` | ai | Ollama address |
+| `ai.prompt_log.enabled` (secure) | `-` | ai | Local record of prompts |
+| `ai.prompt_log.keep` | `-` | ai | Prompts kept |
 | `ai.provider` (secure) | `"none"` | ai | AI service |
+| `ai.redact.extra_patterns` (secure) | `-` | ai | Patterns to always hide |
 | `ai.redact.extra_terms` (secure) | `-` | ai | Words to always hide |
 | `ai.similar.enabled` | `-` | ai | Similar alerts |
 | `ai.similar.max` | `-` | ai | Most similar alerts |
