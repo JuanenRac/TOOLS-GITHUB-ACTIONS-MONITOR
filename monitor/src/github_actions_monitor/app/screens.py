@@ -50,6 +50,39 @@ RED_CONCLUSIONS = ("failure", "timed_out", "startup_failure")
 HEAT_ROWS, HEAT_BUCKETS = 12, 24
 TOP_RED, EVENTS, ACTIVE_ROWS, FAILURES, TIMELINE, MERGES = 8, 10, 12, 8, 24, 6
 
+#: why a tab has no wall screen: `people` (it names people, and a wall screen never shows a user name), `controls` (it is made of buttons and fields that change something, and a wall screen has none),
+#: `reading` (it is made to be read, compared or saved, not to be seen from far away) and `text` (it is made of titles, causes and messages, which a wall screen never shows).
+NO_SCREEN_REASONS = ("people", "controls", "reading", "text")
+#: the decision of the wall screens, tab by tab (every tab of the page is here, and a test fails when a tab is added without its decision). A tab that is shown says on which screen and in which field of the
+#: answer of /api/screens/data; a tab that is not shown says why. The map of the fleet by groups belongs to the overview (it is the Fleet tab at a glance).
+TAB_DECISIONS = {
+    "now": {"screen": "now", "field": "running"},
+    "al": {"screen": "overview", "field": "alerts"},
+    "charts": {"screen": "overview", "field": "trend24"},
+    "sent": {"screen": "sentinels", "field": "cards"},
+    "sci": {"screen": "sentinels", "field": "cards"},
+    "scol": {"screen": "sentinels", "field": "cards"},
+    "ssec": {"screen": "sentinels", "field": "cards"},
+    "sdel": {"screen": "sentinels", "field": "cards"},
+    "ssup": {"screen": "sentinels", "field": "cards"},
+    "strend": {"screen": None, "reason": "reading"},
+    "syvt": {"screen": None, "reason": "reading"},
+    "team": {"screen": None, "reason": "people"},
+    "fleet": {"screen": "overview", "field": "groups"},
+    "repos": {"screen": None, "reason": "controls"},
+    "rep": {"screen": None, "reason": "reading"},
+    "trep": {"screen": None, "reason": "reading"},
+    "les": {"screen": None, "reason": "text"},
+    "hist": {"screen": None, "reason": "text"},
+    "upd": {"screen": None, "reason": "controls"},
+    "cfg": {"screen": None, "reason": "controls"},
+}
+
+
+def tab_decisions():
+    """The decision of the wall screens for every tab, as plain data: {tab: {"screen": kind or None, "field": the field that carries it, "reason": why it is not shown}}."""
+    return {tab: {"screen": d["screen"], "field": d.get("field", ""), "reason": d.get("reason", "")} for tab, d in TAB_DECISIONS.items()}
+
 
 def _int(value, low, high, default):
     if isinstance(value, bool):
