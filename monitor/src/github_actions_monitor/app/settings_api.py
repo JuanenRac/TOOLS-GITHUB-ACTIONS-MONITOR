@@ -673,7 +673,7 @@ _f("lint", "lint_sparse", "lint.sparse.refresh_seconds", "int", (600, 604800))
 _f("lint", "lint_sparse", "lint.sparse.max_repos_per_tick", "int", (1, 20))
 _f("lint", "own_actions", "lint.own_owners", "names")
 _f("lint", "own_actions", "lint.unpinned_own", "enum", ("same", "info", "ignore"))
-for _rule in ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "own_action_main"):
+for _rule in ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "own_action_main", "permissions_top"):
     _f("lint", "rule_" + _rule, f"lint.rules.{_rule}.enabled", "bool", label=["cfg.p.rule_on"], help="cfg.h.rule_on")
     _f("lint", "rule_" + _rule, f"lint.rules.{_rule}.severity", "enum", ("info", "warn", "bad"), label=["cfg.p.severity"], help="cfg.h.p.severity")
 # --- Terminal view

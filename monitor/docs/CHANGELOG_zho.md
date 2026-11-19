@@ -20,6 +20,8 @@
 - “屏幕”菜单的目录也可由工具读取:`GET /api/screens/menu`、命令行的新命令 `screens`(`screens list`、`screens urls`)以及 MCP 工具 `screens_menu`;三者都只读
 
 - 新增五项“屏幕”菜单设置:`screens.menu`(默认开启,只做导航)、`screens.menu_target`(新窗口或同一标签页)、`screens.menu_max_windows`、`screens.menu_rotate_seconds` 和 `screens.menu_tv_scale`,每项在设置中都有帮助说明
+- **针对文件顶层没有 `permissions:` 块的工作流的可选 lint 规则**：`permissions_top`（在 `lint.rules.permissions_top.enabled` 开启前关闭，默认级别为信息，可用 `lint.rules.permissions_top.severity` 调整）会指出这样的文件：作业设置了自己的权限，而文件本身没有设置，之后新增的作业就会得到范围更宽的默认令牌。若文件任何地方都没有权限，它不作提示（较早的 `permissions` 规则已处理）。标签、帮助和文档均提供八种语言。
+
 - **用真实进程对页面的更新做端到端测试**：测试可以让页面的更新器指向本地 zip（`MONITOR_TEST_HOOKS=1` 加 `MONITOR_TEST_UPDATE_ZIP`；缺少任何一个都不会有变化，并且该 zip 与其他 zip 一样要通过内容、成员和 SHA-256 的检查），新的测试在第二个进程中应用它，用回滚退回，并检查版本、文件和数据恢复如初，`--start` 会启动新版本并检查其健康状态，`--handover` 会等待正在运行的监视器停止后再启动新的。
 
 - **在容器内检查进程之间的锁**：容器检查新增 E9，它针对同一个共享卷启动镜像的多个进程，并统计它们在操作系统锁和锁文件之下写入的内容，因此丢失的更新会出现在工作流的证据中；锁文件的测试现在也在 Windows 上运行。

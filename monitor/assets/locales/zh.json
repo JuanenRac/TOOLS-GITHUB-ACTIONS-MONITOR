@@ -1523,6 +1523,7 @@
  "lint.rule.no_timeout": "没有 timeout-minutes 的作业",
  "lint.rule.own_action_main": "自有 action 跟随分支（@main）",
  "lint.rule.permissions": "没有 permissions 块,或为 write-all",
+ "lint.rule.permissions_top": "顶层没有 permissions 块，只有作业里有",
  "lint.rule.pr_target": "pull_request_target 检出了 PR 的代码",
  "lint.rule.secrets_in_clear": "看起来像写在文件里的密钥",
  "lint.rule.secrets_inherit": "secrets: inherit 会传递所有机密",
