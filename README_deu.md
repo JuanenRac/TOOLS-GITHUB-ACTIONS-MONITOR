@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4569_passing-brightgreen.svg" alt="4569 tests">
+  <img src="https://img.shields.io/badge/Tests-4580_passing-brightgreen.svg" alt="4580 tests">
 </p>
 
 > Überwacht die Workflows aller deiner Repositories und zeigt dir auf einer lokalen Seite, was rot ist, was hängt und was auf dich wartet.
@@ -82,7 +82,7 @@
 | | |
 |---|---|
 | **Reifegrad** | functional |
-| **Tests** | 4569 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 4580 Testmethoden (`python -m unittest discover -s monitor/tests`) |
 | **Einstellungen** | 712 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, Python 3.11, 3.13 |
@@ -310,6 +310,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COMPLETE_TEAM_deu.md`](monitor/docs/COMPLETE_TEAM_deu.md): Vollausgabe für ein Team
 - [`monitor/docs/API_deu.md`](monitor/docs/API_deu.md): Die API für Clients
 - [`monitor/docs/API_V1_deu.md`](monitor/docs/API_V1_deu.md): Die Lese-API v1, Schritt für Schritt
+- [`monitor/docs/ASSISTANT_deu.md`](monitor/docs/ASSISTANT_deu.md): Der Assistent: feste, nur lesende Fragen an Ihre KI
 - [`monitor/docs/NOTIFICATIONS_deu.md`](monitor/docs/NOTIFICATIONS_deu.md): Benachrichtigungen und der Adapter-Vertrag
 - [`monitor/docs/AI_deu.md`](monitor/docs/AI_deu.md): der KI-Assistent: Anbieter, Sicherheit und Aktionen
 - [`monitor/docs/ANALYTICS_deu.md`](monitor/docs/ANALYTICS_deu.md): Analytik, bedingte Lesungen und verlorene Verbindung

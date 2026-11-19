@@ -4371,5 +4371,10 @@
  "ui.pl_confirm": "Empty the record of prompts?",
  "ui.pl_count": "{n} entries (it keeps the last {keep}).",
  "ui.pl_denied": "Only an administrator on this computer can do this.",
- "ui.pl_failed": "no answer"
+ "ui.pl_failed": "no answer",
+ "cfg.t.ai.assistant.enabled": "You will see: a panel of fixed questions in the Alerts tab, answered by your AI from the data the monitor holds. Cost: one AI call per question, inside the daily budget of the AI; nothing is written and GitHub is not called.",
+ "cfg.t.ai.prompt_log.enabled": "You will see: in Settings, a card that lists the last prompts sent to the AI and their answers, cleaned of secrets. Cost: a small local file; only an administrator can read or empty it.",
+ "cfg.t.ai.similar.enabled": "You will see: \"explain this alert\" also lists alerts that look like it, found by comparing words. Cost: none from the AI and none from GitHub; it only reads what the monitor already holds.",
+ "cfg.t.ai.airgapped": "You will see: the AI refuses every address that is not this computer or a private address you list, before any connection is opened. Cost: none; a cloud model stops working while it is on.",
+ "cfg.t.api.v1_enabled": "You will see: the read API for clients under /api/v1/ (auto opens it when the monitor runs as a service). Cost: none; it only reads and follows the same roles as the page."
 }

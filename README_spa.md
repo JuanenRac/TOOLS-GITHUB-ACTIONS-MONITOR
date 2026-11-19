@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4569_passing-brightgreen.svg" alt="4569 tests">
+  <img src="https://img.shields.io/badge/Tests-4580_passing-brightgreen.svg" alt="4580 tests">
 </p>
 
 > Vigila los workflows de todos tus repositorios y te dice, en una página local, qué está en rojo, qué está atascado y qué te espera.
@@ -82,7 +82,7 @@
 | | |
 |---|---|
 | **Madurez** | functional |
-| **Tests** | 4569 métodos de test (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 4580 métodos de test (`python -m unittest discover -s monitor/tests`) |
 | **Ajustes** | 712 ajustes, todos con ayuda |
 | **Idiomas** | 8 (inglés, español, alemán, francés, italiano, japonés, chino y portugués) |
 | **Probado en el CI en** | ubuntu, windows, Python 3.11, 3.13 |
@@ -310,6 +310,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COMPLETE_TEAM_spa.md`](monitor/docs/COMPLETE_TEAM_spa.md): Edición completa para un equipo
 - [`monitor/docs/API_spa.md`](monitor/docs/API_spa.md): La API para clientes
 - [`monitor/docs/API_V1_spa.md`](monitor/docs/API_V1_spa.md): La API de lectura v1, paso a paso
+- [`monitor/docs/ASSISTANT_spa.md`](monitor/docs/ASSISTANT_spa.md): El asistente: preguntas fijas de solo lectura a tu IA
 - [`monitor/docs/NOTIFICATIONS_spa.md`](monitor/docs/NOTIFICATIONS_spa.md): notificaciones y el contrato de los adaptadores
 - [`monitor/docs/AI_spa.md`](monitor/docs/AI_spa.md): el asistente de IA: proveedores, seguridad y acciones
 - [`monitor/docs/ANALYTICS_spa.md`](monitor/docs/ANALYTICS_spa.md): analítica, lecturas condicionales y conexión perdida
