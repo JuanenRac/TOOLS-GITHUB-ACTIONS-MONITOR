@@ -21,6 +21,7 @@
 - **`/api/v1/` 下的每个响应都带有 `X-API-Version` 头**:三条自有路由(`me`、`repos`、`openapi.json`)以及由各自处理器写出的路由(例如 `data` 和 `auth/me`)此前没有该头;现在该头在一处为前缀的所有响应(包括错误)添加,契约套件会检查它。
 - **命令行在 `/api/v1/` 下请求冻结的路由**:`monitor_cli.py` 现在是只读 API 的客户端:它在前缀下请求契约冻结的路由,若监视器在那里返回 404 则回退到旧路由(且不再重试),因此任何命令的输出都不变。新设置 `cli.prefer_v1`(默认开启)和环境变量 `MONITOR_CLI_PREFER_V1`。测试检查相同命令通过两条路径得到相同的 JSON,并检查命令行、终端视图和 MCP 服务器读取的每条路由要么在契约中冻结,要么附理由记录。
 - **只读 API 的 curl 示例**:API 指南用八种语言展示如何读取 `/api/v1/me`、分页遍历 `/api/v1/repos`、下载 `/api/v1/openapi.json` 并沿游标翻页,测试会针对监视器运行所展示的路由。
+- **面向客户端的只读 API 也是 MCP 服务器的一组工具**:`api_me`、`api_openapi`(文档,或用 `path` 取某一条路由)和 `api_contract_check`(契约套件)给出与 `GET /api/v1/me`、`GET /api/v1/openapi.json` 和 `monitor_cli.py api contract-check` 相同的文档,只读且无需任何开关;测试比较这三个入口,命令行和 MCP 服务器现在通过同一个函数加载契约套件。
 
 ### 修复
 
