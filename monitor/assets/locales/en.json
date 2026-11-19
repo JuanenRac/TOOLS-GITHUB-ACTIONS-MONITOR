@@ -3729,7 +3729,7 @@
  "ui.tab_rep": "Reports",
  "ui.scr_open": "Open the wall screen: {name}",
  "cfg.f.api.v1_enabled": "Read API under /api/v1/",
- "cfg.h.api.v1_enabled": "Off by default. On: every read route is also served under /api/v1/ (the same answer, the same roles, plus the header X-API-Version), and three routes are added: /api/v1/me (who is asking, with the role and the accounts of the session), /api/v1/repos (the repositories in pages) and /api/v1/openapi.json. Read only: nothing can be changed through it. Off: the whole prefix answers 404.",
+ "cfg.h.api.v1_enabled": "auto (default): the read API is on when the monitor runs as a service (an account of the team mode, the Docker image, the systemd unit) and off for one person at one computer. on: always. off: never (the whole prefix answers 404). When on, every read route is also served under /api/v1/ (the same answer, the same roles, plus the header X-API-Version) and three routes are added: /api/v1/me (who is asking, with the role, the accounts and what the session may do), /api/v1/repos (the repositories in pages) and /api/v1/openapi.json. Read only: nothing can be changed through it.",
  "cfg.f.api.default_limit": "Items per page",
  "cfg.h.api.default_limit": "Default 50. How many items a list of the API returns when the client does not ask for a number with limit=. It cannot be above the maximum below.",
  "cfg.f.api.max_limit": "Most items per page",

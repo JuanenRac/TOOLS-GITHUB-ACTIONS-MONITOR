@@ -3729,7 +3729,7 @@
  "ui.tab_rep": "报告",
  "ui.scr_open": "打开墙面屏幕：{name}",
  "cfg.f.api.v1_enabled": "/api/v1/ 下的只读 API",
- "cfg.h.api.v1_enabled": "默认关闭。开启后,每条读取路由也会在 /api/v1/ 下提供(相同的响应和角色,另加 X-API-Version 头),并新增三条路由:/api/v1/me(谁在请求,含会话的角色和账户)、/api/v1/repos(分页的仓库列表)和 /api/v1/openapi.json。只读:无法通过它修改任何内容。关闭时整个前缀返回 404。",
+ "cfg.h.api.v1_enabled": "auto(默认):监视器作为服务运行时(团队模式的账户、Docker 镜像、systemd 单元)只读 API 为开启,一人一台电脑时为关闭。on:始终开启。off:始终关闭(整个前缀返回 404)。开启后,每条读取路由也会在 /api/v1/ 下提供(相同的响应和角色,另加 X-API-Version 头),并新增三条路由:/api/v1/me(谁在请求,含角色、账户以及该会话可做的事)、/api/v1/repos(分页的仓库)和 /api/v1/openapi.json。只读:无法通过它更改任何内容。",
  "cfg.f.api.default_limit": "每页条目数",
  "cfg.h.api.default_limit": "默认 50。客户端没有用 limit= 指定数量时,API 列表返回的条目数。不能超过下面的最大值。",
  "cfg.f.api.max_limit": "每页最多条目数",

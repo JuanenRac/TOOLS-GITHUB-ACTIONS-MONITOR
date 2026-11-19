@@ -12,6 +12,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 ### Aggiunto
 
 - **I brief per gli strumenti di IA arrivano alla riga di comando e al server MCP**: `monitor_cli.py briefs index` elenca i brief catalogati, `briefs show SCHEDA` stampa i segnali di una scheda e `briefs all` tutti i brief in un documento; il server MCP ha gli strumenti di sola lettura `briefs_index` e `brief_tab` (il nome di una scheda o `all`). Un test verifica che la pagina, le rotte HTTP, il comando e gli strumenti elenchino le stesse schede; non si scrive nulla e i testi passano dallo stesso depuratore.
+- **L'API di lettura per i client si attiva da sola in modalità servizio**: `api.v1_enabled` diventa `auto` (predefinito), `on` oppure `off`. Con `auto` il prefisso `/api/v1/` risponde quando il monitor gira come servizio (un account della modalità team, l'immagine Docker, l'unità systemd) e resta chiuso per una persona su un solo computer; i vecchi true e false mantengono il loro significato. `/api/v1/me` indica anche la versione del contratto (`contract`) e ciò che la sessione può fare (`capabilities`).
 
 ### Corretto
 

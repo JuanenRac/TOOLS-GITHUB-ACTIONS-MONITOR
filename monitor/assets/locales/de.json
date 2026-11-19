@@ -3729,7 +3729,7 @@
  "ui.tab_rep": "Berichte",
  "ui.scr_open": "Wandanzeige öffnen: {name}",
  "cfg.f.api.v1_enabled": "Lese-API unter /api/v1/",
- "cfg.h.api.v1_enabled": "Standardmäßig aus. An: Jede Leseroute wird auch unter /api/v1/ ausgeliefert (dieselbe Antwort, dieselben Rollen, dazu der Header X-API-Version), und drei Routen kommen hinzu: /api/v1/me (wer fragt, mit Rolle und Konten der Sitzung), /api/v1/repos (die Repositories seitenweise) und /api/v1/openapi.json. Nur lesend: darüber lässt sich nichts ändern. Aus: Das ganze Präfix antwortet mit 404.",
+ "cfg.h.api.v1_enabled": "auto (Standard): Die Lese-API ist an, wenn der Monitor als Dienst läuft (ein Konto des Teammodus, das Docker-Image, die systemd-Unit), und aus für eine Person an einem Rechner. on: immer. off: nie (das ganze Präfix antwortet mit 404). Ist sie an, wird jede Leseroute auch unter /api/v1/ ausgeliefert (dieselbe Antwort, dieselben Rollen, dazu der Header X-API-Version) und drei Routen kommen hinzu: /api/v1/me (wer fragt, mit Rolle, Konten und dem, was die Sitzung darf), /api/v1/repos (die Repositories seitenweise) und /api/v1/openapi.json. Nur lesend: darüber lässt sich nichts ändern.",
  "cfg.f.api.default_limit": "Einträge pro Seite",
  "cfg.h.api.default_limit": "Standard 50. Wie viele Einträge eine Liste der API liefert, wenn der Client mit limit= keine Zahl verlangt. Darf das Maximum unten nicht übersteigen.",
  "cfg.f.api.max_limit": "Höchstzahl Einträge pro Seite",

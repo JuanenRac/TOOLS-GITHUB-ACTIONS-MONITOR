@@ -12,6 +12,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 ### Ajouté
 
 - **Les briefs pour les outils d'IA arrivent à la ligne de commande et au serveur MCP**: `monitor_cli.py briefs index` liste les briefs catalogués, `briefs show ONGLET` affiche les signaux d'un onglet et `briefs all` tous les briefs dans un document; le serveur MCP a les outils en lecture seule `briefs_index` et `brief_tab` (un nom d'onglet ou `all`). Un test vérifie que la page, les routes HTTP, la commande et les outils listent les mêmes onglets; rien n'est écrit et les textes passent par le même nettoyeur.
+- **L'API de lecture pour les clients s'active seule en mode service** : `api.v1_enabled` devient `auto` (par défaut), `on` ou `off`. Avec `auto`, le préfixe `/api/v1/` répond quand le moniteur tourne comme service (un compte du mode équipe, l'image Docker, l'unité systemd) et reste fermé pour une personne sur un seul ordinateur ; les anciens true et false gardent leur sens. `/api/v1/me` donne aussi la version du contrat (`contract`) et ce que la session peut faire (`capabilities`).
 
 ### Corrigé
 
