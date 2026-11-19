@@ -50,3 +50,46 @@ curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/re
 
 - `GET /api/ai/stream` (las alertas) y `GET /api/live-events/stream` (los eventos del webhook, `live.sse.enabled`) son eventos enviados por el servidor, de solo lectura y apagados por defecto; mira [AI_ALERTS_spa.md](AI_ALERTS_spa.md) y [WEBHOOK_spa.md](WEBHOOK_spa.md).
 - `POST /api/chatops/slack` y `POST /api/chatops/discord` reciben los comandos de solo lectura de un chat (desactivados por defecto, `chatops.enabled`). No usan el token de acceso: la prueba es la firma de la plataforma, y una petición sin firma válida se rechaza antes de leer nada. Ver [CHATOPS_spa.md](CHATOPS_spa.md).
+
+## Otras rutas de la página
+
+Estas rutas sirven la página y las herramientas de este equipo. No forman parte del contrato congelado y pueden cambiar entre versiones. POST cambia algo; "este equipo" significa que solo puede usarla el equipo que ejecuta el monitor.
+
+| Ruta | Qué hace |
+| --- | --- |
+| `/api/about` | El panel Acerca de: versiones, enlaces, ficheros, salud, créditos y el aviso de una actualización; sin secretos. |
+| `/api/act/plan` | POST, este equipo. Prepara lo que haría una ejecución local con `act`; todavía no se ejecuta nada. |
+| `/api/act/confirm` | POST, este equipo. Ejecuta un workflow en este equipo con `act` tras su plan; la ejecución queda registrada. |
+| `/api/act/status` | El estado de la ejecución local en curso. |
+| `/api/act/stop` | POST, este equipo. Detiene la ejecución local. |
+| `/api/advanced` | El estado de las funciones que se activan por elección: la red, el almacén del token de GitHub, las acciones en GitHub, la ejecución local y el modo demo; nunca un token. |
+| `/api/ai/actions` | El estado de las acciones de la IA (bloqueadas o no), su registro y el estado de la IA. |
+| `/api/ai/actions/confirm` | POST, este equipo. Ejecuta una acción propuesta por la IA, tras confirmarla; queda registrada. |
+| `/api/ai/actions/unlock` | POST, este equipo. Desbloquea las acciones de la IA durante un tiempo limitado; queda registrado. |
+| `/api/ai/budget` | Las llamadas y el coste estimado de hoy de cada modelo de IA, los límites y los últimos fallos; no consulta a ningún proveedor. |
+| `/api/ai/test` | POST, este equipo. Prueba la conexión de la IA configurada; no cambia nada. |
+| `/api/alerts/unmute` | POST. Quita el silencio de una alerta; queda registrado. |
+| `/api/analytics` | El resumen de la analítica de las ejecuciones: duraciones, cola, pasos, tests inestables y ejecuciones más lentas. |
+| `/api/discovery` | Lo que encontró el descubrimiento: el cuadro con la cuenta y los repositorios mostrados y ocultos, los últimos eventos, los grupos sugeridos, sus ajustes, los forks y las organizaciones. |
+| `/api/discovery/group` | POST. Añade un grupo sugerido al fichero de ecosistemas, guardando una copia del fichero. |
+| `/api/gh-action/plan` | POST, este equipo. Prepara lo que se enviaría a GitHub (un reintento, una cancelación, un dispatch o una fusión); todavía no se envía nada. |
+| `/api/gh-action/confirm` | POST, este equipo. Envía a GitHub lo que decía el plan, tras confirmarlo; queda registrado. |
+| `/api/github-token` | Solo este equipo. El estado del almacén del token de GitHub (el sistema y si hay uno guardado); nunca su valor. |
+| `/api/help/search` | Busca en los temas de ayuda con una palabra y devuelve los que coinciden. |
+| `/api/help/topic` | El texto de un tema de ayuda (`id=`) en el idioma de la página. |
+| `/api/help/topics` | La lista de los temas de ayuda con sus títulos. |
+| `/api/hot-only` | POST, este equipo. El interruptor "solo lo caliente" de la página; no cambia ningún estado guardado. |
+| `/api/mirror` | El estado del espejo de los repositorios (apagado por defecto). |
+| `/api/mode` | GET: el modo de trabajo, la estimación de cada modo y el tiempo restante. POST, este equipo: cambia el modo. |
+| `/api/notify/test` | POST. Envía un mensaje de prueba a un canal de notificación; no cambia nada. |
+| `/api/quota-pool/status` | Solo este equipo. La cuota de cada fuente de lecturas y lo que le falta a la GitHub App; nunca una clave ni un token. |
+| `/api/refresh-repos` | POST, este equipo. Refresca solo los repositorios que indiques y reescribe el fichero de los rojos (lo usa `finalize --execute`). |
+| `/api/screens/logo` | GET: el logo de la organización como imagen. POST: guarda uno nuevo (máximo 1 MB, comprobado por su tipo real). |
+| `/api/screens/logo/remove` | POST. Quita el logo de la organización; queda registrado. |
+| `/api/sentinel/ai` | POST. Pide a la IA que explique una alerta o una compilación; la petición es pequeña y la pregunta se limpia de secretos antes. No existe mientras la IA está apagada. |
+| `/api/sentinel/historial` | Ayer frente a hoy: los rojos y las firmas pendientes que aparecen o desaparecen. |
+| `/api/sentinel/parte/save` | POST. Guarda una copia del parte diario en la carpeta de auditoría; un GET nunca escribe. |
+| `/api/sentinel/security` | Lo que GitHub dice que está abierto o falta en seguridad (el centinela de Seguridad; apagado por defecto; solo lectura). |
+| `/api/session-token` | Un token de un solo uso para el siguiente cambio de un ajuste; la página lo pide justo antes de escribir. |
+| `/api/statusbar` | Lo que muestra la barra al pie de la página: edición, dirección, cuenta y centinelas; sin secretos ni llamadas a GitHub. |
+| `/api/welcome` | GET: si la guía de primer inicio está hecha. POST, este equipo: la marca como hecha o no. |

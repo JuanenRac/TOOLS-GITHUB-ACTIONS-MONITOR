@@ -45,7 +45,16 @@
       "workflow_minutes": [],
       "runner_minutes": []
     },
-    "rerun_timing": false
+    "rerun_timing": false,
+    "failed_jobs": {
+      "enabled": false,
+      "group_by": "auto",
+      "max_per_cycle": 4
+    },
+    "group": {
+      "min": 2,
+      "reusable": false
+    }
   },
   "watchdog_minutes": 10,
   "watchdog_max_abandoned": 8,
@@ -72,35 +81,17 @@
     "trend_green_pct": 90,
     "trend_health": 70,
     "trend_quota_pct": 80,
-    "dependency_bots": [
-      "dependabot",
-      "renovate"
-    ],
+    "dependency_bots": ["dependabot", "renovate"],
     "bots_apart": false,
     "required_files": [
-      [
-        "README.md"
-      ],
-      [
-        "LICENSE",
-        "LICENSE.md",
-        "LICENSE.txt",
-        "LICENSE-APACHE",
-        "LICENSE-MIT",
-        "COPYING"
-      ],
-      [
-        "CHANGELOG.md"
-      ],
-      [
-        "SECURITY.md"
-      ]
+      ["README.md"],
+      ["LICENSE", "LICENSE.md", "LICENSE.txt", "LICENSE-APACHE", "LICENSE-MIT", "COPYING"],
+      ["CHANGELOG.md"],
+      ["SECURITY.md"]
     ],
     "hygiene": {
       "ruleset_mode": "effective",
-      "ruleset_names": [
-        "protect-main"
-      ],
+      "ruleset_names": ["protect-main"],
       "skip": [],
       "community_fallback": false
     },
@@ -161,13 +152,8 @@
           "enabled": true,
           "recent_days": 30,
           "required": {
-            "default": [
-              "sha256",
-              "sig"
-            ],
-            "apk-build.yml": [
-              "sha256"
-            ]
+            "default": ["sha256", "sig"],
+            "apk-build.yml": ["sha256"]
           },
           "require_sha256": true,
           "require_signature": true,
@@ -262,14 +248,36 @@
       "min_rate_remaining": 1500,
       "repos": "all",
       "signals": {
-        "dependabot": {"enabled": true, "min_severity": "high"},
-        "code_scanning": {"enabled": true, "min_severity": "high"},
-        "secret": {"enabled": true},
-        "branch": {"enabled": true},
-        "workflow": {"enabled": true},
-        "codeowners": {"enabled": false}
+        "dependabot": {
+          "enabled": true,
+          "min_severity": "high"
+        },
+        "code_scanning": {
+          "enabled": true,
+          "min_severity": "high"
+        },
+        "secret": {
+          "enabled": true
+        },
+        "branch": {
+          "enabled": true
+        },
+        "workflow": {
+          "enabled": true
+        },
+        "codeowners": {
+          "enabled": false
+        }
       },
-      "penalty": {"critical": 25, "high": 10, "medium": 3, "low": 1, "branch": 5, "workflow": 3, "codeowners": 1}
+      "penalty": {
+        "critical": 25,
+        "high": 10,
+        "medium": 3,
+        "low": 1,
+        "branch": 5,
+        "workflow": 3,
+        "codeowners": 1
+      }
     },
     "collab": {
       "enabled": false,
@@ -279,22 +287,104 @@
       "repos": "all",
       "rules": {
         "issue_stale_days": 14,
-        "issue_critical_labels": [
-          "security",
-          "critical"
-        ],
+        "issue_critical_labels": ["security", "critical"],
         "pr_review_pending_days": 3,
         "pr_draft_max_days": 30,
         "pr_conflict_days": 7,
         "watch_external_comments": false,
-        "ignore_labels": [
-          "monitor:ignore"
-        ]
+        "ignore_labels": ["monitor:ignore"]
+      },
+      "search_api": false
+    },
+    "delivery": {
+      "changelog_paths": ["CHANGELOG.md"],
+      "enabled": false,
+      "expected_assets": [],
+      "max_calls_per_tick": 60,
+      "max_repos_per_tick": 10,
+      "min_rate_remaining": 1000,
+      "refresh_seconds": 3600,
+      "repos": "all",
+      "signals": {
+        "assets_missing": {
+          "enabled": true,
+          "level": "warning"
+        },
+        "ecosystem_drift": {
+          "enabled": true,
+          "level": "warning"
+        },
+        "release_without_notes": {
+          "enabled": true,
+          "level": "info"
+        },
+        "tag_without_release": {
+          "enabled": true,
+          "level": "warning"
+        },
+        "unreleased_pending": {
+          "enabled": true,
+          "level": "info"
+        },
+        "version_mismatch": {
+          "enabled": true,
+          "level": "warning"
+        }
+      },
+      "unreleased_days": 14,
+      "unreleased_min_entries": 1,
+      "version_files": []
+    },
+    "supply": {
+      "enabled": false,
+      "ignore": [],
+      "max_calls_per_tick": 60,
+      "max_files_per_repo": 40,
+      "max_repos_per_tick": 10,
+      "min_rate_remaining": 1000,
+      "refresh_seconds": 3600,
+      "repos": "all",
+      "signals": {
+        "mutable_ref": {
+          "enabled": true,
+          "level": "warning"
+        },
+        "permissions_missing": {
+          "enabled": true,
+          "level": "warning"
+        },
+        "permissions_wide": {
+          "enabled": true,
+          "level": "warning"
+        },
+        "pr_target_checkout": {
+          "enabled": true,
+          "level": "error"
+        },
+        "unpinned": {
+          "enabled": true,
+          "level": "warning"
+        }
       }
     }
   },
   "alerts": {
-    "mute_hours": 24
+    "mute_hours": 24,
+    "digest": {
+      "minutes": 0,
+      "threshold": 10
+    },
+    "group": {
+      "by_commit": false,
+      "min": 3
+    },
+    "service": {
+      "enabled": false,
+      "failures": 3,
+      "rate_percent": 0,
+      "workflows": []
+    },
+    "silences": []
   },
   "ai": {
     "provider": "none",
@@ -303,11 +393,7 @@
     "max_input_chars": 5000,
     "max_output_chars": 1500,
     "timeout_seconds": 90,
-    "events": [
-      "build",
-      "codeql",
-      "report"
-    ],
+    "events": ["build", "codeql", "report"],
     "allowed_repos": [],
     "answer_language": "",
     "catalog": {
@@ -319,12 +405,34 @@
     "actions": {
       "enabled": false,
       "execute": false,
-      "allowed": [
-        "rerun_failed",
-        "close_issue"
-      ],
+      "allowed": ["rerun_failed", "close_issue"],
       "max_per_hour": 5,
       "ttl_seconds": 600
+    },
+    "assistant": {
+      "max_context": 6000,
+      "max_tool_calls": 4,
+      "tools": ["status", "alerts", "runs", "score"]
+    },
+    "prompt_log": {
+      "keep": 200
+    },
+    "tasks": {
+      "alert": {
+        "timeout_seconds": 30
+      },
+      "build": {
+        "timeout_seconds": 30
+      },
+      "codeql": {
+        "timeout_seconds": 30
+      },
+      "diagnose": {
+        "timeout_seconds": 30
+      },
+      "report": {
+        "timeout_seconds": 30
+      }
     }
   },
   "webhook": {
@@ -333,7 +441,11 @@
     "record_events": true,
     "live_events_keep": 100,
     "replay_seconds": 3600,
-    "max_per_minute": 30
+    "max_per_minute": 30,
+    "max_bad_per_minute": 120,
+    "max_verified_per_minute": 120,
+    "persist_deliveries": true,
+    "reject_stale": false
   },
   "chatops": {
     "enabled": false,
@@ -441,13 +553,7 @@
   },
   "notify": {
     "enabled": false,
-    "events": [
-      "red_new",
-      "stuck_new",
-      "pending_sign",
-      "offline",
-      "credential_blind"
-    ],
+    "events": ["red_new", "stuck_new", "pending_sign", "offline", "credential_blind"],
     "max_per_hour": 20,
     "channels": {
       "telegram": {
@@ -503,6 +609,9 @@
     },
     "report_schedule": {
       "max_items": 50
+    },
+    "digest": {
+      "max_items": 50
     }
   },
   "display": {
@@ -515,7 +624,20 @@
     "on_connection_lost": true,
     "cooldown_seconds": 30,
     "volume": 40,
-    "server_beep": false
+    "server_beep": false,
+    "on_info": true,
+    "on_lesson": true,
+    "on_live_recovered": true,
+    "on_report": true,
+    "on_resolved": true,
+    "on_score_drop": true,
+    "on_sentinel": true,
+    "on_stuck": true,
+    "on_warning": true,
+    "quiet_enabled": false,
+    "quiet_from_hour": 22,
+    "quiet_to_hour": 7,
+    "theme": "classic"
   },
   "updates": {
     "check": true
@@ -536,6 +658,15 @@
       "cold_refresh_seconds": 90,
       "runs_per_repo": 50,
       "hot_hours": 12
+    },
+    "auto_low": true,
+    "auto_low_enter": 1000,
+    "auto_low_exit": 2500,
+    "low": {
+      "cold_refresh_seconds": 1800,
+      "hot_hours": 2,
+      "refresh_seconds": 240,
+      "runs_per_repo": 10
     }
   },
   "account": {
@@ -577,7 +708,10 @@
     "secure_cookie": false,
     "max_failed_attempts": 10,
     "query_access": false,
-    "local_port": 0
+    "local_port": 0,
+    "proxy_public_host": "",
+    "trusted_proxies": [],
+    "trusted_proxy": false
   },
   "github_token": {
     "enabled": false,
@@ -585,10 +719,7 @@
   },
   "github_actions": {
     "enabled": false,
-    "allowed": [
-      "rerun_failed",
-      "cancel"
-    ],
+    "allowed": ["rerun_failed", "cancel"],
     "merge_method": "squash"
   },
   "act": {
@@ -598,9 +729,7 @@
     "allow_symlinks": false
   },
   "dispatch": {
-    "required_ci": [
-      "ci.yml"
-    ]
+    "required_ci": ["ci.yml"]
   },
   "mirror": {
     "enabled": false,
@@ -615,26 +744,12 @@
     "model": {
       "enabled": false,
       "jobs_per_cycle": 10,
-      "thirdparty_labels": [
-        "blacksmith",
-        "buildjet",
-        "namespace-profile",
-        "depot",
-        "warpbuild",
-        "ubicloud",
-        "runs-on",
-        "actuated",
-        "cirrus-runners",
-        "codspeed"
-      ],
+      "thirdparty_labels": ["blacksmith", "buildjet", "namespace-profile", "depot", "warpbuild", "ubicloud", "runs-on", "actuated", "cirrus-runners", "codspeed"],
       "large_labels": [],
       "self_labels": [],
       "queue_warn_minutes": 20,
       "runaway_runs_per_hour": 20,
-      "runaway_ignore_events": [
-        "pull_request",
-        "pull_request_target"
-      ],
+      "runaway_ignore_events": ["pull_request", "pull_request_target"],
       "thirdparty_usd_per_minute": 0.0,
       "alerts": true,
       "alert_level": "warning"
@@ -694,6 +809,35 @@
       "enabled": false,
       "url": "",
       "max_per_hour": 6
+    },
+    "briefs": {
+      "access_log": false
+    },
+    "cascade": {
+      "enabled": true
+    },
+    "client_hook": {
+      "block_on_stop": false,
+      "cooldown_minutes": 20,
+      "enabled": true,
+      "max_chars": 2400,
+      "max_lines": 12,
+      "stale_hours": 3
+    },
+    "diagnose": {
+      "enabled": false,
+      "log_lines": 10,
+      "max_bytes": 1500,
+      "max_per_cycle": 3
+    },
+    "heartbeat": {
+      "enabled": true,
+      "window_minutes": 15
+    },
+    "stream": {
+      "enabled": false,
+      "max_clients": 3,
+      "max_seconds": 3600
     }
   },
   "retention": {
@@ -734,11 +878,26 @@
       "security": 25
     },
     "limits": {
-      "reliability": {"good": 0.98, "bad": 0.5},
-      "speed": {"good": 600, "bad": 3600},
-      "recovery": {"good": 1800, "bad": 86400},
-      "collaboration": {"good": 172800, "bad": 1209600},
-      "security": {"good": 0, "bad": 100}
+      "reliability": {
+        "good": 0.98,
+        "bad": 0.5
+      },
+      "speed": {
+        "good": 600,
+        "bad": 3600
+      },
+      "recovery": {
+        "good": 1800,
+        "bad": 86400
+      },
+      "collaboration": {
+        "good": 172800,
+        "bad": 1209600
+      },
+      "security": {
+        "good": 0,
+        "bad": 100
+      }
     },
     "grades": {
       "A": 90,
@@ -752,15 +911,176 @@
       "notify_external": false
     }
   },
+  "tui": {
+    "theme": "dark",
+    "refresh_seconds": 5
+  },
+  "ai_notify": {
+    "confirmed_provider": "",
+    "cost_per_call_cents": 5,
+    "enabled": false,
+    "max_calls_per_hour": 4,
+    "max_cost_per_hour_cents": 50,
+    "timeout_seconds": 30
+  },
+  "central": {
+    "max_age_minutes": 120,
+    "source": "off"
+  },
+  "compare": {
+    "cache_seconds": 60,
+    "default_days_filter": "all",
+    "default_window_days": 7,
+    "enabled": false,
+    "include_in_report": false,
+    "min_days_of_history": 14,
+    "min_repo_runs": 3,
+    "min_resolved": 3,
+    "min_runs_per_window": 20,
+    "min_snapshots": 12,
+    "top_changes": 10,
+    "workdays": ["1", "2", "3", "4", "5"]
+  },
+  "extra_reader": {
+    "any_folder": false,
+    "enabled": false,
+    "file": ""
+  },
+  "github_app": {
+    "enabled": false,
+    "installation_id": "",
+    "key_path": "",
+    "openssl_path": "",
+    "share_reads": false
+  },
+  "live": {
+    "sse": {
+      "enabled": false,
+      "max_clients": 3,
+      "max_seconds": 3600
+    }
+  },
+  "logs": {
+    "failed_step": {
+      "enabled": false,
+      "lines": 12,
+      "max_bytes": 2000,
+      "max_per_minute": 10
+    }
+  },
+  "network": {
+    "etag": true,
+    "graphql_batch": 20,
+    "graphql_checks": false,
+    "use_proxy": false
+  },
+  "ops": {
+    "backup": {
+      "compress_level": 6,
+      "dir": "backups",
+      "enabled": false,
+      "encrypt": false,
+      "include_config": true,
+      "interval_hours": 24,
+      "keep": 7,
+      "key_env": ""
+    },
+    "doctor": {
+      "backup_max_age_days": 8,
+      "min_free_mb": 500,
+      "sqlite_check": "quick",
+      "sqlite_timeout_s": 20,
+      "strict_exit": false,
+      "webhook_min_length": 16
+    },
+    "purge": {
+      "enabled": false,
+      "require_backup_hours": 24
+    }
+  },
+  "pagination": {
+    "collab_pages": 3,
+    "job_pages": 2,
+    "workflow_pages": 3
+  },
+  "ports": {
+    "complete": 8765,
+    "lite": 8766
+  },
+  "reports": {
+    "max_calls_per_cycle": 4,
+    "queue": {
+      "enabled": false
+    },
+    "release_view": {
+      "enabled": false
+    },
+    "supply_chain": {
+      "enabled": false
+    },
+    "workflow_hygiene": {
+      "enabled": false
+    }
+  },
+  "sampling": {
+    "api_budget_per_hour": 0,
+    "default_branch_probe": false,
+    "min_coverage_minutes": 30
+  },
+  "savings": {
+    "feeds": {
+      "enabled": false,
+      "max_age_minutes": 240,
+      "method": "atom"
+    },
+    "webhook_first": false,
+    "webhook_full_minutes": 360,
+    "webhook_window_minutes": 60
+  },
   "screens": {
     "menu": true,
     "menu_target": "new",
     "menu_max_windows": 4,
     "menu_rotate_seconds": 20,
-    "menu_tv_scale": 1.5
+    "menu_tv_scale": 1.5,
+    "alert_hold_seconds": 30,
+    "blink": true,
+    "blink_calm_minutes": 30,
+    "burn_in_protection": true,
+    "default_density": "normal",
+    "default_theme": "inherit",
+    "enabled": false,
+    "group_map": true,
+    "logo_corner": "top-right",
+    "logo_max_height": 64,
+    "logo_max_width": 160,
+    "logo_now": false,
+    "logo_overview": true,
+    "logo_sentinels": false,
+    "mode": "three",
+    "night_dim": false,
+    "night_dim_from_hour": 22,
+    "night_dim_to_hour": 7,
+    "refresh_seconds": 10,
+    "rotate_every_seconds": 20,
+    "rotate_seconds": 0,
+    "show_repo_names": "public",
+    "sound": false,
+    "theme_now": "inherit",
+    "theme_overview": "inherit",
+    "theme_sentinels": "inherit"
   },
-  "tui": {
-    "theme": "dark",
-    "refresh_seconds": 5
+  "ui": {
+    "alerts_sort": "server",
+    "now_sort": "ecosystem",
+    "orientation": "auto",
+    "rotate_seconds": 0,
+    "screen1_orientation": "auto",
+    "screen1_tabs": "",
+    "screen2_orientation": "auto",
+    "screen2_tabs": "",
+    "screen3_orientation": "auto",
+    "screen3_tabs": "",
+    "theme": "auto"
   }
 }
