@@ -79,6 +79,15 @@ def inventory(data, panels=None, health=None, now=None, daily_trend=None):
     out.append(_signal("now.fail24", "now", "info", f"{figures.get('fail24', 0)} failure(s) and {figures.get('ok24', 0)} success(es) in the last 24 h"))
     errors = data.get("errors") or {}
     out.append(_signal("repos.errors", "repos", "watch" if errors else "info", f"{len(errors)} repositor(ies) without data", [_row(k, v, "", None, "wait: reads are repeated by themselves") for k, v in list(errors.items())[:20]], transient=True))
+    drift = data.get("drift") or {}
+    if drift.get("status") or drift.get("conclusion") or drift.get("malformed"):
+        names = [f"status {k} ({n})" for k, n in (drift.get("status") or {}).items()] + [f"conclusion {k} ({n})" for k, n in (drift.get("conclusion") or {}).items()]
+        out.append(_signal("schema.drift", "repos", "info", "GitHub sent values the monitor does not know: " + (", ".join(names[:8]) or "no named value") + (f"; {drift.get('malformed')} run(s) without a usable number left out" if drift.get("malformed") else ""),
+                           [_row("", "an unknown value is never counted as red or as green: it is shown as it came", "", None, "the rules of the monitor have to learn it; report it")], transient=False))
+    listing = data.get("listing") or {}
+    if listing.get("suspect"):
+        out.append(_signal("repos.listing", "repos", "watch", f"the listing of the account came back {'empty' if listing.get('verdict') == 'empty' else 'with far fewer repositories'} ({listing.get('now')} instead of {listing.get('before')}): the last good listing is kept",
+                           [_row("", "a listing like this is not believed: it would look like everything is green with nothing watched", "", None, "wait: it is asked again in a few minutes; check the access of the token to the account")], transient=True))
     block = data.get("quota_block") or {}
     rate = data.get("rate") or {}
     if block.get("blocked"):
@@ -100,6 +109,8 @@ def inventory(data, panels=None, health=None, now=None, daily_trend=None):
         rows = [_row(name, f"{info.get('remaining')}/{info.get('limit')} calls left, renews {info.get('reset')}", "", None, "") for name, info in sources.items()]
         out.append(_signal("quota.accounting", "now", "info", f"reads: {etag.get('calls', 0)} conditional calls, {etag.get('saved', 0)} answered 304 (no allowance spent)" + (f"; {len(sources)} sources read the repositories" if len(sources) > 1 else "") +
                            (f"; GraphQL: {gql.get('calls')} batch(es) read {gql.get('repos', 0)} repositories for {gql.get('cost', 0)} point(s), {gql.get('fallbacks', 0)} went to REST" if gql.get("calls") else ""), rows))
+    if etag.get("calls"):
+        out.append(etag_health_signal(etag))
     offline = (data.get("offline") or {}).get("offline")
     out.append(_signal("connection", "now", "watch" if offline else "info", "offline since " + str((data.get("offline") or {}).get("since")) if offline else "online", transient=bool(offline)))
     for panel in panels or []:
@@ -208,3 +219,14 @@ def brief_sections(doc):
     lines += [f"- {s['id']}: {s['summary']}" for s in doc["signals"] if s["id"].startswith(("health.", "connection", "quota"))]
     lines.append(f"- edition: {doc['edition']}" + (" (panels not in this edition: " + ", ".join(doc["panels_not_in_this_edition"]) + ")" if doc["panels_not_in_this_edition"] else "") + f"; signals to act on: {doc['act']}")
     return "\n".join(lines) + "\n"
+
+
+def etag_health_signal(etag):
+    """The health of the conditional reads in one signal: the share of calls answered 304, the full answers that came without an ETag (a proxy that strips it makes the cache do nothing), the reads made in full on purpose
+    because they describe something still running, and the refusals remembered. `watch` only when the cache stores nothing and answers without an ETag keep arriving."""
+    calls, saved, bare = int(etag.get("calls") or 0), int(etag.get("saved") or 0), int(etag.get("no_etag") or 0)
+    broken = bare >= 10 and bare > saved
+    text = (f"conditional reads: {etag.get('hit_pct', 0) or 0}% of {calls} calls answered 304; {bare} full answer(s) without ETag; {int(etag.get('skipped_active') or 0)} list(s) with running work and "
+            f"{int(etag.get('skipped_stateful') or 0)} read(s) of a state in motion made in full; {int(etag.get('denied_hits') or 0)} refused read(s) not repeated")
+    rows = [_row("", "answers without ETag outnumber the 304: something between this computer and GitHub strips the header, so the cache saves nothing", "", None, "check the proxy or turn the cache off")] if broken else []
+    return _signal("quota.etag", "now", "watch" if broken else "info", text, rows, transient=broken)

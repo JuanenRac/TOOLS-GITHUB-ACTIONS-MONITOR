@@ -23,7 +23,8 @@ A workflow that FAILED and then PASSED on the very same commit (or whose run nee
 
 ## Conditional reads (ETag)
 
-- Each read of the run lists sends `If-None-Match`; GitHub answers `304 Not Modified` when nothing changed and that answer costs no quota. The header shows how many reads were saved and `ghamon_etag_saved_total` counts them. `cache.etag.enabled` and `cache.etag.ttl_hours` are in the Settings tab.
+- Each read of the run lists sends `If-None-Match`; GitHub answers `304 Not Modified` when nothing changed and that answer costs no quota. The header shows how many reads were saved and `ghamon_etag_saved_total` counts them. `cache.etag.enabled` and `cache.etag.ttl_hours` are in the Settings tab. Every entry belongs to the credential that read it (a short fingerprint of the token is part of the key, never the token), so a `304` never returns the body of another identity. A state that is still moving is always read in full: the jobs of a run, one run, the check suites and check runs (`cache.etag.skip_stateful`) and any list of runs whose last answer still had a run queued or in progress (`cache.etag.revalidate_active`). A refusal (404 or 403 that is not a rate limit) is remembered for `cache.negative_ttl_s` seconds. `/metrics` also counts the answers without ETag, the reads made in full on purpose and the refusals not repeated, and the brief for the AI tools has the signal `quota.etag`.
+- The brief for the AI tools names `schema.drift` when GitHub sent a status or a conclusion the monitor does not know, or a run without a usable number: the unknown value is shown as it came and is never counted as red or as green.
 - The cache is the local file `etag_cache.json` (never published); a broken file is just an empty cache.
 
 

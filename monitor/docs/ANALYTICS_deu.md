@@ -23,7 +23,8 @@ Ein Workflow, der auf demselben Commit FEHLSCHLUG und dann BESTAND (oder dessen 
 
 ## Bedingte Lesungen (ETag)
 
-- Jede Lesung der Run-Listen sendet `If-None-Match`; GitHub antwortet mit `304 Not Modified`, wenn sich nichts geändert hat, und das kostet kein Kontingent. Die Kopfzeile zeigt, wie viele Lesungen gespart wurden, `ghamon_etag_saved_total` zählt sie. `cache.etag.enabled` und `cache.etag.ttl_hours` stehen im Reiter Einstellungen.
+- Jede Lesung der Run-Listen sendet `If-None-Match`; GitHub antwortet mit `304 Not Modified`, wenn sich nichts geändert hat, und das kostet kein Kontingent. Die Kopfzeile zeigt, wie viele Lesungen gespart wurden, `ghamon_etag_saved_total` zählt sie. `cache.etag.enabled` und `cache.etag.ttl_hours` stehen im Reiter Einstellungen. Jeder Eintrag gehört zu der Zugangsberechtigung, die ihn gelesen hat (ein kurzer Fingerabdruck des Tokens ist Teil des Schlüssels, nie das Token), daher liefert ein `304` nie den Inhalt einer anderen Identität. Ein Zustand, der sich noch bewegt, wird immer vollständig gelesen: die Jobs eines Laufs, ein einzelner Lauf, Check-Suites und Check-Runs (`cache.etag.skip_stateful`) und jede Laufliste, deren letzte Antwort noch einen wartenden oder laufenden Lauf enthielt (`cache.etag.revalidate_active`). Eine Ablehnung (404 oder 403, kein Ratelimit) wird `cache.negative_ttl_s` Sekunden gemerkt. `/metrics` zählt außerdem die Antworten ohne ETag, die absichtlich vollständigen Lesungen und die nicht wiederholten Ablehnungen; der Brief für die KI-Werkzeuge hat das Signal `quota.etag`.
+- Der Brief für die KI-Werkzeuge nennt `schema.drift`, wenn GitHub einen dem Monitor unbekannten Zustand oder ein unbekanntes Ergebnis oder einen Lauf ohne brauchbare Nummer gesendet hat: Der unbekannte Wert wird gezeigt, wie er kam, und nie als rot oder grün gezählt.
 - Der Cache ist die lokale Datei `etag_cache.json` (nie veröffentlicht); eine defekte Datei ist einfach ein leerer Cache.
 
 

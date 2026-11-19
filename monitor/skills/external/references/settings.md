@@ -152,7 +152,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `auth.min_length` (secure) | `10` | advanced | Shortest password |
 | `auth.session_hours` (secure) | `12` | advanced | Session length |
 | `cache.etag.enabled` | `true` | cache | Conditional reads on |
+| `cache.etag.revalidate_active` | `true` | cache | Read lists with running work in full |
+| `cache.etag.skip_stateful` | `true` | cache | Always read live state in full |
 | `cache.etag.ttl_hours` | `24` | cache | Entry lifetime |
+| `cache.negative_ttl_s` | `300` | cache | Remember a refusal for |
 | `central.max_age_minutes` | `120` | quota | Minutes before the central panel is behind |
 | `central.source` (secure) | `"off"` | quota | Central panel as a base line |
 | `chatops.allowed_channels` (secure) | `[]` | webhook | Allowed channels |
@@ -219,6 +222,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `compare.min_snapshots` | `12` | sentinel | Least hourly snapshots |
 | `compare.top_changes` | `10` | sentinel | Rows in the changes |
 | `compare.workdays` | `["1", "2", "3", "4", "5"]` | sentinel | Workdays |
+| `config_check.strict` | `false` | basic | Refuse to start with a bad configuration |
 | `discover_limit` | `1000` | polling | Repositories listed |
 | `discover_refresh_seconds` | `3600` | polling | Search for new repositories |
 | `discovery.auto_frequency` | `false` | basic | Adjust the refresh to the real activity |
@@ -227,6 +231,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `discovery.fork_ci_days` | `90` | basic | A fork is maintained if its CI ran in the last |
 | `discovery.fork_policy` | `"show"` | basic | Forks |
 | `discovery.hide` | `[]` | basic | Leave out repositories of these kinds |
+| `discovery.min_keep_pct` | `-` | basic | Smallest listing believed (%) |
 | `discovery.skip_archived` | `true` | basic | Leave out archived repositories |
 | `discovery.suggest_groups` | `true` | basic | Suggest groups for unclassified repositories |
 | `dispatch.required_ci` | `["ci.yml"]` | advanced | Workflows that must pass before a build is fired |
@@ -391,6 +396,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `outputs.prometheus.enabled` (secure) | `-` | outputs | Prometheus: /metrics |
 | `outputs.prometheus.per_repo` | `-` | outputs | Prometheus: series per repository |
 | `pagination.collab_pages` | `3` | polling | Pages of issues and pull requests per repository |
+| `pagination.cursor_pages` | `3` | polling | Pages followed by cursor (alerts) |
 | `pagination.job_pages` | `2` | polling | Pages of jobs per run |
 | `pagination.workflow_pages` | `3` | polling | Pages of workflows per repository |
 | `ports.complete` | `8765` | general | Port of the complete edition |
