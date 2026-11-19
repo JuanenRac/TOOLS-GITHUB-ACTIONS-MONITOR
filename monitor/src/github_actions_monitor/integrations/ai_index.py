@@ -31,7 +31,7 @@ ENDPOINTS = (
     ("GET", "/api/health", "is it alive; `?deep=1` fails when the refresh cycle is stuck"),
     ("GET", "/api/paths", "the folders and files of this monitor and whether anything is still in the old places"),
     ("GET", "/api/ai/brief", "the brief (Markdown; `?fmt=json` for JSON)"),
-    ("GET", "/api/ai/alerts", "the feed since a moment (`?since=SECONDS`)"),
+    ("GET", "/api/ai/alerts", "the feed since a moment (`?since=SECONDS`), each alert with `first_failed`, `last_failed`, `last_checked` and a `status` (failed, suppressed, passed)"),
     ("GET", "/api/ai/state", "every signal of the monitor, versioned"),
     ("GET", "/api/ai/stream", "server-sent events of the alerts (off by default)"),
     ("GET", "/api/ai/budget", "the calls and the estimated cost of today for each AI model, the limits and the last failures of a main model (no request to a provider)"),
