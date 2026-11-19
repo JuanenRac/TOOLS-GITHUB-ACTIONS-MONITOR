@@ -590,6 +590,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinel.surface.max_repos_per_tick` | `-` | surface | Repositories per surface cycle |
 | `sentinel.surface.min_rate_factor` | `-` | surface | Allowance factor to start A10 |
 | `sentinel.surface.refresh_seconds` | `-` | surface | Surface read of GitHub |
+| `sentinel.trend_green_pct` | `-` | sentinel | Line of green workflows |
+| `sentinel.trend_health` | `-` | sentinel | Line of the health |
+| `sentinel.trend_quota_pct` | `-` | sentinel | Line of the API quota used |
 | `sentinel.workers` | `-` | sentinel | Sentinel parallel requests |
 | `sentinels.collab.enabled` | `-` | sentinel | Collab sentinel on |
 | `sentinels.collab.max_repos_per_tick` | `-` | sentinel | Repositories per round |

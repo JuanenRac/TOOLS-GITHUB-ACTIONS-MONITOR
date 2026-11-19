@@ -149,7 +149,7 @@ def demo_analytics(runs):
 def rich_alerts(now, iso):
     """Invented findings of the Delivery sentinel (release.*) and of the Supply chain sentinel (actions.supply.*)."""
     def one(code, level, repo, title, hours):
-        return {"id": f"{code}:{repo}", "code": code, "level": level, "sentinel": "delivery" if code.startswith("release.") else "supply", "account_id": "", "repo": repo, "title": title, "details": {"url": "#"},
+        return {"id": f"{code}:{repo}", "code": code, "level": level, "sentinel": "delivery" if code.startswith("release.") else ("security" if code.startswith("security.") else "supply"), "account_id": "", "repo": repo, "title": title, "details": {"url": "#"},
                 "created_at": iso(now - timedelta(hours=hours))}
     return [one("release.unreleased_pending", "info", "demo-beta-docs", "demo-beta-docs: 4 changelog entries wait for a release (18 days)", 430),
             one("release.tag_without_release", "warning", "demo-alpha-app", "demo-alpha-app: tag v2.4.0 has no release", 52),
@@ -159,7 +159,34 @@ def rich_alerts(now, iso):
             one("actions.supply.unpinned", "warning", "demo-alpha-app", "demo-alpha-app: 3 actions are not pinned to a commit", 90),
             one("actions.supply.mutable_ref", "info", "demo-gamma-ui", "demo-gamma-ui: an action uses a branch as its reference", 300),
             one("actions.supply.permissions_wide", "error", "demo-gamma-api", "demo-gamma-api: a workflow grants write-all to the token", 60),
-            one("actions.supply.pr_target_checkout", "error", "demo-beta-docs", "demo-beta-docs: pull_request_target checks out code of the pull request", 40)]
+            one("actions.supply.pr_target_checkout", "error", "demo-beta-docs", "demo-beta-docs: pull_request_target checks out code of the pull request", 40),
+            one("security.secret", "error", "demo-gamma-api", "demo-gamma-api: a secret was found in the history (1 open alert)", 18),
+            one("security.code_scanning", "warning", "demo-alpha-app", "demo-alpha-app: 2 open code scanning alerts (1 high)", 70),
+            one("security.dependabot", "warning", "demo-beta-fw", "demo-beta-fw: 4 open Dependabot alerts (1 critical)", 100),
+            one("security.branch_unprotected", "warning", "demo-gamma-ui", "demo-gamma-ui: the default branch is not protected", 260),
+            one("security.codeowners_missing", "info", "demo-beta-docs", "demo-beta-docs: no CODEOWNERS file", 500),
+            one("security.workflow_write", "warning", "demo-alpha-core", "demo-alpha-core: the workflow token can write by default", 150)]
+
+
+def rich_tabs(config, snap, now):
+    """--rich, the tabs that have data of their own: the book of failures of the Lessons tab (four failures of the demo runs) and one scheduled report for the Scheduled reports tab. Each one is written into the temporary
+    folders of the demo and none stops the others: a tab that could not be filled says so on the console."""
+    from github_actions_monitor.integrations import lessons
+    from github_actions_monitor.reporting import report_service
+    stamp = int(now.timestamp())
+    failures = [{"repo": "demo-alpha-app", "workflow": "Release build", "conclusion": "failure", "cause": "Process completed with exit code 1: npm ERR! missing script build", "url": f"https://github.com/{OWNER}/demo-alpha-app/actions/runs/401"},
+                {"repo": "demo-gamma-api", "workflow": "CI", "conclusion": "failure", "cause": "ModuleNotFoundError: No module named 'requests'", "url": f"https://github.com/{OWNER}/demo-gamma-api/actions/runs/402"},
+                {"repo": "demo-beta-docs", "workflow": "CI", "conclusion": "timed_out", "cause": "The job running on runner demo-runner-2 has exceeded the maximum execution time of 360 minutes", "url": f"https://github.com/{OWNER}/demo-beta-docs/actions/runs/403"},
+                {"repo": "demo-beta-fw", "workflow": "Firmware build", "conclusion": "failure", "cause": "error: linker command failed with exit code 1", "url": f"https://github.com/{OWNER}/demo-beta-fw/actions/runs/404"}]
+    try:
+        lessons.record(config, failures, now=stamp)
+    except Exception as error:   # noqa: BLE001
+        print("demo: the Lessons tab stays empty:", error, flush=True)
+    try:
+        snapshot, alerts, team = am.report_gather()
+        report_service.run(config, am.report_account(), snapshot, alerts, team, now=stamp)
+    except Exception as error:   # noqa: BLE001
+        print("demo: the Scheduled reports tab stays empty:", error, flush=True)
 
 
 def rich_setup(snap, now):
@@ -167,7 +194,21 @@ def rich_setup(snap, now):
     days = [(now - timedelta(days=13 - i)).strftime("%Y-%m-%d") for i in range(14)]
     series = {"codeql": [5, 5, 4, 4, 4, 3, 3, 3, 2, 2, 2, 2, 1, 1], "dependabot": [9, 9, 8, 10, 10, 9, 7, 7, 6, 6, 5, 5, 4, 4], "secret": [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
               "prs": [3, 4, 4, 5, 3, 2, 3, 6, 5, 4, 3, 3, 2, 2], "red": [4, 3, 5, 2, 2, 3, 1, 2, 4, 3, 2, 2, 1, 3], "candidates": [1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5]}
-    snap["a3"]["trend"] = {k: {"dates": days, "values": v} for k, v in series.items()}
+    n = None      # a day before the figure existed: a gap in the chart, never a zero
+    series.update({"stuck": [1, 0, 2, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1], "ci_green_pct": [88.0, 91.5, 86.2, 94.0, 93.1, 90.4, 96.0, 95.2, 89.9, 92.3, 94.7, 95.1, 97.0, 91.0], "ci_repos_ok": [6, 7, 6, 8, 8, 7, 9, 8, 7, 8, 8, 9, 9, 8],
+                   "issues_open": [2, 2, 3, 3, 2, 2, 1, 1, 2, 2, 1, 1, 1, 0], "prs_old": [1, 1, 2, 2, 2, 3, 3, 2, 2, 1, 1, 1, 0, 0], "unsigned": [0, 0, 1, 1, 1, 2, 2, 1, 1, 0, 0, 0, 1, 1],
+                   "health": [72.0, 74.5, 73.0, 76.0, 78.5, 77.0, 80.0, 82.5, 81.0, 83.0, 84.5, 85.0, 86.5, 87.0], "ready": [1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4],
+                   "quota_used_pct": [35.0, 42.0, 51.0, 47.0, 66.0, 83.0, 71.0, 58.0, 49.0, 44.0, 52.0, 61.0, 57.0, 54.0], "minutes24": [210, 180, 330, 290, 150, 400, 360, 240, 260, 310, 190, 220, 280, 300],
+                   "sev_critical": [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], "sev_high": [3, 3, 4, 4, 3, 3, 2, 2, 2, 2, 1, 1, 1, 1],
+                   "sev_medium": [n, n, n, n, 6, 6, 5, 5, 5, 4, 4, 4, 3, 3], "sev_low": [n, n, n, n, 9, 9, 9, 8, 8, 8, 7, 7, 7, 6],
+                   "dur_avg": [n, n, n, 4.2, 4.0, 4.6, 5.1, 4.4, 4.1, 4.0, 3.9, 4.3, 4.5, 4.2], "dur_p95": [n, n, n, 11.0, 10.2, 12.5, 14.0, 11.8, 10.9, 10.4, 10.1, 11.2, 12.0, 11.5],
+                   "queue_avg": [n, n, n, 8.0, 7.5, 12.0, 15.5, 9.0, 8.5, 7.0, 6.5, 8.0, 9.5, 8.0], "flaky": [n, n, n, 1, 0, 2, 3, 1, 1, 0, 0, 1, 0, 1], "artifact_mb": [n, n, n, n, n, 120.5, 124.0, 131.2, 133.0, 140.4, 138.9, 142.0, 150.3, 151.0]})
+    trend = {k: {"dates": days, "values": v} for k, v in series.items()}
+    trend["min_repo"] = {"dates": days, "repos": {"demo-alpha-app": [n, n, n, 60, 55, 80, 90, 70, 65, 72, 60, 58, 77, 80], "demo-gamma-api": [n, n, n, 40, 35, 50, 45, 42, 38, 41, 39, 44, 46, 47], "demo-beta-docs": [n, n, n, 12, 10, 18, 16, 14, 13, 12, 11, 15, 16, 14]}}
+    trend["releases"] = {days[3]: ["demo-alpha-app v1.4.0"], days[9]: ["demo-gamma-api v2.0.1", "demo-beta-docs v0.9.0"]}
+    trend["thresholds"] = {"ci_green_pct": 90, "health": 70, "quota_used_pct": 80}
+    trend["versions"] = [None] * 14
+    snap["a3"]["trend"] = trend
     from github_actions_monitor.compare import compare_service
     cmp_answer = {"schema": compare_service.SCHEMA, "account": OWNER, "enabled": True, "state": "compared", "windows": None, "days": "all", "baseline": "previous", "coverage": 0.92,
                   "metrics": {"red_rate": {"state": "ok", "now": 0.12, "base": 0.21, "direction": "better"}, "duration_p50": {"state": "ok", "now": 196, "base": 171, "direction": "worse"},
@@ -228,8 +269,8 @@ def main():
             return ["ci", "collab", "security", "delivery", "supply"]
 
         def get(self, name):
-            if rich and name in ("delivery", "supply"):
-                return DemoRelease("release." if name == "delivery" else "actions.supply.")
+            if rich and name in ("delivery", "supply", "security"):
+                return DemoRelease({"delivery": "release.", "supply": "actions.supply.", "security": "security."}[name])
             return DemoCollab() if name == "collab" else (DemoSecurity() if name in ("security", "delivery", "supply") else None)
     if not lite:
         am.SENTINEL["registry"] = DemoRegistry()
@@ -239,6 +280,8 @@ def main():
     am.ETAG["cache"] = etagcache.EtagCache(Path(tempfile.mkdtemp()) / "e.json")
     am.update_info = lambda read=True: {"enabled": True, "newer": True, "latest": "9.9.9", "current": am.TOOL_VERSION, "url": "https://example.invalid/release", "changelog": "https://example.invalid/changelog", "airgapped": False, "checked_at": 0, "offline": False}   # an invented newer version, for the picture of the badge
     am.LIVE_CONFIG.update({"account": {"plan": "free"}, "session_guard": False})
+    if rich and not lite:
+        rich_tabs(am.LIVE_CONFIG, snap, now)
     if "--network" in sys.argv:      # only what the page shows: the server below still listens on 127.0.0.1 and localguard stays off
         real_state = am.localguard.public_state
         am.localguard.public_state = lambda: {**real_state(), "network": True, "host": "0.0.0.0", "token_required": True, "secure": True}

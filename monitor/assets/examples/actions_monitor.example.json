@@ -69,6 +69,9 @@
     "candidate_min_entries": 1,
     "skip_candidate_prefixes": [],
     "stale_pr_days": 7,
+    "trend_green_pct": 90,
+    "trend_health": 70,
+    "trend_quota_pct": 80,
     "dependency_bots": [
       "dependabot",
       "renovate"

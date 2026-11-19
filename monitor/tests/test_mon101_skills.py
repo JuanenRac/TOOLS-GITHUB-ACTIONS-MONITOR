@@ -16,7 +16,7 @@ class Skills(unittest.TestCase):
     def test_every_card_and_every_series_is_named_in_both_skills_and_the_core_points_to_it(self):
         codes = re.findall(r'"([a-z]+\.[a-z_.]+)"', PAGE[PAGE.index("const SPDEF="):PAGE.index("const SPKEY=")])
         series = re.findall(r'\["([a-z_0-9]+)","ui\.tr_', PAGE[PAGE.index("const TRS="):PAGE.index("let TRR=")])
-        self.assertEqual((len(codes), len(series)), (23, 18))
+        self.assertEqual((len(codes), len(series)), (23, 25))
         for name in skills.names():
             text = skills.read(name, "references/cards-and-trend.md")
             for word in codes + series:

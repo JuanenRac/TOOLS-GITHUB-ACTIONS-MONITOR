@@ -45,7 +45,7 @@ class Coverage(unittest.TestCase):
             self.assertIn("tab:" + tab, signals.COVERAGE, tab)
 
     def test_the_covered_signals_exist(self):
-        doc = signals.state(data(), sentinel_panels.panels(snapshot(), i18n.t, analytics={"enabled": True, "slower": [], "duration": [1], "flaky": []}, collab=[], owner="o"), "complete")
+        doc = signals.state(data(), sentinel_panels.panels(snapshot(), i18n.t, analytics={"enabled": True, "slower": [], "duration": [1], "flaky": []}, collab=[], owner="o"), "complete", trend={"red": {"dates": ["2026-01-01"], "values": [1]}})      # the daily trend of the sentinel is a signal of its own
         ids = {s["id"] for s in doc["signals"]}
         for element, target in signals.COVERAGE.items():
             if target.startswith("decorative"):
