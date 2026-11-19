@@ -25,6 +25,9 @@ Look: `recurring`, `trend`, `repos`, `propose_guard`. Do: write the guard (`refe
 ## A new lesson
 Look: category `other`, or a reason no lesson covers. Do: draft with `POST /api/ai/lessons` (no `confirm`), show the draft to a person, write only with `lessons.allow_write`, an administrator and a confirmation. Do NOT: write it without all three.
 
+## The assistant is on
+Look: `GET /api/assistant` (404 means it is off). Do: leave it to the person; read `/api/ai/brief` and `/api/ai/state` yourself. Do NOT: call `POST /api/assistant/ask` to save yourself a reading: it spends the daily budget of the AI of the monitor and only a person at the page should.
+
 ## No network
 Look: `/api/health` (`offline`). Do: say that the picture is the last complete one and read the files in `ai/`. Do NOT: say a run is green.
 

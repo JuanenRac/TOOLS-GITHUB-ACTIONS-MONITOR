@@ -12,6 +12,7 @@
 ### 新增
 
 - **面向 AI 工具的简报现在也可通过命令行和 MCP 服务器使用**：`monitor_cli.py briefs index` 列出已编目的简报，`briefs show 标签页` 输出某个标签页的信号，`briefs all` 在一份文档中输出全部简报；MCP 服务器提供只读工具 `briefs_index` 和 `brief_tab`（标签页名称或 `all`）。测试会检查页面、HTTP 路由、命令和工具列出相同的标签页；不会写入任何内容，文本经过同一个清理器。
+- **可选的固定问题助手**:“警报”标签页可以显示一个面板(默认关闭,`ai.assistant.enabled`,并且需要 AI 提供方),由您配置的 AI 仅根据监视器的数据解释警报、总结当前情况或说明某个仓库为什么慢。它有一个只读取的四工具封闭列表(`ai.assistant.tools`,每个问题最多读取 `ai.assistant.max_tool_calls` 次),没有自由聊天,会显示读取的 ID 和发送的内容量(`ai.assistant.max_context`),消耗 AI 唯一的每日预算,把仓库中写下的内容截断到 `ai.untrusted_text_max` 后作为标记之间的数据交出,允许查看者提问,并把每个问题记入操作日志(路由 `GET /api/assistant` 和 `POST /api/assistant/ask`;Lite 版中不存在)。
 - **面向客户端的只读 API 在服务模式下自动开启**:`api.v1_enabled` 现在是 `auto`(默认)、`on` 或 `off`。使用 `auto` 时,监视器作为服务运行(团队模式的账户、Docker 镜像、systemd 单元)前缀 `/api/v1/` 会响应,一人一台电脑时保持关闭;旧的 true 和 false 含义不变。`/api/v1/me` 还会给出契约版本(`contract`)和该会话可做的事(`capabilities`)。
 - **只读 API 的完整 OpenAPI 文档**:`/api/v1/openapi.json` 现在描述每条已冻结的路由(55 个路径)及契约中的键和类型,由 `docs/schemas/api_contract.json` 生成而非手写;契约未冻结的路由是实验性的,在 `/api/v1/` 下返回 404,仅当新设置 `api.experimental_routes` 开启时才会列出。测试使文档、契约和代码中的路由保持一致。
 

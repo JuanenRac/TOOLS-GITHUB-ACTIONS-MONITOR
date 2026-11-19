@@ -4,10 +4,42 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "6942d4d95be2bef98b8a4441adec78bbe45ba92284747765050dc1dd46652fa1",
+ "digest": "1b23f494bcabebafd0f0221fbd9cd3072cc3969a2f9d09e0515985d2d65a43c3",
  "data_schema": 2,
  "settings": {
   "added": [
+   {
+    "key": "ai.assistant.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "ai.assistant.max_context",
+    "kind": "int",
+    "bounds": [
+     500,
+     200000
+    ]
+   },
+   {
+    "key": "ai.assistant.max_tool_calls",
+    "kind": "int",
+    "bounds": [
+     0,
+     20
+    ]
+   },
+   {
+    "key": "ai.assistant.tools",
+    "kind": "names"
+   },
+   {
+    "key": "ai.untrusted_text_max",
+    "kind": "int",
+    "bounds": [
+     200,
+     20000
+    ]
+   },
    {
     "key": "ai_alerts.briefs.access_log",
     "kind": "bool",

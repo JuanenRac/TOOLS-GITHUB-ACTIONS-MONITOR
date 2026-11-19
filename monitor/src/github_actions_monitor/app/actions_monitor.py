@@ -174,7 +174,7 @@ def state_dir():
     """Where the small state files of this process live: the folder of the account when this is the monitor of one account, else next to the code, as always."""
     return Path(CHILD["folder"]) if CHILD["folder"] else paths.folder("data")
 LITE_SHARED = ("/api/ai/state", "/api/ai/index", "/api/ai/briefs", "/api/ai/stream", "/api/ai/brief", "/api/ai/alerts", "/api/ai/ack")      # the channels for an AI tool are the same in both editions
-LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/auth", "/api/notify", "/api/score", "/api/compare", "/api/report-files", "/api/ops", "/api/audit-log", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/chatops", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events", "/api/updates")   # they do not exist in lite
+LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/assistant", "/api/auth", "/api/notify", "/api/score", "/api/compare", "/api/report-files", "/api/ops", "/api/audit-log", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/chatops", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events", "/api/updates")   # they do not exist in lite
 
 
 LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language", "runs_per_repo", "cold_runs_per_repo", "hot_hours", "stuck_minutes", "refresh_seconds", "cold_refresh_seconds")   # what a first lite start copies from actions_monitor.json
@@ -2769,6 +2769,28 @@ class Handler(BaseHTTPRequestHandler):
             except (ValueError, OSError):
                 self.json_reply({"ok": False, "error": "request"}, 400)
             return
+        if path == "/api/assistant/ask":      # a fixed question to the assistant (assistant.py): off = this route does not exist; the role of the person decides which tools it may use
+            from github_actions_monitor.integrations import assistant
+            from github_actions_monitor.sentinels import sentinel_ai
+            if not self.guard():
+                return
+            if not assistant.settings(sentinel_ai.ai_config(toolconfig.raw_config()))["enabled"]:
+                self.send_response(404)
+                self.end_headers()
+                return
+            try:
+                size = int(self.headers.get("Content-Length") or 0)
+                request = json.loads(self.rfile.read(size) if 0 < size <= 1024 else b"{}")
+                if not isinstance(request, dict):
+                    self.json_reply({"ok": False, "error": "argument"}, 400)
+                    return
+                context = getattr(self, "auth_user", None)
+                answer = assistant_ask(request, context["role"] if context else "admin")
+                self.json_reply(answer, 200 if answer.get("ok") or answer.get("error") not in ("action", "argument") else 400)
+            except Exception as error:   # noqa: BLE001 - the answer never repeats the request
+                degraded.note("assistant.ask", error)
+                self.json_reply({"ok": False, "error": "unavailable"}, 500)
+            return
         if path == "/api/hot-only":   # "only hot" switch: local request only, tiny body {"on": true|false}
             if not self.guard():
                 return
@@ -3298,6 +3320,17 @@ class Handler(BaseHTTPRequestHandler):
                 return
             from github_actions_monitor.sentinels import ai_models, sentinel_ai
             self.json_reply(ai_models.listing(sentinel_ai.ai_config(toolconfig.raw_config()), ai_store()))
+        elif path == "/api/assistant":      # read only: whether the assistant is on, its fixed actions, its tools and its limits (it spends nothing; off = it does not exist)
+            if not self.guard():
+                return
+            from github_actions_monitor.integrations import assistant
+            from github_actions_monitor.sentinels import sentinel_ai
+            cfg = sentinel_ai.ai_config(toolconfig.raw_config())
+            if not assistant.settings(cfg)["enabled"]:
+                self.send_response(404)
+                self.end_headers()
+                return
+            self.json_reply(assistant.describe(cfg))
         elif path == "/api/ai/budget":      # read only: the calls and the estimated cost of today for each model, the limits and the last failures of a main model
             if not self.guard():
                 return
@@ -3849,6 +3882,27 @@ def ai_store():
 
 
 AI_FALLBACK_STORE = {}
+
+
+def assistant_reader():
+    """What the tools of the assistant read: the health of every repository and the score of the account, both from what the monitor already holds (no call to GitHub). Read only."""
+    def score():
+        from github_actions_monitor.scoring import api as score_api
+        from github_actions_monitor.storage import runtime
+        storage, account = runtime.process_storage(CHILD["account"] or None)
+        return score_api.latest(storage, account, toolconfig.raw_config())
+    return {"views": health_views, "score": score}
+
+
+def assistant_ask(request, role="admin"):
+    """The answer of POST /api/assistant/ask: one fixed action ({action, repo?, alert?}) answered by the AI of the monitor with the shared budget, cache and chain; the text of the request is never kept."""
+    from github_actions_monitor.integrations import assistant
+    from github_actions_monitor.sentinels import sentinel_ai
+    cfg = sentinel_ai.ai_config(toolconfig.raw_config())
+    store = ai_store()
+    out = assistant.ask(request.get("action"), {"repo": request.get("repo"), "alert": request.get("alert")}, cfg, assistant_reader(), lambda text: sentinel_ai.explain("assistant", text, cfg, store), role)
+    out["used_today"], out["daily_limit"] = store.used_today(), cfg["daily_limit"]
+    return out
 
 
 def _tell_cloud_fallback(first, used):

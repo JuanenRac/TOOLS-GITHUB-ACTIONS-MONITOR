@@ -23,6 +23,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.allowed_repos` | `-` | ai | Repositories it may see |
 | `ai.answer_language` | `-` | ai | Language of the answers |
 | `ai.api_key_env` | `-` | ai | Key variable |
+| `ai.assistant.enabled` (secure) | `-` | ai | Assistant panel |
+| `ai.assistant.max_context` | `-` | ai | Context sent per question |
+| `ai.assistant.max_tool_calls` | `-` | ai | Tool calls per question |
+| `ai.assistant.tools` (secure) | `-` | ai | Tools it may use |
 | `ai.base_url` (secure) | `-` | ai | Endpoint of an OpenAI-compatible service |
 | `ai.catalog.enabled` (secure) | `-` | ai | Check the model against the provider's list |
 | `ai.catalog.fit_context` | `-` | ai | Fit the input to the context window |
@@ -70,6 +74,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.tasks.report.provider` (secure) | `-` | ai | Provider (empty = the general one) |
 | `ai.tasks.report.timeout_seconds` | `-` | ai | Time limit (0 = the general one) |
 | `ai.timeout_seconds` | `-` | ai | Time limit |
+| `ai.untrusted_text_max` | `-` | ai | Size of outside text |
 | `ai_alerts.brief_max_bytes` | `2048` | ai | Size of the brief |
 | `ai_alerts.briefs.access_log` | `false` | ai | Record of the briefs read |
 | `ai_alerts.cascade.enabled` | `true` | ai | Group alerts that fall together |
