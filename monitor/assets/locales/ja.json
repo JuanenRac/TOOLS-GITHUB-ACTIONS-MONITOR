@@ -1523,6 +1523,7 @@
  "lint.rule.no_timeout": "timeout-minutes のないジョブ",
  "lint.rule.own_action_main": "自分のアクションがブランチ（@main）を追っています",
  "lint.rule.permissions": "permissions ブロックが無い、または write-all",
+ "lint.rule.permissions_top": "先頭に permissions ブロックがなく、ジョブにだけあります",
  "lint.rule.pr_target": "pull_request_target が PR のコードをチェックアウトする",
  "lint.rule.secrets_in_clear": "ファイルに書かれたシークレットのように見える",
  "lint.rule.secrets_inherit": "secrets: inherit はすべてのシークレットを渡します",

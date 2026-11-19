@@ -15,6 +15,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Aggiunto
 
+- **Una regola opzionale del linter per un workflow senza blocco `permissions:` in cima al file**: `permissions_top` (spenta finché `lint.rules.permissions_top.enabled` non è attivo, informativa di default, `lint.rules.permissions_top.severity`) indica i file i cui job impostano permessi propri mentre il file non ne imposta, così un job aggiunto dopo riceverebbe il token di default, più ampio. Non dice nulla se il file non ha permessi da nessuna parte (lo fa già la regola `permissions`). Etichetta, aiuto e documentazione esistono in otto lingue.
+
 - **Il registro dei prompt e l'origine delle cifre di un modello, nella pagina**: sotto l'IA in Impostazioni, una scheda «Registro dei prompt» mostra le ultime 20 voci (già ripulite dai segreti e dalle tue parole nascoste) e svuota il registro con un pulsante, per un amministratore su questo computer; la tabella dei modelli ha una colonna «Origine» (la pagina, il file `config/ai_models.json` o il fornitore) per vedere da dove viene ogni cifra. Entrambi nelle otto lingue.
 
 - **Altre due domande per l'assistente, entrambe di sola lettura**: «la situazione di un repository» (`explain_repo`, dalle sue esecuzioni e dai suoi avvisi aperti) e «cosa fare per primo» (`prioritize`, gli avvisi aperti, lo stato e il punteggio messi in ordine con i loro id) si aggiungono alle tre esistenti; usano gli stessi quattro strumenti, limiti e budget giornaliero dell'IA, e non c'è ancora una chat libera.

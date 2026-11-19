@@ -15,6 +15,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Une règle optionnelle du linter pour un workflow sans bloc `permissions:` en haut du fichier** : `permissions_top` (désactivée tant que `lint.rules.permissions_top.enabled` n'est pas activé, information par défaut, `lint.rules.permissions_top.severity`) nomme les fichiers dont les jobs fixent leurs propres permissions alors que le fichier n'en fixe aucune, si bien qu'un job ajouté plus tard recevrait le jeton par défaut, plus large. Elle ne dit rien si le fichier n'a de permissions nulle part (la règle `permissions`, plus ancienne, s'en charge). Le libellé, l'aide et la documentation existent en huit langues.
+
 - **Le journal des prompts et l'origine des chiffres d'un modèle, dans la page** : sous l'IA dans les Réglages, une carte « Journal des prompts » montre les 20 dernières entrées (déjà nettoyées des secrets et de vos mots cachés) et vide le journal avec un bouton, pour un administrateur sur cet ordinateur ; le tableau des modèles a une colonne « Origine » (la page, le fichier `config/ai_models.json` ou le fournisseur) pour voir d'où vient chaque chiffre. Les deux dans les huit langues.
 
 - **Deux questions de plus pour l'assistant, toutes deux en lecture seule** : « la situation d'un dépôt » (`explain_repo`, d'après ses exécutions et ses alertes ouvertes) et « quoi faire en premier » (`prioritize`, les alertes ouvertes, l'état et le score mis en ordre avec leurs identifiants) s'ajoutent aux trois existantes ; elles utilisent les mêmes quatre outils, limites et budget quotidien de l'IA, et il n'y a toujours pas de discussion libre.
