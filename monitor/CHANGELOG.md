@@ -17,6 +17,8 @@ when this file and `tool_version.py` disagree.
 
 ### Added
 
+- **After a restart the page shows the last picture at once, with its age**: after every complete cycle the picture is kept in `last_picture.json` next to the monitor (a private file, replaced whole); when the monitor starts it is shown marked "Data from N min ago" while the first cycle reads GitHub and replaces it. `startup.resume_max_age_hours` (Settings > Basic, 12 by default) is the oldest picture that is shown; 0 keeps and shows nothing and deletes an old file. A file that does not read, of another format or from the future is ignored.
+
 - A Screens menu in the top bar lists every kind of screen the monitor has (the page, kiosks, the tab screens, the three wall screens, a wall that turns, a TV preset and a set for several monitors), with a description, the parameters each address accepts (theme, density, refresh, scale, language, rotation, repository filter), a copy of the full address and the choice of opening it in a new window or in the same tab; for several monitors it opens one window per monitor with the layout chosen, placing each on its own monitor when the browser has the Window Management API and listing kiosk commands otherwise
 
 - The catalogue of the Screens menu is also read by tools: `GET /api/screens/menu`, the new command `screens` of the command line (`screens list`, `screens urls`) and the MCP tool `screens_menu`; the three only read

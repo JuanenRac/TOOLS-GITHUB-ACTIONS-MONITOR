@@ -15,6 +15,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Añadido
 
+- **Tras reiniciar, la página muestra al instante el último cuadro, con su edad**: después de cada ciclo completo el cuadro se guarda en `last_picture.json` junto al monitor (fichero privado, reemplazado entero); al arrancar se muestra marcado «Datos de hace N min» mientras el primer ciclo lee GitHub y lo sustituye. `startup.resume_max_age_hours` (Ajustes > Básico, 12 por defecto) es el cuadro más viejo que se muestra; 0 no guarda ni muestra nada y borra un fichero viejo. Un fichero ilegible, de otro formato o del futuro se ignora.
+
 - Un menú Pantallas en la barra superior lista todos los tipos de pantalla del monitor (la página, los quioscos, las pantallas de pestañas, las tres pantallas de pared, una pared que rota, un preajuste de TV y un conjunto para varios monitores), con una descripción, los parámetros que admite cada dirección (tema, densidad, actualización, escala, idioma, rotación, filtro de repositorios), la copia de la dirección completa y la elección de abrirla en una ventana nueva o en la misma pestaña; para varios monitores abre una ventana por monitor con la distribución elegida, colocando cada una en su monitor cuando el navegador tiene la API de gestión de ventanas y listando comandos de quiosco en caso contrario
 
 - El catálogo del menú Pantallas lo leen también las herramientas: `GET /api/screens/menu`, el nuevo comando `screens` de la línea de comandos (`screens list`, `screens urls`) y la herramienta MCP `screens_menu`; las tres solo leen

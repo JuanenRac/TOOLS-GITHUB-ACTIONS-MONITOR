@@ -22,6 +22,7 @@ do not use up the GitHub allowance shared with the agents.
 """
 from github_actions_monitor.app import api_spec, api_v1
 from github_actions_monitor.app import degraded
+from github_actions_monitor.app import lastpicture
 from github_actions_monitor.app import cycle_watch
 import argparse
 import hmac
@@ -109,6 +110,7 @@ DEFAULTS = {
     "chatops": {"enabled": False, "slack": {"enabled": False, "signing_secret_env": "MONITOR_SLACK_SIGNING_SECRET"}, "discord": {"enabled": False, "public_key_env": "MONITOR_DISCORD_PUBLIC_KEY"}, "allowed_teams": [], "allowed_channels": [], "allowed_users": [],
                 "allowed_words": ["help", "status", "alerts", "red", "queue", "score"], "max_rows": 8, "show_repo_names": "all", "links": True, "max_age_seconds": 300, "rate_per_user_per_minute": 6, "rate_per_channel_per_minute": 20, "rate_per_minute": 60},   # read only commands from Slack and Discord, see chatops/inbound.py (off by default; the proofs are only in the environment)
     "cache": {"etag": {"enabled": True, "ttl_hours": 24}},   # conditional reads: a 304 answer costs no quota (etagcache.py)
+    "startup": {"resume_max_age_hours": 12},   # the last picture is shown at once after a restart, with its age (lastpicture.py); 0 = off
     "display": {"timezone": "local", "blink_red_tiles": True},   # blink_red_tiles: the red tiles and red items of the bar blink softly until the cause is solved; zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
     "modes": {"auto_low": True, "auto_low_enter": 1000, "auto_low_exit": 2500, "low": {"refresh_seconds": 240, "cold_refresh_seconds": 1800, "runs_per_repo": 10, "hot_hours": 2}},      # see modes.py: only what is shown in the Quota tab
     "extra_reader": {"enabled": False, "file": "", "any_folder": False},      # a second read-only account: only the PATH of the file with its token (readpool.py)
@@ -2126,6 +2128,11 @@ def run_cycle(config, generation):
     with LOCK:
         STATE["data"], STATE["error"], STATE["hint"] = data, None, None
         STATE["complete"] = True
+    if not LITE["on"]:
+        try:      # the picture is kept for the next start; a disk that refuses it never stops the cycle
+            lastpicture.save(state_dir(), data, config)
+        except Exception as error:   # noqa: BLE001
+            degraded.note("loop.last_picture", error)
     WATCH.phase("log")
     write_cycle_log(data)
     WATCH.phase("extras")
@@ -4591,6 +4598,15 @@ def main():
         print(banner_mode_line(MODE.name, "" if ok else why), flush=True)
     degraded.attach(state_dir() / ("degraded_lite.json" if LITE["on"] else "degraded.json"))
     degraded.set_writer(degraded_line)
+    if not LITE["on"]:
+        try:      # the page shows the last picture with its age while the first cycle reads GitHub
+            resumed = lastpicture.load(state_dir(), config)
+            if resumed is not None:
+                with LOCK:
+                    if STATE["data"] is None:
+                        STATE["data"] = resumed
+        except Exception as error:   # noqa: BLE001
+            degraded.note("loop.last_picture", error)
     start_loop(config)
     if started_blind:
         announce_credential("credential_blind", config)

@@ -15,6 +15,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Aggiunto
 
+- **Dopo un riavvio la pagina mostra subito l'ultima immagine, con la sua età**: dopo ogni ciclo completo l'immagine viene conservata in `last_picture.json` accanto al monitor (file privato, sostituito per intero); all'avvio viene mostrata con la dicitura «Dati di N min fa» mentre il primo ciclo legge GitHub e la sostituisce. `startup.resume_max_age_hours` (Impostazioni > Base, 12 per impostazione predefinita) è l'immagine più vecchia mostrata; 0 non conserva né mostra nulla ed elimina un vecchio file. Un file illeggibile, di un altro formato o dal futuro viene ignorato.
+
 - Un menu Schermi nella barra superiore elenca ogni tipo di schermo del monitor (la pagina, i chioschi, gli schermi di schede, i tre schermi a parete, una parete a rotazione, un preset TV e un insieme per più monitor), con una descrizione, i parametri che ogni indirizzo accetta (tema, densità, aggiornamento, scala, lingua, rotazione, filtro dei repository), la copia dell'indirizzo completo e la scelta di aprirlo in una nuova finestra o nella stessa scheda; per più monitor apre una finestra per monitor con la disposizione scelta, collocando ciascuna sul suo monitor quando il browser ha l'API di gestione finestre ed elencando altrimenti i comandi chiosco
 
 - Il catalogo del menu Schermi è letto anche dagli strumenti: `GET /api/screens/menu`, il nuovo comando `screens` della riga di comando (`screens list`, `screens urls`) e lo strumento MCP `screens_menu`; tutti e tre si limitano a leggere

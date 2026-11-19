@@ -15,6 +15,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Après un redémarrage, la page affiche aussitôt la dernière image, avec son âge** : après chaque cycle complet, l'image est conservée dans `last_picture.json` à côté du moniteur (fichier privé, remplacé en entier) ; au démarrage elle est affichée marquée « Données d'il y a N min » pendant que le premier cycle lit GitHub et la remplace. `startup.resume_max_age_hours` (Réglages > Base, 12 par défaut) est l'image la plus ancienne affichée ; 0 ne conserve ni n'affiche rien et supprime un ancien fichier. Un fichier illisible, d'un autre format ou venant du futur est ignoré.
+
 - Un menu Écrans dans la barre du haut liste chaque type d'écran du moniteur (la page, les bornes, les écrans d'onglets, les trois écrans muraux, un mur tournant, un préréglage télé et un ensemble pour plusieurs moniteurs), avec une description, les paramètres que chaque adresse accepte (thème, densité, actualisation, échelle, langue, rotation, filtre de dépôts), la copie de l'adresse complète et le choix de l'ouvrir dans une nouvelle fenêtre ou dans le même onglet ; pour plusieurs moniteurs il ouvre une fenêtre par moniteur avec la disposition choisie, en plaçant chacune sur son moniteur quand le navigateur a l'API de gestion des fenêtres et en listant des commandes de borne sinon
 
 - Le catalogue du menu Écrans est aussi lu par les outils : `GET /api/screens/menu`, la nouvelle commande `screens` de la ligne de commande (`screens list`, `screens urls`) et l'outil MCP `screens_menu` ; les trois ne font que lire

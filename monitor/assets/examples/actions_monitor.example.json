@@ -648,6 +648,9 @@
   },
   "airgapped": false,
   "open_browser": true,
+  "startup": {
+    "resume_max_age_hours": 12
+  },
   "modes": {
     "start": "normal",
     "default_minutes": 60,

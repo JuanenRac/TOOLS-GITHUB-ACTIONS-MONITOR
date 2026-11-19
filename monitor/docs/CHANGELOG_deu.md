@@ -15,6 +15,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Hinzugefügt
 
+- **Nach einem Neustart zeigt die Seite sofort das letzte Bild, mit seinem Alter**: nach jedem vollständigen Zyklus wird das Bild in `last_picture.json` neben dem Monitor aufbewahrt (private Datei, ganz ersetzt); beim Start wird es als „Daten von vor N Min.“ gezeigt, während der erste Zyklus GitHub liest und es ersetzt. `startup.resume_max_age_hours` (Einstellungen > Basis, standardmäßig 12) ist das älteste gezeigte Bild; 0 bewahrt und zeigt nichts und löscht eine alte Datei. Eine unlesbare Datei, in anderem Format oder aus der Zukunft wird ignoriert.
+
 - Ein Menü Bildschirme in der oberen Leiste listet jede Art von Bildschirm des Monitors auf (die Seite, Kioske, die Tab-Bildschirme, die drei Wandbildschirme, eine rotierende Wand, eine Fernseher-Voreinstellung und einen Satz für mehrere Monitore), mit Beschreibung, den Parametern jeder Adresse (Thema, Dichte, Aktualisierung, Maßstab, Sprache, Rotation, Repository-Filter), dem Kopieren der vollständigen Adresse und der Wahl, sie in einem neuen Fenster oder im selben Tab zu öffnen; für mehrere Monitore öffnet es ein Fenster je Monitor mit der gewählten Anordnung, setzt jedes auf seinen Monitor, wenn der Browser die Window-Management-API hat, und listet sonst Kiosk-Befehle auf
 
 - Den Katalog des Menüs Bildschirme lesen auch Werkzeuge: `GET /api/screens/menu`, der neue Befehl `screens` der Befehlszeile (`screens list`, `screens urls`) und das MCP-Werkzeug `screens_menu`; alle drei lesen nur
