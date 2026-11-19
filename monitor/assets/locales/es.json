@@ -4287,5 +4287,22 @@
  "ui.asst_err_argument": "Elige primero la alerta o el repositorio.",
  "ui.asst_err_role": "Tu rol no puede usar esa herramienta.",
  "ui.asst_err_unavailable": "El asistente no pudo responder.",
- "ui.cfg_u_tokens": "tokens"
+ "ui.cfg_u_tokens": "tokens",
+ "ui.cfg_b_privacy": "Privacidad y aislamiento",
+ "cfg.f.ai.airgapped": "Modo aislado de la IA",
+ "cfg.h.ai.airgapped": "Apagado. Encendido = la IA solo habla con un modelo de este equipo o de una dirección privada que declares abajo; cualquier dirección de internet y cualquier servicio en la nube se rechaza antes de abrir una conexión. El interruptor general de aislamiento también lo enciende. Solo se cambia desde este equipo.",
+ "cfg.f.ai.airgap_hosts": "Direcciones privadas permitidas",
+ "cfg.h.ai.airgap_hosts": "Solo se usa en modo aislado: nombres o direcciones de tu propia red (192.168.1.20, gpu.lan) donde corre un modelo; una por línea. Este equipo siempre está permitido; una dirección pública se rechaza aunque esté en la lista.",
+ "cfg.f.ai.redact.extra_terms": "Palabras que siempre se ocultan",
+ "cfg.h.ai.redact.extra_terms": "Palabras (un servidor, un proyecto) que se sustituyen por [hidden] en todo texto antes de que la IA lo vea, sea cual sea su mayúscula. Se suman a los secretos que el monitor ya oculta; nunca los sustituyen.",
+ "ai.airgap_cloud_provider": "El modo aislado está encendido: este proveedor es un servicio de internet y se rechaza.",
+ "ai.airgap_host_not_allowed": "El modo aislado está encendido: {host} no está en este equipo ni en la lista de direcciones privadas que declaraste.",
+ "ai.airgap_no_address": "El modo aislado está encendido: el proveedor no tiene una dirección que se pueda comprobar.",
+ "ai.doc_egress_ok": "El modo aislado está encendido y este proveedor está en este equipo o en una dirección que declaraste.",
+ "ai.doc_egress_blocked": "El modo aislado está encendido y rechaza este proveedor: {why}",
+ "ai.chain_airgap": "rechazado por el modo aislado",
+ "cfg.f.ai.similar.enabled": "Alertas parecidas",
+ "cfg.h.ai.similar.enabled": "Apagado. Encendido = «explica esta alerta» también lista las alertas que se le parecen (abiertas y resueltas que recuerda el feed), halladas con una comparación simple de palabras: sin modelo, sin embeddings, solo con los datos de esta cuenta.",
+ "cfg.f.ai.similar.max": "Máximo de alertas parecidas",
+ "cfg.h.ai.similar.max": "Las alertas parecidas que se listan como máximo junto a una explicación."
 }

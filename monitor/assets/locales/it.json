@@ -4287,5 +4287,22 @@
  "ui.asst_err_argument": "Scegli prima l'avviso o il repository.",
  "ui.asst_err_role": "Il tuo ruolo non può usare questo strumento.",
  "ui.asst_err_unavailable": "L'assistente non ha potuto rispondere.",
- "ui.cfg_u_tokens": "token"
+ "ui.cfg_u_tokens": "token",
+ "ui.cfg_b_privacy": "Privacy e isolamento",
+ "cfg.f.ai.airgapped": "Modalità isolata dell'IA",
+ "cfg.h.ai.airgapped": "Spento. Acceso = l'IA parla solo con un modello di questo computer o di un indirizzo privato dichiarato qui sotto; ogni indirizzo di internet e ogni servizio cloud viene rifiutato prima di aprire una connessione. Anche l'interruttore generale di isolamento lo accende. Si cambia solo da questo computer.",
+ "cfg.f.ai.airgap_hosts": "Indirizzi privati consentiti",
+ "cfg.h.ai.airgap_hosts": "Usato solo in modalità isolata: nomi o indirizzi della tua rete (192.168.1.20, gpu.lan) dove gira un modello; uno per riga. Questo computer è sempre consentito; un indirizzo pubblico viene rifiutato anche se è nell'elenco.",
+ "cfg.f.ai.redact.extra_terms": "Parole sempre nascoste",
+ "cfg.h.ai.redact.extra_terms": "Parole (un server, un progetto) sostituite con [hidden] in ogni testo prima che l'IA lo veda, qualunque sia la maiuscola. Si aggiungono ai segreti che il monitor già nasconde; non li sostituiscono mai.",
+ "ai.airgap_cloud_provider": "La modalità isolata è attiva: questo provider è un servizio di internet e viene rifiutato.",
+ "ai.airgap_host_not_allowed": "La modalità isolata è attiva: {host} non è su questo computer e non è nell'elenco degli indirizzi privati che hai dichiarato.",
+ "ai.airgap_no_address": "La modalità isolata è attiva: il provider non ha un indirizzo verificabile.",
+ "ai.doc_egress_ok": "La modalità isolata è attiva e questo provider è su questo computer o a un indirizzo che hai dichiarato.",
+ "ai.doc_egress_blocked": "La modalità isolata è attiva e rifiuta questo provider: {why}",
+ "ai.chain_airgap": "rifiutato dalla modalità isolata",
+ "cfg.f.ai.similar.enabled": "Avvisi simili",
+ "cfg.h.ai.similar.enabled": "Spento. Acceso = «spiega questo avviso» elenca anche gli avvisi che gli somigliano (aperti e risolti che il feed ricorda), trovati con un semplice confronto di parole: nessun modello, nessun embedding, solo i dati di questo account.",
+ "cfg.f.ai.similar.max": "Massimo di avvisi simili",
+ "cfg.h.ai.similar.max": "Il massimo di avvisi simili elencati accanto a una spiegazione."
 }

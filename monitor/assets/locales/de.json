@@ -4287,5 +4287,22 @@
  "ui.asst_err_argument": "Wählen Sie zuerst die Warnung oder das Repository.",
  "ui.asst_err_role": "Ihre Rolle darf dieses Werkzeug nicht nutzen.",
  "ui.asst_err_unavailable": "Der Assistent konnte nicht antworten.",
- "ui.cfg_u_tokens": "Tokens"
+ "ui.cfg_u_tokens": "Tokens",
+ "ui.cfg_b_privacy": "Datenschutz und Isolation",
+ "cfg.f.ai.airgapped": "Isolierter Modus der KI",
+ "cfg.h.ai.airgapped": "Aus. An = die KI spricht nur mit einem Modell auf diesem Computer oder an einer unten angegebenen privaten Adresse; jede Internetadresse und jeder Cloud-Dienst wird abgelehnt, bevor eine Verbindung geöffnet wird. Der allgemeine Isolationsschalter schaltet ihn ebenfalls ein. Er lässt sich nur von diesem Computer aus ändern.",
+ "cfg.f.ai.airgap_hosts": "Erlaubte private Adressen",
+ "cfg.h.ai.airgap_hosts": "Nur im isolierten Modus verwendet: Namen oder Adressen Ihres eigenen Netzes (192.168.1.20, gpu.lan), auf denen ein Modell läuft; eine pro Zeile. Dieser Computer ist immer erlaubt; eine öffentliche Adresse wird auch dann abgelehnt, wenn sie in der Liste steht.",
+ "cfg.f.ai.redact.extra_terms": "Immer zu verbergende Wörter",
+ "cfg.h.ai.redact.extra_terms": "Wörter (ein Server, ein Projekt), die in jedem Text durch [hidden] ersetzt werden, bevor die KI ihn sieht, unabhängig von der Schreibweise. Sie ergänzen die Geheimnisse, die der Monitor ohnehin verbirgt; sie ersetzen sie nie.",
+ "ai.airgap_cloud_provider": "Der isolierte Modus ist an: Dieser Anbieter ist ein Internetdienst und wird abgelehnt.",
+ "ai.airgap_host_not_allowed": "Der isolierte Modus ist an: {host} liegt nicht auf diesem Computer und steht nicht in der Liste der privaten Adressen, die Sie angegeben haben.",
+ "ai.airgap_no_address": "Der isolierte Modus ist an: Der Anbieter hat keine Adresse, die sich prüfen lässt.",
+ "ai.doc_egress_ok": "Der isolierte Modus ist an und dieser Anbieter liegt auf diesem Computer oder an einer von Ihnen angegebenen Adresse.",
+ "ai.doc_egress_blocked": "Der isolierte Modus ist an und lehnt diesen Anbieter ab: {why}",
+ "ai.chain_airgap": "vom isolierten Modus abgelehnt",
+ "cfg.f.ai.similar.enabled": "Ähnliche Warnungen",
+ "cfg.h.ai.similar.enabled": "Aus. An = „Diese Warnung erklären“ listet auch ähnliche Warnungen auf (offene und im Feed gemerkte gelöste), gefunden durch einen einfachen Wortvergleich: kein Modell, keine Embeddings, nur die Daten dieses Kontos.",
+ "cfg.f.ai.similar.max": "Höchstzahl ähnlicher Warnungen",
+ "cfg.h.ai.similar.max": "Die höchste Zahl ähnlicher Warnungen, die neben einer Erklärung aufgelistet werden."
 }

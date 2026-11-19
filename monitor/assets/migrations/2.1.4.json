@@ -4,10 +4,18 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "1b23f494bcabebafd0f0221fbd9cd3072cc3969a2f9d09e0515985d2d65a43c3",
+ "digest": "d850ddec1a5ce4a62cf1e975f20feab10b9ce0d59919895b4074c43dbfe88301",
  "data_schema": 2,
  "settings": {
   "added": [
+   {
+    "key": "ai.airgap_hosts",
+    "kind": "names"
+   },
+   {
+    "key": "ai.airgapped",
+    "kind": "bool"
+   },
    {
     "key": "ai.assistant.enabled",
     "kind": "bool"
@@ -31,6 +39,22 @@
    {
     "key": "ai.assistant.tools",
     "kind": "names"
+   },
+   {
+    "key": "ai.redact.extra_terms",
+    "kind": "names"
+   },
+   {
+    "key": "ai.similar.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "ai.similar.max",
+    "kind": "int",
+    "bounds": [
+     1,
+     20
+    ]
    },
    {
     "key": "ai.untrusted_text_max",

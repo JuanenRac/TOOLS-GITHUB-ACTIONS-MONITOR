@@ -4287,5 +4287,22 @@
  "ui.asst_err_argument": "Choose the alert or the repository first.",
  "ui.asst_err_role": "Your role may not use that tool.",
  "ui.asst_err_unavailable": "The assistant could not answer.",
- "ui.cfg_u_tokens": "tokens"
+ "ui.cfg_u_tokens": "tokens",
+ "ui.cfg_b_privacy": "Privacy and air gap",
+ "cfg.f.ai.airgapped": "Air-gapped mode of the AI",
+ "cfg.h.ai.airgapped": "Off. On = the AI only talks to a model on this computer or on a private address you declared below; any address of the internet and any cloud service is refused before a connection is opened. The general air-gapped switch turns it on too. It can only be changed from this computer.",
+ "cfg.f.ai.airgap_hosts": "Private addresses allowed",
+ "cfg.h.ai.airgap_hosts": "Only used in air-gapped mode: names or addresses of your own network (192.168.1.20, gpu.lan) where a model runs; one per line. This computer is always allowed; a public address is refused even if listed.",
+ "cfg.f.ai.redact.extra_terms": "Words to always hide",
+ "cfg.h.ai.redact.extra_terms": "Words (a server, a project) that are replaced by [hidden] in every text before the AI sees it, whatever their case. They add to the secrets the monitor already hides; they never replace them.",
+ "ai.airgap_cloud_provider": "Air-gapped mode is on: this provider is a service of the internet and is refused.",
+ "ai.airgap_host_not_allowed": "Air-gapped mode is on: {host} is not on this computer and is not in the list of private addresses you declared.",
+ "ai.airgap_no_address": "Air-gapped mode is on: the provider has no address that can be checked.",
+ "ai.doc_egress_ok": "Air-gapped mode is on and this provider is on this computer or on an address you declared.",
+ "ai.doc_egress_blocked": "Air-gapped mode is on and it refuses this provider: {why}",
+ "ai.chain_airgap": "refused by the air-gapped mode",
+ "cfg.f.ai.similar.enabled": "Similar alerts",
+ "cfg.h.ai.similar.enabled": "Off. On = \"explain this alert\" also lists the alerts that look like it (open ones and resolved ones the feed remembers), found by a plain comparison of words: no model, no embeddings, only the data of this account.",
+ "cfg.f.ai.similar.max": "Most similar alerts",
+ "cfg.h.ai.similar.max": "The most alerts that look alike that are listed next to an explanation."
 }

@@ -13,10 +13,11 @@ import time
 import urllib.error
 import urllib.request
 from datetime import datetime
+from urllib.parse import urlparse
 
 from github_actions_monitor import i18n
 from github_actions_monitor.security import netguard
-from github_actions_monitor.sentinels import sentinel_ai
+from github_actions_monitor.sentinels import ai_airgap, sentinel_ai
 
 CATALOG_DEFAULTS = {"enabled": False, "ttl_minutes": 360, "max_requests_per_day": 20, "fit_context": False}
 MAX_MODELS = 2000
@@ -204,6 +205,9 @@ def fetch(cfg, store, getter=None, force=True):
     if url is None:
         state = "off" if cfg["provider"] == "none" else ("unsupported" if cfg["provider"] == "copilot" else "error")
         return {**base, "state": state, "message": headers, "models": have["models"] if have else [], "at": have["at"] if have else 0}
+    air = ai_airgap.problem(cfg, url)
+    if air:
+        return {**base, "state": "airgap", "message": ai_airgap.message(air, urlparse(url).hostname or ""), "models": have["models"] if have else [], "at": have["at"] if have else 0}
     if not _count_request(catalog_config(cfg), store):
         return {**base, "state": "capped", "message": i18n.t("ai.cat_capped", n=catalog_config(cfg)["max_requests_per_day"]),
                 "models": have["models"] if have else [], "at": have["at"] if have else 0}
@@ -417,6 +421,9 @@ def doctor(cfg, store, getter=None, transport=None, live=True):
         return {"ok": False, "checks": checks, "verdict": "provider"}
     add("provider", True, i18n.t("ai.doc_provider", provider=cfg["provider"]))
     stop = None
+    if ai_airgap.on(cfg):      # only while the mode is on: the check says whether the configured provider may be called
+        report = ai_airgap.report(cfg)
+        add("ai_egress", not report["problem"], i18n.t("ai.doc_egress_ok") if not report["problem"] else i18n.t("ai.doc_egress_blocked", why=ai_airgap.message(report["problem"], urlparse(report["target"] or "").hostname or "")))
     if cfg["provider"] in ("openai-compatible", "anthropic"):
         url = cfg.get("base_url") or (sentinel_ai.ANTHROPIC_URL if cfg["provider"] == "anthropic" else "")
         add("address", bool(url), i18n.t("ai.doc_address_ok") if url else i18n.t("ai.need_base_url"))
