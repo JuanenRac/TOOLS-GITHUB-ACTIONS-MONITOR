@@ -73,6 +73,10 @@ Además del feed que lee una IA (`ALERTS_BRIEF.md`, el stream, el servidor MCP),
 
 El aviso se envía desde un hilo propio, de modo que un proveedor lento nunca retiene el ciclo.
 
+## El asistente (opcional, apagado por defecto)
+
+La pestaña Alertas puede mostrar un panel de preguntas fijas que la IA que ya configuraste responde con los datos del monitor: «explica esta alerta», «resume la situación» y «por qué va lento aquí». Está apagado (`ai.assistant.enabled`) y necesita un proveedor de IA (`ai.provider`, ninguno por defecto). Solo lee: tiene cuatro herramientas (`status`, `alerts`, `runs`, `score`, una lista cerrada que `ai.assistant.tools` puede reducir), como máximo `ai.assistant.max_tool_calls` lecturas por pregunta, ninguna herramienta que escriba o llegue a GitHub y ningún chat libre. La respuesta muestra siempre sus fuentes (los ids que leyó), cuánto se envió (`ai.assistant.max_context`) y las llamadas del día; cada llamada gasta el único presupuesto diario de la IA (`ai.daily_limit` y los presupuestos por modelo). Lo que escribió un repositorio (un título, el nombre de un flujo) se corta a `ai.untrusted_text_max`, se limpia de secretos y se entrega como dato entre marcas que llevan una palabra de esa petición, nunca como instrucción. Un visor puede preguntar; cada pregunta queda en el registro de acciones (la acción, nunca el texto). Rutas: `GET /api/assistant` (qué es y sus límites) y `POST /api/assistant/ask` con `action` (`explain_alert`, `summarize_week` o `why_slow`) y, según la acción, `alert` o `repo`; ambas responden 404 mientras está apagado y no existen en la edición Lite.
+
 ## Modelos del proveedor
 
 El nombre del modelo es texto libre, pero el monitor puede leer la lista de modelos del proveedor y comprobar el nombre con ella. Los modelos y las versiones cambian a menudo, así que el monitor no trae ninguna lista de modelos: los ejemplos de los preajustes pueden estar desfasados.

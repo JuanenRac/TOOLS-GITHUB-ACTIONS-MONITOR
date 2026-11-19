@@ -12,6 +12,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 ### Ajouté
 
 - **Les briefs pour les outils d'IA arrivent à la ligne de commande et au serveur MCP**: `monitor_cli.py briefs index` liste les briefs catalogués, `briefs show ONGLET` affiche les signaux d'un onglet et `briefs all` tous les briefs dans un document; le serveur MCP a les outils en lecture seule `briefs_index` et `brief_tab` (un nom d'onglet ou `all`). Un test vérifie que la page, les routes HTTP, la commande et les outils listent les mêmes onglets; rien n'est écrit et les textes passent par le même nettoyeur.
+- **Un assistant facultatif de questions fixes** : l'onglet Alertes peut afficher un panneau (désactivé par défaut, `ai.assistant.enabled`, et il faut un fournisseur d'IA) où l'IA configurée explique une alerte, résume la situation ou dit pourquoi un dépôt est lent, uniquement à partir des données du moniteur. Il dispose d'une liste fermée de quatre outils qui ne font que lire (`ai.assistant.tools`, au plus `ai.assistant.max_tool_calls` lectures par question), sans chat libre, montre les identifiants lus et la quantité envoyée (`ai.assistant.max_context`), dépense l'unique budget quotidien de l'IA, remet ce qu'un dépôt a écrit comme donnée entre des repères, coupé à `ai.untrusted_text_max`, laisse un lecteur poser une question et inscrit chaque question dans le journal des actions (routes `GET /api/assistant` et `POST /api/assistant/ask` ; absentes de l'édition Lite).
 
 ### Corrigé
 

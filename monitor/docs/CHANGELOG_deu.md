@@ -12,6 +12,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 ### Hinzugefügt
 
 - **Die Briefs für die KI-Werkzeuge erreichen die Kommandozeile und den MCP-Server**: `monitor_cli.py briefs index` listet die katalogisierten Briefs, `briefs show TAB` gibt die Signale eines Tabs aus und `briefs all` alle Briefs in einem Dokument; der MCP-Server hat die nur lesenden Werkzeuge `briefs_index` und `brief_tab` (ein Tab-Name oder `all`). Ein Test prüft, dass Seite, HTTP-Routen, Befehl und Werkzeuge dieselben Tabs auflisten; es wird nichts geschrieben und die Texte laufen durch denselben Reiniger.
+- **Ein optionaler Assistent mit festen Fragen**: Der Reiter Warnungen kann ein Panel zeigen (standardmäßig aus, `ai.assistant.enabled`, und es braucht einen KI-Anbieter), in dem die konfigurierte KI eine Warnung erklärt, die Lage zusammenfasst oder sagt, warum ein Repository langsam ist, nur aus den Daten des Monitors. Er hat eine geschlossene Liste von vier Werkzeugen, die nur lesen (`ai.assistant.tools`, höchstens `ai.assistant.max_tool_calls` Lesezugriffe pro Frage), keinen freien Chat, zeigt die gelesenen IDs und wie viel er gesendet hat (`ai.assistant.max_context`), verbraucht das eine Tagesbudget der KI, übergibt von einem Repository Geschriebenes als Daten zwischen Markierungen, gekürzt auf `ai.untrusted_text_max`, lässt einen Betrachter fragen und trägt jede Frage ins Aktionsprotokoll ein (Routen `GET /api/assistant` und `POST /api/assistant/ask`; nicht in der Lite-Edition).
 
 ### Behoben
 

@@ -12,6 +12,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 ### Adicionado
 
 - **Os briefs para as ferramentas de IA chegam à linha de comandos e ao servidor MCP**: `monitor_cli.py briefs index` lista os briefs catalogados, `briefs show SEPARADOR` imprime os sinais de um separador e `briefs all` todos os briefs num documento; o servidor MCP tem as ferramentas só de leitura `briefs_index` e `brief_tab` (o nome de um separador ou `all`). Um teste verifica que a página, as rotas HTTP, o comando e as ferramentas listam os mesmos separadores; não se escreve nada e os textos passam pelo mesmo limpador.
+- **Um assistente opcional de perguntas fixas**: o separador Alertas pode mostrar um painel (desligado por predefinição, `ai.assistant.enabled`, e precisa de um fornecedor de IA) onde a IA configurada explica um alerta, resume a situação ou diz porque um repositório está lento, só com os dados do monitor. Tem uma lista fechada de quatro ferramentas que só leem (`ai.assistant.tools`, no máximo `ai.assistant.max_tool_calls` leituras por pergunta), nenhum chat livre, mostra os ids lidos e quanto enviou (`ai.assistant.max_context`), gasta o único orçamento diário da IA, entrega o que um repositório escreveu como dado entre marcas, cortado a `ai.untrusted_text_max`, deixa um leitor perguntar e regista cada pergunta no registo de ações (rotas `GET /api/assistant` e `POST /api/assistant/ask`; não existe na edição Lite).
 
 ### Corrigido
 

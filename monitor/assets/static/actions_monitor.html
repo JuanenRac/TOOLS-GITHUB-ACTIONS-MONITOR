@@ -509,6 +509,11 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <section><h2 data-i18n="ui.happening"></h2><div class="sortbar"><label><span data-i18n="ui.sort_by"></span> <select id="now-sort" data-i18n-title="ui.sort_now_title"><option value="ecosystem" data-i18n="ui.sort_now_ecosystem"></option><option value="severity" data-i18n="ui.sort_now_severity"></option><option value="age" data-i18n="ui.sort_now_age"></option><option value="newest" data-i18n="ui.sort_now_newest"></option><option value="repo" data-i18n="ui.sort_now_repo"></option><option value="event" data-i18n="ui.sort_now_event"></option><option value="state" data-i18n="ui.sort_now_state"></option></select></label><span class="foldbtns" role="group" data-i18n-aria="ui.fold_title"><button type="button" id="now-open" data-i18n="ui.fold_open_all" data-i18n-title="ui.fold_title"></button><button type="button" id="now-close" data-i18n="ui.fold_close_all" data-i18n-title="ui.fold_title"></button></span></div><div class="body" id="now"><span class="mut">–</span></div></section>
 </div>
 <div class="tab" id="t-al" role="tabpanel" aria-labelledby="n-al">
+<section id="asst-box" hidden><h2 data-i18n="ui.asst_title"></h2><div class="body"><p class="mut" data-i18n="ui.asst_intro"></p>
+<div class="row" role="group" data-i18n-aria="ui.asst_title"><label><span data-i18n="ui.asst_action"></span> <select id="asst-action"><option value="explain_alert" data-i18n="ui.asst_a_explain_alert"></option><option value="summarize_week" data-i18n="ui.asst_a_summarize_week"></option><option value="why_slow" data-i18n="ui.asst_a_why_slow"></option></select></label>
+<label id="asst-alert-l"><span data-i18n="ui.asst_alert"></span> <select id="asst-alert"></select></label><label id="asst-repo-l"><span data-i18n="ui.asst_repo"></span> <select id="asst-repo"></select></label>
+<button type="button" id="asst-go" data-i18n="ui.asst_ask"></button></div>
+<div id="asst-out" role="status" aria-live="polite"></div></div></section>
 <section><h2><span data-i18n="ui.al_title"></span> <span class="mut" id="al-count" style="font-weight:400"></span></h2><div class="body">
 <div class="row" id="al-filters" role="group" data-i18n-aria="ui.al_filters"><span id="al-chips"></span><label><span data-i18n="ui.al_level"></span> <select id="al-level"><option value="" data-i18n="ui.f_all"></option><option value="error" data-i18n="ui.lv_bad"></option><option value="warning" data-i18n="ui.lv_warn"></option><option value="info" data-i18n="ui.lv_info"></option></select></label><label><span data-i18n="ui.sort_by"></span> <select id="al-sort" data-i18n-title="ui.sort_al_title"><option value="server" data-i18n="ui.sort_al_server"></option><option value="severity" data-i18n="ui.sort_al_severity"></option><option value="streak" data-i18n="ui.sort_al_streak"></option><option value="class" data-i18n="ui.sort_al_class"></option><option value="age" data-i18n="ui.sort_al_age"></option><option value="newest" data-i18n="ui.sort_al_newest"></option><option value="repo" data-i18n="ui.sort_al_repo"></option><option value="origin" data-i18n="ui.sort_al_origin"></option><option value="state" data-i18n="ui.sort_al_state"></option></select></label><label class="inl"><input type="checkbox" id="al-muted"> <span data-i18n="ui.al_show_muted"></span></label></div>
 <div id="al-list"><span class="mut">–</span></div>
@@ -1656,7 +1661,35 @@ $("t-sent").addEventListener("click",async e=>{
 });
 /* the Alerts tab: the alerts of every sentinel in one list, a filter by origin and level, and local silences with an end (the monitor never writes to GitHub) */
 var ALERTS=null;const ALF={s:QS.get("sentinel")||store.get("am-al-s")||"",l:"",m:store.get("am-al-m")==="1"};
-async function alertsTick(){if(LITE)return;try{const r=await fetch("/api/alerts",{cache:"no-store"});if(r.ok)ALERTS=await r.json()}catch(e){}try{renderAlerts()}catch(e){}try{soundAlerts(ALERTS)}catch(e){}lessonsTick()}
+async function alertsTick(){if(LITE)return;try{const r=await fetch("/api/alerts",{cache:"no-store"});if(r.ok)ALERTS=await r.json()}catch(e){}try{renderAlerts()}catch(e){}try{soundAlerts(ALERTS)}catch(e){}try{assistantTick()}catch(e){}lessonsTick()}
+/* the assistant (assistant.py): a panel of fixed questions, drawn only when ai.assistant.enabled answers; it reads, never acts, and always shows its sources and what it sent */
+var ASST=null;
+async function assistantTick(){
+  if(LITE)return;const box=$("asst-box");if(!box)return;
+  try{const r=await fetch("/api/assistant",{cache:"no-store"});ASST=r.ok?await r.json():null}catch(e){ASST=null}
+  box.hidden=!ASST;if(!ASST)return;
+  const al=$("asst-alert"),rp=$("asst-repo"),keepA=al.value,keepR=rp.value;
+  const list=(ALERTS&&ALERTS.alerts||[]).filter(a=>!a.muted_until&&a.repo);
+  al.innerHTML=`<option value="">${esc(T("ui.asst_pick"))}</option>`+list.slice(0,60).map(a=>`<option value="${esc(a.id)}" data-repo="${esc(a.repo)}">${esc(a.repo)} · ${esc(String(a.title||a.code||a.id).slice(0,60))}</option>`).join("");
+  rp.innerHTML=`<option value="">${esc(T("ui.asst_pick"))}</option>`+[...new Set((ALERTS&&ALERTS.alerts||[]).map(a=>a.repo).filter(Boolean))].sort().map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+  al.value=keepA;rp.value=keepR;assistantShape();
+}
+function assistantShape(){const a=$("asst-action").value;$("asst-alert-l").hidden=a!=="explain_alert";$("asst-repo-l").hidden=a==="explain_alert"||a==="summarize_week"}
+$("asst-action").addEventListener("change",assistantShape);
+$("asst-go").addEventListener("click",async()=>{
+  const out=$("asst-out"),action=$("asst-action").value,sel=$("asst-alert"),body={action};
+  if(action==="explain_alert"){body.alert=sel.value;const o=sel.selectedOptions[0];body.repo=o?o.dataset.repo||"":""}else if(action==="why_slow")body.repo=$("asst-repo").value;
+  out.className="mut";out.textContent=T("ui.asst_busy");$("asst-go").disabled=true;
+  try{
+    const r=await fetch("/api/assistant/ask?"+qlang(),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});const j=await r.json();
+    if(!j.ok){const k="ui.asst_err_"+(j.error||"unavailable"),t=T(k);out.className="mut";out.textContent=t===k?String(j.error||T("ui.asst_err_unavailable")).slice(0,300):t;return}
+    out.className="";out.textContent="";
+    const p=document.createElement("p");p.style.whiteSpace="pre-wrap";p.textContent=j.text;out.appendChild(p);
+    const m=document.createElement("p");m.className="mut";m.textContent=[T("ui.asst_by",{model:j.model||j.provider||"-"}),T("ui.asst_sources",{n:(j.sources||[]).reduce((n,s)=>n+Math.max(1,(s.items||[]).length),0)}),T("ui.asst_sent",{tokens:j.sent_tokens}),T("ui.asst_calls",{used:j.used_today,limit:j.daily_limit})].join(" · ");out.appendChild(m);
+    const ids=[...new Set((j.sources||[]).flatMap(s=>s.items||[]).filter(Boolean))].slice(0,12);
+    if(ids.length){const s=document.createElement("p");s.className="mut";s.textContent=ids.join(", ");out.appendChild(s)}
+  }catch(e){out.className="mut";out.textContent=T("ui.asst_err_unavailable")}finally{$("asst-go").disabled=false}
+});
 /* the lessons of the failures of this CI (lessons.py): what keeps failing, the trend, what to do and the guard to add; local data, read only */
 /* the four optional reports (reports.py): drawn only when one of them is on */
 var REP=null;

@@ -73,6 +73,10 @@ Neben dem Feed, den eine KI liest (`ALERTS_BRIEF.md`, der Stream, der MCP-Server
 
 Der Hinweis wird aus einem eigenen Thread gesendet, sodass ein langsamer Anbieter den Zyklus nie aufhält.
 
+## Der Assistent (optional, standardmäßig aus)
+
+Der Reiter Warnungen kann ein Panel mit festen Fragen zeigen, die die bereits konfigurierte KI aus den Daten des Monitors beantwortet: „Diese Warnung erklären“, „Die Lage zusammenfassen“ und „Warum ist es hier langsam“. Er ist aus (`ai.assistant.enabled`) und braucht einen KI-Anbieter (`ai.provider`, standardmäßig keiner). Er liest nur: Er hat vier Werkzeuge (`status`, `alerts`, `runs`, `score`, eine geschlossene Liste, die `ai.assistant.tools` verkleinern kann), höchstens `ai.assistant.max_tool_calls` Lesezugriffe pro Frage, kein Werkzeug, das schreibt oder GitHub erreicht, und keinen freien Chat. Die Antwort zeigt immer ihre Quellen (die gelesenen IDs), wie viel gesendet wurde (`ai.assistant.max_context`) und die Aufrufe des Tages; jeder Aufruf verbraucht das eine Tagesbudget der KI (`ai.daily_limit` und die Budgets je Modell). Was ein Repository geschrieben hat (ein Titel, der Name eines Workflows), wird auf `ai.untrusted_text_max` gekürzt, von Geheimnissen bereinigt und als Daten zwischen Markierungen übergeben, die ein Wort dieser Anfrage tragen, nie als Anweisung. Ein Betrachter darf fragen; jede Frage steht im Aktionsprotokoll (die Aktion, nie der Text). Routen: `GET /api/assistant` (was er ist und seine Grenzen) und `POST /api/assistant/ask` mit `action` (`explain_alert`, `summarize_week` oder `why_slow`) und je nach Aktion `alert` oder `repo`; beide antworten mit 404, solange er aus ist, und existieren in der Lite-Edition nicht.
+
 ## Modelle des Anbieters
 
 Der Modellname ist freier Text, aber der Monitor kann die Modellliste vom Anbieter lesen und den Namen damit prüfen. Modelle und Versionen ändern sich oft, deshalb liefert der Monitor keine Modellliste mit: Die Beispiele der Voreinstellungen können veraltet sein.
