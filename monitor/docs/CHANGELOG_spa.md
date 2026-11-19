@@ -17,6 +17,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Añadido
 
+- **Una regla opcional del linter para un workflow sin bloque `permissions:` al principio del fichero**: `permissions_top` (apagada hasta `lint.rules.permissions_top.enabled`, informativa por defecto, `lint.rules.permissions_top.severity`) nombra los ficheros cuyos trabajos fijan sus propios permisos mientras el fichero no fija ninguno, de modo que un trabajo añadido después recibiría el token más amplio por defecto. No dice nada si el fichero no tiene permisos en ninguna parte (ya lo hace la regla `permissions`). La etiqueta, la ayuda y la documentación existen en los ocho idiomas.
+
 - **La actualización de la página se prueba de principio a fin con procesos reales**: una prueba puede apuntar el actualizador de la página a un zip local (`MONITOR_TEST_HOOKS=1` con `MONITOR_TEST_UPDATE_ZIP`; sin las dos cosas no cambia nada, y el zip pasa por las mismas comprobaciones de contenido, miembros y SHA-256 que cualquier otro), y pruebas nuevas lo aplican en un segundo proceso, vuelven atrás con la reversión y comprueban que la versión, los ficheros y los datos regresan como estaban, que `--start` levanta la versión nueva y comprueba su salud, y que `--handover` espera a que el monitor en marcha se detenga antes de arrancar el nuevo.
 
 - **Los candados entre procesos se comprueban dentro del contenedor**: las comprobaciones del contenedor ganan E9, que arranca varios procesos de la imagen contra un mismo volumen compartido y cuenta lo que escriben bajo el candado del sistema operativo y bajo el fichero candado, de modo que una actualización perdida se vería en la evidencia del workflow; la prueba del fichero candado también se ejecuta ya en Windows.

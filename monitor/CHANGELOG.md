@@ -19,6 +19,8 @@ when this file and `tool_version.py` disagree.
 
 ### Added
 
+- **An optional lint rule for a workflow with no `permissions:` block at the top of the file**: `permissions_top` (off until `lint.rules.permissions_top.enabled`, information by default, `lint.rules.permissions_top.severity`) names the files whose jobs set their own permissions while the file sets none, so a job added later would get the broader default token. It says nothing when the file has no permissions anywhere (the older `permissions` rule already does). The label, the help and the documentation exist in the eight languages.
+
 - **The update of the page is tested end to end with real processes**: a test can point the updater of the page at a local zip (`MONITOR_TEST_HOOKS=1` with `MONITOR_TEST_UPDATE_ZIP`; without both nothing changes, and the zip goes through the same checks of contents, members and SHA-256 as any other), and new tests apply it in a second process, go back with the rollback and check that the version, the files and the data return as they were, that `--start` brings the new version up and checks its health, and that `--handover` waits for the running monitor to stop before it starts the new one.
 
 - **The locks between processes are checked inside the container**: the container checks gain E9, which starts several processes of the image against one shared volume and counts what they write under the lock of the operating system and under the lock file, so a lost update would show in the evidence of the workflow; the test of the lock file now runs on Windows too.
