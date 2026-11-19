@@ -35,3 +35,15 @@ Si todas las lecturas de un ciclo fallan por un problema de conexión (no de log
 ## Cuánto tiempo se conserva el histórico
 
 Además de `keep_days` del bloque de analíticas, la pasada de retención elimina los días del histórico más antiguos que `retention.analytics_days` (180 por defecto); las muestras están limitadas por `max_samples`. Véase [STORAGE_spa.md](STORAGE_spa.md).
+
+
+## Tiempo ahorrado (una estimación)
+
+Apagado por defecto (`productivity.enabled`). Encendido, la sección muestra, tarea por tarea, cuántos minutos a la semana ahorra el monitor, con la fórmula de [PRODUCTIVITY_spa.md](PRODUCTIVITY_spa.md): veces por semana x minutos cada vez sin el monitor x el ahorro de la tarea.
+
+- Se cuantifican dos tareas. **Vigilar** (mirar las pestañas de Actions a mano y decidir qué está rojo) toma las veces por semana y los minutos de sus notas (`productivity.watch_times_per_week`, `productivity.watch_minutes_before`). **Diagnóstico** (hallar la causa de una ejecución fallida) cuenta las ejecuciones fallidas que el monitor tiene a la vista en `productivity.window_days` y toma los minutos de sus notas (`productivity.triage_minutes_before`).
+- El monitor no puede ver lo que usted hacía antes de instalarse. Una tarea sin esas notas dice **sin datos** y no se inventa ningún número. El total también dice sin datos mientras todas las tareas carezcan de notas.
+- Si además anotó los minutos con el monitor (`productivity.watch_minutes_after`, `productivity.triage_minutes_after`), el ahorro se mide con sus notas: 1 - después / antes. Si no, es el porcentaje de `productivity.saving_percent` (90 por defecto) y la tabla dice **supuesto (sin medir)**.
+- Con `productivity.team_hours_per_week` la estimación dice también qué parte del tiempo de trabajo son los minutos ahorrados.
+- Arreglar un fallo lleva el mismo tiempo con o sin el monitor y nunca se cuenta. Solo se cuentan las ejecuciones fallidas que el monitor tiene: una lista de ejecuciones muy larga puede tener más fallos de los que se muestran.
+- Es local y de solo lectura: ninguna llamada a GitHub, nada sale del equipo. Está en `/api/analytics` (`time_saved`), en el resumen del panel A12 y en el brief de la pestaña Resumen para las herramientas de IA.

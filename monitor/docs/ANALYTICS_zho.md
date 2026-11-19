@@ -35,3 +35,15 @@
 ## 历史保留多久
 
 除了分析区块里的 `keep_days`,保留任务还会删除早于 `retention.analytics_days`(默认 180)的历史日期;样本数量本身由 `max_samples` 限制。详见 [STORAGE_zho.md](STORAGE_zho.md)。
+
+
+## 节省的时间(估算)
+
+默认关闭(`productivity.enabled`)。开启后,该部分会逐项任务显示监控器每周节省多少分钟,公式见 [PRODUCTIVITY_zho.md](PRODUCTIVITY_zho.md):每周次数 x 没有监控器时每次的分钟数 x 该任务的节省比例。
+
+- 量化两项任务。**监视**(手动查看 Actions 标签页并判断哪些是红色的)的每周次数和分钟数取自你的记录(`productivity.watch_times_per_week`、`productivity.watch_minutes_before`)。**排查**(找出失败运行的原因)统计监控器在 `productivity.window_days` 内掌握的失败运行,分钟数取自你的记录(`productivity.triage_minutes_before`)。
+- 监控器无法知道安装之前你做了什么。没有这些记录的任务显示 **无数据**,不会编造数字。只要每项任务都没有记录,总计也显示无数据。
+- 如果你还记录了有监控器时的分钟数(`productivity.watch_minutes_after`、`productivity.triage_minutes_after`),节省比例就依据你的记录测得:1 - 之后 / 之前。否则使用 `productivity.saving_percent`(默认 90)的百分比,表中标注 **假设(未测量)**。
+- 填写 `productivity.team_hours_per_week` 后,估算还会说明节省的分钟占工作时间的比例。
+- 修复故障所需的时间与有无监控器无关,从不计入。只统计监控器持有的失败运行:运行列表很长时,实际失败数可能多于显示的数量。
+- 仅本地、只读:不调用 GitHub,任何内容都不会离开电脑。它出现在 `/api/analytics`(`time_saved`)、A12 面板的摘要,以及供 AI 工具使用的概览标签页简报中。

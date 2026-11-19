@@ -35,3 +35,15 @@ If every read of a cycle fails with a connection problem (not a login or a quota
 ## How long the history is kept
 
 Besides `keep_days` of the analytics block, the days of the history older than `retention.analytics_days` (180 by default) are removed by the retention pass; the samples themselves are capped by `max_samples`. See [STORAGE.md](STORAGE.md).
+
+
+## Time saved (an estimate)
+
+Off by default (`productivity.enabled`). When it is on, the section shows, task by task, how many minutes a week the monitor saves, with the formula of [PRODUCTIVITY.md](PRODUCTIVITY.md): times a week x minutes each time without the monitor x the saving of the task.
+
+- Two tasks are quantified. **Watching** (looking at the Actions tabs by hand and deciding what is red) takes the times a week and the minutes from your notes (`productivity.watch_times_per_week`, `productivity.watch_minutes_before`). **Triage** (finding the cause of a failed run) counts the failed runs the monitor has in view over `productivity.window_days` and takes the minutes from your notes (`productivity.triage_minutes_before`).
+- The monitor cannot see what you did before it was installed. A task without those notes says **no data** and no number is made up. The total says no data too while every task lacks its notes.
+- If you also noted the minutes with the monitor (`productivity.watch_minutes_after`, `productivity.triage_minutes_after`), the saving is measured from your notes: 1 - after / before. Otherwise it is the percentage in `productivity.saving_percent` (90 by default), and the table says **assumed (not measured)**.
+- With `productivity.team_hours_per_week` the estimate also says what share of the working time the saved minutes are.
+- Fixing a failure takes the same time with or without the monitor and is never counted. Only failed runs the monitor holds are counted: a very long list of runs may hold more failures than are shown.
+- It is local and read only: no call to GitHub, nothing leaves the computer. It is in `/api/analytics` (`time_saved`), in the summary of the A12 panel and in the brief of the Summary tab for the AI tools.

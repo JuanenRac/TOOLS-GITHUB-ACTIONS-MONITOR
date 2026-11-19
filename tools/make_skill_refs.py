@@ -74,7 +74,7 @@ NOTES = {
     "/api/alerts": ("GET", "the alerts of every sentinel in one list, with silences and history"),
     "/api/alerts/mute": ("POST", "silence an alert, a code or a sentinel for some hours (local only)"),
     "/api/alerts/unmute": ("POST", "end a silence"),
-    "/api/analytics": ("GET", "history, trends and the numbers behind the charts"),
+    "/api/analytics": ("GET", "history, trends, the numbers behind the charts and, when `productivity.enabled` is on, the ESTIMATE of the time saved (`time_saved`: a task without notes is `no_data`, a percentage that was not timed is `assumed`)"),
     "/api/compare": ("GET", "this period against the one before, read only, from the ledger and the snapshots of the score (`?window=`, `?days=`, `?baseline=`, `?from=`/`?to=`, `?format=json|ndjson|csv`): every figure with its change, direction and state (`insufficient_data`, `baseline_unavailable` instead of a made-up number), and what changed (Complete only, off by default)"),
     "/api/score": ("GET", "the score of the account: a number from 0 to 100, a letter from A to E and a trend, with its parts, its coverage, the quality of the data and a breakdown by repository (Complete only; null and a state instead of a number when there is not enough data)"),
     "/api/score/global": ("GET", "the score of the whole installation, for information only (supervisor): the mean of the scored accounts the asker may see, weighted by their repositories with a number, with who is in it (Complete only)"),

@@ -69,7 +69,7 @@ Queste route servono la pagina e gli strumenti di questo computer. Non fanno par
 | `/api/ai/budget` | Le chiamate e il costo stimato di oggi per ogni modello di IA, i limiti e gli ultimi guasti; non interroga alcun fornitore. |
 | `/api/ai/test` | POST, questo computer. Verifica la connessione dell'IA configurata; non cambia nulla. |
 | `/api/alerts/unmute` | POST. Toglie il silenzio di un avviso; viene registrato. |
-| `/api/analytics` | Il riepilogo dell'analisi delle esecuzioni: durate, coda, passaggi, test instabili ed esecuzioni più lente. |
+| `/api/analytics` | Il riepilogo dell'analisi delle esecuzioni: durate, coda, passaggi, test instabili ed esecuzioni più lente, e la stima del tempo risparmiato quando è attiva. |
 | `/api/discovery` | Cosa ha trovato la scoperta: il riquadro con l'account e i repository mostrati e nascosti, gli ultimi eventi, i gruppi suggeriti, le sue impostazioni, i fork e le organizzazioni. |
 | `/api/discovery/group` | POST. Aggiunge un gruppo suggerito al file degli ecosistemi, conservando una copia del file. |
 | `/api/gh-action/plan` | POST, questo computer. Prepara ciò che verrebbe inviato a GitHub (una riesecuzione, un annullamento, un dispatch o un merge); ancora non si invia nulla. |

@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parent.parent / "monitor"
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "tests"))
 from github_actions_monitor.app import actions_monitor as am  # noqa: E402
-from github_actions_monitor.data_pipeline import analytics  # noqa: E402
+from github_actions_monitor.data_pipeline import analytics, timesaved  # noqa: E402
 from github_actions_monitor.data_pipeline import etagcache  # noqa: E402
 from github_actions_monitor.sentinels import sentinel_local as sl  # noqa: E402
 from github_actions_monitor.app import settings_api  # noqa: E402
@@ -156,6 +156,9 @@ def demo_analytics(runs):
     cfg = analytics.settings({"analytics": {"min_samples": 3}})
     summary = analytics.summary(runs, store, cfg)
     summary["slower"] = [{"repo": "demo-beta-fw", "workflow": "Release build", "p50": 410, "usual": 240, "factor": 1.71}]
+    if "--rich" in sys.argv:      # the estimate of the time saved, from invented notes (the plain demo leaves it off, as the monitor does)
+        notes = {"productivity": {"enabled": True, "watch_times_per_week": 10, "watch_minutes_before": 8, "watch_minutes_after": 1, "triage_minutes_before": 25, "team_hours_per_week": 40}}
+        summary["time_saved"] = timesaved.estimate(runs, timesaved.settings(notes))
     return summary
 
 

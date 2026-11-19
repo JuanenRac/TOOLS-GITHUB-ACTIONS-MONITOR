@@ -41,3 +41,8 @@ Les deux chiffres ne concordent que si la surveillance et le tri occupent enviro
 ### Exemple avec des chiffres inventés
 
 Quelqu'un passe 20 minutes par jour à regarder les onglets Actions (100 minutes sur une semaine de cinq jours) et trie 4 exécutions en échec par semaine à 30 minutes chacune (120 minutes) : 220 minutes en tout. Avec 85-95 % de gain, entre 187 et 209 minutes sont libérées. Ces chiffres sont inventés pour montrer le calcul ; utilisez les vôtres.
+
+
+## La mesurer dans le moniteur
+
+La page peut faire pour vous l'arithmétique de ce guide avec vos propres notes : activez `productivity.enabled` (Réglages, Analyses) et écrivez-y les notes de l'« avant » et de l'« après ». La section Analytique affiche alors une estimation des minutes gagnées par semaine pour chaque tâche. Elle indique **pas de données** pour une tâche dont vous n'avez pas noté l'« avant », étiquette **supposé (non mesuré)** tout gain qui vient du pourcentage de ce guide au lieu de vos propres notes de l'« après », et ne présente jamais 85-95 % ou 15-25 % comme une mesure. Voir [ANALYTICS_fra.md](ANALYTICS_fra.md).

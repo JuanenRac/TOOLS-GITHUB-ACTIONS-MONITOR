@@ -662,6 +662,17 @@
     "steps": true,
     "flaky": true
   },
+  "productivity": {
+    "enabled": false,
+    "window_days": 7,
+    "watch_times_per_week": 0,
+    "watch_minutes_before": 0,
+    "watch_minutes_after": -1,
+    "triage_minutes_before": 0,
+    "triage_minutes_after": -1,
+    "saving_percent": 90,
+    "team_hours_per_week": 0
+  },
   "lint": {
     "enabled": true,
     "refresh_seconds": 3600,

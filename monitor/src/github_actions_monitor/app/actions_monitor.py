@@ -46,7 +46,7 @@ from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from github_actions_monitor.data_pipeline import analytics
+from github_actions_monitor.data_pipeline import analytics, timesaved
 from github_actions_monitor.data_pipeline import backpressure, quota_buckets, tickstats
 from github_actions_monitor.integrations import notify_dedupe  # noqa: F401 - its ledger file is one of the state files an account child redirects
 from github_actions_monitor.data_pipeline import activity
@@ -2642,6 +2642,7 @@ def maintain(config, data):
                 continue
             store.add_jobs(run["repo"], run["name"], run["id"], (body or {}).get("jobs") or [], cfg["steps"])
         ANALYTICS["summary"] = analytics.summary(source_runs(config, data), store, cfg)
+        ANALYTICS["summary"]["time_saved"] = timesaved.estimate(source_runs(config, data), timesaved.settings(config))
         ANALYTICS["at"] = time.time()
         store.save()
     except Exception as error:   # noqa: BLE001 - analytics never stop the monitor, but a problem is said once
@@ -4463,7 +4464,7 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/analytics":
             if not self.guard():
                 return
-            self.json_reply(ANALYTICS["summary"] or {"enabled": ANALYTICS["store"] is not None, "duration": [], "queue": [], "steps": [], "flaky": [], "slower": []})
+            self.json_reply(ANALYTICS["summary"] or {"enabled": ANALYTICS["store"] is not None, "duration": [], "queue": [], "steps": [], "flaky": [], "slower": [], "time_saved": timesaved.off()})
         elif path == "/api/statusbar":      # what the bar at the foot of the page shows about this monitor: edition, address, account, sentinels (no secret, no GitHub call)
             if not self.guard():
                 return
