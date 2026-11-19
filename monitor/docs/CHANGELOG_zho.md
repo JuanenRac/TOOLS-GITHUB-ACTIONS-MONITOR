@@ -21,6 +21,9 @@
 
 - **每日趋势现在可以标记工作流文件发生变化的日期**(`sentinel.trend_workflow_marks`,默认关闭,另有 `sentinel.trend_workflow_marks_per_tick`、`sentinel.trend_workflow_marks_hours` 和 `sentinel.trend_workflow_marks_days`):在某个仓库的 `.github/workflows` 文件有提交改动的日期,图表上与版本发布标记并列显示一个方块,使时长或失败数的突变旁边就有解释。每个仓库花费一次请求,每轮若干个仓库,同一仓库在所设小时数之后才会再查;只标记每日历史中已有的日期,标记位于 `GET /api/sentinel` 的 `a3.trend.workflows` 中。
 - **工作流 linter 现在可以不使用凭据读取公开仓库**(`lint.anonymous_public`,默认关闭;`lint_workflows.py --remote OWNER/REPO --anon`):查看第三方的工作流时,文件来自 `raw.githubusercontent.com`,不消耗你令牌的任何额度,文件夹列表是匿名请求;未变化的文件不会重复读取,超过 256 KiB 的文件会被跳过,不会发送带有密钥的请求头,与网络隔离的监视器从不读取,私有或不存在的仓库会显示“未找到”,绝不会显示“干净”。
+
+- **订阅源中的每条警报都会说明从何时开始失败以及最后一次检查的时间**:`GET /api/ai/alerts` 和订阅源的状态文件现在带有 `first_failed`(第一次发现它为红色的读取)、`last_failed`(最后一次发现它为红色的读取)和 `last_checked`(最后一次检查的时间,关闭后也有),因此 AI 或人可以区分新的回归与旧的欠债,并看到安静的警报仍在被监视。旧版本保存的警报以首次看到的时刻作为 `first_failed`,其他日期不会编造。钩子的封闭字段列表不变。每条警报还带有 `status`(未关闭时为 `failed`,有人确认后为 `suppressed`,关闭后为 `passed`),摘要会单独统计被抑制的警报,因此确认永远不会掩盖不断增长的问题。没有新设置。
+
 - **现在可以按可见性排除仓库,并统计每条规则排除了多少**:`discovery.hide` 现在也接受 `public`(与 `private`、`fork`、`empty` 并列),基本标签页和 `GET /api/discovery` 会显示每条规则排除的仓库数(`excluded`:archived、empty、private、public、fork),被过滤器排除的仓库会被计数,绝不会被当作干净。未读取到的可见性绝不会成为排除仓库的理由。
 
 - **协作哨兵的每一轮也有时间上限**:`sentinels.collab.deadline_s`(默认 30 秒;0 = 无上限),与安全、供应链和交付哨兵相同。超时后,该轮不再开始新的仓库,没轮到的等待下一轮(最久未读的先读),状态会把它们按名称列为 `unchecked` 并带有 `round_cut`,而不是算作零告警。

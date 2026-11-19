@@ -18,7 +18,7 @@ endpoints of the running monitor. Do not assume a fixed path: the folders can be
 | `README.md` | this text | at every start of the monitor |
 | `ALERTS_BRIEF.md` | short Markdown: the real red alerts that are open (repository, workflow, conclusion, link). A line says how old it is (`updated_epoch`) | every refresh cycle |
 | `ai_alerts.jsonl` | one JSON object per line: alert opened, acknowledged or resolved, with a stable `id`, `severity`, `class` (real or transient), `repo`, `workflow`, `conclusion`, `since`, `streak`, `url`, `cause`, `action`, `state` | when an alert changes |
-| `ai_alerts_state.json` | which alerts are open now and which were acknowledged (the state the feed is computed from) | every refresh cycle |
+| `ai_alerts_state.json` | which alerts are open now and which were acknowledged (the state the feed is computed from), with `first_failed`, `last_failed` and `last_checked` of each (the feed adds a `status`: failed, suppressed or passed) | every refresh cycle |
 | `ai_heartbeat.json` | when each reader (stream, MCP server, hook, endpoint) last read the feed; the page uses it to say whether an AI is connected | when something reads |
 | `ai_hook_state.json` | the cooldown of the gate script `bin/ai_hook.py` (when it last asked an AI tool to stop) | when the hook blocks |
 | `ai_notify.jsonl`, `ai_notify_state.json` | the optional active notice to an AI tool (off by default) | only when that option is on |
