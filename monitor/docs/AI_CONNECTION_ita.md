@@ -73,6 +73,10 @@ Oltre al flusso che una IA legge (`ALERTS_BRIEF.md`, lo stream, il server MCP), 
 
 L'avviso parte da un thread a parte, così un fornitore lento non trattiene mai il ciclo.
 
+## L'assistente (facoltativo, spento per impostazione predefinita)
+
+La scheda Avvisi può mostrare un pannello di domande fisse a cui l'IA già configurata risponde con i dati del monitor: «spiega questo avviso», «riassumi la situazione» e «perché qui è lento». È spento (`ai.assistant.enabled`) e richiede un provider di IA (`ai.provider`, nessuno per impostazione predefinita). Legge soltanto: ha quattro strumenti (`status`, `alerts`, `runs`, `score`, un elenco chiuso che `ai.assistant.tools` può ridurre), al massimo `ai.assistant.max_tool_calls` letture per domanda, nessuno strumento che scriva o raggiunga GitHub e nessuna chat libera. La risposta mostra sempre le sue fonti (gli id letti), quanto è stato inviato (`ai.assistant.max_context`) e le chiamate del giorno; ogni chiamata spende l'unico budget giornaliero dell'IA (`ai.daily_limit` e i budget per modello). Ciò che un repository ha scritto (un titolo, il nome di un workflow) viene tagliato a `ai.untrusted_text_max`, ripulito dai segreti e consegnato come dato tra delimitatori che portano una parola di quella richiesta, mai come istruzione. Un visualizzatore può chiedere; ogni domanda è registrata nel registro delle azioni (l'azione, mai il testo). Rotte: `GET /api/assistant` (che cos'è e i suoi limiti) e `POST /api/assistant/ask` con `action` (`explain_alert`, `summarize_week` o `why_slow`) e, secondo l'azione, `alert` o `repo`; entrambe rispondono 404 finché è spento e non esistono nell'edizione Lite.
+
 ## Modelli del provider
 
 Il nome del modello è testo libero, ma il monitor può leggere l'elenco dei modelli dal provider e verificare il nome. Modelli e versioni cambiano spesso, quindi il monitor non include alcun elenco di modelli: gli esempi dei preset possono essere superati.

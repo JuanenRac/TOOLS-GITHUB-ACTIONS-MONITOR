@@ -73,6 +73,10 @@ GitHub 配额由监视器、AI 工具和账户下的所有其他工具共享。�
 
 通知由单独的线程发送,因此较慢的提供方不会拖住周期。
 
+## 助手(可选,默认关闭)
+
+“警报”标签页可以显示一组固定问题的面板,由您已配置的 AI 根据监视器的数据作答:“解释此警报”“总结当前情况”和“这里为什么慢”。它默认关闭(`ai.assistant.enabled`),并且需要 AI 提供方(`ai.provider`,默认没有)。它只读取:有四个工具(`status`、`alerts`、`runs`、`score`,是封闭列表,可用 `ai.assistant.tools` 缩小),每个问题最多读取 `ai.assistant.max_tool_calls` 次,没有任何写入或访问 GitHub 的工具,也没有自由聊天。回答始终显示其数据来源(读取的 ID)、发送了多少内容(`ai.assistant.max_context`)以及当天的调用次数;每次调用都会消耗 AI 唯一的每日预算(`ai.daily_limit` 和各模型的预算)。仓库中写下的内容(标题、工作流名称)会被截断到 `ai.untrusted_text_max`,清除机密,并作为数据放在带有该请求专属词语的标记之间交出,绝不当作指令。查看者可以提问;每个问题都会记入操作日志(只记操作,不记文本)。路由:`GET /api/assistant`(它是什么及其限制)和 `POST /api/assistant/ask`,带 `action`(`explain_alert`、`summarize_week` 或 `why_slow`),并按操作需要带 `alert` 或 `repo`;关闭期间两者都返回 404,且 Lite 版中不存在。
+
 ## 提供方的模型
 
 模型名称是自由文本，但监视器可以从提供方读取模型列表并据此检查名称。模型和版本经常变化，因此监视器不附带任何模型列表：预设中的示例可能已经过时。

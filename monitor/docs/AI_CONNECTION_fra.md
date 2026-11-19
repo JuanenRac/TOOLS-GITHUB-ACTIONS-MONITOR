@@ -73,6 +73,10 @@ En plus du flux qu'une IA lit (`ALERTS_BRIEF.md`, le flux continu, le serveur MC
 
 L'avis part d'un fil d'exécution à part, si bien qu'un fournisseur lent ne retient jamais le cycle.
 
+## L'assistant (facultatif, désactivé par défaut)
+
+L'onglet Alertes peut afficher un panneau de questions fixes auxquelles l'IA déjà configurée répond à partir des données du moniteur : « expliquer cette alerte », « résumer la situation » et « pourquoi c'est lent ici ». Il est désactivé (`ai.assistant.enabled`) et nécessite un fournisseur d'IA (`ai.provider`, aucun par défaut). Il lit seulement : il a quatre outils (`status`, `alerts`, `runs`, `score`, une liste fermée que `ai.assistant.tools` peut réduire), au plus `ai.assistant.max_tool_calls` lectures par question, aucun outil qui écrit ou atteint GitHub et aucun chat libre. La réponse montre toujours ses sources (les identifiants lus), la quantité envoyée (`ai.assistant.max_context`) et les appels du jour ; chaque appel dépense l'unique budget quotidien de l'IA (`ai.daily_limit` et les budgets par modèle). Ce qu'un dépôt a écrit (un titre, le nom d'un workflow) est coupé à `ai.untrusted_text_max`, débarrassé des secrets et remis comme donnée entre des repères portant un mot propre à cette requête, jamais comme instruction. Un lecteur peut poser une question ; chaque question est inscrite dans le journal des actions (l'action, jamais le texte). Routes : `GET /api/assistant` (ce qu'il est et ses limites) et `POST /api/assistant/ask` avec `action` (`explain_alert`, `summarize_week` ou `why_slow`) et, selon l'action, `alert` ou `repo` ; toutes deux répondent 404 tant qu'il est désactivé et n'existent pas dans l'édition Lite.
+
 ## Modèles du fournisseur
 
 Le nom du modèle est un texte libre, mais le moniteur peut lire la liste des modèles auprès du fournisseur et y vérifier le nom. Les modèles et les versions changent souvent : le moniteur ne fournit donc aucune liste de modèles, et les exemples des préréglages peuvent être périmés.
