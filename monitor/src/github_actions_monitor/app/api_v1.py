@@ -1,6 +1,6 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
-"""The read API for clients, version 1, as pure functions. Off by default (`api.v1_enabled`); read only; nothing here talks to the network, the disk or the clock.
+"""The read API for clients, version 1, as pure functions. Switched by `api.v1_enabled` ("auto" by default: on in the service mode, off for one person at one computer); read only; nothing here talks to the network, the disk or the clock.
 
   /api/v1/<route>     every read route that already exists, under the prefix `/api/v1/` (the same answer, the same roles, plus the header `X-API-Version: 1`)
   /api/v1/me          who is asking: the mode (individual or team), the user, the role and the accounts the session may see
@@ -20,6 +20,7 @@ import re
 from github_actions_monitor import i18n
 
 API_VERSION = "1"
+CONTRACT_VERSION = "1.0"      # grows with every key added to the frozen shape (minor); a key removed or renamed would be a new API version
 PREFIX = "/api/v1"
 VERSION_HEADER = "X-API-Version"
 OWN_ROUTES = ("/api/v1/me", "/api/v1/repos", "/api/v1/openapi.json")
@@ -29,12 +30,13 @@ VERSION_RE = re.compile(r"^/api/v(\d{1,3})(?:/|\Z)")
 CURSOR_MAX_LENGTH = 512
 ALPHABET_RE = re.compile(r"^[A-Za-z0-9_-]+\Z")
 ERROR_SLUGS = {400: "bad_request", 401: "unauthorized", 403: "forbidden", 404: "not_found", 429: "rate_limited", 500: "server_error"}
-DEFAULTS = {"v1_enabled": False, "default_limit": 50, "max_limit": 200, "cursor_ttl_seconds": 900, "gzip_min_bytes": 1024}
+MODES = ("auto", "on", "off")
+DEFAULTS = {"v1_enabled": "auto", "default_limit": 50, "max_limit": 200, "cursor_ttl_seconds": 900, "gzip_min_bytes": 1024}
 BOUNDS = {"default_limit": (1, 1000), "max_limit": (1, 1000), "cursor_ttl_seconds": (30, 86400), "gzip_min_bytes": (0, 10_000_000)}
 
 #: what each own route promises. `required` is in every item of the full answer; `compact` is the short list of `profile=compact` (always a subset of `required`).
 CONTRACT = {
-    "me": {"path": "/api/v1/me", "kind": "object", "required": ["schema", "api_version", "version", "edition", "mode", "authenticated", "user", "role", "accounts", "limits"],
+    "me": {"path": "/api/v1/me", "kind": "object", "required": ["schema", "api_version", "contract", "version", "edition", "mode", "authenticated", "user", "role", "accounts", "capabilities", "limits"],
            "compact": ["mode", "authenticated", "user", "role"]},
     "repos": {"path": "/api/v1/repos", "kind": "list", "item": ["repo", "ecosystem", "state", "risk", "runs_24h", "failures_24h", "red_workflows", "stuck_runs", "alerts", "last_run_at"],
               "compact": ["repo", "state", "risk"], "filters": ["state", "ecosystem", "q"]},
@@ -48,8 +50,11 @@ def settings(config):
     block = (config or {}).get("api")
     block = block if isinstance(block, dict) else {}
     out = dict(DEFAULTS)
-    if isinstance(block.get("v1_enabled"), bool):
-        out["v1_enabled"] = block["v1_enabled"]
+    mode = block.get("v1_enabled")
+    if isinstance(mode, bool):      # the old switch (true / false) keeps its meaning
+        out["v1_enabled"] = "on" if mode else "off"
+    elif isinstance(mode, str) and mode in MODES:
+        out["v1_enabled"] = mode
     for key, (low, high) in BOUNDS.items():
         value = block.get(key)
         if isinstance(value, int) and not isinstance(value, bool) and low <= value <= high:
@@ -57,6 +62,11 @@ def settings(config):
     if out["default_limit"] > out["max_limit"]:
         out["default_limit"] = out["max_limit"]
     return out
+
+
+def enabled(cfg, service):
+    """Whether the prefix answers: `on` always, `off` never, `auto` (the default) when the monitor runs as a service (the process of an account, the image, the unit of systemd) and not for one person at one computer."""
+    return cfg["v1_enabled"] == "on" or (cfg["v1_enabled"] == "auto" and bool(service))
 
 
 # ---- the error envelope ---------------------------------------------------------------------------------------------------------------------
@@ -194,10 +204,17 @@ def maybe_compress(body, accept_encoding, min_bytes=1024):
 
 # ---- the two routes -------------------------------------------------------------------------------------------------------------------------
 
+def capabilities(mode, role):
+    """What the session may do on the monitor as a whole (the prefix /api/v1/ itself is read only, whatever the role): `write` = the actions of the page (acknowledge, mute, change a setting that is not reserved),
+    `admin` = users, credentials and the settings of the access. The individual mode has no roles: the person at the computer, or holding the access token, can do what the page does."""
+    team = mode == "team"
+    return {"read": True, "write": (role in ("maintainer", "admin")) if team else True, "admin": (role == "admin") if team else True, "v1_write": False}
+
+
 def me_payload(*, version, edition, mode, authenticated, user, role, accounts, cfg):
     """Who is asking. `role` and `accounts` are None when there is no team session (the individual mode has no roles: the person at the computer or holding the access token can do what the page does)."""
-    return {"schema": 1, "api_version": API_VERSION, "version": version, "edition": edition, "mode": mode, "authenticated": bool(authenticated), "user": user or None, "role": role,
-            "accounts": list(accounts) if accounts is not None else None, "limits": {"default_limit": cfg["default_limit"], "max_limit": cfg["max_limit"]}}
+    return {"schema": 1, "api_version": API_VERSION, "contract": CONTRACT_VERSION, "version": version, "edition": edition, "mode": mode, "authenticated": bool(authenticated), "user": user or None, "role": role,
+            "accounts": list(accounts) if accounts is not None else None, "capabilities": capabilities(mode, role), "limits": {"default_limit": cfg["default_limit"], "max_limit": cfg["max_limit"]}}
 
 
 def repo_item(view):
