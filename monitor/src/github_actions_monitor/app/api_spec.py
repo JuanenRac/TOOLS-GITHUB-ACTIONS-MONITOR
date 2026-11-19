@@ -5,6 +5,7 @@
   load()                   the contract of the folder of the product (None when the file is not there: a copy without docs/)
   document(version, ...)   the OpenAPI 3.0.3 document: every frozen route under `/api/v1/`, with the keys and the types the contract promises; the routes that are not frozen appear only when
                            `experimental` is true, each one marked `x-experimental`
+  contract_suite()         the module of tools/api_contract_suite.py (None in a copy without tools/): the one suite that the command line, the MCP server and tools/check_api_contract.py all run
   experimental(path, c)    whether a route (without the prefix) is one of those that are not frozen: under `/api/v1/` they answer 404 unless `api.experimental_routes` is on
 
 The three routes of the prefix (me, repos, openapi.json) keep the detailed description of api_v1.openapi(); the contract only adds what they do not say. Nothing here talks to the network or the clock."""
@@ -29,6 +30,26 @@ def load():
         except (OSError, ValueError):
             _CACHE["contract"] = None
     return _CACHE["contract"]
+
+
+def contract_suite():
+    """The contract suite for clients as a module, loaded once from the folder of the product; None when the file is not there. It has no state of its own: `module.run(module.Client(url, token))`."""
+    if "suite" not in _CACHE:
+        import importlib.util
+        path = ROOT / "tools" / "api_contract_suite.py"
+        module = None
+        if path.is_file():
+            spec = importlib.util.spec_from_file_location("api_contract_suite", path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+        _CACHE["suite"] = module
+    return _CACHE["suite"]
+
+
+def suite_summary(report):
+    """The same JSON for the command line and the MCP tool: {ok, checks, failed, rows}."""
+    failed = report.failed
+    return {"ok": not failed, "checks": len(report.rows), "failed": len(failed), "rows": report.rows}
 
 
 def schema_of(keys):
