@@ -19,6 +19,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- **An optional switch to judge the webhook repository by repository**: with `savings.webhook_live_per_repo` on (off by default, and it works together with `savings.webhook_first`), a quiet repository skips its slow read only when an event of ITS OWN arrived in the last `savings.webhook_window_minutes`. A repository whose webhook was never set up, or broke, is read as always while the others are spared; it spares fewer reads. The Webhook panel counts the repositories that are alive by themselves (`live_repos`). Label, help, tip and guide in the eight languages.
+
 - **Optional look at the runs that are still going** (`sampling.active_probe`, off by default): when the list of runs of a repository is full, two light requests ask for the runs that are `in_progress` and the runs that are `queued`, so a long run that started before the window of the list is not lost or shown as finished.
 
 - **Every record the monitor keeps now carries the version of its schema, and a record from a newer version is left aside and named**: the state of the sentinels, the silences, the feed state and the update notice are written with `schema_version` at the top (the readers never see it; a record from before the mark reads as version 0, as always). A record of a version newer than the program understands is not read half way: that record starts from its defaults and the file is named in the degraded list (`records.newer`), so a downgrade says which file it did not understand.

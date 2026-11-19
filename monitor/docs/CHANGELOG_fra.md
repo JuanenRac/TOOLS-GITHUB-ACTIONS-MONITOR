@@ -18,6 +18,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Un interrupteur optionnel pour juger le webhook dépôt par dépôt** : avec `savings.webhook_live_per_repo` activé (désactivé par défaut, et il fonctionne avec `savings.webhook_first`), un dépôt calme saute sa lecture lente seulement quand un événement À LUI est arrivé dans les derniers `savings.webhook_window_minutes`. Un dépôt dont le webhook n'a jamais été installé, ou est tombé, est lu comme toujours pendant que les autres sont épargnés ; cela économise moins de lectures. Le panneau Webhook compte les dépôts vivants par eux-mêmes (`live_repos`). Libellé, aide, conseil et guide en huit langues.
+
 - **Regard optionnel sur les exécutions encore en cours** (`sampling.active_probe`, désactivé par défaut) : quand la liste des exécutions d'un dépôt est pleine, deux requêtes légères demandent les exécutions `in_progress` et `queued`, pour qu'une longue exécution commencée avant la fenêtre de la liste ne soit ni perdue ni affichée comme terminée.
 
 - **Chaque enregistrement que garde le moniteur porte désormais la version de son schéma, et un enregistrement d'une version plus récente est mis de côté et nommé** : l'état des sentinelles, les silences, l'état du flux et l'avis de mise à jour s'écrivent avec `schema_version` en tête (les lecteurs ne le voient jamais ; un enregistrement antérieur à la marque se lit comme la version 0, comme toujours). Un enregistrement d'une version plus récente que celle que comprend le programme n'est pas lu à moitié : cet enregistrement repart de ses valeurs par défaut et le fichier est nommé dans la liste des dégradations (`records.newer`) ; un retour en arrière dit donc quel fichier il n'a pas compris.
