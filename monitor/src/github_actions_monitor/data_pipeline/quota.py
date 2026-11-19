@@ -167,6 +167,12 @@ def api_mode(limit):
     return {60: "unauthenticated", 1000: "actions_token", 5000: "token", 12500: "token", 15000: "enterprise"}.get(limit, "custom")
 
 
+def app_notice(config, rate_limit=None):
+    """Whether the GitHub App is turned on but the reads use the token of the user (and why): {"state": off | using | fallback, "code", "reason", "limit"}. Never a key or a token."""
+    from github_actions_monitor.integrations import github_app
+    return github_app.notice(config, rate_limit if isinstance(rate_limit, int) and not isinstance(rate_limit, bool) else None)
+
+
 def concurrency(active, plan, data):
     """Running and queued against the concurrent-job limit of the plan. Jobs are approximated by runs (one job each) unless a run lists its jobs."""
     info = data["plans"].get(plan)
@@ -246,6 +252,6 @@ def summary(config, runs, active, private, reader=None, owner="", rate_limit=Non
     month = projection(sums["billable"])
     used = real["minutes"] if real else month
     return {"plan": cfg["plan"], "included_minutes": included, "billable": sums, "month_estimate": month, "billing": real, "billing_requested": cfg["billing_api"], "level": level(used, included, cfg),
-            "warn_percent": cfg["warn_percent"], "alert_percent": cfg["alert_percent"], "api_mode": api_mode(rate_limit), "concurrency": concurrency(active, cfg["plan"], data),
+            "warn_percent": cfg["warn_percent"], "alert_percent": cfg["alert_percent"], "api_mode": api_mode(rate_limit), "app": app_notice(config, rate_limit), "concurrency": concurrency(active, cfg["plan"], data),
             "long_jobs": long_jobs(active, data), "extra_cost_usd": extra_cost(used, included, data), "limits": data["limits"], "multipliers": {s: multiplier(s, data) for s in SYSTEMS}, "source": data.get("source", ""),
             "public_free": data.get("public_repositories_free", True)}

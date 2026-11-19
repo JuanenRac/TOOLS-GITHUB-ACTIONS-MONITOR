@@ -1,13 +1,14 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
-"""An optional GitHub App for the READS of the monitor: its own allowance, separate from the one of the user (an App installed on many repositories gets a bigger one). Standard library and the `openssl` program.
+"""An optional GitHub App for the READS of the monitor: its own allowance, separate from the one of the user (an App installed on many repositories gets a bigger one). Standard library only (the signature is made by rsa_sign.py; the `openssl` program is the fallback).
 
   github_app.enabled          false (default)
   github_app.app_id           the number of the App
   github_app.key_path         ONLY the path of its private key (a .pem kept outside any repository)
   github_app.installation_id  optional: found by itself with GET /app/installations
 
-How it works: a JWT (RS256, valid at most 10 minutes) is signed by `openssl dgst -sha256 -sign <path>`: the path is handed to openssl, the monitor never reads, copies, prints or logs the key. The JWT asks for an
+How it works: a JWT (RS256, valid at most 10 minutes) is signed by rsa_sign.py (the key is read into memory only for the signature and is never copied, printed or logged); if that cannot sign, by
+`openssl dgst -sha256 -sign <path>` when an openssl is found (the PATH, `github_app.openssl_path`, Git for Windows). The JWT asks for an
 installation token (valid one hour) that is kept in memory and renewed five minutes before it expires; `gh` gets it as GH_TOKEN for READS only. Writes and actions keep using the token of the user. If the App fails,
 or lacks a permission, the read is made again with the user's token. Create the App with read-only permissions: Actions, Checks, Code scanning alerts, Commit statuses, Contents, Dependabot alerts, Issues,
 Pull requests, Secret scanning alerts and Metadata.
@@ -20,13 +21,15 @@ import shutil
 import subprocess
 import time
 import urllib.request
+
+from github_actions_monitor.integrations import rsa_sign
 from datetime import datetime, timezone
 
 API = "https://api.github.com"
 DEFAULTS = {"enabled": False, "app_id": "", "key_path": "", "installation_id": "", "openssl_path": ""}
 OPENSSL = {"configured": ""}      # the program chosen in the configuration (settings() keeps it here so that the signature finds it)
 PERMISSIONS = ("actions", "checks", "security_events", "statuses", "contents", "vulnerability_alerts", "issues", "pull_requests", "secret_scanning_alerts", "metadata")
-_STATE = {"token": "", "expires": 0.0, "installation": "", "error": "", "failed_at": 0.0}
+_STATE = {"token": "", "expires": 0.0, "installation": "", "error": "", "failed_at": 0.0, "code": "", "signer": "", "noticed": "", "limit": None}
 RETRY_AFTER = 300      # seconds before a failed App is tried again (the reads use the token of the user meanwhile)
 
 
@@ -75,11 +78,62 @@ def _b64(data):
 
 
 def _sign(data, key_path):
-    program = find_openssl() or "openssl"
-    done = subprocess.run([program, "dgst", "-sha256", "-sign", key_path], input=data, capture_output=True, timeout=20, shell=False)
+    """The signature of the JWT: with the standard library first; openssl only when that cannot sign (and one is found). Raises RuntimeError with a reason that holds no byte of the key."""
+    own = ""
+    try:
+        signature = rsa_sign.sign_file(data, key_path)
+        _STATE["signer"] = "builtin"
+        return signature
+    except Exception as error:   # noqa: BLE001 - whatever the reason, openssl gets its turn
+        own = str(error)[:100] or "the key cannot be signed with"
+    program = find_openssl()
+    if not program:
+        raise RuntimeError("the key cannot be used to sign: " + own)
+    try:
+        done = subprocess.run([program, "dgst", "-sha256", "-sign", key_path], input=data, capture_output=True, timeout=20, shell=False)
+    except (OSError, subprocess.SubprocessError):
+        raise RuntimeError("the key cannot be used to sign: " + own) from None
     if done.returncode != 0 or not done.stdout:
-        raise RuntimeError("openssl could not sign (check the key file)")
+        raise RuntimeError("the key cannot be used to sign: " + own)
+    _STATE["signer"] = "openssl"
     return done.stdout
+
+
+def reason_code(text):
+    """Why the App is not used, as a short code: key_unreadable (the file is not there, cannot be read, has a passphrase or is not an RSA key), sign_failed, app_not_installed, token_refused, other."""
+    low = str(text or "").lower()
+    if "not installed" in low:
+        return "app_not_installed"
+    if "cannot be used to sign" in low:
+        return "key_unreadable" if re.search(r"cannot be read|no rsa|passphrase|not valid|inconsistent|not an rsa|too large|truncated|bad length|not an|too short", low) else "sign_failed"
+    if re.search(r"\b(401|403|bad credentials|refused)\b", low):
+        return "token_refused"
+    return "other"
+
+
+def notice(config, rate_limit=None):
+    """For the doctor and the Quota tab: {"state": "off" | "using" | "fallback", "code", "reason", "limit"}. `fallback` = the App is turned on and the reads use the token of the user (with the
+    reason); `using` = the App gives the reads. Never a key, never a token."""
+    cfg = settings(config)
+    if not cfg["enabled"]:
+        return {"state": "off", "code": "", "reason": "", "limit": rate_limit}
+    if not (cfg["app_id"] and cfg["key_path"]):
+        return {"state": "fallback", "code": "not_configured", "reason": "app_id or key_path is missing", "limit": rate_limit}
+    if _STATE["error"]:
+        return {"state": "fallback", "code": _STATE["code"] or reason_code(_STATE["error"]), "reason": _STATE["error"], "limit": rate_limit, "app_limit": _STATE["limit"]}
+    return {"state": "using", "code": "", "reason": "", "limit": rate_limit}
+
+
+def _tell_once(code, reason):
+    """The first time the App fails for a given reason an event goes to the counters of failures the doctor and the page show; the same reason again says nothing more."""
+    if _STATE["noticed"] == code:
+        return
+    _STATE["noticed"] = code
+    try:
+        from github_actions_monitor.app import degraded
+        degraded.note("github_app." + code, RuntimeError(reason))
+    except Exception:   # noqa: BLE001 - telling must never change what the caller does
+        pass
 
 
 def make_jwt(app_id, key_path, now=None, signer=None):
@@ -124,10 +178,12 @@ def token(config, opener=None, signer=None, now=None, force=False):
             install = str(data[0]["id"])
             _STATE["installation"] = install
         data, _ = _call("POST", f"/app/installations/{install}/access_tokens", jwt, b"{}", opener=opener)
-        _STATE.update({"token": data["token"], "expires": _expires(data["expires_at"]), "error": "", "failed_at": 0.0})
+        _STATE.update({"token": data["token"], "expires": _expires(data["expires_at"]), "error": "", "failed_at": 0.0, "code": "", "noticed": ""})
         return _STATE["token"]
     except Exception as error:   # noqa: BLE001 - a broken App is "use the user token", said once in the status
-        _STATE.update({"token": "", "expires": 0.0, "error": clean(str(error))[:160], "failed_at": now})
+        text = clean(str(error))[:160]
+        _STATE.update({"token": "", "expires": 0.0, "error": text, "failed_at": now, "code": reason_code(text)})
+        _tell_once(_STATE["code"], text)
         return ""
 
 
@@ -231,12 +287,13 @@ def key_warning(key_path):
 def status(config, opener=None, signer=None, now=None):
     """What the settings page shows (never the key or the token): {"enabled", "ok", "installation_id", "expires_epoch", "rate", "permissions", "app", "error", "warning", "openssl"}."""
     cfg = settings(config)
-    out = {"enabled": cfg["enabled"], "ok": False, "openssl": bool(find_openssl()), "openssl_path": find_openssl(), "warning": key_warning(cfg["key_path"]) if cfg["key_path"] else "", "error": ""}
+    out = {"enabled": cfg["enabled"], "ok": False, "signer": _STATE["signer"] or "builtin", "code": "", "openssl": bool(find_openssl()), "openssl_path": find_openssl(), "warning": key_warning(cfg["key_path"]) if cfg["key_path"] else "", "error": ""}
     if not cfg["enabled"]:
         return out
     got = token(config, opener, signer, now, force=True)
     if not got:
         out["error"] = _STATE["error"] or "the App could not give a token"
+        out["code"] = _STATE["code"] or reason_code(out["error"])
         return out
     try:
         jwt = make_jwt(cfg["app_id"], cfg["key_path"], now, signer)
@@ -245,6 +302,8 @@ def status(config, opener=None, signer=None, now=None):
         info, _ = _call("GET", f"/app/installations/{install}", jwt, opener=opener) if install else ({}, {})
         rate, _ = _call("GET", "/rate_limit", got, opener=opener)
         core = (rate.get("resources") or {}).get("core") or {}
+        if isinstance(core.get("limit"), int):
+            _STATE["limit"] = core["limit"]
         granted = info.get("permissions") or {}
         out.update({"ok": True, "app": str(app.get("name") or "")[:80], "installation_id": install, "expires_epoch": int(_STATE["expires"]),
                     "rate": {"remaining": core.get("remaining"), "limit": core.get("limit"), "reset": core.get("reset")},
@@ -255,4 +314,4 @@ def status(config, opener=None, signer=None, now=None):
 
 
 def reset():
-    _STATE.update({"token": "", "expires": 0.0, "installation": "", "error": "", "failed_at": 0.0})
+    _STATE.update({"token": "", "expires": 0.0, "installation": "", "error": "", "failed_at": 0.0, "code": "", "signer": "", "noticed": "", "limit": None})
