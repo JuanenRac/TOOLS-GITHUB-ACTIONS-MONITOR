@@ -19,6 +19,8 @@ when this file and `tool_version.py` disagree.
 
 ### Added
 
+- **Optional look at the runs that are still going** (`sampling.active_probe`, off by default): when the list of runs of a repository is full, two light requests ask for the runs that are `in_progress` and the runs that are `queued`, so a long run that started before the window of the list is not lost or shown as finished.
+
 - **A section on what the monitor saves, and a guide to measure it**: the README, in the eight languages, now says, as an estimate and not a measurement, that using the monitor saves about 85-95 % of the time spent watching CI and triaging failures and about 15-25 % of the overall productivity of a team, with a table by task, the assumptions behind it and the cases where the saving is smaller; the guide PRODUCTIVITY gives the method of the calculation and how to measure the saving in your own use.
 
 - **A refusal of GitHub to an action on the page says why**: the answer of `/api/gh-action/confirm` carries `reason` (`forbidden`: the token has no Actions write permission; `not_found`: no such item or a private repository the token cannot see, GitHub answers 404 for both; `method`, `conflict`, `invalid`) and the page prints it in the eight languages next to the refusal instead of a bare "GitHub refused it".

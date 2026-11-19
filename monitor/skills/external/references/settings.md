@@ -451,6 +451,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `runners.model.thirdparty_usd_per_minute` | `0.0` | advanced | Price of a third-party minute |
 | `runners.scope` | `"owner"` | advanced | Where to look |
 | `runs_per_repo` | `20` | polling | Runs read per hot repository |
+| `sampling.active_probe` | `false` | polling | Look at the runs still going |
 | `sampling.api_budget_per_hour` | `0` | polling | Request budget per hour |
 | `sampling.default_branch_probe` | `false` | polling | Second look at the default branch |
 | `sampling.min_coverage_minutes` | `30` | polling | Low coverage below |

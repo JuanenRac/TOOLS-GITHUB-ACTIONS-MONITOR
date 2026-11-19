@@ -17,6 +17,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Regard optionnel sur les exécutions encore en cours** (`sampling.active_probe`, désactivé par défaut) : quand la liste des exécutions d'un dépôt est pleine, deux requêtes légères demandent les exécutions `in_progress` et `queued`, pour qu'une longue exécution commencée avant la fenêtre de la liste ne soit ni perdue ni affichée comme terminée.
+
 - **Une section sur ce que le moniteur fait gagner et un guide pour le mesurer** : le README, dans les huit langues, dit désormais, comme une estimation et non une mesure, que le moniteur fait gagner environ 85-95 % du temps de surveillance de la CI et de tri des échecs et environ 15-25 % de la productivité globale d'une équipe, avec un tableau par tâche, les hypothèses qui le fondent et les cas où le gain est plus faible ; le guide PRODUCTIVITY donne la méthode du calcul et comment mesurer le gain dans votre propre usage.
 
 - **Quand GitHub refuse une action de la page, elle dit maintenant pourquoi** : la réponse de `/api/gh-action/confirm` porte `reason` (`forbidden` : le jeton n'a pas la permission d'écriture sur Actions ; `not_found` : inexistant ou dépôt privé que le jeton ne voit pas, GitHub répond 404 dans les deux cas ; `method`, `conflict`, `invalid`) et la page l'affiche dans les huit langues à côté du refus, au lieu d'un simple « GitHub l'a refusé ».

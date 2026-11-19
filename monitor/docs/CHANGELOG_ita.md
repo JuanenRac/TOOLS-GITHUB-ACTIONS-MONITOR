@@ -17,6 +17,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Aggiunto
 
+- **Sguardo facoltativo alle esecuzioni ancora in corso** (`sampling.active_probe`, disattivato per impostazione predefinita): quando l'elenco delle esecuzioni di un repository è pieno, due richieste leggere chiedono le esecuzioni `in_progress` e `queued`, così un'esecuzione lunga iniziata prima della finestra dell'elenco non si perde né appare come terminata.
+
 - **Una sezione su cosa fa risparmiare il monitor e una guida per misurarlo**: il README, nelle otto lingue, dice ora, come stima e non come misura, che il monitor fa risparmiare circa l'85-95 % del tempo di sorveglianza della CI e di smistamento dei guasti e circa il 15-25 % della produttività complessiva di un team, con una tabella per attività, le ipotesi su cui si basa e i casi in cui il risparmio è minore; la guida PRODUCTIVITY descrive il metodo del calcolo e come misurare il risparmio nel proprio uso.
 
 - **Quando GitHub rifiuta un'azione della pagina, ora dice perché**: la risposta di `/api/gh-action/confirm` porta `reason` (`forbidden`: il token non ha il permesso di scrittura su Actions; `not_found`: inesistente o repository privato che il token non vede, GitHub risponde 404 in entrambi i casi; `method`, `conflict`, `invalid`) e la pagina lo mostra nelle otto lingue accanto al rifiuto, invece di un semplice «GitHub l'ha rifiutato».

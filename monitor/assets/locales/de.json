@@ -3443,6 +3443,8 @@
  "ci.lane_branch": "Branch {branch}",
  "cfg.f.sampling.default_branch_probe": "Zweiter Blick auf den Standard-Branch",
  "cfg.h.sampling.default_branch_probe": "Ist die Liste der Läufe eines Repositorys voll, fragt eine weitere Anfrage die Pushes auf den Standard-Branch ab (ohne Pull Requests), damit die Läufe, die über Rot auf main entscheiden, nicht von Pull Requests und Zeitplänen verdrängt werden. Kostet eine Anfrage pro vollem Repository und Lesevorgang; standardmäßig aus.",
+ "cfg.f.sampling.active_probe": "Noch laufende Runs gesondert abfragen",
+ "cfg.h.sampling.active_probe": "Ist die Liste der Runs eines Repositorys voll, fragen zwei leichte Anfragen die noch laufenden und die wartenden Runs ab, damit ein langer Run, der vor dem Fenster der Liste begann, nicht verloren geht oder als beendet erscheint. Kostet zwei Anfragen pro vollem Repository und Lesevorgang; standardmäßig aus.",
  "cfg.f.sampling.min_coverage_minutes": "Geringe Abdeckung unter",
  "cfg.h.sampling.min_coverage_minutes": "Eine volle Liste von Läufen, die weniger als diese Minuten zurückreicht, wird als geringe Abdeckung markiert, statt vollständig zu wirken. 0 schaltet die Markierung aus.",
  "cfg.f.sampling.api_budget_per_hour": "Anfragenbudget pro Stunde",
