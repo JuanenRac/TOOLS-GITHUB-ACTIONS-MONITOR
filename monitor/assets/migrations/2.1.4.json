@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "ac5b43d423baa699cda6ab62688b437a9fc5e0d8dc12767ee7f2130c44416dc4",
+ "digest": "85147a52d88c6e340285f252aef7a6567c5bf2e0276b6662bf358aedee8b1bf4",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -281,12 +281,20 @@
     ]
    },
    {
+    "key": "sentinels.security.plan_na",
+    "kind": "bool"
+   },
+   {
     "key": "sentinels.supply.deadline_s",
     "kind": "int",
     "bounds": [
      0,
      600
     ]
+   },
+   {
+    "key": "sentinels.supply.ignore_uses",
+    "kind": "names"
    },
    {
     "key": "startup.resume_max_age_hours",

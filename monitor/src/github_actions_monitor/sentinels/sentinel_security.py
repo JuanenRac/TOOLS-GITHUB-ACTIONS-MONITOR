@@ -23,6 +23,7 @@ and it pauses while the allowance is below `min_rate_remaining`. The state (`sec
 repository are not written. The metrics carry `security_penalty`: points taken off the security part of the score for what is open.
 """
 import json
+import re
 import threading
 import time
 from urllib.parse import quote
@@ -43,10 +44,11 @@ RETRY_AFTER = (300, 1800, 21600)                         # seconds a repository 
 UNREAD_KEEP = 7 * 24 * 3600                              # an alert whose source cannot be read any more is kept (marked unread) this long before it is dropped without an event
 CODEOWNERS_EVERY = 24 * 3600          # a repository without a CODEOWNERS file is looked at again this often (three reads)
 CODEOWNERS_PATHS = (".github/CODEOWNERS", "CODEOWNERS", "docs/CODEOWNERS")
+PLAN_RE = re.compile(r"upgrade to github|github (pro|team|enterprise)|make this repository public|advanced security|not available (for|on) (your|this) plan|your plan", re.I)      # what GitHub says when the feature is not in the plan
 SEVERITIES = ("low", "medium", "high", "critical")
 SIGNALS = ("dependabot", "code_scanning", "secret", "branch", "workflow", "codeowners")
 DEFAULTS = {
-    "enabled": False, "refresh_seconds": 1800, "max_repos_per_tick": 5, "deadline_s": 30, "min_rate_remaining": 1500, "repos": "all",
+    "enabled": False, "refresh_seconds": 1800, "max_repos_per_tick": 5, "deadline_s": 30, "min_rate_remaining": 1500, "repos": "all", "plan_na": True,
     "signals": {"dependabot": {"enabled": True, "min_severity": "high"}, "code_scanning": {"enabled": True, "min_severity": "high"}, "secret": {"enabled": True},
                 "branch": {"enabled": True}, "workflow": {"enabled": True}, "codeowners": {"enabled": False}},
     "penalty": {"critical": 25, "high": 10, "medium": 3, "low": 1, "branch": 5, "workflow": 3, "codeowners": 1},
@@ -66,6 +68,8 @@ def settings(config):
         return merged
     if isinstance(block.get("enabled"), bool):
         merged["enabled"] = block["enabled"]
+    if isinstance(block.get("plan_na"), bool):
+        merged["plan_na"] = block["plan_na"]
     for key, (low, high) in BOUNDS.items():
         value = block.get(key)
         if isinstance(value, int) and not isinstance(value, bool) and low <= value <= high:
@@ -106,6 +110,14 @@ def load_state(path):
     except (OSError, ValueError, AttributeError):
         pass
     return {"alerts": {}, "per_repo": {}, "last_full_scan": None}
+
+
+def why_of(status, message=""):
+    """Why GitHub did not answer a source: `plan` (the feature is not in the plan of the account: branch protection or code scanning of a private repository on the free plan), `permission` (403: the login may not read it)
+    or `off` (404 or 451: the feature is off or does not exist for the repository). Neither of the three is a finding and none of them is a clean bill of health."""
+    if PLAN_RE.search(str(message or "")):
+        return "plan"
+    return "permission" if status == 403 else "off"
 
 
 def severity_of(kind, raw):
@@ -187,7 +199,7 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
         self.lock = threading.RLock()
         self.state = load_state(STATE_FILE)
         self.calls, self.errors, self.paused = [], {}, False
-        self.last_link = ""
+        self.last_link, self.last_message = "", ""
         self.feed = events.Feed(events.EVENTS_FILE, events.STATE_FILE)
 
     @property
@@ -211,7 +223,7 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
     def fetch(self, endpoint, etag=""):
         """(status, parsed body or None, etag): a conditional read. 304 = unchanged; 403/404/451 are answers, not failures (the feature is off or may not be read). Anything else raises."""
         self._count()
-        self.last_link = ""
+        self.last_link, self.last_message = "", ""
         run = (self.ctx or {}).get("run_gh")
         if run is None:
             data = self.ctx["gh"]("api", endpoint, retries=1)
@@ -221,6 +233,11 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
         if status == 304 and etag:
             return 304, None, etag
         if status in (403, 404, 451):
+            try:
+                said = json.loads(body) if body.strip() else None
+                self.last_message = str(said.get("message") or "")[:300] if isinstance(said, dict) else ""
+            except ValueError:
+                self.last_message = ""
             return status, None, ""
         if code != 0 or status not in (200, 0):
             raise RuntimeError((err or out or "gh failed").strip()[:200])
@@ -303,6 +320,7 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
         with self.lock:
             mine = dict(self.state["per_repo"].get(repo) or {})
         etag, facts, unavailable = dict(mine.get("etag") or {}), dict(mine.get("facts") or {}), dict(mine.get("unavailable") or {})
+        why = dict(mine.get("unavailable_why") or {})
         unread, silent = dict(mine.get("unread_since") or {}), set()
         rules = self.cfg["signals"]
 
@@ -312,9 +330,11 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
             if status == 200:
                 etag[key] = tag
                 unavailable.pop(key, None)
+                why.pop(key, None)
             elif status in (403, 404, 451):
                 etag.pop(key, None)
                 unavailable[key] = status
+                why[key] = why_of(status, self.last_message)
             return status, body
 
         status, body = read("repo", f"repos/{owner}/{repo}")
@@ -355,6 +375,7 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
                 elif status == 404:      # "Branch not protected": the answer for an unprotected branch (403 is a login that may not read it: unavailable, not a finding)
                     facts["branch_protected"] = False
                     unavailable.pop("branch", None)
+                    why.pop("branch", None)
                 elif status != 304:
                     facts.pop("branch_protected", None)
             if rules["workflow"]["enabled"]:
@@ -372,9 +393,9 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
                         break
                 facts["codeowners"] = found_file
                 mine["codeowners_at"] = now
-        self._commit(repo, facts, etag, unavailable, mine.get("codeowners_at", 0), now, unread, silent)
+        self._commit(repo, facts, etag, unavailable, mine.get("codeowners_at", 0), now, unread, silent, {k: v for k, v in why.items() if k in unavailable})
 
-    def _commit(self, repo, facts, etag, unavailable, codeowners_at, now, unread=None, silent=()):
+    def _commit(self, repo, facts, etag, unavailable, codeowners_at, now, unread=None, silent=(), why=None):
         """Applies the rules to what is known of one repository, replaces its alerts, and writes the events of what changed (nothing the first time the repository is looked at)."""
         with self.lock:
             before = {k: a for k, a in self.state["alerts"].items() if a["repo"] == repo}
@@ -383,7 +404,7 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
             for key in before:
                 self.state["alerts"].pop(key, None)
             self.state["alerts"].update(found)
-            self.state["per_repo"][repo] = {"scanned": now, "etag": etag, "facts": facts, "unavailable": unavailable, "codeowners_at": codeowners_at, "unread_since": dict(unread or {})}
+            self.state["per_repo"][repo] = {"scanned": now, "etag": etag, "facts": facts, "unavailable": unavailable, "unavailable_why": dict(why or {}), "codeowners_at": codeowners_at, "unread_since": dict(unread or {})}
         if first:
             return
         # an alert that disappears because its source stopped answering (silent) was not fixed: no "fixed" event
@@ -431,21 +452,42 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
                         out[names[key]] = out.get(names[key], 0) + 1
         return out
 
+    def unavailable_why(self):
+        """{reason: {signal: repositories}} for the sources GitHub did not answer, with the reason (`plan`, `permission`, `off`; a source with no recorded reason counts as `off`), so "N/A (plan)" is told from "no access"."""
+        out = {}
+        with self.lock:
+            for record in self.state["per_repo"].values():
+                why = record.get("unavailable_why") or {}
+                for key in (record.get("unavailable") or {}):
+                    if key in SIGNALS:
+                        reason = why.get(key) if why.get(key) in ("plan", "permission", "off") else "off"
+                        row = out.setdefault(reason, {})
+                        row[key] = row.get(key, 0) + 1
+        return out
+
     def source_coverage(self):
         """(readable, total): over the repositories already looked at, how many of their (repository, source) pairs for the sources that weigh in the penalty (Dependabot, code scanning, secrets; the
         ones switched on) answered. A repository that GitHub did not let us read counts as seen only for what it said, never as a clean one. Archived repositories have nothing to ask and are left out."""
+        return self.source_counts()[:2]
+
+    def source_counts(self):
+        """(readable, total, na_plan): like `source_coverage`; with `plan_na` on (the default) the pairs the plan of the account does not have are left out of both figures and counted apart as `na_plan`:
+        they are neither a failure nor a clean source."""
         repos, rules = self.scope(), self.cfg["signals"]
         wanted = [k for k in WEIGHTY if rules[k]["enabled"]]
-        readable = total = 0
+        readable = total = na_plan = 0
         with self.lock:
             for r in repos:
                 record = self.state["per_repo"].get(r) or {}
                 if not record.get("scanned") or (record.get("facts") or {}).get("archived"):
                     continue
                 for k in wanted:
+                    if self.cfg["plan_na"] and k in (record.get("unavailable") or {}) and (record.get("unavailable_why") or {}).get(k) == "plan":
+                        na_plan += 1
+                        continue
                     total += 1
                     readable += 0 if k in (record.get("unavailable") or {}) else 1
-        return readable, total
+        return readable, total, na_plan
 
     def min_source_coverage(self):
         from github_actions_monitor.scoring import engine as score_engine
@@ -460,17 +502,17 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
     def _status(self):
         if not self.enabled:
             return {"enabled": False, "level": "off", "loading": "", "errors": [], "refresh_seconds": self.refresh_seconds, "repos_in_scope": 0, "repos_checked": 0, "last_full_scan": None, "paused": False,
-                    "unavailable": {}}
+                    "unavailable": {}, "unavailable_why": {}, "sources_na_plan": 0}
         repos = self.scope()
         with self.lock:
             checked = sum(1 for r in repos if (self.state["per_repo"].get(r) or {}).get("scanned"))
             alerts = list(self.state["alerts"].values())
             last = self.state["last_full_scan"]
         level = "unknown" if not checked else ("bad" if any(a["level"] in ("critical", "error") for a in alerts) else ("warn" if alerts else "ok"))
-        readable, total = self.source_coverage()
-        if level == "ok" and total and readable / total < self.min_source_coverage():
-            level = "unknown"      # nothing open because most of what weighs could not be read: not a clean bill of health
-        return {"sources_readable": readable, "sources_total": total, "enabled": True, "level": level, "loading": "" if checked or not repos else "starting", "errors": [{"section": r, "at": e["at"]} for r, e in sorted(self.errors.items())],
+        readable, total, na_plan = self.source_counts()
+        if level == "ok" and ((total and readable / total < self.min_source_coverage()) or (na_plan and not total)):
+            level = "unknown"      # nothing open because most of what weighs could not be read (or the plan has none of it): not a clean bill of health
+        return {"sources_readable": readable, "sources_total": total, "sources_na_plan": na_plan, "unavailable_why": self.unavailable_why(), "enabled": True, "level": level, "loading": "" if checked or not repos else "starting", "errors": [{"section": r, "at": e["at"]} for r, e in sorted(self.errors.items())],
                 "refresh_seconds": self.refresh_seconds, "repos_in_scope": len(repos), "repos_checked": checked, "last_full_scan": last, "paused": self.paused, "unavailable": self.unavailable(), "unchecked": sentinel_base.unchecked(repos, self.state["per_repo"]), "round_cut": self.round_cut}
 
     def get_metrics(self):
@@ -479,7 +521,7 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
         with self.lock:
             alerts = list(self.state["alerts"].values())
         return {"security_alerts": len(alerts), "security_critical": sum(1 for a in alerts if a["level"] == "critical"), "security_penalty": penalty(alerts, self.cfg),
-                "security_repos_checked": self.get_status()["repos_checked"], "security_sources_readable": self.source_coverage()[0], "security_sources_total": self.source_coverage()[1], "security_calls_last_hour": len([t for t in self.calls if t > time.time() - 3600])}
+                "security_repos_checked": self.get_status()["repos_checked"], "security_sources_readable": self.source_coverage()[0], "security_sources_total": self.source_coverage()[1], "security_sources_na_plan": self.source_counts()[2], "security_calls_last_hour": len([t for t in self.calls if t > time.time() - 3600])}
 
     def get_config_schema(self):
         flat = {k: v for k, v in DEFAULTS.items() if k not in ("signals", "penalty")}

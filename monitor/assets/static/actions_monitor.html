@@ -1641,6 +1641,7 @@ function spPanel(scope,c,offKey,noneKey){
   const unl=Object.keys(st.unavailable||{});
   const cut=scope==="scol"?(st.truncated_count?" \u00b7 "+esc(T("ui.collab_cut",{n:st.truncated_count,p:st.pages||1})):"")+(st.search_cut||[]).map(x=>" \u00b7 "+esc(T("ui.collab_cut_search",{seen:x.seen,total:x.total}))).join(""):"";
   if(scope==="ssec"&&unl.length)h+=`<div class="mut" style="margin-top:8px">${esc(T("ui.sec_unavailable",{list:unl.map(k=>T("ui.sec_sig_"+k)+" ("+st.unavailable[k]+")").join(", ")}))}</div>`;
+  if(scope==="ssec"&&st.unavailable_why){const w=st.unavailable_why,part=r=>Object.keys(w[r]||{}).map(k=>T("ui.sec_sig_"+k)+" ("+w[r][k]+")").join(", "),rows=["plan","permission","off"].filter(r=>part(r)).map(r=>T("ui.sec_why_"+r)+": "+part(r));if(rows.length)h+=`<div class="mut" title="${esc(T("ui.sec_why_help"))}" style="margin-top:4px">${esc(rows.join(" \u00b7 "))}</div>`}
   h+=`<div class="mut" style="margin-top:8px">${esc(T(scope==="scol"?"ui.collab_foot":"ui.sec_foot",{c:st.repos_checked||0,r:st.repos_in_scope||0,s:st.refresh_seconds||0}))}${(st.errors||[]).length?" \u00b7 "+esc(st.errors.map(e=>e.section).slice(0,4).join(", ")):""}${cut}</div>`;
   return h
 }

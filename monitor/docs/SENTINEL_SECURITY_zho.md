@@ -28,6 +28,8 @@ GitHub 对某个仓库不回应的来源（该功能在那里是关闭的，或�
 
 当计入扣分的大部分来源（Dependabot、代码扫描、密钥）无法读取时，级别为 `unknown` 而不是 `ok`，评分的安全部分会被排除，而不是按 100 计；状态会显示 `sources_readable` 和 `sources_total`。如果某个来源在告警未关闭时不再响应，该告警会保留一周（标有 `unread_since`），并且绝不会被宣布为已修复。读取持续失败的仓库会等待 5 分钟、30 分钟、然后 6 小时再重试，因此少数损坏的仓库不会耗尽整个轮次。
 
+账户套餐中没有的来源(免费套餐下私有仓库的分支保护或代码扫描:GitHub 回答该功能需要其他套餐)会与被拒绝和功能关闭区分开:页面和状态中的 `unavailable_why` 显示 `N/A(套餐)`、`N/A(无权限)` 或 `N/A(未开启)`。`sentinels.security.plan_na` 开启(默认)时,第一类来源不计入可读数量和评分的覆盖率,而是单独计为 `sources_na_plan`;这三种情况都不是发现项,也不代表没有问题;若套餐中没有任何计入扣分的内容,哨兵为 `unknown`,评分不含安全部分。关闭时,它们按无法读取的来源计算。
+
 现在每个哨兵都会给出自己的**生命周期**：`healthy`（正常）、`degraded`（降级：部分读取失败、某个来源无法读取，或尚未完成第一轮）、`paused`（暂停，等待 GitHub 额度）、`error`（出错且尚未读到任何内容）或 `off`（关闭）。只有生命周期为 `healthy` 时，“没有告警”才有意义。
 
 ## 成本
@@ -44,4 +46,4 @@ GitHub 对某个仓库不回应的来源（该功能在那里是关闭的，或�
 
 ## 设置
 
-在设置页面的“哨兵”子标签中，“安全”区块：`sentinels.security.enabled`、`sentinels.security.refresh_seconds`、`sentinels.security.max_repos_per_tick`、`sentinels.security.min_rate_remaining`、`sentinels.security.repos`、`sentinels.security.signals.dependabot.enabled`、`sentinels.security.signals.dependabot.min_severity`、`sentinels.security.signals.code_scanning.enabled`、`sentinels.security.signals.code_scanning.min_severity`、`sentinels.security.signals.secret.enabled`、`sentinels.security.signals.branch.enabled`、`sentinels.security.signals.workflow.enabled` 和 `sentinels.security.signals.codeowners.enabled`。每个发现从评分的安全部分扣除的点数（`sentinels.security.penalty`）从文件中读取；见示例文件。
+在设置页面的“哨兵”子标签中，“安全”区块：`sentinels.security.enabled`、`sentinels.security.refresh_seconds`、`sentinels.security.max_repos_per_tick`、`sentinels.security.min_rate_remaining`、`sentinels.security.repos`, `sentinels.security.plan_na`、`sentinels.security.signals.dependabot.enabled`、`sentinels.security.signals.dependabot.min_severity`、`sentinels.security.signals.code_scanning.enabled`、`sentinels.security.signals.code_scanning.min_severity`、`sentinels.security.signals.secret.enabled`、`sentinels.security.signals.branch.enabled`、`sentinels.security.signals.workflow.enabled` 和 `sentinels.security.signals.codeowners.enabled`。每个发现从评分的安全部分扣除的点数（`sentinels.security.penalty`）从文件中读取；见示例文件。

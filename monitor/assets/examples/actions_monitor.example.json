@@ -251,6 +251,7 @@
       "deadline_s": 30,
       "max_repos_per_tick": 5,
       "min_rate_remaining": 1500,
+      "plan_na": true,
       "repos": "all",
       "signals": {
         "dependabot": {
@@ -345,6 +346,7 @@
     "supply": {
       "enabled": false,
       "ignore": [],
+      "ignore_uses": [],
       "max_calls_per_tick": 60,
       "max_files_per_repo": 40,
       "deadline_s": 30,
