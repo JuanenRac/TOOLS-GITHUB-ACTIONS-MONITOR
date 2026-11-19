@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "7f72a3828823438b4abd9c1cb318d05832713e019af04d336efc7bdb38dfb04a",
+ "digest": "158ac657ab15ba15c75e63063191715eb2fd981a83a24388c34af2b623d4da85",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -94,6 +94,19 @@
     "key": "cli.prefer_v1",
     "kind": "bool",
     "default": true
+   },
+   {
+    "key": "lint.rules.permissions_top.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "lint.rules.permissions_top.severity",
+    "kind": "enum",
+    "bounds": [
+     "info",
+     "warn",
+     "bad"
+    ]
    },
    {
     "key": "savings.webhook_live_per_repo",
