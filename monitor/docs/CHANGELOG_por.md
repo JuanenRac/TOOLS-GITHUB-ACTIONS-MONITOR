@@ -15,6 +15,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Adicionado
 
+- **A atualização da página é testada de ponta a ponta com processos reais**: um teste pode apontar o atualizador da página para um zip local (`MONITOR_TEST_HOOKS=1` com `MONITOR_TEST_UPDATE_ZIP`; sem as duas coisas nada muda, e o zip passa pelas mesmas verificações de conteúdo, membros e SHA-256 que qualquer outro), e novos testes aplicam-no num segundo processo, voltam atrás com a reversão e verificam que a versão, os ficheiros e os dados regressam como estavam, que `--start` levanta a versão nova e verifica a sua saúde, e que `--handover` espera que o monitor em execução pare antes de arrancar o novo.
+
 - **Os bloqueios entre processos são verificados dentro do contentor**: as verificações do contentor passam a ter E9, que arranca vários processos da imagem contra um mesmo volume partilhado e conta o que escrevem sob o bloqueio do sistema operativo e sob o ficheiro de bloqueio, de modo que uma atualização perdida apareceria na evidência do workflow; o teste do ficheiro de bloqueio também corre agora no Windows.
 
 - **Um guia próprio para o assistente, `ASSISTANT.md`, em oito idiomas**: como o ligar, as suas cinco perguntas fixas, as quatro ferramentas com que lê, o que nunca faz (não escreve nada, não toca em nada no GitHub, entrega como dado o que um repositório escreveu) e como o verificar com as duas rotas e o registo de prompts. A secção de `AI_CONNECTION.md` fica como referência das definições.

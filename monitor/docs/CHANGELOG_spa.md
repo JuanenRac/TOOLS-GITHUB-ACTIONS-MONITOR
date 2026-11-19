@@ -15,6 +15,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Añadido
 
+- **La actualización de la página se prueba de principio a fin con procesos reales**: una prueba puede apuntar el actualizador de la página a un zip local (`MONITOR_TEST_HOOKS=1` con `MONITOR_TEST_UPDATE_ZIP`; sin las dos cosas no cambia nada, y el zip pasa por las mismas comprobaciones de contenido, miembros y SHA-256 que cualquier otro), y pruebas nuevas lo aplican en un segundo proceso, vuelven atrás con la reversión y comprueban que la versión, los ficheros y los datos regresan como estaban, que `--start` levanta la versión nueva y comprueba su salud, y que `--handover` espera a que el monitor en marcha se detenga antes de arrancar el nuevo.
+
 - **Los candados entre procesos se comprueban dentro del contenedor**: las comprobaciones del contenedor ganan E9, que arranca varios procesos de la imagen contra un mismo volumen compartido y cuenta lo que escriben bajo el candado del sistema operativo y bajo el fichero candado, de modo que una actualización perdida se vería en la evidencia del workflow; la prueba del fichero candado también se ejecuta ya en Windows.
 
 - **Una guía propia del asistente, `ASSISTANT.md`, en ocho idiomas**: cómo encenderlo, sus cinco preguntas fijas, las cuatro herramientas con las que lee, lo que nunca hace (no escribe nada, no toca nada en GitHub, entrega como dato lo que escribió un repositorio) y cómo comprobarlo con las dos rutas y el registro de prompts. La sección de `AI_CONNECTION.md` queda como referencia de los ajustes.
