@@ -608,6 +608,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinels.collab.rules.watch_external_comments` | `-` | sentinel | Watch outsiders |
 | `sentinels.collab.search_api` | `-` | sentinel | Read issues and pull requests with the Search API |
 | `sentinels.delivery.changelog_paths` | `-` | sentinel | CHANGELOG files |
+| `sentinels.delivery.deadline_s` | `-` | sentinel | Time ceiling per round |
 | `sentinels.delivery.enabled` | `-` | sentinel | Delivery sentinel on |
 | `sentinels.delivery.expected_assets` | `-` | sentinel | Expected release files |
 | `sentinels.delivery.max_calls_per_tick` | `-` | sentinel | Calls per round |
@@ -630,6 +631,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinels.delivery.unreleased_days` | `-` | sentinel | Days before unreleased entries count |
 | `sentinels.delivery.unreleased_min_entries` | `-` | sentinel | Least entries under Unreleased |
 | `sentinels.delivery.version_files` | `-` | sentinel | Version files |
+| `sentinels.security.deadline_s` | `-` | sentinel | Time ceiling per round |
 | `sentinels.security.enabled` | `-` | sentinel | Security sentinel on |
 | `sentinels.security.max_repos_per_tick` | `-` | sentinel | Repositories per round |
 | `sentinels.security.min_rate_remaining` | `-` | sentinel | Allowance kept free |
@@ -643,6 +645,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinels.security.signals.dependabot.min_severity` | `-` | sentinel | Dependabot: least severity |
 | `sentinels.security.signals.secret.enabled` | `-` | sentinel | Secret scanning alerts |
 | `sentinels.security.signals.workflow.enabled` | `-` | sentinel | Workflow permissions |
+| `sentinels.supply.deadline_s` | `-` | sentinel | Time ceiling per round |
 | `sentinels.supply.enabled` | `-` | sentinel | Supply chain sentinel on |
 | `sentinels.supply.ignore` | `-` | sentinel | Workflow findings to ignore |
 | `sentinels.supply.max_calls_per_tick` | `-` | sentinel | Calls per round |

@@ -37,7 +37,7 @@
 
 ## 成本
 
-每轮最多读取 `sentinels.supply.max_repos_per_tick` 个仓库（默认 10），最多进行 `sentinels.supply.max_calls_per_tick` 次调用（60）：列出一个仓库的工作流一次，每个新增或更改的文件再一次，因为 SHA 未变的文件不会再次读取。最久未读的优先，有未关闭警报的稍早一些；周期为每 `sentinels.supply.refresh_seconds`（默认一小时）。当剩余额度低于 `sentinels.supply.min_rate_remaining` 时哨兵暂停。其状态（`supply_state.json`）保存未关闭的警报，因此重启不会重复通知，对仓库的首次查看也不会写入事件。`sentinels.supply.max_files_per_repo` 限制在一个仓库中读取的文件数；超出的仓库只会被部分读取并计为部分。
+每轮最多读取 `sentinels.supply.max_repos_per_tick` 个仓库（默认 10），最多进行 `sentinels.supply.max_calls_per_tick` 次调用（60）：列出一个仓库的工作流一次，每个新增或更改的文件再一次，因为 SHA 未变的文件不会再次读取。最久未读的优先，有未关闭警报的稍早一些；周期为每 `sentinels.supply.refresh_seconds`（默认一小时）。当剩余额度低于 `sentinels.supply.min_rate_remaining` 时哨兵暂停。其状态（`supply_state.json`）保存未关闭的警报，因此重启不会重复通知，对仓库的首次查看也不会写入事件。`sentinels.supply.max_files_per_repo` 限制在一个仓库中读取的文件数；超出的仓库只会被部分读取并计为部分。 一轮在 `sentinels.supply.deadline_s` 秒后(默认 30;0 = 无上限)也不再开始新的仓库:没轮到的等待下一轮,状态会把它们按名称列为 `unchecked`(并带有 `round_cut`),而不是算作零告警。
 
 ## 忽略一条发现
 

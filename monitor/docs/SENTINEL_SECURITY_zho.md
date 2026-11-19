@@ -32,7 +32,7 @@ GitHub 对某个仓库不回应的来源（该功能在那里是关闭的，或�
 
 ## 成本
 
-每轮最多读取 `sentinels.security.max_repos_per_tick` 个仓库（默认 5 个），先读很久没看的，有未处理告警的稍早一些，每 `sentinels.security.refresh_seconds` 秒一个周期（默认 30 分钟）。每个仓库最多七次读取，几乎都是条件读取，所以未变化的仓库不消耗额度；CODEOWNERS 文件在需要时每天最多查找一次。剩余额度低于 `sentinels.security.min_rate_remaining` 时哨兵会暂停。其状态（`security_state.json`）保存未处理的告警，因此重启不会重复通知，第一次查看某个仓库时也不写事件。
+每轮最多读取 `sentinels.security.max_repos_per_tick` 个仓库（默认 5 个），先读很久没看的，有未处理告警的稍早一些，每 `sentinels.security.refresh_seconds` 秒一个周期（默认 30 分钟）。每个仓库最多七次读取，几乎都是条件读取，所以未变化的仓库不消耗额度；CODEOWNERS 文件在需要时每天最多查找一次。剩余额度低于 `sentinels.security.min_rate_remaining` 时哨兵会暂停。其状态（`security_state.json`）保存未处理的告警，因此重启不会重复通知，第一次查看某个仓库时也不写事件。 一轮在 `sentinels.security.deadline_s` 秒后(默认 30;0 = 无上限)也不再开始新的仓库:没轮到的等待下一轮,状态会把它们按名称列为 `unchecked`(并带有 `round_cut`),而不是算作零告警。
 
 ## 每个发现只有一个负责者
 

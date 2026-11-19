@@ -46,12 +46,12 @@ CODEOWNERS_PATHS = (".github/CODEOWNERS", "CODEOWNERS", "docs/CODEOWNERS")
 SEVERITIES = ("low", "medium", "high", "critical")
 SIGNALS = ("dependabot", "code_scanning", "secret", "branch", "workflow", "codeowners")
 DEFAULTS = {
-    "enabled": False, "refresh_seconds": 1800, "max_repos_per_tick": 5, "min_rate_remaining": 1500, "repos": "all",
+    "enabled": False, "refresh_seconds": 1800, "max_repos_per_tick": 5, "deadline_s": 30, "min_rate_remaining": 1500, "repos": "all",
     "signals": {"dependabot": {"enabled": True, "min_severity": "high"}, "code_scanning": {"enabled": True, "min_severity": "high"}, "secret": {"enabled": True},
                 "branch": {"enabled": True}, "workflow": {"enabled": True}, "codeowners": {"enabled": False}},
     "penalty": {"critical": 25, "high": 10, "medium": 3, "low": 1, "branch": 5, "workflow": 3, "codeowners": 1},
 }
-BOUNDS = {"refresh_seconds": (300, 86400), "max_repos_per_tick": (1, 100), "min_rate_remaining": (100, 5000)}
+BOUNDS = {"refresh_seconds": (300, 86400), "max_repos_per_tick": (1, 100), "deadline_s": (0, 600), "min_rate_remaining": (100, 5000)}
 TITLE_KEYS = {"security.dependabot": "security.t.dependabot", "security.code_scanning": "security.t.code_scanning", "security.secret": "security.t.secret",
               "security.branch_unprotected": "security.t.branch", "security.workflow_write": "security.t.workflow", "security.codeowners_missing": "security.t.codeowners"}
 SIGNAL_OF = {"security.dependabot": "dependabot", "security.code_scanning": "code_scanning", "security.secret": "secret", "security.branch_unprotected": "branch",
@@ -178,6 +178,7 @@ def penalty(alerts, cfg):
 
 
 class SentinelSecurity(sentinel_base.BaseSentinel):
+    round_cut = False      # the last round stopped for lack of time (deadline_s) and left repositories for the next one
     name = "security"
 
     def __init__(self, ctx, config):
@@ -259,7 +260,11 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
         if self.paused:
             return False
         repos = self.scope()
+        deadline, self.round_cut = sentinel_base.round_deadline(self.cfg["deadline_s"]), False
         for repo in self._order(repos, now)[:self.cfg["max_repos_per_tick"]]:
+            if sentinel_base.expired(deadline):      # the round ran out of time: the rest waits for the next one and is named as not checked
+                self.round_cut = True
+                break
             try:
                 self.scan(repo, now)
                 self.errors.pop(repo, None)
@@ -447,7 +452,7 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
         if level == "ok" and total and readable / total < self.min_source_coverage():
             level = "unknown"      # nothing open because most of what weighs could not be read: not a clean bill of health
         return {"sources_readable": readable, "sources_total": total, "enabled": True, "level": level, "loading": "" if checked or not repos else "starting", "errors": [{"section": r, "at": e["at"]} for r, e in sorted(self.errors.items())],
-                "refresh_seconds": self.refresh_seconds, "repos_in_scope": len(repos), "repos_checked": checked, "last_full_scan": last, "paused": self.paused, "unavailable": self.unavailable()}
+                "refresh_seconds": self.refresh_seconds, "repos_in_scope": len(repos), "repos_checked": checked, "last_full_scan": last, "paused": self.paused, "unavailable": self.unavailable(), "unchecked": sentinel_base.unchecked(repos, self.state["per_repo"]), "round_cut": self.round_cut}
 
     def get_metrics(self):
         if not self.enabled:

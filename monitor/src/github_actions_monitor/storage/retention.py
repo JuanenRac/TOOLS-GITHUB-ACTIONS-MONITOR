@@ -12,6 +12,9 @@ Settings (the `retention` block of the configuration; every one is read through 
     retention.interval_hours  24     how often the purge runs (a tick of maintenance checks the clock; the purge itself is one short pass)
     retention.warn_events_mb  20     `--doctor` warns when the events of an account are bigger than this
 
+A retention shorter than the longest window that reads it (the comparison of periods for the events, `analytics.keep_days` for the analytics) is raised to that window when the purge runs
+(`effective`) and the doctor says so: nothing is purged that a window still needs.
+
 What a purge touches: ONLY events older than the limit and days of the analytics older than its limit. It never touches the configuration, the state of the sentinels or the small
 documents (the silences, what the feed announced, the update notice) and it never removes an event that has no time. Each pass leaves a line in the audit document `retention_audit`
 (when, how many events removed and kept, the archive file, how many days of analytics, the mode, an error if there was one); the last AUDIT_KEEP are kept.
@@ -42,6 +45,35 @@ def settings(config):
         value = block.get(key)
         if isinstance(value, (int, float)) and not isinstance(value, bool) and low <= value <= high:
             out[key] = int(value)
+    return out
+
+
+def floors(config):
+    """{setting: days} the retention may not go below: the feed of events must reach back as far as the window of the comparison needs (two of its windows and a day, while it is on) and the days of
+    the analytics must reach as far as `analytics.keep_days`. Purging earlier than a window reads would make that window quietly show less than it says."""
+    out = {"events_days": 0, "analytics_days": 0}
+    try:
+        from github_actions_monitor.compare import config as compare_config
+        cfg = compare_config.settings(config)
+        out["events_days"] = 2 * max(cfg["default_window_days"], 7) + 1 if cfg["enabled"] else 0
+    except Exception:   # noqa: BLE001 - a floor that cannot be worked out is no floor
+        pass
+    try:
+        from github_actions_monitor.data_pipeline import analytics
+        out["analytics_days"] = int(analytics.settings(config)["keep_days"])
+    except Exception:   # noqa: BLE001
+        pass
+    return out
+
+
+def effective(config):
+    """`settings` with the retention raised to the longest window that reads it (see `floors`): what the purge really uses. `raised` = {setting: {"asked", "now"}} of what was raised."""
+    out = settings(config)
+    out["raised"] = {}
+    for key, floor in floors(config).items():
+        if out[key] < floor:
+            out["raised"][key] = {"asked": out[key], "now": floor}
+            out[key] = floor
     return out
 
 
@@ -105,7 +137,7 @@ def due(storage, account_id, cfg, now=None):
 
 def tick(storage, account_id, config, now=None):
     """The tick of maintenance: runs a pass when retention is on and the interval has passed. Returns the audit line, or None when nothing was due. Cheap when nothing is due."""
-    cfg = settings(config)
+    cfg = effective(config)
     if not due(storage, account_id, cfg, now):
         return None
     return run(storage, account_id, cfg, now)
