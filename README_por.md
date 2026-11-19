@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4416_passing-brightgreen.svg" alt="4416 tests">
+  <img src="https://img.shields.io/badge/Tests-4422_passing-brightgreen.svg" alt="4422 tests">
 </p>
 
 > Vigia os workflows de todos os seus repositórios e diz-lhe, numa página local, o que está a vermelho, o que está encravado e o que o espera.
@@ -82,7 +82,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 | | |
 |---|---|
 | **Maturidade** | functional |
-| **Testes** | 4416 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Testes** | 4422 métodos de teste (`python -m unittest discover -s monitor/tests`) |
 | **Definições** | 706 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, Python 3.11, 3.13 |
@@ -309,6 +309,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COMPLETE_SERVICE_por.md`](monitor/docs/COMPLETE_SERVICE_por.md): Edição completa como serviço
 - [`monitor/docs/COMPLETE_TEAM_por.md`](monitor/docs/COMPLETE_TEAM_por.md): Edição completa para uma equipa
 - [`monitor/docs/API_por.md`](monitor/docs/API_por.md): A API para clientes
+- [`monitor/docs/API_V1_por.md`](monitor/docs/API_V1_por.md): A API de leitura v1, passo a passo
 - [`monitor/docs/NOTIFICATIONS_por.md`](monitor/docs/NOTIFICATIONS_por.md): notificações e o contrato dos adaptadores
 - [`monitor/docs/AI_por.md`](monitor/docs/AI_por.md): o assistente de IA: fornecedores, segurança e ações
 - [`monitor/docs/ANALYTICS_por.md`](monitor/docs/ANALYTICS_por.md): análises, leituras condicionais e ligação perdida
