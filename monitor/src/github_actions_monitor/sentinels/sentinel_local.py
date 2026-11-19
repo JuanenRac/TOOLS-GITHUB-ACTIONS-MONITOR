@@ -107,6 +107,9 @@ DEFAULTS = {
     # workflow on the default branch (`gh run list -w <file> --branch <default> -L 1`): red counts as red in A2, none stays inconclusive for that workflow only.
     # Same quota gate as A10 (min_rate_remaining x surface.min_rate_factor, and the hourly budget). max_calls_per_tick 0 = never ask; ttl = how long an answer is kept.
     "a2_resolve_max_calls_per_tick": 4, "a2_resolve_ttl_seconds": 3600,
+    # trend_workflow_marks (OFF): a mark in the daily trend on the days a commit touched .github/workflows (it explains a jump in duration or in failures). It costs ONE request per repository
+    # (`commits?path=.github/workflows&since=...`), at most `trend_workflow_marks_per_tick` repositories a tick, each one again only after `trend_workflow_marks_hours`.
+    "trend_workflow_marks": False, "trend_workflow_marks_per_tick": 4, "trend_workflow_marks_hours": 24, "trend_workflow_marks_days": 14,
     # a2_resolve_batch_min: a repository with at least this many workflows to look up is asked ONCE for its newest completed runs of the default branch (up to a2_resolve_batch_pages
     # pages of 100, each page one call) and every workflow found in them is resolved together; the rest go one by one as before. 0 = always one by one.
     "a2_resolve_batch_min": 2, "a2_resolve_batch_pages": 1,
@@ -952,7 +955,7 @@ def compute_snapshot(inp):
                "high_repos": [r for r, t in sorted(totals.items()) if sev_high(t["sev"])], "severity": sev_total, "severity_all": trend_day.severities(totals),
                "new": new or {}, "new_total": (sum(new.values()) if new is not None else None), "has_reference": new is not None,
                "codeql": codeql_list[:200], "unavailable": len(unavailable), "alerts_checked": sum(1 for a in alerts.values() if a.get("at")),
-               "trend": {**{k: trend(inp["history"], k) for k in ("codeql", "dependabot", "secret", "prs", "red", "candidates")}, **{k: trend_gaps(inp["history"], k) for k in EXTRA_SERIES}, "min_repo": trend_day.repo_series(inp["history"]), "releases": trend_day.release_marks(inp["history"]),
+               "trend": {**{k: trend(inp["history"], k) for k in ("codeql", "dependabot", "secret", "prs", "red", "candidates")}, **{k: trend_gaps(inp["history"], k) for k in EXTRA_SERIES}, "min_repo": trend_day.repo_series(inp["history"]), "releases": trend_day.release_marks(inp["history"]), "workflows": trend_day.workflow_marks(inp["history"]),
                          "thresholds": {"ci_green_pct": cfg.get("trend_green_pct", 90), "health": cfg.get("trend_health", 70), "quota_used_pct": cfg.get("trend_quota_pct", 80)}, "versions": [(inp["history"].get("days") or {}).get(d, {}).get("version") for d in sorted(inp["history"].get("days") or {})]}},
         "a4": {"dependabot": dep_prs, "other": sum(1 for p in prs_all if not p["dependabot"] and not (bots_apart and p["bot"])), "other_bots": sum(1 for p in prs_all if not p["dependabot"] and p["bot"]),
                "stale_days": cfg["stale_pr_days"]},
@@ -1094,6 +1097,7 @@ class Sentinel:
         self.a2_resolved = {}        # "repo|workflow file" -> last run on the default branch (or none), see _a2_resolve_tick
         self.tick_began = None       # when the tick in progress began (None between ticks): the calls of the tick are counted from here
         self.a2_reason = "pending"   # why an unresolved workflow is still unresolved: "pending" (waiting its turn) or "quota"
+        self.wf_asked = {}           # repository -> when its commits on the workflow files were last read (trend_workflow_marks): not asked again before trend_workflow_marks_hours
         self.a2_listed = {}          # repository -> when the listing of its last runs was read for the batch way: not asked again before the TTL, whatever it brought
         self.backoff = {}            # question -> (failures in a row, not before): a question that failed is not asked again in the next turn (see _failed_question)
         self.dirty = False
@@ -1503,6 +1507,7 @@ class Sentinel:
         did = self._surface_tick() or did
         did = self._lint_remote_tick() or did
         did = self._a2_resolve_tick() or did
+        did = self._workflow_marks_tick() or did
         did = self._upstream_tick() or did
         did = self._failed_jobs_tick() or did
         if did or self.dirty:
@@ -1685,6 +1690,40 @@ class Sentinel:
             did = True
         if did:
             self.ok("a2_resolve")
+        return did
+
+    def _workflow_marks_tick(self):
+        """trend_workflow_marks (off by default): for the repositories whose turn has come, one request for the commits of the last `trend_workflow_marks_days` days that touched
+        `.github/workflows`; the days they fall on get a mark in the history of the trend. Same quota gate as A10; a failed read leaves the repository for the next turn. Read only."""
+        if self.cfg.get("trend_workflow_marks") is not True or not self.repo_info:
+            return False
+        now_ts = time.time()
+        wait = float(self.cfg.get("trend_workflow_marks_hours") or 24) * 3600
+        due = sorted((r for r in self.repo_info if now_ts - self.wf_asked.get(r, 0.0) >= wait), key=lambda r: self.wf_asked.get(r, 0.0))
+        rate = (self.ctx["data_fn"]() or {}).get("rate")
+        needed = self.cfg["min_rate_remaining"] * self.cfg["surface"]["min_rate_factor"]
+        room = min(int(self.cfg.get("trend_workflow_marks_per_tick") or 0), self._budget())
+        if not due or room <= 0 or (rate and rate["remaining"] < needed):
+            return False
+        days = int(self.cfg.get("trend_workflow_marks_days") or 14)
+        since = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        did = failed = False
+        for repo in due[:room]:
+            self.wf_asked[repo] = now_ts      # a failure also waits its turn: the others are read
+            try:
+                answer = self._gh("api", f"repos/{toolconfig.github_owner()}/{repo}/commits?path=.github/workflows&since={since}&per_page=20")
+            except Exception as error:   # noqa: BLE001 - a repository that cannot be read has no mark, the others go on
+                self.error("workflow_marks", error)
+                failed = True
+                continue
+            found = trend_day.commit_days(repo, answer, since[:10])
+            with self.lock:
+                trend_day.merge_marks(self.history.get("days") or {}, found, "workflows")
+                if found:
+                    self._save(HISTORY_FILE, self.history)
+            did = True
+        if did and not failed:
+            self.ok("workflow_marks")
         return did
 
     def _a2_resolve_batch(self, repo, names, branch, room, now_ts):

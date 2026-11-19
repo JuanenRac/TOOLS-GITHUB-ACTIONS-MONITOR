@@ -270,6 +270,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `lessons.max_entries` | `5000` | ai | Most lines in the book |
 | `lessons.recurring_from` | `2` | ai | A kind of failure repeats from |
 | `lessons.retention_days` | `180` | ai | Keep failures for |
+| `lint.anonymous_public` (secure) | `-` | lint | Read public repositories without any credential |
 | `lint.api.max_calls_per_tick` | `-` | lint | API calls per cycle for workflow files |
 | `lint.api.max_files_per_repo` | `-` | lint | Workflow files read per repository |
 | `lint.api.refresh_seconds` | `-` | lint | Read a repository again after |
@@ -612,6 +613,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinel.trend_green_pct` | `-` | sentinel | Line of green workflows |
 | `sentinel.trend_health` | `-` | sentinel | Line of the health |
 | `sentinel.trend_quota_pct` | `-` | sentinel | Line of the API quota used |
+| `sentinel.trend_workflow_marks` | `-` | sentinel | Mark the days a workflow file changed |
+| `sentinel.trend_workflow_marks_days` | `-` | sentinel | Days back to look for workflow changes |
+| `sentinel.trend_workflow_marks_hours` | `-` | sentinel | Hours before a repository is asked again for workflow changes |
+| `sentinel.trend_workflow_marks_per_tick` | `-` | sentinel | Repositories asked per round for workflow changes |
 | `sentinel.workers` | `-` | sentinel | Sentinel parallel requests |
 | `sentinels.collab.deadline_s` | `-` | sentinel | Time ceiling per round |
 | `sentinels.collab.enabled` | `-` | sentinel | Collab sentinel on |

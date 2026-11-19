@@ -22,7 +22,12 @@ NAME_RE = re.compile(r"^(?!\.+\Z)[A-Za-z0-9._-]{1,100}\Z")      # "." and ".." n
 FILE_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\.ya?ml\Z")
 MAX_BYTES = 262144      # a workflow file bigger than this is skipped (the clone scan reads the same limit)
 NOT_EVALUABLE_BY_API = ("stacks", "dependabot_yml", "manifest", "changelog")      # what a list of workflow files cannot say
-REASONS = ("sso", "rate_limited", "auth", "forbidden", "error", "budget", "too_big", "over_limit")
+REASONS = ("sso", "rate_limited", "auth", "forbidden", "error", "budget", "too_big", "over_limit", "airgapped", "anon_off")
+RAW_HOST = "raw.githubusercontent.com"
+API_HOST = "api.github.com"
+ANON_LIST_RE = re.compile(r"^repos/([A-Za-z0-9._-]{1,100})/([A-Za-z0-9._-]{1,100})/contents/\.github/workflows\Z")
+ANON_FILE_RE = re.compile(r"^repos/([A-Za-z0-9._-]{1,100})/([A-Za-z0-9._-]{1,100})/contents/\.github/workflows/([A-Za-z0-9._-]{1,100}\.ya?ml)\Z")
+MAX_LIST_BYTES = 1048576      # the listing of a folder of workflows is never bigger than this
 
 
 def reason_of(message):
@@ -40,6 +45,44 @@ def reason_of(message):
     if "403" in low or "not accessible" in low or "forbidden" in low:
         return "forbidden"
     return "error"
+
+
+def anonymous_reader(opener=None):
+    """A `read(endpoint)` for `Reader` that asks GitHub WITHOUT any credential, for public repositories only (`lint.anonymous_public`): the listing of the folder from `api.github.com` (an anonymous
+    request: it counts against the address of this computer, never against the allowance of the token of the monitor) and each file from `raw.githubusercontent.com`, which costs no API
+    allowance at all. A file whose SHA did not change in the listing is not asked again (the `Reader` keeps it). Only those two hosts, over https, with no redirect followed and no header
+    that carries a secret; a file bigger than MAX_BYTES is cut before it is read. A private or missing repository answers 404: "not found", never "clean". `opener(request)` is the seam of the tests."""
+    import json
+    import urllib.error
+    import urllib.request
+    from github_actions_monitor.security import netguard
+
+    def fetch(url, limit):
+        request = urllib.request.Request(url, headers={"User-Agent": "github-actions-monitor", "Accept": "application/vnd.github+json" if url.startswith("https://" + API_HOST) else "text/plain"})
+        try:
+            with (opener or (lambda r: netguard.open_url(r, timeout=15, follow_redirects=False)))(request) as answer:
+                return answer.read(limit + 1)
+        except urllib.error.HTTPError as error:
+            text = "rate limit exceeded" if error.code in (403, 429) else "not found" if error.code == 404 else "error"
+            error.close()
+            raise RuntimeError(f"HTTP {error.code} {text}") from None
+        except OSError as error:
+            raise RuntimeError("the read failed: " + str(error)[:120]) from None
+
+    def read(endpoint):
+        listing, one = ANON_LIST_RE.match(str(endpoint)), ANON_FILE_RE.match(str(endpoint))
+        if listing:
+            data = fetch(f"https://{API_HOST}/repos/{listing.group(1)}/{listing.group(2)}/contents/.github/workflows", MAX_LIST_BYTES)
+            if len(data) > MAX_LIST_BYTES:
+                raise RuntimeError("the listing is too big")
+            return json.loads(data.decode("utf-8", "replace"))
+        if one:
+            data = fetch(f"https://{RAW_HOST}/{one.group(1)}/{one.group(2)}/HEAD/.github/workflows/{one.group(3)}", MAX_BYTES)
+            if len(data) > MAX_BYTES:
+                raise RuntimeError("file too big")
+            return {"encoding": "base64", "content": base64.b64encode(data).decode("ascii")}
+        raise RuntimeError("an anonymous read asks only for the workflow files of a repository")
+    return read
 
 
 def _pack(text):

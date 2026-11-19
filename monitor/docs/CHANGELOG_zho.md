@@ -21,6 +21,9 @@
 
 - **把自托管运行器与工作流文件所写的内容对照**(`runners.model.observed_reads_per_cycle`,默认 0 = 关闭;需要 `runners.model.enabled`):监控器读取在自托管运行器上有作业的仓库的工作流文件(每个周期少量调用,仓库每六小时重新读取一次,文件仅在 SHA 变化时才读取),`GET /api/runners/model` 和 设置 > 高级 中的 `observed` 会列出每个仓库、作业实际运行的运行器,以及值得留意的原因:没有文件写明自托管但其中一个在 `runs-on` 中使用了表达式,根本没有文件写明,或者仓库是公开的。文件尚未读取的仓库会说明这一点,绝不判定。不会向 GitHub 写入任何内容。
 
+- **每日趋势现在可以标记工作流文件发生变化的日期**(`sentinel.trend_workflow_marks`,默认关闭,另有 `sentinel.trend_workflow_marks_per_tick`、`sentinel.trend_workflow_marks_hours` 和 `sentinel.trend_workflow_marks_days`):在某个仓库的 `.github/workflows` 文件有提交改动的日期,图表上与版本发布标记并列显示一个方块,使时长或失败数的突变旁边就有解释。每个仓库花费一次请求,每轮若干个仓库,同一仓库在所设小时数之后才会再查;只标记每日历史中已有的日期,标记位于 `GET /api/sentinel` 的 `a3.trend.workflows` 中。
+- **工作流 linter 现在可以不使用凭据读取公开仓库**(`lint.anonymous_public`,默认关闭;`lint_workflows.py --remote OWNER/REPO --anon`):查看第三方的工作流时,文件来自 `raw.githubusercontent.com`,不消耗你令牌的任何额度,文件夹列表是匿名请求;未变化的文件不会重复读取,超过 256 KiB 的文件会被跳过,不会发送带有密钥的请求头,与网络隔离的监视器从不读取,私有或不存在的仓库会显示“未找到”,绝不会显示“干净”。
+
 - **每个标签页都说明墙面屏幕如何处理它**:墙面屏幕的决定现在逐个标签页写在代码里(`screens.py` 中的 `TAB_DECISIONS`):“现在”在“此刻”上;“告警”“图表”“车队”在总览上;每个哨兵标签页在“哨兵”上;不显示的标签页会说明原因(`people`、`controls`、`reading` 或 `text`)。屏幕指南以八种语言列出该表,若新增标签页却没有决定,或某份指南缺少一行,测试就会失败。
 - **带数据的演示现在会填满普通演示留空的每个标签页**:`tools/demo_monitor.py --rich` 除了原有的发现、每日趋势、对比、失败记录和一份定时报告外,还加入了前一天保存的报告(“昨天与今天”因此能显示出现和消失的内容),并用虚构的发现开启了四个可选报告(工作流卫生、按运行器的队列、发布就绪或被阻止、供应链)。每个标签页都在 `TAB_DEMO` 中标为 `plain` 或 `rich` 并说明获得的内容,测试会启动演示并通过各自的端点读取每个 rich 标签页。
 

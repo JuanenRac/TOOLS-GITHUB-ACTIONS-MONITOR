@@ -81,6 +81,10 @@
     "trend_green_pct": 90,
     "trend_health": 70,
     "trend_quota_pct": 80,
+    "trend_workflow_marks": false,
+    "trend_workflow_marks_per_tick": 4,
+    "trend_workflow_marks_hours": 24,
+    "trend_workflow_marks_days": 14,
     "dependency_bots": ["dependabot", "renovate"],
     "bots_apart": false,
     "required_files": [
@@ -571,6 +575,7 @@
     "refresh_seconds": 3600,
     "in_report": true,
     "source": "clone",
+    "anonymous_public": false,
     "api": {
       "refresh_seconds": 21600,
       "max_calls_per_tick": 20,

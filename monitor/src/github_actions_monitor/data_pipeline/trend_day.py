@@ -88,12 +88,45 @@ def build(runs_by_repo, now, raw, totals, minutes):
     return figures
 
 
-def merge_releases(days, found):
-    """Writes the release days into the days of the history that exist (a release published when the monitor was off is not invented a day): the names already there are kept."""
+def merge_marks(days, found, key="releases"):
+    """Writes the marks of a kind (`releases`, `workflows`) into the days of the history that exist (a mark of a day the monitor was off is not invented a day): the names already there are kept."""
     for day, names in (found or {}).items():
         if day in days and isinstance(days[day], dict):
-            old = [n for n in (days[day].get("releases") or []) if isinstance(n, str)]
-            days[day]["releases"] = (old + [n for n in names if n not in old])[:MAX_RELEASES_PER_DAY]
+            old = [n for n in (days[day].get(key) or []) if isinstance(n, str)]
+            days[day][key] = (old + [n for n in names if n not in old])[:MAX_RELEASES_PER_DAY]
+
+
+def merge_releases(days, found):
+    """The release days into the days of the history (see merge_marks)."""
+    merge_marks(days, found, "releases")
+
+
+def commit_days(repo, commits, since_day=""):
+    """{day: ["repo abc1234", ...]} of the days a commit touched the workflow files, from the answer of `commits?path=.github/workflows` (the date of the committer, the first 7 letters of the SHA).
+    A commit without a date or with a SHA that is not hexadecimal is left out; a day before `since_day` is left out; the names of a day are at most MAX_RELEASES_PER_DAY."""
+    out = {}
+    for item in commits if isinstance(commits, list) else []:
+        if not isinstance(item, dict):
+            continue
+        sha = str(item.get("sha") or "")
+        when = str((((item.get("commit") or {}).get("committer") or {}).get("date")) or "")[:10]
+        if len(when) != 10 or not (7 <= len(sha) <= 40) or any(c not in "0123456789abcdef" for c in sha) or (since_day and when < since_day):
+            continue
+        names = out.setdefault(when, [])
+        name = f"{repo} {sha[:7]}"
+        if name not in names and len(names) < MAX_RELEASES_PER_DAY:
+            names.append(name)
+    return out
+
+
+def workflow_marks(history):
+    """{day: [names]} of the days of the history in which a commit touched the workflow files."""
+    out = {}
+    for d, row in sorted((history.get("days") or {}).items()):
+        names = [n for n in ((row or {}).get("workflows") or []) if isinstance(n, str)]
+        if names:
+            out[d] = names
+    return out
 
 
 def repo_series(history, top=MAX_REPOS):
