@@ -24,6 +24,7 @@ SCENARIOS = {
     "E6": ("e6_secrets.py", 25, "Secrets"),
     "E7": ("e7_shutdown.py", 30, "SIGTERM, kill -9, memory"),
     "E8": ("e8_webhook.py", 35, "Webhook behind the proxy"),
+    "E9": ("e9_shared_files.py", 25, "Files shared by several processes (os_lock, process_lock)"),
 }
 NAME = re.compile(r"^[A-Za-z0-9._/-]{1,100}$")
 
@@ -47,7 +48,7 @@ def plan(repo, ref, scenarios, previous):
     else:
         codes = [c.strip().upper() for c in scenarios.split(",") if c.strip()]
         if not codes or any(c not in SCENARIOS for c in codes):
-            raise SystemExit("the list of checks must be `all` or codes between E1 and E8 separated by commas: %r" % scenarios)
+            raise SystemExit("the list of checks must be `all` or codes between E1 and E9 separated by commas: %r" % scenarios)
     known = tags(repo)
     ref = ref.strip() or (known[-1] if known else "")
     if not ref or not NAME.match(ref):
