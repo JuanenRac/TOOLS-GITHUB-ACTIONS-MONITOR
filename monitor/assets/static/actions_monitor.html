@@ -1045,7 +1045,7 @@ function render(d){
   const F=d.figures||{},ok=F.ok24!=null?F.ok24:done.filter(r=>r.conclusion==="success").length,bad=F.fail24!=null?F.fail24:done.filter(r=>BAD.includes(r.conclusion)).length;      // the server counts them: both editions show the same figures
   {const c=runCounts(d);kSet("k-active",runFig(c.sr,c.tr));kSet("k-queued",runFig(c.sq,c.tq));runTitle("k-active","ui.k_active_title",c.sr,c.tr);runTitle("k-queued","ui.k_queued_title",c.sq,c.tq)}
   kSet("k-min",F.min24!=null?F.min24:Math.round(last.reduce((a,r)=>a+r.seconds,0)/60));kSet("k-fail",bad);kSet("k-ok",ok);kSet("k-issues",d.issues.length);
-  $("stamp").textContent=d.loading?T("ui.loading_repos",{n:d.loading}):T("ui.updated",{time:clock(d.updated),secs:d.took});
+  $("stamp").textContent=d.loading?T("ui.loading_repos",{n:d.loading}):d.resumed?T("ui.resumed",{time:clock(d.updated),mins:Math.max(1,Math.round(d.resumed.age_seconds/60))}):T("ui.updated",{time:clock(d.updated),secs:d.took});
   const eta=d.rate?Math.max(0,Math.round((new Date(d.rate.reset).getTime()-Date.now())/60000)):null;
   $("rate").textContent=d.rate?T("ui.quota",{remaining:d.rate.remaining,limit:d.rate.limit,time:clock(d.rate.reset,{hour:"2-digit",minute:"2-digit"}),eta:eta}):"";
   const q=$("quota");q.hidden=!d.paused_quota;if(d.paused_quota)q.textContent=T("ui.quota_paused",{remaining:d.rate.remaining,min:d.min_rate,eta:eta!=null?T("ui.quota_until",{eta:eta}):""});

@@ -74,7 +74,7 @@ class Bound(unittest.TestCase):
 
     def test_the_state_of_the_sentinels_the_silences_and_the_update_notice(self):
         sentinel_local.Sentinel._save(sentinel_local.CACHE_FILE, {"saved": 1, "repo_info": {"a": 1}})
-        self.assertEqual(self.storage.load_sentinel_state("alpha", "sentinel_cache"), {"saved": 1, "repo_info": {"a": 1}})
+        self.assertEqual(self.storage.load_sentinel_state("alpha", "sentinel_cache"), {"schema_version": 1, "saved": 1, "repo_info": {"a": 1}})      # the record carries the version of its schema; the readers of state_io never see it
         self.assertEqual(sentinel_local.Sentinel._load(sentinel_local.CACHE_FILE, {}), {"saved": 1, "repo_info": {"a": 1}})
         self.assertEqual(sentinel_local.Sentinel._load(sentinel_local.HISTORY_FILE, {"days": {}}), {"days": {}})      # nothing stored: the default
         ai = sentinel_ai.Store(sentinel_ai.CACHE_FILE)

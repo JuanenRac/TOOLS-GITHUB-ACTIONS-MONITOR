@@ -35,6 +35,8 @@ Se elige en la configuración de la cuenta (o del monitor): `"storage": {"backen
 - El esquema tiene versión (`schema_version`). Cada migración se ejecuta en una sola transacción junto con el cambio de versión, de modo que una interrumpida deja la base como estaba y se repite en el siguiente arranque. Una base escrita por una versión más nueva se rechaza, nunca se degrada.
 - Un elemento dañado o ausente se lee como vacío: el monitor arranca con lo que haya en el disco.
 
+Cada registro que guarda el monitor (el estado de los centinelas, los silencios, el estado del feed, el aviso de actualización) lleva `schema_version` al principio de su objeto. Un registro anterior a la marca se lee como versión 0, como siempre. Un registro de una versión MÁS NUEVA de la que entiende el programa nunca se lee a medias: se deja aparte, el programa parte de sus valores por defecto para ese registro y el fichero se nombra en la lista de degradados (`records.newer`), de modo que una bajada de versión dice qué fichero no entendió en lugar de leerlo mal.
+
 ## Mover datos y copias de seguridad
 
 ```

@@ -35,6 +35,8 @@ Gewählt wird in der Konfiguration des Kontos (oder des Monitors): `"storage": {
 - Das Schema ist versioniert (`schema_version`). Jede Migration läuft in einer einzigen Transaktion zusammen mit dem Hochsetzen der Version; eine unterbrochene lässt die Datenbank, wie sie war, und läuft beim nächsten Start erneut. Eine Datenbank einer neueren Version wird abgelehnt, nie zurückgestuft.
 - Ein beschädigtes oder fehlendes Element liest sich als leer: Der Monitor startet mit dem, was auf der Platte liegt.
 
+Jeder Datensatz, den der Monitor aufbewahrt (Zustand der Wächter, Stummschaltungen, Feed-Zustand, Update-Hinweis), trägt `schema_version` am Anfang seines Objekts. Ein Datensatz aus der Zeit vor der Markierung wird wie immer als Version 0 gelesen. Ein Datensatz einer NEUEREN Version, als das Programm versteht, wird nie halb gelesen: Er wird beiseitegelegt, das Programm beginnt für diesen Datensatz mit seinen Standardwerten, und die Datei wird in der Liste der Beeinträchtigungen genannt (`records.newer`); ein Downgrade sagt also, welche Datei er nicht verstand, statt sie falsch zu lesen.
+
 ## Daten verschieben und Sicherungen
 
 ```
