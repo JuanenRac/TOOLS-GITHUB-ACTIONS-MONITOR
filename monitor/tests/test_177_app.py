@@ -153,7 +153,9 @@ class SettingsAndDoctor(unittest.TestCase):
                 self.assertIn("other users", doctor.github_app_check({"github_app": {"enabled": True, "app_id": "1", "key_path": str(key)}})[1])
                 os.chmod(key, 0o600)
             with mock.patch.object(doctor.shutil, "which", return_value="/usr/bin/openssl"):
-                self.assertEqual(doctor.github_app_check({"github_app": {"enabled": True, "app_id": "1", "key_path": str(key)}}), ("ok", "on"))
+                status, detail = doctor.github_app_check({"github_app": {"enabled": True, "app_id": "1", "key_path": str(key)}})      # a file that is not a key: said (the valid key is in test_mon102_rsa_signer)
+                self.assertEqual(status, "warn")
+                self.assertIn("key unreadable", detail)
         self.assertIn("github_app", doctor.ORDER)
         for lang in i18n.LANGS:
             for key_name in ("doctor.t.github_app", "doctor.f.github_app"):

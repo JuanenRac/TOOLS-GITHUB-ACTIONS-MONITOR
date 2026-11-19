@@ -2480,6 +2480,7 @@ async function quotaBox(host){
       if(q.billing_requested)rows.push([T("ui.q_real"),q.billing?String(q.billing.minutes):T("ui.q_real_none")])}
     rows.push([T("ui.q_clock"),q.billable.clock+" / "+q.billable.billable+" "+T("quota.estimate")]);
     rows.push([T("ui.q_api"),T("ui.q_api_"+q.api_mode)]);
+    if(q.app&&q.app.state==="fallback"){const k="ui.q_app_c_"+q.app.code,w=T(k);rows.push([T("ui.q_app"),T("ui.q_app_fb",{why:w===k?q.app.code:w,limit:q.app.limit==null?"?":q.app.limit})])}
     if(q.concurrency&&q.concurrency.limit)rows.push([T("ui.q_conc"),q.concurrency.running+" / "+q.concurrency.queued+" / "+q.concurrency.limit]);
     rows.push([T("ui.q_long"),q.long_jobs.length?q.long_jobs.map(j=>j.repo+" ("+j.hours+" h)").join(", "):T("ui.q_none")]);
     box.innerHTML=`<h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gauge"/></svg><span>${esc(T("ui.q_title"))}</span></h3><div class="cfg-grid" style="grid-template-columns:1fr">`+dl(rows)+`<div class="mut">${esc(T("ui.q_public"))} ${esc(T("ui.q_note"))}</div></div>`;

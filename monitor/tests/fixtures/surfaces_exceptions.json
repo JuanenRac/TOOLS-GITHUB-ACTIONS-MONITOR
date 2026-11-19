@@ -324,7 +324,6 @@
      "/api/mirror",
      "/api/mode",
      "/api/notify/test",
-     "/api/quota",
      "/api/quota-pool/status",
      "/api/refresh-repos",
      "/api/screens/logo",
