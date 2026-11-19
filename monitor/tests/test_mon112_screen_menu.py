@@ -209,19 +209,18 @@ class TheCommandAndTheTool(unittest.TestCase):
         self.assertNotIn("screens", cli.LITE_COMMANDS)
         self.assertEqual(cli.SCREENS_ACTIONS, ("list", "urls"))
         self.addCleanup(i18n.set_language, "en")
-        with mock.patch.object(toolconfig, "raw_config", return_value={"screens": {"enabled": True}}):
-            served = logo_tests.Running(self, {"screens": {"enabled": True}})
-            url = f"http://127.0.0.1:{served.port}"
-            for action, expect in (("list", "/screen/overview"), ("urls", url + "/screen/overview?theme=contrast")):
-                out = io.StringIO()
-                with contextlib.redirect_stdout(out):
-                    code = cli.main(["screens", action, "--url", url, "--lang", "en"])
-                self.assertEqual(code, cli.EXIT_OK)
-                self.assertIn(expect, out.getvalue())
-                self.assertIn("12 kinds of screen", out.getvalue())
-            bad = io.StringIO()
-            with contextlib.redirect_stdout(bad), contextlib.redirect_stderr(bad):
-                self.assertEqual(cli.main(["screens", "open", "--url", url, "--lang", "en"]), cli.EXIT_USAGE)
+        served = logo_tests.Running(self, {"screens": {"enabled": True}})
+        url = f"http://127.0.0.1:{served.port}"
+        for action, expect in (("list", "/screen/overview"), ("urls", url + "/screen/overview?theme=contrast")):
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                code = cli.main(["screens", action, "--url", url, "--lang", "en"])
+            self.assertEqual(code, cli.EXIT_OK)
+            self.assertIn(expect, out.getvalue())
+            self.assertIn("12 kinds of screen", out.getvalue())
+        bad = io.StringIO()
+        with contextlib.redirect_stdout(bad), contextlib.redirect_stderr(bad):
+            self.assertEqual(cli.main(["screens", "open", "--url", url, "--lang", "en"]), cli.EXIT_USAGE)
 
     def test_the_words_of_the_command_exist_in_the_eight_languages(self):
         for lang in LANGS:
