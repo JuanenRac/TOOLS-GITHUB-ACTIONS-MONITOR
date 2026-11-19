@@ -34,11 +34,24 @@ VIEWS = [view("repo%03d" % n, "bad" if n % 10 == 0 else "ok", "HYDRA" if n % 2 e
 
 
 class TheRules(unittest.TestCase):
-    def test_it_is_off_by_default_and_the_values_are_bounded(self):
-        self.assertFalse(CFG["v1_enabled"])
+    def test_it_is_automatic_by_default_and_the_values_are_bounded(self):
+        self.assertEqual(CFG["v1_enabled"], "auto")
+        for old, new in ((True, "on"), (False, "off"), ("on", "on"), ("off", "off"), ("auto", "auto"), ("maybe", "auto"), (1, "auto"), (None, "auto")):      # the old true / false keep their meaning
+            self.assertEqual(api_v1.settings({"api": {"v1_enabled": old}})["v1_enabled"], new, old)
         bad = api_v1.settings({"api": {"v1_enabled": "yes", "default_limit": 0, "max_limit": True, "cursor_ttl_seconds": 5, "gzip_min_bytes": -1}})
         self.assertEqual(bad, CFG)
         self.assertEqual(api_v1.settings({"api": {"default_limit": 500, "max_limit": 100}})["default_limit"], 100)      # the default never passes the ceiling
+
+    def test_auto_is_on_in_the_service_mode_only(self):
+        for mode, service, want in (("auto", True, True), ("auto", False, False), ("on", False, True), ("on", True, True), ("off", True, False), ("off", False, False)):
+            self.assertEqual(api_v1.enabled({"v1_enabled": mode}, service), want, (mode, service))
+
+    def test_the_capabilities_follow_the_role_and_v1_never_writes(self):
+        self.assertEqual(api_v1.capabilities("individual", None), {"read": True, "write": True, "admin": True, "v1_write": False})
+        self.assertEqual(api_v1.capabilities("team", "viewer"), {"read": True, "write": False, "admin": False, "v1_write": False})
+        self.assertEqual(api_v1.capabilities("team", "maintainer"), {"read": True, "write": True, "admin": False, "v1_write": False})
+        self.assertEqual(api_v1.capabilities("team", "admin"), {"read": True, "write": True, "admin": True, "v1_write": False})
+        self.assertEqual(api_v1.capabilities("team", None), {"read": True, "write": False, "admin": False, "v1_write": False})      # a team session without a known role gets the least
 
     def test_the_program_defaults_and_the_example_file_are_the_same_as_the_module(self):
         self.assertEqual(actions_monitor.DEFAULTS["api"], api_v1.DEFAULTS)
@@ -200,6 +213,16 @@ class TheServer(unittest.TestCase):
             row = next(r for r in CONTRACT["v1_endpoints"] if r["path"] == path)
             for key, kind in keys.items():
                 self.assertEqual(row["keys"].get(key) if not isinstance(row["keys"].get(key), dict) else "object", kind, (path, key))
+
+    def test_auto_follows_the_service_mode_over_http(self):
+        served = self.serve(enabled=False)      # the configuration says nothing: "auto"
+        self.assertEqual(self.get(served, "/api/v1/me")[0], 404)      # one person at one computer
+        with mock.patch.object(actions_monitor, "service_mode", return_value=True):
+            status, body, _ = self.get(served, "/api/v1/me")      # the image, the unit, the process of an account
+            self.assertEqual((status, body["contract"]), (200, api_v1.CONTRACT_VERSION))
+            self.assertEqual(self.get(served, "/api/v1/health")[0], 200)
+            with mock.patch.object(actions_monitor.toolconfig, "raw_config", return_value={"api": {"v1_enabled": "off"}}):
+                self.assertEqual(self.get(served, "/api/v1/me")[0], 404)      # off switches it off in the service mode too
 
     def test_me_in_the_individual_mode(self):
         status, body, _ = self.get(self.serve(), "/api/v1/me")
