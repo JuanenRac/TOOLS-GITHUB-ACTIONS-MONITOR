@@ -3443,6 +3443,8 @@
  "ci.lane_branch": "branche {branch}",
  "cfg.f.sampling.default_branch_probe": "Second regard sur la branche par défaut",
  "cfg.h.sampling.default_branch_probe": "Quand la liste des exécutions d'un dépôt est pleine, une requête de plus demande les push vers sa branche par défaut (sans pull requests), afin que les exécutions qui décident du rouge sur main ne soient pas chassées par les pull requests et les planifications. Coûte une requête par dépôt plein et par lecture ; désactivé par défaut.",
+ "cfg.f.sampling.active_probe": "Regarder les exécutions encore en cours",
+ "cfg.h.sampling.active_probe": "Quand la liste des exécutions d'un dépôt est pleine, deux requêtes légères demandent les exécutions encore en cours et celles en file d'attente, pour qu'une longue exécution commencée avant la fenêtre de la liste ne soit ni perdue ni affichée comme terminée. Coûte deux requêtes par dépôt plein et par lecture ; désactivé par défaut.",
  "cfg.f.sampling.min_coverage_minutes": "Couverture faible en dessous de",
  "cfg.h.sampling.min_coverage_minutes": "Une liste d'exécutions pleine qui remonte moins que ce nombre de minutes est marquée couverture faible au lieu de paraître complète. 0 désactive la marque.",
  "cfg.f.sampling.api_budget_per_hour": "Budget de requêtes par heure",

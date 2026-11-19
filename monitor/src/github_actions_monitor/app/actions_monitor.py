@@ -155,7 +155,7 @@ DEFAULTS = {
     "network": {"use_proxy": False, "etag": True, "graphql_checks": False, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
     "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
     "pagination": {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3, "cursor_pages": 3},      # pages of 100 followed when a list is full, and said when something is cut (paging.py)
-    "sampling": {"default_branch_probe": False, "min_coverage_minutes": 30, "api_budget_per_hour": 0},      # how much of a repository the list of runs shows, a second look at the default branch, a budget of requests (sampling.py)
+    "sampling": {"default_branch_probe": False, "active_probe": False, "min_coverage_minutes": 30, "api_budget_per_hour": 0},      # how much of a repository the list of runs shows, a second look at the default branch, a budget of requests (sampling.py)
     "savings": {"webhook_first": False, "webhook_window_minutes": 60, "webhook_full_minutes": 360, "feeds": {"enabled": False, "method": "atom", "max_age_minutes": 240}},      # read less: OFF (savings.py)
     "logs": {"failed_step": {"enabled": False, "lines": 12, "max_bytes": 2000, "max_per_minute": 10}},      # the log of the failed step in the page: OFF, one press of a button, steplog.py
     "reports": {"workflow_hygiene": {"enabled": False}, "queue": {"enabled": False}, "release_view": {"enabled": False}, "supply_chain": {"enabled": False}, "max_calls_per_cycle": 4},      # four optional reports, all OFF (reports.py)
@@ -696,10 +696,31 @@ def fetch_runs(repo, per_page):
     return parse_runs(repo, data), None
 
 
+def fetch_active(repo, runs):
+    """The runs of the repository that are still `in_progress` or `queued`, asked for on their own (sampling.active_probe) and joined to a full list: a long run that started before the
+    window of the sample is not lost. A failed request leaves the list as it was."""
+    for status in ("in_progress", "queued"):
+        try:
+            BUDGET.record(1)
+            data = gh_read(f"repos/{toolconfig.github_owner()}/{repo}/actions/runs?status={status}&per_page=100")
+        except AuthError:
+            raise
+        except Exception:   # noqa: BLE001 - the look at the active runs is extra: the first list stands
+            continue
+        runs, added = sampling.merge_probe(runs, parse_runs(repo, data))
+        SAMPLE_INFO.setdefault(repo, {})["probe"] = SAMPLE_INFO.get(repo, {}).get("probe", 0) + added
+    return runs
+
+
 def fetch_sampled(repo, per_page, config):
     """The list of runs of a repository; with sampling.default_branch_probe on and a full list, one more request for the pushes to the default branch, joined to it (sampling.py)."""
     runs, error = fetch_runs(repo, per_page)
-    if error or len(runs) < per_page or not sampling.settings(config)["default_branch_probe"]:
+    wanted = sampling.settings(config)
+    if error or len(runs) < per_page or not (wanted["default_branch_probe"] or wanted["active_probe"]):
+        return runs, error
+    if wanted["active_probe"]:
+        runs = fetch_active(repo, runs)
+    if not wanted["default_branch_probe"]:
         return runs, error
     branch = (repo_meta([repo]).get(repo) or {}).get("branch") or redrule.guess_default_branch(runs)
     if not branch or not BRANCH_RE.match(branch):
@@ -898,10 +919,12 @@ def refresh_runs(repos, config, progress=None):
         todo = [item for item in todo if item[0] not in batched]
     limit = sampling.settings(config)["api_budget_per_hour"]
     probing = sampling.settings(config)["default_branch_probe"]
+    watching = sampling.settings(config)["active_probe"]
 
     def price(item):      # a repository whose last list was full (or never read) also gets the second look at the pushes to its default branch: two requests
         held = RUN_CACHE.get(item[0])
-        return 2 if probing and (held is None or len(held.get("runs") or []) >= item[1]) else 1
+        full = held is None or len(held.get("runs") or []) >= item[1]
+        return 1 + (1 if probing and full else 0) + (2 if watching and full else 0)
     todo, waiting = sampling.plan(todo, red_repos_of([r for r, _n in todo]) if limit else set(), limit, BUDGET.used(), price)      # a spent budget: the repositories with red first, the others wait
     SAMPLING_STATE["dropped"] = [item[0] for item in waiting]
     for start in range(0, len(todo), 40):  # chunks, so the page can show the first results while the rest loads
@@ -1117,7 +1140,7 @@ def sampling_summary(config, repos, meta):
     cfg = sampling.settings(config)
     low = sorted(r for r in repos if ((meta.get(r) or {}).get("coverage") or {}).get("low"))
     waiting = [r for r in SAMPLING_STATE["dropped"] if r in set(repos)]
-    estimate = sampling.estimate_per_hour(len(repos), config.get("refresh_seconds") or 45, config.get("cold_refresh_seconds") or 600, probe=cfg["default_branch_probe"])
+    estimate = sampling.estimate_per_hour(len(repos), config.get("refresh_seconds") or 45, config.get("cold_refresh_seconds") or 600, probe=cfg["default_branch_probe"] or cfg["active_probe"])
     return {"low": low[:50], "low_count": len(low), "estimate_per_hour": estimate, "budget_per_hour": cfg["api_budget_per_hour"], "used_last_hour": BUDGET.used(),
             "waiting": waiting[:50], "waiting_count": len(waiting), "probe": cfg["default_branch_probe"], "min_coverage_minutes": cfg["min_coverage_minutes"]}
 

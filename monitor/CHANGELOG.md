@@ -19,6 +19,8 @@ when this file and `tool_version.py` disagree.
 
 ### Added
 
+- **Optional look at the runs that are still going** (`sampling.active_probe`, off by default): when the list of runs of a repository is full, two light requests ask for the runs that are `in_progress` and the runs that are `queued`, so a long run that started before the window of the list is not lost or shown as finished.
+
 - **Every record the monitor keeps now carries the version of its schema, and a record from a newer version is left aside and named**: the state of the sentinels, the silences, the feed state and the update notice are written with `schema_version` at the top (the readers never see it; a record from before the mark reads as version 0, as always). A record of a version newer than the program understands is not read half way: that record starts from its defaults and the file is named in the degraded list (`records.newer`), so a downgrade says which file it did not understand.
 
 - **After a restart the page shows the last picture at once, with its age**: after every complete cycle the picture is kept in `last_picture.json` next to the monitor (a private file, replaced whole); when the monitor starts it is shown marked "Data from N min ago" while the first cycle reads GitHub and replaces it. `startup.resume_max_age_hours` (Settings > Basic, 12 by default) is the oldest picture that is shown; 0 keeps and shows nothing and deletes an old file. A file that does not read, of another format or from the future is ignored.

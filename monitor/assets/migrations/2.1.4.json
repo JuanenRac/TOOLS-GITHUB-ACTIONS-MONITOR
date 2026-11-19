@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "d64b16ed98ef788d6fc0495e32f3f47713b9764f456c0b3b7695105264306cb3",
+ "digest": "1f1cfaa2ae6aedea70cb0e82462eaeefde3a3e36b8cd24113b6bd8f5af79253b",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -148,6 +148,11 @@
      20
     ],
     "default": 3
+   },
+   {
+    "key": "sampling.active_probe",
+    "kind": "bool",
+    "default": false
    },
    {
     "key": "screens.menu",
