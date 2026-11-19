@@ -62,7 +62,7 @@ class TheEtagThatJustExpired(unittest.TestCase):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         cache = etagcache.EtagCache(Path(tmp.name) / "etag.json", ttl_hours=1)
-        cache.entries["repos/a/b/actions/runs"] = {"etag": 'W/"abc"', "data": {"x": 1}, "at": NOW}
+        cache.entries[cache.key_of("repos/a/b/actions/runs")] = {"etag": 'W/"abc"', "data": {"x": 1}, "at": NOW}
         return cache
 
     def test_an_entry_on_the_edge_is_used_and_one_second_older_is_read_again(self):
