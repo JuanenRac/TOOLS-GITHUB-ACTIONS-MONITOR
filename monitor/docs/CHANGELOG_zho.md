@@ -19,6 +19,10 @@
 
 - **按仓库判断 webhook 的可选开关**：开启 `savings.webhook_live_per_repo`（默认关闭，需与 `savings.webhook_first` 一起使用）后，安静的仓库只有在最近 `savings.webhook_window_minutes` 分钟内收到过它自己的事件时，才会跳过缓慢读取。webhook 从未配置或已失效的仓库照常读取，其他仓库则被节省；节省的读取更少。Webhook 面板会统计自身在线的仓库（`live_repos`）。标签、帮助、提示和指南均提供八种语言。
 
+- **页面上的操作被 GitHub 拒绝时,现在会说明原因**:`/api/gh-action/confirm` 的响应带有 `reason`(`forbidden`:令牌没有 Actions 写入权限;`not_found`:不存在或是令牌看不到的私有仓库,两种情况 GitHub 都返回 404;`method`、`conflict`、`invalid`),页面会用八种语言在拒绝信息旁显示原因,而不再只是一句“GitHub 拒绝了”。
+- **无数据仓库的提示会合并相同的错误**:当许多仓库以同一条消息失败时,页面只显示一条提示“N 个仓库: <错误>”,名称收在折叠项里,而不是只显示长列表中的第一个错误。
+- **访问审计现在在操作系统锁之下轮转和写入**,读取服务器拒绝响应的测试也会释放连接:写同一个文件的监督进程和账户,不会再在其中一个移动文件时丢失一行。
+
 - **安全、供应链和交付哨兵的每一轮都有时间上限**:`sentinels.security.deadline_s`、`sentinels.supply.deadline_s` 和 `sentinels.delivery.deadline_s`(默认 30 秒;0 = 无)。超过后,该轮不再开始新的仓库,没轮到的继续等待(下一轮最久未读的优先),哨兵状态会把它们按名称列为 `unchecked` 并带有 `round_cut`,而不是算作零告警。
 - **保留期不能再短于读取它的最长窗口**:清理运行时,`retention.events_days` 会提高到对比的两个窗口加一天(对比开启期间),`retention.analytics_days` 会提高到 `analytics.keep_days`。设置保持原样;清理计划显示实际使用的值,doctor 会警告并说明提高了什么。
 - **更多开关会说明您将看到什么以及代价**:安全、供应链、交付和协作哨兵、运行器模型、AI 助手、相似告警、提示记录和实时事件流的提示,现在都以出现的内容和请求成本开头(八种语言);测试确保每条说明都对应一个真实的设置。

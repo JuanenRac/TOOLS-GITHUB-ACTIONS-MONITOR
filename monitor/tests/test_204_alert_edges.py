@@ -48,6 +48,7 @@ class WholeNumbers(unittest.TestCase):
             try:
                 code = urllib.request.urlopen(base + path, timeout=10).status
             except urllib.error.HTTPError as error:
+                error.close()      # the answer of a refusal holds its socket: release it
                 code = error.code
             self.assertIn(code, (200, 400, 404), path[:60])
 

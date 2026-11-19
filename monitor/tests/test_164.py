@@ -605,6 +605,7 @@ class NetworkMode(unittest.TestCase):
                 opener.open(urllib.request.Request(server.base + "/?access=" + access, headers={"Accept": "text/html"}), timeout=8)
                 self.fail("expected a redirect")
             except urllib.error.HTTPError as error:
+                error.close()      # the answer of a refusal holds its socket: release it
                 self.assertEqual(error.code, 302)
                 self.assertEqual(error.headers["Location"], "/")
                 cookie = error.headers["Set-Cookie"]
