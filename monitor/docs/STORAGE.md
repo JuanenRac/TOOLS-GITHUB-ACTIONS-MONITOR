@@ -35,6 +35,8 @@ Choose in the configuration of the account (or of the monitor): `"storage": {"ba
 - The schema is versioned (`schema_version`). Every migration runs in one transaction together with the bump of the version, so an interrupted one leaves the database as it was and runs again at the next start. A database written by a newer version is refused, never downgraded.
 - A damaged or missing item reads as empty: the monitor starts with whatever is on the disk.
 
+Every record the monitor keeps (the state of the sentinels, the silences, the feed state, the update notice) carries `schema_version` at the top of its object. A record from before the mark reads as version 0, as always. A record of a NEWER version than the program understands is never read half way: it is left aside, the program starts from its defaults for that record, and the file is named in the degraded list (`records.newer`), so a downgrade tells you which file it did not understand instead of misreading it.
+
 ## Moving data and backups
 
 ```

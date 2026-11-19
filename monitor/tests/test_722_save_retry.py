@@ -42,7 +42,7 @@ class SaveRetry(unittest.TestCase):
                 with mock.patch.object(os, "replace", replace):
                     state_io.save_text(self.path, json.dumps({"count": 7}))
                 self.assertEqual(state["calls"], 4)
-                self.assertEqual(json.loads(self.path.read_text(encoding="utf-8")), {"count": 7})
+                self.assertEqual(json.loads(self.path.read_text(encoding="utf-8"))["count"], 7)
                 self.assertEqual([p.name for p in self.path.parent.iterdir()], ["state.json"])
 
     def test_a_replace_that_never_works_raises_and_leaves_no_temporary_file(self):

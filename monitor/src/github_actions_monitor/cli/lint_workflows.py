@@ -267,18 +267,27 @@ def workflow_files(path):
         return []
 
 
-def lint_path(path, rules=None, root=None):
-    """The findings of every workflow file under `path`; file names are shown relative to `root` when given."""
-    out = []
+def lint_path_status(path, rules=None, root=None):
+    """(findings, problems) of every workflow file under `path`; file names are shown relative to `root` when given. A file that cannot be read is skipped and named in `problems` as
+    (file, reason): one bad file never stops the others and never reads as a clean one. A path that does not exist gives ([], [(path, "not_found")]), never a clean bill of health."""
+    out, problems = [], []
+    if not Path(path).exists():
+        return out, [(str(path), "not_found")]
     for file in workflow_files(path):
         try:
             with open(file, "r", encoding="utf-8", errors="replace") as handle:
                 text = handle.read(MAX_TEXT)
-        except OSError:
+        except OSError as error:
+            problems.append((str(file), type(error).__name__))
             continue
         label = str(file.relative_to(root)).replace("\\", "/") if root and Path(root) in file.parents else file.name
         out += lint_text(text, label, rules)
-    return out
+    return out, problems
+
+
+def lint_path(path, rules=None, root=None):
+    """The findings of every workflow file under `path` (see lint_path_status for the files that could not be read)."""
+    return lint_path_status(path, rules, root)[0]
 
 
 def ignored(repo, finding, patterns):
@@ -365,9 +374,13 @@ def main(argv=None):
     if args.lang:
         i18n.set_language(args.lang)
     findings = []
-    for path in args.paths or ([] if args.remote else ["."]):
-        findings += lint_path(path)
     unread = 0
+    for path in args.paths or ([] if args.remote else ["."]):
+        found, problems = lint_path_status(path)
+        findings += found
+        for name, reason in problems:      # a path that is not there, or a file that cannot be read, is said and is never a clean one
+            print(i18n.t("lint.path_unread", name=name, reason=i18n.t("lint.reason." + ("not_found" if reason == "not_found" else "error"))), file=sys.stderr)
+            unread += 1
     for name in args.remote or []:
         found, failure = lint_remote_status(name)
         findings += found

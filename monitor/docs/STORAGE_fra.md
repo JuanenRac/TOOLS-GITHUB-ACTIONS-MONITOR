@@ -35,6 +35,8 @@ Le choix se fait dans la configuration du compte (ou du moniteur) : `"storage": 
 - Le schéma est versionné (`schema_version`). Chaque migration s'exécute dans une seule transaction avec le changement de version : une migration interrompue laisse la base comme elle était et reprend au démarrage suivant. Une base écrite par une version plus récente est refusée, jamais rétrogradée.
 - Un élément abîmé ou absent se lit comme vide : le moniteur démarre avec ce qu'il y a sur le disque.
 
+Chaque enregistrement que garde le moniteur (l'état des sentinelles, les silences, l'état du flux, l'avis de mise à jour) porte `schema_version` en tête de son objet. Un enregistrement antérieur à la marque se lit comme la version 0, comme toujours. Un enregistrement d'une version PLUS RÉCENTE que celle que comprend le programme n'est jamais lu à moitié : il est mis de côté, le programme repart de ses valeurs par défaut pour cet enregistrement et le fichier est nommé dans la liste des dégradations (`records.newer`) ; un retour en arrière dit donc quel fichier il n'a pas compris au lieu de le mal lire.
+
 ## Déplacer les données et sauvegardes
 
 ```
