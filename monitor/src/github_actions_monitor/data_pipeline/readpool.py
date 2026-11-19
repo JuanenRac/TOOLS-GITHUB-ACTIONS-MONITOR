@@ -147,6 +147,11 @@ def note_probe(name, remaining):
         _STATE["left"][name] = remaining
 
 
+def note_spent(name):
+    """The source answered that its allowance is over (429 or a limit): it counts as having nothing left until the next free probe of its allowance, and it is not left out for a refusal."""
+    _STATE["left"][name] = 0
+
+
 def note_failure(name, now=None):
     _STATE["failed"][name] = time.time() if now is None else now
 

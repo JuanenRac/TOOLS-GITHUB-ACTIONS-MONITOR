@@ -233,6 +233,8 @@ for _kind in ("runs", "security", "issues", "history", "discovery", "other"):
     _f("quota", "rp_prefer", f"readpool.prefer.{_kind}", "enum", ("auto", "user", "app", "extra"), restart=False, label=["cfg.p.rp_prefer", "cfg.p.rp_kind_" + _kind], help="cfg.h.rp_prefer")
 for _source in ("user", "app", "extra"):
     _f("quota", "rp_reserve", f"readpool.reserve.{_source}", "int", (0, 4000), restart=False, unit="", label=["cfg.p.rp_reserve", "cfg.p.rp_src_" + _source], help="cfg.h.rp_reserve")
+_f("quota", "failover", "quota.failover", "bool", restart=False)
+_f("quota", "failover", "quota.failover_max_age_minutes", "int", (1, 1440), unit="min", restart=False)
 _f("quota", "central", "central.source", "enum", ("off", "git", "http"), restart=False, secure=True)
 _f("quota", "central", "central.max_age_minutes", "int", (5, 10080), unit="min", restart=False)
 _f(_T_GENERAL, "sound", "sound.on_new_red", "bool", restart=False)
