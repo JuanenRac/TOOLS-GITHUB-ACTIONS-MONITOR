@@ -10,7 +10,7 @@
 数百のリポジトリ、多数のフォーク、複数の組織があるアカウントは API の割り当てをすぐに使い切ります。以下は、効果の大きい順のレシピです。設定はすべて設定タブにあります。
 
 1. **まずプロファイルを選ぶ。** 設定 > 基本 > プロファイル: *オープンソース組織* を選ぶと、以下の大半がワンクリックで設定されます（後から各設定を変更できます）。
-2. **保守されているものを監視する。** `discovery.fork_policy` = `auto` は独自の CI があるフォークだけを残します（アカウントの種類が期間を決めます: `discovery.fork_ci_days`）。`discovery.fork_checks_per_pass` は問い合わせを複数回の一覧取得に分散します。`discovery.skip_archived` は既定でオンです。`exclude` と `ecosystems` で名前による絞り込みができます。 空のアカウント一覧、または前回の正常な一覧の `discovery.min_keep_pct` パーセント未満の一覧は信用されません。前回の正常な一覧を保ち、5 分後に再度読み、AI ツール向けブリーフにシグナル `repos.listing` が出ます。
+2. **保守されているものを監視する。** `discovery.fork_policy` = `auto` は独自の CI があるフォークだけを残します（アカウントの種類が期間を決めます: `discovery.fork_ci_days`）。`discovery.fork_checks_per_pass` は問い合わせを複数回の一覧取得に分散します。`discovery.skip_archived` は既定でオンです。`exclude` と `ecosystems` で名前による絞り込みができます。 空のアカウント一覧、または前回の正常な一覧の `discovery.min_keep_pct` パーセント未満の一覧は信用されません。前回の正常な一覧を保ち、5 分後に再度読み、AI ツール向けブリーフにシグナル repos.listing が出ます。
 3. **問い合わせを減らす。** `cold_runs_per_repo` と `cold_refresh_seconds` は静かなリポジトリのコストを、`runs_per_repo` と `refresh_seconds` はアクティブなものを決めます。`network.etag` は変化がないときの繰り返しの読み取りを無料にし、低速モード（`modes.auto_low`）は割り当てが減ると自動で速度を落とします。
 4. **センチネルに予算を与える。** `sentinel.budget_per_hour`、`sentinel.max_calls_per_tick`、`sentinel.hygiene_seconds`（衛生チェックは既定でリポジトリごとに6時間に1回のリクエストです。長くしてください）が A3〜A6 の消費を抑えます。
 5. **2つ目の割り当てを加える。** `github_app.share_reads` で GitHub App が自分の割り当てで読み取りの一部に答えます。
