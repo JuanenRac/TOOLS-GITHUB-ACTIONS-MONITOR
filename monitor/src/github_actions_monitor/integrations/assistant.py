@@ -15,6 +15,7 @@ import re
 import secrets
 import unicodedata
 
+from github_actions_monitor.integrations import similar_alerts
 from github_actions_monitor.security import redactor
 
 ACTIONS = ("explain_alert", "summarize_week", "why_slow")
@@ -51,7 +52,15 @@ def settings(ai_cfg):
     if isinstance(tools, list):
         out["tools"] = [t for t in dict.fromkeys(tools) if t in TOOLS]
     out["untrusted_text_max"] = untrusted_max(ai_cfg)
+    out["similar"] = similar_settings(ai_cfg)
     return out
+
+
+def similar_settings(ai_cfg):
+    """`ai.similar.*`: off by default; when on, "explain this alert" also lists the alerts that look like it (open ones and resolved ones of the feed), at most `max`."""
+    raw = ai_cfg.get("similar") if isinstance(ai_cfg, dict) and isinstance(ai_cfg.get("similar"), dict) else {}
+    number = raw.get("max")
+    return {"enabled": raw.get("enabled") is True, "max": number if isinstance(number, int) and not isinstance(number, bool) and 1 <= number <= 20 else 5}
 
 
 def untrusted_max(ai_cfg):
@@ -160,7 +169,30 @@ def _lines(value, nonce, limit, indent=""):
     return rows
 
 
-def build_context(action, args, toolbox, nonce, limit):
+def similar_lines(found, toolbox, history, count, nonce, limit):
+    """The lines of "alerts that look like this one": the open alerts of the account and the resolved ones the feed remembers; each one cited by its id. Says so when there is none."""
+    try:
+        pool = list(toolbox.call("alerts")["alerts"])
+    except AssistantError as error:
+        if error.code not in ("calls", "tool"):
+            raise
+        pool = []
+    try:
+        pool += list(history() if callable(history) else [])
+    except Exception:   # noqa: BLE001 - the history is a help: without it the open alerts still answer
+        pass
+    like = similar_alerts.find(found, pool, count)
+    toolbox.sources.append({"tool": "similar", "repo": "", "items": [a.get("id") for a in like]})
+    if not like:
+        return ["SIMILAR ALERTS: none"]
+    rows = ["SIMILAR ALERTS (already seen):"]
+    for item in like:
+        rows.append("  - " + ", ".join(f"{k}={untrusted(item.get(k), limit, nonce) if k in ('title', 'cause', 'repo') else plain(item.get(k), 80)}" for k in ("id", "repo", "state", "since", "score", "title", "cause")
+                                       if item.get(k) not in (None, "")))
+    return rows
+
+
+def build_context(action, args, toolbox, nonce, limit, similar=None, history=None):
     """(text, sources) for one fixed action: the question, then what the tools read. Raises AssistantError for a wrong argument or a refused tool."""
     if action not in ACTIONS:
         raise AssistantError("action")
@@ -177,6 +209,8 @@ def build_context(action, args, toolbox, nonce, limit):
             parts.append("The alert is not among the open alerts the monitor holds.")
         else:
             parts += ["ALERT:"] + _lines(found, nonce, limit, "  ")
+            if similar and similar["enabled"]:
+                parts += similar_lines(found, toolbox, history, similar["max"], nonce, limit)
             if found.get("repo") and "runs" in toolbox.allowed:
                 try:
                     parts += ["CI OF ITS REPOSITORY:"] + _lines(toolbox.call("runs", repo=found["repo"]), nonce, limit, "  ")
@@ -222,7 +256,7 @@ def ask(action, args, ai_cfg, reader, explain, role="viewer", nonce=None):
     nonce = nonce or hmac.new(PROCESS_KEY, repr((action, args.get("repo"), args.get("alert"))).encode("utf-8", "replace"), hashlib.sha256).hexdigest()[:12]      # the same question gives the same words, so the cache of the AI still answers it
     toolbox = Toolbox(reader, cfg["tools"], cfg["max_tool_calls"], role)
     try:
-        text, sources = build_context(action, args, toolbox, nonce, cfg["untrusted_text_max"])
+        text, sources = build_context(action, args, toolbox, nonce, cfg["untrusted_text_max"], cfg["similar"], reader.get("history"))
     except AssistantError as error:
         return {**base, "error": error.code, "sources": toolbox.sources, "tool_calls": toolbox.calls}
     text = redactor.redact(text)

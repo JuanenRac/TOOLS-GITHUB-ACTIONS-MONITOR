@@ -4281,5 +4281,22 @@
  "ui.asst_err_argument": "请先选择警报或仓库。",
  "ui.asst_err_role": "您的角色不能使用该工具。",
  "ui.asst_err_unavailable": "助手无法作答。",
- "ui.cfg_u_tokens": "令牌"
+ "ui.cfg_u_tokens": "令牌",
+ "ui.cfg_b_privacy": "隐私与隔离",
+ "cfg.f.ai.airgapped": "AI 隔离模式",
+ "cfg.h.ai.airgapped": "关闭。开启后,AI 只与本机上的模型或您在下方声明的私有地址上的模型通信;任何互联网地址和任何云服务都会在建立连接之前被拒绝。全局隔离开关也会将其开启。只能在本机上更改。",
+ "cfg.f.ai.airgap_hosts": "允许的私有地址",
+ "cfg.h.ai.airgap_hosts": "仅在隔离模式下使用:运行模型的您自己网络中的名称或地址(192.168.1.20、gpu.lan),每行一个。本机始终允许;公网地址即使列出也会被拒绝。",
+ "cfg.f.ai.redact.extra_terms": "始终隐藏的词",
+ "cfg.h.ai.redact.extra_terms": "在 AI 看到任何文本之前,这些词(服务器、项目)都会被替换为 [hidden],不区分大小写。它们是对监视器已隐藏的机密的补充,绝不会替代它们。",
+ "ai.airgap_cloud_provider": "隔离模式已开启:该提供方是互联网服务,已被拒绝。",
+ "ai.airgap_host_not_allowed": "隔离模式已开启:{host} 不在本机上,也不在您声明的私有地址列表中。",
+ "ai.airgap_no_address": "隔离模式已开启:该提供方没有可检查的地址。",
+ "ai.doc_egress_ok": "隔离模式已开启,该提供方位于本机或您声明的地址。",
+ "ai.doc_egress_blocked": "隔离模式已开启,并拒绝该提供方:{why}",
+ "ai.chain_airgap": "被隔离模式拒绝",
+ "cfg.f.ai.similar.enabled": "相似警报",
+ "cfg.h.ai.similar.enabled": "关闭。开启后,“解释此警报”还会列出与之相似的警报(未解决的,以及订阅源记得的已解决的),通过简单的词语比较找到:不使用模型,不使用嵌入,只用本账户的数据。",
+ "cfg.f.ai.similar.max": "相似警报的最大数量",
+ "cfg.h.ai.similar.max": "解释旁边最多列出的相似警报数量。"
 }

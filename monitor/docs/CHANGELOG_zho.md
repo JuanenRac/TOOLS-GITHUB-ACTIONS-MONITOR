@@ -14,6 +14,8 @@
 - **面向 AI 工具的简报现在也可通过命令行和 MCP 服务器使用**：`monitor_cli.py briefs index` 列出已编目的简报，`briefs show 标签页` 输出某个标签页的信号，`briefs all` 在一份文档中输出全部简报；MCP 服务器提供只读工具 `briefs_index` 和 `brief_tab`（标签页名称或 `all`）。测试会检查页面、HTTP 路由、命令和工具列出相同的标签页；不会写入任何内容，文本经过同一个清理器。
 - **可选的固定问题助手**:“警报”标签页可以显示一个面板(默认关闭,`ai.assistant.enabled`,并且需要 AI 提供方),由您配置的 AI 仅根据监视器的数据解释警报、总结当前情况或说明某个仓库为什么慢。它有一个只读取的四工具封闭列表(`ai.assistant.tools`,每个问题最多读取 `ai.assistant.max_tool_calls` 次),没有自由聊天,会显示读取的 ID 和发送的内容量(`ai.assistant.max_context`),消耗 AI 唯一的每日预算,把仓库中写下的内容截断到 `ai.untrusted_text_max` 后作为标记之间的数据交出,允许查看者提问,并把每个问题记入操作日志(路由 `GET /api/assistant` 和 `POST /api/assistant/ask`;Lite 版中不存在)。
 - **面向客户端的只读 API 在服务模式下自动开启**:`api.v1_enabled` 现在是 `auto`(默认)、`on` 或 `off`。使用 `auto` 时,监视器作为服务运行(团队模式的账户、Docker 镜像、systemd 单元)前缀 `/api/v1/` 会响应,一人一台电脑时保持关闭;旧的 true 和 false 含义不变。`/api/v1/me` 还会给出契约版本(`contract`)和该会话可做的事(`capabilities`)。
+- **可证明的 AI 隔离模式**:开启 `ai.airgapped`(默认关闭)后,AI 只与本机上的模型或您在 `ai.airgap_hosts` 中列出的私有地址上的模型通信;在聊天、模型列表、模型测试、备用链、助手和摘要中,任何互联网地址和任何云服务都会在建立连接之前被拒绝,AI 诊断会增加 `ai_egress` 检查。全局的 `airgapped` 开关也会将其开启,并且该设置只能从监视器所在的计算机更改。`ai.redact.extra_terms` 可添加您自己的词,在 AI 看到文本之前始终隐藏。
+- **不使用模型的相似警报**:开启 `ai.similar.enabled`(默认关闭)后,“解释此警报”还会在未解决的警报和订阅源记得的已解决警报中,列出最多 `ai.similar.max` 个与之相似的警报,通过简单的词语比较找到(不使用嵌入),只用账户的数据,并按 ID 引用。
 
 ### 修复
 
