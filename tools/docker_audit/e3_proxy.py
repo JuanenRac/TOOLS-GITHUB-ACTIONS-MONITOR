@@ -80,8 +80,10 @@ def body(s):
     # the same lie from a container of the Compose network that does not go through Caddy: the monitor believes the proxies of its own network
     unchecked = stack.request(ps.CLIENT_C, [{"method": "POST", "url": "http://monitor:8765/api/access", "headers": {"Host": ps.SITE, "Origin": "https://%s" % ps.SITE, "Content-Type": "application/json",
                                                                                                                 "X-Forwarded-For": "192.0.2.{i}"}, "body": {"json": {"token": "wrong-%s" % ("y" * 20)}}, "repeat": 14}])[0]
-    s.note("a container of the proxy network that skips Caddy and changes X-Forwarded-For at each try: statuses %s (429 present = the lock still holds; none = it can choose its own address, which the guide says "
-           "about the networks listed in trusted_proxies)" % unchecked["statuses"])
+    s.check("Caddy has the fixed address of the Compose file (MONITOR_PROXY_IP) and nothing else of the network is trusted",
+            ps.PROXY_IP in s.run(["docker", "inspect", "-f", "{{range .NetworkSettings.Networks}}{{.IPAddress}} {{end}}", caddy], timeout=60, record=False)[1], "address of Caddy: expected %s" % ps.PROXY_IP)
+    s.check("a container of the proxy network that skips Caddy cannot choose its own address with X-Forwarded-For: the lock holds (429 present)", "429" in unchecked["statuses"],
+            "statuses %s: the monitor believes only the address of Caddy, not the whole network" % unchecked["statuses"])
 
     # the variables are taken out of the environment: the guide says the environment stays the authority for the keys it names
     stack.write(trusted=False)
