@@ -50,3 +50,46 @@ curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/re
 
 - `GET /api/ai/stream` (the alerts) and `GET /api/live-events/stream` (the events of the webhook, `live.sse.enabled`) are server-sent events, read only and off by default; see [AI_ALERTS.md](AI_ALERTS.md) and [WEBHOOK.md](WEBHOOK.md).
 - `POST /api/chatops/slack` and `POST /api/chatops/discord` receive the read only commands of a chat (off by default, `chatops.enabled`). They do not use the access token: the signature of the platform is the proof, and a request without a valid one is refused before anything is read. See [CHATOPS.md](CHATOPS.md).
+
+## Other routes of the page
+
+These routes serve the page and the tools of this computer. They are not part of the frozen contract and can change between versions. POST changes something; "this computer" means that only the computer that runs the monitor may use it.
+
+| Route | What it does |
+| --- | --- |
+| `/api/about` | The About panel: versions, links, files, health, credits and the notice of an update; no secret. |
+| `/api/act/plan` | POST, this computer. Prepares what a local run with `act` would do; nothing runs yet. |
+| `/api/act/confirm` | POST, this computer. Runs a workflow on this computer with `act` after its plan; the run is recorded. |
+| `/api/act/status` | The state of the local run in progress. |
+| `/api/act/stop` | POST, this computer. Stops the local run. |
+| `/api/advanced` | The state of the features you switch on by choice: the network, the store of the GitHub token, the actions on GitHub, the local run and the demo mode; never a token. |
+| `/api/ai/actions` | The state of the actions of the AI (locked or not), their log and the state of the AI. |
+| `/api/ai/actions/confirm` | POST, this computer. Runs one action that the AI proposed, after you confirm it; recorded. |
+| `/api/ai/actions/unlock` | POST, this computer. Unlocks the actions of the AI for a limited time; recorded. |
+| `/api/ai/budget` | The calls and the estimated cost of today for each AI model, the limits and the last failures; it asks no provider. |
+| `/api/ai/test` | POST, this computer. Tests the connection of the AI that is set up; it changes nothing. |
+| `/api/alerts/unmute` | POST. Lifts the silence of an alert; recorded. |
+| `/api/analytics` | The summary of the analytics of the runs: durations, queue, steps, flaky tests and slower runs. |
+| `/api/discovery` | What the discovery found: the box with the account and the repositories shown and hidden, the last events, the suggested groups, its settings, the forks and the organizations. |
+| `/api/discovery/group` | POST. Adds a suggested group to the ecosystems file, keeping a copy of the file. |
+| `/api/gh-action/plan` | POST, this computer. Prepares what would be sent to GitHub (a rerun, a cancel, a dispatch or a merge); nothing is sent yet. |
+| `/api/gh-action/confirm` | POST, this computer. Sends to GitHub what the plan said, after you confirm; recorded. |
+| `/api/github-token` | This computer only. The state of the store of the GitHub token (the backend and whether one is stored); never its value. |
+| `/api/help/search` | Searches the help topics with a word and returns the matching ones. |
+| `/api/help/topic` | The text of one help topic (`id=`) in the language of the page. |
+| `/api/help/topics` | The list of the help topics with their titles. |
+| `/api/hot-only` | POST, this computer. The switch "only hot" of the page; it changes no stored state. |
+| `/api/mirror` | The state of the mirror of the repositories (off by default). |
+| `/api/mode` | GET: the working mode, the estimate of each mode and the time left. POST, this computer: changes the mode. |
+| `/api/notify/test` | POST. Sends a test message to one notification channel; it changes nothing. |
+| `/api/quota-pool/status` | This computer only. The allowance of every source of reads and what the GitHub App lacks; never a key or a token. |
+| `/api/refresh-repos` | POST, this computer. Refreshes only the repositories you name and rewrites the file of the red ones (used by `finalize --execute`). |
+| `/api/screens/logo` | GET: the logo of the organization as an image. POST: stores a new one (at most 1 MB, checked by its real type). |
+| `/api/screens/logo/remove` | POST. Removes the logo of the organization; recorded. |
+| `/api/sentinel/ai` | POST. Asks the AI to explain an alert or a build; the request is small and the question is cleaned of secrets first. It does not exist while the AI is off. |
+| `/api/sentinel/historial` | Yesterday against today: the reds and the pending signatures that appear or disappear. |
+| `/api/sentinel/parte/save` | POST. Saves a copy of the daily report in the audit folder; a GET never writes. |
+| `/api/sentinel/security` | What GitHub says is open or missing about security (the Security sentinel; off by default; read only). |
+| `/api/session-token` | A token of one use for the next change of a setting; the page asks for it right before it writes. |
+| `/api/statusbar` | What the bar at the foot of the page shows: edition, address, account and sentinels; no secret and no call to GitHub. |
+| `/api/welcome` | GET: whether the first-start guide is done. POST, this computer: marks it as done or not. |
