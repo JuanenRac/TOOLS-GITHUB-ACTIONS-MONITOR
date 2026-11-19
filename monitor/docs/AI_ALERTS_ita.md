@@ -9,6 +9,7 @@ Un workflow rosso non serve a nulla se nessuno di chi lavora sul repository lo v
 
 ## Cosa scrive (locale, sola lettura, senza rete)
 - `ai_alerts.jsonl`: una riga per evento (aperto, confermato, risolto) con id stabile, gravità, repository, workflow, esito, da quando, serie, link, una causa probabile (**reale** o **transitoria**), un'azione suggerita e lo stato.
+- Ogni avviso del feed (`GET /api/ai/alerts` e il file di stato) dice inoltre da quando fallisce e quando è stato guardato l'ultima volta: `first_failed`, `last_failed` e `last_checked` (secondi di epoca), e uno `status`: `failed` (aperto), `suppressed` (riconosciuto da una persona, ancora contato nel riepilogo) o `passed` (chiuso).
 - `ALERTS_BRIEF.md`: riscritto a ogni ciclo e breve (`ai_alerts.brief_max_bytes`, 2 KB di default). Gli avvisi reali vengono per primi.
 - Le cause transitorie (502/503/504, timeout, limiti di frequenza, errori di download, un'esecuzione mai partita) si distinguono dai guasti reali con regole modificabili in `ai_alerts.transient_patterns`. Un avviso si risolve da solo quando il workflow torna verde e puoi confermarlo (`ack`), cosa che cambia solo questo stato locale.
 - Tutto passa prima da UN solo pulitore (token, chiavi, credenziali dentro gli indirizzi, indirizzi e-mail, indirizzi IP e la tua cartella personale): i file, gli endpoint (`/api/ai/state`, `/api/ai/alerts`, `/api/ai/brief`), il flusso, il server MCP e l'hook. Funziona per modelli: riduce il rischio, non è una garanzia, quindi non farci affidamento per un segreto di forma insolita.
