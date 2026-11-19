@@ -8,6 +8,12 @@
 Versión de la propia herramienta (monitor + centinela + herramientas por lotes), con su propio semver. La fuente es el CHANGELOG.md en inglés; este fichero lleva las mismas versiones y secciones.
 
 ## [Unreleased]
+- **Todos los comandos de la línea de comandos aceptan `--format text|table|plain|json|ndjson`**: `table` ajusta las columnas al ancho de la terminal y cuenta los caracteres anchos japoneses y chinos como dos celdas, `plain` es una línea por registro separada por tabuladores para `grep` y `awk`, y `ndjson` es un objeto JSON por línea. `text` es lo que cada comando escribía antes y sigue siendo el predeterminado (`cli.default_format` lo cambia); `--json` no cambia.
+- **`watch status|alerts` repite la lectura del comando** (`--interval`, `--once`, `--no-clear`): lee el monitor de este ordenador, nunca GitHub, mantiene un suelo bajo el intervalo (`cli.watch.min_interval_seconds`, 2 por defecto), reintenta con una pausa cada vez mayor un monitor al que no llega y termina con el código de salida 0 al pulsar Ctrl-C.
+- **`watch --exit-on-change` termina con el nuevo código de salida 6 cuando cambian el conjunto de alertas o las cifras del estado**: un reloj que avanza no es un cambio, y sin la opción el código 6 nunca aparece. Los códigos 0 a 5 no cambian y una prueba mantiene de acuerdo la tabla de la guía y el código.
+- **`completions bash|zsh|fish|powershell` imprime el script que completa los comandos, palabras y opciones**, escrito a partir del analizador real para que no pueda quedar atrás (una prueba compara ambos). Solo imprime: nunca edita un fichero tuyo.
+- **Un perfil de kiosco para una TV o una pared, apagado por defecto** (`kiosk.enabled`): `monitor_cli.py kiosk ops|team|release|quiet` imprime la dirección de un preset, y la página, solo cuando el ajuste está encendido y la dirección lleva `kiosk=1`, agranda la letra (`kiosk.font_scale_percent`, 150 por defecto), puede usar un contraste alto (`kiosk.high_contrast`) y puede pasar por las pestañas del preset (`kiosk.rotate_views`, `kiosk.rotate_seconds`).
+- **Dos guías nuevas en ocho idiomas**: la línea de comandos para el operador (formatos, `watch`, `completions`, códigos de salida y ejemplos con `jq` que una prueba ejecuta) y el kiosco; la guía de la línea de comandos y la de las pantallas remiten a ellas.
 
 ### Cambiado
 
@@ -243,6 +249,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 - **Una carga del webhook tiene que nombrar a su propietario y su enlace tiene que apuntar a su repositorio**: ya no se cree una entrega sin el nombre completo del repositorio, y el enlace del run que va a los avisos, a la lista en vivo y al flujo solo se conserva cuando cuelga de ese propietario y repositorio.
 
 ### Añadido
+
 
 - **`logs.failed_step.max_per_minute` limita cuántas ejecuciones distintas lee en un minuto el log del paso fallido en GitHub** (10 por defecto): pedir muchas ejecuciones seguidas ya no gasta tu cuota en todas.
 - **Los silencios por patrón pueden caducar y una señal lista los que necesitan una decisión** (`alerts.silences_expire_days`, 0 = nunca por defecto): con un número, un silencio deja de funcionar esos días después de su fecha de revisión; los recordatorios ya hechos se guardan en el fichero de estado, así que un reinicio no los repite; y la señal de los silencios lista los pasados de fecha, caducados o sin fecha.

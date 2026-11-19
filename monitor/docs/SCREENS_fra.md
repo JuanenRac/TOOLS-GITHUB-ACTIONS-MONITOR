@@ -9,6 +9,8 @@
 
 La page s'adapte à la taille de sa fenêtre, du téléphone à la 4K, à la verticale ou à l'horizontale, et un même moniteur peut servir plusieurs écrans, chacun avec les onglets que vous choisissez. Rien n'est interrogé deux fois : tous les écrans lisent le même état.
 
+
+Pour une télévision ou un mur avec un texte plus grand, un contraste élevé ou une rotation parmi quelques onglets, voir [KIOSK_fra.md](KIOSK_fra.md).
 ## Adresses
 
 - `/` - la page entière.

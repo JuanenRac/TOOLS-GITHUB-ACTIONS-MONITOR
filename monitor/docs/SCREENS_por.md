@@ -9,6 +9,8 @@
 
 A página adapta-se ao tamanho da janela, do telemóvel ao 4K, na vertical ou na horizontal, e um mesmo monitor pode servir vários ecrãs, cada um com os separadores que escolher. Nada é consultado duas vezes: todos os ecrãs leem o mesmo estado.
 
+
+Para uma TV ou uma parede com texto maior, um contraste alto ou uma rotação por alguns separadores, veja [KIOSK_por.md](KIOSK_por.md).
 ## Endereços
 
 - `/` - a página inteira.

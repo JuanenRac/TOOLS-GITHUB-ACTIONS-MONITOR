@@ -209,7 +209,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ci.stuck.queue_minutes` | `0` | sentinel | Limit for a run waiting for a runner |
 | `ci.stuck.runner_minutes` | `[]` | sentinel | Fixed limits per runner label |
 | `ci.stuck.workflow_minutes` | `[]` | sentinel | Fixed limits per workflow |
+| `cli.default_format` | `"text"` | general | Default format of the command line |
 | `cli.prefer_v1` | `true` | advanced | The command line asks /api/v1/ first |
+| `cli.watch.default_interval_seconds` | `5` | general | Usual interval of watch |
+| `cli.watch.min_interval_seconds` | `2` | general | Fastest refresh of watch |
 | `cold_refresh_seconds` | `600` | polling | Refresh of cold repositories |
 | `cold_runs_per_repo` | `5` | polling | Runs read per cold repository |
 | `compare.cache_seconds` | `60` | sentinel | Keep the answer (seconds) |
@@ -265,6 +268,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `github_token.store` (secure) | `"auto"` | advanced | Where the token is kept |
 | `hot_hours` | `3` | polling | A repository is hot for |
 | `issues_refresh_seconds` | `180` | polling | Refresh of issues |
+| `kiosk.enabled` | `false` | general | Kiosk profile |
+| `kiosk.font_scale_percent` | `150` | general | Type size of the kiosk |
+| `kiosk.high_contrast` | `false` | general | High contrast in the kiosk |
+| `kiosk.rotate_seconds` | `30` | general | Seconds between tabs in the kiosk |
+| `kiosk.rotate_views` | `false` | general | Turn through the tabs of a preset |
 | `language` | `""` | general | Language of the tools |
 | `lessons.allow_write` (secure) | `false` | ai | Allow writing lessons |
 | `lessons.brief_max_bytes` | `3000` | ai | Size of ai/LESSONS.md |
