@@ -28,3 +28,8 @@ The skills travel with the monitor and have its version: `GET /api/skills` answe
 ## When an AI of the monitor does not answer
 
 `python bin/monitor_cli.py ai doctor` checks in order the provider, its address, whether the variable of the key is set (it only says yes or no), the name of the model against the list of the provider, the network, the daily cap and the last test of the model, and says the first thing that is wrong. `ai models` lists the models and their data (unknown stays unknown) and `ai test --provider NAME --model NAME` tries one with a made-up failure, never with data of a repository.
+
+
+## When the GitHub App is on and is not used
+
+`GET /api/quota` carries `app` (`state`: `off`, `using` or `fallback`; `code`; `reason`; `limit`) and `GET /api/github-app/status` carries `signer` (`builtin` or `openssl`) and `code`. `fallback` means that `github_app.enabled` is on but the reads use the token of the user, whose allowance is smaller; the `code` says why: `key_unreadable`, `sign_failed`, `app_not_installed`, `token_refused`, `not_configured` or `other`. The doctor (`monitor_cli.py doctor`) shows it amber and a failure is noted once in the swallowed failures. Report it to the person; do not try to read the key file, and never print a key or a token. The monitor signs with the standard library and needs no `openssl`.

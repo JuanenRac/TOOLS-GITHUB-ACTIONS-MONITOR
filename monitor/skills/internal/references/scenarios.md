@@ -30,3 +30,8 @@ Look: `/api/health` (`offline`) and the age of the data. Do: say that what you s
 
 ## Several screens
 `/screen/1` to `/screen/3` show chosen tabs of the same data; there is no separate state. Do: answer from the same endpoints. Do NOT: ask the person which screen they are looking at.
+
+
+## The GitHub App is on and is not used
+
+If `app.state` in `GET /api/quota` is `fallback`, say so in your answer with its `code` (`key_unreadable`, `sign_failed`, `app_not_installed`, `token_refused`, `not_configured`): the reads use the token of the user and the allowance is the smaller one. Read only; never ask for the key or a token.

@@ -16,6 +16,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 ### Corrigé
 
 - **Le nettoyeur de texte ne ralentit plus avec les longs textes**: cinq mille caractères de lettres, de points, de chiffres ou de tirets prenaient de deux à six secondes parce que plusieurs motifs essayaient de correspondre depuis chaque position; les préfixes et les adresses ont maintenant la longueur des vrais noms, le temps croît avec la taille du texte et un test le borne. Les secrets après une longue suite sont toujours trouvés.
+- **La GitHub App ne perd plus en silence son quota plus grand**: quand le moniteur était lancé sans `openssl` dans le PATH, il ne pouvait pas signer la demande de jeton et revenait au jeton de l'utilisateur (5000 appels par heure au lieu des 10 000 ou plus de l'App) sans rien dire. Le moniteur signe maintenant lui-même avec la bibliothèque standard (clés PKCS#1 et PKCS#8 sans phrase secrète, vérifiées contre `openssl`), garde `openssl` seulement comme recours et, quand l'App est activée mais pas utilisée, il le dit : le doctor passe à l'orange avec la cause (clé illisible, signature échouée, App non installée, jeton refusé), l'échec est noté une fois et l'onglet Quota montre une ligne `GitHub App` avec la cause et la limite utilisée (`app` dans `/api/quota`, `signer` et `code` dans `/api/github-app/status`).
 
 ## [2.1.3]
 

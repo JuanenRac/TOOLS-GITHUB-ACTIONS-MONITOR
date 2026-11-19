@@ -21,6 +21,7 @@ when this file and `tool_version.py` disagree.
 ### Fixed
 
 - **The cleaner of text no longer slows down with long texts**: five thousand characters of letters, dots, digits or dashes took between two and six seconds because several patterns tried to match from every position; the prefixes and addresses now have the length that real names have, the time grows with the size of the text and a test bounds it. Secrets after a long run are still found.
+- **The GitHub App no longer loses its larger allowance in silence**: when the monitor was started without `openssl` in the PATH it could not sign the token request and went back to the token of the user (5,000 calls an hour instead of the 10,000 or more of the App) without saying anything. The monitor now signs by itself with the standard library (keys PKCS#1 and PKCS#8 without passphrase, proved against `openssl`), keeps `openssl` only as a fallback, and when the App is on but not used it says so: the doctor turns amber with the cause (key unreadable, signature failed, App not installed, token refused), the failure is noted once, and the Quota tab shows a `GitHub App` line with the cause and the limit in use (`app` in `/api/quota`, `signer` and `code` in `/api/github-app/status`).
 
 ## [2.1.3]
 

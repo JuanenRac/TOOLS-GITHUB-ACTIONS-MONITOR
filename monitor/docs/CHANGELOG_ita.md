@@ -16,6 +16,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 ### Corretto
 
 - **Il depuratore di testo non rallenta più con i testi lunghi**: cinquemila caratteri di lettere, punti, cifre o trattini richiedevano da due a sei secondi perché diversi modelli provavano a corrispondere da ogni posizione; i prefissi e gli indirizzi hanno ora la lunghezza dei nomi reali, il tempo cresce con la dimensione del testo e un test lo limita. I segreti dopo una lunga sequenza vengono ancora trovati.
+- **La GitHub App non perde più in silenzio la sua quota maggiore**: se il monitor veniva avviato senza `openssl` nel PATH non poteva firmare la richiesta del token e tornava al token dell'utente (5000 chiamate all'ora invece delle 10.000 o più dell'App) senza dire nulla. Ora il monitor firma da solo con la libreria standard (chiavi PKCS#1 e PKCS#8 senza passphrase, verificate contro `openssl`), tiene `openssl` solo come ripiego e, quando l'App è attiva ma non viene usata, lo dice: il doctor diventa ambra con la causa (chiave illeggibile, firma fallita, App non installata, token rifiutato), l'errore viene annotato una volta e la scheda Quota mostra una riga `GitHub App` con la causa e il limite in uso (`app` in `/api/quota`, `signer` e `code` in `/api/github-app/status`).
 
 ## [2.1.3]
 

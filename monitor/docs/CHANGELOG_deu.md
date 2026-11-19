@@ -16,6 +16,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 ### Behoben
 
 - **Der Textreiniger wird bei langen Texten nicht mehr langsam**: fünftausend Zeichen aus Buchstaben, Punkten, Ziffern oder Strichen brauchten zwei bis sechs Sekunden, weil mehrere Muster von jeder Position aus zu passen versuchten; Präfixe und Adressen haben jetzt die Länge echter Namen, die Zeit wächst mit der Textgröße und ein Test begrenzt sie. Geheimnisse nach einer langen Folge werden weiterhin gefunden.
+- **Die GitHub-App verliert ihr größeres Kontingent nicht mehr stillschweigend**: Wurde der Monitor ohne `openssl` im PATH gestartet, konnte er die Token-Anfrage nicht signieren und fiel ohne ein Wort auf das Token des Benutzers zurück (5000 Aufrufe pro Stunde statt der 10 000 oder mehr der App). Der Monitor signiert jetzt selbst mit der Standardbibliothek (Schlüssel PKCS#1 und PKCS#8 ohne Passphrase, gegen `openssl` geprüft), behält `openssl` nur als Rückfalloption und sagt es, wenn die App an ist, aber nicht benutzt wird: Der Doctor wird gelb mit der Ursache (Schlüssel nicht lesbar, Signatur fehlgeschlagen, App nicht installiert, Token abgelehnt), der Fehler wird einmal vermerkt und der Tab Kontingent zeigt eine Zeile `GitHub App` mit Ursache und verwendetem Limit (`app` in `/api/quota`, `signer` und `code` in `/api/github-app/status`).
 
 ## [2.1.3]
 

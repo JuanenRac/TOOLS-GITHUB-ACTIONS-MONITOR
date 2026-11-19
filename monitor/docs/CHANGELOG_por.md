@@ -16,6 +16,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 ### Corrigido
 
 - **O limpador de texto deixa de abrandar com textos longos**: cinco mil carateres de letras, pontos, dígitos ou hífenes demoravam entre dois e seis segundos porque vários padrões tentavam casar a partir de cada posição; os prefixos e os endereços têm agora o comprimento dos nomes reais, o tempo cresce com o tamanho do texto e um teste limita-o. Os segredos depois de uma sequência longa continuam a ser encontrados.
+- **A GitHub App deixa de perder em silêncio a sua quota maior**: se o monitor era iniciado sem `openssl` no PATH não conseguia assinar o pedido do token e voltava ao token do utilizador (5000 chamadas por hora em vez das 10 000 ou mais da App) sem dizer nada. Agora o monitor assina por si com a biblioteca padrão (chaves PKCS#1 e PKCS#8 sem frase-passe, verificadas contra o `openssl`), deixa o `openssl` só como recurso e, quando a App está ligada e não é usada, di-lo: o doctor fica âmbar com a causa (chave ilegível, assinatura falhada, App não instalada, token recusado), a falha é anotada uma vez e o separador Quota mostra uma linha `GitHub App` com a causa e o limite em uso (`app` em `/api/quota`, `signer` e `code` em `/api/github-app/status`).
 
 ## [2.1.3]
 
