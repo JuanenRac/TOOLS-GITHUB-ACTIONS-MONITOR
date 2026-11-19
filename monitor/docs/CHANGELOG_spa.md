@@ -15,6 +15,10 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Añadido
 
+- **Una guía propia del asistente, `ASSISTANT.md`, en ocho idiomas**: cómo encenderlo, sus cinco preguntas fijas, las cuatro herramientas con las que lee, lo que nunca hace (no escribe nada, no toca nada en GitHub, entrega como dato lo que escribió un repositorio) y cómo comprobarlo con las dos rutas y el registro de prompts. La sección de `AI_CONNECTION.md` queda como referencia de los ajustes.
+
+- **Ayuda con coste y efecto en cinco interruptores más**: el tooltip de `ai.assistant.enabled`, `ai.prompt_log.enabled`, `ai.similar.enabled`, `ai.airgapped` y `api.v1_enabled` dice ahora qué verás y qué cuesta, en los ocho idiomas, junto a la línea genérica que ya tenía todo ajuste.
+
 - **El fichero de ejemplo de los ajustes lleva 221 ajustes más**: la página de Ajustes toma el valor por defecto que muestra del fichero de ejemplo, y 221 ajustes de la IA, de los centinelas de entrega y de cadena de suministro, de las copias, del doctor, del fondo de lecturas, de los sonidos, del webhook y de las alertas no estaban en él, así que la página no mostraba defecto para ellos. Cada uno lleva ahora el valor que usa el código cuando el ajuste falta; el registro de superficies lista los 61 que aún no lo tienen.
 
 - **Las 36 rutas de la página que ninguna guía nombraba están en una tabla**: `API.md`, en los ocho idiomas, termina con una tabla de las rutas de la página que el contrato no congela (el panel Acerca de, las ejecuciones guiadas con `act` y en GitHub, las acciones de la IA, la analítica, el descubrimiento, la ayuda, el modo, la barra de estado, el logo y el resto), con lo que hace cada una y cuáles solo puede usar este equipo; el registro de superficies ya no las da por faltantes.

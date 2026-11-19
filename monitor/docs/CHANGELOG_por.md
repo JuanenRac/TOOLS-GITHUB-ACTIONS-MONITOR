@@ -15,6 +15,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Adicionado
 
+- **Um guia próprio para o assistente, `ASSISTANT.md`, em oito idiomas**: como o ligar, as suas cinco perguntas fixas, as quatro ferramentas com que lê, o que nunca faz (não escreve nada, não toca em nada no GitHub, entrega como dado o que um repositório escreveu) e como o verificar com as duas rotas e o registo de prompts. A secção de `AI_CONNECTION.md` fica como referência das definições.
+
+- **Ajuda com custo e efeito em mais cinco interruptores**: o tooltip de `ai.assistant.enabled`, `ai.prompt_log.enabled`, `ai.similar.enabled`, `ai.airgapped` e `api.v1_enabled` diz agora o que vai ver e quanto custa, nos oito idiomas, ao lado da linha genérica que cada definição já tinha.
+
 - **O ficheiro de exemplo das definições leva mais 221 definições**: a página de Definições tira do ficheiro de exemplo o valor predefinido que mostra, e 221 definições da IA, das sentinelas de entrega e de cadeia de abastecimento, das cópias, do doctor, do conjunto de leituras, dos sons, do webhook e dos alertas não estavam lá, pelo que a página não mostrava predefinição para elas. Cada uma leva agora o valor que o código usa quando a definição falta; o registo de superfícies lista as 61 que ainda não o têm.
 
 - **As 36 rotas da página que nenhum guia nomeava estão numa tabela**: o `API.md`, nos oito idiomas, termina com uma tabela das rotas da página que o contrato não congela (o painel Acerca de, as execuções guiadas com `act` e no GitHub, as ações da IA, a análise, a descoberta, a ajuda, o modo, a barra de estado, o logótipo e o resto), com o que cada uma faz e quais só este computador pode usar; o registo de superfícies já não as dá como em falta.

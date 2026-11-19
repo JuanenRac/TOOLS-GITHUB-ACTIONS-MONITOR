@@ -15,6 +15,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Aggiunto
 
+- **Una guida a parte per l'assistente, `ASSISTANT.md`, in otto lingue**: come accenderlo, le sue cinque domande fisse, i quattro strumenti con cui legge, ciò che non fa mai (non scrive nulla, non tocca nulla su GitHub, consegna come dato ciò che un repository ha scritto) e come verificarlo con le due route e il registro dei prompt. La sezione di `AI_CONNECTION.md` resta il riferimento delle impostazioni.
+
+- **Aiuto con costo ed effetto su altri cinque interruttori**: il tooltip di `ai.assistant.enabled`, `ai.prompt_log.enabled`, `ai.similar.enabled`, `ai.airgapped` e `api.v1_enabled` dice ora cosa vedrai e quanto costa, nelle otto lingue, accanto alla riga generica che ogni impostazione aveva già.
+
 - **Il file di esempio delle impostazioni porta 221 impostazioni in più**: la pagina Impostazioni prende dal file di esempio il valore predefinito che mostra, e 221 impostazioni dell'IA, delle sentinelle di consegna e di catena di fornitura, dei backup, del doctor, del pool di letture, dei suoni, del webhook e degli avvisi non c'erano, così la pagina non mostrava alcun predefinito per esse. Ognuna porta ora il valore che il codice usa quando l'impostazione manca; il registro delle superfici elenca le 61 che ancora non lo hanno.
 
 - **Le 36 route della pagina che nessuna guida nominava sono in una tabella**: `API.md`, nelle otto lingue, termina con una tabella delle route della pagina che il contratto non congela (il pannello Informazioni, le esecuzioni guidate con `act` e su GitHub, le azioni dell'IA, l'analisi, la scoperta, l'aiuto, la modalità, la barra di stato, il logo e il resto), con ciò che fa ciascuna e quali solo questo computer può usare; il registro delle superfici non le dà più per mancanti.

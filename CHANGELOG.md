@@ -16,6 +16,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- **A guide of its own for the assistant, `ASSISTANT.md`, in eight languages**: how to switch it on, its five fixed questions, the four tools it reads with, what it never does (it writes nothing, reaches nothing on GitHub, hands what a repository wrote over as data) and how to check it with the two routes and the record of prompts. The section of `AI_CONNECTION.md` stays as the reference of the settings.
+
+- **Help with cost and effect on five more switches**: the tooltip of `ai.assistant.enabled`, `ai.prompt_log.enabled`, `ai.similar.enabled`, `ai.airgapped` and `api.v1_enabled` now says what you will see and what it costs, in the eight languages, beside the generic line every setting already had.
+
 - **The example file of the settings carries 221 more settings**: the Settings page takes the default it shows from the example file, and 221 settings of the AI, the delivery and supply sentinels, the backups, the doctor, the pool of reads, the sounds, the webhook and the alerts were not in it, so the page showed no default for them. Each one now carries the value the code uses when the setting is absent; the register of surfaces lists the 61 that still lack it.
 
 - **The 36 routes of the page that no guide named are in a table**: `API.md`, in the eight languages, ends with a table of the routes of the page that the contract does not freeze (the About panel, the guided runs with `act` and on GitHub, the actions of the AI, the analytics, the discovery, the help, the mode, the status bar, the logo and the rest), with what each one does and which ones only this computer may use; the register of surfaces no longer lists them as missing.

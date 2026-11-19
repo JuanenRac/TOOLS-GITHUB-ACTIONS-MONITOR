@@ -15,6 +15,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Un guide à part pour l'assistant, `ASSISTANT.md`, en huit langues** : comment l'activer, ses cinq questions fixes, les quatre outils avec lesquels il lit, ce qu'il ne fait jamais (il n'écrit rien, ne touche à rien sur GitHub, remet comme donnée ce qu'un dépôt a écrit) et comment le vérifier avec les deux routes et le journal des prompts. La section de `AI_CONNECTION.md` reste la référence des réglages.
+
+- **Aide avec coût et effet sur cinq interrupteurs de plus** : l'infobulle de `ai.assistant.enabled`, `ai.prompt_log.enabled`, `ai.similar.enabled`, `ai.airgapped` et `api.v1_enabled` dit maintenant ce que vous verrez et ce que cela coûte, dans les huit langues, à côté de la ligne générique que chaque réglage avait déjà.
+
 - **Le fichier d'exemple des réglages porte 221 réglages de plus** : la page des Réglages prend la valeur par défaut qu'elle montre dans le fichier d'exemple, et 221 réglages de l'IA, des sentinelles de livraison et de chaîne d'approvisionnement, des sauvegardes, du doctor, du pool de lectures, des sons, du webhook et des alertes n'y étaient pas, si bien que la page n'affichait aucune valeur par défaut pour eux. Chacun porte maintenant la valeur que le code utilise quand le réglage est absent ; le registre des surfaces liste les 61 qui en manquent encore.
 
 - **Les 36 routes de la page qu'aucun guide ne nommait sont dans un tableau** : `API.md`, dans les huit langues, se termine par un tableau des routes de la page que le contrat ne fige pas (le panneau À propos, les exécutions guidées avec `act` et sur GitHub, les actions de l'IA, l'analyse, la découverte, l'aide, le mode, la barre d'état, le logo et le reste), avec ce que fait chacune et celles que seul cet ordinateur peut utiliser ; le registre des surfaces ne les donne plus comme manquantes.

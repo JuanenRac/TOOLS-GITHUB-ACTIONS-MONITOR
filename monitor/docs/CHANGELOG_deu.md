@@ -15,6 +15,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Hinzugefügt
 
+- **Eine eigene Anleitung für den Assistenten, `ASSISTANT.md`, in acht Sprachen**: wie man ihn einschaltet, seine fünf festen Fragen, die vier Werkzeuge, mit denen er liest, was er nie tut (er schreibt nichts, erreicht nichts auf GitHub und übergibt, was ein Repository schrieb, als Daten) und wie man ihn mit den zwei Routen und dem Protokoll der Prompts prüft. Der Abschnitt in `AI_CONNECTION.md` bleibt die Referenz der Einstellungen.
+
+- **Hilfe mit Kosten und Wirkung bei fünf weiteren Schaltern**: Der Tooltip von `ai.assistant.enabled`, `ai.prompt_log.enabled`, `ai.similar.enabled`, `ai.airgapped` und `api.v1_enabled` sagt nun in den acht Sprachen, was Sie sehen und was es kostet, neben der allgemeinen Zeile, die jede Einstellung schon hatte.
+
 - **Die Beispieldatei der Einstellungen enthält 221 Einstellungen mehr**: Die Einstellungsseite nimmt den angezeigten Standardwert aus der Beispieldatei, und 221 Einstellungen der KI, der Wächter für Lieferung und Lieferkette, der Sicherungen, des Doctors, des Lesepools, der Töne, des Webhooks und der Meldungen fehlten dort, sodass die Seite für sie keinen Standard zeigte. Jede trägt nun den Wert, den der Code verwendet, wenn die Einstellung fehlt; das Register der Oberflächen listet die 61, denen er noch fehlt.
 
 - **Die 36 Routen der Seite, die keine Anleitung nannte, stehen in einer Tabelle**: `API.md` endet in den acht Sprachen mit einer Tabelle der Routen der Seite, die der Vertrag nicht einfriert (das Feld Über, die geführten Läufe mit `act` und auf GitHub, die Aktionen der KI, die Auswertung, die Entdeckung, die Hilfe, der Modus, die Statusleiste, das Logo und der Rest), mit dem, was jede tut, und welche nur dieser Rechner nutzen darf; das Register der Oberflächen führt sie nicht mehr als fehlend.
