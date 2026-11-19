@@ -40,7 +40,7 @@ NOTES = {
     "/api/ai/actions": ("GET", "the log of the actions that the AI proposed and a person confirmed"),
     "/api/ai/actions/confirm": ("POST", "a person confirms one action proposed by the AI (this computer only)"),
     "/api/ai/actions/unlock": ("POST", "a person unlocks the actions of the AI for a short time (this computer only)"),
-    "/api/ai/alerts": ("GET", "the feed of alerts since a moment (`?since=SECONDS`)"),
+    "/api/ai/alerts": ("GET", "the feed of alerts since a moment (`?since=SECONDS`), each alert with `first_failed`, `last_failed`, `last_checked` (epoch seconds) and a `status` (failed, suppressed or passed)"),
     "/api/ai/brief": ("GET", "the short brief of the real open alerts (Markdown, or `?fmt=json`)"),
     "/api/ai/failures": ("GET,POST", "the book of failures, newest first (`?since=&repo=&category=&limit=`)"),
     "/api/assistant": ("GET", "whether the optional assistant is on (404 while it is off), its three fixed questions, its closed list of read-only tools and its limits (it spends nothing)"),

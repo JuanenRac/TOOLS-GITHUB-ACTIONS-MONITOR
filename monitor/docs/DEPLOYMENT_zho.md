@@ -105,7 +105,7 @@ launchd（macOS）：`ProgramArguments` = `/usr/bin/python3`、`-m`、`github_ac
 | `MONITOR_PROXY_PUBLIC_HOST` | 反向代理的公开名称（`listen.proxy_public_host`）；声明代理的存在。 |
 | `MONITOR_SECURE_COOKIE` | `1` = 会话为 HTTPS（由代理终止）：Cookie 带 Secure（`listen.secure_cookie`）。 |
 | `MONITOR_TRUSTED_PROXY` | `1` = 代理运行在同一台机器上，并信任其 `X-Forwarded-For`（`listen.trusted_proxy`）。 |
-| `MONITOR_TRUSTED_PROXIES` | 代理不在本机时其地址或网络，逗号分隔（`listen.trusted_proxies`）；仅与 `MONITOR_TRUSTED_PROXY` 一起使用。Compose 文件使用网络 `MONITOR_SUBNET`。 |
+| `MONITOR_TRUSTED_PROXIES` | 代理不在本机时其地址或网络，逗号分隔（`listen.trusted_proxies`）；仅与 `MONITOR_TRUSTED_PROXY` 一起使用。Compose 文件给 Caddy 一个固定地址 `MONITOR_PROXY_IP`(默认 172.29.77.250,位于 `MONITOR_SUBNET` 内):只填写这一个地址。 |
 | `MONITOR_LOCAL_PORT` | 声明了代理时，供本机操作者使用的第二个端口，仅限回环（`listen.local_port`；镜像中为 8766）。 |
 | `MONITOR_TLS_CERT_FILE` | 直接提供 HTTPS 的证书（PEM，`listen.tls_cert_file`），需配合密钥。若无法使用，监视器不会退回明文 HTTP 启动。 |
 | `MONITOR_TLS_KEY_FILE` | 该证书的私钥（`listen.tls_key_file`）。 |
@@ -191,7 +191,7 @@ location / {
 
 一旦声明了代理,无论请求头怎么写,从主端口到达的任何请求都不算作“本机”(否则忘记加请求头的代理会让互联网上的所有客户端看起来都是本地的)。因此决定暴露范围的键、对 GitHub 的操作和通道测试无法从那里使用。要使用它们,请用 `listen.local_port`(1024 到 65535 之间的数字)再打开一个只监听 `127.0.0.1` 的端口,并在运行监控的这台电脑上使用它:它要求同一个访问令牌。
 
-`listen.trusted_proxy` 假定代理与监控运行在同一台电脑上(监控会相信任何经回环地址到达的连接上的 `X-Forwarded-For`):不要用于位于另一台机器上的代理。没有可用 `X-Forwarded-For` 的请求的错误令牌还会合计计数(为单个地址上限的三倍);这个共同的锁定绝不会拦下带有正确令牌的请求。 如果代理位于另一个容器或另一台机器上，请在 `listen.trusted_proxies`（`MONITOR_TRUSTED_PROXIES`；在 Docker Compose 文件中为网络 `MONITOR_SUBNET`）中列出其地址或网络：来自这些地址或本机的连接，其 `X-Forwarded-For` 会被信任用于统计尝试次数；这绝不会使请求被视为本机。
+`listen.trusted_proxy` 假定代理与监控运行在同一台电脑上(监控会相信任何经回环地址到达的连接上的 `X-Forwarded-For`):不要用于位于另一台机器上的代理。没有可用 `X-Forwarded-For` 的请求的错误令牌还会合计计数(为单个地址上限的三倍);这个共同的锁定绝不会拦下带有正确令牌的请求。 如果代理位于另一个容器或另一台机器上，请在 `listen.trusted_proxies`（`MONITOR_TRUSTED_PROXIES`；在 Docker Compose 文件中为 Caddy 的固定地址 `MONITOR_PROXY_IP`,而不是整个网络 `MONITOR_SUBNET`:否则绕过 Caddy 的容器也会被信任）中列出其地址或网络：来自这些地址或本机的连接，其 `X-Forwarded-For` 会被信任用于统计尝试次数；这绝不会使请求被视为本机。
 
 ## 针对另一台计算机的命令行
 
