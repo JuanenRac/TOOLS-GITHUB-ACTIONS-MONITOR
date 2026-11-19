@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "835d9c9ab79a14af52c5acec3eac3e73515212cb4ea7f27a1c8f29e9516ba536",
+ "digest": "02586cda7dedc89064a06eef127aa26f54866ea7fbff3b0e3811505339adfe8d",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -242,6 +242,15 @@
      0,
      600
     ]
+   },
+   {
+    "key": "startup.resume_max_age_hours",
+    "kind": "int",
+    "bounds": [
+     0,
+     168
+    ],
+    "default": 12
    }
   ],
   "removed": [],

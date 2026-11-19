@@ -700,6 +700,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sound.server_beep` (secure) | `false` | general | Beep of this computer (page closed) |
 | `sound.theme` | `"classic"` | general | Theme of the sounds |
 | `sound.volume` | `40` | general | Volume of the page |
+| `startup.resume_max_age_hours` | `12` | basic | Show the last picture after a restart (hours) |
 | `stuck_minutes` | `120` | polling | A build is stuck after |
 | `targets_file` | `-` | paths | Build targets file |
 | `tools_dir` | `-` | paths | Folder of the local signing tools |
