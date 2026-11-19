@@ -151,6 +151,38 @@ I dati arrivano da `/api/screens/data?screen=overview` (oppure `now`, `sentinels
 2. Aprire ciascuna in Chrome o Edge in modalità chiosco: `msedge --kiosk "http://questo-computer:8765/screen/now?monitor=2" --edge-kiosk-type=fullscreen` oppure `chrome --kiosk "http://questo-computer:8765/screen/now?monitor=2"`; con `--app=INDIRIZZO` al posto di `--kiosk` la finestra non ha barre. Senza modalità chiosco, il pulsante discreto a piè di pagina chiede lo schermo intero.
 3. Da un altro computer usare la modalità di rete: basta il token di accesso di un visualizzatore, perché queste pagine non scrivono mai.
 
+## Quale scheda è su quale schermo da parete
+
+Ogni scheda della pagina ha una decisione, scritta nel codice (`TAB_DECISIONS` di `screens.py`) e verificata da un test: viene mostrata su uno degli schermi da parete oppure dice perché no. Una scheda mostrata ha i suoi dati nella risposta di `/api/screens/data` (la panoramica porta Avvisi, Grafici e Flotta; In questo momento porta Adesso; Sentinelle porta le carte delle schede delle sentinelle). Una scheda non mostrata indica il suo motivo:
+
+- `people`: nomina persone, e uno schermo da parete non mostra mai un nome utente.
+- `controls`: è fatta di pulsanti e campi che cambiano qualcosa, e uno schermo da parete non ne ha.
+- `reading`: è fatta per essere letta, confrontata o salvata, non per essere vista da lontano.
+- `text`: è fatta di titoli, cause e messaggi, che uno schermo da parete non mostra mai.
+
+| Scheda | Nome | Schermo da parete | Motivo |
+|---|---|---|---|
+| `now` | Adesso | `/screen/now` | - |
+| `al` | Avvisi | `/screen/overview` | - |
+| `charts` | Grafici | `/screen/overview` | - |
+| `sent` | Riepilogo | `/screen/sentinels` | - |
+| `sci` | Sentinella CI | `/screen/sentinels` | - |
+| `scol` | Sentinella collab | `/screen/sentinels` | - |
+| `ssec` | Sentinella sicurezza | `/screen/sentinels` | - |
+| `sdel` | Sentinella di consegna | `/screen/sentinels` | - |
+| `ssup` | Sentinella della catena di fornitura | `/screen/sentinels` | - |
+| `strend` | Andamento giornaliero | - | `reading` |
+| `syvt` | Ieri vs oggi | - | `reading` |
+| `team` | Salute del team | - | `people` |
+| `fleet` | Flotta | `/screen/overview` | - |
+| `repos` | Repository | - | `controls` |
+| `rep` | Rapporti | - | `reading` |
+| `trep` | Report pianificati | - | `reading` |
+| `les` | Lezioni | - | `text` |
+| `hist` | Cronologia | - | `text` |
+| `upd` | Aggiornamenti | - | `controls` |
+| `cfg` | Impostazioni | - | `controls` |
+
 ## Menu Schermi
 
 Il pulsante **Schermi** nella barra superiore (l'icona di due monitor) apre un menu con ogni tipo di schermo del monitor, così nessuno deve ricordare gli indirizzi. Fa solo da navigazione: apre indirizzi, non scrive nulla e non legge nulla da GitHub. È attivo per impostazione predefinita e `screens.menu` lo disattiva.

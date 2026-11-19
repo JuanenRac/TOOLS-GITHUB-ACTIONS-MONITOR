@@ -151,6 +151,38 @@
 2. 在 Chrome 或 Edge 的展示模式下分别打开：`msedge --kiosk "http://这台电脑:8765/screen/now?monitor=2" --edge-kiosk-type=fullscreen` 或 `chrome --kiosk "http://这台电脑:8765/screen/now?monitor=2"`；用 `--app=地址` 代替 `--kiosk` 则窗口没有工具栏。不使用展示模式时，页面底部不显眼的按钮可请求全屏。
 3. 从另一台电脑访问时使用网络模式：查看者的访问令牌就够了，因为这些页面从不写入。
 
+## 哪个标签页在哪块墙面屏幕上
+
+页面的每个标签页都有一个决定，写在代码中（`screens.py` 的 `TAB_DECISIONS`）并由测试检查：它显示在某块墙面屏幕上，或者说明为何不显示。显示的标签页，其数据在 `/api/screens/data` 的响应里（总览承载“告警”“图表”“车队”；此刻承载“现在”；哨兵承载各哨兵标签页的卡片）。不显示的标签页会给出理由：
+
+- `people`: 它点名具体的人，而墙面屏幕从不显示用户名。
+- `controls`: 它由会改变某些内容的按钮和字段组成，而墙面屏幕没有这些。
+- `reading`: 它是用来阅读、比较或保存的，不是用来远距离观看的。
+- `text`: 它由标题、原因和消息组成，墙面屏幕从不显示这些。
+
+| 标签页 | 名称 | 墙面屏幕 | 理由 |
+|---|---|---|---|
+| `now` | 当前 | `/screen/now` | - |
+| `al` | 警报 | `/screen/overview` | - |
+| `charts` | 图表 | `/screen/overview` | - |
+| `sent` | 概览 | `/screen/sentinels` | - |
+| `sci` | CI 哨兵 | `/screen/sentinels` | - |
+| `scol` | 协作哨兵 | `/screen/sentinels` | - |
+| `ssec` | 安全哨兵 | `/screen/sentinels` | - |
+| `sdel` | 交付哨兵 | `/screen/sentinels` | - |
+| `ssup` | 供应链哨兵 | `/screen/sentinels` | - |
+| `strend` | 每日趋势 | - | `reading` |
+| `syvt` | 昨天与今天 | - | `reading` |
+| `team` | 团队健康 | - | `people` |
+| `fleet` | 舰队 | `/screen/overview` | - |
+| `repos` | 仓库 | - | `controls` |
+| `rep` | 报告 | - | `reading` |
+| `trep` | 定时报告 | - | `reading` |
+| `les` | 经验教训 | - | `text` |
+| `hist` | 历史 | - | `text` |
+| `upd` | 更新 | - | `controls` |
+| `cfg` | 设置 | - | `controls` |
+
 ## 屏幕菜单
 
 顶部栏的**屏幕**按钮(两台显示器的图标)会打开一个菜单,列出监视器拥有的每一种屏幕,无需记住地址。它只做导航:只打开地址,不写入任何内容,也不从 GitHub 读取任何内容。默认开启,可用 `screens.menu` 关闭。

@@ -35,6 +35,17 @@ from test_sentinel import run as make_run  # noqa: E402
 
 OWNER = "demo-owner"
 REPOS = ["demo-alpha-core", "demo-alpha-app", "demo-beta-fw", "demo-beta-docs", "demo-gamma-api", "demo-gamma-ui"]
+#: what the demo puts in each tab of the page: `plain` = the invented runs, alerts and analytics of the plain demo already fill it; `rich` = only `--rich` fills it, with the thing named here. Every tab of the page is here
+#: (a test fails when a tab is added without its line, and runs `--rich` to check that every `rich` tab really has data).
+TAB_DEMO = {
+    "now": ("plain", "running, queued and recent runs"), "al": ("plain", "alerts of the sentinels"), "charts": ("plain", "analytics of the demo runs"),
+    "sent": ("plain", "the sentinel snapshot"), "sci": ("plain", "red and stuck workflows"), "scol": ("plain", "collaboration alerts"),
+    "ssec": ("rich", "security findings"), "sdel": ("rich", "delivery findings"), "ssup": ("rich", "supply chain findings"),
+    "strend": ("rich", "fourteen days of daily trend"), "syvt": ("rich", "a saved report of the day before"),
+    "team": ("plain", "the health of the team"), "fleet": ("plain", "the fleet by ecosystem"), "repos": ("plain", "the six demo repositories"),
+    "rep": ("rich", "workflow hygiene, queue, release view and supply chain"), "trep": ("rich", "one scheduled report"), "les": ("rich", "four failures in the book of failures"),
+    "hist": ("plain", "the demo runs"), "upd": ("plain", "an invented newer version"), "cfg": ("plain", "the settings of the demo"),
+}
 
 
 def setup(now):
@@ -183,10 +194,44 @@ def rich_tabs(config, snap, now):
     except Exception as error:   # noqa: BLE001
         print("demo: the Lessons tab stays empty:", error, flush=True)
     try:
+        rich_yesterday(snap, now)
+    except Exception as error:   # noqa: BLE001
+        print("demo: the Yesterday against today tab stays empty:", error, flush=True)
+    try:
+        rich_reports(config, now)
+    except Exception as error:   # noqa: BLE001
+        print("demo: the Reports tab stays empty:", error, flush=True)
+    try:
         snapshot, alerts, team = am.report_gather()
         report_service.run(config, am.report_account(), snapshot, alerts, team, now=stamp)
     except Exception as error:   # noqa: BLE001
         print("demo: the Scheduled reports tab stays empty:", error, flush=True)
+
+
+def rich_yesterday(snap, now):
+    """--rich, the tab Yesterday against today: a saved report of the day before (in a temporary folder that replaces the audit folder for this process only), with one red workflow that is green today and one
+    repository that was not waiting for a signature, so that the tab shows something that appeared and something that disappeared."""
+    from github_actions_monitor.data_pipeline import report_history
+    folder = Path(tempfile.mkdtemp(prefix="ghamon_demo_audit_"))
+    today = report_history.day_state(snap)
+    before = {"day": (now - timedelta(days=1)).strftime("%Y-%m-%d"), "generated": snap.get("generated"), "red": sorted(set(today["red"][1:]) | {"demo-beta-docs (CI)"}), "pending_sign": sorted(set(today["pending_sign"]) - {"demo-beta-fw"}),
+              "budget": [], "parte": []}
+    (folder / f"{report_history.PREFIX}{before['day']}.json").write_text(json.dumps(before), encoding="utf-8")
+    sl.AUDIT_DIR = folder
+
+
+def rich_reports(config, now):
+    """--rich, the tab Reports: the four optional reports switched on and filled with invented findings (nothing is read from GitHub)."""
+    from github_actions_monitor.integrations import reports
+    config["reports"] = {kind: {"enabled": True} for kind in reports.KINDS}
+    stamp = int(now.timestamp())
+    reports.reset()
+    with reports.LOCK:
+        reports.STATE["hygiene"]["demo-alpha-app"] = {"at": stamp, "files": 3, "findings": [{"rule": "no_timeout", "line": 12, "severity": "warn", "detail": "build"}, {"rule": "no_concurrency", "line": 1, "severity": "info", "detail": ""}]}
+        reports.STATE["hygiene"]["demo-gamma-api"] = {"at": stamp, "files": 2, "findings": [{"rule": "no_timeout", "line": 9, "severity": "warn", "detail": "test"}]}
+        for repo, tag, sbom, sums, sig in (("demo-alpha-app", "v2.3.0", True, True, True), ("demo-beta-fw", "v0.9.0", False, False, False), ("demo-gamma-api", "v1.3.0", False, True, False)):
+            reports.STATE["supply"][repo] = {"at": stamp, "tag": tag, "sbom": sbom, "checksums": sums, "signature": sig}
+        reports.STATE["queue"] = [{"group": group, "wait": wait} for group, waits in (("github-hosted", (4, 6, 9, 12, 20)), ("self-hosted", (35, 60, 180, 240))) for wait in waits]
 
 
 def rich_setup(snap, now):

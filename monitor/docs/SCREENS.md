@@ -151,6 +151,38 @@ The data come from `/api/screens/data?screen=overview` (or `now`, `sentinels`): 
 2. Open each one in Chrome or Edge in kiosk mode: `msedge --kiosk "http://this-computer:8765/screen/now?monitor=2" --edge-kiosk-type=fullscreen` or `chrome --kiosk "http://this-computer:8765/screen/now?monitor=2"`; with `--app=ADDRESS` instead of `--kiosk` the window has no bars. Without kiosk mode, the discreet button at the foot of the page asks for full screen.
 3. From another computer use the network mode: the access token of a viewer is enough, because these pages never write.
 
+## Which tab is on which wall screen
+
+Every tab of the page has a decision, written in the code (`TAB_DECISIONS` of `screens.py`) and checked by a test: it is shown on one of the wall screens, or it says why it is not. A tab that is shown has its data in the answer of `/api/screens/data` (the overview carries Alerts, Charts and Fleet; Right now carries Now; Sentinels carries the cards of the sentinel tabs). A tab that is not shown gives its reason:
+
+- `people`: it names people, and a wall screen never shows a user name.
+- `controls`: it is made of buttons and fields that change something, and a wall screen has none.
+- `reading`: it is made to be read, compared or saved, not to be seen from far away.
+- `text`: it is made of titles, causes and messages, which a wall screen never shows.
+
+| Tab | Name | Wall screen | Reason |
+|---|---|---|---|
+| `now` | Now | `/screen/now` | - |
+| `al` | Alerts | `/screen/overview` | - |
+| `charts` | Charts | `/screen/overview` | - |
+| `sent` | Summary | `/screen/sentinels` | - |
+| `sci` | CI sentinel | `/screen/sentinels` | - |
+| `scol` | Collab sentinel | `/screen/sentinels` | - |
+| `ssec` | Security sentinel | `/screen/sentinels` | - |
+| `sdel` | Delivery sentinel | `/screen/sentinels` | - |
+| `ssup` | Supply chain sentinel | `/screen/sentinels` | - |
+| `strend` | Daily trend | - | `reading` |
+| `syvt` | Yesterday vs today | - | `reading` |
+| `team` | Team health | - | `people` |
+| `fleet` | Fleet | `/screen/overview` | - |
+| `repos` | Repositories | - | `controls` |
+| `rep` | Reports | - | `reading` |
+| `trep` | Scheduled reports | - | `reading` |
+| `les` | Lessons | - | `text` |
+| `hist` | History | - | `text` |
+| `upd` | Updates | - | `controls` |
+| `cfg` | Settings | - | `controls` |
+
 ## Screens menu
 
 The **Screens** button in the top bar (the icon of two monitors) opens a menu with every kind of screen the monitor has, so nobody has to remember the addresses. It only navigates: it opens addresses, writes nothing and reads nothing from GitHub. It is on by default and `screens.menu` turns it off.
