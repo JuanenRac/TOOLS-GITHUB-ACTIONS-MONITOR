@@ -10,7 +10,7 @@
 拥有数百个仓库、大量 fork 或多个组织的账户会很快用完 API 配额。下面是按节省效果排序的做法；所有设置都在“设置”标签页。
 
 1. **先选一个配置档案。** 设置 > 基本 > 配置档案：*开源组织* 一键设定下面大部分内容（之后仍可逐项修改）。
-2. **只监视在维护的。** `discovery.fork_policy` = `auto` 只保留有自己 CI 的 fork（账户类型决定时间窗口，`discovery.fork_ci_days`）；`discovery.fork_checks_per_pass` 把询问分摊到多次列表中。`discovery.skip_archived` 默认开启。`exclude` 和 `ecosystems` 按名称缩小列表。 为空的账户列表,或不足上次正常列表 `discovery.min_keep_pct` 百分比的列表,不会被采信:保留上次正常列表,五分钟后重新读取,面向 AI 工具的简报中会出现信号 repos.listing。
+2. **只监视在维护的。** `discovery.fork_policy` = `auto` 只保留有自己 CI 的 fork（账户类型决定时间窗口，`discovery.fork_ci_days`）；`discovery.fork_checks_per_pass` 把询问分摊到多次列表中。`discovery.skip_archived` 默认开启。`exclude` 和 `ecosystems` 按名称缩小列表。 为空的账户列表,或不足上次正常列表 `discovery.min_keep_pct` 百分比的列表,不会被采信:保留上次正常列表,五分钟后重新读取,面向 AI 工具的简报中会出现信号 repos.listing。 `discovery.hide` 也接受 `public`(以及 `private`、`fork`、`empty`);基本标签页会统计每条规则排除的数量,因此被过滤器排除的内容不会被当作干净。
 3. **少问。** `cold_runs_per_repo` 和 `cold_refresh_seconds` 决定安静仓库的开销；`runs_per_repo` 和 `refresh_seconds` 决定活跃仓库的开销。`network.etag` 让无变化时的重复读取免费，低速模式（`modes.auto_low`）会在配额不足时自动放慢。
 4. **给哨兵一个预算。** `sentinel.budget_per_hour`、`sentinel.max_calls_per_tick` 和 `sentinel.hygiene_seconds`（卫生检查默认每六小时对每个仓库发一次请求；可调长）限制 A3-A6 检查的花费。
 5. **增加第二份配额。** `github_app.share_reads` 让 GitHub App 用自己的配额回答一部分读取。
