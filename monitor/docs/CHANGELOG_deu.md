@@ -17,6 +17,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Hinzugefügt
 
+- **Ein optionaler Schalter, der den Webhook Repository für Repository beurteilt**: Mit `savings.webhook_live_per_repo` an (standardmäßig aus, wirkt zusammen mit `savings.webhook_first`) überspringt ein ruhiges Repository sein langsames Lesen nur, wenn in den letzten `savings.webhook_window_minutes` ein EIGENES Ereignis ankam. Ein Repository, dessen Webhook nie eingerichtet wurde oder ausfiel, wird wie immer gelesen, während die anderen geschont werden; es werden weniger Lesevorgänge gespart. Das Webhook-Panel zählt die Repositorys, die für sich lebendig sind (`live_repos`). Bezeichnung, Hilfe, Tipp und Anleitung in den acht Sprachen.
+
 - **Optionaler Blick auf die noch laufenden Runs** (`sampling.active_probe`, standardmäßig aus): Ist die Liste der Runs eines Repositorys voll, fragen zwei leichte Anfragen die Runs mit `in_progress` und `queued` ab, damit ein langer Run, der vor dem Fenster der Liste begann, nicht verloren geht oder als beendet erscheint.
 
 - **Jeder vom Monitor aufbewahrte Datensatz trägt jetzt die Version seines Schemas, und ein Datensatz einer neueren Version wird beiseitegelegt und genannt**: Zustand der Wächter, Stummschaltungen, Feed-Zustand und Update-Hinweis werden mit `schema_version` am Anfang geschrieben (die Leser sehen sie nie; ein Datensatz aus der Zeit vor der Markierung wird wie immer als Version 0 gelesen). Ein Datensatz einer neueren Version, als das Programm versteht, wird nicht halb gelesen: Dieser Datensatz beginnt mit seinen Standardwerten, und die Datei wird in der Liste der Beeinträchtigungen genannt (`records.newer`); ein Downgrade sagt also, welche Datei er nicht verstand.
