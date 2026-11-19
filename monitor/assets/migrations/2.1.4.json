@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "fe1ec3b002402d97ca6ab836f931339634e677d36445fd6292f01a7c30d9c1f4",
+ "digest": "d3575178ada7f568c4ecf523e8d0ec215781892afda05e1856ee903d5c5f0fbe",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -288,6 +288,14 @@
     ]
    },
    {
+    "key": "sentinels.collab.deadline_s",
+    "kind": "int",
+    "bounds": [
+     0,
+     600
+    ]
+   },
+   {
     "key": "sentinels.delivery.deadline_s",
     "kind": "int",
     "bounds": [
@@ -319,6 +327,11 @@
      168
     ],
     "default": 12
+   },
+   {
+    "key": "updates.systemd_helper",
+    "kind": "bool",
+    "default": false
    }
   ],
   "removed": [],

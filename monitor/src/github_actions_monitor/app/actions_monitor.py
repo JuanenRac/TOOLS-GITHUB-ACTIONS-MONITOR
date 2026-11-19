@@ -127,7 +127,7 @@ DEFAULTS = {
                 "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64, "group_map": True,
                 "menu": True, "menu_target": "new", "menu_max_windows": 4, "menu_rotate_seconds": 20, "menu_tv_scale": 1.5},   # the wall screens /screen/overview, /screen/now and /screen/sentinels (docs/SCREENS.md, screens.py): read only, from what the monitor already holds
     "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "on_warning": True, "on_resolved": True, "on_report": True, "on_lesson": True, "on_sentinel": True, "on_stuck": True, "on_score_drop": True, "on_info": True, "on_live_recovered": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False, "theme": "classic", "quiet_enabled": False, "quiet_from_hour": 22, "quiet_to_hour": 7},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
-    "updates": {"check": True},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
+    "updates": {"check": True, "systemd_helper": False},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
     "airgapped": False,            # True: nothing is requested from the network except GitHub's data you asked for; the update check is off
     "open_browser": True,
     "modes": {"start": "normal", "default_minutes": 60},     # normal | fast | turbo: see modes.py; the presets can be edited under modes.fast / modes.turbo
@@ -186,7 +186,7 @@ LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-toke
 
 LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language", "runs_per_repo", "cold_runs_per_repo", "hot_hours", "stuck_minutes", "refresh_seconds", "cold_refresh_seconds")   # what a first lite start copies from actions_monitor.json
 HOT_FORCED = set()    # repositories a webhook event touched: they are read again in the next cycle
-HIDDEN = {"hidden": 0, "discovered": 0, "names": []}      # repositories of the account that the ecosystem filter leaves out, and how many the account has
+HIDDEN = {"hidden": 0, "discovered": 0, "names": [], "reasons": {}}      # repositories of the account that the ecosystem filter leaves out, and how many the account has
 
 
 def lite_inheritance(source):
@@ -585,7 +585,9 @@ def watched_repos(config, force=False):
                         announce_discovery(found, config)
                 DISCOVERED["snapshot"] = snapshot
                 items = [dict(item, isArchived=bool(item.get("isArchived"))) for item in data if not item.get("isArchived") or not rules["skip_archived"]]
-                DISCOVERED["names"] = sorted(discovery.lifecycle(items, config.get("discovery") or {}, fork_ci_answers(config, rules, items)))
+                answers = fork_ci_answers(config, rules, items)
+                DISCOVERED["names"] = sorted(discovery.lifecycle(items, config.get("discovery") or {}, answers))
+                DISCOVERED["reasons"] = discovery.exclusions(items, config.get("discovery") or {}, answers)
                 DISCOVERED["at"] = time.time()
         known = toolconfig.ecosystem_names(config)
         wanted_eco = config["ecosystems"]
@@ -595,6 +597,7 @@ def watched_repos(config, force=False):
         kept = set(names)
         left_out = [n for n in DISCOVERED["names"] if n not in kept]
         HIDDEN["discovered"], HIDDEN["hidden"], HIDDEN["names"] = len(DISCOVERED["names"]), len(left_out), left_out[:50]
+        HIDDEN["reasons"] = dict(DISCOVERED.get("reasons") or {})
         if discovery.settings(config)["suggest_groups"]:
             DISCOVERY["suggestions"] = discovery.suggest_groups([n for n in DISCOVERED["names"] if ecosystem_of(n) in ("other", "rest")], taken=set(known))
     skip = set(config["exclude"])
@@ -3933,7 +3936,7 @@ def discovery_payload():
     config = LIVE_CONFIG or toolconfig.raw_config()
     with LOCK:
         data = STATE.get("data") or {}
-    box = discovery.box(toolconfig.github_owner(config), len(data.get("repos") or []), HIDDEN["discovered"], HIDDEN["names"])
+    box = discovery.box(toolconfig.github_owner(config), len(data.get("repos") or []), HIDDEN["discovered"], HIDDEN["names"], HIDDEN["reasons"])
     from github_actions_monitor.data_pipeline import orgs
     organisations = orgs.view(toolconfig.raw_config(), lambda endpoint: gh_read(endpoint, retries=0), state_dir() / ("orgs_state_lite.json" if LITE["on"] else "orgs_state.json"), offline=True) if not DEMO["on"] else {"enabled": False, "orgs": [], "checked_at": 0}      # offline=True: it shows what the cycle read, it never reads
     return {**box, "events": list(reversed(DISCOVERY["events"]))[:20], "suggestions": DISCOVERY["suggestions"], "settings": discovery.settings(config), "owner_kind": FORKS["kind"], "forks": {k: FORKS[k] for k in ("checked", "kept", "left", "waiting")}, "demo": DEMO["on"], "organizations": organisations}
@@ -4169,11 +4172,11 @@ def handle_updates_post(path, request, who, config):
         if path.endswith("/plan"):
             return {"ok": True, "plan": updates.plan(target, policy)}
         if path.endswith("/apply"):
-            answer = updates.apply(target, policy, request.get("confirm"), edition, lang, lite=LITE["on"], demo=DEMO["on"])
+            answer = updates.apply(target, policy, request.get("confirm"), edition, lang, lite=LITE["on"], demo=DEMO["on"], helper=updates.helper_on(toolconfig.raw_config()))
             _audit_plain("update_apply", who, target, {"from": answer.get("from")}, "ok")
             return {"ok": True, **answer}
         if path.endswith("/rollback"):
-            answer = updates.rollback(request.get("confirm"), edition, lang, lite=LITE["on"], demo=DEMO["on"])
+            answer = updates.rollback(request.get("confirm"), edition, lang, lite=LITE["on"], demo=DEMO["on"], helper=updates.helper_on(toolconfig.raw_config()))
             _audit_plain("update_rollback", who, "previous", None, "ok")
             return {"ok": True, **answer}
     except updates.UpdatesError as error:
