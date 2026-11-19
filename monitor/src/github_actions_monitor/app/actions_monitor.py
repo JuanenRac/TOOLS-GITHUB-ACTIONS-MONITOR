@@ -3887,7 +3887,10 @@ def assistant_reader():
         from github_actions_monitor.storage import runtime
         storage, account = runtime.process_storage(CHILD["account"] or None)
         return score_api.latest(storage, account, toolconfig.raw_config())
-    return {"views": health_views, "score": score}
+    def history():
+        from github_actions_monitor.integrations import ai_alerts, similar_alerts
+        return similar_alerts.from_feed(ai_alerts.alerts(toolconfig.raw_config(), states=("resolved",))[:200])
+    return {"views": health_views, "score": score, "history": history}
 
 
 def assistant_ask(request, role="admin"):

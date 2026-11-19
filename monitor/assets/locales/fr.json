@@ -4281,5 +4281,22 @@
  "ui.asst_err_argument": "Choisissez d'abord l'alerte ou le dépôt.",
  "ui.asst_err_role": "Votre rôle ne peut pas utiliser cet outil.",
  "ui.asst_err_unavailable": "L'assistant n'a pas pu répondre.",
- "ui.cfg_u_tokens": "jetons"
+ "ui.cfg_u_tokens": "jetons",
+ "ui.cfg_b_privacy": "Confidentialité et isolement",
+ "cfg.f.ai.airgapped": "Mode isolé de l'IA",
+ "cfg.h.ai.airgapped": "Désactivé. Activé = l'IA ne parle qu'à un modèle de cet ordinateur ou d'une adresse privée que vous déclarez ci-dessous ; toute adresse d'internet et tout service en nuage sont refusés avant l'ouverture d'une connexion. Le commutateur général d'isolement l'active aussi. Il ne se change que depuis cet ordinateur.",
+ "cfg.f.ai.airgap_hosts": "Adresses privées autorisées",
+ "cfg.h.ai.airgap_hosts": "Utilisé seulement en mode isolé : noms ou adresses de votre propre réseau (192.168.1.20, gpu.lan) où tourne un modèle ; un par ligne. Cet ordinateur est toujours autorisé ; une adresse publique est refusée même si elle figure dans la liste.",
+ "cfg.f.ai.redact.extra_terms": "Mots toujours masqués",
+ "cfg.h.ai.redact.extra_terms": "Mots (un serveur, un projet) remplacés par [hidden] dans tout texte avant que l'IA le voie, quelle que soit la casse. Ils s'ajoutent aux secrets que le moniteur masque déjà ; ils ne les remplacent jamais.",
+ "ai.airgap_cloud_provider": "Le mode isolé est actif : ce fournisseur est un service d'internet et il est refusé.",
+ "ai.airgap_host_not_allowed": "Le mode isolé est actif : {host} n'est pas sur cet ordinateur et ne figure pas dans la liste des adresses privées que vous avez déclarées.",
+ "ai.airgap_no_address": "Le mode isolé est actif : le fournisseur n'a pas d'adresse vérifiable.",
+ "ai.doc_egress_ok": "Le mode isolé est actif et ce fournisseur est sur cet ordinateur ou à une adresse que vous avez déclarée.",
+ "ai.doc_egress_blocked": "Le mode isolé est actif et refuse ce fournisseur : {why}",
+ "ai.chain_airgap": "refusé par le mode isolé",
+ "cfg.f.ai.similar.enabled": "Alertes semblables",
+ "cfg.h.ai.similar.enabled": "Désactivé. Activé = « expliquer cette alerte » liste aussi les alertes qui lui ressemblent (ouvertes et résolues dont le flux se souvient), trouvées par une simple comparaison de mots : pas de modèle, pas d'embeddings, seulement les données de ce compte.",
+ "cfg.f.ai.similar.max": "Nombre maximal d'alertes semblables",
+ "cfg.h.ai.similar.max": "Le plus grand nombre d'alertes semblables listées à côté d'une explication."
 }

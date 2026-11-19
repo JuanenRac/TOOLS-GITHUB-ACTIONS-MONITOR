@@ -19,6 +19,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.actions.execute` (secure) | `-` | ai | Run with confirmation |
 | `ai.actions.max_per_hour` | `-` | ai | Actions per hour |
 | `ai.actions.ttl_seconds` | `-` | ai | Proposal lifetime |
+| `ai.airgap_hosts` (secure) | `-` | ai | Private addresses allowed |
+| `ai.airgapped` (secure) | `-` | ai | Air-gapped mode of the AI |
 | `ai.allow_private_targets` (secure) | `-` | ai | Allow an AI provider on a private address |
 | `ai.allowed_repos` | `-` | ai | Repositories it may see |
 | `ai.answer_language` | `-` | ai | Language of the answers |
@@ -46,6 +48,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.model_daily_limit` | `-` | ai | Calls per model per day |
 | `ai.ollama_url` | `-` | ai | Ollama address |
 | `ai.provider` (secure) | `"none"` | ai | AI service |
+| `ai.redact.extra_terms` (secure) | `-` | ai | Words to always hide |
+| `ai.similar.enabled` | `-` | ai | Similar alerts |
+| `ai.similar.max` | `-` | ai | Most similar alerts |
 | `ai.skill` | `-` | ai | Give the AI its guide |
 | `ai.skill_max_chars` | `-` | ai | Size of the guide in the prompt |
 | `ai.tasks.alert.max_input_chars` | `-` | ai | Input limit (0 = the general one) |

@@ -38,6 +38,7 @@ from urllib.parse import urlparse
 
 from github_actions_monitor import i18n
 from github_actions_monitor.security import envguard, netguard, private_io
+from github_actions_monitor.sentinels import ai_airgap
 from github_actions_monitor.security.redactor import redact as _redact
 from github_actions_monitor.storage import locks, state_io
 
@@ -60,6 +61,9 @@ AI_DEFAULTS = {
     "model_daily_limit": 0, "cost_limit_daily": 0, "model_cost_limit_daily": 0,      # budgets (0 = no limit): calls per model per day, estimated cost per model and in total
     "catalog": {"enabled": False, "ttl_minutes": 360, "max_requests_per_day": 20, "fit_context": False},      # the live list of models of the provider (ai_models.py): off for background use, a person asking for it is always served
     "assistant": {"enabled": False, "max_context": 6000, "tools": ["status", "alerts", "runs", "score"], "max_tool_calls": 4},      # OFF: the panel of fixed questions (assistant.py); read only
+    "airgapped": False, "airgap_hosts": [],      # OFF: with it on the AI only talks to this computer or to a private address declared in the list (ai_airgap.py); the general `airgapped` switch turns it on too
+    "redact": {"extra_terms": []},      # words of the owner (a server, a project) that are always hidden before the AI sees a text; they add to the secrets the cleaner already hides, never replace them
+    "similar": {"enabled": False, "max": 5},      # OFF: "explain this alert" also lists the alerts that look like it (similar_alerts.py, no model)
     "untrusted_text_max": 2000,      # what a repository wrote (a title, a name) is cut to this size before the AI sees it, as data between marks (assistant.py)
     "skill": True, "skill_max_chars": 3000,      # the core of the skill of the AI of the monitor (skills/internal/SKILL.md) goes into every prompt, cut to this size (a small local model: 1500)
 }
@@ -100,6 +104,12 @@ def ai_config(config):
         merged["fallback_cloud_allowed"] = [str(x).strip()[:60] for x in allowed if isinstance(x, str) and x.strip()][:20] if isinstance(allowed, list) else []
         merged["fallback"] = merged["fallback"] if isinstance(merged["fallback"], (str, list)) else ""
         merged["tasks"] = merged["tasks"] if isinstance(merged["tasks"], dict) else {}
+        merged["airgapped"] = merged["airgapped"] is True or (config or {}).get("airgapped") is True or os.environ.get("MONITOR_AIRGAPPED", "").strip().lower() in ("1", "true", "yes")
+        hosts = merged["airgap_hosts"]
+        merged["airgap_hosts"] = [str(x).strip().lower()[:100] for x in hosts if isinstance(x, str) and x.strip()][:50] if isinstance(hosts, list) else []
+        redact = merged["redact"] if isinstance(merged["redact"], dict) else {}
+        terms = redact.get("extra_terms")
+        merged["redact"] = {"extra_terms": list(dict.fromkeys(t.strip() for t in terms if isinstance(t, str) and 2 <= len(t.strip()) <= 80))[:50] if isinstance(terms, list) else []}
         network = (config or {}).get("network")
         merged["use_proxy"] = isinstance(network, dict) and network.get("use_proxy") is True      # network.use_proxy (off by default): the proxies of the environment, only for a provider that is not on this computer
     except (TypeError, ValueError):
@@ -117,12 +127,19 @@ def model_of(cfg):
     return cfg.get("model") or DEFAULT_MODELS.get(cfg["provider"], "")
 
 
-def sanitize_text(text, max_chars, keep="tail"):
+def hide_terms(text, terms):
+    """The words the owner asked to hide (`ai.redact.extra_terms`), whatever their case: a plain replacement, no pattern, so nothing the owner writes can slow the cleaner down."""
+    for term in terms or ():
+        text = re.sub(re.escape(term), "[hidden]", text, flags=re.IGNORECASE)
+    return text
+
+
+def sanitize_text(text, max_chars, keep="tail", terms=()):
     """Removes control characters and secrets, neutralises our delimiters and cuts to max_chars. The secrets go through the ONE cleaner of the product (security/redactor.py, the same as the feed
     for the AIs); the short list below is only a second pass over what that one leaves."""
     text = CONTROL.sub("", str(text if text is not None else "").replace("\r\n", "\n").replace("\r", "\n"))
     text = text[-(max_chars * 3 + 2000):] if keep == "tail" else text[:max_chars * 3 + 2000]      # a long log is cut BEFORE cleaning (the cleaner is not made for megabytes); the final cut comes after it
-    text = _redact(text)
+    text = hide_terms(_redact(text), terms)
     for pattern in SECRET_PATTERNS:
         text = pattern.sub("[REDACTED]", text)
     text = text.replace("<<<", "< < <").replace(">>>", "> > >")
@@ -310,9 +327,11 @@ def note_usage(body, in_key, out_key):
     _USAGE.value = (number(usage.get(in_key)), number(usage.get(out_key)))
 
 
-def _post_json(url, payload, headers, timeout, use_proxy=False, allow_private=False):
+def _post_json(url, payload, headers, timeout, use_proxy=False, allow_private=False, ai=None):
     """The call to a provider: no redirect is followed (the key would go on to another address) and no proxy of the environment is used for a server on this computer (nor for any other unless
     `network.use_proxy`): netguard.open_plain."""
+    if ai is not None:
+        ai_airgap.check(ai, url)      # before any connection is opened: in the air-gapped mode no socket leaves for an address that is not on this computer or declared
     request = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), method="POST",
                                      headers={"Content-Type": "application/json", **headers})
     with netguard.open_plain(request, timeout=timeout, use_proxy=use_proxy, allow_private=allow_private) as answer:
@@ -322,6 +341,9 @@ def _post_json(url, payload, headers, timeout, use_proxy=False, allow_private=Fa
 def ollama_available(cfg):
     if not _loopback(cfg["ollama_url"]):
         return False, i18n.t("ai.ollama_local")
+    why = ai_airgap.problem(cfg, cfg["ollama_url"])
+    if why:
+        return False, ai_airgap.message(why, urlparse(cfg["ollama_url"]).hostname or "")
     try:
         with netguard.open_plain(urllib.request.Request(cfg["ollama_url"].rstrip("/") + "/api/tags"), timeout=1.5) as answer:
             answer.read(1000)
@@ -336,7 +358,7 @@ def ollama_chat(cfg, system, user):
     body = _post_json(cfg["ollama_url"].rstrip("/") + "/api/chat",
                       {"model": model_of(cfg), "stream": False, "options": {"temperature": 0.1},
                        "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]},
-                      {}, cfg["timeout_seconds"], cfg.get("use_proxy") is True, allow_private=cfg.get("allow_private_targets") is True)
+                      {}, cfg["timeout_seconds"], cfg.get("use_proxy") is True, allow_private=cfg.get("allow_private_targets") is True, ai=cfg)
     note_usage(body, "prompt_eval_count", "eval_count")
     return (body.get("message") or {}).get("content", "")
 
@@ -373,7 +395,7 @@ def openai_compatible_chat(cfg, system, user):
     try:
         body = _post_json(url, {"model": cfg["model"], "temperature": 0.1, "max_tokens": 500,
                                 "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]},
-                          {"Authorization": "Bearer " + key, "api-key": key} if key else {}, cfg["timeout_seconds"], cfg.get("use_proxy") is True, allow_private=cfg.get("allow_private_targets") is True)
+                          {"Authorization": "Bearer " + key, "api-key": key} if key else {}, cfg["timeout_seconds"], cfg.get("use_proxy") is True, allow_private=cfg.get("allow_private_targets") is True, ai=cfg)
     except urllib.error.HTTPError as error:
         raise ProviderError(i18n.t("ai.provider_answered", code=error.code), error.code) from None
     note_usage(body, "prompt_tokens", "completion_tokens")
@@ -404,7 +426,7 @@ def anthropic_chat(cfg, system, user):
     url = (cfg.get("base_url") or ANTHROPIC_URL).rstrip("/") + "/v1/messages"
     try:
         body = _post_json(url, {"model": cfg["model"], "max_tokens": 600, "temperature": 0.1, "system": system, "messages": [{"role": "user", "content": user}]},
-                          {"x-api-key": key, "anthropic-version": ANTHROPIC_VERSION}, cfg["timeout_seconds"], cfg.get("use_proxy") is True, allow_private=cfg.get("allow_private_targets") is True)
+                          {"x-api-key": key, "anthropic-version": ANTHROPIC_VERSION}, cfg["timeout_seconds"], cfg.get("use_proxy") is True, allow_private=cfg.get("allow_private_targets") is True, ai=cfg)
     except urllib.error.HTTPError as error:
         raise ProviderError(i18n.t("ai.provider_answered", code=error.code), error.code) from None
     note_usage(body, "input_tokens", "output_tokens")
@@ -491,7 +513,7 @@ def explain(kind, data, cfg, store, transport=None, task=None):
     first = chain[0]["cfg"]
     base.update({"provider": first["provider"], "model": model_of(first)})
     first_chars = ai_models.fit_chars(first, store)
-    clean = sanitize_text(data, first_chars, keep="tail" if kind == "build" else "head")
+    clean = sanitize_text(data, first_chars, keep="tail" if kind == "build" else "head", terms=cfg["redact"]["extra_terms"])
     lesson = ""
     if kind == "build":
         try:
@@ -499,7 +521,7 @@ def explain(kind, data, cfg, store, transport=None, task=None):
             lesson = lessons.prompt_block(clean)
             library = lessons.prompt_data(clean)
             if library:      # a lesson of the library may have been written by an AI: it is data, between the delimiters, cleaned like the rest
-                clean = clean + "\n\n" + sanitize_text(library, 700, keep="head")
+                clean = clean + "\n\n" + sanitize_text(library, 700, keep="head", terms=cfg["redact"]["extra_terms"])
         except Exception:   # noqa: BLE001 - a lesson that cannot be read never stops the explanation
             lesson = ""
     skill = ""
@@ -525,6 +547,10 @@ def explain(kind, data, cfg, store, transport=None, task=None):
     for index, cand in enumerate(chain):
         ccfg = dict(cand["cfg"])
         last = index == len(chain) - 1
+        air = ai_airgap.problem(ccfg, ai_airgap.target(ccfg))
+        if air:
+            failed.append({"model": cand["label"], "reason": "airgap", "error": ai_airgap.message(air, urlparse(ai_airgap.target(ccfg) or "").hostname or "")})
+            continue
         blocked = cand.get("blocked") or ai_chain.budget_block(ccfg, store) or ("retired" if not last and ai_chain.retired(ccfg, store) else None)
         if blocked:
             failed.append({"model": cand["label"], "reason": blocked})
@@ -541,7 +567,7 @@ def explain(kind, data, cfg, store, transport=None, task=None):
                 continue
             store.add_call()  # counted before the call: a failing provider also spends the cap
             ai_chain.add_model_call(store, ccfg)
-        piece = clean if len(clean) <= ccfg["max_input_chars"] else sanitize_text(clean, ccfg["max_input_chars"], keep="tail" if kind == "build" else "head")
+        piece = clean if len(clean) <= ccfg["max_input_chars"] else sanitize_text(clean, ccfg["max_input_chars"], keep="tail" if kind == "build" else "head", terms=cfg["redact"]["extra_terms"])
         system, user = build_prompt(kind, piece, _secrets.token_hex(6), cfg.get("answer_language") or None, lesson, skill)
         _USAGE.value = None
         try:
@@ -585,6 +611,9 @@ def run_call(cfg, store, kind, data, transport=None, language=None):
     or, if it did not, estimated at four characters per token) and the estimated cost when the table has the prices. Never raises."""
     import time as _time
     from github_actions_monitor.sentinels import ai_chain
+    air = ai_airgap.problem(cfg, ai_airgap.target(cfg))
+    if air and cfg["provider"] != "none":
+        return {"ok": False, "error": ai_airgap.message(air, urlparse(ai_airgap.target(cfg) or "").hostname or "")}
     with store.exclusive():
         if cfg["provider"] == "none":
             return {"ok": False, "error": i18n.t("ai.is_off")}
@@ -595,7 +624,7 @@ def run_call(cfg, store, kind, data, transport=None, language=None):
             return {"ok": False, "error": i18n.t("ai.budget_spent", model=ai_chain.label_of(cfg), why=ai_chain.reason_text(spent))}
         store.add_call()
         ai_chain.add_model_call(store, cfg)
-    system, user = build_prompt(kind, sanitize_text(data, cfg["max_input_chars"], keep="tail"), _secrets.token_hex(6), language)
+    system, user = build_prompt(kind, sanitize_text(data, cfg["max_input_chars"], keep="tail", terms=cfg["redact"]["extra_terms"]), _secrets.token_hex(6), language)
     _USAGE.value = None
     started = _time.time()
     try:
@@ -617,6 +646,9 @@ def run_call(cfg, store, kind, data, transport=None, language=None):
 def test_connection(cfg, store, transport=None):
     """The smallest call the provider can answer ("reply with ok"), to check the address, the model and the key. It counts against the daily cap like any call. Never raises."""
     import time as _time
+    air = ai_airgap.problem(cfg, ai_airgap.target(cfg))
+    if air and cfg["provider"] != "none":
+        return {"ok": False, "error": ai_airgap.message(air, urlparse(ai_airgap.target(cfg) or "").hostname or ""), "provider": cfg["provider"]}
     with store.exclusive():
         if cfg["provider"] == "none":
             return {"ok": False, "error": i18n.t("ai.is_off")}
