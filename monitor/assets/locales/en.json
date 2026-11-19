@@ -4308,5 +4308,7 @@
  "cfg.f.ai.similar.enabled": "Similar alerts",
  "cfg.h.ai.similar.enabled": "Off. On = \"explain this alert\" also lists the alerts that look like it (open ones and resolved ones the feed remembers), found by a plain comparison of words: no model, no embeddings, only the data of this account.",
  "cfg.f.ai.similar.max": "Most similar alerts",
- "cfg.h.ai.similar.max": "The most alerts that look alike that are listed next to an explanation."
+ "cfg.h.ai.similar.max": "The most alerts that look alike that are listed next to an explanation.",
+ "cfg.f.ai.redact.extra_patterns": "Patterns to always hide",
+ "cfg.h.ai.redact.extra_patterns": "Off (empty). One per line; a pattern describes a whole word and has only three wildcards: * (any run of characters), ? (one character) and # (one digit), for example deploy-* or *.corp-name. It is not a regular expression, so it cannot make the monitor hang. At least 3 plain characters, 80 at most."
 }

@@ -4308,5 +4308,7 @@
  "cfg.f.ai.similar.enabled": "Avvisi simili",
  "cfg.h.ai.similar.enabled": "Spento. Acceso = «spiega questo avviso» elenca anche gli avvisi che gli somigliano (aperti e risolti che il feed ricorda), trovati con un semplice confronto di parole: nessun modello, nessun embedding, solo i dati di questo account.",
  "cfg.f.ai.similar.max": "Massimo di avvisi simili",
- "cfg.h.ai.similar.max": "Il massimo di avvisi simili elencati accanto a una spiegazione."
+ "cfg.h.ai.similar.max": "Il massimo di avvisi simili elencati accanto a una spiegazione.",
+ "cfg.f.ai.redact.extra_patterns": "Modelli da nascondere sempre",
+ "cfg.h.ai.redact.extra_patterns": "Spento (vuoto). Uno per riga; un modello descrive una parola intera e ha solo tre caratteri jolly: * (qualsiasi sequenza di caratteri), ? (un carattere) e # (una cifra), per esempio deploy-* o *.nome-corp. Non è un'espressione regolare, quindi non può bloccare il monitor. Almeno 3 caratteri normali, al massimo 80."
 }

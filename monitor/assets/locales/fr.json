@@ -4308,5 +4308,7 @@
  "cfg.f.ai.similar.enabled": "Alertes semblables",
  "cfg.h.ai.similar.enabled": "Désactivé. Activé = « expliquer cette alerte » liste aussi les alertes qui lui ressemblent (ouvertes et résolues dont le flux se souvient), trouvées par une simple comparaison de mots : pas de modèle, pas d'embeddings, seulement les données de ce compte.",
  "cfg.f.ai.similar.max": "Nombre maximal d'alertes semblables",
- "cfg.h.ai.similar.max": "Le plus grand nombre d'alertes semblables listées à côté d'une explication."
+ "cfg.h.ai.similar.max": "Le plus grand nombre d'alertes semblables listées à côté d'une explication.",
+ "cfg.f.ai.redact.extra_patterns": "Motifs toujours masqués",
+ "cfg.h.ai.redact.extra_patterns": "Désactivé (vide). Un par ligne ; un motif décrit un mot entier et n'a que trois jokers : * (toute suite de caractères), ? (un caractère) et # (un chiffre), par exemple deploy-* ou *.nom-corp. Ce n'est pas une expression régulière : il ne peut pas bloquer le moniteur. Au moins 3 caractères ordinaires, 80 au plus."
 }

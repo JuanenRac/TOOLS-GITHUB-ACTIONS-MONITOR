@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "6aeae53d0bfffb38476cadf3c453ca9d8ec64b06bf70eebb2c2466287babb49a",
+ "digest": "2f25a8510b89d37a55135b7025d11e8c13d354ca1a30f7cdc76f03c924a61a99",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -38,6 +38,10 @@
    },
    {
     "key": "ai.assistant.tools",
+    "kind": "names"
+   },
+   {
+    "key": "ai.redact.extra_patterns",
     "kind": "names"
    },
    {

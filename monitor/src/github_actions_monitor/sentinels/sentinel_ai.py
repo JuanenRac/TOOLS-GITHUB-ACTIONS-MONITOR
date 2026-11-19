@@ -37,7 +37,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from github_actions_monitor import i18n
-from github_actions_monitor.security import envguard, netguard, private_io
+from github_actions_monitor.security import envguard, glob_patterns, netguard, private_io
 from github_actions_monitor.sentinels import ai_airgap
 from github_actions_monitor.security.redactor import redact as _redact
 from github_actions_monitor.storage import locks, state_io
@@ -62,7 +62,7 @@ AI_DEFAULTS = {
     "catalog": {"enabled": False, "ttl_minutes": 360, "max_requests_per_day": 20, "fit_context": False},      # the live list of models of the provider (ai_models.py): off for background use, a person asking for it is always served
     "assistant": {"enabled": False, "max_context": 6000, "tools": ["status", "alerts", "runs", "score"], "max_tool_calls": 4},      # OFF: the panel of fixed questions (assistant.py); read only
     "airgapped": False, "airgap_hosts": [],      # OFF: with it on the AI only talks to this computer or to a private address declared in the list (ai_airgap.py); the general `airgapped` switch turns it on too
-    "redact": {"extra_terms": []},      # words of the owner (a server, a project) that are always hidden before the AI sees a text; they add to the secrets the cleaner already hides, never replace them
+    "redact": {"extra_terms": [], "extra_patterns": []},      # words of the owner (a server, a project) that are always hidden before the AI sees a text; they add to the secrets the cleaner already hides, never replace them
     "similar": {"enabled": False, "max": 5},      # OFF: "explain this alert" also lists the alerts that look like it (similar_alerts.py, no model)
     "untrusted_text_max": 2000,      # what a repository wrote (a title, a name) is cut to this size before the AI sees it, as data between marks (assistant.py)
     "skill": True, "skill_max_chars": 3000,      # the core of the skill of the AI of the monitor (skills/internal/SKILL.md) goes into every prompt, cut to this size (a small local model: 1500)
@@ -109,7 +109,8 @@ def ai_config(config):
         merged["airgap_hosts"] = [str(x).strip().lower()[:100] for x in hosts if isinstance(x, str) and x.strip()][:50] if isinstance(hosts, list) else []
         redact = merged["redact"] if isinstance(merged["redact"], dict) else {}
         terms = redact.get("extra_terms")
-        merged["redact"] = {"extra_terms": list(dict.fromkeys(t.strip() for t in terms if isinstance(t, str) and 2 <= len(t.strip()) <= 80))[:50] if isinstance(terms, list) else []}
+        merged["redact"] = {"extra_terms": list(dict.fromkeys(t.strip() for t in terms if isinstance(t, str) and 2 <= len(t.strip()) <= 80))[:50] if isinstance(terms, list) else [],
+                            "extra_patterns": glob_patterns.clean_list(redact.get("extra_patterns"))}
         network = (config or {}).get("network")
         merged["use_proxy"] = isinstance(network, dict) and network.get("use_proxy") is True      # network.use_proxy (off by default): the proxies of the environment, only for a provider that is not on this computer
     except (TypeError, ValueError):
@@ -134,12 +135,12 @@ def hide_terms(text, terms):
     return text
 
 
-def sanitize_text(text, max_chars, keep="tail", terms=()):
+def sanitize_text(text, max_chars, keep="tail", terms=(), patterns=()):
     """Removes control characters and secrets, neutralises our delimiters and cuts to max_chars. The secrets go through the ONE cleaner of the product (security/redactor.py, the same as the feed
     for the AIs); the short list below is only a second pass over what that one leaves."""
     text = CONTROL.sub("", str(text if text is not None else "").replace("\r\n", "\n").replace("\r", "\n"))
     text = text[-(max_chars * 3 + 2000):] if keep == "tail" else text[:max_chars * 3 + 2000]      # a long log is cut BEFORE cleaning (the cleaner is not made for megabytes); the final cut comes after it
-    text = hide_terms(_redact(text), terms)
+    text = glob_patterns.hide(hide_terms(_redact(text), terms), patterns)
     for pattern in SECRET_PATTERNS:
         text = pattern.sub("[REDACTED]", text)
     text = text.replace("<<<", "< < <").replace(">>>", "> > >")
@@ -513,7 +514,7 @@ def explain(kind, data, cfg, store, transport=None, task=None):
     first = chain[0]["cfg"]
     base.update({"provider": first["provider"], "model": model_of(first)})
     first_chars = ai_models.fit_chars(first, store)
-    clean = sanitize_text(data, first_chars, keep="tail" if kind == "build" else "head", terms=cfg["redact"]["extra_terms"])
+    clean = sanitize_text(data, first_chars, keep="tail" if kind == "build" else "head", terms=cfg["redact"]["extra_terms"], patterns=cfg["redact"]["extra_patterns"])
     lesson = ""
     if kind == "build":
         try:
@@ -521,7 +522,7 @@ def explain(kind, data, cfg, store, transport=None, task=None):
             lesson = lessons.prompt_block(clean)
             library = lessons.prompt_data(clean)
             if library:      # a lesson of the library may have been written by an AI: it is data, between the delimiters, cleaned like the rest
-                clean = clean + "\n\n" + sanitize_text(library, 700, keep="head", terms=cfg["redact"]["extra_terms"])
+                clean = clean + "\n\n" + sanitize_text(library, 700, keep="head", terms=cfg["redact"]["extra_terms"], patterns=cfg["redact"]["extra_patterns"])
         except Exception:   # noqa: BLE001 - a lesson that cannot be read never stops the explanation
             lesson = ""
     skill = ""
@@ -567,7 +568,7 @@ def explain(kind, data, cfg, store, transport=None, task=None):
                 continue
             store.add_call()  # counted before the call: a failing provider also spends the cap
             ai_chain.add_model_call(store, ccfg)
-        piece = clean if len(clean) <= ccfg["max_input_chars"] else sanitize_text(clean, ccfg["max_input_chars"], keep="tail" if kind == "build" else "head", terms=cfg["redact"]["extra_terms"])
+        piece = clean if len(clean) <= ccfg["max_input_chars"] else sanitize_text(clean, ccfg["max_input_chars"], keep="tail" if kind == "build" else "head", terms=cfg["redact"]["extra_terms"], patterns=cfg["redact"]["extra_patterns"])
         system, user = build_prompt(kind, piece, _secrets.token_hex(6), cfg.get("answer_language") or None, lesson, skill)
         _USAGE.value = None
         try:
@@ -624,7 +625,7 @@ def run_call(cfg, store, kind, data, transport=None, language=None):
             return {"ok": False, "error": i18n.t("ai.budget_spent", model=ai_chain.label_of(cfg), why=ai_chain.reason_text(spent))}
         store.add_call()
         ai_chain.add_model_call(store, cfg)
-    system, user = build_prompt(kind, sanitize_text(data, cfg["max_input_chars"], keep="tail", terms=cfg["redact"]["extra_terms"]), _secrets.token_hex(6), language)
+    system, user = build_prompt(kind, sanitize_text(data, cfg["max_input_chars"], keep="tail", terms=cfg["redact"]["extra_terms"], patterns=cfg["redact"]["extra_patterns"]), _secrets.token_hex(6), language)
     _USAGE.value = None
     started = _time.time()
     try:

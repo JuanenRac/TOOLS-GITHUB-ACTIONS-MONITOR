@@ -4308,5 +4308,7 @@
  "cfg.f.ai.similar.enabled": "Ähnliche Warnungen",
  "cfg.h.ai.similar.enabled": "Aus. An = „Diese Warnung erklären“ listet auch ähnliche Warnungen auf (offene und im Feed gemerkte gelöste), gefunden durch einen einfachen Wortvergleich: kein Modell, keine Embeddings, nur die Daten dieses Kontos.",
  "cfg.f.ai.similar.max": "Höchstzahl ähnlicher Warnungen",
- "cfg.h.ai.similar.max": "Die höchste Zahl ähnlicher Warnungen, die neben einer Erklärung aufgelistet werden."
+ "cfg.h.ai.similar.max": "Die höchste Zahl ähnlicher Warnungen, die neben einer Erklärung aufgelistet werden.",
+ "cfg.f.ai.redact.extra_patterns": "Muster, die immer verborgen werden",
+ "cfg.h.ai.redact.extra_patterns": "Aus (leer). Eines pro Zeile; ein Muster beschreibt ein ganzes Wort und kennt nur drei Platzhalter: * (beliebige Zeichenfolge), ? (ein Zeichen) und # (eine Ziffer), zum Beispiel deploy-* oder *.firmen-name. Es ist kein regulärer Ausdruck und kann den Monitor daher nicht blockieren. Mindestens 3 normale Zeichen, höchstens 80."
 }

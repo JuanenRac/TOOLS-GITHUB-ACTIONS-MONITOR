@@ -4308,5 +4308,7 @@
  "cfg.f.ai.similar.enabled": "相似警报",
  "cfg.h.ai.similar.enabled": "关闭。开启后,“解释此警报”还会列出与之相似的警报(未解决的,以及订阅源记得的已解决的),通过简单的词语比较找到:不使用模型,不使用嵌入,只用本账户的数据。",
  "cfg.f.ai.similar.max": "相似警报的最大数量",
- "cfg.h.ai.similar.max": "解释旁边最多列出的相似警报数量。"
+ "cfg.h.ai.similar.max": "解释旁边最多列出的相似警报数量。",
+ "cfg.f.ai.redact.extra_patterns": "始终隐藏的模式",
+ "cfg.h.ai.redact.extra_patterns": "关闭(空)。每行一个;模式描述整个单词,只有三个通配符:*(任意一串字符)、?(一个字符)和 #(一个数字),例如 deploy-* 或 *.corp-name。它不是正则表达式,因此不会让监视器卡死。至少 3 个普通字符,最多 80 个。"
 }

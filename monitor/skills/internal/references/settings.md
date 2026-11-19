@@ -48,6 +48,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.model_daily_limit` | `-` | ai | Calls per model per day |
 | `ai.ollama_url` | `-` | ai | Ollama address |
 | `ai.provider` (secure) | `"none"` | ai | AI service |
+| `ai.redact.extra_patterns` (secure) | `-` | ai | Patterns to always hide |
 | `ai.redact.extra_terms` (secure) | `-` | ai | Words to always hide |
 | `ai.similar.enabled` | `-` | ai | Similar alerts |
 | `ai.similar.max` | `-` | ai | Most similar alerts |

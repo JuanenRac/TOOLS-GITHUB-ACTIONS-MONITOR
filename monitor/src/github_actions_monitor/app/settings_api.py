@@ -539,6 +539,7 @@ _f(_T_AI, "limits", "ai.untrusted_text_max", "int", (200, 20000), unit="chars", 
 _f(_T_AI, "privacy", "ai.airgapped", "bool", restart=False, secure=True)
 _f(_T_AI, "privacy", "ai.airgap_hosts", "names", restart=False, secure=True)
 _f(_T_AI, "privacy", "ai.redact.extra_terms", "names", restart=False, secure=True)
+_f(_T_AI, "privacy", "ai.redact.extra_patterns", "names", restart=False, secure=True)
 _f(_T_AI, "assistant", "ai.assistant.enabled", "bool", restart=False, secure=True)
 _f(_T_AI, "assistant", "ai.assistant.max_context", "int", (500, 200000), unit="tokens", restart=False)
 _f(_T_AI, "assistant", "ai.assistant.tools", "names", restart=False, secure=True)
