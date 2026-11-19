@@ -69,10 +69,23 @@ def module():
     return _module["obj"]
 
 
+def test_zip(env=None):
+    """The zip a test asks the updater to use instead of GitHub, or None. Both MONITOR_TEST_HOOKS=1 and MONITOR_TEST_UPDATE_ZIP (a file that exists) are needed; without them nothing changes. It never relaxes a
+    check: the zip is the same local source the command line offers with --zip, so its contents, members and SHA-256 are checked as always."""
+    env = os.environ if env is None else env
+    path = env.get("MONITOR_TEST_UPDATE_ZIP", "")
+    if env.get("MONITOR_TEST_HOOKS") == "1" and path and Path(path).is_file():
+        return str(path)
+    return None
+
+
 def updater(source=None):
     mod = module()
     if mod is None:
         raise UpdatesError("tool_missing")
+    hooked = test_zip()
+    if source is None and hooked:
+        source = mod.LocalZipSource(hooked)
     return mod, mod.Updater(ROOT, source or mod.GitHubSource(prefer_gh=True))
 
 
@@ -297,6 +310,8 @@ def apply(target, policy, confirm, edition, lang, lite=False, demo=False, env=No
         args = ["apply", "--dir", str(ROOT), "--to", done["target"], "--yes", "--start", "--handover", "--status-file", str(status_file(up)), "--edition", "lite" if edition == "lite" else "complete",
                 "--lang", lang or "en"] + {"keep_old": ["--keep-old-defaults"], "adopt_new": ["--adopt-new-defaults"]}.get(policy, [])
         args += unit_args(mod, helper, env)
+        if test_zip():
+            args += ["--zip", test_zip()]
         _spawn(args, up)
         note_success()
         return {"started": True, "from": done["installed"], "to": done["target"], "backups": str(up.backups)}

@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "5b5a8ee1eeccd0d4d8dc3b67118adb9381b55739db593567447863951eb7e2ab",
+ "digest": "51d45f59c89f7581ba2a01825bba8c6ef71dfe34d2d20fe26b04ab1b962b6312",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -91,9 +91,104 @@
     "default": false
    },
    {
+    "key": "cache.etag.revalidate_active",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "cache.etag.skip_stateful",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "cache.negative_ttl_s",
+    "kind": "int",
+    "bounds": [
+     0,
+     3600
+    ],
+    "default": 300
+   },
+   {
     "key": "cli.prefer_v1",
     "kind": "bool",
     "default": true
+   },
+   {
+    "key": "config_check.strict",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "discovery.min_keep_pct",
+    "kind": "int",
+    "bounds": [
+     0,
+     100
+    ]
+   },
+   {
+    "key": "lint.rules.permissions_top.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "lint.rules.permissions_top.severity",
+    "kind": "enum",
+    "bounds": [
+     "info",
+     "warn",
+     "bad"
+    ]
+   },
+   {
+    "key": "pagination.cursor_pages",
+    "kind": "int",
+    "bounds": [
+     0,
+     20
+    ],
+    "default": 3
+   },
+   {
+    "key": "screens.menu",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "screens.menu_max_windows",
+    "kind": "int",
+    "bounds": [
+     1,
+     9
+    ],
+    "default": 4
+   },
+   {
+    "key": "screens.menu_rotate_seconds",
+    "kind": "int",
+    "bounds": [
+     5,
+     300
+    ],
+    "default": 20
+   },
+   {
+    "key": "screens.menu_target",
+    "kind": "enum",
+    "bounds": [
+     "new",
+     "same"
+    ],
+    "default": "new"
+   },
+   {
+    "key": "screens.menu_tv_scale",
+    "kind": "float",
+    "bounds": [
+     0.5,
+     3.0
+    ],
+    "default": 1.5
    },
    {
     "key": "sentinel.trend_green_pct",

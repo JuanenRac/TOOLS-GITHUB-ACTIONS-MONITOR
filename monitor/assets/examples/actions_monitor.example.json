@@ -487,8 +487,11 @@
   "cache": {
     "etag": {
       "enabled": true,
-      "ttl_hours": 24
-    }
+      "ttl_hours": 24,
+      "skip_stateful": true,
+      "revalidate_active": true
+    },
+    "negative_ttl_s": 300
   },
   "analytics": {
     "enabled": true,
@@ -546,6 +549,10 @@
         "severity": "warn"
       },
       "own_action_main": {
+        "enabled": false,
+        "severity": "info"
+      },
+      "permissions_top": {
         "enabled": false,
         "severity": "info"
       }
@@ -645,6 +652,9 @@
   },
   "airgapped": false,
   "open_browser": true,
+  "config_check": {
+    "strict": false
+  },
   "modes": {
     "start": "normal",
     "default_minutes": 60,
@@ -688,7 +698,8 @@
     "skip_archived": true,
     "fork_policy": "show",
     "fork_ci_days": 90,
-    "fork_checks_per_pass": 30
+    "fork_checks_per_pass": 30,
+    "min_keep_pct": 50
   },
   "auth": {
     "enabled": false,
@@ -1001,6 +1012,7 @@
   },
   "pagination": {
     "collab_pages": 3,
+    "cursor_pages": 3,
     "job_pages": 2,
     "workflow_pages": 3
   },
@@ -1039,6 +1051,11 @@
     "webhook_window_minutes": 60
   },
   "screens": {
+    "menu": true,
+    "menu_target": "new",
+    "menu_max_windows": 4,
+    "menu_rotate_seconds": 20,
+    "menu_tv_scale": 1.5,
     "alert_hold_seconds": 30,
     "blink": true,
     "blink_calm_minutes": 30,

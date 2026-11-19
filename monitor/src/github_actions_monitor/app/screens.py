@@ -41,7 +41,8 @@ NAMES = ("all", "public", "none")
 DEFAULTS = {"enabled": False, "blink": True, "blink_calm_minutes": 30, "rotate_seconds": 0, "default_theme": "inherit", "default_density": "normal", "refresh_seconds": 10, "burn_in_protection": True,
             "night_dim": False, "night_dim_from_hour": 22, "night_dim_to_hour": 7, "show_repo_names": "public", "sound": False,
             "theme_overview": "inherit", "theme_now": "inherit", "theme_sentinels": "inherit", "mode": "three", "rotate_every_seconds": 20, "alert_hold_seconds": 30,
-            "logo_overview": True, "logo_now": False, "logo_sentinels": False, "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64, "group_map": True}
+            "logo_overview": True, "logo_now": False, "logo_sentinels": False, "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64, "group_map": True,
+            "menu": True, "menu_target": "new", "menu_max_windows": 4, "menu_rotate_seconds": 20, "menu_tv_scale": 1.5}   # the last five belong to the Screens menu (screenmenu.py)
 SENTINEL_KEY = re.compile(r"^ui\.a(1[0-2]|[1-9])\Z")
 SENTINELS = tuple("a%d" % n for n in range(1, 13))
 LEVELS = ("ok", "warn", "bad", "info", "unknown")
@@ -58,6 +59,11 @@ def _int(value, low, high, default):
     except (TypeError, ValueError):
         return default
     return max(low, min(high, number))
+
+
+def _scale(value, default):
+    """A number from 0.5 to 3 (the size of the TV preset); the default when it is not a number."""
+    return default if isinstance(value, bool) or not isinstance(value, (int, float)) else round(max(0.5, min(3.0, float(value))), 2)
 
 
 def _flag(value, default):
@@ -101,7 +107,9 @@ def settings(config):
             "rotate_every_seconds": _int(block.get("rotate_every_seconds"), 5, 300, d["rotate_every_seconds"]), "alert_hold_seconds": _int(block.get("alert_hold_seconds"), 5, 600, d["alert_hold_seconds"]),
             "logo_overview": _flag(block.get("logo_overview"), d["logo_overview"]), "logo_now": _flag(block.get("logo_now"), d["logo_now"]), "logo_sentinels": _flag(block.get("logo_sentinels"), d["logo_sentinels"]),
             "logo_corner": _choice(block.get("logo_corner"), CORNERS, d["logo_corner"]), "logo_max_width": _int(block.get("logo_max_width"), 16, 640, d["logo_max_width"]),
-            "logo_max_height": _int(block.get("logo_max_height"), 16, 320, d["logo_max_height"]), "group_map": _flag(block.get("group_map"), d["group_map"])}
+            "logo_max_height": _int(block.get("logo_max_height"), 16, 320, d["logo_max_height"]), "group_map": _flag(block.get("group_map"), d["group_map"]),
+            "menu": _flag(block.get("menu"), d["menu"]), "menu_target": _choice(block.get("menu_target"), ("new", "same"), d["menu_target"]), "menu_max_windows": _int(block.get("menu_max_windows"), 1, 9, d["menu_max_windows"]),
+            "menu_rotate_seconds": _int(block.get("menu_rotate_seconds"), 5, 300, d["menu_rotate_seconds"]), "menu_tv_scale": _scale(block.get("menu_tv_scale"), d["menu_tv_scale"])}
 
 
 def global_theme(config):

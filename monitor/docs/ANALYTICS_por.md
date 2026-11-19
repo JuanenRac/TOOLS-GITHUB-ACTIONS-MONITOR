@@ -23,7 +23,8 @@ Um workflow que FALHOU e depois PASSOU no mesmo commit (ou cujo run precisou de 
 
 ## Leituras condicionais (ETag)
 
-- Cada leitura das listas de runs envia `If-None-Match`; o GitHub responde `304 Not Modified` quando nada mudou e essa resposta não gasta quota. O cabeçalho mostra quantas leituras foram poupadas e `ghamon_etag_saved_total` conta-as. `cache.etag.enabled` e `cache.etag.ttl_hours` estão no separador Definições.
+- Cada leitura das listas de runs envia `If-None-Match`; o GitHub responde `304 Not Modified` quando nada mudou e essa resposta não gasta quota. O cabeçalho mostra quantas leituras foram poupadas e `ghamon_etag_saved_total` conta-as. `cache.etag.enabled` e `cache.etag.ttl_hours` estão no separador Definições. Cada entrada pertence à credencial que a leu (uma impressão curta do token faz parte da chave, nunca o token), pelo que um `304` nunca devolve o corpo de outra identidade. Um estado que ainda se move lê-se sempre por inteiro: os trabalhos de uma execução, uma execução isolada, os conjuntos e verificações (`cache.etag.skip_stateful`) e qualquer lista de execuções cuja última resposta ainda tinha uma em fila ou em curso (`cache.etag.revalidate_active`). Uma recusa (404 ou 403 que não seja limite de pedidos) lembra-se durante `cache.negative_ttl_s` segundos. O `/metrics` conta ainda as respostas sem ETag, as leituras inteiras feitas de propósito e as recusas não repetidas, e o resumo para as ferramentas de IA tem o sinal quota.etag.
+- O resumo para as ferramentas de IA nomeia schema.drift quando o GitHub enviou um estado ou uma conclusão que o monitor não conhece, ou uma execução sem número utilizável: o valor desconhecido mostra-se como chegou e nunca se conta como vermelho nem como verde.
 - A cache é o ficheiro local `etag_cache.json` (nunca publicado); um ficheiro estragado é apenas uma cache vazia.
 
 

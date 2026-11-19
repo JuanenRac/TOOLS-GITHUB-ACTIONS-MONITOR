@@ -27,6 +27,7 @@
 | `ai` | `ai models [--refresh]` 列出 AI 提供方的模型及各模型的数据；`ai test --provider 名称 --model 名称` 用合成文本试用一个模型（延迟、令牌、估算成本）；`ai doctor` 说明 AI 为何没有响应，且不输出密钥 | 不支持 |
 | `lessons` | 这个 CI 的失败教会了什么:`lessons list`、`lessons brief --repo NAME`(推送前阅读)、`lessons failures`、`lessons close` | 不支持 |
 | `briefs` | AI 工具读取的各标签页摘要:`briefs index`、`briefs show TAB`、`briefs all` | 支持 |
+| `screens` | 页面的“屏幕”菜单:`screens list`(每种屏幕及其能否打开)和 `screens urls`(可直接用于展台命令的完整地址) | 不支持 |
 | `credential` | 在一切运行时为某个账户更换 GitHub 登录:`credential replace\|reload [--account ID] [--new-token-file FILE\|-]`;从不打印令牌 | 不支持 |
 | `install-skill` | 把监视器的一个技能(`internal` 或 `external`)复制到 AI 工具读取技能的文件夹:`install-skill external --dest FOLDER`;无需监视器正在运行 | 不支持 |
 | `gh-token` | 打印 GitHub App 的一小时安装令牌,使工具的读取消耗 App 的配额(仅在 `github_app.share_reads` 开启时);请不带 `--json` 运行 | 不支持 |
