@@ -3575,6 +3575,7 @@
  "lint.reason.over_limit": "plus de fichiers que lint.api.max_files_per_repo",
  "lint.help_remote": "Lit les fichiers de workflow d'un dépôt depuis GitHub (sans clone) ; répétable.",
  "lint.remote_failed": "{name} : lecture impossible ({reason}).",
+ "lint.path_unread": "{name} : n'a pas pu être vérifié ({reason}) ; il ne compte pas comme propre.",
  "lint.remote_bad_name": "Pas un nom de dépôt (utilisez PROPRIÉTAIRE/DÉPÔT) : {name}",
  "doctor.t.access": "L'accès peut lire le compte ou l'organisation",
  "doctor.f.access": "Un 403 ou un 404 sur une organisation vient en général de l'une de ces causes : le jeton n'est pas autorisé pour son authentification unique SAML (autorisez-le via Configure SSO sur la page du jeton), il manque la portée repo ou read:org (ou, pour un jeton à granularité fine, une permission de lecture), ou les dépôts sont privés et l'accès ne les voit pas. Le détail dit laquelle.",

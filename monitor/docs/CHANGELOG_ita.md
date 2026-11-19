@@ -78,6 +78,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Corretto
 
+- **Il verificatore dei workflow non dà mai per pulito ciò che non ha letto**: una cartella o un file indicato che non esiste ora lo dice sull'uscita degli errori ed esce con 2 (prima stampava `0 finding(s).` e usciva con 0), e un file di workflow illeggibile viene nominato mentre gli altri vengono comunque controllati, con codice di uscita 2 (prima veniva saltato senza dire nulla). Il comportamento di `--remote` non cambia.
+
 - **Due aggiornatori contemporanei non si pestano più il download**: ogni chiamata scarica in una cartella propria (rimossa alla fine); prima entrambi scrivevano lo stesso SHA256SUMS e uno poteva leggerlo a metà e rifiutare con «publishes no SHA-256».
 - **Un file di blocco che il suo proprietario non ha potuto eliminare non blocca più per cinque minuti su Windows**: quando l'eliminazione è rifiutata perché un lettore ha il file aperto, il proprietario vi scrive dentro un segno di rilascio e il processo successivo lo prende dopo un secondo; `os_lock` inoltre attende almeno 45 s su Windows (se gliene vengono chiesti 5 o più) e interroga con un po' di variazione, così una macchina carica non si arrende più davanti a un detentore vivo.
 - **Un test del browser instabile del contatore dello storico**: la sonda aspettava 1,5 s fissi i dati e falliva su un Windows carico; ora aspetta che i dati ci siano.

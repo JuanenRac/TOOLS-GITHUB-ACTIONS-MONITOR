@@ -84,6 +84,8 @@ when this file and `tool_version.py` disagree.
 
 ### Fixed
 
+- **The workflow checker never calls something it did not read clean**: a folder or file you name that does not exist now says so on the error output and exits with 2 (before, it printed `0 finding(s).` and exited 0), and a workflow file that cannot be read is named while the others are still checked and the exit code is 2 (before, it was skipped without a word). The `--remote` behaviour is unchanged.
+
 - **Two updaters at once no longer step on each other's download**: each call downloads into a folder of its own (removed when it ends); before, both wrote the same SHA256SUMS and one of them could read it half written and refuse with "publishes no SHA-256".
 - **A lock file its owner could not delete no longer blocks for five minutes on Windows**: when the delete is refused because a reader has the file open, the owner now writes a released mark inside it and the next process takes it over after a second; `os_lock` also waits at least 45 s on Windows (when asked for 5 s or more) and polls with a little jitter, so a loaded machine no longer gives up on a live holder.
 - **A flaky browser test of the history count**: the probe waited a fixed 1.5 s for the data and failed on a loaded Windows machine; it now waits until the data is there.

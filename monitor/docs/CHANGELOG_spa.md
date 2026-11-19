@@ -78,6 +78,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Corregido
 
+- **El comprobador de workflows nunca da por limpio lo que no leyó**: una carpeta o fichero que nombres y no exista ahora lo dice en la salida de errores y sale con 2 (antes imprimía `0 hallazgo(s).` y salía con 0), y un fichero de workflow que no se puede leer se nombra mientras los demás se siguen comprobando y el código de salida es 2 (antes se saltaba sin decir nada). El comportamiento de `--remote` no cambia.
+
 - **Dos actualizadores a la vez ya no se pisan la descarga**: cada llamada descarga en una carpeta propia (se borra al terminar); antes ambos escribían el mismo SHA256SUMS y uno podía leerlo a medio escribir y negarse con «publishes no SHA-256».
 - **Un fichero de bloqueo que su dueño no pudo borrar ya no bloquea cinco minutos en Windows**: cuando el borrado se rechaza porque un lector tiene el fichero abierto, el dueño escribe dentro una marca de liberado y el siguiente proceso lo toma al cabo de un segundo; `os_lock` además espera al menos 45 s en Windows (si se le piden 5 s o más) y sondea con algo de variación, de modo que una máquina cargada ya no se rinde ante un titular vivo.
 - **Una prueba de navegador inestable del contador del historial**: la sonda esperaba 1,5 s fijos a los datos y fallaba en un Windows cargado; ahora espera a que los datos estén.

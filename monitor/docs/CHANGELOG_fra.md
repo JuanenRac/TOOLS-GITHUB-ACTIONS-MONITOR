@@ -78,6 +78,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Corrigé
 
+- **Le vérificateur de workflows ne tient jamais pour propre ce qu'il n'a pas lu** : un dossier ou un fichier nommé qui n'existe pas le dit maintenant sur la sortie d'erreur et sort avec 2 (avant, il affichait `0 finding(s).` et sortait avec 0), et un fichier de workflow illisible est nommé pendant que les autres sont toujours vérifiés, avec le code de sortie 2 (avant, il était ignoré sans un mot). Le comportement de `--remote` ne change pas.
+
 - **Deux outils de mise à jour en même temps ne se marchent plus sur le téléchargement** : chaque appel télécharge dans son propre dossier (supprimé à la fin) ; avant, les deux écrivaient le même SHA256SUMS et l'un pouvait le lire à moitié écrit et refuser avec « publishes no SHA-256 ».
 - **Un fichier de verrou que son propriétaire n'a pas pu supprimer ne bloque plus cinq minutes sous Windows** : quand la suppression est refusée parce qu'un lecteur a le fichier ouvert, le propriétaire écrit dedans une marque de libération et le processus suivant le reprend après une seconde ; `os_lock` attend aussi au moins 45 s sous Windows (si on lui en demande 5 ou plus) et interroge avec un peu de variation, si bien qu'une machine chargée n'abandonne plus devant un détenteur vivant.
 - **Un test de navigateur instable du compteur de l'historique** : la sonde attendait 1,5 s fixes les données et échouait sur un Windows chargé ; elle attend maintenant que les données soient là.

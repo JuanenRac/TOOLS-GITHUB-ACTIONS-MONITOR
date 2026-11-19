@@ -3575,6 +3575,7 @@
  "lint.reason.over_limit": "more files than lint.api.max_files_per_repo",
  "lint.help_remote": "Read the workflow files of a repository from GitHub (no clone); can be repeated.",
  "lint.remote_failed": "{name}: could not be read ({reason}).",
+ "lint.path_unread": "{name}: could not be checked ({reason}); it does not count as clean.",
  "lint.remote_bad_name": "Not a repository name (use OWNER/REPO): {name}",
  "doctor.t.access": "The login can read the account or organization",
  "doctor.f.access": "A 403 or a 404 on an organization usually means one of these: the token is not authorised for its SAML single sign-on (authorise it under Configure SSO on the token page), it lacks the scope repo or read:org (or, for a fine-grained token, a read permission), or the repositories are private and the login cannot see them. The detail names which one.",

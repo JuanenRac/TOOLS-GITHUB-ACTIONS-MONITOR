@@ -78,6 +78,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Corrigido
 
+- **O verificador de workflows nunca dá por limpo o que não leu**: uma pasta ou ficheiro indicado que não exista passa a dizê-lo na saída de erros e sai com 2 (antes imprimia `0 finding(s).` e saía com 0), e um ficheiro de workflow que não possa ser lido é nomeado enquanto os outros continuam a ser verificados, com o código de saída 2 (antes era saltado sem dizer nada). O comportamento de `--remote` não muda.
+
 - **Dois atualizadores ao mesmo tempo já não se atropelam na transferência**: cada chamada transfere para uma pasta própria (removida no fim); antes ambos escreviam o mesmo SHA256SUMS e um podia lê-lo a meio e recusar com «publishes no SHA-256».
 - **Um ficheiro de bloqueio que o dono não conseguiu apagar já não bloqueia cinco minutos no Windows**: quando o apagamento é recusado porque um leitor tem o ficheiro aberto, o dono escreve lá dentro uma marca de libertado e o processo seguinte toma-o ao fim de um segundo; o `os_lock` espera ainda pelo menos 45 s no Windows (se lhe pedirem 5 s ou mais) e sonda com alguma variação, pelo que uma máquina carregada já não desiste perante um detentor vivo.
 - **Um teste de navegador instável da contagem do histórico**: a sonda esperava 1,5 s fixos pelos dados e falhava num Windows carregado; agora espera até os dados estarem lá.

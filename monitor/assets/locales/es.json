@@ -3575,6 +3575,7 @@
  "lint.reason.over_limit": "más ficheros que lint.api.max_files_per_repo",
  "lint.help_remote": "Lee los ficheros de workflow de un repositorio desde GitHub (sin clon); se puede repetir.",
  "lint.remote_failed": "{name}: no se pudo leer ({reason}).",
+ "lint.path_unread": "{name}: no se pudo comprobar ({reason}); no cuenta como limpio.",
  "lint.remote_bad_name": "No es un nombre de repositorio (usa PROPIETARIO/REPO): {name}",
  "doctor.t.access": "El acceso puede leer la cuenta u organización",
  "doctor.f.access": "Un 403 o un 404 en una organización suele ser una de estas causas: el token no está autorizado para su inicio de sesión único SAML (autorízalo en Configure SSO en la página del token), le falta el alcance repo o read:org (o, en un token de grano fino, un permiso de lectura), o los repositorios son privados y el acceso no los ve. El detalle dice cuál.",

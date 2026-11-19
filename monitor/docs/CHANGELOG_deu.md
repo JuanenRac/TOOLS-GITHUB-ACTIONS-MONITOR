@@ -78,6 +78,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Behoben
 
+- **Der Workflow-Prüfer nennt nichts sauber, was er nicht gelesen hat**: Ein genannter Ordner oder eine Datei, die nicht existiert, wird jetzt auf der Fehlerausgabe gemeldet und beendet mit 2 (zuvor gab er `0 finding(s).` aus und endete mit 0), und eine Workflow-Datei, die nicht gelesen werden kann, wird genannt, während die übrigen weiter geprüft werden, und der Exit-Code ist 2 (zuvor wurde sie wortlos übersprungen). Das Verhalten von `--remote` ändert sich nicht.
+
 - **Zwei Updater gleichzeitig treten sich beim Download nicht mehr auf die Füße**: Jeder Aufruf lädt in einen eigenen Ordner (wird am Ende entfernt); vorher schrieben beide dieselbe SHA256SUMS und einer konnte sie halb geschrieben lesen und mit „publishes no SHA-256“ abbrechen.
 - **Eine Sperrdatei, die ihr Besitzer nicht löschen konnte, blockiert unter Windows nicht mehr fünf Minuten**: Wird das Löschen abgelehnt, weil ein Leser die Datei offen hat, schreibt der Besitzer eine Freigabe-Markierung hinein und der nächste Prozess übernimmt sie nach einer Sekunde; `os_lock` wartet unter Windows außerdem mindestens 45 s (bei einer Anforderung von 5 s oder mehr) und fragt mit etwas Streuung ab, sodass eine ausgelastete Maschine nicht mehr vor einem lebenden Halter aufgibt.
 - **Ein unzuverlässiger Browsertest des Verlaufszählers**: Die Sonde wartete fest 1,5 s auf die Daten und scheiterte auf einem ausgelasteten Windows; jetzt wartet sie, bis die Daten da sind.
