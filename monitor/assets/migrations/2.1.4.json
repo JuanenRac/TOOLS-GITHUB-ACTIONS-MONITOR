@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "cde271375426c3c6cd710ce3d9202c2cb117a6b507671b1d854fe4b4fad6f41f",
+ "digest": "7c9b7a9ce588ac67259cf3f3fca113397b582f9a0d6d23cff34e2233a478876c",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -91,9 +91,41 @@
     "default": false
    },
    {
+    "key": "cache.etag.revalidate_active",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "cache.etag.skip_stateful",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "cache.negative_ttl_s",
+    "kind": "int",
+    "bounds": [
+     0,
+     3600
+    ],
+    "default": 300
+   },
+   {
     "key": "cli.prefer_v1",
     "kind": "bool",
     "default": true
+   },
+   {
+    "key": "config_check.strict",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "discovery.min_keep_pct",
+    "kind": "int",
+    "bounds": [
+     0,
+     100
+    ]
    },
    {
     "key": "lint.rules.permissions_top.enabled",
@@ -107,6 +139,15 @@
      "warn",
      "bad"
     ]
+   },
+   {
+    "key": "pagination.cursor_pages",
+    "kind": "int",
+    "bounds": [
+     0,
+     20
+    ],
+    "default": 3
    },
    {
     "key": "screens.menu",

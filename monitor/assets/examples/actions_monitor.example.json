@@ -487,8 +487,11 @@
   "cache": {
     "etag": {
       "enabled": true,
-      "ttl_hours": 24
-    }
+      "ttl_hours": 24,
+      "skip_stateful": true,
+      "revalidate_active": true
+    },
+    "negative_ttl_s": 300
   },
   "analytics": {
     "enabled": true,
@@ -648,6 +651,9 @@
   },
   "airgapped": false,
   "open_browser": true,
+  "config_check": {
+    "strict": false
+  },
   "modes": {
     "start": "normal",
     "default_minutes": 60,
@@ -691,7 +697,8 @@
     "skip_archived": true,
     "fork_policy": "show",
     "fork_ci_days": 90,
-    "fork_checks_per_pass": 30
+    "fork_checks_per_pass": 30,
+    "min_keep_pct": 50
   },
   "auth": {
     "enabled": false,
@@ -1004,6 +1011,7 @@
   },
   "pagination": {
     "collab_pages": 3,
+    "cursor_pages": 3,
     "job_pages": 2,
     "workflow_pages": 3
   },
