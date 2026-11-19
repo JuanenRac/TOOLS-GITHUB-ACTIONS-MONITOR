@@ -34,7 +34,7 @@ services:
       MONITOR_SECURE_COOKIE: ${MONITOR_SECURE_COOKIE:-}
       MONITOR_ALLOWED_HOSTS: ${MONITOR_ALLOWED_HOSTS:-}
       MONITOR_TRUSTED_PROXY: ${MONITOR_TRUSTED_PROXY:-}                # 1 with the profile "proxy": the failed attempts are counted against the client behind Caddy, not against Caddy
-      MONITOR_TRUSTED_PROXIES: ${MONITOR_TRUSTED_PROXIES:-}            # the network of this compose (MONITOR_SUBNET): the only addresses whose X-Forwarded-For is believed
+      MONITOR_TRUSTED_PROXIES: ${MONITOR_TRUSTED_PROXIES:-}            # the fixed address of Caddy (MONITOR_PROXY_IP): the only address whose X-Forwarded-For is believed
       MONITOR_TEAM_MODE: ${MONITOR_TEAM_MODE:-}                        # 1 = users and roles (the first administrator: auth_cli create-admin once, see deploy/.env.example)
       MONITOR_ADMIN_USER: ${MONITOR_ADMIN_USER:-}                      # optional: the first administrator, created on the first start with the password of the file below
       MONITOR_ADMIN_PASSWORD_FILE: ${MONITOR_ADMIN_PASSWORD_FILE:-}    # a file (a Docker secret) with its password on the first line
@@ -60,6 +60,9 @@ services:
     depends_on:
       monitor:
         condition: service_healthy
+    networks:
+      default:
+        ipv4_address: ${MONITOR_PROXY_IP:-172.29.77.250}      # a fixed address inside MONITOR_SUBNET: the monitor believes X-Forwarded-For from this one address only, not from every container of the network
     environment:
       MONITOR_SITE: ${MONITOR_SITE:?set MONITOR_SITE in deploy/.env (see deploy/Caddyfile)}
     ports:
