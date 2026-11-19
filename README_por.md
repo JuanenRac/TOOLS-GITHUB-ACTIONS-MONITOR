@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4701_passing-brightgreen.svg" alt="4701 tests">
+  <img src="https://img.shields.io/badge/Tests-4707_passing-brightgreen.svg" alt="4707 tests">
 </p>
 
 > Vigia os workflows de todos os seus repositórios e diz-lhe, numa página local, o que está a vermelho, o que está encravado e o que o espera.
@@ -65,6 +65,20 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 - **Aviso de versão nova**: um emblema discreto quando sai uma versão mais recente; só lê a página pública de versões uma vez por dia, nunca instala nada e pode ser desligado (sempre desligado numa instalação isolada).
 - **Quotas para qualquer conta**: plano, minutos faturáveis (os repositórios públicos não custam), quota da API lida dos cabeçalhos do GitHub, concorrência e jobs perto do limite de 6 horas; os valores estão num ficheiro editável.
 
+## O que poupa
+
+Usar o monitor em vez de consultar o Actions à mão poupa tempo. É uma **estimativa, não uma medição**: cerca de **85-95 % do tempo gasto a vigiar a CI e a triar falhas** e, em consequência, cerca de **15-25 % da produtividade global de uma equipa** que trabalha com muitos repositórios. Pressupõe que, sem o monitor, alguém abre o separador Actions de cada repositório para ver o que está a vermelho e lê cada registo falhado para encontrar a causa, que há falhas todas as semanas e que vigiar e triar ocupa entre um sexto e um terço do tempo de trabalho (os dois números só concordam com este pressuposto). Com poucos repositórios, ou se hoje ninguém vigia à mão, a poupança é muito menor.
+
+| Tarefa | Sem o monitor | Com o monitor | Poupança estimada |
+| --- | --- | --- | --- |
+| Vigiar cada fluxo de trabalho de cada repositório | Abrir vezes sem conta o separador Actions de cada repositório | Uma página e uma lista de alertas que se atualizam sozinhas | 85-95 % |
+| Decidir o que está mesmo a vermelho | Comparar execuções a olho (as canceladas e ignoradas escondem falhas) | Uma regra: a última execução concluída de cada fluxo no ramo predefinido | 85-95 % |
+| Encontrar a causa de uma execução falhada | Abrir a execução, a tarefa e o registo | O alerta já nomeia o fluxo e a falha, com as lições que lhe correspondem | 85-95 % |
+| Saber a tempo de uma falha | Dar por ela mais tarde, ou quando alguém avisa | Alertas, notificações e um resumo para as ferramentas de IA | 85-95 % |
+| Não repetir um erro conhecido, segurança, higiene e versões prontas | Depende da memória e de revisões manuais | Biblioteca de lições e sentinelas | Não quantificado |
+
+Método, pressupostos e como medi-lo na sua própria utilização: [`monitor/docs/PRODUCTIVITY_por.md`](monitor/docs/PRODUCTIVITY_por.md).
+
 ## Num relance
 
 | | |
@@ -82,7 +96,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 | | |
 |---|---|
 | **Maturidade** | functional |
-| **Testes** | 4701 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Testes** | 4707 métodos de teste (`python -m unittest discover -s monitor/tests`) |
 | **Definições** | 729 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, Python 3.11, 3.13 |
@@ -343,6 +357,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/AUDIT_PACKAGE_por.md`](monitor/docs/AUDIT_PACKAGE_por.md): Pacote para o auditor
 - [`monitor/docs/LARGE_ACCOUNTS_por.md`](monitor/docs/LARGE_ACCOUNTS_por.md): Contas grandes: centenas de repositórios
 - [`monitor/docs/ORGANIZATIONS_por.md`](monitor/docs/ORGANIZATIONS_por.md): Organizações e contas grandes
+- [`monitor/docs/PRODUCTIVITY_por.md`](monitor/docs/PRODUCTIVITY_por.md): o que o monitor poupa: uma estimativa, os seus pressupostos e como a medir
 
 ## Contribuir
 

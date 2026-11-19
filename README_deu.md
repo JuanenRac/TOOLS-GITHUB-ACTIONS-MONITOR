@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4701_passing-brightgreen.svg" alt="4701 tests">
+  <img src="https://img.shields.io/badge/Tests-4707_passing-brightgreen.svg" alt="4707 tests">
 </p>
 
 > Überwacht die Workflows aller deiner Repositories und zeigt dir auf einer lokalen Seite, was rot ist, was hängt und was auf dich wartet.
@@ -65,6 +65,20 @@
 - **Hinweis auf eine neuere Version**: ein dezentes Abzeichen, wenn eine neuere Version erscheint; es liest nur einmal am Tag die öffentliche Release-Seite, installiert nie etwas und lässt sich abschalten (bei netzgetrennter Installation immer aus).
 - **Kontingente für jedes Konto**: Tarif, abrechenbare Minuten (öffentliche Repositorys kosten nichts), API-Kontingent aus den Headern von GitHub, Parallelität und Jobs nahe dem 6-Stunden-Limit; die Zahlen stehen in einer bearbeitbaren Datei.
 
+## Was es spart
+
+Der Monitor spart Zeit gegenüber dem manuellen Prüfen von Actions. Das ist eine **Schätzung, keine Messung**: etwa **85-95 % der Zeit für die Beobachtung der CI und die Sichtung von Fehlern** und dadurch etwa **15-25 % der Gesamtproduktivität eines Teams**, das mit vielen Repositorys arbeitet. Die Schätzung nimmt an, dass ohne den Monitor jemand den Actions-Tab jedes Repositorys öffnet, um zu sehen, was rot ist, und jedes fehlgeschlagene Protokoll liest, um die Ursache zu finden, dass jede Woche Fehler auftreten und dass Beobachten und Sichten ungefähr ein Sechstel bis ein Drittel der Arbeitszeit beanspruchen (nur unter dieser Annahme passen die beiden Zahlen zusammen). Bei wenigen Repositorys oder wenn heute niemand von Hand prüft, ist die Ersparnis deutlich kleiner.
+
+| Aufgabe | Ohne den Monitor | Mit dem Monitor | Geschätzte Ersparnis |
+| --- | --- | --- | --- |
+| Jeden Workflow jedes Repositorys beobachten | Den Actions-Tab jedes Repositorys immer wieder öffnen | Eine Seite und eine Liste von Alarmen, die sich selbst aktualisieren | 85-95 % |
+| Entscheiden, was wirklich rot ist | Läufe nach Augenmaß vergleichen (abgebrochene und übersprungene Läufe verdecken Fehler) | Eine Regel: der letzte beendete Lauf jedes Workflows im Standardzweig | 85-95 % |
+| Die Ursache eines fehlgeschlagenen Laufs finden | Lauf, Job und Protokoll öffnen | Der Alarm nennt Workflow und Fehler bereits, samt der passenden Lehren | 85-95 % |
+| Einen Fehler rechtzeitig bemerken | Später bemerken oder wenn es jemand sagt | Alarme, Benachrichtigungen und eine Kurzfassung für KI-Werkzeuge | 85-95 % |
+| Bekannte Fehler nicht wiederholen, Sicherheit, Hygiene und bereite Releases | Hängt vom Gedächtnis und von manuellen Prüfungen ab | Bibliothek der Lehren und Wächter | Nicht beziffert |
+
+Methode, Annahmen und wie Sie es in Ihrer eigenen Nutzung messen: [`monitor/docs/PRODUCTIVITY_deu.md`](monitor/docs/PRODUCTIVITY_deu.md).
+
 ## Auf einen Blick
 
 | | |
@@ -82,7 +96,7 @@
 | | |
 |---|---|
 | **Reifegrad** | functional |
-| **Tests** | 4701 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 4707 Testmethoden (`python -m unittest discover -s monitor/tests`) |
 | **Einstellungen** | 729 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, Python 3.11, 3.13 |
@@ -343,6 +357,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/AUDIT_PACKAGE_deu.md`](monitor/docs/AUDIT_PACKAGE_deu.md): Paket für den Prüfer
 - [`monitor/docs/LARGE_ACCOUNTS_deu.md`](monitor/docs/LARGE_ACCOUNTS_deu.md): Große Konten: hunderte Repositorys
 - [`monitor/docs/ORGANIZATIONS_deu.md`](monitor/docs/ORGANIZATIONS_deu.md): Organisationen und große Konten
+- [`monitor/docs/PRODUCTIVITY_deu.md`](monitor/docs/PRODUCTIVITY_deu.md): was der Monitor spart: eine Schätzung, ihre Annahmen und wie man sie misst
 
 ## Mitwirken
 

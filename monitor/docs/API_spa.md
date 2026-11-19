@@ -73,7 +73,7 @@ Estas rutas sirven la página y las herramientas de este equipo. No forman parte
 | `/api/discovery` | Lo que encontró el descubrimiento: el cuadro con la cuenta y los repositorios mostrados y ocultos, los últimos eventos, los grupos sugeridos, sus ajustes, los forks y las organizaciones. |
 | `/api/discovery/group` | POST. Añade un grupo sugerido al fichero de ecosistemas, guardando una copia del fichero. |
 | `/api/gh-action/plan` | POST, este equipo. Prepara lo que se enviaría a GitHub (un reintento, una cancelación, un dispatch o una fusión); todavía no se envía nada. |
-| `/api/gh-action/confirm` | POST, este equipo. Envía a GitHub lo que decía el plan, tras confirmarlo; queda registrado. |
+| `/api/gh-action/confirm` | POST, este equipo. Envía a GitHub lo que decía el plan, tras confirmarlo; queda registrado. Si GitHub lo rechaza, la respuesta lleva `reason`: forbidden, not_found, method, conflict o invalid. |
 | `/api/github-token` | Solo este equipo. El estado del almacén del token de GitHub (el sistema y si hay uno guardado); nunca su valor. |
 | `/api/help/search` | Busca en los temas de ayuda con una palabra y devuelve los que coinciden. |
 | `/api/help/topic` | El texto de un tema de ayuda (`id=`) en el idioma de la página. |

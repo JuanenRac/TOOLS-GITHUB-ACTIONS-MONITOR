@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4701_passing-brightgreen.svg" alt="4701 tests">
+  <img src="https://img.shields.io/badge/Tests-4707_passing-brightgreen.svg" alt="4707 tests">
 </p>
 
 > Vigila los workflows de todos tus repositorios y te dice, en una página local, qué está en rojo, qué está atascado y qué te espera.
@@ -65,6 +65,20 @@
 - **Aviso de versión nueva**: una insignia discreta cuando se publica una versión más nueva; solo lee la página pública de versiones una vez al día, nunca instala nada y se puede apagar (siempre apagado en una instalación aislada).
 - **Cuotas para cualquier cuenta**: plan, minutos facturables (los repositorios públicos no cuestan), cuota de la API leída de las cabeceras de GitHub, concurrencia y jobs cerca del límite de 6 horas; las cifras están en un archivo editable.
 
+## Qué ahorra
+
+Usar el monitor en lugar de revisar Actions a mano ahorra tiempo. Es una **estimación, no una medición**: cerca del **85-95 % del tiempo que se dedica a vigilar el CI y a clasificar los fallos** y, como consecuencia, cerca del **15-25 % de la productividad global de un equipo** que trabaja con muchos repositorios. Supone que, sin el monitor, alguien abre la pestaña Actions de cada repositorio para ver qué está en rojo y lee cada registro fallido para encontrar la causa, que hay fallos cada semana y que vigilar y clasificar ocupa entre una sexta parte y un tercio del tiempo de trabajo (las dos cifras solo concuerdan con esa suposición). Con pocos repositorios, o si hoy nadie vigila a mano, el ahorro es mucho menor.
+
+| Tarea | Sin el monitor | Con el monitor | Ahorro estimado |
+| --- | --- | --- | --- |
+| Vigilar cada flujo de trabajo de cada repositorio | Abrir una y otra vez la pestaña Actions de cada repositorio | Una página y una lista de alertas que se actualizan solas | 85-95 % |
+| Decidir qué está de verdad en rojo | Comparar ejecuciones a ojo (las canceladas y omitidas esconden fallos) | Una sola regla: la última ejecución terminada de cada flujo en la rama por defecto | 85-95 % |
+| Encontrar la causa de una ejecución fallida | Abrir la ejecución, el trabajo y el registro | La alerta ya nombra el flujo y el fallo, con las lecciones que le corresponden | 85-95 % |
+| Enterarse a tiempo de un fallo | Notarlo más tarde, o cuando alguien avisa | Alertas, notificaciones y un resumen para las herramientas de IA | 85-95 % |
+| No repetir un error conocido, seguridad, higiene y versiones listas | Depende de la memoria y de revisiones manuales | Biblioteca de lecciones y centinelas | Sin cuantificar |
+
+Método, supuestos y cómo medirlo en tu propio uso: [`monitor/docs/PRODUCTIVITY_spa.md`](monitor/docs/PRODUCTIVITY_spa.md).
+
 ## De un vistazo
 
 | | |
@@ -82,7 +96,7 @@
 | | |
 |---|---|
 | **Madurez** | functional |
-| **Tests** | 4701 métodos de test (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 4707 métodos de test (`python -m unittest discover -s monitor/tests`) |
 | **Ajustes** | 729 ajustes, todos con ayuda |
 | **Idiomas** | 8 (inglés, español, alemán, francés, italiano, japonés, chino y portugués) |
 | **Probado en el CI en** | ubuntu, windows, Python 3.11, 3.13 |
@@ -343,6 +357,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/AUDIT_PACKAGE_spa.md`](monitor/docs/AUDIT_PACKAGE_spa.md): Paquete para el auditor
 - [`monitor/docs/LARGE_ACCOUNTS_spa.md`](monitor/docs/LARGE_ACCOUNTS_spa.md): Cuentas grandes: cientos de repositorios
 - [`monitor/docs/ORGANIZATIONS_spa.md`](monitor/docs/ORGANIZATIONS_spa.md): Organizaciones y cuentas grandes
+- [`monitor/docs/PRODUCTIVITY_spa.md`](monitor/docs/PRODUCTIVITY_spa.md): lo que ahorra el monitor: una estimación, sus supuestos y cómo medirlo
 
 ## Contribuir
 

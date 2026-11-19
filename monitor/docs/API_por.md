@@ -73,7 +73,7 @@ Estas rotas servem a página e as ferramentas deste computador. Não fazem parte
 | `/api/discovery` | O que a descoberta encontrou: o quadro com a conta e os repositórios mostrados e ocultos, os últimos eventos, os grupos sugeridos, as suas definições, os forks e as organizações. |
 | `/api/discovery/group` | POST. Junta um grupo sugerido ao ficheiro de ecossistemas, guardando uma cópia do ficheiro. |
 | `/api/gh-action/plan` | POST, este computador. Prepara o que seria enviado ao GitHub (uma repetição, um cancelamento, um dispatch ou um merge); ainda não se envia nada. |
-| `/api/gh-action/confirm` | POST, este computador. Envia ao GitHub o que dizia o plano, depois de o confirmar; fica registado. |
+| `/api/gh-action/confirm` | POST, este computador. Envia ao GitHub o que dizia o plano, depois de o confirmar; fica registado. Se o GitHub recusar, a resposta traz `reason`: forbidden, not_found, method, conflict ou invalid. |
 | `/api/github-token` | Só este computador. O estado do armazém do token do GitHub (o sistema e se há um guardado); nunca o seu valor. |
 | `/api/help/search` | Procura uma palavra nos temas de ajuda e devolve os que coincidem. |
 | `/api/help/topic` | O texto de um tema de ajuda (`id=`) no idioma da página. |
