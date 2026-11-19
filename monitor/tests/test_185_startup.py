@@ -173,7 +173,8 @@ class WhereIsOpenssl(unittest.TestCase):
             key = Path(keys.name) / "app.pem"
             key.write_text("x", encoding="utf-8")
             os.chmod(key, 0o600)
-            status, detail = doctor.github_app_check({"github_app": {"enabled": True, "app_id": "1", "key_path": str(key)}})
+            with mock.patch("github_actions_monitor.integrations.rsa_sign.load", lambda path: None):      # the key is read by the monitor itself (test_mon102_rsa_signer); here only which openssl is named
+                status, detail = doctor.github_app_check({"github_app": {"enabled": True, "app_id": "1", "key_path": str(key)}})
             self.assertIn("/found/openssl", detail)
             self.assertEqual(status, "ok", detail)
 

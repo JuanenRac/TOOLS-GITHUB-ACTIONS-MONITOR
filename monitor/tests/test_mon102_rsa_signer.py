@@ -128,6 +128,8 @@ class Folder(unittest.TestCase):
     def write(self, name, text):
         path = self.dir / name
         path.write_text(text, encoding="ascii")
+        if sys.platform != "win32":
+            path.chmod(0o600)      # a key that others can read is a warning of the doctor of its own
         return str(path)
 
 
