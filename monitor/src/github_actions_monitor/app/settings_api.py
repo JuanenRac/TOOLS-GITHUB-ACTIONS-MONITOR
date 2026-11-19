@@ -739,6 +739,7 @@ _f("advanced", "runner_model", "runners.model.large_labels", "names", restart=Fa
 _f("advanced", "runner_model", "runners.model.self_labels", "names", restart=False)
 _f("advanced", "runner_model", "runners.model.thirdparty_usd_per_minute", "float", (0, 10), unit="", restart=False)
 _f("advanced", "runner_model", "runners.model.queue_warn_minutes", "int", (1, 10080), unit="min", restart=False)
+_f("advanced", "runner_model", "runners.model.observed_reads_per_cycle", "int", (0, 20), unit="calls", restart=False)
 _f("advanced", "runner_model", "runners.model.runaway_runs_per_hour", "int", (0, 1000), unit="", restart=False)
 _f("advanced", "runner_model", "runners.model.runaway_ignore_events", "names", restart=False)
 _f("advanced", "runner_model", "runners.model.alerts", "bool", restart=False)

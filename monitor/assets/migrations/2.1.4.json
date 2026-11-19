@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "0868630eea488db79dd77c1b5b456e40a5af657d5a9d8d2e886c056260532899",
+ "digest": "39316ef5f0c30c7302333f407d94f13fae3304675e1c87bae66bd25bfaad56ee",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -148,6 +148,15 @@
      20
     ],
     "default": 3
+   },
+   {
+    "key": "runners.model.observed_reads_per_cycle",
+    "kind": "int",
+    "bounds": [
+     0,
+     20
+    ],
+    "default": 0
    },
    {
     "key": "sampling.active_probe",
