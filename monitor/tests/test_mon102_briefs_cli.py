@@ -178,5 +178,21 @@ class TheTools(unittest.TestCase):
         self.assertIn("`briefs`", cli_md)
 
 
+class TheSkills(unittest.TestCase):
+    def test_both_skills_say_what_the_briefs_are_how_to_read_them_and_with_which_permission(self):
+        skills = HERE / "skills"
+        external = (skills / "external" / "references" / "connect.md").read_text(encoding="utf-8")
+        internal = (skills / "internal" / "references" / "scenarios.md").read_text(encoding="utf-8")
+        for needle in ("`briefs_index`", "`brief_tab`", "briefs show", "/api/ai/index", "/api/ai/briefs", "untrusted_text", "access_log"):
+            self.assertIn(needle, external, needle)
+        for needle in ("`briefs_index`", "`brief_tab`", "`briefs`", "/api/ai/briefs"):
+            self.assertIn(needle, internal, needle)
+
+    def test_every_tool_of_the_mcp_server_that_reads_the_briefs_is_named_in_the_external_skill(self):
+        text = chr(10).join(p.read_text(encoding="utf-8") for p in (HERE / "skills" / "external").rglob("*.md"))
+        for name in ("briefs_index", "brief_tab"):
+            self.assertIn(f"`{name}`", text)
+
+
 if __name__ == "__main__":
     unittest.main()
