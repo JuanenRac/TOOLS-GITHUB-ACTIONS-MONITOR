@@ -47,6 +47,15 @@ Das Fenster ist die Zahl der Tage an Läufen, die die Punktzahl betrachtet: `sco
 
 Jedes Konto hat seine eigene Punktzahl. Das Detail gliedert sie nach Repository auf (nur die CI-Teile, die schlechtesten zuerst). Eine einzige Zahl für die ganze Installation gibt es nicht. Nur zur Information liefert `GET /api/score/global` des Supervisors den Mittelwert der bewerteten Konten, die der Fragende sehen darf, gewichtet nach ihren Repositories mit einer Zahl und immer mit der Angabe, wie viele Konten darin sind; ein Konto ohne Zahl wird aufgeführt und ausgelassen.
 
+## Welche Läufe gelesen werden
+
+Die Seite listet die neuesten 600 Läufe, ein Konto mit vielen Repositories kann aber in einem Zyklus Tausende lesen. `score.source` wählt, woraus Bewertung, Berichte, Spiegel und Analytik entstehen:
+
+- `recent600` (Standard in dieser Version): die neuesten 600 Läufe der Seite, wie bisher. Hat der Zyklus mehr gelesen, sagt das die Momentaufnahme: `data_quality.cut` ist wahr, `data_quality.runs_read` ist die gelesene Anzahl und `recent_cut` gehört zu den Gründen, und die Seite zeigt die Zeile „Der Zyklus las N Läufe, die Bewertung sah aber nur die neuesten 600“. Nichts wird verborgen: Eine Zahl, die nur einen jüngeren Teil des Fensters sieht, wird nie als das Ganze dargestellt.
+- `ledger`: alle Läufe, die der Zyklus gelesen hat, einmal im Hauptbuch des Kontos gezählt. Das Hauptbuch führt außerdem Stundensummen (Erfolge und Fehler pro Stunde), die seine Obergrenze von 20000 Läufen überdauern: Musste die Obergrenze Läufe des Fensters verwerfen, ist `data_quality.truncated` wahr, und `data_quality.aggregate` nennt die Läufe und die Erfolgsquote, die diese Summen für das Fenster enthalten.
+
+Der Standard von `score.source` wird in der nächsten Version `ledger`, mit seinem Eintrag im Migrationsprotokoll. Wer ihn von Hand setzt, behält seinen Wert. Ein vor dieser Version geschriebenes Hauptbuch baut seine Stundensummen aus den Läufen auf, die es hält; Momentaufnahmen früherer Versionen werden unverändert gelesen, ohne die neuen Felder. Es kommt kein Aufruf an GitHub hinzu.
+
 ## Auf der Seite
 
 Ein Chip in der Kopfzeile, neben den Bereitschafts-Chips, zeigt die Punktzahl: die Zahl, den Buchstaben, einen Pfeil mit der Änderung gegenüber dem vorherigen Fenster und eine kleine Linie der letzten Tage. Seine Farbe folgt dem Buchstaben (A und B grün, C bernstein, D und E rot). Solange es keine Zahl gibt, ist er neutral und sagt warum (Kalibrierung, zu wenige Daten). Ein Stern hinter dem Buchstaben bedeutet, dass ein Teil noch nicht eingerechnet ist (heute die Sicherheit): eine hohe Zahl heißt dann nicht, dass alles in Ordnung ist. Beim Darüberfahren zeigt er die Abdeckung, die Teile mit ihren Gewichten und das schwächste Repository. Der Chip erscheint weder in Lite noch bei ausgeschalteter Punktzahl (`score.enabled`). Während der Kalibrierung zeigt der Chip, wie viel von `score.calibrating_hours` (`data_quality.calibrating_hours`) noch fehlt, mit einem Balken und Tag und Uhrzeit, zu denen die Zahl erscheint; bei zu wenigen Daten nennt er die nicht erfüllte Bedingung (Läufe oder Abdeckung), und der Hinweistext sagt auch, warum ein Teil nicht zählt (ein ausgeschalteter Wächter, der seinen ersten Durchlauf nicht beendet oder zu wenige Repositories gelesen hat).
@@ -65,7 +74,7 @@ Fällt die Punktzahl gegenüber dem vorherigen Fenster um `score.alert.drop_poin
 
 ## Die Einstellungen
 
-Auf der Einstellungsseite, Unterreiter Wächter, Blöcke Punktzahl des Kontos, Gewichte der Punktzahl und Buchstaben der Punktzahl: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, `score.grades.A` bis `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` und `score.alert.notify_external` (standardmäßig aus). Die guten und schlechten Grenzen jedes Teils werden aus der Datei gelesen, unter `score.limits` (siehe die Beispieldatei); sie werden nicht auf der Seite bearbeitet.
+Auf der Einstellungsseite, Unterreiter Wächter, Blöcke Punktzahl des Kontos, Gewichte der Punktzahl und Buchstaben der Punktzahl: `score.enabled`, `score.source`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, `score.grades.A` bis `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` und `score.alert.notify_external` (standardmäßig aus). Die guten und schlechten Grenzen jedes Teils werden aus der Datei gelesen, unter `score.limits` (siehe die Beispieldatei); sie werden nicht auf der Seite bearbeitet.
 
 ## Gegenüber dem Zeitraum davor
 

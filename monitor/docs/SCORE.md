@@ -47,6 +47,15 @@ The window is the number of days of runs the score looks at: `score.window_days`
 
 Each account has its own score. Its detail breaks it down by repository (the CI parts only, the worst first). There is no single number for the whole installation. Only for information, `GET /api/score/global` of the supervisor gives the mean of the scored accounts the asker may see, weighted by their repositories with a number, always with how many accounts are in it; an account without a number is listed and left out.
 
+## Which runs it reads
+
+The page lists the newest 600 runs, but an account with many repositories can read thousands in one cycle. `score.source` chooses what the score, the reports, the mirror and the analytics are made from:
+
+- `recent600` (the default in this version): the newest 600 runs of the page, as before. When the cycle read more than that, the snapshot says so: `data_quality.cut` is true, `data_quality.runs_read` is the number read and `recent_cut` is among the reasons, and the page shows the line "The cycle read N runs but the score saw only the newest 600". Nothing is hidden: a figure that sees only a recent part of the window is never presented as the whole.
+- `ledger`: every run the cycle read, counted once in the ledger of the account. The ledger also keeps hourly totals (successes and failures per hour) that outlive its ceiling of 20000 runs: when the ceiling had to drop runs of the window, `data_quality.truncated` is true and `data_quality.aggregate` gives the runs and the success rate those totals hold for the window.
+
+The default of `score.source` becomes `ledger` in the next version, with its entry in the migration record. Whoever sets it by hand keeps the value. A ledger written before this version builds its hourly totals from the runs it holds; the snapshots of earlier versions are read as they are, without the new fields. No call to GitHub is added.
+
 ## On the page
 
 A chip in the header, next to the readiness chips, shows the score: the number, the letter, an arrow with the change against the window before and a small line with the last days. Its colour follows the letter (A and B green, C amber, D and E red). While there is no number it is neutral and says why (calibrating, not enough data). A star after the letter means that a part is not counted yet (today, security): a high number is then not an all clear. Hovering over it shows the coverage, the parts with their weights and the weakest repository. The chip is not shown in Lite, nor when the score is off (`score.enabled`). While it calibrates the chip says how long is left of `score.calibrating_hours` (`data_quality.calibrating_hours` in the answer of the API), with a bar and the day and hour when the number will appear; with not enough data it says which condition fails (runs or coverage), and the hover also says why a part is not counted (a sentinel that is off, that has not finished its first sweep or that has read too few repositories).
@@ -65,7 +74,7 @@ When the score falls by `score.alert.drop_points` points (10 by default) or more
 
 ## The settings
 
-In the Settings page, Sentinel sub-tab, blocks Account score, Score weights and Score letters: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, `score.grades.A` to `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` and `score.alert.notify_external` (off by default). The good and bad limits of every part are read from the file, under `score.limits` (see the example file); they are not edited in the page.
+In the Settings page, Sentinel sub-tab, blocks Account score, Score weights and Score letters: `score.enabled`, `score.source`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, `score.grades.A` to `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` and `score.alert.notify_external` (off by default). The good and bad limits of every part are read from the file, under `score.limits` (see the example file); they are not edited in the page.
 
 ## Against the period before
 

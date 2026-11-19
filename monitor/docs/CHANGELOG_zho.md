@@ -19,6 +19,7 @@
 
 ### 新增
 
+- **评分、报告、镜像和分析可以读取每一个运行,而不只是最新的 600 个**(`score.source`,默认 `recent600`,可选 `ledger`):在一个周期读到数千个运行的账户上,页面只保留最新的 600 个,评分正是由它们得出。使用 `ledger` 时由周期读到的全部运行得出,在账本中只计一次;账本现在还保存按小时的汇总(每小时的成功数和失败数),超过 20000 个运行的上限后仍然保留;上限未能完整保留的窗口会如实说明(`data_quality.truncated`),并给出各小时所含的汇总(`data_quality.aggregate`)。使用默认值时,当周期读到的比评分看到的更多,快照会说明(`data_quality.cut`、`data_quality.runs_read`、原因 `recent_cut` 以及页面上的一行)。默认值将在下一个版本变为 `ledger`。早期版本的账本和快照按原样读取。不增加任何对 GitHub 的调用;见评分指南、设置帮助、各指南和技能。
 - **每日趋势现在可以标记工作流文件发生变化的日期**(`sentinel.trend_workflow_marks`,默认关闭,另有 `sentinel.trend_workflow_marks_per_tick`、`sentinel.trend_workflow_marks_hours` 和 `sentinel.trend_workflow_marks_days`):在某个仓库的 `.github/workflows` 文件有提交改动的日期,图表上与版本发布标记并列显示一个方块,使时长或失败数的突变旁边就有解释。每个仓库花费一次请求,每轮若干个仓库,同一仓库在所设小时数之后才会再查;只标记每日历史中已有的日期,标记位于 `GET /api/sentinel` 的 `a3.trend.workflows` 中。
 - **工作流 linter 现在可以不使用凭据读取公开仓库**(`lint.anonymous_public`,默认关闭;`lint_workflows.py --remote OWNER/REPO --anon`):查看第三方的工作流时,文件来自 `raw.githubusercontent.com`,不消耗你令牌的任何额度,文件夹列表是匿名请求;未变化的文件不会重复读取,超过 256 KiB 的文件会被跳过,不会发送带有密钥的请求头,与网络隔离的监视器从不读取,私有或不存在的仓库会显示“未找到”,绝不会显示“干净”。
 

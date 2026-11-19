@@ -47,6 +47,15 @@
 
 每个账户有自己的评分。其详情按仓库细分（仅 CI 部分，最差的在前）。整个安装没有单一的数值。 仅供参考，监督器的 `GET /api/score/global` 给出提问者可见的、已评分账户的平均值，按其有数值的仓库数加权，并始终注明纳入了多少个账户；没有数值的账户会被列出但不计入。
 
+## 读取哪些运行
+
+页面列出最新的 600 个运行,但仓库很多的账户在一个周期内可能读到数千个。`score.source` 选择评分、报告、镜像和分析基于哪些运行:
+
+- `recent600`(本版本的默认值):页面上最新的 600 个运行,与以前相同。当周期读到的更多时,快照会说明:`data_quality.cut` 为真,`data_quality.runs_read` 是读到的数量,原因中包含 `recent_cut`,页面显示“周期读到了 N 个运行,但评分只看到最新的 600 个”。不隐藏任何东西:只看到窗口较新部分的数字,绝不会被当作整体。
+- `ledger`:周期读到的全部运行,在账户的账本中只计一次。账本还保存按小时的汇总(每小时的成功数和失败数),超过 20000 个运行的上限后仍然保留:当上限不得不丢弃窗口内的运行时,`data_quality.truncated` 为真,`data_quality.aggregate` 给出这些汇总在窗口内所含的运行数和成功率。
+
+`score.source` 的默认值将在下一个版本变为 `ledger`,并在迁移记录中有对应条目。手动设置的人保留自己的值。本版本之前写入的账本会用其持有的运行建立按小时汇总;早期版本的快照按原样读取,没有新字段。不增加任何对 GitHub 的调用。
+
 ## 在页面上
 
 页眉中、紧挨着就绪度标签的一个标签显示评分：数值、等级、与上一窗口相比变化的箭头，以及最近几天的小折线。其颜色随等级而定（A 和 B 为绿色，C 为琥珀色，D 和 E 为红色）。没有数值时它为中性色，并说明原因（校准中、数据不足）。等级后的星号表示有一个部分尚未计入（目前是安全性）：此时高分并不代表一切正常。鼠标悬停时显示覆盖率、各部分及其权重以及最弱的仓库。在 Lite 中或评分关闭（`score.enabled`）时不显示该标签。 校准期间，该标签会显示 `score.calibrating_hours` (`data_quality.calibrating_hours`) 还剩多少时间，附带进度条以及数字出现的日期和时间；数据不足时会说明哪一项条件未满足（运行数或覆盖率），悬停提示还会说明某一部分为何不计入（哨兵已关闭、尚未完成首次扫描或读取的仓库太少）。
@@ -65,7 +74,7 @@
 
 ## 设置
 
-在设置页面的“哨兵”子标签中，“账户评分”“评分权重”和“评分等级”三个区块：`score.enabled`、`score.window_days`、`score.calibrating_hours`、`score.min_runs`、`score.min_coverage`、`score.trend_flat`、`score.weights.reliability`、`score.weights.speed`、`score.weights.recovery`、`score.weights.collaboration`, `score.weights.security`、`score.grades.A` 至 `score.grades.D`、`score.alert.enabled`、`score.alert.drop_points` 和 `score.alert.notify_external`（默认关闭）。每个部分的良好和较差界限从文件中读取，位于 `score.limits` 之下（见示例文件）；不在页面中编辑。
+在设置页面的“哨兵”子标签中，“账户评分”“评分权重”和“评分等级”三个区块：`score.enabled`、`score.source`、`score.window_days`、`score.calibrating_hours`、`score.min_runs`、`score.min_coverage`、`score.trend_flat`、`score.weights.reliability`、`score.weights.speed`、`score.weights.recovery`、`score.weights.collaboration`, `score.weights.security`、`score.grades.A` 至 `score.grades.D`、`score.alert.enabled`、`score.alert.drop_points` 和 `score.alert.notify_external`（默认关闭）。每个部分的良好和较差界限从文件中读取，位于 `score.limits` 之下（见示例文件）；不在页面中编辑。
 
 ## 与上一时段对比
 

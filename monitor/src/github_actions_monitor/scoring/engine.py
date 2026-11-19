@@ -20,6 +20,7 @@ from github_actions_monitor.scoring import collector
 
 DEFAULTS = {
     "enabled": True,
+    "source": "recent600",        # which runs the score reads: "recent600" = the newest 600 of the page (the default until 2.1.6), "ledger" = every run the cycle read, counted once in the ledger
     "window_days": 7,             # the window the user chooses (per account); the previous window of the same length gives the trend
     "calibrating_hours": 24,      # watched for less than this: no score yet
     "min_runs": 20,               # fewer finished runs in the window: not enough data
@@ -50,6 +51,8 @@ def settings(config):
         return merged
     if isinstance(user.get("enabled"), bool):
         merged["enabled"] = user["enabled"]
+    if user.get("source") in ("recent600", "ledger"):
+        merged["source"] = user["source"]
     ranges = {"window_days": (1, 90), "calibrating_hours": (0, 720), "min_runs": (1, 100000), "trend_flat": (0, 100)}
     for key, (low, high) in ranges.items():
         v = user.get(key)

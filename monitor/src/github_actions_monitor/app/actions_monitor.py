@@ -608,6 +608,7 @@ def watched_repos(config, force=False):
 
 
 RUN_SUMMARY = {"by_repo": {}}      # repo -> counts over ALL the runs of the last cycle (health/repo_view.summarize_runs): the page only receives the 600 newest ones, the health must not
+ALL_RUNS = {"runs": []}      # every run the last cycle read, before the page's cut to 600: the score, the reports, the mirror and the analytics read it when score.source is "ledger" (source_runs)
 SAMPLE_INFO = {}      # repo -> {"asked": runs asked for, "total": total_count of GitHub or None, "probe": runs only the second look found}
 SAMPLING_STATE = {"dropped": []}      # the repositories that waited in the last cycle because the budget of requests was spent
 BUDGET = sampling.Budget()      # requests for run lists in the last hour
@@ -1263,6 +1264,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
         RUN_SUMMARY["by_repo"] = health_repo_view.summarize_runs(runs, time.time())
     except Exception as error:   # noqa: BLE001 - the summary of the health never stops a cycle
         degraded.note("loop.summary", error)
+    ALL_RUNS["runs"] = runs
     return {
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "updated_local": tzdisplay.stamp(time.time()), "took": round(time.time() - started, 1),
         "repos": repos, "ecosystems": {repo: ecosystem_of(repo) for repo in repos},
@@ -1810,9 +1812,9 @@ def maintain_extras(config, data):
                       ("runners", lambda: spare and read_runner_list(config, data)),
                       ("orgs", lambda: spare and read_extra_lists(config)),
                       ("pool", lambda: spare and refresh_pool_status()),
-                      ("reports", lambda: spare and __import__("github_actions_monitor.integrations.reports", fromlist=["_"]).cycle(config, toolconfig.github_owner(config), list(data.get("repos") or []), data.get("runs") or [],
+                      ("reports", lambda: spare and __import__("github_actions_monitor.integrations.reports", fromlist=["_"]).cycle(config, toolconfig.github_owner(config), list(data.get("repos") or []), source_runs(config, data),
                                                                                                                                   lambda endpoint: gh_read(endpoint, retries=0))),
-                      ("mirror", lambda: spare and __import__("github_actions_monitor.integrations.mirror", fromlist=["_"]).cycle(config, data.get("runs") or [], toolconfig.github_owner(config), lambda e: gh_read(e, retries=0), download_artifact)),
+                      ("mirror", lambda: spare and __import__("github_actions_monitor.integrations.mirror", fromlist=["_"]).cycle(config, source_runs(config, data), toolconfig.github_owner(config), lambda e: gh_read(e, retries=0), download_artifact)),
                       ("otlp", lambda: __import__("github_actions_monitor.integrations.otlp", fromlist=["_"]).export(config, data, TOOL_VERSION))):
         try:
             job()
@@ -1929,6 +1931,17 @@ def compare_keep_days(config):
     return 2 * max(cfg["default_window_days"], 7) + 1 if cfg["enabled"] else 0
 
 
+def source_runs(config, data):
+    """The runs the score, the reports, the mirror and the analytics read: with `score.source` "ledger" every run the last cycle read (the page keeps only the newest 600), otherwise the list of the page.
+    The full list is used only while it belongs to the picture in hand (same total), so a picture resumed from disk never mixes with the runs of another cycle."""
+    listed = data.get("runs") or []
+    from github_actions_monitor.scoring import engine as score_engine
+    if score_engine.settings(config if isinstance(config.get("score"), dict) else toolconfig.raw_config())["source"] != "ledger":
+        return listed
+    full = ALL_RUNS["runs"]
+    return full if full and data.get("runs_total") == len(full) and len(full) >= len(listed) else listed
+
+
 def score_tick(config, data):
     """The pass of the score (once every few minutes at most): the runs and the alerts of the collaboration sentinel go to the ledger and the snapshot of the hour is written. Complete only; a
     failure is counted and never stops the cycle."""
@@ -1942,7 +1955,7 @@ def score_tick(config, data):
         known = bool(collab is not None and getattr(collab, "enabled", False) and not (collab.get_status() or {}).get("loading"))
         storage, account = runtime.process_storage(CHILD["account"] or None)
         idle = set(data.get("forks_idle_all") or data.get("forks_idle") or [])      # the runs of a fork without a CI of its own (the cron it inherited) are not the work of the account
-        snapshot = score_service.tick(storage, account, config, [r for r in (data.get("runs") or []) if r.get("repo") not in idle], collab.get_alerts() if known else [], collab_known=known, security=score_security(registry, config), activity=data.get("activity"), keep_days_min=compare_keep_days(config))
+        snapshot = score_service.tick(storage, account, config, [r for r in source_runs(config, data) if r.get("repo") not in idle], collab.get_alerts() if known else [], collab_known=known, security=score_security(registry, config), activity=data.get("activity"), keep_days_min=compare_keep_days(config), seen=data.get("runs_total"))
         if snapshot and snapshot.get("drop_new") and snapshot.get("drop"):      # the moment a drop appears; it leaves the panel only when the person asked for it
             from github_actions_monitor.scoring import drop as score_drop, engine as score_engine
             sentinel = SENTINEL["obj"]
@@ -2117,14 +2130,14 @@ def maintain(config, data):
         store = ANALYTICS["store"]
         if store is None or not cfg["enabled"] or data.get("loading") or data["offline"]["offline"]:
             return
-        for run in analytics.pending_runs(data.get("runs") or [], store, cfg["jobs_per_cycle"]):
+        for run in analytics.pending_runs(source_runs(config, data), store, cfg["jobs_per_cycle"]):
             try:
                 body = gh_read(f"repos/{toolconfig.github_owner()}/{run['repo']}/actions/runs/{run['id']}/jobs?per_page=100", retries=0)
             except Exception:   # noqa: BLE001 - a job list that cannot be read is skipped for good
                 store.add_jobs(run["repo"], run["name"], run["id"], [], cfg["steps"])
                 continue
             store.add_jobs(run["repo"], run["name"], run["id"], (body or {}).get("jobs") or [], cfg["steps"])
-        ANALYTICS["summary"] = analytics.summary(data.get("runs") or [], store, cfg)
+        ANALYTICS["summary"] = analytics.summary(source_runs(config, data), store, cfg)
         ANALYTICS["at"] = time.time()
         store.save()
     except Exception as error:   # noqa: BLE001 - analytics never stop the monitor, but a problem is said once

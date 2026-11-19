@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "ac5b43d423baa699cda6ab62688b437a9fc5e0d8dc12767ee7f2130c44416dc4",
+ "digest": "4167c1d26b4df71554de782b61b1dddedaa898c99a6c49b86a6bf0709fae0e86",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -162,6 +162,14 @@
     "key": "savings.webhook_live_per_repo",
     "kind": "bool",
     "default": false
+   },
+   {
+    "key": "score.source",
+    "kind": "enum",
+    "bounds": [
+     "recent600",
+     "ledger"
+    ]
    },
    {
     "key": "screens.menu",

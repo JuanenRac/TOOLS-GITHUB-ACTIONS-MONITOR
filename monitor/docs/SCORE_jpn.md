@@ -47,6 +47,15 @@
 
 各アカウントに独自のスコアがあります。詳細ではリポジトリ別に内訳を示します（CI の要素のみ、悪いものが先）。インストール全体の単一の数値はありません。 参考としてのみ、スーパーバイザーの `GET /api/score/global` が、問い合わせた人が見られる採点済みアカウントの平均を、数値のあるリポジトリ数で重み付けして返します。何件のアカウントが含まれるかも必ず示し、数値のないアカウントは一覧に出ますが平均には含めません。
 
+## どの実行を読むか
+
+ページには最新の 600 件が並びますが、リポジトリの多いアカウントは 1 サイクルで数千件を読むことがあります。`score.source` は、スコア、レポート、ミラー、分析の元になる実行を選びます。
+
+- `recent600`(このバージョンの既定):従来どおりページの最新 600 件。サイクルがそれ以上を読んだ場合はスナップショットが示します。`data_quality.cut` が true になり、`data_quality.runs_read` に読んだ件数が入り、`recent_cut` が理由に含まれ、ページには「サイクルは N 件の実行を読みましたが、スコアが見たのは最新の 600 件だけです」という行が出ます。何も隠しません。ウィンドウの新しい部分しか見ていない数値を全体として示すことはありません。
+- `ledger`:サイクルが読んだすべての実行を、アカウントの台帳に一度だけ数えます。台帳は時間別の合計(1 時間ごとの成功数と失敗数)も持ち、上限の 20000 件を超えても残ります。上限のためにウィンドウ内の実行を捨てた場合は `data_quality.truncated` が true になり、`data_quality.aggregate` にその合計がウィンドウについて持つ実行数と成功率が入ります。
+
+`score.source` の既定は次のバージョンで `ledger` になり、移行記録に項目が入ります。手で設定した人は値がそのまま残ります。このバージョンより前に書かれた台帳は、持っている実行から時間別合計を作ります。以前のバージョンのスナップショットは新しい項目なしでそのまま読まれます。GitHub への呼び出しは増えません。
+
 ## ページ上では
 
 ヘッダーの準備状況チップの隣にあるチップがスコアを表示します。数値、文字評価、直前の期間との変化を示す矢印、直近数日の小さな折れ線です。色は文字評価に従います（A と B は緑、C は琥珀色、D と E は赤）。数値がないときは中立の色で、理由（較正中、データ不足）を示します。文字評価の後ろの星印は、まだ数えていない要素（現在はセキュリティ）があることを意味し、その場合は高い数値でも問題なしとは限りません。カーソルを合わせると、カバレッジ、要素とその重み、最も弱いリポジトリが表示されます。Lite では、またスコアがオフ（`score.enabled`）のときは表示されません。 較正中、チップは `score.calibrating_hours` (`data_quality.calibrating_hours`) の残り時間を、バーと数値が表示される日時とともに示します。データ不足の場合は満たされていない条件（実行数またはカバレッジ）を示し、ホバー表示では項目が集計されない理由（センチネルがオフ、最初のスキャンが未完了、読み込んだリポジトリが少なすぎる）も示します。
@@ -65,7 +74,7 @@
 
 ## 設定
 
-設定ページの「番人」サブタブにある「アカウントのスコア」「スコアの重み」「スコアの文字評価」の各ブロック：`score.enabled`、`score.window_days`、`score.calibrating_hours`、`score.min_runs`、`score.min_coverage`、`score.trend_flat`、`score.weights.reliability`、`score.weights.speed`、`score.weights.recovery`、`score.weights.collaboration`、`score.weights.security`、`score.grades.A` から `score.grades.D`、`score.alert.enabled`、`score.alert.drop_points`、`score.alert.notify_external`（既定はオフ）。各要素の良好と不良の限度はファイルの `score.limits` から読み込まれます（サンプルファイルを参照）。ページでは編集しません。
+設定ページの「番人」サブタブにある「アカウントのスコア」「スコアの重み」「スコアの文字評価」の各ブロック：`score.enabled`、`score.source`、`score.window_days`、`score.calibrating_hours`、`score.min_runs`、`score.min_coverage`、`score.trend_flat`、`score.weights.reliability`、`score.weights.speed`、`score.weights.recovery`、`score.weights.collaboration`、`score.weights.security`、`score.grades.A` から `score.grades.D`、`score.alert.enabled`、`score.alert.drop_points`、`score.alert.notify_external`（既定はオフ）。各要素の良好と不良の限度はファイルの `score.limits` から読み込まれます（サンプルファイルを参照）。ページでは編集しません。
 
 ## 直前の期間との比較
 
