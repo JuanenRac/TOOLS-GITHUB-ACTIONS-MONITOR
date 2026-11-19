@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "f7a33c66758f36145da6136d4f96fcddb1588cf619170354b0d061d3df3a5a5e",
+ "digest": "0868630eea488db79dd77c1b5b456e40a5af657d5a9d8d2e886c056260532899",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -155,6 +155,11 @@
     "default": false
    },
    {
+    "key": "savings.webhook_live_per_repo",
+    "kind": "bool",
+    "default": false
+   },
+   {
     "key": "screens.menu",
     "kind": "bool",
     "default": true
@@ -259,6 +264,11 @@
      168
     ],
     "default": 12
+   },
+   {
+    "key": "updates.systemd_helper",
+    "kind": "bool",
+    "default": false
    }
   ],
   "removed": [],
