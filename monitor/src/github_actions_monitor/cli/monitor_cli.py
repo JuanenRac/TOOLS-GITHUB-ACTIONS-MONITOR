@@ -54,7 +54,7 @@ SKILL_ACTIONS = ("internal", "external")
 AI_ACTIONS = ("models", "doctor", "test")
 LESSONS_ACTIONS = ("list", "brief", "failures", "close")
 BRIEFS_ACTIONS = ("index", "show", "all")
-API_ACTIONS = ("openapi", "me")
+API_ACTIONS = ("openapi", "me", "contract-check")
 AI_HOOK_ACTIONS = ("install", "status", "uninstall")
 CREDENTIAL_ACTIONS = ("replace", "reload")
 LITE_COMMANDS = ("status", "doctor", "health", "check", "briefs")
@@ -433,12 +433,34 @@ def cmd_briefs(ctx):
     return answer, lines, EXIT_OK
 
 
+def _contract_check(ctx):
+    """api contract-check: the contract suite for clients (tools/api_contract_suite.py, only reads) against the monitor of this command line. Exit 0 when every check passes, 4 when one fails."""
+    import importlib.util
+    from github_actions_monitor.util.paths import ROOT
+    path = ROOT / "tools" / "api_contract_suite.py"
+    if not path.is_file():
+        raise CliError(EXIT_USAGE, i18n.t("cli.api_no_suite"))
+    spec = importlib.util.spec_from_file_location("api_contract_suite", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    try:
+        report = module.run(module.Client(ctx["base"], ctx["token"], ctx["timeout"]))
+    except OSError:
+        raise CliError(EXIT_DOWN, i18n.t("cli.unreachable", url=ctx["base"])) from None
+    failed = report.failed
+    lines = [("PASS " if row["ok"] else "FAIL ") + row["check"] + ("" if row["ok"] else ": " + row["detail"]) for row in report.rows]
+    lines.append(i18n.t("cli.api_suite_total", ok=len(report.rows) - len(failed), n=len(report.rows)))
+    return {"ok": not failed, "checks": len(report.rows), "failed": len(failed), "rows": report.rows}, lines, EXIT_DEGRADED if failed else EXIT_OK
+
+
 def cmd_api(ctx):
-    """api [openapi | me]: the read API for clients (`/api/v1/`, see docs/API.md). `openapi` prints the OpenAPI document of every frozen route (redirect it to a file); `me` says who the monitor takes this
-    client for (mode, user, role and what the session may do). Read only; a monitor whose API is closed (`api.v1_enabled`) is told in one line."""
+    """api [openapi | me | contract-check]: the read API for clients (`/api/v1/`, see docs/API.md). `openapi` prints the OpenAPI document of every frozen route (redirect it to a file); `me` says who the monitor takes this
+    client for (mode, user, role and what the session may do); `contract-check` runs the contract suite for clients against it. Read only; a monitor whose API is closed (`api.v1_enabled`) is told in one line."""
     action = ctx["action"] or "me"
     if action not in API_ACTIONS:
         raise CliError(EXIT_USAGE, i18n.t("cli.api_action"))
+    if action == "contract-check":
+        return _contract_check(ctx)
     try:
         answer = fetch(ctx["base"], "/api/v1/openapi.json" if action == "openapi" else "/api/v1/me", {"lang": i18n.language()} if action == "me" else None, ctx["timeout"], ctx["token"])
     except CliError as error:

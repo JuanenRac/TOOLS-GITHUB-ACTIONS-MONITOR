@@ -2407,6 +2407,8 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header(name, value)
         if getattr(self, "deprecated_access", False):
             self.send_header("Deprecation", "true")      # the ?access= address is deprecated: POST /api/access keeps the token out of the address bar
+        if getattr(self, "v1", False):      # every answer under /api/v1/ says which version of the API it is, whichever handler wrote it
+            self.send_header(api_v1.VERSION_HEADER, api_v1.API_VERSION)
         super().end_headers()
 
     def reply(self, body, kind):
@@ -2444,8 +2446,6 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
-        if getattr(self, "v1", False):      # an answer under /api/v1/ says which version of the API it is
-            self.send_header(api_v1.VERSION_HEADER, api_v1.API_VERSION)
         try:
             self.end_headers()
             self.wfile.write(body)

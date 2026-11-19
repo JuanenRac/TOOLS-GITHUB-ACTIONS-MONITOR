@@ -21,7 +21,7 @@
 | `alerts` | すべての番人のアラートを 1 つの一覧で：`--sentinel ci\|collab\|security\|supply\|delivery`、`--level info\|warning\|error`、`--muted show\|hide\|only` | 不可 |
 | `score` | アカウントのスコア：数値、文字評価、傾向、要素、カバレッジ、リポジトリ別の内訳。`--compare` で期間の履歴と比較します | 不可 |
 | `compare` | 今の期間と直前の期間の比較：数値とその変化・方向、悪化または改善したもの。`--window 7\|30d`、`--days all\|workdays\|weekend`、`--baseline previous\|year_ago`、`--format table\|json\|ndjson\|csv`。数値のデータが少ないと終了コード 4、`--fail-on` 指定で悪化があれば 5 | 不可 |
-| `api` | クライアント向けの読み取りAPI:`api openapi` は固定された各ルートの OpenAPI 文書を出力し(ファイルにリダイレクトできます)、`api me` はモニターがこのクライアントを何者と見ているか(モード、ユーザー、ロール、セッションができること、契約のバージョン)を示します。`api.v1_enabled` が閉じているモニターはそう伝えます | 不可 |
+| `api` | クライアント向けの読み取りAPI:`api openapi` は固定された各ルートの OpenAPI 文書を出力し(ファイルにリダイレクトできます)、`api me` はモニターがこのクライアントを何者と見ているか(モード、ユーザー、ロール、セッションができること、契約のバージョン)を示します。`api.v1_enabled` が閉じているモニターはそう伝えます。`api contract-check` はクライアント向けの契約スイートをそれに対して実行します(検査が失敗すると終了コード4) | 不可 |
 | `team` | リポジトリの健全性を、人の手が必要なものから順に表示します。`--severity warn\|bad` で悪いものだけに絞り、`--repo owner/name` で 1 件の詳細を表示します | 不可 |
 | `live` | Webhook 受信の状態と直近のイベント | 不可 |
 | `ai` | `ai models [--refresh]` は AI プロバイダーのモデルを各モデルのデータとともに一覧表示します。`ai test --provider 名前 --model 名前` は合成テキストで 1 つを試します (遅延、トークン、推定コスト)。`ai doctor` は AI が応答しない理由をキーを表示せずに説明します | 不可 |

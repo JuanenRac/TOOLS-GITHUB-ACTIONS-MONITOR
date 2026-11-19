@@ -73,6 +73,11 @@ jobs:
           done
           python monitor/tools/check_api_contract.py --url http://127.0.0.1:18871
           python monitor/tools/check_api_contract.py --lite --url http://127.0.0.1:18872
+      - name: The demo passes the contract suite for clients (the service mode switches the read API on)
+        run: |
+          MONITOR_SERVICE=1 python tools/demo_monitor.py 18873 &
+          for i in $(seq 1 60); do curl -fsS "http://127.0.0.1:18873/api/health" >/dev/null 2>&1 && break; sleep 1; done
+          python monitor/tools/api_contract_suite.py --url http://127.0.0.1:18873
 
   browser:
     name: The page in a browser (eight languages, every tab)
