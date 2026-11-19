@@ -126,7 +126,7 @@ svg{display:block;max-width:none}svg text{fill:var(--mut);font-size:12px}
 #t-al,#t-rep,#t-les{grid-template-columns:minmax(0,1fr);overflow:auto}#al-filters{align-items:center;gap:10px;margin:0 0 10px}#al-chips button{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:999px;padding:3px 12px;margin:0 4px 0 0;cursor:pointer}#al-chips button[aria-pressed=true]{background:var(--acc);color:var(--on-acc,#fff);border-color:var(--acc)}
 .alrow{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:6px 10px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}.alrow.muted{opacity:.6}.alrow .tt{min-width:0;overflow-wrap:anywhere}.alrow .acts{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}.alrow .acts button{font-size:12px;padding:2px 8px}.origin{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:1px 8px;border-radius:6px;border:1px solid var(--line)}.origin.ci{border-color:var(--acc);color:var(--acc)}.origin.collab{border-color:var(--ok);color:var(--ok)}
 @media (max-width:700px){.alrow{grid-template-columns:auto minmax(0,1fr)}.alrow .tt{grid-column:1/-1}.alrow .acts{grid-column:1/-1;justify-content:flex-start}.alrow>.chip,.alrow>.origin{justify-self:start}}
-.trbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-bottom:8px}.trbar select{max-width:100%}.trbig{margin-bottom:10px}.trlegend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}.trleg{display:inline-flex;align-items:center;gap:4px}.trleg.off{opacity:.45;text-decoration:line-through}.trwrap{position:relative}.trsvg{display:block;width:100%;height:auto;max-height:46vh;background:var(--panel2);border:1px solid var(--line);border-radius:6px}.trtip{position:absolute;top:4px;left:0;z-index:2;background:var(--panel);border:1px solid var(--line2);border-radius:4px;padding:3px 7px;font-size:12px;pointer-events:none;max-width:90%}.trax{font-size:10px;fill:var(--mut)}.trthr{stroke:var(--warn);stroke-width:1;stroke-dasharray:3 3}.trgrid0{stroke:var(--line2);stroke-width:1}.trev{stroke:var(--mut);stroke-width:1;stroke-dasharray:1 3}.trev.incident{stroke:var(--bad)}.trevm{font-size:10px;fill:var(--mut)}.trevm.incident{fill:var(--bad)}.trcur{stroke:var(--text);stroke-width:1}.trgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}.trcard.spk{display:block;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);cursor:pointer}.trcard.sel{border-color:var(--run);box-shadow:0 0 0 1px var(--run)}.trcard .trh{display:flex;justify-content:space-between;gap:6px}.trcard .trh>span{min-width:0;flex:1 1 auto}.trcard .trh>b{flex:0 0 auto;overflow:visible;text-overflow:clip;white-space:nowrap}.trcard .trdl{font-size:11px;display:flex;flex-wrap:wrap;gap:2px 8px;margin:2px 0}.trd.good{color:var(--ok)}.trd.bad{color:var(--bad)}.trcard svg{height:34px}
+.trbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-bottom:8px}.trbar select{max-width:100%}.trbig{margin-bottom:10px}.trlegend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}.trleg{display:inline-flex;align-items:center;gap:4px}.trleg.off{opacity:.45;text-decoration:line-through}.trwrap{position:relative}.trsvg{display:block;width:100%;height:auto;max-height:46vh;background:var(--panel2);border:1px solid var(--line);border-radius:6px}.trtip{position:absolute;top:4px;left:0;z-index:2;background:var(--panel);border:1px solid var(--line2);border-radius:4px;padding:3px 7px;font-size:12px;pointer-events:none;max-width:90%}.trax{font-size:10px;fill:var(--mut)}.trthr{stroke:var(--warn);stroke-width:1;stroke-dasharray:3 3}.trgrid0{stroke:var(--line2);stroke-width:1}.trev{stroke:var(--mut);stroke-width:1;stroke-dasharray:1 3}.trev.incident{stroke:var(--bad)}.trev.release{stroke:var(--ok)}.trevm{font-size:10px;fill:var(--mut)}.trevm.incident{fill:var(--bad)}.trevm.release{fill:var(--ok)}.trbar .trmsg{font-size:12px}.trcur{stroke:var(--text);stroke-width:1}.trgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}.trcard.spk{display:block;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);cursor:pointer}.trcard.sel{border-color:var(--run);box-shadow:0 0 0 1px var(--run)}.trcard .trh{display:flex;justify-content:space-between;gap:6px}.trcard .trh>span{min-width:0;flex:1 1 auto}.trcard .trh>b{flex:0 0 auto;overflow:visible;text-overflow:clip;white-space:nowrap}.trcard .trdl{font-size:11px;display:flex;flex-wrap:wrap;gap:2px 8px;margin:2px 0}.trd.good{color:var(--ok)}.trd.bad{color:var(--bad)}.trcard svg{height:34px}
 .spbar{display:flex;flex-wrap:wrap;gap:8px 14px;margin:6px 0;align-items:center}.spbar input,.spbar select{max-width:100%}.sphelp{margin-bottom:6px}.sptable{margin-bottom:10px}
 #t-sent,#t-sci,#t-scol,#t-ssec,#t-sdel,#t-ssup,#t-strend,#t-syvt{grid-template-columns:minmax(0,1fr);gap:12px;overflow:auto}
 #t-sent .lcol{display:flex;flex-direction:column;gap:12px;min-height:0;min-width:0}
@@ -299,6 +299,8 @@ th.sortable{cursor:pointer;user-select:none;white-space:nowrap}th.sortable:hover
 .sb-bar{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;margin-left:auto}.sb-bar .ib{width:28px;height:28px}
 .sb-bar .sb-item{display:inline-flex;align-items:center;padding:2px 10px;border:1px dashed var(--line2);border-radius:999px;color:var(--mut);white-space:nowrap;line-height:1.5}.sb-bar .sb-item:empty{display:none}.sb-bar .sb-item.sb-on{color:var(--text);border-style:solid}
 @media print{.sb-bar,#statusbar,nav[role=tablist],#accbar,.dlg,.cfg-tip{display:none!important}}
+/* print: the page that is printed is the whole tab, not the part a scrolling box shows; the controls of the trend (selectors, copy, export) do nothing on paper */
+@media print{.tab{overflow:visible!important;max-height:none!important;height:auto!important}.trbar{display:none!important}.trsvg{max-height:none!important}.trgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.trcard{break-inside:avoid}.spbar,.sphelp button{display:none!important}}
 #statusbar .sb-sound{cursor:pointer;font:inherit;font-weight:600}#statusbar .sb-sound.off{color:var(--mut);border-style:dashed}
 #statusbar .sb-item.sb-opt{color:var(--mut);background:transparent;border-style:dashed}
 #statusbar .sb-clock{order:99;flex:none;display:inline-flex;flex-wrap:nowrap;align-items:baseline;justify-content:center;gap:0 8px;padding:3px 14px;margin-left:6px;border:2px solid var(--acc);border-radius:12px;background:var(--bg);box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo);overflow:visible;line-height:1.15}
@@ -1361,9 +1363,14 @@ function upstreamBox(s){
 const TRS=[["red","ui.tr_red","var(--bad)","",1,null],["stuck","ui.tr_stuck","var(--warn)","",1,null],["ci_green_pct","ui.tr_ci_green_pct","var(--ok)","%",0,{v:90,low:1}],["ci_repos_ok","ui.tr_ci_repos_ok","var(--ok)","",0,null],
  ["codeql","ui.tr_codeql","var(--warn)","",1,null],["dependabot","ui.tr_dependabot","var(--warn)","",1,null],["secret","ui.tr_secret","var(--bad)","",1,null],["sev_critical","ui.tr_sev_critical","var(--bad)","",1,null],["sev_high","ui.tr_sev_high","var(--warn)","",1,null],
  ["prs","ui.tr_prs","var(--run)","",null,null],["prs_old","ui.tr_prs_old","var(--warn)","",1,null],["issues_open","ui.tr_issues_open","var(--run)","",1,null],["unsigned","ui.tr_unsigned","var(--warn)","",1,null],["candidates","ui.tr_cands","var(--ok)","",null,null],
- ["ready","ui.tr_ready","var(--ok)","",null,null],["health","ui.tr_health","var(--ok)","",0,{v:70,low:1}],["quota_used_pct","ui.tr_quota_used_pct","var(--run)","%",1,{v:80,low:0}],["minutes24","ui.tr_minutes24","var(--run)"," min",1,null]];
-let TRR=[7,30,60].includes(parseInt(store.get("am-tr-range")))?parseInt(store.get("am-tr-range")):30,TRSEL=store.get("am-tr-sel")||"red",TRCMP=store.get("am-tr-cmp")||"",TRHIDE=new Set(),TRLAST=null,TRCUR=-1;
-const trDef=k=>TRS.find(x=>x[0]===k),trNum=x=>typeof x==="number"&&isFinite(x),trFmt=(x,u)=>trNum(x)?(Math.round(x*10)/10)+u:"\u2013";
+ ["ready","ui.tr_ready","var(--ok)","",null,null],["health","ui.tr_health","var(--ok)","",0,{v:70,low:1}],["quota_used_pct","ui.tr_quota_used_pct","var(--run)","%",1,{v:80,low:0}],["minutes24","ui.tr_minutes24","var(--run)"," min",1,null],
+ ["sev_medium","ui.tr_sev_medium","var(--run)","",1,null],["sev_low","ui.tr_sev_low","var(--mut)","",null,null],["dur_avg","ui.tr_dur_avg","var(--run)"," min",1,null],["dur_p95","ui.tr_dur_p95","var(--warn)"," min",1,null],
+ ["queue_avg","ui.tr_queue_avg","var(--run)"," s",1,null],["flaky","ui.tr_flaky","var(--warn)","",1,null],["artifact_mb","ui.tr_artifact_mb","var(--run)"," MB",1,null]];
+let TRR=[7,30,60].includes(parseInt(store.get("am-tr-range")))?parseInt(store.get("am-tr-range")):30,TRSEL=store.get("am-tr-sel")||"red",TRCMP=store.get("am-tr-cmp")||"",TRHIDE=new Set(),TRLAST=null,TRCUR=-1,TRVIEW=store.get("am-tr-view")==="bars"?"bars":"line";
+const trDyn=k=>/^mr:./.test(k)?[k,"ui.tr_min_repo","var(--run)"," min",1,null,k.slice(3)]:undefined,trDef=k=>TRS.find(x=>x[0]===k)||trDyn(k),trName=d=>d[6]!==undefined?T(d[1],{repo:d[6]}):T(d[1]),
+ trDefs=tr=>TRS.filter(d=>tr[d[0]]).concat(Object.keys(tr).filter(k=>/^mr:./.test(k)).map(trDyn)),
+ trThr=d=>{const b=d[5];if(!b)return null;const v=TRLAST&&TRLAST.thresholds&&TRLAST.thresholds[d[0]];return {v:trNum(v)?v:b.v,low:b.low}},
+ trPrep=tr=>{if(!tr)return tr;const o=Object.assign({},tr),m=tr.min_repo&&tr.min_repo.repos||{};Object.keys(m).forEach(r=>{o["mr:"+r]={dates:tr.min_repo.dates,values:m[r]}});return o},trNum=x=>typeof x==="number"&&isFinite(x),trFmt=(x,u)=>trNum(x)?(Math.round(x*10)/10)+u:"\u2013";
 function trData(tr,k){const g=tr&&tr[k]||{},v=g.values||[],d=(tr&&tr.red&&tr.red.dates)||g.dates||[];return {v:v.slice(-TRR),d:d.slice(-TRR),all:v}}
 function trDelta(v,back){const n=v.length;if(n<=back)return null;const a=v[n-1],b=v[n-1-back];return trNum(a)&&trNum(b)?a-b:null}
 function trDeltaHtml(def,d,key){
@@ -1374,6 +1381,7 @@ function trEvents(tr){
   for(let i=Math.max(1,off);i<d.length;i++){
     if(ver[i]&&ver[i-1]&&ver[i]!==ver[i-1])out.push({i:i-off,kind:"update",text:T("ui.tr_ev_update",{v:ver[i]})});
     if((red[i]||0)>0&&(red[i-1]||0)===0)out.push({i:i-off,kind:"incident",text:T("ui.tr_ev_incident")})}
+  const rel=(tr&&tr.releases)||{};for(let i=off;i<d.length;i++){if(Array.isArray(rel[d[i]])&&rel[d[i]].length)out.push({i:i-off,kind:"release",text:T("ui.tr_ev_release",{names:rel[d[i]].join(", ")})})}
   return out}
 const trVals0=(tr,k)=>(tr&&tr[k]&&tr[k].values)||[];
 function trPath(v,x,y){let segs=[],cur=[];v.forEach((val,i)=>{if(trNum(val))cur.push([x(i),y(val)]);else if(cur.length){segs.push(cur);cur=[]}});if(cur.length)segs.push(cur);return segs}
@@ -1383,55 +1391,72 @@ function trChart(items,dates,events,o){
   let g="",defs="",k=0;
   items.forEach((it,idx)=>{
     const nums=it.v.filter(trNum);if(!nums.length)return;
-    let lo=Math.min(...nums),hi=Math.max(...nums);if(it.thr&&idx===0){lo=Math.min(lo,it.thr.v);hi=Math.max(hi,it.thr.v)}if(hi===lo){hi=lo+1}if(lo>0&&lo<hi*0.5)lo=0;
+    let lo=Math.min(...nums),hi=Math.max(...nums);if(it.thr&&idx===0){lo=Math.min(lo,it.thr.v);hi=Math.max(hi,it.thr.v)}if(hi===lo){hi=lo+1}if(lo>0&&(o.bars&&idx===0||lo<hi*0.5))lo=0;
     const y=val=>Tp+(1-(val-lo)/(hi-lo))*(H-Tp-B),segs=trPath(it.v,x,y),dash=idx?' stroke-dasharray="6 4"':"";
-    if(idx===0&&items.length===1){defs+=`<linearGradient id="trg-${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:${it.color};stop-opacity:.35"/><stop offset="1" style="stop-color:${it.color};stop-opacity:0"/></linearGradient>`;
+    if(idx===0&&items.length===1&&!o.bars){defs+=`<linearGradient id="trg-${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:${it.color};stop-opacity:.35"/><stop offset="1" style="stop-color:${it.color};stop-opacity:0"/></linearGradient>`;
       g+=segs.map(sg=>`<path d="M${sg[0][0].toFixed(1)},${(H-B).toFixed(1)} ${sg.map(p=>"L"+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")} L${sg[sg.length-1][0].toFixed(1)},${(H-B).toFixed(1)}Z" fill="url(#trg-${uid})" stroke="none"/>`).join("")}
-    g+=segs.map(sg=>sg.length===1?`<circle cx="${sg[0][0].toFixed(1)}" cy="${sg[0][1].toFixed(1)}" r="3" fill="${it.color}"/>`:`<polyline points="${sg.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")}" fill="none" stroke="${it.color}" stroke-width="2" stroke-linejoin="round"${dash}/>`).join("");
+    if(o.bars&&idx===0){const bw=Math.max(2,Math.min(40,(W-L-R)/Math.max(n,1)*0.6)),y0=y(Math.max(lo,Math.min(0,hi)));it.v.forEach((val,i)=>{if(trNum(val)){const yy=y(val);g+=`<rect class="trbar1" x="${(x(i)-bw/2).toFixed(1)}" y="${Math.min(yy,y0).toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1,Math.abs(yy-y0)).toFixed(1)}" fill="${it.color}" fill-opacity=".85"/>`}})}
+    else g+=segs.map(sg=>sg.length===1?`<circle cx="${sg[0][0].toFixed(1)}" cy="${sg[0][1].toFixed(1)}" r="3" fill="${it.color}"/>`:`<polyline points="${sg.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")}" fill="none" stroke="${it.color}" stroke-width="2" stroke-linejoin="round"${dash}/>`).join("");
     const last=segs.length?segs[segs.length-1][segs[segs.length-1].length-1]:null;
-    if(big){it.v.forEach((val,i)=>{if(trNum(val))g+=idx?`<rect x="${(x(i)-2.5).toFixed(1)}" y="${(y(val)-2.5).toFixed(1)}" width="5" height="5" fill="${it.color}"/>`:`<circle cx="${x(i).toFixed(1)}" cy="${y(val).toFixed(1)}" r="2.5" fill="${it.color}"/>`});
+    if(big){if(!(o.bars&&idx===0))it.v.forEach((val,i)=>{if(trNum(val))g+=idx?`<rect x="${(x(i)-2.5).toFixed(1)}" y="${(y(val)-2.5).toFixed(1)}" width="5" height="5" fill="${it.color}"/>`:`<circle cx="${x(i).toFixed(1)}" cy="${y(val).toFixed(1)}" r="2.5" fill="${it.color}"/>`});
       const ax=idx?W-R+4:L-4;g+=`<text x="${ax}" y="${Tp+8}" text-anchor="${idx?"start":"end"}" class="trax" style="fill:${it.color}">${esc(trFmt(hi,""))}</text><text x="${ax}" y="${H-B}" text-anchor="${idx?"start":"end"}" class="trax" style="fill:${it.color}">${esc(trFmt(lo,""))}</text>`}
     else if(last)g+=`<circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="3" fill="${it.color}"/>`;
     if(it.thr&&idx===0&&it.thr.v>=lo&&it.thr.v<=hi){const ty=y(it.thr.v);g+=`<line x1="${L}" x2="${W-R}" y1="${ty.toFixed(1)}" y2="${ty.toFixed(1)}" class="trthr"/>`+(big?`<text x="${L+4}" y="${(ty-3).toFixed(1)}" class="trax">${esc(T("ui.tr_thr",{v:it.thr.v+(it.unit||"")}))}</text>`:"")}
     k++});
   if(big){g+=`<line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" class="trgrid0"/>`;if(n){g+=`<text x="${L}" y="${H-5}" class="trax">${esc(dates[0])}</text><text x="${W-R}" y="${H-5}" text-anchor="end" class="trax">${esc(dates[n-1])}</text>`}
-    events.forEach(e=>{const ex=x(e.i);g+=`<line x1="${ex.toFixed(1)}" x2="${ex.toFixed(1)}" y1="${Tp}" y2="${H-B}" class="trev ${e.kind}"/><text x="${ex.toFixed(1)}" y="${Tp-1}" text-anchor="middle" class="trevm ${e.kind}">${e.kind==="update"?"\u25B2":"!"}<title>${esc(dates[e.i]+": "+e.text)}</title></text>`});
+    events.forEach(e=>{const ex=x(e.i);g+=`<line x1="${ex.toFixed(1)}" x2="${ex.toFixed(1)}" y1="${Tp}" y2="${H-B}" class="trev ${e.kind}"/><text x="${ex.toFixed(1)}" y="${Tp-1}" text-anchor="middle" class="trevm ${e.kind}">${e.kind==="update"?"\u25B2":(e.kind==="release"?"\u25C6":"!")}<title>${esc(dates[e.i]+": "+e.text)}</title></text>`});
     g+=`<line class="trcur" x1="0" x2="0" y1="${Tp}" y2="${H-B}" visibility="hidden"/>`}
   if(!k)g+=`<text x="${L}" y="${H/2}" class="trax">${esc(T("ui.tr_nodata"))}</text>`;
   return `<svg viewBox="0 0 ${W} ${H}" ${big?'class="trsvg" tabindex="0"':'preserveAspectRatio="none"'} width="100%" height="${big?"":H}" role="img" aria-label="${esc(o.label)}" data-n="${n}" data-l="${L}" data-r="${R}" data-w="${W}"><defs>${defs}</defs>${g}</svg>`}
 function renderTrend(){
   const box=$("s-trend"),tr=TRLAST;if(!box||!tr||!tr.red)return;
-  const dates=trData(tr,"red").d,ev=trEvents(tr),defs=TRS.filter(d=>tr[d[0]]),sel=trDef(TRSEL)&&tr[TRSEL]?TRSEL:"red",cmp=TRCMP&&TRCMP!==sel&&tr[TRCMP]?TRCMP:"";
-  const item=(k)=>{const d=trDef(k);return {k,v:trData(tr,k).v,color:d[2],thr:d[5],unit:d[3],name:T(d[1])}};
+  const dates=trData(tr,"red").d,ev=trEvents(tr),defs=trDefs(tr),sel=trDef(TRSEL)&&tr[TRSEL]?TRSEL:"red",cmp=TRCMP&&TRCMP!==sel&&tr[TRCMP]?TRCMP:"";
+  const item=(k)=>{const d=trDef(k);return {k,v:trData(tr,k).v,color:d[2],thr:trThr(d),unit:d[3],name:trName(d)}};
   const plotted=[item(sel)].concat(cmp?[item(cmp)]:[]),shown=plotted.filter(p=>!TRHIDE.has(p.k));
   const legend=plotted.map((p,i)=>`<button type="button" class="trleg${TRHIDE.has(p.k)?" off":""}" data-trleg="${esc(p.k)}" aria-pressed="${!TRHIDE.has(p.k)}"><svg width="26" height="10" aria-hidden="true"><line x1="1" x2="25" y1="5" y2="5" stroke="${p.color}" stroke-width="3"${i?' stroke-dasharray="6 4"':""}/></svg> ${esc(p.name)}</button>`).join("");
-  const opts=(cur,none)=>(none?`<option value="">${esc(T("ui.tr_none"))}</option>`:"")+defs.map(d=>`<option value="${d[0]}"${cur===d[0]?" selected":""}>${esc(T(d[1]))}</option>`).join("");
+  const opts=(cur,none)=>(none?`<option value="">${esc(T("ui.tr_none"))}</option>`:"")+defs.map(d=>`<option value="${esc(d[0])}"${cur===d[0]?" selected":""}>${esc(trName(d))}</option>`).join("");
   const bar=`<div class="trbar"><label>${esc(T("ui.tr_range"))} <select id="tr-range" aria-label="${esc(T("ui.tr_range"))}">${[7,30,60].map(n=>`<option value="${n}"${TRR===n?" selected":""}>${esc(T("ui.tr_days",{n}))}</option>`).join("")}</select></label>`
     +`<label>${esc(T("ui.tr_series"))} <select id="tr-sel" aria-label="${esc(T("ui.tr_series"))}">${opts(sel,false)}</select></label><label>${esc(T("ui.tr_compare"))} <select id="tr-cmp" aria-label="${esc(T("ui.tr_compare"))}">${opts(cmp,true)}</select></label>`
-    +`<button type="button" data-trexp="csv" title="${esc(T("ui.tr_export_csv"))}">CSV</button><button type="button" data-trexp="json" title="${esc(T("ui.tr_export_json"))}">JSON</button></div>`;
-  const big=`<div class="trbig"><div class="trlegend" role="group" aria-label="${esc(T("ui.tr_legend"))}">${legend}</div><div class="trwrap">${trChart(shown,dates,ev,{big:1,w:720,h:230,id:"big",label:T("ui.tr_big",{name:plotted.map(p=>p.name).join(" / ")})})}<div class="trtip" role="status" hidden></div></div></div>`;
+    +`<label>${esc(T("ui.tr_view"))} <select id="tr-view" aria-label="${esc(T("ui.tr_view"))}"><option value="line"${TRVIEW==="line"?" selected":""}>${esc(T("ui.tr_view_line"))}</option><option value="bars"${TRVIEW==="bars"?" selected":""}>${esc(T("ui.tr_view_bars"))}</option></select></label>`
+    +`<button type="button" data-trcopy="1">${esc(T("ui.tr_copy"))}</button><span class="mut trmsg" role="status"></span><button type="button" data-trexp="csv" title="${esc(T("ui.tr_export_csv"))}">CSV</button><button type="button" data-trexp="json" title="${esc(T("ui.tr_export_json"))}">JSON</button></div>`;
+  const big=`<div class="trbig"><div class="trlegend" role="group" aria-label="${esc(T("ui.tr_legend"))}">${legend}</div><div class="trwrap">${trChart(shown,dates,ev,{big:1,w:720,h:230,id:"big",bars:TRVIEW==="bars",label:T("ui.tr_big",{name:plotted.map(p=>p.name).join(" / ")})})}<div class="trtip" role="status" hidden></div></div></div>`;
   const cards=defs.map(d=>{const dd=trData(tr,d[0]),v=dd.v,cur=[...dd.all].reverse().find(trNum);
-    return `<div class="spk trcard${d[0]===sel?" sel":""}" data-trs="${d[0]}" role="button" tabindex="0" aria-pressed="${d[0]===sel}"><div class="trh"><span>${esc(T(d[1]))}</span><b>${esc(trFmt(cur,d[3]))}</b></div>`
-      +`<div class="trdl">${trDeltaHtml(d,trDelta(dd.all,1),"ui.tr_d1")} ${trDeltaHtml(d,trDelta(dd.all,7),"ui.tr_d7")}</div>${trChart([{k:d[0],v,color:d[2],thr:d[5],unit:d[3]}],dd.d,[],{w:160,h:34,id:"s"+d[0],label:T(d[1])})}</div>`}).join("");
+    return `<div class="spk trcard${d[0]===sel?" sel":""}" data-trs="${esc(d[0])}" role="button" tabindex="0" aria-pressed="${d[0]===sel}"><div class="trh"><span>${esc(trName(d))}</span><b>${esc(trFmt(cur,d[3]))}</b></div>`
+      +`<div class="trdl">${trDeltaHtml(d,trDelta(dd.all,1),"ui.tr_d1")} ${trDeltaHtml(d,trDelta(dd.all,7),"ui.tr_d7")}</div>${trChart([{k:d[0],v,color:d[2],thr:trThr(d),unit:d[3]}],dd.d,[],{w:160,h:34,id:"s"+d[0].replace(/[^a-z0-9]/gi,"_"),label:trName(d)})}</div>`}).join("");
   box.innerHTML=bar+big+`<div class="trgrid">${cards}</div><div class="mut" style="font-size:12px;margin-top:6px">${esc(T("ui.tr_note"))} ${dates.length<2?esc(T("ui.tr_fill")):""} ${esc(T("ui.tr_pick"))}</div>`
 }
 function trExport(kind){
-  const tr=TRLAST;if(!tr||!tr.red)return;const dates=trData(tr,"red").d,defs=TRS.filter(d=>tr[d[0]]);let text,type;
+  const tr=TRLAST;if(!tr||!tr.red)return;const dates=trData(tr,"red").d,defs=trDefs(tr);let text,type;
   if(kind==="json"){const o={dates,series:{}};defs.forEach(d=>{o.series[d[0]]=trData(tr,d[0]).v});text=JSON.stringify(o,null,1);type="application/json"}
   else{text=["date"].concat(defs.map(d=>d[0])).join(",")+"\n"+dates.map((dt,i)=>[dt].concat(defs.map(d=>{const v=trData(tr,d[0]).v[i];return trNum(v)?v:""})).join(",")).join("\n")+"\n";type="text/csv"}
   try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type:type+";charset=utf-8"}));a.download="daily-trend-"+(dates[dates.length-1]||"empty")+"."+kind;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}catch(e){}
 }
+/* the large chart as a PNG (copied to the clipboard, or saved as a file when the browser does not allow copying images): the SVG is written out with the colours of the theme already resolved, so it does not depend on the page */
+function trPng(done){
+  const svg=document.querySelector("#s-trend .trsvg");if(!svg){done(null);return}
+  const cs=getComputedStyle(document.documentElement),res=t=>t.replace(/var\((--[a-z0-9-]+)\)/g,(m,n)=>cs.getPropertyValue(n).trim()||"#888"),W=+svg.dataset.w,H=svg.viewBox.baseVal.height;let css="";
+  try{Array.prototype.forEach.call(document.styleSheets,ss=>{Array.prototype.forEach.call(ss.cssRules,r=>{if(/\.(trax|trthr|trgrid0|trev|trevm|trcur)/.test(r.selectorText||""))css+=res(r.cssText)})})}catch(e){}
+  const xml=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W*2}" height="${H*2}"><style>text{font-family:system-ui,sans-serif}${css}</style><rect width="${W}" height="${H}" fill="${res("var(--panel2)")}"/>${res(svg.innerHTML)}</svg>`,img=new Image();
+  img.onload=()=>{try{const c=document.createElement("canvas");c.width=W*2;c.height=H*2;c.getContext("2d").drawImage(img,0,0);c.toBlob(done,"image/png")}catch(e){done(null)}};img.onerror=()=>done(null);
+  img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(xml)}
+function trCopy(){
+  const msg=document.querySelector("#s-trend .trmsg"),say=t=>{if(msg)msg.textContent=t},dts=TRLAST&&TRLAST.red?trData(TRLAST,"red").d:[];
+  const save=blob=>{try{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="daily-trend-"+(dts[dts.length-1]||"empty")+".png";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);say(T("ui.tr_copy_save"))}catch(e){say(T("ui.tr_nodata"))}};
+  trPng(blob=>{if(!blob){say(T("ui.tr_nodata"));return}
+    try{if(navigator.clipboard&&window.ClipboardItem){navigator.clipboard.write([new ClipboardItem({"image/png":blob})]).then(()=>say(T("ui.tr_copy_ok")),()=>save(blob));return}}catch(e){}
+    save(blob)})}
 function trCursor(svg,i){
   const n=+svg.dataset.n,L=+svg.dataset.l,R=+svg.dataset.r,W=+svg.dataset.w,tip=svg.parentNode.querySelector(".trtip"),cur=svg.querySelector(".trcur");if(!n||!tip||!cur)return;
   i=Math.max(0,Math.min(n-1,i));TRCUR=i;const tr=TRLAST,sel=trDef(TRSEL)&&tr[TRSEL]?TRSEL:"red",ks=[sel].concat(TRCMP&&TRCMP!==sel&&tr[TRCMP]?[TRCMP]:[]).filter(k=>!TRHIDE.has(k));
   const cx=n<2?L+(W-L-R)/2:L+i/(n-1)*(W-L-R);cur.setAttribute("x1",cx);cur.setAttribute("x2",cx);cur.setAttribute("visibility","visible");
-  const dts=trData(tr,"red").d;tip.hidden=false;tip.textContent=(dts[i]||"")+" \u2014 "+ks.map(k=>{const d=trDef(k);return T(d[1])+": "+trFmt(trData(tr,k).v[i],d[3])}).join(" \u00b7 ");
+  const dts=trData(tr,"red").d;tip.hidden=false;tip.textContent=(dts[i]||"")+" \u2014 "+ks.map(k=>{const d=trDef(k);return trName(d)+": "+trFmt(trData(tr,k).v[i],d[3])}).join(" \u00b7 ");
   const w=svg.getBoundingClientRect().width,px=cx/W*w;tip.style.left=Math.max(0,Math.min(w-tip.offsetWidth,px+8))+"px"
 }
 (function(){
   const root=$("s-trend");if(!root)return;
-  root.addEventListener("change",e=>{const t=e.target;if(t.id==="tr-range"){TRR=parseInt(t.value)||30;store.set("am-tr-range",String(TRR))}else if(t.id==="tr-sel"){TRSEL=t.value;store.set("am-tr-sel",TRSEL)}else if(t.id==="tr-cmp"){TRCMP=t.value;store.set("am-tr-cmp",TRCMP)}else return;TRHIDE.clear();renderTrend()});
-  root.addEventListener("click",e=>{const x=e.target.closest&&e.target.closest("[data-trexp],[data-trleg],[data-trs]");if(!x)return;
+  root.addEventListener("change",e=>{const t=e.target;if(t.id==="tr-range"){TRR=parseInt(t.value)||30;store.set("am-tr-range",String(TRR))}else if(t.id==="tr-sel"){TRSEL=t.value;store.set("am-tr-sel",TRSEL)}else if(t.id==="tr-cmp"){TRCMP=t.value;store.set("am-tr-cmp",TRCMP)}else if(t.id==="tr-view"){TRVIEW=t.value==="bars"?"bars":"line";store.set("am-tr-view",TRVIEW)}else return;TRHIDE.clear();renderTrend()});
+  root.addEventListener("click",e=>{const x=e.target.closest&&e.target.closest("[data-trexp],[data-trleg],[data-trs],[data-trcopy]");if(!x)return;
+    if(x.dataset.trcopy){trCopy(x);return}
     if(x.dataset.trexp){trExport(x.dataset.trexp);return}
     if(x.dataset.trleg){const k=x.dataset.trleg;TRHIDE.has(k)?TRHIDE.delete(k):TRHIDE.add(k);renderTrend();return}
     if(x.dataset.trs){TRSEL=x.dataset.trs;store.set("am-tr-sel",TRSEL);TRHIDE.clear();renderTrend()}});
@@ -1489,7 +1514,7 @@ function renderSent0(){
   const ecoLabel=k=>I18N.ecosystems[k]||k;
   $("s-parte").innerHTML=s.parte.map(p=>`<div class="pline ${p.level} ${p.head?"head":""}">${esc(p.text)}</div>`).join("")
    +(s.by_ecosystem?`<table style="margin-top:8px"><thead><tr>${["ui.be_eco","ui.be_repos","ui.be_red","ui.be_stuck","ui.be_alerts","ui.be_prs","ui.be_cands","ui.be_unsigned","ui.be_hyg","ui.be_depoff"].map(h=>`<th>${esc(T(h))}</th>`).join("")}</tr></thead><tbody>${Object.keys(s.by_ecosystem).map(k=>{const r=s.by_ecosystem[k]||{};const c=(v,bad)=>`<td${v&&bad?' style="color:var(--bad);font-weight:600"':""}>${v||0}</td>`;return `<tr><td><b>${esc(ecoLabel(k))}</b></td><td>${r.repos||0}</td>${c(r.red,1)}${c(r.stuck,1)}${c(r.alerts,1)}${c(r.prs)}${c(r.candidates)}${c(r.pending_sign,1)}${c(r.hygiene)}${c(r.dep_off,1)}</tr>`}).join("")}</tbody></table>`:"");
-  TRLAST=s.a3.trend;renderTrend();
+  TRLAST=trPrep(s.a3.trend);renderTrend();
   const ai=s.ai||{};$("s-ai-state").textContent=ai.enabled?T("ui.ai_state",{provider:ai.provider,model:ai.model||"",used:ai.used_today||0,limit:ai.daily_limit,unavail:ai.available===false?T("ui.ai_unavailable",{msg:ai.message}):""}):T("ui.ai_off");
   // A1
   const stuck=s.a1.stuck.filter(r=>sVis(r.repo)),iss=s.a1.issues.filter(i=>sVis(i.repo));

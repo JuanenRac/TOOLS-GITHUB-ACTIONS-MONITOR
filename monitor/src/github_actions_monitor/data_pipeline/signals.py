@@ -23,7 +23,7 @@ _MAP = {"bad": "act", "warn": "watch"}
 # element of the page -> id of the signal that carries it ("decorative" = it shows nothing to act on, with the reason)
 COVERAGE = {
     "tab:now": "now.runs", "tab:al": "alerts.unresolved", "tab:rep": "decorative: the optional reports are read from GET /api/reports, not from the signals", "tab:les": "decorative: the lessons are read from GET /api/ai/lessons and travel in GET /api/ai/state as lessons", "tab:sent": "sentinel.*", "tab:charts": "decorative: trends are drawn from the same data (see sentinel.a3 and now.runs)",
-    "tab:repos": "repos.errors", "tab:team": "decorative: the ranking of the repositories is drawn from the alerts and the runs (see alerts.unresolved and now.runs)", "tab:sci": "decorative: the panels of the CI sentinel are the signals sentinel.* and now.* drawn by layer", "tab:scol": "decorative: the Collab sentinel alerts travel in the feed of alerts (see alerts.unresolved)", "tab:ssec": "decorative: the Security sentinel alerts travel in the feed of alerts (see alerts.unresolved)", "tab:fleet": "decorative: the fleet view groups the same ranking of the repositories as the Team health tab", "tab:trep": "decorative: the scheduled reports are files written by the monitor, listed by GET /api/report-files", "tab:sdel": "decorative: the Delivery sentinel alerts travel in the feed of alerts (see alerts.unresolved)", "tab:ssup": "decorative: the Supply chain sentinel alerts travel in the feed of alerts (see alerts.unresolved)", "tab:syvt": "decorative: yesterday against today is drawn from the reports saved by the CI sentinel (see sentinel.a3)", "tab:strend": "decorative: the daily trend is drawn from the history of the CI sentinel (see sentinel.a3)", "tab:upd": "decorative: the Updates menu reads GET /api/updates/status; it is a tool for the person, not a state of the monitor", "tab:hist": "now.fail24", "tab:cfg": "health.doctor",
+    "tab:repos": "repos.errors", "tab:team": "decorative: the ranking of the repositories is drawn from the alerts and the runs (see alerts.unresolved and now.runs)", "tab:sci": "decorative: the panels of the CI sentinel are the signals sentinel.* and now.* drawn by layer", "tab:scol": "decorative: the Collab sentinel alerts travel in the feed of alerts (see alerts.unresolved)", "tab:ssec": "decorative: the Security sentinel alerts travel in the feed of alerts (see alerts.unresolved)", "tab:fleet": "decorative: the fleet view groups the same ranking of the repositories as the Team health tab", "tab:trep": "decorative: the scheduled reports are files written by the monitor, listed by GET /api/report-files", "tab:sdel": "decorative: the Delivery sentinel alerts travel in the feed of alerts (see alerts.unresolved)", "tab:ssup": "decorative: the Supply chain sentinel alerts travel in the feed of alerts (see alerts.unresolved)", "tab:syvt": "decorative: yesterday against today is drawn from the reports saved by the CI sentinel (see sentinel.a3)", "tab:strend": "trend.daily", "tab:upd": "decorative: the Updates menu reads GET /api/updates/status; it is a tool for the person, not a state of the monitor", "tab:hist": "now.fail24", "tab:cfg": "health.doctor",
     "tile:kt-active": "now.runs", "tile:kt-queued": "now.runs", "tile:kp-fail": "now.fail24", "tile:kt-ok": "decorative: successes need nothing",
     "tile:kt-min": "decorative: compute minutes are in sentinel.a7", "tile:kt-issues": "alerts.issues", "tile:kp-red": "alerts.unresolved", "tile:kp-sign": "sentinel.a5",
     "tile:kt-repos": "decorative: a count of repositories", "tile:kt-hot": "decorative: a count of hot repositories", "tile:kt-mode": "health.mode",
@@ -52,7 +52,7 @@ def _age(stamp, now):
         return None
 
 
-def inventory(data, panels=None, health=None, now=None):
+def inventory(data, panels=None, health=None, now=None, daily_trend=None):
     """The signals of one cycle. `data` is what the page reads (/api/data), `panels` the output of sentinel_panels.panels (complete edition), `health` a dict of the health of the monitor."""
     now = time.time() if now is None else now
     data = data or {}
@@ -105,6 +105,8 @@ def inventory(data, panels=None, health=None, now=None):
     for panel in panels or []:
         rows = [_row(r.get("repo"), r.get("text"), r.get("url"), None, "open the panel " + panel["id"].upper() + " of the Sentinel tab and deal with it") for r in panel.get("rows") or []]
         out.append(_signal("sentinel." + panel["id"], panel["id"], _level(panel.get("level")), panel.get("summary") or panel.get("title"), rows))
+    if isinstance(daily_trend, dict) and daily_trend:
+        out.append(trend_signal(daily_trend))
     health = health or {}
     out.append(_signal("health.refresh", "health", "watch" if health.get("stale") else "info", f"data read {health.get('age_seconds', '?')} s ago", transient=bool(health.get("stale"))))
     low = health.get("working_mode") == "low"
@@ -122,10 +124,52 @@ def inventory(data, panels=None, health=None, now=None):
     return out
 
 
-def state(data, panels, edition, health=None, now=None, version=""):
+_TREND_LEFT_OUT = ("versions", "releases", "thresholds", "min_repo")
+
+
+def _last(values):
+    for value in reversed(values or []):
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            return value
+    return None
+
+
+def _change(values, back):
+    """The change of the last day against `back` days earlier; None when either day has no figure (a gap is not a zero)."""
+    if not values or len(values) <= back:
+        return None
+    a, b = values[-1], values[-1 - back]
+    ok = all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in (a, b))
+    return round(a - b, 2) if ok else None
+
+
+def trend_signal(trend):
+    """The daily trend of the sentinel as ONE signal of level info (it asks nothing of anybody): a row per series with its last figure, the change against yesterday and seven days ago and the days
+    that have no figure, the series of minutes of each repository, the days a release was published and the lines of the chart. Read from the history the sentinel already keeps."""
+    rows, days = [], 0
+    for key, doc in sorted(trend.items()):
+        if key in _TREND_LEFT_OUT or not isinstance(doc, dict) or "values" not in doc:
+            continue
+        values = doc.get("values") or []
+        days = max(days, len(values))
+        last, d1, d7 = _last(values), _change(values, 1), _change(values, 7)
+        gaps = sum(1 for v in values if v is None)
+        rows.append(_row("", f"{key}: {last if last is not None else 'no figure'}; change against yesterday {d1 if d1 is not None else 'unknown'}, against 7 days ago {d7 if d7 is not None else 'unknown'}; {gaps} day(s) without figure",
+                         "", None, "open the Daily trend tab or read a3.trend of GET /api/sentinel"))
+    per_repo = (trend.get("min_repo") or {}).get("repos") or {}
+    for repo, values in list(per_repo.items())[:8]:
+        rows.append(_row(repo, f"minutes24 of this repository: {_last(values) if _last(values) is not None else 'no figure'} (last of {len(values)} day(s))", "", None, "a3.trend.min_repo"))
+    releases = trend.get("releases") or {}
+    lines = trend.get("thresholds") or {}
+    summary = (f"{len(rows)} series over {days} day(s); a day without a figure is a gap, never zero; releases published on {len(releases)} day(s)" +
+               (": " + ", ".join(f"{k} {v}" for k, v in sorted(lines.items())) if lines else ""))
+    return _signal("trend.daily", "a3", "info", summary, rows)
+
+
+def state(data, panels, edition, health=None, now=None, version="", trend=None):
     """The document of `GET /api/ai/state`: versioned, read only, with the counters the page and the brief show."""
     now = time.time() if now is None else now
-    signals = inventory(data, panels, health, now)
+    signals = inventory(data, panels, health, now, trend)
     missing = [p for p in SENTINEL_PANELS] if edition == "lite" else []
     return {"schema": SCHEMA, "edition": edition, "version": version, "generated_epoch": int(now), "signals": signals,
             "act": sum(max(1, len(s["rows"])) for s in signals if s["level"] == "act" and not s["transient"]),

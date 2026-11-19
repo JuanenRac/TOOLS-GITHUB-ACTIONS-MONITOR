@@ -39,6 +39,7 @@ the repository, a link, how old it is and the next step. `GET /api/sentinel/pane
 | `sentinel.a8` | the panel `a8` of the Sentinel: A8 · Audits and rounds |
 | `sentinel.a9` | the panel `a9` of the Sentinel: A9 · GitHub roadmaps |
 | `sentinel.collab` | the panel `collab` of the Sentinel: Issues and pull requests |
+| `trend.daily` | the daily trend of the CI sentinel: a row per series with its last figure, the change against yesterday and 7 days ago and the days without a figure; always level info |
 
 ## Panels of the Sentinel
 

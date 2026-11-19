@@ -1566,8 +1566,14 @@ def ai_state(lang=None, data=None, panels=None):
             warnings.append("central panel behind: not trusted")
     except Exception as error:   # noqa: BLE001
         degraded.note("loop.extra", error)
+    trend = None
+    try:
+        sentinel = None if LITE["on"] else SENTINEL.get("obj")
+        trend = ((sentinel.snapshot() or {}).get("a3") or {}).get("trend") if sentinel is not None else None      # the daily trend of the CI sentinel, for its brief
+    except Exception as error:   # noqa: BLE001
+        degraded.note("loop.extra", error)
     doc = signals.state(data, panels, "lite" if LITE["on"] else "complete", {"age_seconds": age, "stale": stale, "warnings": warnings, "working_mode": MODE.name, "auto_mode": bool(MODE.auto),
-                                                                           "central": central}, version=TOOL_VERSION)
+                                                                           "central": central}, version=TOOL_VERSION, trend=trend)
     try:
         from github_actions_monitor.integrations import lessons
         doc["lessons"] = lessons.apply_now(config, limit=5) if lessons.settings(config)["enabled"] else []      # what the failures of this CI have already taught, for the AI that reads the state

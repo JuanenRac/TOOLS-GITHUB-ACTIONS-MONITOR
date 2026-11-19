@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "6aeae53d0bfffb38476cadf3c453ca9d8ec64b06bf70eebb2c2466287babb49a",
+ "digest": "a655dd0f07251b0acb7bbddcf33079e47b0d43a90f4460a0d82d1ca78706945c",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -78,6 +78,30 @@
     "key": "cli.prefer_v1",
     "kind": "bool",
     "default": true
+   },
+   {
+    "key": "sentinel.trend_green_pct",
+    "kind": "int",
+    "bounds": [
+     1,
+     100
+    ]
+   },
+   {
+    "key": "sentinel.trend_health",
+    "kind": "int",
+    "bounds": [
+     1,
+     100
+    ]
+   },
+   {
+    "key": "sentinel.trend_quota_pct",
+    "kind": "int",
+    "bounds": [
+     1,
+     100
+    ]
    }
   ],
   "removed": [],
