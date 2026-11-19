@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4477_passing-brightgreen.svg" alt="4477 tests">
+  <img src="https://img.shields.io/badge/Tests-4483_passing-brightgreen.svg" alt="4483 tests">
 </p>
 
 > Watches the workflows of every repository you own and tells you, on one local page, what is red, what is stuck and what is waiting for you.
@@ -82,7 +82,7 @@
 | | |
 |---|---|
 | **Maturity** | functional |
-| **Tests** | 4477 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 4483 test methods (`python -m unittest discover -s monitor/tests`) |
 | **Settings** | 706 settings, all with help |
 | **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
 | **Tested in the CI on** | ubuntu, windows, Python 3.11, 3.13 |
@@ -309,6 +309,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COMPLETE_SERVICE.md`](monitor/docs/COMPLETE_SERVICE.md): Complete edition as a service
 - [`monitor/docs/COMPLETE_TEAM.md`](monitor/docs/COMPLETE_TEAM.md): Complete edition for a team
 - [`monitor/docs/API.md`](monitor/docs/API.md): The API for clients
+- [`monitor/docs/API_V1.md`](monitor/docs/API_V1.md): The read API v1, step by step
 - [`monitor/docs/NOTIFICATIONS.md`](monitor/docs/NOTIFICATIONS.md): notifications and the adapter contract
 - [`monitor/docs/SKILLS.md`](monitor/docs/SKILLS.md): the two skills for AIs, how they are made and how to install them
 - [`monitor/docs/EXTRAS.md`](monitor/docs/EXTRAS.md): optional extras - the log of the failed step and a read-only token of the GitHub App

@@ -6,7 +6,8 @@
     python tools/check_api_contract.py                       the complete edition on 127.0.0.1:8765
     python tools/check_api_contract.py --lite                the lite edition on 127.0.0.1:8766
     python tools/check_api_contract.py --url http://host:8765 --token-file token.txt
-    python tools/check_api_contract.py --v1                   the routes under /api/v1/ (the monitor must have api.v1_enabled on)
+    python tools/check_api_contract.py --v1                   everything under /api/v1/ (the monitor must have api.v1_enabled on): the frozen shapes of its own routes AND the whole
+                                                              contract suite for clients (tools/api_contract_suite.py), so that this tool is the one place to ask "does the contract hold?"
 
 It only reads (GET, plus one POST to a path that does not exist), asks GitHub for nothing and prints one line per failure and a last line `CONTRACT=PASS` or `CONTRACT=FAIL`.
 The exit code is 0 when it passes. A key the contract does not list is allowed (an answer may grow); a key it lists must be there with its type.
@@ -120,6 +121,18 @@ def check_v1(call, contract=None):
     return problems
 
 
+def check_v1_suite(url, token="", timeout=30.0):
+    """The contract suite for clients (tools/api_contract_suite.py, next to this file) run against `url`: one problem per failed check. Nothing is checked twice - the suite takes the document the server serves
+    as the description of what to look for, and this tool only adds the shapes frozen in `v1_endpoints`."""
+    import importlib.util
+    path = Path(__file__).resolve().parent / "api_contract_suite.py"
+    spec = importlib.util.spec_from_file_location("api_contract_suite", path)
+    suite = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(suite)
+    report = suite.run(suite.Client(url, token, timeout))
+    return [f"suite: {row['check']}: {row['detail']}" for row in report.failed]
+
+
 def make_caller(url, token=""):
     parts = urlsplit(url)
     name, port = parts.hostname, parts.port or (443 if parts.scheme == "https" else 80)
@@ -155,7 +168,7 @@ def main(argv=None):
     url = args.url or ("http://127.0.0.1:8766" if args.lite else "http://127.0.0.1:8765")
     token = Path(args.token_file).read_text(encoding="utf-8").strip() if args.token_file else ""
     try:
-        problems = check_v1(make_caller(url, token)) if args.v1 else check(make_caller(url, token), "lite" if args.lite else "complete")
+        problems = (check_v1(make_caller(url, token)) + check_v1_suite(url, token)) if args.v1 else check(make_caller(url, token), "lite" if args.lite else "complete")
     except OSError as error:
         print(f"no answer from {url}: {error}")
         print("CONTRACT=FAIL")
