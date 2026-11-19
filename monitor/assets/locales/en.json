@@ -4348,5 +4348,22 @@
  "cfg.h.ai.prompt_log.keep": "How many of the newest lines the record keeps; older ones are dropped.",
  "ui.cfg_u_lines": "lines",
  "ai.doc_model_retired": "The model {model} is in your list of retired models (config/ai_models.json): it is skipped and the next of the chain answers.",
- "ai.doc_model_use": "Use {use} instead."
+ "ai.doc_model_use": "Use {use} instead.",
+ "ui.asst_a_explain_repo": "Situation of a repository",
+ "ui.asst_a_prioritize": "What to do first",
+ "ui.ai_col_origin": "Origin",
+ "ui.ai_src_manual": "page",
+ "ui.ai_src_file": "file",
+ "ui.ai_src_provider": "provider",
+ "ui.pl_h": "Record of prompts",
+ "ui.pl_help": "The questions sent to the AI and its answers, already cleaned of secrets and of your hidden words, kept in a local file while ai.prompt_log.enabled is on. Only an administrator can read or empty it.",
+ "ui.pl_show": "Show the last ones",
+ "ui.pl_clear": "Empty the record",
+ "ui.pl_off": "The record is off (ai.prompt_log.enabled).",
+ "ui.pl_empty": "The record is empty.",
+ "ui.pl_cleared": "Emptied: {n} lines removed.",
+ "ui.pl_confirm": "Empty the record of prompts?",
+ "ui.pl_count": "{n} entries (it keeps the last {keep}).",
+ "ui.pl_denied": "Only an administrator on this computer can do this.",
+ "ui.pl_failed": "no answer"
 }

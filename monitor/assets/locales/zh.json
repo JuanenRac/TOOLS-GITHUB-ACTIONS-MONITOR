@@ -4348,5 +4348,22 @@
  "cfg.h.ai.prompt_log.keep": "记录保留的最新行数;更早的会被丢弃。",
  "ui.cfg_u_lines": "行",
  "ai.doc_model_retired": "模型 {model} 在您的已退役模型列表(config/ai_models.json)中:它会被跳过,由链中的下一个模型回答。",
- "ai.doc_model_use": "请改用 {use}。"
+ "ai.doc_model_use": "请改用 {use}。",
+ "ui.asst_a_explain_repo": "某个仓库的情况",
+ "ui.asst_a_prioritize": "首先该做什么",
+ "ui.ai_col_origin": "来源",
+ "ui.ai_src_manual": "页面",
+ "ui.ai_src_file": "文件",
+ "ui.ai_src_provider": "提供商",
+ "ui.pl_h": "提示词记录",
+ "ui.pl_help": "发送给 AI 的问题及其回答，已去除机密和您隐藏的词，在 ai.prompt_log.enabled 开启期间保存在本地文件中。只有管理员可以读取或清空。",
+ "ui.pl_show": "显示最近的",
+ "ui.pl_clear": "清空记录",
+ "ui.pl_off": "记录已关闭（ai.prompt_log.enabled）。",
+ "ui.pl_empty": "记录为空。",
+ "ui.pl_cleared": "已清空：移除 {n} 行。",
+ "ui.pl_confirm": "清空提示词记录？",
+ "ui.pl_count": "{n} 条（保留最近 {keep} 条）。",
+ "ui.pl_denied": "只有本机的管理员可以执行此操作。",
+ "ui.pl_failed": "无回答"
 }
