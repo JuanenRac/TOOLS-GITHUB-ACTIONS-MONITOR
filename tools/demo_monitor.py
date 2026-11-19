@@ -165,7 +165,8 @@ def rich_alerts(now, iso):
             one("security.dependabot", "warning", "demo-beta-fw", "demo-beta-fw: 4 open Dependabot alerts (1 critical)", 100),
             one("security.branch_unprotected", "warning", "demo-gamma-ui", "demo-gamma-ui: the default branch is not protected", 260),
             one("security.codeowners_missing", "info", "demo-beta-docs", "demo-beta-docs: no CODEOWNERS file", 500),
-            one("security.workflow_write", "warning", "demo-alpha-core", "demo-alpha-core: the workflow token can write by default", 150)]
+            one("security.workflow_write", "warning", "demo-alpha-core", "demo-alpha-core: the workflow token can write by default", 150),
+            one("security.runs_deleted", "error", "demo-gamma-api", "demo-gamma-api: 1 workflow run was deleted after the monitor saw it", 30)]
 
 
 def rich_tabs(config, snap, now):

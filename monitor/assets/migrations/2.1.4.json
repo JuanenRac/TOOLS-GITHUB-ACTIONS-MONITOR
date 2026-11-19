@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "0868630eea488db79dd77c1b5b456e40a5af657d5a9d8d2e886c056260532899",
+ "digest": "79af8ce40411153b0ed7e7fcd8acc4c8d152a6ee6e2e82a3594752943c82c018",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -249,12 +249,36 @@
     ]
    },
    {
+    "key": "sentinels.security.signals.runs_deleted.check_window_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     90
+    ]
+   },
+   {
+    "key": "sentinels.security.signals.runs_deleted.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.security.signals.runs_deleted.max_checks",
+    "kind": "int",
+    "bounds": [
+     1,
+     500
+    ]
+   },
+   {
     "key": "sentinels.supply.deadline_s",
     "kind": "int",
     "bounds": [
      0,
      600
     ]
+   },
+   {
+    "key": "sentinels.supply.incremental",
+    "kind": "bool"
    },
    {
     "key": "startup.resume_max_age_hours",
