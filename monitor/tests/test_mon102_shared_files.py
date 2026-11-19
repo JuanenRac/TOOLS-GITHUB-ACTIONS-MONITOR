@@ -69,7 +69,6 @@ class NoUpdateIsLost(unittest.TestCase):
     def test_four_processes_counting_under_the_lock_of_the_operating_system(self):
         self.count("os")
 
-    @unittest.skipIf(sys.platform == "win32", "on Windows a lock file that cannot be deleted at once (a scanner has it open) stays with a live owner until it is ten times the stale time: known, planned")
     def test_four_processes_counting_under_the_lock_file(self):
         self.count("file")
 

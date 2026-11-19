@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "0789129926f1da47bd3e9a19842e1974026f6df9e9d332c9c68d4497fdd6ff23",
+ "digest": "94af4b665165f39700112f587bc43cbedca42d16b6ddbaa042dbe56c4e04f4fb",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -125,6 +125,19 @@
     "bounds": [
      0,
      100
+    ]
+   },
+   {
+    "key": "lint.rules.permissions_top.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "lint.rules.permissions_top.severity",
+    "kind": "enum",
+    "bounds": [
+     "info",
+     "warn",
+     "bad"
     ]
    },
    {

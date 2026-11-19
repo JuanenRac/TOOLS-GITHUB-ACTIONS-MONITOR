@@ -18,7 +18,7 @@ import unicodedata
 from github_actions_monitor.integrations import similar_alerts
 from github_actions_monitor.security import redactor
 
-ACTIONS = ("explain_alert", "summarize_week", "why_slow")
+ACTIONS = ("explain_alert", "summarize_week", "why_slow", "explain_repo", "prioritize")
 TOOLS = ("status", "alerts", "runs", "score")      # the closed list: nothing else can be called, whatever the settings or the model say
 DEFAULT_TOOLS = ["status", "alerts", "runs", "score"]
 DEFAULTS = {"enabled": False, "max_context": 6000, "tools": list(DEFAULT_TOOLS), "max_tool_calls": 4}
@@ -226,6 +226,33 @@ def build_context(action, args, toolbox, nonce, limit, similar=None, history=Non
         if "score" in toolbox.allowed:
             try:
                 parts += ["SCORE:"] + _lines(toolbox.call("score"), nonce, limit, "  ")
+            except AssistantError as error:
+                if error.code != "calls":
+                    raise
+    elif action == "prioritize":
+        parts.append("QUESTION: put what needs attention in order: which repository or alert comes first, which second, and why. Use only the data below and name the ids.")
+        if "alerts" in toolbox.allowed:
+            parts += ["OPEN ALERTS:"] + _lines(toolbox.call("alerts", repo=repo), nonce, limit, "  ")
+        if "status" in toolbox.allowed:
+            try:
+                parts += ["STATUS:"] + _lines(toolbox.call("status"), nonce, limit, "  ")
+            except AssistantError as error:
+                if error.code != "calls":
+                    raise
+        if "score" in toolbox.allowed:
+            try:
+                parts += ["SCORE:"] + _lines(toolbox.call("score"), nonce, limit, "  ")
+            except AssistantError as error:
+                if error.code != "calls":
+                    raise
+    elif action == "explain_repo":
+        parts.append("QUESTION: describe the situation of this repository in a few lines: what is red or open, what the numbers show and what to do first. Say plainly when the data does not show something.")
+        if not repo:
+            raise AssistantError("argument")
+        parts += ["CI OF THE REPOSITORY:"] + _lines(toolbox.call("runs", repo=repo), nonce, limit, "  ")
+        if "alerts" in toolbox.allowed:
+            try:
+                parts += ["OPEN ALERTS:"] + _lines(toolbox.call("alerts", repo=repo), nonce, limit, "  ")
             except AssistantError as error:
                 if error.code != "calls":
                     raise

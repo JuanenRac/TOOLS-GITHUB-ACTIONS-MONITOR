@@ -551,6 +551,10 @@
       "own_action_main": {
         "enabled": false,
         "severity": "info"
+      },
+      "permissions_top": {
+        "enabled": false,
+        "severity": "info"
       }
     }
   },

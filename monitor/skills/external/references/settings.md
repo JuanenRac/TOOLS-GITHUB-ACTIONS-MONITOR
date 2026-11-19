@@ -286,6 +286,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `lint.rules.own_action_main.severity` | `-` | lint | lint.rules.own_action_main.severity |
 | `lint.rules.permissions.enabled` | `-` | lint | lint.rules.permissions.enabled |
 | `lint.rules.permissions.severity` | `-` | lint | lint.rules.permissions.severity |
+| `lint.rules.permissions_top.enabled` | `-` | lint | lint.rules.permissions_top.enabled |
+| `lint.rules.permissions_top.severity` | `-` | lint | lint.rules.permissions_top.severity |
 | `lint.rules.pr_target.enabled` | `-` | lint | lint.rules.pr_target.enabled |
 | `lint.rules.pr_target.severity` | `-` | lint | lint.rules.pr_target.severity |
 | `lint.rules.secrets_in_clear.enabled` | `-` | lint | lint.rules.secrets_in_clear.enabled |
