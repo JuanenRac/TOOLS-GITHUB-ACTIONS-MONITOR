@@ -1,8 +1,8 @@
 DOCKER CHECKS OF THE MONITOR IMAGE (tools/docker_audit/)
 
 WHAT IT IS
-Eight checks that build the image of a version and run it in REAL containers: the basic start and the API contract, the team mode, a trusted proxy (Caddy with its own TLS), the hardening,
-the volumes and the migration from the previous version, the secrets, the shutdown, and the incoming webhook behind the proxy. Each check writes one JSON and one text file with every
+Nine checks that build the image of a version and run it in REAL containers: the basic start and the API contract, the team mode, a trusted proxy (Caddy with its own TLS), the hardening,
+the volumes and the migration from the previous version, the secrets, the shutdown, the incoming webhook behind the proxy, and the files shared by several processes (the locks). Each check writes one JSON and one text file with every
 command it ran, what came back, and one verdict per check: PASS, FAIL or NO-APLICA (not applicable, with the reason). The exit code is not 0 when a check fails.
 It publishes nothing, signs in to no registry, uses no secret of the repository and calls GitHub for nothing: the GitHub CLI inside the containers is a stand-in (deploy/test/fake_gh.py)
 and every token, password and secret of a run is made up for that run.
@@ -17,11 +17,11 @@ Follow it with `gh run list --workflow docker-audit.yml` and `gh run view RUN_ID
 HOW TO READ THE RESULT
 1. The summary of the run (the "Summary" job, or `gh run view RUN_ID`) has a table: one row per check with its verdict, the checks passed, the seconds, and below the table the evidence of
    every failed check and the notes. A note never changes a verdict: it records something worth reading (a measurement, a behaviour the guide documents).
-2. The artifact `docker-audit-<version>` (`gh run download RUN_ID -n docker-audit-v2.0.8`) holds E1.json ... E8.json, E1.txt ... E8.txt, summary.md and summary.json. In a .txt file the
+2. The artifact `docker-audit-<version>` (`gh run download RUN_ID -n docker-audit-v2.0.8`) holds E1.json ... E9.json, E1.txt ... E9.txt, summary.md and summary.json. In a .txt file the
    verdict is on the third line, then the environment (Docker, Compose, the digests of the base images, the Caddy image), the checks and finally every command with its exit code and output.
 3. FAIL means a check of the container did not hold. A line that starts with `the script of this check ran to the end (SCRIPT-ERROR)` is a fault of the script itself, not of the image.
 
-THE EIGHT CHECKS
+THE NINE CHECKS
 E1 e1_basic_start.py   the image starts as a service and becomes healthy by its own health check; without the access token every request is refused; the frozen contract of the API
                        (monitor/tools/check_api_contract.py) holds on the published port and inside the container.
 E2 e2_team_mode.py     team mode: the first administrator comes from MONITOR_ADMIN_USER and a password file; a second start needs neither; a start with no administrator stops and says how to
@@ -37,6 +37,9 @@ E6 e6_secrets.py       with every secret given as a file: none of their values i
                        image, or in the environment or command line of a process of the container.
 E7 e7_shutdown.py      docker stop (SIGTERM) ends the service by itself and loses nothing; a start after kill -9 finds the data whole; a memory limit of 256 MiB holds under a burst.
 E8 e8_webhook.py       the incoming webhook behind the proxy: valid and invalid signatures, a replayed delivery, a body that is too big, and the rate limit: it must count the visitor, not the proxy.
+
+E9 e9_shared_files.py  four processes inside the container add to one counter 40 times each with the lock of the operating system and with the lock file: not one increment is lost; a process killed while it
+                       holds the lock lets go of it at once; the container is still healthy at the end. (The two visitors, one locked and the other not, are checked in E3.)
 
 RUN THE SAME CHECKS ON A LINUX MACHINE WITH DOCKER
 Needs Docker (with the Compose plugin for E3 and E8), Python 3.8 or newer, and nothing else (no package, no account). Ports 80, 443 and 8765 on 127.0.0.1 must be free and the user must be
