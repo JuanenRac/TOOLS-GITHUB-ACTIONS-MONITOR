@@ -34,6 +34,7 @@ Which way fits which kind of tool, and how the skill and the monitor stay on the
 - READ: alerts, the brief, signals, lessons that apply now, the book of failures, quota, health, paths.
 - BE TOLD: stream of events, or relay the brief every few minutes (`references/protocol.md`).
 - WRITE (permissions in `references/roles.md`): acknowledge an alert (`POST /api/ai/ack`, maintainer, local state only, and only from the computer where the monitor runs: from another machine it answers 403 `local_only`); propose or write a lesson (`POST /api/ai/lessons`, needs `lessons.allow_write`, an administrator and a confirmation); register failures (`POST /api/ai/failures`, same permissions); your own notification preferences (`/api/auth/me/notify`, team mode).
+- The assistant (`ai.assistant.enabled`, off by default) is for the person at the page: it asks the AI built into the monitor one of three fixed questions (`POST /api/assistant/ask`, 404 while it is off) and spends the daily budget of that AI. You already read the same data directly, so do not call it to answer a person: read the brief and the signals yourself.
 - Never: write to GitHub through the monitor without a plan and a person's confirmation, change settings by yourself, silence alerts to make a brief shorter.
 
 ## Before every push

@@ -132,6 +132,8 @@ def password_problem(password, username, minimum):
 #: POST routes a maintainer may use (they only change what belongs to the monitor); every other POST is for an admin, so a route added later is closed until someone lists it here on purpose
 MAINTAINER_POST = ("/api/alerts/mute", "/api/alerts/unmute", "/api/ai/ack", "/api/hot-only", "/api/mode", "/api/refresh-repos", "/api/sentinel/parte/save", "/api/discovery/group", "/api/welcome",
                    "/api/session-token")
+#: POST routes a viewer may use because they only READ (and spend the one daily budget of the AI): the assistant answers a fixed question from what that role already sees
+VIEWER_POST = ("/api/assistant/ask",)
 #: GET routes only an admin reads (they describe what is configured to reach the outside)
 MAINTAINER_GET = ("/api/audit-log",)      # the log of actions: never a viewer (an administrator, or a maintainer when audit_log.maintainers_can_read says so, is decided by the route)
 ADMIN_GET = ("/api/run-log", "/api/github-token", "/api/advanced", "/api/github-app/status", "/api/auth/users", "/api/auth/audit")
@@ -148,6 +150,8 @@ def required_role(method, path):
         return None
     if method in ("GET", "HEAD"):
         return "admin" if path in ADMIN_GET else ("maintainer" if path in MAINTAINER_GET else "viewer")
+    if path in VIEWER_POST:
+        return "viewer"
     if path in MAINTAINER_POST:
         return "maintainer"
     if path == "/api/auth/password":      # everybody changes their own password

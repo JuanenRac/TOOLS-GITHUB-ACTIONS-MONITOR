@@ -73,6 +73,10 @@ Besides the feed that an AI reads (`ALERTS_BRIEF.md`, the stream, the MCP server
 
 The notice is sent from a thread of its own, so a slow provider never holds the cycle.
 
+## The assistant (optional, off by default)
+
+The Alerts tab can show a panel of fixed questions that the AI you already configured answers from the data of the monitor: "explain this alert", "summarise the situation" and "why is it slow here". It is off (`ai.assistant.enabled`) and needs an AI provider (`ai.provider`, none by default). It only reads: it has four tools (`status`, `alerts`, `runs`, `score`, a closed list that `ai.assistant.tools` can narrow), at most `ai.assistant.max_tool_calls` readings per question, no tool that writes or reaches GitHub, and no free chat. The answer always shows its sources (the ids it read), how much was sent (`ai.assistant.max_context`) and the calls of the day; every call spends the one daily budget of the AI (`ai.daily_limit` and the budgets per model). What a repository wrote (a title, the name of a workflow) is cut to `ai.untrusted_text_max`, cleaned of secrets and handed over as data between marks that carry a word of that request, never as an instruction. A viewer may ask; each question is recorded in the log of actions (the action, never the text). Routes: `GET /api/assistant` (what it is and its limits) and `POST /api/assistant/ask` with `action` (`explain_alert`, `summarize_week` or `why_slow`) and, as the action needs, `alert` or `repo`; both answer 404 while it is off and do not exist in the Lite edition.
+
 ## Models of the provider
 
 The name of the model is free text, but the monitor can read the list of models from the provider and check the name against it. Models and versions change often, so the monitor ships no list of models: the examples of the presets may be out of date.
