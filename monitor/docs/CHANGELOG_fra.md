@@ -15,6 +15,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Un guide à part pour l'assistant, `ASSISTANT.md`, en huit langues** : comment l'activer, ses cinq questions fixes, les quatre outils avec lesquels il lit, ce qu'il ne fait jamais (il n'écrit rien, ne touche à rien sur GitHub, remet comme donnée ce qu'un dépôt a écrit) et comment le vérifier avec les deux routes et le journal des prompts. La section de `AI_CONNECTION.md` reste la référence des réglages.
+
+- **Aide avec coût et effet sur cinq interrupteurs de plus** : l'infobulle de `ai.assistant.enabled`, `ai.prompt_log.enabled`, `ai.similar.enabled`, `ai.airgapped` et `api.v1_enabled` dit maintenant ce que vous verrez et ce que cela coûte, dans les huit langues, à côté de la ligne générique que chaque réglage avait déjà.
+
 - **Le journal des prompts et l'origine des chiffres d'un modèle, dans la page** : sous l'IA dans les Réglages, une carte « Journal des prompts » montre les 20 dernières entrées (déjà nettoyées des secrets et de vos mots cachés) et vide le journal avec un bouton, pour un administrateur sur cet ordinateur ; le tableau des modèles a une colonne « Origine » (la page, le fichier `config/ai_models.json` ou le fournisseur) pour voir d'où vient chaque chiffre. Les deux dans les huit langues.
 
 - **Deux questions de plus pour l'assistant, toutes deux en lecture seule** : « la situation d'un dépôt » (`explain_repo`, d'après ses exécutions et ses alertes ouvertes) et « quoi faire en premier » (`prioritize`, les alertes ouvertes, l'état et le score mis en ordre avec leurs identifiants) s'ajoutent aux trois existantes ; elles utilisent les mêmes quatre outils, limites et budget quotidien de l'IA, et il n'y a toujours pas de discussion libre.

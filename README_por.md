@@ -310,6 +310,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COMPLETE_TEAM_por.md`](monitor/docs/COMPLETE_TEAM_por.md): Edição completa para uma equipa
 - [`monitor/docs/API_por.md`](monitor/docs/API_por.md): A API para clientes
 - [`monitor/docs/API_V1_por.md`](monitor/docs/API_V1_por.md): A API de leitura v1, passo a passo
+- [`monitor/docs/ASSISTANT_por.md`](monitor/docs/ASSISTANT_por.md): O assistente: perguntas fixas só de leitura à sua IA
 - [`monitor/docs/NOTIFICATIONS_por.md`](monitor/docs/NOTIFICATIONS_por.md): notificações e o contrato dos adaptadores
 - [`monitor/docs/AI_por.md`](monitor/docs/AI_por.md): o assistente de IA: fornecedores, segurança e ações
 - [`monitor/docs/ANALYTICS_por.md`](monitor/docs/ANALYTICS_por.md): análises, leituras condicionais e ligação perdida
