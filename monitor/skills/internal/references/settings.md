@@ -486,6 +486,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `screens.logo_now` | `false` | general | Logo on the screen: Right now |
 | `screens.logo_overview` | `true` | general | Logo on the screen: Overview |
 | `screens.logo_sentinels` | `false` | general | Logo on the screen: Sentinels |
+| `screens.menu` | `true` | general | Screens menu in the top bar |
+| `screens.menu_max_windows` | `4` | general | Most windows of a multi-monitor set |
+| `screens.menu_rotate_seconds` | `20` | general | Seconds per screen in the turning presets |
+| `screens.menu_target` | `"new"` | general | Where the Screens menu opens a screen |
+| `screens.menu_tv_scale` | `1.5` | general | Size of the TV preset |
 | `screens.mode` | `"three"` | general | Wall screens mode |
 | `screens.night_dim` | `false` | general | Dim at night |
 | `screens.night_dim_from_hour` | `22` | general | Dim from (hour) |

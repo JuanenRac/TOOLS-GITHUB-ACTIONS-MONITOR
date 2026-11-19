@@ -118,6 +118,7 @@ NOTES = {
     "/api/health": ("GET", "is it alive; `?deep=1` fails when the refresh cycle is stuck"),
     "/api/help/search": ("GET", "search the documentation"),
     "/api/screens/logo": ("GET, POST", "the logo of the organization for the wall screens: GET returns the image itself with its real type; POST uploads it as the body of the request (PNG, JPEG, WebP or SVG, at most 1 MB, the type is checked by the first bytes and an SVG with scripts or links is refused; it is kept in the data folder, never in the configuration; an administrator, a session token)"),
+    "/api/screens/menu": ("GET", "the Screens menu of the page: every kind of screen (the page, kiosks, tab screens, the wall screens, the TV, a set of monitors) with its address, the parameters it accepts and whether it can be opened here; navigation only"),
     "/api/screens/logo/info": ("GET", "whether a logo was uploaded: `present`, `kind`, `bytes` and the `tag` that goes in the address of the image"),
     "/api/screens/logo/remove": ("POST", "removes the logo of the organization (an administrator)"),
     "/api/help/topic": ("GET", "one documentation topic"),

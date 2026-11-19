@@ -17,6 +17,11 @@ when this file and `tool_version.py` disagree.
 
 ### Added
 
+- A Screens menu in the top bar lists every kind of screen the monitor has (the page, kiosks, the tab screens, the three wall screens, a wall that turns, a TV preset and a set for several monitors), with a description, the parameters each address accepts (theme, density, refresh, scale, language, rotation, repository filter), a copy of the full address and the choice of opening it in a new window or in the same tab; for several monitors it opens one window per monitor with the layout chosen, placing each on its own monitor when the browser has the Window Management API and listing kiosk commands otherwise
+
+- The catalogue of the Screens menu is also read by tools: `GET /api/screens/menu`, the new command `screens` of the command line (`screens list`, `screens urls`) and the MCP tool `screens_menu`; the three only read
+
+- Five settings for the Screens menu: `screens.menu` (on by default; it only navigates), `screens.menu_target` (new window or same tab), `screens.menu_max_windows`, `screens.menu_rotate_seconds` and `screens.menu_tv_scale`, each with its help in Settings
 - **An optional lint rule for a workflow with no `permissions:` block at the top of the file**: `permissions_top` (off until `lint.rules.permissions_top.enabled`, information by default, `lint.rules.permissions_top.severity`) names the files whose jobs set their own permissions while the file sets none, so a job added later would get the broader default token. It says nothing when the file has no permissions anywhere (the older `permissions` rule already does). The label, the help and the documentation exist in the eight languages.
 
 - **The update of the page is tested end to end with real processes**: a test can point the updater of the page at a local zip (`MONITOR_TEST_HOOKS=1` with `MONITOR_TEST_UPDATE_ZIP`; without both nothing changes, and the zip goes through the same checks of contents, members and SHA-256 as any other), and new tests apply it in a second process, go back with the rollback and check that the version, the files and the data return as they were, that `--start` brings the new version up and checks its health, and that `--handover` waits for the running monitor to stop before it starts the new one.
