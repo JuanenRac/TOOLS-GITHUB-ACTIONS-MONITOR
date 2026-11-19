@@ -9,6 +9,7 @@ A red workflow is useless if nobody who works on the repository hears about it. 
 
 ## What it writes (local, read only, no network)
 - `ai_alerts.jsonl`: one line per event (opened, acknowledged, resolved) with a stable id, severity, repository, workflow, conclusion, since when, streak, link, a probable cause (**real** or **transient**), a suggested action and the state.
+- Each alert of the feed (`GET /api/ai/alerts` and the state file) also says since when it fails and when it was last looked at: `first_failed`, `last_failed` and `last_checked` (epoch seconds), and a `status`: `failed` (open), `suppressed` (acknowledged by a person, still counted in the brief) or `passed` (closed).
 - `ALERTS_BRIEF.md`: rewritten at every cycle, short (`ai_alerts.brief_max_bytes`, 2 KB by default). Real alerts come first.
 - Transient causes (502/503/504, time-outs, rate limits, download failures, a run that never started) are told apart from real failures with rules you can edit in `ai_alerts.transient_patterns`. An alert is resolved by itself when the workflow turns green, and you can acknowledge it (`ack`), which only changes this local state.
 - Everything goes through ONE cleaner first (tokens, keys, credentials inside addresses, e-mail addresses, IP addresses and your home folder): the files, the endpoints (`/api/ai/state`, `/api/ai/alerts`, `/api/ai/brief`), the stream, the MCP server and the hook. It works by pattern: it lowers the risk, it is not a guarantee, so do not rely on it for a secret of an unusual shape.

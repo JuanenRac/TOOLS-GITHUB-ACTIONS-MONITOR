@@ -279,7 +279,8 @@ def brief(alerts, limit, now=None, panels=None, sections="", status=""):
             followers.setdefault(a["origin"]["id"], []).append(a)
     roots = [a for a in live if not a.get("origin")]
     stamp = time.time() if now is None else now
-    head = f"{real} real alert(s) open, {len(live)} in total" + (f", in {sum(1 for a in roots if a['class'] == 'real' and a['state'] == 'open')} independent group(s)" if followers else "")
+    suppressed = sum(1 for a in live if a["state"] == "acknowledged")
+    head = f"{real} real alert(s) open, {len(live)} in total" + (f", {suppressed} suppressed (acknowledged, still counted)" if suppressed else "") + (f", in {sum(1 for a in roots if a['class'] == 'real' and a['state'] == 'open')} independent group(s)" if followers else "")
     lines = ["# CI alerts", "", head + ". Transient ones usually clear by themselves; re-run once before you dig.", f"Updated: {tzdisplay.stamp(stamp)}", f"updated_epoch: {int(stamp)}"] + ([f"Monitor: {status}"] if status else []) + [""]
     for a in roots:
         mark = {"open": "", "acknowledged": " (acknowledged)"}[a["state"]]
@@ -403,13 +404,16 @@ def _update_locked(cfg, folder, account, red_rows, now, texts, fresh, panels, se
         seen.add(alert["id"])
         if old and old.get("state") != "resolved":
             alert["state"], alert["first_seen"] = old["state"], old.get("first_seen", int(now))
+            alert["first_failed"] = old.get("first_failed", alert["first_seen"])
         else:
             alert["state"], alert["first_seen"] = "open", int(now)
+            alert["first_failed"] = int(now)
             opened.append(alert)
+        alert["last_failed"] = alert["last_checked"] = int(now)      # it is red in this reading: the age of the finding is first_failed .. last_failed, and last_checked says it was looked at
         state[alert["id"]] = alert
     for key, old in list(state.items()):
         if key not in seen and old.get("state") != "resolved" and (old.get("account_id") or "") == account:      # only the alerts of THIS account: an alert of another account is not in this snapshot and is not closed by its absence
-            old["state"], old["resolved_at"] = "resolved", int(now)
+            old["state"], old["resolved_at"], old["last_checked"] = "resolved", int(now), int(now)
             resolved.append(old)
     for item in state.values():
         if not cfg["cascade"]["enabled"]:
@@ -466,11 +470,15 @@ def ack(config, alert_id_, now=None):
         return False
 
 
+STATUS_OF = {"open": "failed", "acknowledged": "suppressed", "resolved": "passed"}      # the three states of a finding: failed (open), suppressed (acknowledged by a person, still counted) and passed (closed)
+
+
 def alerts(config, since=0, states=None):
-    """The alerts as a list of dicts with the closed list of fields (plus `first_seen`), those changed after `since` (epoch seconds)."""
+    """The alerts as a list of dicts with the closed list of fields (plus `first_seen`, the age of the finding: `first_failed`, `last_failed`, `last_checked`, and its `status`: failed, suppressed or passed), those changed after `since` (epoch seconds)."""
     cfg = settings(config)
     state = _read(folder_of(cfg) / STATE, {})
-    return redact_data([{**{k: a.get(k) for k in FIELDS + EXTRA}, "first_seen": a.get("first_seen")} for a in sorted(state.values(), key=lambda a: (a["repo"], a["workflow"]))
+    return redact_data([{**{k: a.get(k) for k in FIELDS + EXTRA}, "first_seen": a.get("first_seen"), "first_failed": a.get("first_failed", a.get("first_seen")), "last_failed": a.get("last_failed"),
+                                                                              "last_checked": a.get("last_checked"), "status": STATUS_OF.get(a.get("state"), "failed")} for a in sorted(state.values(), key=lambda a: (a["repo"], a["workflow"]))
                         if (states is None or a.get("state") in states) and max(a.get("first_seen", 0), a.get("resolved_at", 0)) >= since])      # a state file written by an older version is cleaned on the way out
 
 
