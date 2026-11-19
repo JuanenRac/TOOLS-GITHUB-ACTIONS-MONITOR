@@ -396,6 +396,9 @@
     "events": ["build", "codeql", "report"],
     "allowed_repos": [],
     "answer_language": "",
+    "report_summary": {
+      "enabled": false
+    },
     "catalog": {
       "enabled": false,
       "ttl_minutes": 360,
