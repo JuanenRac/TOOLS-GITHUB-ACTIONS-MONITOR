@@ -16,6 +16,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- **The example file of the settings carries 221 more settings**: the Settings page takes the default it shows from the example file, and 221 settings of the AI, the delivery and supply sentinels, the backups, the doctor, the pool of reads, the sounds, the webhook and the alerts were not in it, so the page showed no default for them. Each one now carries the value the code uses when the setting is absent; the register of surfaces lists the 61 that still lack it.
+
+- **The 36 routes of the page that no guide named are in a table**: `API.md`, in the eight languages, ends with a table of the routes of the page that the contract does not freeze (the About panel, the guided runs with `act` and on GitHub, the actions of the AI, the analytics, the discovery, the help, the mode, the status bar, the logo and the rest), with what each one does and which ones only this computer may use; the register of surfaces no longer lists them as missing.
+
 - **The progress of an update as server-sent events**: `GET /api/updates/stream` sends `hello`, one `progress` frame each time the progress file of the updater changes, keep-alive comments and `bye` when nothing runs any more (at most two listeners, 15 minutes each, read only, no new setting). The Updates menu uses it while an update runs and keeps asking every second and a half when the browser has no EventSource or the monitor restarts. Both skills list the route.
 - **A note about where the trust of the SHA-256 rests**: the confirmation of an update now says that the zip and SHA256SUMS come from the same GitHub release, so the check finds a damaged or incomplete download but not a release replaced at its source; the trust rests on GitHub and on your account there. Also in the update guide.
 - **`tools/compare_tree.py`, for whoever audits a package**: compares an extracted release (a folder or the zip) with the files a git ref versions, by content: line endings and the layout of JSON files do not count, a real change, a missing file and an extra file do (`COMPARE=SAME` or `DIFFERENT`, exit code 0, 1 or 2).

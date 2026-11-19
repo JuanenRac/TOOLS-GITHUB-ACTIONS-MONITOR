@@ -50,3 +50,46 @@ curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/re
 
 - `GET /api/ai/stream`（警报）和 `GET /api/live-events/stream`（webhook 事件，`live.sse.enabled`）是服务器发送事件，只读且默认关闭；参见 [AI_ALERTS_zho.md](AI_ALERTS_zho.md) 和 [WEBHOOK_zho.md](WEBHOOK_zho.md)。
 - `POST /api/chatops/slack` 和 `POST /api/chatops/discord` 接收来自聊天的只读命令(默认关闭,`chatops.enabled`)。它们不使用访问令牌:平台的签名就是凭据,没有有效签名的请求会在读取任何内容之前被拒绝。参见 [CHATOPS_zho.md](CHATOPS_zho.md)。
+
+## 页面的其他路由
+
+这些路由为页面和本机的工具提供服务。它们不属于已冻结的契约，版本之间可能变化。POST 会修改内容；“本机”表示只有运行监视器的计算机才能使用。
+
+| 路由 | 作用 |
+| --- | --- |
+| `/api/about` | “关于”面板：版本、链接、文件、健康状态、致谢和更新通知；不含任何机密。 |
+| `/api/act/plan` | POST，本机。准备用 `act` 在本地运行时会做什么；此时尚未运行任何内容。 |
+| `/api/act/confirm` | POST，本机。在计划之后用 `act` 在本机运行工作流；运行会被记录。 |
+| `/api/act/status` | 正在进行的本地运行的状态。 |
+| `/api/act/stop` | POST，本机。停止本地运行。 |
+| `/api/advanced` | 您主动开启的功能的状态：网络、GitHub 令牌的存放、GitHub 上的操作、本地运行和演示模式；绝不含令牌。 |
+| `/api/ai/actions` | AI 操作的状态（是否锁定）、其日志以及 AI 的状态。 |
+| `/api/ai/actions/confirm` | POST，本机。在您确认后执行 AI 提出的一项操作；会被记录。 |
+| `/api/ai/actions/unlock` | POST，本机。在限定时间内解锁 AI 的操作；会被记录。 |
+| `/api/ai/budget` | 每个 AI 模型今天的调用次数和估算成本、限额以及最近的失败；不会询问任何提供商。 |
+| `/api/ai/test` | POST，本机。测试已配置 AI 的连接；不会改变任何内容。 |
+| `/api/alerts/unmute` | POST。解除某条警报的静音；会被记录。 |
+| `/api/analytics` | 运行分析的摘要：耗时、队列、步骤、不稳定测试和较慢的运行。 |
+| `/api/discovery` | 发现功能找到的内容：含账户及已显示和已隐藏仓库的面板、最近的事件、建议的分组、其设置、复刻和组织。 |
+| `/api/discovery/group` | POST。把建议的分组加入生态系统文件，并保留该文件的副本。 |
+| `/api/gh-action/plan` | POST，本机。准备将发送给 GitHub 的内容（重新运行、取消、派发或合并）；此时尚未发送。 |
+| `/api/gh-action/confirm` | POST，本机。在您确认后，按计划把内容发送给 GitHub；会被记录。 |
+| `/api/github-token` | 仅限本机。GitHub 令牌存放处的状态（所用方式以及是否已存有）；绝不含其值。 |
+| `/api/help/search` | 用一个词搜索帮助主题，并返回匹配的主题。 |
+| `/api/help/topic` | 一个帮助主题（`id=`）在页面语言下的文本。 |
+| `/api/help/topics` | 帮助主题的列表及其标题。 |
+| `/api/hot-only` | POST，本机。页面的“仅看热点”开关；不改变任何已保存的状态。 |
+| `/api/mirror` | 仓库镜像的状态（默认关闭）。 |
+| `/api/mode` | GET：工作模式、各模式的估算和剩余时间。POST，本机：更改模式。 |
+| `/api/notify/test` | POST。向一个通知渠道发送测试消息；不改变任何内容。 |
+| `/api/quota-pool/status` | 仅限本机。每个读取来源的配额以及 GitHub App 缺少的内容；绝不含密钥或令牌。 |
+| `/api/refresh-repos` | POST，本机。只刷新您指定的仓库并重写红色仓库的文件（`finalize --execute` 使用）。 |
+| `/api/screens/logo` | GET：组织标志的图片。POST：保存新的标志（最大 1 MB，按其真实类型检查）。 |
+| `/api/screens/logo/remove` | POST。移除组织的标志；会被记录。 |
+| `/api/sentinel/ai` | POST。请 AI 解释一条警报或一次构建；请求很小，问题会先去除机密。AI 关闭时该路由不存在。 |
+| `/api/sentinel/historial` | 昨天与今天的对比：出现或消失的红色项和待签名项。 |
+| `/api/sentinel/parte/save` | POST。在审计文件夹中保存一份每日报告的副本；GET 从不写入。 |
+| `/api/sentinel/security` | GitHub 报告的安全方面未解决或缺失的内容（安全哨兵；默认关闭；只读）。 |
+| `/api/session-token` | 用于下一次修改设置的一次性令牌；页面在写入之前才会请求它。 |
+| `/api/statusbar` | 页面底部栏显示的内容：版本、地址、账户和哨兵；不含机密，也不调用 GitHub。 |
+| `/api/welcome` | GET：首次启动向导是否已完成。POST，本机：将其标记为已完成或未完成。 |
