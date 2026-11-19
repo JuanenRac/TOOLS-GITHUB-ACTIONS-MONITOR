@@ -6,10 +6,18 @@ A list of 100 is a page, not the whole list: a repository can have 148 or 348 wo
 the last page was full and the limit of pages has not been reached; the answer says how many it saw (`seen`), how many GitHub says there are when it says so (`total`) and whether
 something was left out (`cut`), so the page can write "seen 100 of 348" instead of looking complete. A first page that is not full costs no extra request, so a small repository spends
 exactly what it spent before.
-"""
 
-DEFAULTS = {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3}
-BOUNDS = {"workflow_pages": (1, 20), "job_pages": (1, 20), "collab_pages": (1, 20)}
+Some lists (the alerts of Dependabot, of code scanning and of secret scanning) reject `?page=`: they hand out a cursor in the `Link` header (`rel="next"`). `next_link` reads it and `endpoint_of`
+turns the address into the path `gh api` takes; only addresses of the API itself are followed, never another host.
+"""
+import re
+from urllib.parse import urlsplit
+
+LINK_RE = re.compile(r'<([^>]{1,2000})>\s*;\s*rel="?next"?', re.I)
+API_HOSTS = ("api.github.com",)
+
+DEFAULTS = {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3, "cursor_pages": 3}
+BOUNDS = {"workflow_pages": (1, 20), "job_pages": (1, 20), "collab_pages": (1, 20), "cursor_pages": (0, 20)}
 
 
 def settings(config):
@@ -53,3 +61,38 @@ def read_pages(read, path, key, per_page, max_pages):
     if error:
         out["error"] = error
     return out
+
+
+def next_link(header):
+    """The address of `rel="next"` in a `Link` header, or "" when there is none."""
+    found = LINK_RE.search(header or "")
+    return found.group(1) if found else ""
+
+
+def endpoint_of(url, hosts=API_HOSTS):
+    """The path (with its query) of an address of the API, or "" for anything else: another host, another scheme, a relative or an odd address are never followed."""
+    try:
+        parts = urlsplit(url or "")
+    except ValueError:
+        return ""
+    if parts.scheme != "https" or (parts.hostname or "").lower() not in hosts or parts.username or parts.password or (parts.port not in (None, 443)):
+        return ""
+    path = parts.path.lstrip("/")
+    if not path or ".." in path.split("/"):
+        return ""
+    return path + ("?" + parts.query if parts.query else "")
+
+
+def follow_cursor(read, link, max_pages, hosts=API_HOSTS):
+    """({"items", "pages", "cut"}): `read(endpoint)` gives (list or None, next Link header). Follows `rel="next"` up to `max_pages` pages; `cut` = more was there and the pages ran out, or a page could not be read."""
+    items, pages = [], 0
+    while pages < max_pages:
+        endpoint = endpoint_of(next_link(link), hosts)
+        if not endpoint:
+            return {"items": items, "pages": pages, "cut": False}
+        body, link = read(endpoint)
+        if not isinstance(body, list):
+            return {"items": items, "pages": pages, "cut": True}
+        items.extend(body)
+        pages += 1
+    return {"items": items, "pages": pages, "cut": bool(endpoint_of(next_link(link), hosts))}

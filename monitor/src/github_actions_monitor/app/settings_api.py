@@ -125,6 +125,7 @@ _G_GENERAL, _G_POLL, _G_SENT, _G_SURF, _G_READY, _G_PATHS, _G_OUT, _G_AI = _T_GE
 
 # --- Basic: what a new user may want to change first
 _f("basic", "start", "open_browser", "bool")
+_f("basic", "start", "config_check.strict", "bool")
 _f("basic", "updates", "updates.check", "bool", restart=False)
 _f("basic", "network", "airgapped", "bool", restart=False, secure=True)
 _f("basic", "plan", "account.plan", "enum", ("unknown", "free", "pro", "team", "enterprise"), restart=False)
@@ -141,6 +142,7 @@ _f("basic", "lifecycle", "discovery.skip_archived", "bool")
 _f("basic", "lifecycle", "discovery.fork_policy", "enum", ("show", "skip", "skip_unless_ci", "auto"))
 _f("basic", "lifecycle", "discovery.fork_ci_days", "int", (0, 365), unit="d")
 _f("basic", "lifecycle", "discovery.fork_checks_per_pass", "int", (1, 500), unit="calls")
+_f("basic", "lifecycle", "discovery.min_keep_pct", "int", (0, 100), unit="%")
 # --- General
 _f(_T_GENERAL, "identity", "github_owner", "text", OWNER_RE)
 _f(_T_GENERAL, "identity", "language", "enum", ("",) + tuple(i18n.LANGS), False)
@@ -272,6 +274,7 @@ _f(_T_POLL, "quota", "min_rate_remaining", "int", (100, 5000), unit="calls")
 _f(_T_POLL, "pagination", "pagination.workflow_pages", "int", (1, 20), unit="", restart=False)
 _f(_T_POLL, "pagination", "pagination.job_pages", "int", (1, 20), unit="", restart=False)
 _f(_T_POLL, "pagination", "pagination.collab_pages", "int", (1, 20), unit="", restart=False)
+_f(_T_POLL, "pagination", "pagination.cursor_pages", "int", (0, 20), unit="", restart=False)
 _f(_T_POLL, "sampling", "sampling.default_branch_probe", "bool", restart=False)
 _f(_T_POLL, "sampling", "sampling.min_coverage_minutes", "int", (0, 10080), unit="min", restart=False)
 _f(_T_POLL, "sampling", "sampling.api_budget_per_hour", "int", (0, 100000), unit="calls", restart=False)
@@ -616,6 +619,9 @@ _f(_T_HOOK, "chatops", "chatops.rate_per_minute", "int", (1, 6000), restart=Fals
 # --- Reads and cache (conditional reads)
 _f("cache", "etag", "cache.etag.enabled", "bool")
 _f("cache", "etag", "cache.etag.ttl_hours", "int", (1, 168))
+_f("cache", "etag", "cache.etag.skip_stateful", "bool")
+_f("cache", "etag", "cache.etag.revalidate_active", "bool")
+_f("cache", "etag", "cache.negative_ttl_s", "int", (0, 3600))
 # --- Notifications
 _f("notify", "main", "notify.enabled", "bool", secure=True)
 _f("notify", "main", "notify.allow_private_targets", "bool", secure=True)

@@ -12,12 +12,12 @@ A test fails when something in the code is not named in these skills, so this ta
 | --- | --- | --- | --- |
 | endpoints | 134 | references/api.md | references/api.md |
 | commands | 21 | out of scope: the AI of the monitor does not run commands | references/cli.md |
-| settings | 720 | references/settings.md (the ai, lessons and alert ones matter) | references/settings.md |
+| settings | 726 | references/settings.md (the ai, lessons and alert ones matter) | references/settings.md |
 | files | 14 | references/files.md | references/files.md |
 | roles | 3 | references/roles.md | references/roles.md |
 | tabs | 21 | references/tabs.md | references/tabs.md |
 | classes | 6 | SKILL.md (Alert classes) | SKILL.md (Alert classes) |
-| signals | 30 | references/signals.md | references/signals.md |
+| signals | 33 | references/signals.md | references/signals.md |
 | panels | 14 | references/signals.md | references/signals.md |
 
 Out of scope on purpose: the keys, tokens and passwords themselves (the AIs never ask for or print them), the content of the repositories, and writing to GitHub (the monitor never does it; actions go through a plan and a person's confirmation).

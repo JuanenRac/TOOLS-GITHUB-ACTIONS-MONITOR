@@ -53,12 +53,12 @@ class WebhookMakesItHot(unittest.TestCase):
 class DamagedCache(unittest.TestCase):
     def test_a_304_on_a_damaged_entry_is_a_miss_that_reads_again_and_is_counted(self):
         cache = etagcache.EtagCache(Path(tempfile.mkdtemp()) / "c.json")
-        cache.entries["e"] = {"etag": '"a"', "at": 10 ** 12, "data": "not what the API sends"}
+        cache.entries[cache.key_of("e")] = {"etag": '"a"', "at": 10 ** 12, "data": "not what the API sends"}
         answers = iter([(1, "HTTP/2.0 304 Not Modified\r\n\r\n", "gh: HTTP 304"), (0, 'HTTP/2.0 200 OK\r\nEtag: "b"\r\n\r\n{"ok": 1}', "")])
         data, status = cache.fetch("e", lambda args: next(answers), now=10 ** 12)
         self.assertEqual((data, status), ({"ok": 1}, "200"))
         self.assertEqual(cache.stats()["invalid"], 1)
-        self.assertEqual(cache.entries["e"]["etag"], '"b"')
+        self.assertEqual(cache.entries[cache.key_of("e")]["etag"], '"b"')
 
     def test_the_counter_is_in_the_metrics(self):
         from github_actions_monitor.integrations import outputs
