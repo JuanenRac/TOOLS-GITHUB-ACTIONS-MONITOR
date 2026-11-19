@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4571_passing-brightgreen.svg" alt="4571 tests">
+  <img src="https://img.shields.io/badge/Tests-4574_passing-brightgreen.svg" alt="4574 tests">
 </p>
 
 > 所有するすべてのリポジトリのワークフローを監視し、赤いもの・止まっているもの・対応待ちのものを、ローカルの1ページで教えます。
@@ -82,7 +82,7 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **テスト** | テストメソッド 4571 件(`python -m unittest discover -s monitor/tests`) |
+| **テスト** | テストメソッド 4574 件(`python -m unittest discover -s monitor/tests`) |
 | **設定** | 設定 712 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows、Python 3.11, 3.13 |
@@ -310,6 +310,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COMPLETE_TEAM_jpn.md`](monitor/docs/COMPLETE_TEAM_jpn.md): チームで使う完全版
 - [`monitor/docs/API_jpn.md`](monitor/docs/API_jpn.md): クライアント向け API
 - [`monitor/docs/API_V1_jpn.md`](monitor/docs/API_V1_jpn.md): 読み取り API v1 をステップごとに
+- [`monitor/docs/ASSISTANT_jpn.md`](monitor/docs/ASSISTANT_jpn.md): アシスタント: あなたの AI への読み取り専用の定型の質問
 - [`monitor/docs/NOTIFICATIONS_jpn.md`](monitor/docs/NOTIFICATIONS_jpn.md): 通知とアダプターの取り決め
 - [`monitor/docs/AI_jpn.md`](monitor/docs/AI_jpn.md): AI アシスタント:プロバイダー、安全性、アクション
 - [`monitor/docs/ANALYTICS_jpn.md`](monitor/docs/ANALYTICS_jpn.md): 分析、条件付き読み取り、接続の喪失
