@@ -23,6 +23,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Añadido
 
+- **Un interruptor opcional para juzgar el webhook repositorio a repositorio**: con `savings.webhook_live_per_repo` encendido (apagado por defecto, y funciona junto con `savings.webhook_first`), un repositorio tranquilo se salta su lectura lenta solo cuando ha llegado un evento SUYO en los últimos `savings.webhook_window_minutes`. Un repositorio cuyo webhook nunca se montó, o se rompió, se lee como siempre mientras los demás se ahorran; ahorra menos lecturas. El panel del Webhook cuenta los repositorios que están vivos por sí mismos (`live_repos`). Etiqueta, ayuda, consejo y guía en los ocho idiomas.
+
 - **Mirada opcional a las ejecuciones aún en curso** (`sampling.active_probe`, desactivada por defecto): cuando la lista de ejecuciones de un repositorio está llena, dos peticiones ligeras piden las ejecuciones `in_progress` y las `queued`, para que una ejecución larga que empezó antes de la ventana de la lista no se pierda ni se muestre como terminada.
 
 - **Cada registro que guarda el monitor lleva ahora la versión de su esquema, y uno de una versión más nueva se deja aparte y se nombra**: el estado de los centinelas, los silencios, el estado del feed y el aviso de actualización se escriben con `schema_version` al principio (los lectores no lo ven; un registro anterior a la marca se lee como versión 0, como siempre). Un registro de una versión más nueva de la que entiende el programa no se lee a medias: ese registro parte de sus valores por defecto y el fichero se nombra en la lista de degradados (`records.newer`), de modo que una bajada de versión dice qué fichero no entendió.

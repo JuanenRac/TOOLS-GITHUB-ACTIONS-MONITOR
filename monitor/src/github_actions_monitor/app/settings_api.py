@@ -804,6 +804,7 @@ _f(_T_AI, "lessons", "lessons.max_entries", "int", (100, 100000), restart=False,
 _f(_T_AI, "lessons", "lessons.brief_max_bytes", "int", (500, 20000), restart=False, unit="")
 _f(_T_AI, "lessons", "lessons.recurring_from", "int", (2, 20), restart=False, unit="")
 _f("quota", "savings", "savings.webhook_first", "bool", restart=False)
+_f("quota", "savings", "savings.webhook_live_per_repo", "bool", restart=False)
 _f("quota", "savings", "savings.webhook_window_minutes", "int", (5, 1440), restart=False)
 _f("quota", "savings", "savings.webhook_full_minutes", "int", (30, 10080), restart=False)
 _f("quota", "savings", "savings.feeds.enabled", "bool", restart=False, secure=True)

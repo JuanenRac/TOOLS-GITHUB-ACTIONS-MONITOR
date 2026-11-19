@@ -468,6 +468,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `savings.feeds.method` | `"atom"` | quota | Which free source |
 | `savings.webhook_first` | `false` | quota | Webhook first |
 | `savings.webhook_full_minutes` | `360` | quota | Full read at least every |
+| `savings.webhook_live_per_repo` | `false` | quota | Webhook alive for each repository |
 | `savings.webhook_window_minutes` | `60` | quota | The webhook counts as alive for |
 | `score.alert.drop_points` | `-` | sentinel | Drop that raises the alert |
 | `score.alert.enabled` | `-` | sentinel | Alert on a drop |
