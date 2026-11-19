@@ -35,11 +35,11 @@ RETRY_AFTER = (300, 1800, 21600)      # seconds a repository whose read fails wa
 UNREAD_KEEP = 7 * 24 * 3600           # alerts of a repository that stays unreadable are kept (marked unread) this long, then dropped without an event
 MIN_COVERAGE = 0.5                    # "nothing open" with fewer readable repositories than this is `unknown`, not `ok`
 DEFAULTS = {
-    "enabled": False, "refresh_seconds": 3600, "max_repos_per_tick": 10, "max_calls_per_tick": 60, "max_files_per_repo": 40, "min_rate_remaining": 1000, "repos": "all", "ignore": [],
+    "enabled": False, "refresh_seconds": 3600, "max_repos_per_tick": 10, "deadline_s": 30, "max_calls_per_tick": 60, "max_files_per_repo": 40, "min_rate_remaining": 1000, "repos": "all", "ignore": [],
     "signals": {name: {"enabled": True, "level": supply.DEFAULT_LEVEL[name]} for name in supply.SIGNALS},
     "penalty": {"per_finding": 2, "cap_per_repo": 10},
 }
-BOUNDS = {"refresh_seconds": (600, 86400), "max_repos_per_tick": (1, 200), "max_calls_per_tick": (1, 600), "max_files_per_repo": (1, 100), "min_rate_remaining": (100, 5000)}
+BOUNDS = {"refresh_seconds": (600, 86400), "max_repos_per_tick": (1, 200), "deadline_s": (0, 600), "max_calls_per_tick": (1, 600), "max_files_per_repo": (1, 100), "min_rate_remaining": (100, 5000)}
 TITLE_KEYS = {code: "supply.t." + name for name, code in supply.CODES.items()}
 
 
@@ -96,6 +96,7 @@ def load_state(path):
 
 
 class SentinelSupply(sentinel_base.BaseSentinel):
+    round_cut = False      # the last round stopped for lack of time (deadline_s) and left repositories for the next one
     name = "supply"
 
     def __init__(self, ctx, config):
@@ -153,8 +154,12 @@ class SentinelSupply(sentinel_base.BaseSentinel):
         if self.paused:
             return False
         repos, budget = self.scope(), self.cfg["max_calls_per_tick"]
+        deadline, self.round_cut = sentinel_base.round_deadline(self.cfg["deadline_s"]), False
         for repo in self._order(repos, now)[:self.cfg["max_repos_per_tick"]]:
             if budget < 1:
+                break
+            if sentinel_base.expired(deadline):      # the round ran out of time: the rest waits for the next one and is named as not checked
+                self.round_cut = True
                 break
             try:
                 budget -= max(1, self.scan(repo, now, budget))
@@ -278,7 +283,7 @@ class SentinelSupply(sentinel_base.BaseSentinel):
             level = "unknown"      # nothing open because most of what was looked at could not be read: not a clean bill of health
         return {"enabled": True, "level": level, "loading": "" if checked or not repos else "starting", "errors": [{"section": r, "at": e["at"]} for r, e in sorted(self.errors.items())],
                 "refresh_seconds": self.refresh_seconds, "repos_in_scope": len(repos), "repos_checked": checked, "repos_readable": readable, "last_full_scan": last, "paused": self.paused,
-                "unavailable": self.unavailable(), "partial": partial}
+                "unavailable": self.unavailable(), "partial": partial, "unchecked": sentinel_base.unchecked(repos, self.state["per_repo"]), "round_cut": self.round_cut}
 
     def get_metrics(self):
         if not self.enabled:

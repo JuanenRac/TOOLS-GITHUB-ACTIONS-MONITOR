@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "cca1779731868a2bc089d557f6e04188076376eaa55b3f85acd706bdf5e69c26",
+ "digest": "b2664fbd150c0c11a44b73c9e6d18ee4dcfbfba10b6ba5dd9cc68b217bead94c",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -212,6 +212,30 @@
     "bounds": [
      1,
      100
+    ]
+   },
+   {
+    "key": "sentinels.delivery.deadline_s",
+    "kind": "int",
+    "bounds": [
+     0,
+     600
+    ]
+   },
+   {
+    "key": "sentinels.security.deadline_s",
+    "kind": "int",
+    "bounds": [
+     0,
+     600
+    ]
+   },
+   {
+    "key": "sentinels.supply.deadline_s",
+    "kind": "int",
+    "bounds": [
+     0,
+     600
     ]
    }
   ],

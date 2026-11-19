@@ -20,7 +20,7 @@ LOAD_MAX = 500000      # more events than this are not counted for the plan (the
 def plan(config, storage, account_id, folder=None, now=None):
     """What a purge would do now: the policy, the cutoff, how many events would go and whether the copy that is asked for exists."""
     now = time.time() if now is None else now
-    policy = retention.settings(config)
+    policy = retention.effective(config)
     before, analytics_before = retention.cutoffs(policy, now)
     stats = storage.event_stats(account_id)
     would = None
@@ -43,5 +43,5 @@ def run(config, storage, account_id, folder=None, now=None, dry_run=True):
         return {"dry_run": True, **found}
     if not found["backup_ok"]:
         raise OpsError("purge_no_backup")
-    line = retention.run(storage, account_id, retention.settings(config), now)
+    line = retention.run(storage, account_id, retention.effective(config), now)
     return {"dry_run": False, **found, "line": line}
