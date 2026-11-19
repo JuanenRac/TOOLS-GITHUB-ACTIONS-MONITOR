@@ -72,10 +72,10 @@ class Page(unittest.TestCase):
 
 @unittest.skipUnless(check_unfolded is not None and check_overflow is not None and check_overflow.edge(), "no tools folder or no browser")
 class InTheBrowser(unittest.TestCase):
-    def test_the_cards_of_the_sentinels_and_the_rich_trend_work_wide_and_narrow(self):
+    def test_the_cards_the_rich_trend_and_the_tooltip_of_the_settings_work_wide_and_narrow(self):
         results = check_unfolded.run(["en"], ("desktop", "mobile"), quiet=True)
         self.assertIsNotNone(results)
-        bad = [(key, f) for key, found in results.items() for f in found if f["kind"].startswith(("sub_", "trend_"))]
+        bad = [(key, f) for key, found in results.items() for f in found if f["kind"].startswith(("sub_", "trend_", "tip_"))]
         self.assertEqual(bad, [])
 
 

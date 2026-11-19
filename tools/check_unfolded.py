@@ -112,6 +112,21 @@ PROBE = r"""
      const cs=[...document.querySelectorAll("#s-trend .trcard")];if(cs.length>2){cs[2].click();await wait(60);if(!q(".trcard.sel")||q(".trcard.sel").dataset.trs!==cs[2].dataset.trs)found.push({kind:"trend_pick",at:"strend",detail:"a card does not become the large chart"})}
      if(typeof trExport!=="function"||!q('[data-trexp="csv"]')||!q('[data-trexp="json"]'))found.push({kind:"trend_export",at:"strend",detail:"no export"});
      seen.push("strend-rich")}
+    /* the help of the settings: pointing at or focusing a control shows the tooltip inside the window, tied to the control, and Escape hides it */
+    {try{showTab("cfg")}catch(e){}await wait(700);let tested=0;
+     for(const id of ["cfg-sentinel-enabled","cfg-report_history_days"]){
+       const el=document.getElementById(id);if(!el)continue;
+       const pan=el.closest('[id^="cfp-"]');if(pan){try{cfgShowTab(pan.id.slice(4))}catch(e){}await wait(150)}
+       el.focus();await wait(100);const tip=document.getElementById("cfg-tip");
+       if(!tip||tip.hidden||tip.textContent.trim().length<10){found.push({kind:"tip_missing",at:id,detail:"no tooltip when the control takes the focus"});continue}
+       const r=tip.getBoundingClientRect();
+       if(r.left<-1||r.top<-1||r.right>window.innerWidth+1||r.bottom>window.innerHeight+1)found.push({kind:"tip_outside",at:id,detail:"the tooltip leaves the window"});
+       if(el.getAttribute("aria-describedby")!=="cfg-tip")found.push({kind:"tip_aria",at:id,detail:"the control is not tied to the tooltip"});
+       el.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}));await wait(40);
+       if(!tip.hidden)found.push({kind:"tip_escape",at:id,detail:"Escape does not hide the tooltip"});
+       el.blur();tested++}
+     if(tested<2)found.push({kind:"tip_untested",at:"cfg",detail:"only "+tested+" of the 2 controls were found"});
+     seen.push("cfg-tooltip")}
     /* the counters of the header jump to a tab (some of them with a filter of repositories): back on Now, the list and the alerts are the same as before and no filter is left behind */
     {const count=()=>document.querySelectorAll("#t-now .card,#t-now tr,#t-now .alrow").length;
      for(const id of ["kp-red","kp-sign","kt-active","kt-queued","kt-ok","kt-min","kt-issues","kt-repos","kt-hot"]){
