@@ -215,7 +215,7 @@ _f(_T_AI, "failed_step", "logs.failed_step.enabled", "bool", restart=False, secu
 _f(_T_AI, "failed_step", "logs.failed_step.lines", "int", (3, 40), restart=False, unit="")
 _f(_T_AI, "failed_step", "logs.failed_step.max_bytes", "int", (200, 4000), restart=False, unit="")
 _f(_T_AI, "failed_step", "logs.failed_step.max_per_minute", "int", (1, 60), restart=False, unit="")
-_f("quota", "github_app", "github_app.app_id", "text", re.compile(r"^[0-9]{1,12}\Z"), restart=False, secure=True)
+_f("quota", "github_app", "github_app.app_id", "text", re.compile(r"^[0-9]{0,12}\Z"), restart=False, secure=True)
 _f("quota", "github_app", "github_app.key_path", "path", restart=False, secure=True)
 _f("quota", "github_app", "github_app.installation_id", "text", re.compile(r"^[0-9]{0,12}\Z"), restart=False, secure=True)
 _f("quota", "github_app", "github_app.openssl_path", "path", restart=False, secure=True)

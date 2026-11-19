@@ -89,7 +89,7 @@ class WhatTheExampleSaysIsWhatTheCodeDoes(unittest.TestCase):
     def test_the_values_of_the_example_pass_the_checks_of_the_page(self):
         refused = []
         for key in sa.FIELDS:
-            if key in sa.STATUS_KEYS or key == "github_app.app_id":      # an empty application id means "none": the page asks for a number only when it is written
+            if key in sa.STATUS_KEYS:
                 continue
             try:
                 value = example(key)
