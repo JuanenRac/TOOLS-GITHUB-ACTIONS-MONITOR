@@ -136,6 +136,22 @@ def kind_of(path):
     return found.group(1) if found else None
 
 
+REPO_FILTER_MAX = 80
+REPO_FILTER_WORDS = 8
+
+
+def clean_repo_filter(value):
+    """The repository filter of an address (`?repo=`): letters, digits and `. _ - /`, words separated by commas, at most 80 characters; anything else is left out (an empty text means no filter)."""
+    text = str(value or "").strip()[:REPO_FILTER_MAX]
+    words = [w for w in (part.strip() for part in text.split(",")) if w and all(c.isalnum() or c in "._-/" for c in w)]
+    return ",".join(words[:REPO_FILTER_WORDS])
+
+
+def repo_words(text):
+    """The words of a clean filter, in lower case: a repository is kept when its name holds any of them."""
+    return [w.lower() for w in clean_repo_filter(text).split(",") if w]
+
+
 def params(query, cfg, kind=None, global_name="auto"):
     """What the address of one window asks for, checked. `query` is {name: first value}. A window may blink less, sound less and rotate on its own; it can never turn on blinking or sound that the
     settings turned off, and the refresh stays between 5 and 120 seconds. With `screens.mode` = rotate the window turns through the three screens every `rotate_every_seconds` and jumps to the screen
@@ -154,7 +170,7 @@ def params(query, cfg, kind=None, global_name="auto"):
     return {"monitor": monitor, "theme": asked or resolve_theme(cfg, kind, global_name), "theme_locked": asked is not None, "density": _choice(query.get("density"), DENSITIES, cfg["default_density"]),
             "refresh": _int(query.get("refresh"), 5, 120, cfg["refresh_seconds"]), "scale": scale, "rotate": rotate, "mode": cfg.get("mode", "three"),
             "jump": turning and rotate > 0 and _flag(query.get("jump"), True), "hold": cfg["alert_hold_seconds"],
-            "blink": cfg["blink"] and _flag(query.get("blink"), True), "sound": cfg["sound"] and _flag(query.get("sound"), False)}
+            "blink": cfg["blink"] and _flag(query.get("blink"), True), "sound": cfg["sound"] and _flag(query.get("sound"), False), "repo": clean_repo_filter(query.get("repo"))}
 
 
 _THEME_RULE = re.compile(r'(:root\[data-theme="(?:' + "|".join(re.escape(n) for n in STUDIO_THEMES) + r')"\]\{[^{}]*\})')
@@ -599,7 +615,35 @@ def build_sentinels(state, snapshot, alerts, score, names, now, refresh):
 # the payload
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def build(kind, state, snapshot, alerts, score, cfg, edition="complete", now=None, fleet_view=None, labels=None):
+def _only(obj, keep):
+    """A copy of a part of the cycle or of the snapshot without the rows of the repositories that are not kept (a list of rows that name a repository, at any depth)."""
+    if isinstance(obj, dict):
+        return {k: _only(v, keep) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_only(v, keep) for v in obj if not (isinstance(v, dict) and isinstance(v.get("repo"), str) and v["repo"] not in keep)]
+    return obj
+
+
+def narrow(data, snapshot, alerts, names, words):
+    """What the Overview and Right now screens show for a repository filter: only the repositories whose name is SHOWN on the screen and holds one of the words. A hidden repository (private, or any when
+    `screens.show_repo_names` is none) is never kept, so that the filter cannot be used to find out what a hidden name contains. The figures that are counted from rows (red, stuck, queued, alerts) follow the
+    rows that are kept. Returns (data, snapshot, alerts)."""
+    keep = {r for r in set(data.get("repos") or []) | set(data.get("repo_meta") or {}) if not names.hidden(r) and any(w in r.lower() for w in words)}
+    data = {k: (sorted(r for r in v if r in keep) if k == "repos" and isinstance(v, list) else {r: m for r, m in v.items() if r in keep} if k == "repo_meta" and isinstance(v, dict) else _only(v, keep)) for k, v in data.items()}
+    snapshot = _only(snapshot, keep) if isinstance(snapshot, dict) else snapshot
+    if isinstance(alerts, dict):
+        rows = [a for a in (alerts.get("alerts") or []) if isinstance(a, dict) and a.get("repo") in keep]
+        levels = {}
+        for row in rows:
+            levels[row.get("level")] = levels.get(row.get("level"), 0) + 1
+        by_sentinel = {}
+        for row in rows:
+            by_sentinel[row.get("sentinel")] = by_sentinel.get(row.get("sentinel"), 0) + 1
+        alerts = {**alerts, "alerts": rows, "summary": {**_d(alerts.get("summary")), "total": len(rows), "by_level": levels, "by_sentinel": {str(k): v for k, v in by_sentinel.items() if k}}}
+    return data, snapshot, alerts
+
+
+def build(kind, state, snapshot, alerts, score, cfg, edition="complete", now=None, fleet_view=None, labels=None, repo=""):
     """The answer of /api/screens/data for one screen, from what the monitor holds. `state` is the last cycle (STATE["data"], or None before the first), `snapshot` the sentinel snapshot (or None),
     `alerts` the alerts payload, `score` the latest score, `fleet_view` the answer of the fleet view for the map of groups of the overview (and `labels` the names of the ecosystems). Never raises for missing parts: a part that is not there is empty and `meta.have_data` says so."""
     if kind not in KINDS:
@@ -607,7 +651,14 @@ def build(kind, state, snapshot, alerts, score, cfg, edition="complete", now=Non
     now = time.time() if now is None else now
     data = state if isinstance(state, dict) else {}
     names = Names(data.get("repos"), data.get("repo_meta"), cfg["show_repo_names"])
+    words = repo_words(repo) if kind in ("overview", "now") else []
+    if words:
+        data, snapshot, alerts = narrow(data, snapshot, alerts, names, words)
+        names = Names(data.get("repos"), data.get("repo_meta"), cfg["show_repo_names"], names.key)
+        score, fleet_view = None, None      # the score and the map of groups are of the whole fleet: with a filter they are not shown
     out = {"schema": SCHEMA, "screen": kind, "version": TOOL_VERSION, "epoch": int(now), "names": cfg["show_repo_names"], "meta": _meta(state, now, cfg["refresh_seconds"], edition)}
+    if words:
+        out["meta"]["repos"] = len(data.get("repos") or [])
     if kind == "overview":
         out.update(build_overview(data, snapshot, alerts, score, names, now, group_map(fleet_view, labels) if cfg.get("group_map", True) else None))
     elif kind == "now":

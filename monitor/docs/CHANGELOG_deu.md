@@ -8,6 +8,7 @@
 Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem Semver. Die Quelle ist das englische CHANGELOG.md; diese Datei enthält dieselben Versionen und Abschnitte.
 
 ## [Unreleased]
+- **Die Wandbildschirme nehmen einen Repository-Filter (`?repo=WORT,WORT`)**: `/screen/overview` und `/screen/now` behalten nur die Repositories, deren Name eines der Wörter enthält, wie es die Seite, der Kiosk und die Tab-Bildschirme schon taten. Ein Repository, dessen Namen der Bildschirm verbirgt, passt nie, sodass man mit dem Filter nicht herausfinden kann, was ein verborgener Name enthält; die Zahlen (Flotte, Rote, Warteschlange, Ereignisse, Alarme) folgen den behaltenen Zeilen, die Bewertung und die Gruppenkarte der ganzen Flotte werden bei gesetztem Filter nicht gezeigt, und `/screen/sentinels` wird nicht gefiltert. Das Menü Bildschirme bietet den Parameter für jeden Wandbildschirm an, und das Fenster nennt den Filter neben seiner Nummer. Anleitung `SCREENS.md` in den acht Sprachen.
 
 ### Geändert
 

@@ -8,6 +8,7 @@
 Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son propre semver. La source est le CHANGELOG.md en anglais ; ce fichier contient les mêmes versions et sections.
 
 ## [Unreleased]
+- **Les écrans muraux acceptent un filtre de dépôts (`?repo=MOT,MOT`)** : `/screen/overview` et `/screen/now` ne gardent que les dépôts dont le nom contient l'un des mots, comme le faisaient déjà la page, le kiosque et les écrans d'onglets. Un dépôt dont l'écran masque le nom ne correspond jamais : le filtre ne permet donc pas de découvrir ce que contient un nom masqué ; les chiffres (flotte, rouges, file, événements, alertes) suivent les lignes gardées, la note et la carte des groupes de toute la flotte ne sont pas affichées tant qu'un filtre est actif, et `/screen/sentinels` n'est pas filtré. Le menu Écrans propose le paramètre pour chaque écran mural et la fenêtre indique le filtre à côté de son numéro. Guide `SCREENS.md` en huit langues.
 
 ### Modifié
 

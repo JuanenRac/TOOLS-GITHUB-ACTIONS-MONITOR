@@ -2372,7 +2372,7 @@ def render_screen(kind, query):
     return page.replace("/*SCREEN_DATA*/null", blob, 1)
 
 
-def screens_payload(kind, cfg):
+def screens_payload(kind, cfg, repo=""):
     """GET /api/screens/data: what the screens show, from what the monitor holds. Nothing is read from GitHub here: the last cycle, the snapshot of the sentinel, the alerts and the score are already in memory or in the local files."""
     with LOCK:
         state = STATE["data"]
@@ -2403,7 +2403,7 @@ def screens_payload(kind, cfg):
     view = labels = None
     if not LITE["on"] and kind == "overview" and cfg.get("group_map", True):
         view, labels = screens_groups()
-    return screens.build(kind, state, snapshot, alerts, score, cfg, "lite" if LITE["on"] else "complete", fleet_view=view, labels=labels)
+    return screens.build(kind, state, snapshot, alerts, score, cfg, "lite" if LITE["on"] else "complete", fleet_view=view, labels=labels, repo=repo)
 
 
 GROUPS_CACHE = {"at": 0.0, "view": None, "labels": None}
@@ -3288,7 +3288,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.end_headers()
                 return
             if path == "/api/screens/data":
-                self.json_reply(screens_payload(kind, screens.settings(toolconfig.raw_config())))
+                self.json_reply(screens_payload(kind, screens.settings(toolconfig.raw_config()), ask.get("repo", "")))
             else:
                 self.reply(render_screen(kind, ask), "text/html; charset=utf-8")
             return

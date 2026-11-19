@@ -10,6 +10,7 @@ and is shown as `tool_version` in the sentinel snapshot and by `read_report.py -
 when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
+- **The wall screens take a repository filter (`?repo=WORD,WORD`)**: `/screen/overview` and `/screen/now` keep only the repositories whose name holds one of the words, as the page, the kiosk and the tab screens already did. A repository whose name the screen hides is never matched, so the filter cannot be used to find out what a hidden name contains; the figures (fleet, red, queue, events, alerts) follow the rows that are kept, the score and the map of groups of the whole fleet are not shown while a filter is on, and `/screen/sentinels` is not filtered. The Screens menu offers the parameter for every wall screen and the window names the filter next to its number. Guide `SCREENS.md` in the eight languages.
 
 ### Changed
 

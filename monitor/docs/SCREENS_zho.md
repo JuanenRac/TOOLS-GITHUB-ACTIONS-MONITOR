@@ -82,6 +82,7 @@
 | `?rotate=30` | 窗口每 30 秒自动在总览、此刻和哨兵之间切换（最少 5；0 = 停留在一个屏幕）。在 `screens.mode` = rotate 时本来就会轮换；这用于改变单个窗口的节奏。 |
 | `?jump=off` | 仅在 `screens.mode` = rotate 时：窗口会轮换，但不会跳转到新的红色。 |
 | `?blink=off` | 失败保持固定光晕而不闪烁。它不能开启 `screens.blink` 关闭的功能。 |
+| `?repo=WORD,WORD` | 仅显示名称包含其中一个词的仓库（字母、数字和 `. _ - /`，最多八个词）。`/screen/overview` 和 `/screen/now` 只保留屏幕显示其名称的仓库（被隐藏的名称永远不会匹配），数字随保留的行变化，属于整个舰队的评分和分组图不显示；`/screen/sentinels` 不做筛选。 |
 | `?sound=on` | 出现新失败时发出短促提示音，仅在 `screens.sound` 允许时有效。默认关闭。 |
 
 ### 屏幕语言

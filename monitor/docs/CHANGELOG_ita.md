@@ -8,6 +8,7 @@
 Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il proprio semver. La fonte è il CHANGELOG.md in inglese; questo file ha le stesse versioni e sezioni.
 
 ## [Unreleased]
+- **Le schermate a muro accettano un filtro dei repository (`?repo=PAROLA,PAROLA`)**: `/screen/overview` e `/screen/now` tengono solo i repository il cui nome contiene una delle parole, come già facevano la pagina, il chiosco e le schermate a schede. Un repository il cui nome la schermata nasconde non corrisponde mai, quindi il filtro non serve a scoprire cosa contiene un nome nascosto; le cifre (flotta, rossi, coda, eventi, avvisi) seguono le righe tenute, il punteggio e la mappa dei gruppi dell'intera flotta non vengono mostrati con un filtro attivo e `/screen/sentinels` non è filtrata. Il menu Schermate offre il parametro per ogni schermata a muro e la finestra riporta il filtro accanto al suo numero. Guida `SCREENS.md` in otto lingue.
 
 ### Modificato
 

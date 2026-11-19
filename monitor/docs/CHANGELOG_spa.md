@@ -8,6 +8,7 @@
 Versión de la propia herramienta (monitor + centinela + herramientas por lotes), con su propio semver. La fuente es el CHANGELOG.md en inglés; este fichero lleva las mismas versiones y secciones.
 
 ## [Unreleased]
+- **Las pantallas de pared aceptan un filtro de repositorios (`?repo=PALABRA,PALABRA`)**: `/screen/overview` y `/screen/now` conservan solo los repositorios cuyo nombre contiene una de las palabras, como ya hacían la página, el quiosco y las pantallas de pestañas. Un repositorio cuyo nombre la pantalla oculta nunca coincide, así que el filtro no sirve para averiguar qué contiene un nombre oculto; las cifras (flota, rojos, cola, eventos, alertas) siguen las filas conservadas, la puntuación y el mapa de grupos de toda la flota no se muestran con un filtro puesto y `/screen/sentinels` no se filtra. El menú Pantallas ofrece el parámetro para cada pantalla de pared y la ventana nombra el filtro junto a su número. Guía `SCREENS.md` en los ocho idiomas.
 
 ### Cambiado
 

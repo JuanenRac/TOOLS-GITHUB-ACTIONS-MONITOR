@@ -82,6 +82,7 @@ Um endereço para cada monitor. Um parâmetro pode tornar uma janela mais calma 
 | `?rotate=30` | A janela passa sozinha por visão geral, neste momento e sentinelas a cada 30 segundos (mínimo 5; 0 = fica num só ecrã). Com `screens.mode` = rotate já roda; isto altera o ritmo de uma janela. |
 | `?jump=off` | Só com `screens.mode` = rotate: a janela roda mas nunca salta para um vermelho novo. |
 | `?blink=off` | As falhas mantêm um halo fixo em vez de piscar. Não pode ativar o que `screens.blink` mantém desligado. |
+| `?repo=WORD,WORD` | Apenas os repositórios cujo nome contém uma das palavras (letras, algarismos e `. _ - /`, até oito palavras). `/screen/overview` e `/screen/now` mantêm apenas os repositórios cujo nome o ecrã mostra (um nome oculto nunca corresponde), os números seguem as linhas mantidas, e a pontuação e o mapa de grupos, que pertencem a toda a frota, não são mostrados; `/screen/sentinels` não é filtrado. |
 | `?sound=on` | Um sinal sonoro curto a cada falha nova, só se `screens.sound` o permitir. Desativado por defeito. |
 
 ### Idioma dos ecrãs

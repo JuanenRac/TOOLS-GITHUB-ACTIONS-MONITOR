@@ -8,6 +8,7 @@
 Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com o seu próprio semver. A fonte é o CHANGELOG.md em inglês; este ficheiro tem as mesmas versões e secções.
 
 ## [Unreleased]
+- **Os ecrãs de parede aceitam um filtro de repositórios (`?repo=PALAVRA,PALAVRA`)**: `/screen/overview` e `/screen/now` mantêm apenas os repositórios cujo nome contém uma das palavras, tal como já faziam a página, o quiosque e os ecrãs de separadores. Um repositório cujo nome o ecrã oculta nunca corresponde, pelo que o filtro não serve para descobrir o que contém um nome oculto; os números (frota, vermelhos, fila, eventos, alertas) seguem as linhas mantidas, a pontuação e o mapa de grupos de toda a frota não são mostrados com um filtro ativo e `/screen/sentinels` não é filtrado. O menu Ecrãs oferece o parâmetro para cada ecrã de parede e a janela indica o filtro junto ao seu número. Guia `SCREENS.md` em oito idiomas.
 
 ### Alterado
 
