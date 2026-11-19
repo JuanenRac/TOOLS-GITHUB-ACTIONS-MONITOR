@@ -609,6 +609,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinel.trend_health` | `-` | sentinel | Line of the health |
 | `sentinel.trend_quota_pct` | `-` | sentinel | Line of the API quota used |
 | `sentinel.workers` | `-` | sentinel | Sentinel parallel requests |
+| `sentinels.collab.deadline_s` | `-` | sentinel | Time ceiling per round |
 | `sentinels.collab.enabled` | `-` | sentinel | Collab sentinel on |
 | `sentinels.collab.max_repos_per_tick` | `-` | sentinel | Repositories per round |
 | `sentinels.collab.min_rate_remaining` | `-` | sentinel | Collab allowance floor |

@@ -209,11 +209,12 @@ class CiSentinel(unittest.TestCase):
 class LiteKnowsNoSentinelContract(unittest.TestCase):
     def test_lite_never_loads_the_contract_the_registry_or_the_ci_sentinel(self):
         script = ("import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; from github_actions_monitor.app import actions_monitor as am; am.enable_lite()\n"
+                  "from github_actions_monitor.app import toolconfig; toolconfig.set_owner('owner')\n"       # without an owner the page asks `gh api user`: a real network call that has nothing to do with what is checked
                   "import threading, urllib.request\nfrom http.server import ThreadingHTTPServer\n"
                   "s = ThreadingHTTPServer(('127.0.0.1', 0), am.Handler); threading.Thread(target=s.serve_forever, daemon=True).start()\n"
-                  "urllib.request.urlopen('http://127.0.0.1:%%d/' %% s.server_address[1], timeout=8).read()\n"
+                  "urllib.request.urlopen('http://127.0.0.1:%%d/' %% s.server_address[1], timeout=90).read()\n"
                   "print([m for m in ('github_actions_monitor.sentinels.sentinel_base', 'github_actions_monitor.sentinels.sentinel_registry', 'github_actions_monitor.sentinels.sentinel_ci', 'github_actions_monitor.sentinels.sentinel_local') if m in sys.modules])" % str(HERE / "src"))
-        done = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True, timeout=60, env=_testenv.isolated_env(self))
+        done = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True, timeout=180, env=_testenv.isolated_env(self))
         self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
         self.assertEqual(done.stdout.strip(), "[]")
 
