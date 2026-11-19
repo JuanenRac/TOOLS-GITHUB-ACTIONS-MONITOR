@@ -3,10 +3,12 @@
 # GPL-3.0-or-later - see LICENSE
 """A small linter for the workflow files of a repository (`.github/workflows/*.yml`), to run BEFORE you push. Read-only and local: it opens files, nothing else.
 
-  py -3 bin/lint_workflows.py [PATH ...] [--remote OWNER/REPO ...] [--json] [--fail-on info|warn|bad] [--lang CODE]
+  py -3 bin/lint_workflows.py [PATH ...] [--remote OWNER/REPO ... [--anon]] [--json] [--fail-on info|warn|bad] [--lang CODE]
 
 With no PATH it looks at `.github/workflows` of the current folder. A PATH is a workflow file or a folder that holds them (or a repository root). `--remote OWNER/REPO` reads the workflow
-files of a repository from GitHub through `gh` instead (no clone; one call for the list and one for each file) and says why when it cannot (SSO not authorised, no access).
+files of a repository from GitHub through `gh` instead (no clone; one call for the list and one for each file) and says why when it cannot (SSO not authorised, no access). With `--anon` (and
+`lint.anonymous_public` on, off by default) a PUBLIC repository is read with no credential at all: the files come from raw.githubusercontent.com, which spends no allowance of your token; a private
+or missing repository says "not found".
 
 Rules (each one can be switched off and given another severity in actions_monitor.json, `lint.rules.<rule>`):
 
@@ -321,7 +323,7 @@ def lint_remote(reader, repos, rules=None, ignore=None):
     return result
 
 
-def lint_remote_status(name, read=None):
+def lint_remote_status(name, read=None, anon=False, config=None):
     """`(findings, failure)` for `OWNER/REPO` read through the API of GitHub (no clone). `failure` is None when the repository was read, otherwise the reason why it was not (the name is not OWNER/REPO, the
     repository does not exist or the token cannot see it, SSO not authorised, no network...). Each failure is printed on the standard error. "Not read" is never the same as "read and clean"."""
     from github_actions_monitor.integrations import remote_workflows
@@ -329,6 +331,13 @@ def lint_remote_status(name, read=None):
     if not (remote_workflows.NAME_RE.match(owner) and remote_workflows.NAME_RE.match(repo)):
         print(i18n.t("lint.remote_bad_name", name=str(name)[:80]), file=sys.stderr)
         return [], "bad_name"
+    if anon:      # without any credential, public repositories only: the files come from raw.githubusercontent.com (lint.anonymous_public, off by default)
+        from github_actions_monitor.app import updatecheck
+        problem = "anon_off" if not anonymous_allowed(config) else "airgapped" if updatecheck.settings(config)["airgapped"] else ""
+        if problem:
+            print(i18n.t("lint.remote_failed", name=f"{owner}/{repo}", reason=i18n.t("lint.reason." + problem)), file=sys.stderr)
+            return [], problem
+        read = read or remote_workflows.anonymous_reader()
     read = read or remote_workflows.gh_read
     reader = remote_workflows.Reader(read, lambda: owner)
     reader.refresh(repo, 400, 100)
@@ -343,6 +352,12 @@ def lint_remote_status(name, read=None):
         print(i18n.t("lint.remote_failed", name=f"{owner}/{repo}", reason=i18n.t("lint.reason." + reason)), file=sys.stderr)
         return [], reason
     return lint_remote(reader, [repo]).get(repo, []), None
+
+
+def anonymous_allowed(config):
+    """`lint.anonymous_public` (off by default): true only when the person switched the anonymous read of public repositories on."""
+    block = (config or {}).get("lint") if isinstance((config or {}).get("lint"), dict) else {}
+    return block.get("anonymous_public") is True
 
 
 def lint_remote_name(name, read=None):
@@ -369,6 +384,7 @@ def main(argv=None):
     ap.add_argument("--json", action="store_true", help=i18n.t("lint.help_json"))
     ap.add_argument("--fail-on", choices=SEVERITIES, default="bad", help=i18n.t("lint.help_fail_on"))
     ap.add_argument("--remote", action="append", metavar="OWNER/REPO", help=i18n.t("lint.help_remote"))
+    ap.add_argument("--anon", action="store_true", help=i18n.t("lint.help_anon"))
     ap.add_argument("--lang", metavar="CODE", help=i18n.t("cli.help_lang"))
     args = ap.parse_args(argv)
     if args.lang:
@@ -381,8 +397,12 @@ def main(argv=None):
         for name, reason in problems:      # a path that is not there, or a file that cannot be read, is said and is never a clean one
             print(i18n.t("lint.path_unread", name=name, reason=i18n.t("lint.reason." + ("not_found" if reason == "not_found" else "error"))), file=sys.stderr)
             unread += 1
+    config = None
+    if args.anon:
+        from github_actions_monitor.app import toolconfig
+        config = toolconfig.raw_config()
     for name in args.remote or []:
-        found, failure = lint_remote_status(name)
+        found, failure = lint_remote_status(name, anon=args.anon, config=config)
         findings += found
         unread += 1 if failure else 0
     if args.json:

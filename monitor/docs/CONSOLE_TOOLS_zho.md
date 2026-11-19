@@ -12,6 +12,7 @@
 ## 工作流检查器:`bin/lint_workflows.py`
 
 - `py -3 bin/lint_workflows.py [路径 ...] [--json] [--fail-on info|warn|bad]` 在推送前检查 `.github/workflows/*.yml`。不带路径时查看当前文件夹。它只打开文件。`--remote OWNER/REPO`(可重复)通过 `gh` 从 GitHub 读取仓库的工作流文件,无需克隆;读不到时会说明原因(SSO 未授权、无访问权限)。
+- 当 `lint.anonymous_public` 开启时(默认关闭),`--remote OWNER/REPO --anon` 完全不使用凭据读取公开仓库(例如第三方仓库):工作流文件夹的列表是匿名请求,每个文件来自 `raw.githubusercontent.com`,不消耗你令牌的任何额度。未变化的文件不会重复读取,超过 256 KiB 的文件会被跳过,私有或不存在的仓库显示“未找到”(绝不是“干净”),与网络隔离的监视器从不读取。从不发送带有密钥的请求头。
 - 规则(可在设置标签页的“工作流检查器”子标签页中分别关闭或调整严重程度):`unpinned_uses`(未固定到完整提交 SHA 的 Action)、`permissions`(没有 `permissions:` 块或为 `write-all`)、`secrets_in_clear`(看起来像写在文件里的令牌或密钥)、`injection`(第三方文本被粘贴进 `run:` 脚本)和 `pr_target`(检出拉取请求代码的 `pull_request_target`)。
 - 可选规则（开启前默认关闭）：`no_timeout`（没有 `timeout-minutes` 的作业）、`secrets_inherit`（调用可复用工作流时的 `secrets: inherit`）、`own_action_main`（跟随 `@main` 的自有账户 action）和 `permissions_top`（作业有自己的 `permissions:`，但文件顶层没有）。`unpinned_uses` 会说明该 action 是自有的还是第三方的（`lint.own_owners`），`lint.unpinned_own` 可降低或隐藏自有的。
 - 当某项发现达到 `--fail-on`(默认 `bad`)时退出码为 1,因此可作为推送前钩子。当监视器能看到你的克隆时,还会在每日报告中增加一行。使用 `--remote` 时,如果某个仓库无法读取(不存在或令牌看不到、SSO 未授权、无网络)或其名称不是 `OWNER/REPO`,退出码为 2:未读取的仓库绝不会被当作干净。 指定的文件夹或文件不存在,或某个工作流文件无法读取时同样如此:它会在错误输出中点名,其余文件仍会检查,退出码为 2。

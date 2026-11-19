@@ -17,6 +17,8 @@
 
 ### 追加
 
+- **日次トレンドが、ワークフローファイルが変わった日に印を付けられるようになりました**(`sentinel.trend_workflow_marks`、既定はオフ。`sentinel.trend_workflow_marks_per_tick`、`sentinel.trend_workflow_marks_hours`、`sentinel.trend_workflow_marks_days` つき):リポジトリの `.github/workflows` のファイルにコミットが触れた日に、リリースの印の隣にグラフ上の四角を表示し、所要時間や失敗数の急な変化の説明を横に示します。リポジトリごとに 1 リクエストで、1 回に数リポジトリ、同じリポジトリは指定時間後にのみ再確認します。日次履歴にすでにある日だけに印が付き、印は `GET /api/sentinel` の `a3.trend.workflows` にあります。
+- **ワークフローリンターが公開リポジトリを認証情報なしで読めるようになりました**(`lint.anonymous_public`、既定はオフ。`lint_workflows.py --remote OWNER/REPO --anon`):第三者のワークフローを確認するとき、ファイルは `raw.githubusercontent.com` から取得されてトークンの割り当てを消費せず、フォルダの一覧は匿名リクエストです。変更のないファイルは再読込されず、256 KiB を超えるファイルはスキップされ、秘密を含むヘッダーは送信されず、エアギャップのモニターは読み取らず、非公開または存在しないリポジトリは「見つかりません」と表示され、「問題なし」にはなりません。
 - **リポジトリを公開範囲で除外でき、各ルールが除外した数が数えられます**:`discovery.hide` は `public` も受け付けるようになり(`private`、`fork`、`empty` に加えて)、基本タブと `GET /api/discovery` が各ルールの除外数(`excluded`:archived、empty、private、public、fork)を示します。フィルターで除外されたリポジトリは数えられ、クリーンとして読まれることはありません。読み取れなかった公開範囲が除外の理由になることはありません。
 
 - **コラボレーション監視にもラウンドの時間上限があります**:`sentinels.collab.deadline_s`(既定 30 秒、0 = なし)。セキュリティ、サプライチェーン、配信の監視と同じです。上限を過ぎるとラウンドは新しいリポジトリを始めず、届かなかったものは次のラウンドを待ち(最も前に読んだものが先)、状態にはアラート 0 件ではなく `unchecked` と `round_cut` として名前付きで一覧されます。

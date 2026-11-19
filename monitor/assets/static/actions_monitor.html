@@ -1392,6 +1392,7 @@ function trEvents(tr){
     if(ver[i]&&ver[i-1]&&ver[i]!==ver[i-1])out.push({i:i-off,kind:"update",text:T("ui.tr_ev_update",{v:ver[i]})});
     if((red[i]||0)>0&&(red[i-1]||0)===0)out.push({i:i-off,kind:"incident",text:T("ui.tr_ev_incident")})}
   const rel=(tr&&tr.releases)||{};for(let i=off;i<d.length;i++){if(Array.isArray(rel[d[i]])&&rel[d[i]].length)out.push({i:i-off,kind:"release",text:T("ui.tr_ev_release",{names:rel[d[i]].join(", ")})})}
+  const wfm=(tr&&tr.workflows)||{};for(let i=off;i<d.length;i++){if(Array.isArray(wfm[d[i]])&&wfm[d[i]].length)out.push({i:i-off,kind:"workflow",text:T("ui.tr_ev_workflow",{names:wfm[d[i]].join(", ")})})}
   return out}
 const trVals0=(tr,k)=>(tr&&tr[k]&&tr[k].values)||[];
 function trPath(v,x,y){let segs=[],cur=[];v.forEach((val,i)=>{if(trNum(val))cur.push([x(i),y(val)]);else if(cur.length){segs.push(cur);cur=[]}});if(cur.length)segs.push(cur);return segs}
@@ -1414,7 +1415,7 @@ function trChart(items,dates,events,o){
     if(it.thr&&idx===0&&it.thr.v>=lo&&it.thr.v<=hi){const ty=y(it.thr.v);g+=`<line x1="${L}" x2="${W-R}" y1="${ty.toFixed(1)}" y2="${ty.toFixed(1)}" class="trthr"/>`+(big?`<text x="${L+4}" y="${(ty-3).toFixed(1)}" class="trax">${esc(T("ui.tr_thr",{v:it.thr.v+(it.unit||"")}))}</text>`:"")}
     k++});
   if(big){g+=`<line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" class="trgrid0"/>`;if(n){g+=`<text x="${L}" y="${H-5}" class="trax">${esc(dates[0])}</text><text x="${W-R}" y="${H-5}" text-anchor="end" class="trax">${esc(dates[n-1])}</text>`}
-    events.forEach(e=>{const ex=x(e.i);g+=`<line x1="${ex.toFixed(1)}" x2="${ex.toFixed(1)}" y1="${Tp}" y2="${H-B}" class="trev ${e.kind}"/><text x="${ex.toFixed(1)}" y="${Tp-1}" text-anchor="middle" class="trevm ${e.kind}">${e.kind==="update"?"\u25B2":(e.kind==="release"?"\u25C6":"!")}<title>${esc(dates[e.i]+": "+e.text)}</title></text>`});
+    events.forEach(e=>{const ex=x(e.i);g+=`<line x1="${ex.toFixed(1)}" x2="${ex.toFixed(1)}" y1="${Tp}" y2="${H-B}" class="trev ${e.kind}"/><text x="${ex.toFixed(1)}" y="${Tp-1}" text-anchor="middle" class="trevm ${e.kind}">${e.kind==="update"?"\u25B2":(e.kind==="release"?"\u25C6":(e.kind==="workflow"?"\u25A0":"!"))}<title>${esc(dates[e.i]+": "+e.text)}</title></text>`});
     g+=`<line class="trcur" x1="0" x2="0" y1="${Tp}" y2="${H-B}" visibility="hidden"/>`}
   if(!k)g+=`<text x="${L}" y="${H/2}" class="trax">${esc(T("ui.tr_nodata"))}</text>`;
   return `<svg viewBox="0 0 ${W} ${H}" ${big?'class="trsvg" tabindex="0"':'preserveAspectRatio="none"'} width="100%" height="${big?"":H}" role="img" aria-label="${esc(o.label)}" data-n="${n}" data-l="${L}" data-r="${R}" data-w="${W}"><defs>${defs}</defs>${g}</svg>`}

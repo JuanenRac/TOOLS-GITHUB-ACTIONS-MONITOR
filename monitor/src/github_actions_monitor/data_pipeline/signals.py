@@ -135,7 +135,7 @@ def inventory(data, panels=None, health=None, now=None, daily_trend=None):
     return out
 
 
-_TREND_LEFT_OUT = ("versions", "releases", "thresholds", "min_repo")
+_TREND_LEFT_OUT = ("versions", "releases", "workflows", "thresholds", "min_repo")
 
 
 def _last(values):
@@ -171,8 +171,9 @@ def trend_signal(trend):
     for repo, values in list(per_repo.items())[:8]:
         rows.append(_row(repo, f"minutes24 of this repository: {_last(values) if _last(values) is not None else 'no figure'} (last of {len(values)} day(s))", "", None, "a3.trend.min_repo"))
     releases = trend.get("releases") or {}
+    workflows = trend.get("workflows") or {}
     lines = trend.get("thresholds") or {}
-    summary = (f"{len(rows)} series over {days} day(s); a day without a figure is a gap, never zero; releases published on {len(releases)} day(s)" +
+    summary = (f"{len(rows)} series over {days} day(s); a day without a figure is a gap, never zero; releases published on {len(releases)} day(s)" + (f"; commits that touched the workflow files on {len(workflows)} day(s)" if workflows else "") +
                (": " + ", ".join(f"{k} {v}" for k, v in sorted(lines.items())) if lines else ""))
     return _signal("trend.daily", "a3", "info", summary, rows)
 
