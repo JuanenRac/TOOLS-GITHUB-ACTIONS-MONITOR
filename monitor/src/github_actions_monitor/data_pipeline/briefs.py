@@ -30,7 +30,7 @@ CATALOG = {
     "ssec": {"prefixes": ["alerts"], "sources": ["/api/sentinel"], "kind": "panel"},
     "sdel": {"prefixes": ["alerts"], "sources": ["/api/sentinel/delivery"], "kind": "panel"},
     "ssup": {"prefixes": ["alerts"], "sources": ["/api/sentinel/supply"], "kind": "panel"},
-    "strend": {"prefixes": ["sentinel.a3"], "sources": ["/api/sentinel"], "kind": "trend"},
+    "strend": {"prefixes": ["trend.daily", "sentinel.a3"], "sources": ["/api/sentinel"], "kind": "trend"},
     "syvt": {"prefixes": ["sentinel.a3"], "sources": ["/api/compare"], "kind": "trend"},
     "team": {"prefixes": ["alerts", "now.runs"], "sources": ["/api/team"], "kind": "ranking"},
     "fleet": {"prefixes": ["alerts", "now.runs"], "sources": ["/api/team"], "kind": "ranking"},

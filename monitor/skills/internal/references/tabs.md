@@ -23,7 +23,7 @@ Generated from the page. The same data is in the endpoints; an AI does not need 
 - `sent`: Summary of the sentinels (report and trends; address #sentinel; present while any sentinel is on)
 - `ssec`: Security sentinel (what GitHub says is open or missing; address #sentinel-security; only while sentinels.security.enabled is on)
 - `ssup`: Supply chain sentinel (one card per signal: unpinned actions, moving branches and wide permissions of the workflow files; address #sentinel-supply; only while sentinels.supply.enabled is on)
-- `strend`: Daily trend (18 series from the history of the CI sentinel: a card with the value now, the change against yesterday and 7 days ago and a sparkline, a large chart with 7/30/60 days, threshold, marks, comparison and CSV/JSON; address #sentinel-trend; see references/cards-and-trend.md)
+- `strend`: Daily trend (25 series and the minutes of each repository from the history of the CI sentinel: a card with the value now, the change against yesterday and 7 days ago and a sparkline, a large chart with 7/30/60 days in lines or bars, threshold lines set in Settings, marks of updates, incidents and releases, comparison, copy as an image and CSV/JSON; address #sentinel-trend; see references/cards-and-trend.md)
 - `syvt`: Yesterday vs today (what appeared, what was solved and what stays since the last saved report of the CI sentinel; address #sentinel-yesterday)
 - `team`: Team (health of the repositories ranked by risk, with filters and the detail of each)
 - `trep`: Scheduled reports (the files written on a schedule; address #team-reports)
