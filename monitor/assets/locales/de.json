@@ -4365,5 +4365,10 @@
  "ui.pl_confirm": "Das Protokoll der Prompts leeren?",
  "ui.pl_count": "{n} Einträge (es behält die letzten {keep}).",
  "ui.pl_denied": "Das kann nur ein Administrator an diesem Rechner.",
- "ui.pl_failed": "keine Antwort"
+ "ui.pl_failed": "keine Antwort",
+ "cfg.t.ai.assistant.enabled": "Sie sehen: ein Feld mit festen Fragen im Reiter Meldungen, von Ihrer KI mit den Daten des Monitors beantwortet. Kosten: ein KI-Aufruf pro Frage, im Tagesbudget der KI; es wird nichts geschrieben und GitHub nicht aufgerufen.",
+ "cfg.t.ai.prompt_log.enabled": "Sie sehen: in den Einstellungen eine Karte mit den letzten an die KI gesendeten Prompts und ihren Antworten, von Geheimnissen befreit. Kosten: eine kleine lokale Datei; nur ein Administrator kann sie lesen oder leeren.",
+ "cfg.t.ai.similar.enabled": "Sie sehen: „diese Meldung erklären“ listet auch ähnliche Meldungen, durch Wortvergleich gefunden. Kosten: keine bei der KI und keine bei GitHub; es liest nur, was der Monitor schon hat.",
+ "cfg.t.ai.airgapped": "Sie sehen: die KI weist jede Adresse ab, die nicht dieser Rechner oder eine von Ihnen gelistete private Adresse ist, bevor eine Verbindung geöffnet wird. Kosten: keine; ein Cloud-Modell funktioniert nicht, solange es an ist.",
+ "cfg.t.api.v1_enabled": "Sie sehen: die Lese-API für Clients unter /api/v1/ (auto öffnet sie, wenn der Monitor als Dienst läuft). Kosten: keine; sie liest nur und folgt denselben Rollen wie die Seite."
 }

@@ -17,6 +17,10 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - **Los candados entre procesos se comprueban dentro del contenedor**: las comprobaciones del contenedor ganan E9, que arranca varios procesos de la imagen contra un mismo volumen compartido y cuenta lo que escriben bajo el candado del sistema operativo y bajo el fichero candado, de modo que una actualización perdida se vería en la evidencia del workflow; la prueba del fichero candado también se ejecuta ya en Windows.
 
+- **Una guía propia del asistente, `ASSISTANT.md`, en ocho idiomas**: cómo encenderlo, sus cinco preguntas fijas, las cuatro herramientas con las que lee, lo que nunca hace (no escribe nada, no toca nada en GitHub, entrega como dato lo que escribió un repositorio) y cómo comprobarlo con las dos rutas y el registro de prompts. La sección de `AI_CONNECTION.md` queda como referencia de los ajustes.
+
+- **Ayuda con coste y efecto en cinco interruptores más**: el tooltip de `ai.assistant.enabled`, `ai.prompt_log.enabled`, `ai.similar.enabled`, `ai.airgapped` y `api.v1_enabled` dice ahora qué verás y qué cuesta, en los ocho idiomas, junto a la línea genérica que ya tenía todo ajuste.
+
 - **El registro de prompts y el origen de las cifras de un modelo, en la página**: bajo la IA en Ajustes, una tarjeta «Registro de prompts» muestra las últimas 20 entradas (ya limpias de secretos y de tus palabras ocultas) y vacía el registro con un botón, para un administrador en este equipo; la tabla de modelos tiene una columna «Origen» (la página, el fichero `config/ai_models.json` o el proveedor) para ver de dónde sale cada cifra. Ambas en los ocho idiomas.
 
 - **Dos preguntas más para el asistente, ambas de solo lectura**: «la situación de un repositorio» (`explain_repo`, a partir de sus ejecuciones y sus alertas abiertas) y «qué hacer primero» (`prioritize`, las alertas abiertas, el estado y la puntuación puestos en orden con sus ids) se suman a las tres que había; usan las mismas cuatro herramientas, límites y presupuesto diario de la IA, y sigue sin haber chat libre.
