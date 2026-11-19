@@ -83,8 +83,12 @@ def limits(config, folder=None, secret_reader=None):
         elif len(value) < cfg["webhook_min_length"]:
             status = "warn"
             notes.append(f"webhook secret {len(value)} < {cfg['webhook_min_length']} characters")
-    policy = retention.settings(config)
+    policy = retention.effective(config)
     notes.append(f"retention {policy['events_days']} d {policy['mode']}" if policy["enabled"] else "retention off")
+    for key, info in (policy.get("raised") or {}).items():
+        notes.append(f"{key} raised from {info['asked']} to {info['now']} to cover the longest window that reads it")
+        if status == "ok":
+            status = "warn"
     if not policy["enabled"] and retention.service_mode(config):
         status = "warn"
     return status, "; ".join(notes)

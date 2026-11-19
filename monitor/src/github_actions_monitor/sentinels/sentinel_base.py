@@ -20,6 +20,20 @@ LEVELS = ("info", "warning", "error", "critical")
 LIFECYCLES = ("healthy", "degraded", "paused", "error", "off")
 
 
+def round_deadline(seconds):
+    """The moment (monotonic) a round must stop starting new repositories, or None when the sentinel has no ceiling (`deadline_s` = 0)."""
+    return time.monotonic() + seconds if seconds else None
+
+
+def expired(deadline):
+    return deadline is not None and time.monotonic() > deadline
+
+
+def unchecked(repos, per_repo, limit=20):
+    """The names of the repositories in scope that have never been read (a round that ran out of time leaves them for the next one): shown by name instead of as zero alerts."""
+    return [r for r in repos if not (per_repo.get(r) or {}).get("scanned")][:limit]
+
+
 def lifecycle(status):
     """Where a sentinel stands, from its status: `off` (not switched on), `paused` (waiting for allowance), `error` (it fails and has read nothing yet), `degraded` (some reads fail, a source
     cannot be read, or it has not finished its first look) or `healthy`. "No alerts" only means something when this is `healthy`: a sentinel that could not look has no alerts either."""

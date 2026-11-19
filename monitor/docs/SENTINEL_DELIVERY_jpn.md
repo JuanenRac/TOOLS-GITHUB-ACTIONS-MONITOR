@@ -34,7 +34,7 @@ CI、Collab、セキュリティ、サプライチェーンに続く5番目の�
 
 ## コスト
 
-1回の巡回で読むのは最大`sentinels.delivery.max_repos_per_tick`個のリポジトリ（既定10）、呼び出しは最大`sentinels.delivery.max_calls_per_tick`回（60）です。リリースに1回、タグに1回、CHANGELOGに1回（複数のパスを挙げて最初のものがなければ増えます）、バージョンファイルごとに1回です。オフにしたシグナルは全く読みません。最も前に読んだものから先に、開いたアラートのあるものは少し早めに読みます。周期は`sentinels.delivery.refresh_seconds`ごと（既定1時間）です。条件付きリクエストはなく、コストは304応答ではなくこれらの設定で抑えられます。残りの利用枠が`sentinels.delivery.min_rate_remaining`を下回る間は一時停止します。状態（`delivery_state.json`）は開いているアラートを保つので、再起動しても何も再通知されず、リポジトリを初めて見たときにはイベントを書きません。
+1回の巡回で読むのは最大`sentinels.delivery.max_repos_per_tick`個のリポジトリ（既定10）、呼び出しは最大`sentinels.delivery.max_calls_per_tick`回（60）です。リリースに1回、タグに1回、CHANGELOGに1回（複数のパスを挙げて最初のものがなければ増えます）、バージョンファイルごとに1回です。オフにしたシグナルは全く読みません。最も前に読んだものから先に、開いたアラートのあるものは少し早めに読みます。周期は`sentinels.delivery.refresh_seconds`ごと（既定1時間）です。条件付きリクエストはなく、コストは304応答ではなくこれらの設定で抑えられます。残りの利用枠が`sentinels.delivery.min_rate_remaining`を下回る間は一時停止します。状態（`delivery_state.json`）は開いているアラートを保つので、再起動しても何も再通知されず、リポジトリを初めて見たときにはイベントを書きません。 ラウンドは `sentinels.delivery.deadline_s` 秒(既定 30、0 = 上限なし)を過ぎると新しいリポジトリを始めません。届かなかったものは次のラウンドを待ち、状態にはアラート 0 件ではなく `unchecked`(と `round_cut`)として名前付きで一覧されます。
 
 ## イベント、通知、スコア
 
