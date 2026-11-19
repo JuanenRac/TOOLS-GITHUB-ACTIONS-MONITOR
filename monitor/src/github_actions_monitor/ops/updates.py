@@ -153,6 +153,56 @@ def running():
     return bool(progress().get("running"))
 
 
+STREAM_MAX_SECONDS = 900     # a listener is let go after this long (the page asks again if the update is still going)
+STREAM_MAX_LISTENERS = 2
+_STREAM = {"open": 0}
+_STREAM_GUARD = threading.Lock()
+
+
+def stream_acquire():
+    with _STREAM_GUARD:
+        if _STREAM["open"] >= STREAM_MAX_LISTENERS:
+            return False
+        _STREAM["open"] += 1
+        return True
+
+
+def stream_release():
+    with _STREAM_GUARD:
+        _STREAM["open"] = max(0, _STREAM["open"] - 1)
+
+
+def _frame(event, data, number=None):
+    head = "" if number is None else "id: %d\n" % number
+    return "%sevent: %s\ndata: %s\n\n" % (head, event, json.dumps(data, ensure_ascii=False, separators=(",", ":")))
+
+
+def stream_frames(read=None, sleep=time.sleep, clock=time.monotonic, poll=0.5, keepalive=15.0, max_seconds=None, stop=lambda: False):
+    """The progress of the update as server-sent events instead of a request every second and a half. `hello` first, then one `progress` frame each time what progress() answers changes (the same JSON
+    the polling route gives, so the page has ONE reader for both), a comment every `keepalive` seconds, and `bye` when the update is over (nothing is running any more), the time is up or `stop()`
+    says so. It reads the very small status file the process of the update writes; it asks nothing of GitHub and changes nothing."""
+    read = read or progress
+    limit = STREAM_MAX_SECONDS if max_seconds is None else max_seconds
+    started = clock()
+    current = read()
+    yield _frame("hello", {"running": bool(current.get("running"))})
+    last, number, beat = None, 0, started
+    while not stop() and clock() - started < limit:
+        text = json.dumps(current, sort_keys=True, default=str)
+        if text != last:
+            last, number, beat = text, number + 1, clock()
+            yield _frame("progress", current, number)
+        if not current.get("running"):
+            yield _frame("bye", {"reason": "done"})
+            return
+        if clock() - beat >= keepalive:
+            beat = clock()
+            yield ": keepalive\n\n"
+        sleep(poll)
+        current = read()
+    yield _frame("bye", {"reason": "stopped" if stop() else "time"})
+
+
 def status(config, tool_version, notice, lite=False, demo=False, env=None):
     """The state for the page without any request to GitHub. `notice` is the view of the update notice the monitor already keeps."""
     mod = module()

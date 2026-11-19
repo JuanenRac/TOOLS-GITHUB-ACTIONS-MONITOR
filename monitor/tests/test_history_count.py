@@ -40,6 +40,7 @@ PROBE = r"""<script>
   const wait=ms=>new Promise(r=>setTimeout(r,ms)),out={steps:[]};
   try{
     await wait(1500);
+    for(let i=0;i<200&&!(typeof DATA!=="undefined"&&DATA&&DATA.runs&&DATA.runs.length);i++)await wait(100);
     const base=JSON.parse(JSON.stringify(DATA)),run=base.runs[0],runs=[];
     for(let i=0;i<600;i++)runs.push({...run,id:700000+i,status:"completed",conclusion:i%7?"success":"failure",started:new Date(Date.now()-i*60000).toISOString()});
     base.runs=runs;base.runs_total=5704;

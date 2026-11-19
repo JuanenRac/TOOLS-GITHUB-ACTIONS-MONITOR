@@ -2519,6 +2519,31 @@ class Handler(BaseHTTPRequestHandler):
         finally:
             ai_alerts.stream_release()
 
+    def updates_stream(self):
+        """GET /api/updates/stream: `text/event-stream` with `hello`, one `progress` frame each time the progress of the update changes (the JSON of /api/updates/progress), keep-alive comments and `bye`
+        when the update is over. Same guard as the other routes of the Updates menu; at most two listeners, each for a limited time. No setting: it only reports a file the updater writes."""
+        from github_actions_monitor.ops import updates
+        if not updates.stream_acquire():
+            self.json_reply({"error": "too many listeners"}, 429)
+            return
+        try:
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Accel-Buffering", "no")
+            self.send_header("Connection", "close")
+            self.end_headers()
+            self.close_connection = True
+            for frame in updates.stream_frames():
+                self.wfile.write(frame.encode("utf-8"))
+                self.wfile.flush()
+        except (ConnectionError, OSError):
+            DISCONNECTS[0] += 1
+        except (ValueError, TypeError) as error:
+            degraded.note("updates.stream", error)
+        finally:
+            updates.stream_release()
+
     local_door = False      # True only on the second, loopback-only port (listen.local_port): the way in of the person at this computer when a reverse proxy is declared
 
     def request_ok(self):
@@ -3470,6 +3495,10 @@ class Handler(BaseHTTPRequestHandler):
                 return
             self.json_reply({"schema": 1, "account": CHILD["account"] or "", "enabled": audit_log.settings(config)["enabled"], "chain": audit_log.verify(), "entries": audit_log.read(200, CHILD["account"] or None),
                              "write_failures": audit_log.STATS["write_failures"], "last_write_error_at": audit_log.STATS["last_write_error_at"]})
+        elif path == "/api/updates/stream":      # the progress of an update as server-sent events (the page falls back to asking every 1.5 s); Complete only, read only
+            if not self.guard():
+                return
+            self.updates_stream()
         elif path in ("/api/updates/status", "/api/updates/progress", "/api/updates/history"):      # the Updates menu: what is installed, what is new, the progress of an update, the updates done (Complete only; no path, no secret)
             if not self.guard():
                 return

@@ -4116,6 +4116,7 @@
  "ui.upd_back_confirm": "Revenir à {to} ? Le moniteur s'arrête de lui-même, les fichiers de la dernière mise à jour sont remplacés par la copie faite avant (et vos données si leur format a changé) et le moniteur redémarre.",
  "ui.upd_verified_yes": "SHA256SUMS correspond",
  "ui.upd_verified_no": "NON vérifié : la version n'a pas de SHA256SUMS",
+ "ui.upd_trust": "La vérification compare le zip à SHA256SUMS, et les deux viennent de la même version GitHub : elle détecte un téléchargement abîmé ou incomplet, pas une version remplacée à la source. La confiance dans la version repose sur GitHub et sur votre propre compte là-bas.",
  "ui.upd_progress": "Progression",
  "ui.upd_restarting": "Le moniteur redémarre ; cette page se reconnecte d'elle-même.",
  "ui.upd_done": "La mise à jour est terminée.",
