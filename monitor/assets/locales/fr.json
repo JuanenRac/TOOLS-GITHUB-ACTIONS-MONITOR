@@ -4348,5 +4348,22 @@
  "cfg.h.ai.prompt_log.keep": "Nombre de lignes les plus récentes que le journal conserve ; les plus anciennes sont supprimées.",
  "ui.cfg_u_lines": "lignes",
  "ai.doc_model_retired": "Le modèle {model} figure dans votre liste de modèles retirés (config/ai_models.json) : il est ignoré et le suivant de la chaîne répond.",
- "ai.doc_model_use": "Utilisez {use} à la place."
+ "ai.doc_model_use": "Utilisez {use} à la place.",
+ "ui.asst_a_explain_repo": "Situation d'un dépôt",
+ "ui.asst_a_prioritize": "Quoi faire en premier",
+ "ui.ai_col_origin": "Origine",
+ "ui.ai_src_manual": "page",
+ "ui.ai_src_file": "fichier",
+ "ui.ai_src_provider": "fournisseur",
+ "ui.pl_h": "Journal des prompts",
+ "ui.pl_help": "Les questions envoyées à l'IA et ses réponses, déjà nettoyées des secrets et de vos mots cachés, gardées dans un fichier local tant que ai.prompt_log.enabled est activé. Seul un administrateur peut le lire ou le vider.",
+ "ui.pl_show": "Afficher les derniers",
+ "ui.pl_clear": "Vider le journal",
+ "ui.pl_off": "Le journal est désactivé (ai.prompt_log.enabled).",
+ "ui.pl_empty": "Le journal est vide.",
+ "ui.pl_cleared": "Vidé : {n} lignes supprimées.",
+ "ui.pl_confirm": "Vider le journal des prompts ?",
+ "ui.pl_count": "{n} entrées (il garde les {keep} dernières).",
+ "ui.pl_denied": "Seul un administrateur sur cet ordinateur peut le faire.",
+ "ui.pl_failed": "sans réponse"
 }

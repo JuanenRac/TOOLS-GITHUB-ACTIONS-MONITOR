@@ -15,6 +15,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Hinzugefügt
 
+- **Das Protokoll der Prompts und die Herkunft der Zahlen eines Modells, auf der Seite**: unter der KI in den Einstellungen zeigt eine Karte „Protokoll der Prompts“ die letzten 20 Einträge (schon von Geheimnissen und Ihren versteckten Wörtern befreit) und leert das Protokoll mit einer Schaltfläche, für einen Administrator an diesem Rechner; die Tabelle der Modelle hat eine Spalte „Herkunft“ (die Seite, die Datei `config/ai_models.json` oder der Anbieter), damit man sieht, woher jede Zahl stammt. Beides in den acht Sprachen.
+
+- **Zwei weitere Fragen für den Assistenten, beide nur lesend**: „die Lage eines Repositorys“ (`explain_repo`, aus seinen Läufen und offenen Meldungen) und „was zuerst zu tun ist“ (`prioritize`, die offenen Meldungen, der Status und die Bewertung mit ihren Ids in eine Reihenfolge gebracht) kommen zu den drei bestehenden hinzu; sie nutzen dieselben vier Werkzeuge, Grenzen und das Tagesbudget der KI, und einen freien Chat gibt es weiterhin nicht.
+
 - **Die Beispieldatei der Einstellungen enthält 221 Einstellungen mehr**: Die Einstellungsseite nimmt den angezeigten Standardwert aus der Beispieldatei, und 221 Einstellungen der KI, der Wächter für Lieferung und Lieferkette, der Sicherungen, des Doctors, des Lesepools, der Töne, des Webhooks und der Meldungen fehlten dort, sodass die Seite für sie keinen Standard zeigte. Jede trägt nun den Wert, den der Code verwendet, wenn die Einstellung fehlt; das Register der Oberflächen listet die 61, denen er noch fehlt.
 
 - **Die 36 Routen der Seite, die keine Anleitung nannte, stehen in einer Tabelle**: `API.md` endet in den acht Sprachen mit einer Tabelle der Routen der Seite, die der Vertrag nicht einfriert (das Feld Über, die geführten Läufe mit `act` und auf GitHub, die Aktionen der KI, die Auswertung, die Entdeckung, die Hilfe, der Modus, die Statusleiste, das Logo und der Rest), mit dem, was jede tut, und welche nur dieser Rechner nutzen darf; das Register der Oberflächen führt sie nicht mehr als fehlend.

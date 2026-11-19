@@ -4348,5 +4348,22 @@
  "cfg.h.ai.prompt_log.keep": "Wie viele der neuesten Zeilen das Protokoll behält; ältere entfallen.",
  "ui.cfg_u_lines": "Zeilen",
  "ai.doc_model_retired": "Das Modell {model} steht in Ihrer Liste zurückgezogener Modelle (config/ai_models.json): es wird übersprungen und das nächste der Kette antwortet.",
- "ai.doc_model_use": "Verwenden Sie stattdessen {use}."
+ "ai.doc_model_use": "Verwenden Sie stattdessen {use}.",
+ "ui.asst_a_explain_repo": "Lage eines Repositorys",
+ "ui.asst_a_prioritize": "Was zuerst zu tun ist",
+ "ui.ai_col_origin": "Herkunft",
+ "ui.ai_src_manual": "Seite",
+ "ui.ai_src_file": "Datei",
+ "ui.ai_src_provider": "Anbieter",
+ "ui.pl_h": "Protokoll der Prompts",
+ "ui.pl_help": "Die an die KI gesendeten Fragen und ihre Antworten, schon von Geheimnissen und Ihren versteckten Wörtern befreit, in einer lokalen Datei, solange ai.prompt_log.enabled an ist. Nur ein Administrator kann es lesen oder leeren.",
+ "ui.pl_show": "Die letzten zeigen",
+ "ui.pl_clear": "Protokoll leeren",
+ "ui.pl_off": "Das Protokoll ist aus (ai.prompt_log.enabled).",
+ "ui.pl_empty": "Das Protokoll ist leer.",
+ "ui.pl_cleared": "Geleert: {n} Zeilen entfernt.",
+ "ui.pl_confirm": "Das Protokoll der Prompts leeren?",
+ "ui.pl_count": "{n} Einträge (es behält die letzten {keep}).",
+ "ui.pl_denied": "Das kann nur ein Administrator an diesem Rechner.",
+ "ui.pl_failed": "keine Antwort"
 }

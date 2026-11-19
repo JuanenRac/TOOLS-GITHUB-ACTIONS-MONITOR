@@ -4348,5 +4348,22 @@
  "cfg.h.ai.prompt_log.keep": "Quantas das linhas mais recentes o registo guarda; as mais antigas são descartadas.",
  "ui.cfg_u_lines": "linhas",
  "ai.doc_model_retired": "O modelo {model} está na sua lista de modelos retirados (config/ai_models.json): é ignorado e responde o seguinte da cadeia.",
- "ai.doc_model_use": "Use {use} em vez dele."
+ "ai.doc_model_use": "Use {use} em vez dele.",
+ "ui.asst_a_explain_repo": "Situação de um repositório",
+ "ui.asst_a_prioritize": "O que fazer primeiro",
+ "ui.ai_col_origin": "Origem",
+ "ui.ai_src_manual": "página",
+ "ui.ai_src_file": "ficheiro",
+ "ui.ai_src_provider": "fornecedor",
+ "ui.pl_h": "Registo de prompts",
+ "ui.pl_help": "As perguntas enviadas à IA e as suas respostas, já limpas de segredos e das suas palavras ocultas, guardadas num ficheiro local enquanto ai.prompt_log.enabled estiver ativo. Só um administrador as pode ler ou esvaziar.",
+ "ui.pl_show": "Mostrar os últimos",
+ "ui.pl_clear": "Esvaziar o registo",
+ "ui.pl_off": "O registo está desligado (ai.prompt_log.enabled).",
+ "ui.pl_empty": "O registo está vazio.",
+ "ui.pl_cleared": "Esvaziado: {n} linhas removidas.",
+ "ui.pl_confirm": "Esvaziar o registo de prompts?",
+ "ui.pl_count": "{n} entradas (guarda as últimas {keep}).",
+ "ui.pl_denied": "Só um administrador neste computador o pode fazer.",
+ "ui.pl_failed": "sem resposta"
 }

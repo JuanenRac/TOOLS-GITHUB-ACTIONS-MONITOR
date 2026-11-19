@@ -17,6 +17,10 @@ when this file and `tool_version.py` disagree.
 
 ### Added
 
+- **The record of prompts and the origin of the figures of a model, in the page**: under the AI in Settings, a card "Record of prompts" shows the last 20 entries (already cleaned of secrets and of your hidden words) and empties the record with a button, for an administrator on this computer; the table of models has a column "Origin" (the page, the file `config/ai_models.json` or the provider) so you can see where each figure comes from. Both in the eight languages.
+
+- **Two more questions for the assistant, both read-only**: "the situation of a repository" (`explain_repo`, from its runs and its open alerts) and "what to do first" (`prioritize`, the open alerts, the status and the score put in order with their ids) join the three that existed; they use the same four tools, limits and daily budget of the AI, and there is still no free chat.
+
 - **The example file of the settings carries 221 more settings**: the Settings page takes the default it shows from the example file, and 221 settings of the AI, the delivery and supply sentinels, the backups, the doctor, the pool of reads, the sounds, the webhook and the alerts were not in it, so the page showed no default for them. Each one now carries the value the code uses when the setting is absent; the register of surfaces lists the 61 that still lack it.
 
 - **The 36 routes of the page that no guide named are in a table**: `API.md`, in the eight languages, ends with a table of the routes of the page that the contract does not freeze (the About panel, the guided runs with `act` and on GitHub, the actions of the AI, the analytics, the discovery, the help, the mode, the status bar, the logo and the rest), with what each one does and which ones only this computer may use; the register of surfaces no longer lists them as missing.

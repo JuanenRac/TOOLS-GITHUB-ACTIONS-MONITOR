@@ -15,6 +15,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Le journal des prompts et l'origine des chiffres d'un modèle, dans la page** : sous l'IA dans les Réglages, une carte « Journal des prompts » montre les 20 dernières entrées (déjà nettoyées des secrets et de vos mots cachés) et vide le journal avec un bouton, pour un administrateur sur cet ordinateur ; le tableau des modèles a une colonne « Origine » (la page, le fichier `config/ai_models.json` ou le fournisseur) pour voir d'où vient chaque chiffre. Les deux dans les huit langues.
+
+- **Deux questions de plus pour l'assistant, toutes deux en lecture seule** : « la situation d'un dépôt » (`explain_repo`, d'après ses exécutions et ses alertes ouvertes) et « quoi faire en premier » (`prioritize`, les alertes ouvertes, l'état et le score mis en ordre avec leurs identifiants) s'ajoutent aux trois existantes ; elles utilisent les mêmes quatre outils, limites et budget quotidien de l'IA, et il n'y a toujours pas de discussion libre.
+
 - **Le fichier d'exemple des réglages porte 221 réglages de plus** : la page des Réglages prend la valeur par défaut qu'elle montre dans le fichier d'exemple, et 221 réglages de l'IA, des sentinelles de livraison et de chaîne d'approvisionnement, des sauvegardes, du doctor, du pool de lectures, des sons, du webhook et des alertes n'y étaient pas, si bien que la page n'affichait aucune valeur par défaut pour eux. Chacun porte maintenant la valeur que le code utilise quand le réglage est absent ; le registre des surfaces liste les 61 qui en manquent encore.
 
 - **Les 36 routes de la page qu'aucun guide ne nommait sont dans un tableau** : `API.md`, dans les huit langues, se termine par un tableau des routes de la page que le contrat ne fige pas (le panneau À propos, les exécutions guidées avec `act` et sur GitHub, les actions de l'IA, l'analyse, la découverte, l'aide, le mode, la barre d'état, le logo et le reste), avec ce que fait chacune et celles que seul cet ordinateur peut utiliser ; le registre des surfaces ne les donne plus comme manquantes.
