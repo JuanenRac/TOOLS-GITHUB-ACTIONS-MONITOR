@@ -148,6 +148,11 @@
         "required_checks": {
           "enabled": true
         },
+        "commit_state": {
+          "enabled": false,
+          "include_other_apps": true,
+          "include_statuses": false
+        },
         "release_assets": {
           "enabled": true,
           "recent_days": 30,
