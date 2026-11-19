@@ -151,6 +151,38 @@ Les données viennent de `/api/screens/data?screen=overview` (ou `now`, `sentine
 2. Ouvrez chacune dans Chrome ou Edge en mode kiosque : `msedge --kiosk "http://cet-ordinateur:8765/screen/now?monitor=2" --edge-kiosk-type=fullscreen` ou `chrome --kiosk "http://cet-ordinateur:8765/screen/now?monitor=2"` ; avec `--app=ADRESSE` au lieu de `--kiosk`, la fenêtre n'a pas de barres. Sans mode kiosque, le bouton discret en bas de page demande le plein écran.
 3. Depuis un autre ordinateur, utilisez le mode réseau : le jeton d'accès d'un lecteur suffit, car ces pages n'écrivent jamais.
 
+## Quel onglet est sur quel écran mural
+
+Chaque onglet de la page a une décision, écrite dans le code (`TAB_DECISIONS` de `screens.py`) et vérifiée par un test : il est montré sur l'un des écrans muraux, ou il dit pourquoi non. Un onglet montré a ses données dans la réponse de `/api/screens/data` (la vue d'ensemble porte Alertes, Graphiques et Flotte ; En ce moment porte Maintenant ; Sentinelles porte les cartes des onglets de sentinelles). Un onglet non montré donne son motif :
+
+- `people`: il nomme des personnes, et un écran mural ne montre jamais un nom d'utilisateur.
+- `controls`: il est fait de boutons et de champs qui changent quelque chose, et un écran mural n'en a aucun.
+- `reading`: il est fait pour être lu, comparé ou enregistré, pas pour être vu de loin.
+- `text`: il est fait de titres, de causes et de messages, qu'un écran mural ne montre jamais.
+
+| Onglet | Nom | Écran mural | Motif |
+|---|---|---|---|
+| `now` | Maintenant | `/screen/now` | - |
+| `al` | Alertes | `/screen/overview` | - |
+| `charts` | Graphiques | `/screen/overview` | - |
+| `sent` | Résumé | `/screen/sentinels` | - |
+| `sci` | Sentinelle CI | `/screen/sentinels` | - |
+| `scol` | Sentinelle collab | `/screen/sentinels` | - |
+| `ssec` | Sentinelle sécurité | `/screen/sentinels` | - |
+| `sdel` | Sentinelle de livraison | `/screen/sentinels` | - |
+| `ssup` | Sentinelle de chaîne d'approvisionnement | `/screen/sentinels` | - |
+| `strend` | Tendance quotidienne | - | `reading` |
+| `syvt` | Hier vs aujourd'hui | - | `reading` |
+| `team` | Santé de l'équipe | - | `people` |
+| `fleet` | Flotte | `/screen/overview` | - |
+| `repos` | Dépôts | - | `controls` |
+| `rep` | Rapports | - | `reading` |
+| `trep` | Rapports planifiés | - | `reading` |
+| `les` | Leçons | - | `text` |
+| `hist` | Historique | - | `text` |
+| `upd` | Mises à jour | - | `controls` |
+| `cfg` | Réglages | - | `controls` |
+
 ## Menu Écrans
 
 Le bouton **Écrans** de la barre du haut (l'icône de deux moniteurs) ouvre un menu avec chaque type d'écran du moniteur, pour que personne n'ait à retenir les adresses. Il ne fait que naviguer : il ouvre des adresses, n'écrit rien et ne lit rien sur GitHub. Il est activé par défaut et `screens.menu` le désactive.

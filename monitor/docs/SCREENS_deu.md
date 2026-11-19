@@ -151,6 +151,38 @@ Die Daten kommen von `/api/screens/data?screen=overview` (oder `now`, `sentinels
 2. Öffnen Sie jede in Chrome oder Edge im Kioskmodus: `msedge --kiosk "http://dieser-rechner:8765/screen/now?monitor=2" --edge-kiosk-type=fullscreen` oder `chrome --kiosk "http://dieser-rechner:8765/screen/now?monitor=2"`; mit `--app=ADRESSE` statt `--kiosk` hat das Fenster keine Leisten. Ohne Kioskmodus bittet die unauffällige Schaltfläche am Seitenende um Vollbild.
 3. Von einem anderen Rechner aus verwenden Sie den Netzwerkmodus: Das Zugriffstoken eines Betrachters genügt, weil diese Seiten nie schreiben.
 
+## Welcher Tab auf welcher Wandanzeige liegt
+
+Jeder Tab der Seite hat eine Entscheidung, die im Code steht (`TAB_DECISIONS` in `screens.py`) und von einem Test geprüft wird: Er wird auf einer der Wandanzeigen gezeigt oder nennt den Grund, warum nicht. Ein gezeigter Tab hat seine Daten in der Antwort von `/api/screens/data` (die Übersicht trägt Alarme, Diagramme und Flotte; Gerade jetzt trägt Jetzt; Wächter trägt die Karten der Wächter-Tabs). Ein nicht gezeigter Tab nennt seinen Grund:
+
+- `people`: er nennt Personen, und eine Wandanzeige zeigt nie einen Benutzernamen.
+- `controls`: er besteht aus Schaltflächen und Feldern, die etwas ändern, und eine Wandanzeige hat keine.
+- `reading`: er ist zum Lesen, Vergleichen oder Speichern gemacht, nicht zum Ansehen aus der Ferne.
+- `text`: er besteht aus Titeln, Ursachen und Meldungen, die eine Wandanzeige nie zeigt.
+
+| Tab | Name | Wandanzeige | Grund |
+|---|---|---|---|
+| `now` | Jetzt | `/screen/now` | - |
+| `al` | Alarme | `/screen/overview` | - |
+| `charts` | Diagramme | `/screen/overview` | - |
+| `sent` | Übersicht | `/screen/sentinels` | - |
+| `sci` | CI-Wächter | `/screen/sentinels` | - |
+| `scol` | Kollaborations-Wächter | `/screen/sentinels` | - |
+| `ssec` | Sicherheits-Wächter | `/screen/sentinels` | - |
+| `sdel` | Delivery-Sentinel | `/screen/sentinels` | - |
+| `ssup` | Lieferketten-Sentinel | `/screen/sentinels` | - |
+| `strend` | Tagestrend | - | `reading` |
+| `syvt` | Gestern vs. heute | - | `reading` |
+| `team` | Teamzustand | - | `people` |
+| `fleet` | Flotte | `/screen/overview` | - |
+| `repos` | Repositories | - | `controls` |
+| `rep` | Berichte | - | `reading` |
+| `trep` | Geplante Berichte | - | `reading` |
+| `les` | Lektionen | - | `text` |
+| `hist` | Verlauf | - | `text` |
+| `upd` | Updates | - | `controls` |
+| `cfg` | Einstellungen | - | `controls` |
+
 ## Menü Bildschirme
 
 Die Schaltfläche **Bildschirme** in der oberen Leiste (das Symbol mit zwei Monitoren) öffnet ein Menü mit jeder Art von Bildschirm, die der Monitor hat, damit sich niemand die Adressen merken muss. Es navigiert nur: Es öffnet Adressen, schreibt nichts und liest nichts von GitHub. Es ist standardmäßig an und `screens.menu` schaltet es aus.
