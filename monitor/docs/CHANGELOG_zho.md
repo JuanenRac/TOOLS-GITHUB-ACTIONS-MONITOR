@@ -15,6 +15,8 @@
 - **面向电视或墙面的展示屏配置，默认关闭**（`kiosk.enabled`）：`monitor_cli.py kiosk ops|team|release|quiet` 会打印预设的地址；仅当该设置开启且地址带有 `kiosk=1` 时，页面才会放大字号（`kiosk.font_scale_percent`，默认 150），可使用高对比度（`kiosk.high_contrast`），并可在预设的标签页之间轮播（`kiosk.rotate_views`、`kiosk.rotate_seconds`）。
 - **八种语言的两份新指南**：面向运维人员的命令行（格式、`watch`、`completions`、退出码，以及由测试运行的 `jq` 示例）和展示屏；命令行指南和屏幕指南都指向它们。
 
+- **墙面屏幕支持仓库过滤（`?repo=词,词`）**：`/screen/overview` 和 `/screen/now` 与页面、展示模式和标签屏幕一样，只保留名称包含其中一个词的仓库。屏幕隐藏名称的仓库永远不会匹配，因此无法借助过滤找出隐藏名称的内容；数字（舰队、红色、队列、事件、告警）随保留的行变化，过滤开启时不显示整个舰队的评分和分组图，`/screen/sentinels` 不做过滤。屏幕菜单为每个墙面屏幕提供该参数，窗口在编号旁显示过滤条件。指南 `SCREENS.md` 提供八种语言。
+
 ### 变更
 
 - **在 Docker Compose 文件中,监控器只信任一个地址(Caddy 的),而不是整个网络**:使用 `proxy` 配置档时,Caddy 现在有固定地址(`MONITOR_PROXY_IP`,默认 172.29.77.250,位于 `MONITOR_SUBNET` 内),`MONITOR_TRUSTED_PROXIES` 指向该地址。网络中绕过 Caddy 的其他容器不能再用 `X-Forwarded-For` 自选地址;Docker 检查用一个每次都撒谎的容器来证明这一点。如果你之前在 `MONITOR_TRUSTED_PROXIES` 中填写了整个网络,请改为填写 Caddy 的地址。

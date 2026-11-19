@@ -84,6 +84,7 @@ Un indirizzo per ogni monitor. Un parametro può rendere una finestra più tranq
 | `?rotate=30` | La finestra passa da sola per panoramica, in questo momento e sentinelle ogni 30 secondi (minimo 5; 0 = resta su uno schermo). Con `screens.mode` = rotate ruota già; questo cambia il ritmo di una finestra. |
 | `?jump=off` | Solo con `screens.mode` = rotate: la finestra ruota ma non salta mai a un nuovo rosso. |
 | `?blink=off` | I guasti mantengono un alone fisso invece di lampeggiare. Non può attivare ciò che `screens.blink` tiene spento. |
+| `?repo=WORD,WORD` | Solo i repository il cui nome contiene una delle parole (lettere, cifre e `. _ - /`, fino a otto parole). `/screen/overview` e `/screen/now` tengono solo i repository il cui nome è mostrato dalla schermata (un nome nascosto non corrisponde mai), le cifre seguono le righe tenute e il punteggio e la mappa dei gruppi, che riguardano l'intera flotta, non vengono mostrati; `/screen/sentinels` non è filtrata. |
 | `?sound=on` | Un breve segnale acustico per un nuovo guasto, solo se `screens.sound` lo consente. Disattivato per impostazione predefinita. |
 
 ### Lingua degli schermi
