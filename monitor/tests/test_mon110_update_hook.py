@@ -104,7 +104,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
 
 Path(os.environ["STUB_PID_FILE"]).write_text(str(os.getpid()))
-http.server.HTTPServer(("127.0.0.1", port), Handler).serve_forever()
+server = http.server.ThreadingHTTPServer(("127.0.0.1", port), Handler)
+server.daemon_threads = True
+server.serve_forever()
 """
 
 
@@ -162,26 +164,41 @@ class Restart(unittest.TestCase):
         self.zip = base.build_zip(Path(self.tmp.name) / "m.zip", "2.9.9", extra=stub_files())
         self.env = dict(clean_env(), STUB_PID_FILE=str(self.pid_file))
 
+    def spawn(self, *more):
+        return subprocess.Popen([sys.executable, "-I", str(TOOL), "apply", "--dir", str(self.root), "--to", "2.9.9", "--zip", str(self.zip), "--yes", "--backups", str(Path(self.tmp.name) / "backups"), "--json", *more],
+                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=self.env, creationflags=0x08000000 if os.name == "nt" else 0)
+
+    def finish(self, proc):
+        out, _ = proc.communicate(timeout=240)
+        return proc.returncode, out
+
     def apply(self, *more):
-        return subprocess.run([sys.executable, "-I", str(TOOL), "apply", "--dir", str(self.root), "--to", "2.9.9", "--zip", str(self.zip), "--yes", "--backups", str(Path(self.tmp.name) / "backups"), "--json", *more],
-                              capture_output=True, text=True, timeout=240, env=self.env, creationflags=0x08000000 if os.name == "nt" else 0)
+        return self.finish(self.spawn(*more))
+
+    def shown(self, out):
+        """The whole answer when it is short, its two ends when it is long (a failure must say why)."""
+        return out if len(out) < 4000 else out[:1500] + " ... " + out[-2500:]
 
     def test_start_brings_up_the_new_version_and_checks_its_health(self):
-        done = self.apply("--start")
-        self.assertEqual(done.returncode, 0, (done.stdout + done.stderr)[-1500:])
+        code, out = self.apply("--start")
+        self.assertEqual(code, 0, self.shown(out))
         self.assertEqual(health_version(self.cfg["ports"]["complete"]), "2.9.9")
 
     def test_handover_waits_for_the_running_monitor_to_stop_then_starts_the_new_one(self):
-        import threading
+        import time
         old = subprocess.Popen([sys.executable, "-m", "github_actions_monitor", "--port", str(self.cfg["ports"]["complete"])], cwd=str(self.root), env=dict(self.env, PYTHONPATH=str(self.root / "src")),
                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=0x08000000 if os.name == "nt" else 0)
         self.addCleanup(reap, old)
         self.assertEqual(health_version(self.cfg["ports"]["complete"]), "2.0.8")
-        timer = threading.Timer(2.0, old.kill)       # the monitor that asked stops itself right after it starts the updater
-        timer.start()
-        self.addCleanup(timer.cancel)
-        done = self.apply("--start", "--handover")
-        self.assertEqual(done.returncode, 0, (done.stdout + done.stderr)[-1500:])
+        status = Path(self.tmp.name) / "status.json"
+        proc = self.spawn("--start", "--handover", "--status-file", str(status))
+        self.addCleanup(lambda: proc.poll() is None and proc.kill())
+        end = time.time() + 60
+        while not status.is_file() and proc.poll() is None and time.time() < end:      # the updater is alive: now the monitor that asked for the update stops itself
+            time.sleep(0.2)
+        old.kill()
+        code, out = self.finish(proc)
+        self.assertEqual(code, 0, self.shown(out))
         self.assertEqual(health_version(self.cfg["ports"]["complete"]), "2.9.9")
 
     def test_a_running_monitor_blocks_the_update_when_no_handover_is_asked(self):
@@ -190,8 +207,8 @@ class Restart(unittest.TestCase):
         self.addCleanup(reap, old)
         self.assertEqual(health_version(self.cfg["ports"]["complete"]), "2.0.8")
         before = base.tree_hash(self.root)
-        done = self.apply()
-        self.assertNotEqual(done.returncode, 0)
+        code, out = self.apply()
+        self.assertEqual(code, 3, self.shown(out))
         self.assertEqual(base.tree_hash(self.root), before)
 
 
