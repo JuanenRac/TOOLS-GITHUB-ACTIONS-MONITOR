@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4432_passing-brightgreen.svg" alt="4432 tests">
+  <img src="https://img.shields.io/badge/Tests-4552_passing-brightgreen.svg" alt="4552 tests">
 </p>
 
 > Surveille les workflows de tous vos dépôts et vous dit, sur une page locale, ce qui est rouge, ce qui est bloqué et ce qui vous attend.
@@ -82,8 +82,8 @@
 | | |
 |---|---|
 | **Maturité** | functional |
-| **Tests** | 4432 méthodes de test (`python -m unittest discover -s monitor/tests`) |
-| **Réglages** | 706 réglages, tous avec aide |
+| **Tests** | 4552 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Réglages** | 712 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -309,6 +309,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COMPLETE_SERVICE_fra.md`](monitor/docs/COMPLETE_SERVICE_fra.md): Édition complète en service
 - [`monitor/docs/COMPLETE_TEAM_fra.md`](monitor/docs/COMPLETE_TEAM_fra.md): Édition complète pour une équipe
 - [`monitor/docs/API_fra.md`](monitor/docs/API_fra.md): L'API pour les clients
+- [`monitor/docs/API_V1_fra.md`](monitor/docs/API_V1_fra.md): L'API de lecture v1, pas à pas
 - [`monitor/docs/NOTIFICATIONS_fra.md`](monitor/docs/NOTIFICATIONS_fra.md): notifications et contrat des adaptateurs
 - [`monitor/docs/AI_fra.md`](monitor/docs/AI_fra.md): l'assistant IA : fournisseurs, sécurité et actions
 - [`monitor/docs/ANALYTICS_fra.md`](monitor/docs/ANALYTICS_fra.md): analyses, lectures conditionnelles et connexion perdue

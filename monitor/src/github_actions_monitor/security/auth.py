@@ -136,7 +136,7 @@ MAINTAINER_POST = ("/api/alerts/mute", "/api/alerts/unmute", "/api/ai/ack", "/ap
 VIEWER_POST = ("/api/assistant/ask",)
 #: GET routes only an admin reads (they describe what is configured to reach the outside)
 MAINTAINER_GET = ("/api/audit-log",)      # the log of actions: never a viewer (an administrator, or a maintainer when audit_log.maintainers_can_read says so, is decided by the route)
-ADMIN_GET = ("/api/run-log", "/api/github-token", "/api/advanced", "/api/github-app/status", "/api/auth/users", "/api/auth/audit")
+ADMIN_GET = ("/api/run-log", "/api/github-token", "/api/advanced", "/api/github-app/status", "/api/auth/users", "/api/auth/audit", "/api/ai/prompts")
 #: routes that never need a session: the login itself, the health check, the page shell, and the webhook and the network access, which have a proof of their own
 PUBLIC = ("/api/auth/login", "/api/auth/me", "/api/auth/bootstrap", "/api/auth/logout", "/api/health", "/api/webhook", "/api/chatops/slack", "/api/chatops/discord", "/api/access", "/login")
 

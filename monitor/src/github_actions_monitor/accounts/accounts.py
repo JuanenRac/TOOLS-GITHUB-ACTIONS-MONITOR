@@ -38,6 +38,7 @@ STATE_FILES = (
     ("github_actions_monitor.data_pipeline.analytics", "HISTORY_FILE", "analytics/analytics_history.json"),
     ("github_actions_monitor.integrations.ai_actions", "LOG_FILE", "ai_actions_log.jsonl"),
     ("github_actions_monitor.integrations.ghactions", "LOG_FILE", "github_actions_log.jsonl"),
+    ("github_actions_monitor.integrations.ai_prompt_log", "LOG_FILE", "ai_prompts.jsonl"),
     ("github_actions_monitor.sentinels.sentinel_local", "CACHE_FILE", "sentinel_state/sentinel_cache.json"),
     ("github_actions_monitor.sentinels.sentinel_local", "HISTORY_FILE", "sentinel_state/sentinel_history.json"),
     ("github_actions_monitor.sentinels.sentinel_ai", "CACHE_FILE", "sentinel_state/sentinel_ai_cache.json"),

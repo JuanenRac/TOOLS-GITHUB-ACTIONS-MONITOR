@@ -228,15 +228,14 @@ def retention_check(config, folder=HERE, env=None):
 
 
 def github_app_check(config):
-    """("ok" | "warn", detail): off = ok; on = the program openssl, the key file and its permissions. Never the key, never a token."""
+    """("ok" | "warn", detail): off = ok; on = the key (read and signed with by the monitor itself; openssl is only the fallback), its permissions and the last reason the App was not used. Never the key,
+    never a token."""
     from github_actions_monitor.integrations import github_app
     cfg = github_app.settings(config)
     if not cfg["enabled"]:
         return "ok", "off"
     problems = []
     program = github_app.find_openssl()
-    if not program:
-        problems.append("openssl missing")
     if not cfg["app_id"]:
         problems.append("app_id missing")
     if not cfg["key_path"]:
@@ -245,6 +244,15 @@ def github_app_check(config):
         warning = github_app.key_warning(cfg["key_path"])
         if warning:
             problems.append(warning)
+        else:
+            from github_actions_monitor.integrations import rsa_sign
+            try:
+                rsa_sign.load(cfg["key_path"])
+            except rsa_sign.KeyError_ as error:      # the monitor cannot sign with it: openssl may still, if there is one
+                problems.append(f"key unreadable: {error}" + ("" if program else " (and no openssl to try)"))
+    shown = github_app.notice(config)
+    if shown["state"] == "fallback" and shown["reason"] and not problems:
+        problems.append(f"the App is not used, the token of the user is ({shown['code']}): {shown['reason']}")      # the allowance of the user is smaller than the one of the App
     where = f"on (openssl: {program})" if program and not shutil.which("openssl") else "on"      # found outside the PATH (Git for Windows): said, so that nobody wonders which one signs
     return ("warn", "; ".join(problems)) if problems else ("ok", where)
 

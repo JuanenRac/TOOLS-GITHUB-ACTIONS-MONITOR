@@ -1,0 +1,190 @@
+name: Evidence
+
+# The checks that an outside reader of the code cannot run on their own computer, run here and kept: the page walked in a browser in the eight languages at two sizes (script errors, console errors,
+# answers with a 5xx status), the updater from the download to the rollback against a false release server, the double of GitHub with 250 and 727 repositories (403, 429, pages that do not fit),
+# the hostile texts, the files shared between processes, and the container behind a trusted proxy. Each job keeps its output as an artifact and in the summary of the run.
+# They also run in the normal CI as part of the unit tests; this workflow repeats them by area, with the output kept, on every change to the code they watch, every week and by hand.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "monitor/src/**"
+      - "monitor/tools/monitor_updater.py"
+      - "monitor/tests/test_mon102_*"
+      - "tools/check_page.py"
+      - "tools/check_overflow.py"
+      - "deploy/**"
+      - "tools/docker_audit/**"
+      - ".github/workflows/evidence.yml"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/evidence.yml"
+  schedule:
+    - cron: "41 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: evidence-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+jobs:
+  page-walk:
+    name: The page in a browser (eight languages, desktop and phone, no error, no 5xx)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Walk through every tab and every sub-tab of Settings, open the three windows, and keep what the page raised
+        shell: bash
+        env:
+          MONITOR_BROWSER_TESTS: "1"
+          MONITOR_REQUIRE_BROWSER: "1"
+        run: |
+          mkdir -p evidence
+          python tools/check_page.py --lang en es de fr it ja zh pt --size desktop mobile 2>&1 | tee evidence/page-walk.txt
+          python -m unittest discover -s monitor/tests -p "test_mon102_page_5xx.py" -v 2>&1 | tee -a evidence/page-walk.txt
+      - name: Overflow of the text in the same languages and sizes
+        shell: bash
+        run: python tools/check_overflow.py --lang en es de fr it ja zh pt --size desktop mobile 2>&1 | tee evidence/overflow.txt
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ always() }}
+        with:
+          name: evidence-page-walk
+          path: evidence/
+          retention-days: 30
+
+  updater:
+    name: The updater from the download to the rollback (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: False release server on this computer, hostile zips, cut downloads, two updaters at once, a failure in every phase
+        shell: bash
+        run: |
+          mkdir -p evidence
+          cd monitor/tests
+          python -m unittest -v test_mon102_updater_e2e test_66_updater_engine test_mon99_updater_hardening test_mon93_updates 2>&1 | tee ../../evidence/updater-${{ matrix.os }}.txt
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ always() }}
+        with:
+          name: evidence-updater-${{ matrix.os }}
+          path: evidence/
+          retention-days: 30
+
+  github-double:
+    name: A double of GitHub with 250 and 727 repositories
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Requests per cycle, 403 and 429 answers, pages that do not fit, and no request to GitHub where there must be none
+        shell: bash
+        run: |
+          mkdir -p evidence
+          cd monitor/tests
+          python -m unittest -v test_mon102_github_double test_216_load test_214_pagination test_mon100_no_github_calls 2>&1 | tee ../../evidence/github-double.txt
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ always() }}
+        with:
+          name: evidence-github-double
+          path: evidence/
+          retention-days: 30
+
+  hostile:
+    name: Hostile texts (release notes, workflow files, alerts) and the cleaner in bounded time
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: The corpus of hostile texts through every way out, and the time of the cleaner
+        shell: bash
+        run: |
+          mkdir -p evidence
+          cd monitor/tests
+          python -m unittest -v test_mon100_hostile_corpus test_mon102_hostile_notes test_mon102_redactor_perf test_redactor_evasions test_203_redactor_forms test_mon99_lint_limits 2>&1 | tee ../../evidence/hostile.txt
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ always() }}
+        with:
+          name: evidence-hostile
+          path: evidence/
+          retention-days: 30
+
+  shared-files:
+    name: Files shared between processes (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Four processes on one file, a writer that dies, a lock that is held and a timeout
+        shell: bash
+        run: |
+          mkdir -p evidence
+          cd monitor/tests
+          python -m unittest -v test_mon102_shared_files test_mon93_oslock test_221_lock_rescue 2>&1 | tee ../../evidence/shared-files-${{ matrix.os }}.txt
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ always() }}
+        with:
+          name: evidence-shared-files-${{ matrix.os }}
+          path: evidence/
+          retention-days: 30
+
+  container-proxy:
+    name: The container behind a trusted proxy (two visitors, trusted proxies, secrets)
+    runs-on: ubuntu-24.04      # the runner image is fixed: the checks start containers and read their logs
+    timeout-minutes: 45
+    if: ${{ github.event_name != 'push' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: E3 (Caddy with its own TLS in front of the monitor) and E6 (secrets) of the container checks, on this commit
+        shell: bash
+        run: bash tools/docker_audit/run_all.sh --target . --out evidence --only E3,E6
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ always() }}
+        with:
+          name: evidence-container-proxy
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30

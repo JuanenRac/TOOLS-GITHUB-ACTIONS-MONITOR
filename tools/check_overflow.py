@@ -111,15 +111,24 @@ def free_port():
         return probe.getsockname()[1]
 
 
-def relay(target_port, probe=None, head=None, change=None):
+def relay(target_port, probe=None, head=None, change=None, fail=()):
     """A relay in front of the demo: the page of the monitor comes back with the measuring script before </body>; everything else is passed through. `head` (bytes) is put right after <head>, so
-    that it runs before any script of the page; `probe` replaces the measuring script; `change(bytes) -> bytes` edits the page first (the smoke test uses it to break the page on purpose)."""
+    that it runs before any script of the page; `probe` replaces the measuring script; `change(bytes) -> bytes` edits the page first (the smoke test uses it to break the page on purpose); `fail` is a
+    list of address prefixes that the relay answers with 503 (a monitor that fails, to see that the page tells it)."""
     tail = (probe if probe is not None else PROBE).encode("utf-8")
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *args):
             pass
 
         def do_GET(self):
+            if any(self.path.startswith(prefix) for prefix in fail):
+                body = b'{"error": "unavailable"}'
+                self.send_response(503)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
             try:
                 with urllib.request.urlopen(urllib.request.Request(f"http://127.0.0.1:{target_port}{self.path}"), timeout=30) as reply:
                     body, kind, code = reply.read(), reply.headers.get("Content-Type", "text/html"), reply.status
