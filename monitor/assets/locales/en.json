@@ -3443,6 +3443,8 @@
  "ci.lane_branch": "branch {branch}",
  "cfg.f.sampling.default_branch_probe": "Second look at the default branch",
  "cfg.h.sampling.default_branch_probe": "When the list of runs of a repository is full, one more request asks for the pushes to its default branch (pull requests left out), so the runs that decide red on main are not pushed out by pull requests and schedules. Costs one request per full repository per read; off by default.",
+ "cfg.f.sampling.active_probe": "Look at the runs still going",
+ "cfg.h.sampling.active_probe": "When the list of runs of a repository is full, two light requests ask for the runs that are still in progress and the runs that are queued, so a long run that started before the window of the list is not lost or shown as finished. Costs two requests per full repository per read; off by default.",
  "cfg.f.sampling.min_coverage_minutes": "Low coverage below",
  "cfg.h.sampling.min_coverage_minutes": "A full list of runs that reaches back less than this many minutes is marked low coverage instead of looking complete. 0 turns the mark off.",
  "cfg.f.sampling.api_budget_per_hour": "Request budget per hour",

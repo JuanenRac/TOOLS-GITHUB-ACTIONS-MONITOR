@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "02586cda7dedc89064a06eef127aa26f54866ea7fbff3b0e3811505339adfe8d",
+ "digest": "fad907d47edcd8fe737dfa3ca195bf3c4ef1ce720dba76ab4736bcda9b0099c4",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -148,6 +148,11 @@
      20
     ],
     "default": 3
+   },
+   {
+    "key": "sampling.active_probe",
+    "kind": "bool",
+    "default": false
    },
    {
     "key": "savings.webhook_live_per_repo",

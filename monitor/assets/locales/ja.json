@@ -3443,6 +3443,8 @@
  "ci.lane_branch": "ブランチ {branch}",
  "cfg.f.sampling.default_branch_probe": "デフォルトブランチの二度目の確認",
  "cfg.h.sampling.default_branch_probe": "リポジトリの実行一覧がいっぱいのとき、デフォルトブランチへのプッシュ(プルリクエストを除く)をもう1回問い合わせ、main の赤を決める実行がプルリクエストやスケジュールに押し出されないようにします。満杯のリポジトリごと、読み取りごとに1リクエスト。既定ではオフです。",
+ "cfg.f.sampling.active_probe": "実行中の run を別に確認",
+ "cfg.h.sampling.active_probe": "リポジトリの run 一覧がいっぱいのとき、軽量なリクエストを 2 回送って実行中の run と待機中の run を取得し、一覧の範囲より前に始まった長い run が失われたり完了と表示されたりしないようにします。一覧がいっぱいのリポジトリごと・読み取りごとに 2 リクエストかかります。既定はオフです。",
  "cfg.f.sampling.min_coverage_minutes": "カバー範囲が狭い基準",
  "cfg.h.sampling.min_coverage_minutes": "実行一覧が満杯でも、この分数より短い期間しかさかのぼれない場合は、完全に見せかけずカバー範囲が狭いと表示します。0 で表示オフ。",
  "cfg.f.sampling.api_budget_per_hour": "1時間あたりのリクエスト予算",
