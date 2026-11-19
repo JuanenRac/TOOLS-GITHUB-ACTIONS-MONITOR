@@ -213,6 +213,14 @@ class EtagCache:
                 self.no_etag += 1
         return data, "plain"
 
+    def last_copy(self, endpoint):
+        """(data, age_seconds) of the stored answer of an endpoint whatever its age (the caller decides how old is too old), or None."""
+        with self.lock:
+            entry = self.entries.get(self.key_of(endpoint))
+            if not entry or not isinstance(entry.get("data"), (dict, list)):
+                return None
+            return entry["data"], max(0, int(time.time() - entry.get("at", 0)))
+
     def invalidate(self, repo):
         """Drops the stored answers of one repository (the endpoints of `/repos/<owner>/<repo>/`), whatever the identity. Returns how many were dropped."""
         marker = f"/{repo}/"

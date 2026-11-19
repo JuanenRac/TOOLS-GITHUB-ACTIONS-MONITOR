@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "4167c1d26b4df71554de782b61b1dddedaa898c99a6c49b86a6bf0709fae0e86",
+ "digest": "c8ea4dfe0bdacc8738a5142b1c4d3920f80133015741dcee4bc81bd382f61633",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -152,6 +152,20 @@
      20
     ],
     "default": 3
+   },
+   {
+    "key": "quota.failover",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "quota.failover_max_age_minutes",
+    "kind": "int",
+    "bounds": [
+     1,
+     1440
+    ],
+    "default": 60
    },
    {
     "key": "sampling.active_probe",
