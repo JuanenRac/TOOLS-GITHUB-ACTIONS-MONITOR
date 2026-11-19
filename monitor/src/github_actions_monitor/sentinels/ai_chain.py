@@ -26,6 +26,7 @@ LOG.addHandler(logging.NullHandler())
 TASKS = ("build", "codeql", "report", "diagnose", "alert")
 KIND_TASK = {"build": "build", "codeql": "codeql", "report": "report", "release_notes": "report", "ask": "diagnose"}
 TASK_LIMITS = ("max_input_chars", "max_output_chars", "timeout_seconds")
+TASK_DEFAULTS = {"provider": "", "model": "", "max_input_chars": 0, "max_output_chars": 0, "timeout_seconds": 0}      # `ai.tasks.<task>.*`: a task that says nothing (empty or 0) uses the general model and the general limits
 REF_RE = re.compile(r"^[A-Za-z0-9-]{1,40}\Z")
 LOCK = threading.RLock()
 STATE = {"failovers": []}      # the last failures of a main model, for the brief (the store keeps the same list for the page)

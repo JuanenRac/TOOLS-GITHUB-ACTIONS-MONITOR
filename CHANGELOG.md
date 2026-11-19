@@ -12,6 +12,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Changed
 
+- **The example file of the configuration now carries every setting, and the page of Settings shows a default for all of them**: the AI settings (the model, the limits and the provider of each of the five tasks, the fallback chain, the budgets, the private addresses, the record of prompts, the hidden words and patterns), the read pool (which source answers each kind of read first and how many calls each keeps free), the three folders, the days after which a silence expires, the application id of the GitHub App and the private addresses of the notifications. Each value is what the code does when the setting is absent, a test compares them, and the five per-task time limits that said 30 seconds now say 0, which is what they are: the task uses the general limit. The three settings that are computed (the state of the signing of the webhook and of Slack and Discord) are shown but never written.
+
 - **The walk through the page also tells a monitor that fails**: besides script and console errors, an answer with a 5xx status to a call of the page is now a problem of the walk (with its address, without the query), and the walk can be made at the size of a desktop and of a phone (`--size desktop mobile`).
 
 ### Added

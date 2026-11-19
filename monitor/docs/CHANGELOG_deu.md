@@ -11,6 +11,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Geändert
 
+- **Die Beispieldatei der Konfiguration enthält jetzt jede Einstellung, und die Einstellungsseite zeigt für alle einen Standardwert**: die KI-Einstellungen (Modell, Grenzen und Anbieter jeder der fünf Aufgaben, die Ausweichkette, die Budgets, die privaten Adressen, das Protokoll der Prompts, die verborgenen Wörter und Muster), der Lesepool (welche Quelle zuerst auf jede Art von Lesezugriff antwortet und wie viele Aufrufe jede frei hält), die drei Ordner, die Tage, nach denen eine Stummschaltung verfällt, die Anwendungs-ID der GitHub-App und die privaten Adressen der Benachrichtigungen. Jeder Wert ist das, was der Code tut, wenn die Einstellung fehlt; ein Test vergleicht sie, und die fünf Zeitlimits je Aufgabe, die 30 Sekunden sagten, sagen jetzt 0, was sie sind: die Aufgabe nutzt das allgemeine Limit. Die drei berechneten Einstellungen (Zustand der Signatur des Webhooks sowie von Slack und Discord) werden angezeigt, aber nie geschrieben.
+
 - **Der Seitendurchlauf meldet auch einen Monitor, der ausfällt**: Neben Skript- und Konsolenfehlern ist jetzt auch eine Antwort mit 5xx-Status auf einen Aufruf der Seite ein Problem des Durchlaufs (mit Adresse, ohne Abfrage), und der Durchlauf kann in Desktop- und Telefongröße erfolgen (`--size desktop mobile`).
 
 ### Hinzugefügt

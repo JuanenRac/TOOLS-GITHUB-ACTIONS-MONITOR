@@ -11,6 +11,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Modifié
 
+- **Le fichier d'exemple de la configuration porte maintenant tous les réglages, et la page des Réglages montre une valeur par défaut pour chacun** : les réglages de l'IA (le modèle, les limites et le fournisseur de chacune des cinq tâches, la chaîne de secours, les budgets, les adresses privées, le journal des prompts, les mots et motifs masqués), le pool de lecture (quelle source répond d'abord à chaque type de lecture et combien d'appels chacune garde libres), les trois dossiers, les jours après lesquels un silence expire, l'identifiant d'application de la GitHub App et les adresses privées des notifications. Chaque valeur est ce que fait le code quand le réglage est absent, un test les compare, et les cinq limites de temps par tâche qui disaient 30 secondes disent maintenant 0, ce qu'elles sont : la tâche utilise la limite générale. Les trois réglages calculés (l'état de la signature du webhook et de Slack et Discord) sont affichés mais jamais écrits.
+
 - **Le parcours de la page signale aussi un moniteur qui échoue**: en plus des erreurs de script et de console, une réponse de statut 5xx à un appel de la page est maintenant un problème du parcours (avec son adresse, sans la requête), et le parcours peut se faire en taille bureau et téléphone (`--size desktop mobile`).
 
 ### Ajouté

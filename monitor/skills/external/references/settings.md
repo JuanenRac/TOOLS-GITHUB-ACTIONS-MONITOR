@@ -123,7 +123,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `alerts.service.rate_percent` | `0` | sentinel | Or when this share of its last runs failed |
 | `alerts.service.workflows` | `[]` | sentinel | More workflows of the service class |
 | `alerts.silences` | `[]` | sentinel | Permanent silences |
-| `alerts.silences_expire_days` | `-` | sentinel | Days after the review date when a silence expires |
+| `alerts.silences_expire_days` | `0` | sentinel | Days after the review date when a silence expires |
 | `analytics.enabled` | `-` | analytics | Analytics on |
 | `analytics.flaky` | `-` | analytics | Flaky detection |
 | `analytics.jobs_per_cycle` | `-` | analytics | Jobs read per cycle |
@@ -138,7 +138,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `api.gzip_min_bytes` | `1024` | advanced | Smallest answer to compress (bytes) |
 | `api.max_limit` | `200` | advanced | Most items per page |
 | `api.v1_enabled` | `"auto"` | advanced | Read API under /api/v1/ |
-| `audit_dir` | `-` | paths | Folder of audit files |
+| `audit_dir` | `""` | paths | Folder of audit files |
 | `audit_log.enabled` (secure) | `-` | sentinel | Log of actions on |
 | `audit_log.keep_generations` (secure) | `-` | sentinel | Rotated files kept |
 | `audit_log.maintainers_can_read` (secure) | `-` | sentinel | Maintainers may read it |
@@ -676,7 +676,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinels.supply.signals.unpinned.level` | `-` | sentinel | Actions not pinned to a commit: level |
 | `session_guard` (secure) | `true` | basic | One-use token for changes |
 | `show_unclassified` | `true` | general | Show unclassified repositories |
-| `signed_dir` | `-` | paths | Folder of signature records |
+| `signed_dir` | `""` | paths | Folder of signature records |
 | `sound.cooldown_seconds` | `30` | general | Seconds between two sounds |
 | `sound.enabled` | `true` | general | Sound alerts |
 | `sound.on_connection_lost` | `true` | general | Sound when the connection drops |
@@ -734,4 +734,4 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `webhook.replay_seconds` | `3600` | webhook | Delivery ids remembered |
 | `webhook.secret_env` (secure) | `"MONITOR_WEBHOOK_SECRET"` | webhook | Environment variable with the shared secret |
 | `webhook.signing_state` | `-` | webhook | Shared secret |
-| `workspace_root` | `-` | paths | Folder with your clones |
+| `workspace_root` | `""` | paths | Folder with your clones |
