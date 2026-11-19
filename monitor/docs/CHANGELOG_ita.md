@@ -11,6 +11,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Modificato
 
+- **Il file di esempio della configurazione ora contiene ogni impostazione, e la pagina delle Impostazioni mostra un valore predefinito per tutte**: le impostazioni dell'IA (il modello, i limiti e il fornitore di ciascuna delle cinque attività, la catena di riserva, i budget, gli indirizzi privati, il registro dei prompt, le parole e i pattern nascosti), il pool di lettura (quale fonte risponde per prima a ogni tipo di lettura e quante chiamate ciascuna tiene libere), le tre cartelle, i giorni dopo i quali scade un silenzio, l'ID applicazione della GitHub App e gli indirizzi privati delle notifiche. Ogni valore è ciò che fa il codice quando l'impostazione manca, un test li confronta, e i cinque limiti di tempo per attività che dicevano 30 secondi ora dicono 0, che è ciò che sono: l'attività usa il limite generale. Le tre impostazioni calcolate (lo stato della firma del webhook e di Slack e Discord) sono mostrate ma mai scritte.
+
 - **Il percorso della pagina segnala anche un monitor che fallisce**: oltre agli errori di script e di console, una risposta con stato 5xx a una chiamata della pagina è ora un problema del percorso (con il suo indirizzo, senza la query), e il percorso può farsi in formato desktop e telefono (`--size desktop mobile`).
 
 ### Aggiunto

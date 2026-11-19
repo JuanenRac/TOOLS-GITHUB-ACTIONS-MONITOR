@@ -11,6 +11,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Alterado
 
+- **O ficheiro de exemplo da configuração passa a trazer todas as definições, e a página das Definições mostra um valor por omissão para todas**: as definições da IA (o modelo, os limites e o fornecedor de cada uma das cinco tarefas, a cadeia de reserva, os orçamentos, os endereços privados, o registo de prompts, as palavras e padrões ocultos), o conjunto de leitura (que fonte responde primeiro a cada tipo de leitura e quantas chamadas cada uma mantém livres), as três pastas, os dias após os quais um silêncio caduca, o id de aplicação da GitHub App e os endereços privados das notificações. Cada valor é o que o código faz quando a definição falta, um teste compara-os, e os cinco limites de tempo por tarefa que diziam 30 segundos passam a dizer 0, que é o que são: a tarefa usa o limite geral. As três definições calculadas (o estado da assinatura do webhook e do Slack e Discord) são mostradas mas nunca escritas.
+
 - **O percurso da página também avisa de um monitor que falha**: além dos erros de script e de consola, uma resposta com estado 5xx a uma chamada da página é agora um problema do percurso (com o seu endereço, sem a consulta), e o percurso pode fazer-se em tamanho de secretária e de telemóvel (`--size desktop mobile`).
 
 ### Adicionado

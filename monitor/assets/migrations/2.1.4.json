@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "5e6444a24e5fead8d9f8a65434a66220c812712736bacf4def2fbf871aaa5487",
+ "digest": "b2664fbd150c0c11a44b73c9e6d18ee4dcfbfba10b6ba5dd9cc68b217bead94c",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -242,6 +242,13 @@
   "removed": [],
   "changed": [
    {
+    "key": "alerts.silences_expire_days",
+    "old": {},
+    "new": {
+     "default": 0
+    }
+   },
+   {
     "key": "api.v1_enabled",
     "old": {
      "kind": "bool",
@@ -255,6 +262,40 @@
       "off"
      ],
      "default": "auto"
+    }
+   },
+   {
+    "key": "audit_dir",
+    "old": {},
+    "new": {
+     "default": ""
+    }
+   },
+   {
+    "key": "github_app.app_id",
+    "old": {
+     "bounds": {
+      "re": "^[0-9]{1,12}\\Z"
+     }
+    },
+    "new": {
+     "bounds": {
+      "re": "^[0-9]{0,12}\\Z"
+     }
+    }
+   },
+   {
+    "key": "signed_dir",
+    "old": {},
+    "new": {
+     "default": ""
+    }
+   },
+   {
+    "key": "workspace_root",
+    "old": {},
+    "new": {
+     "default": ""
     }
    }
   ]
