@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "1f1cfaa2ae6aedea70cb0e82462eaeefde3a3e36b8cd24113b6bd8f5af79253b",
+ "digest": "7154c7bb561e4523c098aeb36b125bff49e7a742b15ea156dd3b3890df613069",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -110,9 +110,39 @@
     "default": 300
    },
    {
+    "key": "cli.default_format",
+    "kind": "enum",
+    "bounds": [
+     "text",
+     "table",
+     "plain",
+     "json",
+     "ndjson"
+    ],
+    "default": "text"
+   },
+   {
     "key": "cli.prefer_v1",
     "kind": "bool",
     "default": true
+   },
+   {
+    "key": "cli.watch.default_interval_seconds",
+    "kind": "int",
+    "bounds": [
+     1,
+     3600
+    ],
+    "default": 5
+   },
+   {
+    "key": "cli.watch.min_interval_seconds",
+    "kind": "int",
+    "bounds": [
+     1,
+     3600
+    ],
+    "default": 2
    },
    {
     "key": "config_check.strict",
@@ -126,6 +156,39 @@
      0,
      100
     ]
+   },
+   {
+    "key": "kiosk.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "kiosk.font_scale_percent",
+    "kind": "int",
+    "bounds": [
+     100,
+     400
+    ],
+    "default": 150
+   },
+   {
+    "key": "kiosk.high_contrast",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "kiosk.rotate_seconds",
+    "kind": "int",
+    "bounds": [
+     5,
+     600
+    ],
+    "default": 30
+   },
+   {
+    "key": "kiosk.rotate_views",
+    "kind": "bool",
+    "default": false
    },
    {
     "key": "lint.rules.permissions_top.enabled",
