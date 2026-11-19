@@ -700,7 +700,8 @@
     "theme": "classic"
   },
   "updates": {
-    "check": true
+    "check": true,
+    "systemd_helper": false
   },
   "airgapped": false,
   "open_browser": true,
@@ -1104,6 +1105,7 @@
       "method": "atom"
     },
     "webhook_first": false,
+    "webhook_live_per_repo": false,
     "webhook_full_minutes": 360,
     "webhook_window_minutes": 60
   },
