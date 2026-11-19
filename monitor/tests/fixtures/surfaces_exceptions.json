@@ -1,4 +1,6 @@
 {
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
  "_note": "What the register of surfaces (test_mon99_surfaces) finds missing today, with the version that closes it. Remove an item the day it has what it lacked.",
  "format": 1,
  "exceptions": {
