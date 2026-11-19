@@ -215,8 +215,11 @@ class ProxyInAnotherContainer(unittest.TestCase):
         text = compose.read_text(encoding="utf-8")
         for needle in ("MONITOR_TRUSTED_PROXY:", "MONITOR_TRUSTED_PROXIES:", "MONITOR_SUBNET"):
             self.assertIn(needle, text)
-        for needle in ("MONITOR_TRUSTED_PROXY=", "MONITOR_TRUSTED_PROXIES=", "MONITOR_SUBNET="):
+        for needle in ("MONITOR_TRUSTED_PROXY=", "MONITOR_TRUSTED_PROXIES=", "MONITOR_SUBNET=", "MONITOR_PROXY_IP="):
             self.assertIn(needle, example.read_text(encoding="utf-8"))
+        # the proxy has ONE fixed address and the monitor is told that address, not the whole network: a container that skips Caddy would be believed
+        self.assertIn("ipv4_address: ${MONITOR_PROXY_IP:-172.29.77.250}", text)
+        self.assertIn("MONITOR_TRUSTED_PROXIES=", example.read_text(encoding="utf-8"))
         from github_actions_monitor import service
         self.assertEqual(service.LISTEN_ENV["MONITOR_TRUSTED_PROXIES"], ("listen", "trusted_proxies", "list"))
 
