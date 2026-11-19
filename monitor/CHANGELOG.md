@@ -17,6 +17,8 @@ when this file and `tool_version.py` disagree.
 
 ### Added
 
+- **An optional switch to judge the webhook repository by repository**: with `savings.webhook_live_per_repo` on (off by default, and it works together with `savings.webhook_first`), a quiet repository skips its slow read only when an event of ITS OWN arrived in the last `savings.webhook_window_minutes`. A repository whose webhook was never set up, or broke, is read as always while the others are spared; it spares fewer reads. The Webhook panel counts the repositories that are alive by themselves (`live_repos`). Label, help, tip and guide in the eight languages.
+
 - **The locks between processes are checked inside the container**: the container checks gain E9, which starts several processes of the image against one shared volume and counts what they write under the lock of the operating system and under the lock file, so a lost update would show in the evidence of the workflow; the test of the lock file now runs on Windows too.
 
 - **A guide of its own for the assistant, `ASSISTANT.md`, in eight languages**: how to switch it on, its five fixed questions, the four tools it reads with, what it never does (it writes nothing, reaches nothing on GitHub, hands what a repository wrote over as data) and how to check it with the two routes and the record of prompts. The section of `AI_CONNECTION.md` stays as the reference of the settings.

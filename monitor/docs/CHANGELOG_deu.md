@@ -15,6 +15,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Hinzugefügt
 
+- **Ein optionaler Schalter, der den Webhook Repository für Repository beurteilt**: Mit `savings.webhook_live_per_repo` an (standardmäßig aus, wirkt zusammen mit `savings.webhook_first`) überspringt ein ruhiges Repository sein langsames Lesen nur, wenn in den letzten `savings.webhook_window_minutes` ein EIGENES Ereignis ankam. Ein Repository, dessen Webhook nie eingerichtet wurde oder ausfiel, wird wie immer gelesen, während die anderen geschont werden; es werden weniger Lesevorgänge gespart. Das Webhook-Panel zählt die Repositorys, die für sich lebendig sind (`live_repos`). Bezeichnung, Hilfe, Tipp und Anleitung in den acht Sprachen.
+
 - **Die Sperren zwischen Prozessen werden im Container geprüft**: die Container-Prüfungen erhalten E9, das mehrere Prozesse des Images gegen ein gemeinsames Volume startet und zählt, was sie unter der Sperre des Betriebssystems und unter der Sperrdatei schreiben, sodass ein verlorenes Update im Nachweis des Workflows sichtbar würde; der Test der Sperrdatei läuft nun auch unter Windows.
 
 - **Eine eigene Anleitung für den Assistenten, `ASSISTANT.md`, in acht Sprachen**: wie man ihn einschaltet, seine fünf festen Fragen, die vier Werkzeuge, mit denen er liest, was er nie tut (er schreibt nichts, erreicht nichts auf GitHub und übergibt, was ein Repository schrieb, als Daten) und wie man ihn mit den zwei Routen und dem Protokoll der Prompts prüft. Der Abschnitt in `AI_CONNECTION.md` bleibt die Referenz der Einstellungen.

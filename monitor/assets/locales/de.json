@@ -4370,5 +4370,8 @@
  "cfg.t.ai.prompt_log.enabled": "Sie sehen: in den Einstellungen eine Karte mit den letzten an die KI gesendeten Prompts und ihren Antworten, von Geheimnissen befreit. Kosten: eine kleine lokale Datei; nur ein Administrator kann sie lesen oder leeren.",
  "cfg.t.ai.similar.enabled": "Sie sehen: „diese Meldung erklären“ listet auch ähnliche Meldungen, durch Wortvergleich gefunden. Kosten: keine bei der KI und keine bei GitHub; es liest nur, was der Monitor schon hat.",
  "cfg.t.ai.airgapped": "Sie sehen: die KI weist jede Adresse ab, die nicht dieser Rechner oder eine von Ihnen gelistete private Adresse ist, bevor eine Verbindung geöffnet wird. Kosten: keine; ein Cloud-Modell funktioniert nicht, solange es an ist.",
- "cfg.t.api.v1_enabled": "Sie sehen: die Lese-API für Clients unter /api/v1/ (auto öffnet sie, wenn der Monitor als Dienst läuft). Kosten: keine; sie liest nur und folgt denselben Rollen wie die Seite."
+ "cfg.t.api.v1_enabled": "Sie sehen: die Lese-API für Clients unter /api/v1/ (auto öffnet sie, wenn der Monitor als Dienst läuft). Kosten: keine; sie liest nur und folgt denselben Rollen wie die Seite.",
+ "cfg.f.savings.webhook_live_per_repo": "Webhook aktiv je Repository",
+ "cfg.h.savings.webhook_live_per_repo": "Beurteilt den Webhook Repository für Repository: Ein ruhiges Repository spart sich sein langsames Lesen nur, wenn kürzlich ein eigenes Ereignis ankam. Ein Repository, dessen Webhook nie eingerichtet wurde oder ausfiel, wird wie immer gelesen. Es spart weniger Lesevorgänge. Wirkt zusammen mit Webhook zuerst.",
+ "cfg.t.savings.webhook_live_per_repo": "Sie sehen: Bei eingeschaltetem Webhook zuerst überspringen nur die Repositorys ihr langsames Lesen, die kürzlich ein eigenes Ereignis gesendet haben; das Webhook-Panel zählt sie ebenfalls. Kosten: keine; es werden dadurch weniger Aufrufe gespart."
 }

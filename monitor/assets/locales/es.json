@@ -4370,5 +4370,8 @@
  "cfg.t.ai.prompt_log.enabled": "Verás: en Ajustes, una tarjeta con los últimos prompts enviados a la IA y sus respuestas, limpios de secretos. Coste: un pequeño fichero local; solo un administrador puede leerlo o vaciarlo.",
  "cfg.t.ai.similar.enabled": "Verás: «explica esta alerta» también lista alertas parecidas, halladas comparando palabras. Coste: ninguno de la IA ni de GitHub; solo lee lo que el monitor ya tiene.",
  "cfg.t.ai.airgapped": "Verás: la IA rechaza toda dirección que no sea este equipo o una dirección privada que listes, antes de abrir ninguna conexión. Coste: ninguno; un modelo en la nube deja de funcionar mientras está activo.",
- "cfg.t.api.v1_enabled": "Verás: la API de lectura para clientes bajo /api/v1/ (auto la abre cuando el monitor funciona como servicio). Coste: ninguno; solo lee y sigue los mismos roles que la página."
+ "cfg.t.api.v1_enabled": "Verás: la API de lectura para clientes bajo /api/v1/ (auto la abre cuando el monitor funciona como servicio). Coste: ninguno; solo lee y sigue los mismos roles que la página.",
+ "cfg.f.savings.webhook_live_per_repo": "Webhook vivo por repositorio",
+ "cfg.h.savings.webhook_live_per_repo": "Juzga el webhook repositorio a repositorio: un repositorio tranquilo se libra de su lectura lenta solo si ha llegado un evento suyo hace poco. Un repositorio cuyo webhook nunca se montó o se rompió se lee como siempre. Ahorra menos lecturas. Funciona junto con Webhook primero.",
+ "cfg.t.savings.webhook_live_per_repo": "Verás: con Webhook primero encendido, solo los repositorios que enviaron un evento suyo hace poco se saltan su lectura lenta; el panel del Webhook también los cuenta. Coste: ninguno; así se ahorran menos llamadas."
 }

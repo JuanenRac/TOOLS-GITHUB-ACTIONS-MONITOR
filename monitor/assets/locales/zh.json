@@ -4370,5 +4370,8 @@
  "cfg.t.ai.prompt_log.enabled": "您将看到：设置中的一张卡片，列出最近发送给 AI 的提示词及其回答（已去除机密）。成本：一个很小的本地文件；只有管理员可以读取或清空。",
  "cfg.t.ai.similar.enabled": "您将看到：“解释这条警报”还会列出相似的警报，通过比较词语找到。成本：AI 和 GitHub 都不用；只读取监视器已有的内容。",
  "cfg.t.ai.airgapped": "您将看到：在打开任何连接之前，AI 会拒绝不是本机也不在您所列私有地址中的任何地址。成本：无；开启期间云端模型无法使用。",
- "cfg.t.api.v1_enabled": "您将看到：/api/v1/ 下面向客户端的只读 API（auto 在监视器作为服务运行时开放）。成本：无；它只读取，并遵循与页面相同的角色。"
+ "cfg.t.api.v1_enabled": "您将看到：/api/v1/ 下面向客户端的只读 API（auto 在监视器作为服务运行时开放）。成本：无；它只读取，并遵循与页面相同的角色。",
+ "cfg.f.savings.webhook_live_per_repo": "按仓库判断 Webhook 是否在线",
+ "cfg.h.savings.webhook_live_per_repo": "逐个仓库判断 webhook：安静的仓库只有在最近收到它自己的事件时，才会跳过缓慢读取。webhook 从未配置或已失效的仓库照常读取。节省的读取更少。需与“优先使用 Webhook”一起使用。",
+ "cfg.t.savings.webhook_live_per_repo": "你会看到：开启“优先使用 Webhook”后，只有最近发送过自己事件的仓库才会跳过缓慢读取；Webhook 面板也会统计它们。成本：无；节省的调用会更少。"
 }

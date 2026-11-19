@@ -15,6 +15,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Aggiunto
 
+- **Un interruttore opzionale per giudicare il webhook repository per repository**: con `savings.webhook_live_per_repo` attivo (spento di default, e funziona insieme a `savings.webhook_first`), un repository tranquillo salta la lettura lenta solo quando è arrivato un evento SUO negli ultimi `savings.webhook_window_minutes`. Un repository il cui webhook non è mai stato configurato, o si è rotto, viene letto come sempre mentre gli altri sono risparmiati; si risparmiano meno letture. Il pannello Webhook conta i repository vivi per conto proprio (`live_repos`). Etichetta, aiuto, suggerimento e guida in otto lingue.
+
 - **I blocchi tra processi vengono verificati dentro il container**: i controlli del container ottengono E9, che avvia più processi dell'immagine contro un unico volume condiviso e conta ciò che scrivono sotto il blocco del sistema operativo e sotto il file di blocco, così un aggiornamento perso si vedrebbe nell'evidenza del workflow; il test del file di blocco ora gira anche su Windows.
 
 - **Una guida a parte per l'assistente, `ASSISTANT.md`, in otto lingue**: come accenderlo, le sue cinque domande fisse, i quattro strumenti con cui legge, ciò che non fa mai (non scrive nulla, non tocca nulla su GitHub, consegna come dato ciò che un repository ha scritto) e come verificarlo con le due route e il registro dei prompt. La sezione di `AI_CONNECTION.md` resta il riferimento delle impostazioni.

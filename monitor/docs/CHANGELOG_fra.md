@@ -15,6 +15,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Un interrupteur optionnel pour juger le webhook dépôt par dépôt** : avec `savings.webhook_live_per_repo` activé (désactivé par défaut, et il fonctionne avec `savings.webhook_first`), un dépôt calme saute sa lecture lente seulement quand un événement À LUI est arrivé dans les derniers `savings.webhook_window_minutes`. Un dépôt dont le webhook n'a jamais été installé, ou est tombé, est lu comme toujours pendant que les autres sont épargnés ; cela économise moins de lectures. Le panneau Webhook compte les dépôts vivants par eux-mêmes (`live_repos`). Libellé, aide, conseil et guide en huit langues.
+
 - **Les verrous entre processus sont vérifiés dans le conteneur** : les contrôles du conteneur gagnent E9, qui démarre plusieurs processus de l'image sur un même volume partagé et compte ce qu'ils écrivent sous le verrou du système d'exploitation et sous le fichier verrou, de sorte qu'une mise à jour perdue apparaîtrait dans la preuve du workflow ; le test du fichier verrou s'exécute désormais aussi sous Windows.
 
 - **Un guide à part pour l'assistant, `ASSISTANT.md`, en huit langues** : comment l'activer, ses cinq questions fixes, les quatre outils avec lesquels il lit, ce qu'il ne fait jamais (il n'écrit rien, ne touche à rien sur GitHub, remet comme donnée ce qu'un dépôt a écrit) et comment le vérifier avec les deux routes et le journal des prompts. La section de `AI_CONNECTION.md` reste la référence des réglages.

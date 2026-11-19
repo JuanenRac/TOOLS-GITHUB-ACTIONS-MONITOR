@@ -4370,5 +4370,8 @@
  "cfg.t.ai.prompt_log.enabled": "You will see: in Settings, a card that lists the last prompts sent to the AI and their answers, cleaned of secrets. Cost: a small local file; only an administrator can read or empty it.",
  "cfg.t.ai.similar.enabled": "You will see: \"explain this alert\" also lists alerts that look like it, found by comparing words. Cost: none from the AI and none from GitHub; it only reads what the monitor already holds.",
  "cfg.t.ai.airgapped": "You will see: the AI refuses every address that is not this computer or a private address you list, before any connection is opened. Cost: none; a cloud model stops working while it is on.",
- "cfg.t.api.v1_enabled": "You will see: the read API for clients under /api/v1/ (auto opens it when the monitor runs as a service). Cost: none; it only reads and follows the same roles as the page."
+ "cfg.t.api.v1_enabled": "You will see: the read API for clients under /api/v1/ (auto opens it when the monitor runs as a service). Cost: none; it only reads and follows the same roles as the page.",
+ "cfg.f.savings.webhook_live_per_repo": "Webhook alive for each repository",
+ "cfg.h.savings.webhook_live_per_repo": "Judge the webhook repository by repository: a quiet repository is spared its slow read only if an event of its own arrived lately. A repository whose webhook was never set up or broke is then read as always. It spares fewer reads. Works together with Webhook first.",
+ "cfg.t.savings.webhook_live_per_repo": "You will see: with Webhook first on, only the repositories that sent an event of their own lately skip their slow read; the Webhook panel also counts them. Cost: none; it reads fewer repositories less often, so it spares fewer calls."
 }
