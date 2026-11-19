@@ -4310,5 +4310,10 @@
  "cfg.f.ai.similar.max": "Massimo di avvisi simili",
  "cfg.h.ai.similar.max": "Il massimo di avvisi simili elencati accanto a una spiegazione.",
  "cfg.f.ai.redact.extra_patterns": "Modelli da nascondere sempre",
- "cfg.h.ai.redact.extra_patterns": "Spento (vuoto). Uno per riga; un modello descrive una parola intera e ha solo tre caratteri jolly: * (qualsiasi sequenza di caratteri), ? (un carattere) e # (una cifra), per esempio deploy-* o *.nome-corp. Non è un'espressione regolare, quindi non può bloccare il monitor. Almeno 3 caratteri normali, al massimo 80."
+ "cfg.h.ai.redact.extra_patterns": "Spento (vuoto). Uno per riga; un modello descrive una parola intera e ha solo tre caratteri jolly: * (qualsiasi sequenza di caratteri), ? (un carattere) e # (una cifra), per esempio deploy-* o *.nome-corp. Non è un'espressione regolare, quindi non può bloccare il monitor. Almeno 3 caratteri normali, al massimo 80.",
+ "cfg.f.ai.prompt_log.enabled": "Registro locale dei prompt",
+ "cfg.h.ai.prompt_log.enabled": "Spento. Acceso = ogni domanda inviata all'IA e la sua risposta vengono scritte, già ripulite da segreti e dalle tue parole nascoste, in ai_prompts.jsonl nella cartella dei registri, perché un amministratore le legga o le svuoti. Non è nel backup né nello zip. Una risposta dalla cache non viene scritta.",
+ "cfg.f.ai.prompt_log.keep": "Prompt conservati",
+ "cfg.h.ai.prompt_log.keep": "Quante delle righe più recenti conserva il registro; le più vecchie vengono scartate.",
+ "ui.cfg_u_lines": "righe"
 }

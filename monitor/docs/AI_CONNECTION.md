@@ -85,6 +85,8 @@ With `ai.airgapped` on, the AI only talks to a model on this computer or on a pr
 
 `ai.redact.extra_patterns` (off, empty) lists patterns of yours for what the AI must never see: one per line, each describing a whole word with only three wildcards, `*` (any run of characters), `?` (one character) and `#` (one digit), for example `deploy-*` or `*.corp-name`. It is NOT a regular expression: there are no groups, alternatives or repeats, so a pattern cannot make the monitor hang; a pattern has 3 to 80 characters (at least 3 plain ones, at most 4 stars), a word is read up to 2000 characters and one text spends a fixed number of steps, after which the rest of the text is hidden, never left open. The patterns are applied to every text that reaches a model, the active notice included, and they add to the secrets the monitor already hides.
 
+`ai.prompt_log.enabled` (off) keeps a local record of what the AI was asked: with it on, every question sent to the model and its answer, already cleaned of secrets and of your hidden words and cut to a fixed size, are appended to `ai_prompts.jsonl` in the folder of the logs (`GET /api/ai/prompts` shows them to an administrator and `POST /api/ai/prompts/clear` empties them). The system prompt is not kept, an answer from the cache is not written, a failed call is written without a reply, the newest `ai.prompt_log.keep` lines are kept, and the file is not part of the backup, of the zip or of the files that AI tools read.
+
 ## Models of the provider
 
 The name of the model is free text, but the monitor can read the list of models from the provider and check the name against it. Models and versions change often, so the monitor ships no list of models: the examples of the presets may be out of date.

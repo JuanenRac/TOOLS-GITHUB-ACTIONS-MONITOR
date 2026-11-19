@@ -38,6 +38,8 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/ai/models/refresh` | POST | admin | read the list of models from the provider now: one request, inside the daily cap (this computer only) |
 | `/api/ai/models/test` | POST | admin | try one model with a synthetic text: latency, tokens, estimated cost and a sample answer (this computer only) |
 | `/api/ai/presets` | GET | viewer | the presets of AI providers (address, name of the variable of the key, example models, privacy); data only, never a key |
+| `/api/ai/prompts` | GET | admin | administrator only: the local record of the cleaned prompts and answers of the AI of the monitor (newest first); empty unless `ai.prompt_log.enabled` is on |
+| `/api/ai/prompts/clear` | POST | admin | administrator only: empties the local record of prompts (the number of lines removed is the answer) |
 | `/api/ai/state` | GET | viewer | every signal of the monitor, versioned, plus the lessons that apply now |
 | `/api/ai/stream` | GET | viewer | server-sent events of the alerts as they open and resolve (off by default) |
 | `/api/ai/test` | POST | admin | test the connection to the AI provider (this computer only) |

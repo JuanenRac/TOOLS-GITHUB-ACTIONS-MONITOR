@@ -4310,5 +4310,10 @@
  "cfg.f.ai.similar.max": "似たアラートの最大数",
  "cfg.h.ai.similar.max": "説明の横に一覧表示する似たアラートの最大数。",
  "cfg.f.ai.redact.extra_patterns": "常に隠すパターン",
- "cfg.h.ai.redact.extra_patterns": "オフ(空)。1行に1つ。パターンは単語全体を表し、ワイルドカードは3つだけです: *(任意の文字列)、?(1文字)、#(1桁の数字)。例: deploy-* や *.corp-name。正規表現ではないため、モニターが固まることはありません。通常の文字を3文字以上、80文字まで。"
+ "cfg.h.ai.redact.extra_patterns": "オフ(空)。1行に1つ。パターンは単語全体を表し、ワイルドカードは3つだけです: *(任意の文字列)、?(1文字)、#(1桁の数字)。例: deploy-* や *.corp-name。正規表現ではないため、モニターが固まることはありません。通常の文字を3文字以上、80文字まで。",
+ "cfg.f.ai.prompt_log.enabled": "プロンプトのローカル記録",
+ "cfg.h.ai.prompt_log.enabled": "オフ。オン = AIに送ったすべての質問とその回答を、秘密や隠す単語を除去した状態でログフォルダーの ai_prompts.jsonl に書き込み、管理者が読んだり空にしたりできます。バックアップにもzipにも含まれません。キャッシュからの回答は書き込まれません。",
+ "cfg.f.ai.prompt_log.keep": "保持するプロンプト数",
+ "cfg.h.ai.prompt_log.keep": "記録が保持する最新の行数。古いものは破棄されます。",
+ "ui.cfg_u_lines": "行"
 }

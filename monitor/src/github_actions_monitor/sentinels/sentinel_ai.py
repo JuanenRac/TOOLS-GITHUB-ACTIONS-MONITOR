@@ -63,6 +63,7 @@ AI_DEFAULTS = {
     "assistant": {"enabled": False, "max_context": 6000, "tools": ["status", "alerts", "runs", "score"], "max_tool_calls": 4},      # OFF: the panel of fixed questions (assistant.py); read only
     "airgapped": False, "airgap_hosts": [],      # OFF: with it on the AI only talks to this computer or to a private address declared in the list (ai_airgap.py); the general `airgapped` switch turns it on too
     "redact": {"extra_terms": [], "extra_patterns": []},      # words of the owner (a server, a project) that are always hidden before the AI sees a text; they add to the secrets the cleaner already hides, never replace them
+    "prompt_log": {"enabled": False, "keep": 200},      # OFF: a local record of the cleaned prompts and answers, for the administrator (ai_prompt_log.py)
     "similar": {"enabled": False, "max": 5},      # OFF: "explain this alert" also lists the alerts that look like it (similar_alerts.py, no model)
     "untrusted_text_max": 2000,      # what a repository wrote (a title, a name) is cut to this size before the AI sees it, as data between marks (assistant.py)
     "skill": True, "skill_max_chars": 3000,      # the core of the skill of the AI of the monitor (skills/internal/SKILL.md) goes into every prompt, cut to this size (a small local model: 1500)
@@ -111,6 +112,8 @@ def ai_config(config):
         terms = redact.get("extra_terms")
         merged["redact"] = {"extra_terms": list(dict.fromkeys(t.strip() for t in terms if isinstance(t, str) and 2 <= len(t.strip()) <= 80))[:50] if isinstance(terms, list) else [],
                             "extra_patterns": glob_patterns.clean_list(redact.get("extra_patterns"))}
+        from github_actions_monitor.integrations import ai_prompt_log
+        merged["prompt_log"] = ai_prompt_log.settings({"prompt_log": merged["prompt_log"]})
         network = (config or {}).get("network")
         merged["use_proxy"] = isinstance(network, dict) and network.get("use_proxy") is True      # network.use_proxy (off by default): the proxies of the environment, only for a provider that is not on this computer
     except (TypeError, ValueError):
@@ -575,8 +578,10 @@ def explain(kind, data, cfg, store, transport=None, task=None):
             raw = (transport or TRANSPORTS[ccfg["provider"]])(ccfg, system, user)
         except Exception as error:
             failed.append({"model": cand["label"], "reason": ai_chain.classify(error), "error": sanitize_text(str(error), 300, keep="head")})
+            _note_prompt(cfg, kind, ccfg, system, user, "", failed[-1]["reason"])
             continue
         text = clean_output(raw, ccfg["max_output_chars"])
+        _note_prompt(cfg, kind, ccfg, system, user, text)
         if not text:
             failed.append({"model": cand["label"], "reason": "no_text", "error": i18n.t("ai.no_text")})
             continue
@@ -605,6 +610,15 @@ def explain(kind, data, cfg, store, transport=None, task=None):
     with store.exclusive():      # read again, add the answer and write as one step: a save with the count this process read before the call would erase what the other processes counted meanwhile
         store.put(key, {"text": text, "verdict": verdict, "model": model_of(ccfg), "at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")})
     return {**base, "ok": True, "text": text, "verdict": verdict, "provider": ccfg["provider"], "model": model_of(ccfg), **note}
+
+
+def _note_prompt(cfg, kind, used, system, user, reply, reason=""):
+    """The local record of prompts (off by default); it never stops a call."""
+    try:
+        from github_actions_monitor.integrations import ai_prompt_log
+        ai_prompt_log.record(cfg, kind, {"provider": used["provider"], "model": model_of(used)}, system, user, reply, reason)
+    except Exception:   # noqa: BLE001 - a record that fails never stops an explanation
+        pass
 
 
 def run_call(cfg, store, kind, data, transport=None, language=None):

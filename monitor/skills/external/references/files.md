@@ -23,3 +23,4 @@ Generated from the code. Never assume a fixed path: read `ai/INDEX.json` or `GET
 | `failures.jsonl` | data/ | the book of failures, one line per failure (schema 1) | jsonl | when a failure opens |
 | `lessons.json` | config/ | the library of lessons you edit | json | by hand or `POST /api/ai/lessons` |
 | `lessons_rules.json` | config/ | the rules that file a failure under a category | json | by hand |
+| `ai_prompts.jsonl` | logs/ | the local record of prompts and answers of the AI (only with `ai.prompt_log.enabled`; an administrator reads it, it is not in the backup) | jsonl | when the AI is asked |

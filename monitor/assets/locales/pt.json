@@ -4310,5 +4310,10 @@
  "cfg.f.ai.similar.max": "Máximo de alertas parecidos",
  "cfg.h.ai.similar.max": "O máximo de alertas parecidos listados junto a uma explicação.",
  "cfg.f.ai.redact.extra_patterns": "Padrões a ocultar sempre",
- "cfg.h.ai.redact.extra_patterns": "Desligado (vazio). Um por linha; um padrão descreve uma palavra inteira e só tem três carateres universais: * (qualquer sequência de carateres), ? (um caráter) e # (um dígito), por exemplo deploy-* ou *.nome-corp. Não é uma expressão regular, por isso não pode bloquear o monitor. Pelo menos 3 carateres normais, 80 no máximo."
+ "cfg.h.ai.redact.extra_patterns": "Desligado (vazio). Um por linha; um padrão descreve uma palavra inteira e só tem três carateres universais: * (qualquer sequência de carateres), ? (um caráter) e # (um dígito), por exemplo deploy-* ou *.nome-corp. Não é uma expressão regular, por isso não pode bloquear o monitor. Pelo menos 3 carateres normais, 80 no máximo.",
+ "cfg.f.ai.prompt_log.enabled": "Registo local de prompts",
+ "cfg.h.ai.prompt_log.enabled": "Desligado. Ligado = cada pergunta enviada à IA e a sua resposta são escritas, já limpas de segredos e das suas palavras ocultas, em ai_prompts.jsonl na pasta dos registos, para um administrador as ler ou esvaziar. Não vai na cópia de segurança nem no zip. Uma resposta da cache não é escrita.",
+ "cfg.f.ai.prompt_log.keep": "Prompts guardados",
+ "cfg.h.ai.prompt_log.keep": "Quantas das linhas mais recentes o registo guarda; as mais antigas são descartadas.",
+ "ui.cfg_u_lines": "linhas"
 }
