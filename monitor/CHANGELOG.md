@@ -22,6 +22,10 @@ when this file and `tool_version.py` disagree.
 - The catalogue of the Screens menu is also read by tools: `GET /api/screens/menu`, the new command `screens` of the command line (`screens list`, `screens urls`) and the MCP tool `screens_menu`; the three only read
 
 - Five settings for the Screens menu: `screens.menu` (on by default; it only navigates), `screens.menu_target` (new window or same tab), `screens.menu_max_windows`, `screens.menu_rotate_seconds` and `screens.menu_tv_scale`, each with its help in Settings
+- **A guide of its own for the assistant, `ASSISTANT.md`, in eight languages**: how to switch it on, its five fixed questions, the four tools it reads with, what it never does (it writes nothing, reaches nothing on GitHub, hands what a repository wrote over as data) and how to check it with the two routes and the record of prompts. The section of `AI_CONNECTION.md` stays as the reference of the settings.
+
+- **Help with cost and effect on five more switches**: the tooltip of `ai.assistant.enabled`, `ai.prompt_log.enabled`, `ai.similar.enabled`, `ai.airgapped` and `api.v1_enabled` now says what you will see and what it costs, in the eight languages, beside the generic line every setting already had.
+
 - **The record of prompts and the origin of the figures of a model, in the page**: under the AI in Settings, a card "Record of prompts" shows the last 20 entries (already cleaned of secrets and of your hidden words) and empties the record with a button, for an administrator on this computer; the table of models has a column "Origin" (the page, the file `config/ai_models.json` or the provider) so you can see where each figure comes from. Both in the eight languages.
 
 - **Two more questions for the assistant, both read-only**: "the situation of a repository" (`explain_repo`, from its runs and its open alerts) and "what to do first" (`prioritize`, the open alerts, the status and the score put in order with their ids) join the three that existed; they use the same four tools, limits and daily budget of the AI, and there is still no free chat.

@@ -310,6 +310,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COMPLETE_TEAM_deu.md`](monitor/docs/COMPLETE_TEAM_deu.md): Vollausgabe für ein Team
 - [`monitor/docs/API_deu.md`](monitor/docs/API_deu.md): Die API für Clients
 - [`monitor/docs/API_V1_deu.md`](monitor/docs/API_V1_deu.md): Die Lese-API v1, Schritt für Schritt
+- [`monitor/docs/ASSISTANT_deu.md`](monitor/docs/ASSISTANT_deu.md): Der Assistent: feste, nur lesende Fragen an Ihre KI
 - [`monitor/docs/NOTIFICATIONS_deu.md`](monitor/docs/NOTIFICATIONS_deu.md): Benachrichtigungen und der Adapter-Vertrag
 - [`monitor/docs/AI_deu.md`](monitor/docs/AI_deu.md): der KI-Assistent: Anbieter, Sicherheit und Aktionen
 - [`monitor/docs/ANALYTICS_deu.md`](monitor/docs/ANALYTICS_deu.md): Analytik, bedingte Lesungen und verlorene Verbindung

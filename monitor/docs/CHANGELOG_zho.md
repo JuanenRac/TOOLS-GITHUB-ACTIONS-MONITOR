@@ -20,6 +20,10 @@
 - “屏幕”菜单的目录也可由工具读取:`GET /api/screens/menu`、命令行的新命令 `screens`(`screens list`、`screens urls`)以及 MCP 工具 `screens_menu`;三者都只读
 
 - 新增五项“屏幕”菜单设置:`screens.menu`(默认开启,只做导航)、`screens.menu_target`(新窗口或同一标签页)、`screens.menu_max_windows`、`screens.menu_rotate_seconds` 和 `screens.menu_tv_scale`,每项在设置中都有帮助说明
+- **新增助手专用指南 `ASSISTANT.md`，支持八种语言**：如何开启、它的五个固定问题、它读取所用的四个工具、它绝不做的事（不写入任何内容、不接触 GitHub、把仓库写下的内容作为数据交出），以及如何用两条路由和提示词记录来检查。`AI_CONNECTION.md` 中的相应章节仍作为设置的参考。
+
+- **再为五个开关增加了说明成本与效果的帮助**：`ai.assistant.enabled`、`ai.prompt_log.enabled`、`ai.similar.enabled`、`ai.airgapped` 和 `api.v1_enabled` 的提示现在以八种语言说明您会看到什么以及成本，位于每项设置原有的通用说明之外。
+
 - **页面中可查看提示词记录和模型数字的来源**：在设置的 AI 下方，“提示词记录”卡片显示最近 20 条（已去除机密和您隐藏的词），本机的管理员可用按钮清空记录；模型表新增“来源”列（页面、文件 `config/ai_models.json` 或提供商），可看到每个数字来自何处。两者均支持八种语言。
 
 - **为助手新增两个只读问题**:“某个仓库的情况”(`explain_repo`,依据其运行和未处理告警)和“首先该做什么”(`prioritize`,把未处理告警、状态和评分连同 id 排出顺序)加入原有的三个;它们使用相同的四个工具、限制和 AI 的每日预算,仍然没有自由聊天。
