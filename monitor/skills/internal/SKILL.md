@@ -52,5 +52,6 @@ The optional assistant (`ai.assistant.enabled`, off by default; the panel of the
 - `references/scenarios.md`: step by step for a real red, a transient red, low quota, a degraded monitor, a repeated failure, a new lesson, no network, several screens.
 - `references/learning.md`: the book, the categories, the library, the trend and how to propose a lesson.
 - `references/providers.md`: local and external providers, their limits and example settings.
+- `references/cards-and-trend.md`: the cards of each sentinel panel by alert code and the series of the daily trend, and how to read them (brief, API, command line).
 - `references/security.md`: prompt injection, secrets, minimum permissions, what is audited.
 - `references/api.md`, `references/settings.md`, `references/files.md`, `references/roles.md`, `references/tabs.md`, `references/signals.md` (every signal id and every panel of the Sentinel): generated from the code.
