@@ -203,6 +203,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ci.stuck.max_minutes` | `720` | sentinel | Largest learned limit |
 | `ci.stuck.min_minutes` | `30` | sentinel | Smallest learned limit |
 | `ci.stuck.min_samples` | `3` | sentinel | Finished runs needed to learn |
+| `ci.stuck.no_runner_check` | `false` | sentinel | Name a label nobody has |
 | `ci.stuck.percentile` | `95` | sentinel | Percentile of the durations |
 | `ci.stuck.queue_minutes` | `0` | sentinel | Limit for a run waiting for a runner |
 | `ci.stuck.runner_minutes` | `[]` | sentinel | Fixed limits per runner label |
