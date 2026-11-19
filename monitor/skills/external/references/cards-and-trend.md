@@ -1,3 +1,7 @@
+<!--
+  Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+  GPL-3.0-or-later - see LICENSE
+-->
 # The cards of the sentinel panels and the daily trend
 
 What a person sees in the panels of Collaboration (`scol`), Security (`ssec`), Delivery (`sdel`) and Supply chain (`ssup`), and in the Daily trend (`strend`), and how to read the same thing without the page.
