@@ -17,6 +17,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Adicionado
 
+- **Uma execução em fila pode ser nomeada «nenhum runner tem essa etiqueta»**: com `ci.stuck.no_runner_check` ligado (desligado por predefinição; precisa de `runners.enabled`), uma execução que espera uma etiqueta que não é alojada pelo GitHub, nem genérica, nem de qualquer runner listado pelo monitor recebe o motivo `no_runner` em vez de apenas `queue`, na lista de execuções, no sentinela e no brief. Um runner que não esteja nessa lista (um maior, de outra organização) seria mal nomeado, por isso é você quem o liga. Lê os trabalhos de dez execuções em fila no máximo por ciclo; não se escreve nada.
+
 - **Olhar opcional para as execuções ainda em curso** (`sampling.active_probe`, desativado por defeito): quando a lista de execuções de um repositório está cheia, dois pedidos leves pedem as execuções `in_progress` e `queued`, para que uma execução longa que começou antes da janela da lista não se perca nem seja mostrada como terminada.
 
 - **Cada registo que o monitor guarda leva agora a versão do seu esquema, e um registo de uma versão mais nova fica de lado e é nomeado**: o estado dos sentinelas, os silêncios, o estado do feed e o aviso de atualização são escritos com `schema_version` no início (os leitores nunca o veem; um registo anterior à marca lê-se como versão 0, como sempre). Um registo de uma versão mais nova do que a que o programa entende não é lido a meio: esse registo parte dos valores por omissão e o ficheiro é nomeado na lista de degradados (`records.newer`), pelo que uma descida de versão diz que ficheiro não entendeu.

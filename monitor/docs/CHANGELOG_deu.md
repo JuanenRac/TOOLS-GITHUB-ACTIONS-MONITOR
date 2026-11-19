@@ -17,6 +17,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Hinzugefügt
 
+- **Ein wartender Lauf kann „kein Runner hat dieses Label“ heißen**: Mit `ci.stuck.no_runner_check` an (standardmäßig aus; braucht `runners.enabled`) bekommt ein Lauf, der auf ein Label wartet, das weder von GitHub gehostet noch generisch ist und von keinem vom Monitor aufgelisteten Runner getragen wird, den Grund `no_runner` statt nur `queue`, in der Laufliste, im Wächter und im Brief. Ein Runner, der nicht in dieser Liste steht (ein größerer, einer anderen Organisation), würde falsch benannt, deshalb schalten Sie es selbst ein. Es liest die Jobs von höchstens zehn wartenden Läufen pro Zyklus; nichts wird geschrieben.
+
 - **Optionaler Blick auf die noch laufenden Runs** (`sampling.active_probe`, standardmäßig aus): Ist die Liste der Runs eines Repositorys voll, fragen zwei leichte Anfragen die Runs mit `in_progress` und `queued` ab, damit ein langer Run, der vor dem Fenster der Liste begann, nicht verloren geht oder als beendet erscheint.
 
 - **Jeder vom Monitor aufbewahrte Datensatz trägt jetzt die Version seines Schemas, und ein Datensatz einer neueren Version wird beiseitegelegt und genannt**: Zustand der Wächter, Stummschaltungen, Feed-Zustand und Update-Hinweis werden mit `schema_version` am Anfang geschrieben (die Leser sehen sie nie; ein Datensatz aus der Zeit vor der Markierung wird wie immer als Version 0 gelesen). Ein Datensatz einer neueren Version, als das Programm versteht, wird nicht halb gelesen: Dieser Datensatz beginnt mit seinen Standardwerten, und die Datei wird in der Liste der Beeinträchtigungen genannt (`records.newer`); ein Downgrade sagt also, welche Datei er nicht verstand.

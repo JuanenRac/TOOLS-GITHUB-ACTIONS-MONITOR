@@ -96,7 +96,7 @@ DEFAULTS = {
     "workspace_root": "", "audit_dir": "", "signed_dir": "",      # "" = look for them (the environment, then the folder that holds the repositories): workspace.py
     "alerts": {"silences_expire_days": 0, "silences": [], "service": {"enabled": False, "failures": 3, "rate_percent": 0, "workflows": []}, "group": {"by_commit": False, "min": 3}, "digest": {"minutes": 0, "threshold": 10}},      # what reaches the channels when there are many alerts (alertflow.py): all off or empty
     "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group", "workflow_run", "repository_dispatch"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "dormant_repos": True, "forks_need_own_ci": True, "fork_own_ci_days": 90, "red_ages": True, "red_age_days": 30, "disabled_apart": True, "dependabot_alerts": True, "copilot_alerts": False, "extra_branches": [], "rerun_timing": False, "group": {"reusable": False, "min": 2}, "failed_jobs": {"enabled": False, "max_per_cycle": 4, "group_by": "auto"},
-           "stuck": {"learned": False, "percentile": 95, "margin": 2.0, "min_samples": 3, "min_minutes": 30, "max_minutes": 720, "queue_minutes": 0, "workflow_minutes": [], "runner_minutes": [], "awaiting_stuck": True, "ghost_enabled": True, "ghost_days": 7}},      # which runs may make a branch red (redrule.py)
+           "stuck": {"learned": False, "percentile": 95, "margin": 2.0, "min_samples": 3, "min_minutes": 30, "max_minutes": 720, "queue_minutes": 0, "workflow_minutes": [], "runner_minutes": [], "awaiting_stuck": True, "ghost_enabled": True, "ghost_days": 7, "no_runner_check": False}},      # which runs may make a branch red (redrule.py)
     "watchdog_minutes": 10,      # a refresh cycle that runs longer than this is dumped to the log and restarted in a new thread (0 = off)
     "watchdog_max_abandoned": 8,      # calls to GitHub that gave up waiting but never returned: with this many still alive no new call is started and the health check says so (0 = no limit)
     "runs_per_repo": 20,
@@ -1185,7 +1185,8 @@ def build(config, repos, started, refreshed, loading, progress_text):
     stuck_cfg = stuckrule.settings(config)
     learned = stuckrule.learn(runs, stuck_cfg) if stuck_cfg["learned"] else {}
     offline = stuckrule.offline_labels(RUNNERS_SEEN.get("payload"))
-    ask_queued = [len(stuck_cfg["runner_minutes"]) > 0 or bool(offline), 10]      # queued runs only read their jobs (one call each) when a runner label can change the verdict
+    known = stuckrule.known_labels(RUNNERS_SEEN.get("payload")) if stuck_cfg["no_runner_check"] else None
+    ask_queued = [len(stuck_cfg["runner_minutes"]) > 0 or bool(offline) or known is not None, 10]      # queued runs only read their jobs (one call each) when a runner label can change the verdict
     for run in active:
         run["jobs"], seen, total = run_jobs_info(run["repo"], run["id"]) if (run["status"] == "in_progress" and not loading) else ([], 0, None)
         run["jobs_seen"], run["jobs_total"] = seen, total      # total only when the jobs were cut: "seen N of M"
@@ -1193,7 +1194,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
             ask_queued[1] -= 1
             run["jobs"] = run_jobs(run["repo"], run["id"])
         labels = sorted({label for job in run["jobs"] for label in job.get("labels") or []})
-        run["stuck"], run["stuck_reason"], run["stuck_limit"] = stuckrule.evaluate(run, config["stuck_minutes"], stuck_cfg, learned, labels, offline, now=time.time())
+        run["stuck"], run["stuck_reason"], run["stuck_limit"] = stuckrule.evaluate(run, config["stuck_minutes"], stuck_cfg, learned, labels, offline, now=time.time(), known_labels=known)
     ghosts = [run for run in active if run.get("stuck_reason") == "ghost"]      # queued for days: GitHub never starts them; they are neither queued nor stuck, only counted apart
     if ghosts:
         active = [run for run in active if run.get("stuck_reason") != "ghost"]

@@ -18,6 +18,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- **A queued run can be named "no runner has that label"**: with `ci.stuck.no_runner_check` on (off by default; it needs `runners.enabled`), a run that waits for a label that is not GitHub-hosted, not generic and not carried by any runner the monitor lists gets the reason `no_runner` instead of just `queue`, in the run list, the sentinel and the brief. A runner that is not in that list (a larger runner, one of another organisation) would be named wrongly, so it is yours to switch on. It reads the jobs of at most ten queued runs per cycle; nothing is written.
+
 - **Optional look at the runs that are still going** (`sampling.active_probe`, off by default): when the list of runs of a repository is full, two light requests ask for the runs that are `in_progress` and the runs that are `queued`, so a long run that started before the window of the list is not lost or shown as finished.
 
 - **Every record the monitor keeps now carries the version of its schema, and a record from a newer version is left aside and named**: the state of the sentinels, the silences, the feed state and the update notice are written with `schema_version` at the top (the readers never see it; a record from before the mark reads as version 0, as always). A record of a version newer than the program understands is not read half way: that record starts from its defaults and the file is named in the degraded list (`records.newer`), so a downgrade says which file it did not understand.

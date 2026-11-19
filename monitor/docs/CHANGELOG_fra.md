@@ -17,6 +17,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Une exécution en file peut être nommée « aucun runner n'a cette étiquette »** : avec `ci.stuck.no_runner_check` activé (désactivé par défaut ; il faut `runners.enabled`), une exécution qui attend une étiquette ni hébergée par GitHub, ni générique, ni portée par un runner listé par le moniteur reçoit le motif `no_runner` au lieu de simplement `queue`, dans la liste des exécutions, la sentinelle et le brief. Un runner absent de cette liste (un plus grand, d'une autre organisation) serait mal nommé, c'est donc à vous de l'activer. Il lit les jobs de dix exécutions en file au plus par cycle ; rien n'est écrit.
+
 - **Regard optionnel sur les exécutions encore en cours** (`sampling.active_probe`, désactivé par défaut) : quand la liste des exécutions d'un dépôt est pleine, deux requêtes légères demandent les exécutions `in_progress` et `queued`, pour qu'une longue exécution commencée avant la fenêtre de la liste ne soit ni perdue ni affichée comme terminée.
 
 - **Chaque enregistrement que garde le moniteur porte désormais la version de son schéma, et un enregistrement d'une version plus récente est mis de côté et nommé** : l'état des sentinelles, les silences, l'état du flux et l'avis de mise à jour s'écrivent avec `schema_version` en tête (les lecteurs ne le voient jamais ; un enregistrement antérieur à la marque se lit comme la version 0, comme toujours). Un enregistrement d'une version plus récente que celle que comprend le programme n'est pas lu à moitié : cet enregistrement repart de ses valeurs par défaut et le fichier est nommé dans la liste des dégradations (`records.newer`) ; un retour en arrière dit donc quel fichier il n'a pas compris.

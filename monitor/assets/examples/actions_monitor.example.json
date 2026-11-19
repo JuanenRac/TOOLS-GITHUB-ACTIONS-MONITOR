@@ -42,6 +42,7 @@
       "awaiting_stuck": true,
       "ghost_enabled": true,
       "ghost_days": 7,
+      "no_runner_check": false,
       "workflow_minutes": [],
       "runner_minutes": []
     },

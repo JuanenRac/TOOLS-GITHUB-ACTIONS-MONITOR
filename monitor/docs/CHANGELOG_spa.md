@@ -17,6 +17,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Añadido
 
+- **Una ejecución en cola puede nombrarse «ningún runner tiene esa etiqueta»**: con `ci.stuck.no_runner_check` activado (apagado por defecto; necesita `runners.enabled`), una ejecución que espera una etiqueta que no es de GitHub, ni genérica, ni de ningún runner de la lista del monitor recibe el motivo `no_runner` en lugar de solo `queue`, en la lista de ejecuciones, el centinela y el brief. Un runner que no esté en esa lista (uno grande, uno de otra organización) se nombraría mal, así que lo enciende usted. Lee los trabajos de diez ejecuciones en cola como mucho por ciclo; no se escribe nada.
+
 - **Mirada opcional a las ejecuciones aún en curso** (`sampling.active_probe`, desactivada por defecto): cuando la lista de ejecuciones de un repositorio está llena, dos peticiones ligeras piden las ejecuciones `in_progress` y las `queued`, para que una ejecución larga que empezó antes de la ventana de la lista no se pierda ni se muestre como terminada.
 
 - **Cada registro que guarda el monitor lleva ahora la versión de su esquema, y uno de una versión más nueva se deja aparte y se nombra**: el estado de los centinelas, los silencios, el estado del feed y el aviso de actualización se escriben con `schema_version` al principio (los lectores no lo ven; un registro anterior a la marca se lee como versión 0, como siempre). Un registro de una versión más nueva de la que entiende el programa no se lee a medias: ese registro parte de sus valores por defecto y el fichero se nombra en la lista de degradados (`records.newer`), de modo que una bajada de versión dice qué fichero no entendió.
