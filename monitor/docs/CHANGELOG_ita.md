@@ -8,6 +8,12 @@
 Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il proprio semver. La fonte è il CHANGELOG.md in inglese; questo file ha le stesse versioni e sezioni.
 
 ## [Unreleased]
+- **Ogni comando della riga di comando accetta `--format text|table|plain|json|ndjson`**: `table` adatta le colonne alla larghezza del terminale e conta i caratteri larghi giapponesi e cinesi come due celle, `plain` è una riga per record separata da tabulazioni per `grep` e `awk`, e `ndjson` è un oggetto JSON per riga. `text` è ciò che ogni comando scriveva prima e resta il predefinito (`cli.default_format` lo cambia); `--json` non cambia.
+- **`watch status|alerts` ripete la lettura del comando** (`--interval`, `--once`, `--no-clear`): legge il monitor di questo computer, mai GitHub, mantiene un minimo sotto l'intervallo (`cli.watch.min_interval_seconds`, 2 per impostazione predefinita), riprova con una pausa sempre più lunga un monitor non raggiungibile e termina con il codice di uscita 0 su Ctrl-C.
+- **`watch --exit-on-change` termina con il nuovo codice di uscita 6 quando cambiano l'insieme degli avvisi o le cifre dello stato**: un orologio che avanza non è un cambiamento, e senza l'opzione il codice 6 non compare mai. I codici da 0 a 5 non cambiano e un test mantiene d'accordo la tabella della guida e il codice.
+- **`completions bash|zsh|fish|powershell` stampa lo script che completa comandi, parole e opzioni**, scritto dal parser reale perché non possa restare indietro (un test confronta le due cose). Si limita a stampare: non modifica mai un tuo file.
+- **Un profilo chiosco per una TV o una parete, disattivato per impostazione predefinita** (`kiosk.enabled`): `monitor_cli.py kiosk ops|team|release|quiet` stampa l'indirizzo di un preset, e la pagina, solo quando l'impostazione è attiva e l'indirizzo contiene `kiosk=1`, ingrandisce il testo (`kiosk.font_scale_percent`, 150 per impostazione predefinita), può usare un alto contrasto (`kiosk.high_contrast`) e può scorrere le schede del preset (`kiosk.rotate_views`, `kiosk.rotate_seconds`).
+- **Due nuove guide in otto lingue**: la riga di comando per l'operatore (formati, `watch`, `completions`, codici di uscita ed esempi con `jq` che un test esegue) e il chiosco; la guida della riga di comando e quella degli schermi rimandano a esse.
 
 ### Modificato
 
@@ -214,6 +220,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 - **Un payload del webhook deve nominare il proprietario e il suo link deve puntare al suo repository**: una consegna senza il nome completo del repository non viene più creduta, e il link del run che va agli avvisi, all'elenco in tempo reale e al flusso viene conservato solo se sta sotto quel proprietario e repository.
 
 ### Aggiunto
+
 
 - **`logs.failed_step.max_per_minute` limita quante esecuzioni diverse il log del passaggio fallito legge da GitHub in un minuto** (10 per impostazione predefinita): chiedere molte esecuzioni di seguito non spende più la tua quota per tutte.
 - **I silenziamenti per schema possono scadere e un segnale elenca quelli che richiedono una decisione** (`alerts.silences_expire_days`, 0 = mai per impostazione predefinita): con un numero, un silenziamento smette di funzionare quel numero di giorni dopo la data di revisione; i promemoria già fatti sono conservati nel file di stato, quindi un riavvio non li ripete; e il segnale dei silenziamenti elenca quelli oltre la data, scaduti o senza data.

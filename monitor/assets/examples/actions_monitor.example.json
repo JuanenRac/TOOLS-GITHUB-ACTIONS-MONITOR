@@ -497,6 +497,21 @@
     "persist_deliveries": true,
     "reject_stale": false
   },
+  "kiosk": {
+    "enabled": false,
+    "font_scale_percent": 150,
+    "high_contrast": false,
+    "rotate_views": false,
+    "rotate_seconds": 30
+  },
+  "cli": {
+    "prefer_v1": true,
+    "default_format": "text",
+    "watch": {
+      "min_interval_seconds": 2,
+      "default_interval_seconds": 5
+    }
+  },
   "chatops": {
     "enabled": false,
     "slack": {
@@ -829,9 +844,6 @@
     "news_days": 7,
     "notify": false,
     "repos": []
-  },
-  "cli": {
-    "prefer_v1": true
   },
   "api": {
     "v1_enabled": "auto",

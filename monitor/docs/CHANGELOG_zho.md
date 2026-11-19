@@ -8,6 +8,12 @@
 工具本身(监视器 + 哨兵 + 批处理工具)的版本,采用自己的语义化版本号。源文件是英文的 CHANGELOG.md,本文件包含相同的版本和章节。
 
 ## [Unreleased]
+- **命令行的每个命令都接受 `--format text|table|plain|json|ndjson`**：`table` 会让列适应终端宽度，并把日文和中文的宽字符算作两个单元格；`plain` 是每条记录一行、以制表符分隔，适合 `grep` 和 `awk`；`ndjson` 是每行一个 JSON 对象。`text` 是各命令之前的输出，仍是默认值（可用 `cli.default_format` 更改）；`--json` 不变。
+- **`watch status|alerts` 重复执行该命令的读取**（`--interval`、`--once`、`--no-clear`）：它读取本机的监控器而不是 GitHub，间隔设有下限（`cli.watch.min_interval_seconds`，默认 2），对无法连接的监控器以越来越长的停顿重试，按 Ctrl-C 时以退出码 0 结束。
+- **当警报的集合或状态的数字发生变化时，`watch --exit-on-change` 以新的退出码 6 结束**：时钟走动不算变化，不带该选项时永远不会出现退出码 6。退出码 0 到 5 不变，并有测试使指南中的表与代码保持一致。
+- **`completions bash|zsh|fish|powershell` 会打印补全命令、词和选项的脚本**，它由真实解析器生成，因此不会落后（有测试对二者进行比较）。它只打印：从不编辑您的任何文件。
+- **面向电视或墙面的展示屏配置，默认关闭**（`kiosk.enabled`）：`monitor_cli.py kiosk ops|team|release|quiet` 会打印预设的地址；仅当该设置开启且地址带有 `kiosk=1` 时，页面才会放大字号（`kiosk.font_scale_percent`，默认 150），可使用高对比度（`kiosk.high_contrast`），并可在预设的标签页之间轮播（`kiosk.rotate_views`、`kiosk.rotate_seconds`）。
+- **八种语言的两份新指南**：面向运维人员的命令行（格式、`watch`、`completions`、退出码，以及由测试运行的 `jq` 示例）和展示屏；命令行指南和屏幕指南都指向它们。
 
 ### 变更
 
@@ -214,6 +220,7 @@
 - **Webhook 载荷必须指明其所有者,其链接必须指向其仓库**:不含仓库全名的投递不再被采信,进入通知、实时列表和数据流的运行链接只有在位于该所有者和仓库之下时才保留。
 
 ### 新增
+
 
 - **`logs.failed_step.max_per_minute` 限制失败步骤日志每分钟从 GitHub 读取的不同运行数**(默认 10):连续请求大量运行不再为所有运行消耗你的配额。
 - **按模式的静音可以失效,并由一个信号列出需要决定的静音**(`alerts.silences_expire_days`,默认 0 = 永不):设为数字后,静音在审核日期之后该天数后停止生效;已发出的提醒保存在状态文件中,重启不会重复;静音信号会列出已过期限、已失效或没有日期的静音。

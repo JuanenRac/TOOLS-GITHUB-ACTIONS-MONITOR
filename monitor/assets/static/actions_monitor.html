@@ -77,6 +77,8 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 /* chrome=0: a screen of its own for a wall or a second monitor: no header, no tabs, no filters; the figures stay */
 .kiosk .sidebar,.kiosk .tools,.kiosk .filters,.kiosk footer{display:none!important}.kiosk .hcorner{position:static}
 .kiosk header{padding:6px 14px}.kiosk main{padding-top:8px}
+/* kiosk=1 (kiosk.enabled in Settings): larger type through the zoom of the body, and an optional high contrast */
+body.kiosk-hc{--bg:#000;--page:#000;--panel:#000;--panel2:#0b0b0b;--line:#fff;--line2:#fff;--text:#fff;--mut:#e5e7eb;--ok:#4ade80;--bad:#ff6b6b;--warn:#fbbf24;--run:#7dd3fc}
 .lite-note{margin:0 0 10px;color:var(--mut)}
 #hidden{display:none;background:var(--warn);color:var(--on-warn);padding:6px 18px;font-weight:600}
 @media (max-width:640px){header{padding:8px 10px}.tile{min-width:calc(50% - 4px);flex:1 1 calc(50% - 4px);padding:6px 9px}.tile.wide{min-width:100%}.tile b{font-size:18px}h1{width:100%}}
@@ -913,6 +915,9 @@ window.addEventListener("hashchange",()=>{const t=tabOf(location.hash);if(t&&TAB
 const VIEWS={now:"now",sentinel:"sent","sentinel-ci":"sci","sentinel-collab":"scol","sentinel-security":"ssec","sentinel-delivery":"sdel","sentinel-supply":"ssup","sentinel-trend":"strend","sentinel-yesterday":"syvt",alerts:"al",reports:"rep",lessons:"les",charts:"charts",repos:"repos",team:"team","team-health":"team",fleet:"fleet","team-reports":"trep",repo:"team",settings:"cfg",updates:"upd",live:"live"};
 const VIEW=QS.get("view")&&VIEWS[QS.get("view")]?QS.get("view"):"";
 if(QS.get("chrome")==="0")document.body.classList.add("kiosk");
+(function(){const k=I18N.kiosk||{};if(k.enabled!==true||QS.get("kiosk")!=="1")return;      // the kiosk profile: only when it is on in Settings and the address asks for it
+  const n=parseInt(QS.get("scale")||k.font_scale_percent,10),s=Math.max(100,Math.min(400,isNaN(n)?100:n));document.body.style.zoom=String(s/100);document.body.classList.add("kiosk");
+  if(QS.get("contrast")==="1"||(k.high_contrast===true&&QS.get("contrast")!=="0"))document.body.classList.add("kiosk-hc")})();
 function accUrl(id){const u=new URL(location.href);if(id)u.searchParams.set("account",id);else u.searchParams.delete("account");return u.pathname+u.search}
 function accApi(path){if(!ACC||!ACC.current)return path;return path+(path.includes("?")?"&":"?")+"account="+encodeURIComponent(ACC.current)}
 if(ACC&&!LITE){

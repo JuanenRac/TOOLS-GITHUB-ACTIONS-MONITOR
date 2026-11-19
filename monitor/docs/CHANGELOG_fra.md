@@ -8,6 +8,12 @@
 Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son propre semver. La source est le CHANGELOG.md en anglais ; ce fichier contient les mêmes versions et sections.
 
 ## [Unreleased]
+- **Chaque commande de la ligne de commande accepte `--format text|table|plain|json|ndjson`** : `table` ajuste les colonnes à la largeur du terminal et compte les caractères larges japonais et chinois pour deux cellules, `plain` est une ligne par enregistrement séparée par des tabulations pour `grep` et `awk`, et `ndjson` est un objet JSON par ligne. `text` est ce que chaque commande écrivait avant et reste la valeur par défaut (`cli.default_format` la change) ; `--json` ne change pas.
+- **`watch status|alerts` répète la lecture de la commande** (`--interval`, `--once`, `--no-clear`) : il lit le moniteur de cet ordinateur, jamais GitHub, garde un plancher sous l'intervalle (`cli.watch.min_interval_seconds`, 2 par défaut), réessaie avec une pause de plus en plus longue un moniteur injoignable et se termine avec le code de sortie 0 sur Ctrl-C.
+- **`watch --exit-on-change` se termine avec le nouveau code de sortie 6 quand l'ensemble des alertes ou les chiffres de l'état changent** : une horloge qui avance n'est pas un changement, et sans l'option le code 6 n'apparaît jamais. Les codes 0 à 5 ne changent pas et un test garde d'accord le tableau du guide et le code.
+- **`completions bash|zsh|fish|powershell` affiche le script qui complète les commandes, mots et options**, écrit à partir de l'analyseur réel pour qu'il ne puisse pas prendre de retard (un test compare les deux). Il se contente d'afficher : il ne modifie jamais un de vos fichiers.
+- **Un profil kiosque pour une télévision ou un mur, désactivé par défaut** (`kiosk.enabled`) : `monitor_cli.py kiosk ops|team|release|quiet` affiche l'adresse d'un préréglage, et la page, seulement quand le réglage est activé et que l'adresse contient `kiosk=1`, agrandit le texte (`kiosk.font_scale_percent`, 150 par défaut), peut utiliser un contraste élevé (`kiosk.high_contrast`) et peut parcourir les onglets du préréglage (`kiosk.rotate_views`, `kiosk.rotate_seconds`).
+- **Deux nouveaux guides en huit langues** : la ligne de commande pour l'opérateur (formats, `watch`, `completions`, codes de sortie et exemples `jq` qu'un test exécute) et le kiosque ; le guide de la ligne de commande et celui des écrans y renvoient.
 
 ### Modifié
 
@@ -214,6 +220,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 - **Une charge du webhook doit nommer son propriétaire et son lien doit pointer vers son dépôt** : une livraison sans le nom complet du dépôt n'est plus crue, et le lien du run qui va aux avis, à la liste en direct et au flux n'est gardé que s'il est sous ce propriétaire et ce dépôt.
 
 ### Ajouté
+
 
 - **`logs.failed_step.max_per_minute` limite le nombre d'exécutions différentes que le journal de l'étape en échec lit sur GitHub en une minute** (10 par défaut) : demander beaucoup d'exécutions à la suite ne dépense plus votre quota pour toutes.
 - **Les mises en sourdine par motif peuvent expirer et un signal liste celles qui demandent une décision** (`alerts.silences_expire_days`, 0 = jamais par défaut) : avec un nombre, une mise en sourdine cesse de fonctionner ce nombre de jours après sa date de revue ; les rappels déjà faits sont gardés dans le fichier d'état, un redémarrage ne les répète donc pas ; et le signal des mises en sourdine liste celles dépassées, expirées ou sans date.

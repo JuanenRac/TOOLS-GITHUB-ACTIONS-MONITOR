@@ -8,6 +8,12 @@
 Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem Semver. Die Quelle ist das englische CHANGELOG.md; diese Datei enthält dieselben Versionen und Abschnitte.
 
 ## [Unreleased]
+- **Jeder Befehl der Befehlszeile akzeptiert `--format text|table|plain|json|ndjson`**: `table` passt die Spalten an die Breite des Terminals an und zählt breite japanische und chinesische Zeichen als zwei Zellen, `plain` ist eine durch Tabulatoren getrennte Zeile pro Datensatz für `grep` und `awk`, und `ndjson` ist ein JSON-Objekt pro Zeile. `text` ist, was jeder Befehl vorher schrieb, und bleibt der Standard (`cli.default_format` ändert ihn); `--json` bleibt unverändert.
+- **`watch status|alerts` wiederholt die Abfrage des Befehls** (`--interval`, `--once`, `--no-clear`): Es liest den Monitor auf diesem Rechner, nie GitHub, hält eine Untergrenze für das Intervall (`cli.watch.min_interval_seconds`, standardmäßig 2), versucht einen nicht erreichbaren Monitor mit immer längerer Pause erneut und endet bei Strg-C mit dem Exit-Code 0.
+- **`watch --exit-on-change` endet mit dem neuen Exit-Code 6, wenn sich die Menge der Alarme oder die Zahlen des Status ändern**: Eine tickende Uhr ist keine Änderung, und ohne die Option erscheint der Code 6 nie. Die Codes 0 bis 5 bleiben unverändert, und ein Test hält die Tabelle der Anleitung und den Code in Einklang.
+- **`completions bash|zsh|fish|powershell` gibt das Skript aus, das Befehle, Wörter und Optionen vervollständigt**, aus dem echten Parser erzeugt, damit es nicht zurückfallen kann (ein Test vergleicht beides). Es gibt nur aus: Es ändert nie eine Ihrer Dateien.
+- **Ein Kiosk-Profil für einen Fernseher oder eine Wand, standardmäßig aus** (`kiosk.enabled`): `monitor_cli.py kiosk ops|team|release|quiet` gibt die Adresse eines Presets aus, und die Seite vergrößert die Schrift (`kiosk.font_scale_percent`, standardmäßig 150), kann einen hohen Kontrast verwenden (`kiosk.high_contrast`) und durch die Tabs des Presets wechseln (`kiosk.rotate_views`, `kiosk.rotate_seconds`), aber nur, wenn die Einstellung an ist und die Adresse `kiosk=1` enthält.
+- **Zwei neue Anleitungen in acht Sprachen**: die Befehlszeile für den Betreiber (Formate, `watch`, `completions`, Exit-Codes und `jq`-Beispiele, die ein Test ausführt) und der Kiosk; die Anleitung der Befehlszeile und die der Bildschirme verweisen darauf.
 
 ### Geändert
 
@@ -214,6 +220,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 - **Eine Webhook-Nutzlast muss ihren Eigentümer nennen, und ihr Link muss auf ihr Repository zeigen**: Eine Zustellung ohne den vollen Namen des Repositorys wird nicht mehr geglaubt, und der Link des Runs, der in die Meldungen, die Live-Liste und den Stream gelangt, bleibt nur erhalten, wenn er unter diesem Eigentümer und Repository liegt.
 
 ### Hinzugefügt
+
 
 - **`logs.failed_step.max_per_minute` begrenzt, wie viele verschiedene Läufe das Log des fehlgeschlagenen Schritts pro Minute von GitHub liest** (standardmäßig 10): Wer viele Läufe hintereinander anfragt, verbraucht Ihr Kontingent nicht mehr für alle.
 - **Stummschaltungen per Muster können ablaufen, und ein Signal listet die auf, die eine Entscheidung brauchen** (`alerts.silences_expire_days`, 0 = standardmäßig nie): Mit einer Zahl wirkt eine Stummschaltung so viele Tage nach ihrem Prüfdatum nicht mehr; bereits ausgesprochene Erinnerungen stehen in der Zustandsdatei, ein Neustart wiederholt sie also nicht; und das Signal der Stummschaltungen listet die über dem Datum liegenden, abgelaufenen oder datumslosen auf.

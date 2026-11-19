@@ -9,6 +9,8 @@
 
 The page adapts to the size of its window, from a phone to 4K, upright or turned, and one monitor can serve several screens, each one showing the tabs you choose. Nothing is polled twice: every screen reads the same state.
 
+
+For a TV or a wall with larger type, a high contrast or a rotation through a few tabs, see [KIOSK.md](KIOSK.md).
 ## Addresses
 
 - `/` - the whole page.
