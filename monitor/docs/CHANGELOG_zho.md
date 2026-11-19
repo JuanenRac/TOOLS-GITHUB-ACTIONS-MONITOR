@@ -19,6 +19,8 @@
 
 ### 新增
 
+- **现在可以按可见性排除仓库,并统计每条规则排除了多少**:`discovery.hide` 现在也接受 `public`(与 `private`、`fork`、`empty` 并列),基本标签页和 `GET /api/discovery` 会显示每条规则排除的仓库数(`excluded`:archived、empty、private、public、fork),被过滤器排除的仓库会被计数,绝不会被当作干净。未读取到的可见性绝不会成为排除仓库的理由。
+
 - **协作哨兵的每一轮也有时间上限**:`sentinels.collab.deadline_s`(默认 30 秒;0 = 无上限),与安全、供应链和交付哨兵相同。超时后,该轮不再开始新的仓库,没轮到的等待下一轮(最久未读的先读),状态会把它们按名称列为 `unchecked` 并带有 `round_cut`,而不是算作零告警。
 
 - **让 systemd 用户服务下的监视器可以通过页面更新的可选助手**：开启 `updates.systemd_helper`（默认关闭）后，作为 systemd“用户”服务（`systemctl --user`）运行的监视器会获得更新选项；应用更新的进程会停止该服务、应用更新并再次启动该服务，如果新版本无法启动，则恢复之前的版本并再次启动服务。它只会对普通单元名运行 `systemctl --user stop`、`start` 或 `is-active`，从不使用 `sudo`；系统服务、容器、演示和 Lite 版本保持原样。命令行可用 `--systemd-unit` 对 `apply` 和 `rollback` 做同样的事。更新状态会说明开关是否开启，以及监视器运行在哪个用户服务下。标签、帮助、提示和指南均提供八种语言。
