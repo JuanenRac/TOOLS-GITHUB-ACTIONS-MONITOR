@@ -33,9 +33,12 @@ from github_actions_monitor.util import ports  # noqa: E402
 
 
 def free_port():
-    with socket.socket() as probe:
-        probe.bind(("127.0.0.1", 0))
-        return probe.getsockname()[1]
+    while True:
+        with socket.socket() as probe:
+            probe.bind(("127.0.0.1", 0))
+            port = probe.getsockname()[1]
+        if port not in (8765, 8766, 8767):      # never one of the defaults the tests compare against
+            return port
 
 
 def two_free_ports():
@@ -169,7 +172,7 @@ class TheProgramsFollowIt(unittest.TestCase):
         port = next(c for c in checks if c["id"] == "port")
         self.assertIn(str(self.complete), port["detail"])
         self.assertIn(str(self.lite), port["detail"])
-        self.assertNotIn("8765", port["detail"])
+        self.assertNotRegex(port["detail"], r"(?<!\d)8765(?!\d)")      # as a whole number: a free port such as 58765 holds the digits of the default
 
     def test_the_health_check_asks_the_configured_port(self):
         class Handler(BaseHTTPRequestHandler):
