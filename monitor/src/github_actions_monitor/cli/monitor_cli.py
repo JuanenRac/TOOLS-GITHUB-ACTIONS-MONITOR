@@ -152,7 +152,54 @@ def sign_in(base, user, password, timeout=8, token=""):
     CLIENT["session"] = str(answer["token"])
 
 
+V1_STATE = {"closed": set()}      # the monitors that answered 404 under /api/v1/ and 200 under /api/: they are asked the old way from then on
+
+
+def prefer_v1(env=None, config=None):
+    """Whether the frozen routes are asked under `/api/v1/` first (`cli.prefer_v1`, true by default; `MONITOR_CLI_PREFER_V1=0|1` wins). It only acts when the monitor answers there (`api.v1_enabled`):
+    the first 404 under the prefix sends the request to the old route and the monitor is not asked again."""
+    env = os.environ if env is None else env
+    flag = (env.get("MONITOR_CLI_PREFER_V1") or "").strip().lower()
+    if flag in ("0", "false", "no", "off"):
+        return False
+    if flag in ("1", "true", "yes", "on"):
+        return True
+    if config is None:
+        try:
+            from github_actions_monitor.util import paths
+            config = ports.read_file(paths.config_file())
+        except Exception:      # noqa: BLE001 - a configuration that cannot be read never stops a command
+            config = {}
+    block = config.get("cli") if isinstance(config, dict) else None
+    value = block.get("prefer_v1") if isinstance(block, dict) else None
+    return value if isinstance(value, bool) else True
+
+
+def v1_path(path):
+    """The route under the prefix when the contract freezes `path` (it answers the same there), else None."""
+    from github_actions_monitor.app import api_spec
+    base = path.split("?")[0]
+    if not base.startswith("/api/") or base.startswith("/api/v1"):
+        return None
+    return api_spec.prefixed(base) if api_spec.prefixed(base) in api_spec.frozen_paths() else None
+
+
 def fetch(base, path, query=None, timeout=8, token=""):
+    """GET one JSON document of the monitor, under `/api/v1/` first when the route is frozen and `cli.prefer_v1` allows it (see prefer_v1): the same document by either way."""
+    versioned = v1_path(path) if base not in V1_STATE["closed"] and prefer_v1() else None
+    if versioned:
+        try:
+            return plain_fetch(base, versioned, query, timeout, token)
+        except CliError as error:
+            if getattr(error, "http_status", 0) != 404:
+                raise
+        answer = plain_fetch(base, path, query, timeout, token)      # 404 under the prefix: closed, or a route that does not exist there; the old route decides
+        V1_STATE["closed"].add(base)
+        return answer
+    return plain_fetch(base, path, query, timeout, token)
+
+
+def plain_fetch(base, path, query=None, timeout=8, token=""):
     """GET one JSON document of the monitor. Raises CliError(2) when it cannot be reached, CliError(3) when it refuses, CliError(4) for an answer that is not JSON."""
     url = base + path + (("?" + urlencode({k: v for k, v in (query or {}).items() if v not in (None, "")})) if query else "")
     request = urllib.request.Request(url, headers=request_headers(token))
@@ -163,7 +210,9 @@ def fetch(base, path, query=None, timeout=8, token=""):
         if error.code in (401, 403):
             raise CliError(EXIT_AUTH, i18n.t("cli.refused", code=error.code)) from None
         if error.code == 404:
-            raise CliError(EXIT_DEGRADED, i18n.t("cli.not_here", path=path)) from None
+            gone = CliError(EXIT_DEGRADED, i18n.t("cli.not_here", path=path))
+            gone.http_status = 404
+            raise gone from None
         raise CliError(EXIT_DEGRADED, i18n.t("cli.http_error", code=error.code)) from None
     except (urllib.error.URLError, OSError, ValueError) as error:
         if monitor_admin.certificate_problem(error):

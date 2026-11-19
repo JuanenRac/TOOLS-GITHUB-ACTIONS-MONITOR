@@ -33,6 +33,17 @@ Aquilo em que um script, um ecrã de parede ou um cliente móvel pode confiar. D
 - `python tools/api_contract_suite.py` é a suite de contrato para clientes externos (só a biblioteca padrão, só lê): dê-lhe o endereço de um servidor (`--url`) e um token de leitura (`--token-file`) e toma o documento que o servidor serve como descrição do que verificar: a forma de cada rota sem parâmetros, o cabeçalho `X-API-Version`, o envelope de erro e os seus códigos estáveis, as páginas e os seus cursores, `fields` e `profile=compact`, gzip e que nada se pode escrever sob o prefixo. Imprime uma linha por verificação e `API_CONTRACT=PASS` ou `API_CONTRACT=FAIL` (`--json` para um documento); o código de saída é 0, 1 ou 2 (nada responde). `python bin/monitor_cli.py api contract-check` lança-a contra o monitor da linha de comandos.
 - As duas rotas próprias respondem um erro como `{"error": "bad_request", "code": "api.bad_cursor", "message": "..."}`: `error` e `code` são estáveis, `message` segue o idioma de `?lang=`. Códigos: api.bad_cursor, api.bad_limit, api.unknown_field, api.bad_profile, api.server_error. Tudo é só de leitura: não há nenhuma escrita sob `/api/v1/`. A forma está congelada na secção `v1_endpoints` do contrato e verifica-se com `python tools/check_api_contract.py --v1` contra um monitor com `api.v1_enabled` ativado.
 
+### Exemplos com curl
+
+O token é o token de acesso do modo de rede (ou use uma sessão do modo equipa); sem modo de rede não é preciso token a partir do mesmo computador. Um cliente segue `next_cursor` até ser `null` e lê primeiro `/api/v1/me` para saber a versão do contrato e o que a sessão pode fazer.
+
+```
+curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/me
+curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?state=bad&limit=20&profile=compact"
+curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/openapi.json -o openapi.json
+curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?limit=50&cursor=THE_NEXT_CURSOR"
+```
+
 ## Streams
 
 - `GET /api/ai/stream` (os alertas) e `GET /api/live-events/stream` (os eventos do webhook, `live.sse.enabled`) são eventos enviados pelo servidor, só de leitura e desligados por predefinição; veja [AI_ALERTS_por.md](AI_ALERTS_por.md) e [WEBHOOK_por.md](WEBHOOK_por.md).

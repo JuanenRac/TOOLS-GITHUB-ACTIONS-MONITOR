@@ -28,6 +28,8 @@
 
 Options of every command: `--json` (the answer as one JSON document: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (port 8766), `--timeout SECONDS` (1 to 60), `--lang CODE`. In the network mode put the access token in the environment variable `MONITOR_ACCESS_TOKEN`, the one the monitor itself reads (`MONITOR_TOKEN` is accepted as an alias; `--token TOKEN` is the last resort, because a flag shows in the list of processes). The order is: `MONITOR_ACCESS_TOKEN`, then `MONITOR_TOKEN`, then `--token`. It travels in the header `X-Monitor-Access`, never in the address and never on screen. A `--url` with plain `http` to another computer prints a warning on stderr (the token and the answers would travel unencrypted): use `https` outside a network you control.
 
+The command line is a client of the read API for clients: the routes the contract freezes (`docs/schemas/api_contract.json`) are asked under `/api/v1/` first, and when the monitor answers 404 there (the API is closed, `api.v1_enabled`) the old route is asked and the prefix is not tried again. The document is the same by both ways, so the output of no command changes. `cli.prefer_v1` (on by default) turns it off, and the variable `MONITOR_CLI_PREFER_V1` (`0` or `1`) wins over it. The routes the contract does not freeze are always asked the old way.
+
 Times written for people (the `Last read` line, the silences, the log, the reports, the notifications) use the zone of this computer and name it, with the UTC time next to it (`11:43:07 CET (10:43:07 UTC)`). Choose another zone with `display.timezone` (`local`, `utc` or a name such as `Europe/Madrid`; the environment variable `MONITOR_TIMEZONE` wins over the file). `--json` keeps UTC and adds `updated_local`.
 
 ## Exit codes (stable)

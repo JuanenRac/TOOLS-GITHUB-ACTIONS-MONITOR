@@ -33,6 +33,17 @@
 - `python tools/api_contract_suite.py` 是面向外部客户端的契约套件(只用标准库,只读):给它服务器地址(`--url`)和只读令牌(`--token-file`),它把服务器提供的文档当作检查内容的描述:每条无需参数的路由的形状、头 `X-API-Version`、错误信封及其稳定代码、分页及游标、`fields` 与 `profile=compact`、gzip,以及前缀下无法写入任何内容。每项检查输出一行,最后是 `API_CONTRACT=PASS` 或 `API_CONTRACT=FAIL`(`--json` 输出一个文档);退出码为 0、1 或 2(无响应)。`python bin/monitor_cli.py api contract-check` 针对命令行的监视器运行它。
 - 两条自有路由以 `{"error": "bad_request", "code": "api.bad_cursor", "message": "..."}` 的形式返回错误:`error` 和 `code` 稳定,`message` 跟随 `?lang=` 的语言。代码:api.bad_cursor、api.bad_limit、api.unknown_field、api.bad_profile, api.server_error。一切均为只读:`/api/v1/` 下没有任何写入。其形状已冻结在契约的 `v1_endpoints` 部分,可用 `python tools/check_api_contract.py --v1` 针对开启了 `api.v1_enabled` 的监视器进行检查。
 
+### curl 示例
+
+令牌是网络模式的访问令牌(或使用团队模式的会话);不在网络模式时,从同一台电脑访问无需令牌。客户端沿 `next_cursor` 翻页直到其为 `null`,并先读取 `/api/v1/me` 以了解契约版本和该会话可做的事。
+
+```
+curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/me
+curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?state=bad&limit=20&profile=compact"
+curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/openapi.json -o openapi.json
+curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?limit=50&cursor=THE_NEXT_CURSOR"
+```
+
 ## 数据流
 
 - `GET /api/ai/stream`（警报）和 `GET /api/live-events/stream`（webhook 事件，`live.sse.enabled`）是服务器发送事件，只读且默认关闭；参见 [AI_ALERTS_zho.md](AI_ALERTS_zho.md) 和 [WEBHOOK_zho.md](WEBHOOK_zho.md)。

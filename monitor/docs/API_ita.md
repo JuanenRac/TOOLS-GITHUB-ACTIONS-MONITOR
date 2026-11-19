@@ -33,6 +33,17 @@ Ciò su cui può contare uno script, uno schermo a parete o un client mobile. Da
 - `python tools/api_contract_suite.py` è la suite di contratto per i client esterni (solo la libreria standard, solo lettura): dalle l'indirizzo di un server (`--url`) e un token di lettura (`--token-file`) e prende il documento che il server serve come descrizione di cosa verificare: la forma di ogni rotta senza parametri, l'intestazione `X-API-Version`, la busta di errore e i suoi codici stabili, le pagine e i loro cursori, `fields` e `profile=compact`, gzip e che nulla si possa scrivere sotto il prefisso. Stampa una riga per verifica e `API_CONTRACT=PASS` o `API_CONTRACT=FAIL` (`--json` per un documento); il codice di uscita è 0, 1 o 2 (nulla risponde). `python bin/monitor_cli.py api contract-check` la lancia contro il monitor della riga di comando.
 - Le due rotte proprie rispondono un errore come `{"error": "bad_request", "code": "api.bad_cursor", "message": "..."}`: `error` e `code` sono stabili, `message` segue la lingua di `?lang=`. Codici: api.bad_cursor, api.bad_limit, api.unknown_field, api.bad_profile, api.server_error. Tutto è di sola lettura: sotto `/api/v1/` non c'è nessuna scrittura. La forma è congelata nella sezione `v1_endpoints` del contratto e si verifica con `python tools/check_api_contract.py --v1` su un monitor con `api.v1_enabled` attivo.
 
+### Esempi con curl
+
+Il token è il token di accesso della modalità di rete (oppure usa una sessione della modalità team); senza modalità di rete non serve alcun token dallo stesso computer. Un client segue `next_cursor` finché è `null` e legge prima `/api/v1/me` per conoscere la versione del contratto e ciò che la sessione può fare.
+
+```
+curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/me
+curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?state=bad&limit=20&profile=compact"
+curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/openapi.json -o openapi.json
+curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?limit=50&cursor=THE_NEXT_CURSOR"
+```
+
 ## Stream
 
 - `GET /api/ai/stream` (gli avvisi) e `GET /api/live-events/stream` (gli eventi del webhook, `live.sse.enabled`) sono eventi inviati dal server, di sola lettura e spenti per impostazione predefinita; vedi [AI_ALERTS_ita.md](AI_ALERTS_ita.md) e [WEBHOOK_ita.md](WEBHOOK_ita.md).

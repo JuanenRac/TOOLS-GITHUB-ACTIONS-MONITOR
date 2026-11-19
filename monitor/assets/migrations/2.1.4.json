@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "d850ddec1a5ce4a62cf1e975f20feab10b9ce0d59919895b4074c43dbfe88301",
+ "digest": "6aeae53d0bfffb38476cadf3c453ca9d8ec64b06bf70eebb2c2466287babb49a",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -73,6 +73,11 @@
     "key": "api.experimental_routes",
     "kind": "bool",
     "default": false
+   },
+   {
+    "key": "cli.prefer_v1",
+    "kind": "bool",
+    "default": true
    }
   ],
   "removed": [],
