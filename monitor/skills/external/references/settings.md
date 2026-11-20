@@ -157,11 +157,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `auth.max_failed_logins` (secure) | `5` | advanced | Wrong passwords before a lock |
 | `auth.min_length` (secure) | `10` | advanced | Shortest password |
 | `auth.session_hours` (secure) | `12` | advanced | Session length |
+| `auth.stream_revalidate_min` (secure) | `10` | advanced | Look at a live stream's session every |
 | `backpressure.enabled` | `false` | polling | Limit the reads of a cycle (backpressure) |
 | `backpressure.max_reads_per_cycle` | `0` | polling | Most reads per cycle (0 = no fixed limit) |
 | `backpressure.min_reads` | `20` | polling | Fewest reads per cycle when it cuts |
 | `backpressure.shed_percent` | `150` | polling | Cut the reads when a cycle lasts this share of the pause |
-| `auth.stream_revalidate_min` (secure) | `10` | advanced | Look at a live stream's session every |
 | `cache.etag.enabled` | `true` | cache | Conditional reads on |
 | `cache.etag.revalidate_active` | `true` | cache | Read lists with running work in full |
 | `cache.etag.skip_stateful` | `true` | cache | Always read live state in full |
@@ -402,7 +402,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `modes.auto_low` | `-` | quota | Low mode by itself |
 | `modes.auto_low_enter` | `-` | quota | Calls left to enter Low |
 | `modes.auto_low_exit` | `-` | quota | Calls left to leave Low |
-| `modes.idle_minutes` | `-` | quota | Minutes without viewers before going cold |
+| `modes.idle_minutes` | `0` | quota | Minutes without viewers before going cold |
 | `modes.low.cold_refresh_seconds` | `-` | quota | Low: seconds between readings of the rest |
 | `modes.low.hot_hours` | `-` | quota | Low: hours a repository stays hot |
 | `modes.low.refresh_seconds` | `-` | quota | Low: seconds between readings of hot repositories |
