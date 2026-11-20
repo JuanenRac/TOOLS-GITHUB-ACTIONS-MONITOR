@@ -28,6 +28,9 @@
 ### 新增
 
 - **按工作流统计所有正在运行的运行**(`fleet.show_all_active`,默认开启):仓库健康新增 `active`(在仓库对话框中显示为“正在运行”),给出每个工作流运行中和等待中的数量以及每个分支最新的运行,因此同一工作流同时进行的两个运行(并行发布、每个分支一个运行)不会被显示成一个;舰队的行带有 `running` 和 `queued`。关闭:每个工作流只显示最新的运行。
+
+- **区分账户套餐中没有的功能与被拒绝的情况,且不对哨兵不利**(`sentinels.security.plan_na`,默认开启):当 GitHub 回答某项检查需要其他套餐(免费套餐下私有仓库的分支保护或代码扫描)时,安全哨兵显示为 `N/A(套餐)`,被拒绝显示为 `N/A(无权限)`,功能关闭显示为 `N/A(未开启)`(状态中的 `unavailable_why`,子面板下方带提示的一行)。第一类组合不计入可读数量和评分的覆盖率,而是单独计数(`sources_na_plan`);三者都不是发现项,也不代表没有问题,因此套餐中没有任何计入扣分的内容时为 `unknown`,评分不含安全部分。关闭:与以前一样按无法读取的来源计算。
+- **登录账户看不到的其他私有组织的 action 可以不进入供应链发现项**(`sentinels.supply.ignore_uses`,默认为空):`owner/repo` 名称(`*` 表示任意)的未固定或会移动的引用不会凭猜测报告;状态会单独计数(`uses_left_out`),所以也不会被隐藏。
 - **额度用尽时改用另一个来源读取,所有来源都耗尽时显示最后一份良好副本及其时龄**(`quota.failover`,默认关闭,另有 `quota.failover_max_age_minutes`):返回 429 或“rate limit exceeded”的读取会改用另一个可读取的来源(你的登录、GitHub App、第二个账户)再读一次,用尽的来源在下一次免费检查之前视为已耗尽;所有来源都耗尽时,会显示该读取最后一份良好的副本及其时龄,而不是报错,且不会比所设上限更旧。限制绝不会被当作权限被拒,写入从不切换来源,额度状态会说明它起作用了多少次。
 - **每日趋势现在可以标记工作流文件发生变化的日期**(`sentinel.trend_workflow_marks`,默认关闭,另有 `sentinel.trend_workflow_marks_per_tick`、`sentinel.trend_workflow_marks_hours` 和 `sentinel.trend_workflow_marks_days`):在某个仓库的 `.github/workflows` 文件有提交改动的日期,图表上与版本发布标记并列显示一个方块,使时长或失败数的突变旁边就有解释。每个仓库花费一次请求,每轮若干个仓库,同一仓库在所设小时数之后才会再查;只标记每日历史中已有的日期,标记位于 `GET /api/sentinel` 的 `a3.trend.workflows` 中。
 - **工作流 linter 现在可以不使用凭据读取公开仓库**(`lint.anonymous_public`,默认关闭;`lint_workflows.py --remote OWNER/REPO --anon`):查看第三方的工作流时,文件来自 `raw.githubusercontent.com`,不消耗你令牌的任何额度,文件夹列表是匿名请求;未变化的文件不会重复读取,超过 256 KiB 的文件会被跳过,不会发送带有密钥的请求头,与网络隔离的监视器从不读取,私有或不存在的仓库会显示“未找到”,绝不会显示“干净”。

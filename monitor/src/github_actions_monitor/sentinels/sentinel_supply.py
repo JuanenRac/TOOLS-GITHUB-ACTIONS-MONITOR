@@ -37,7 +37,7 @@ RETRY_AFTER = (300, 1800, 21600)      # seconds a repository whose read fails wa
 UNREAD_KEEP = 7 * 24 * 3600           # alerts of a repository that stays unreadable are kept (marked unread) this long, then dropped without an event
 MIN_COVERAGE = 0.5                    # "nothing open" with fewer readable repositories than this is `unknown`, not `ok`
 DEFAULTS = {
-    "enabled": False, "incremental": False, "refresh_seconds": 3600, "max_repos_per_tick": 10, "deadline_s": 30, "max_calls_per_tick": 60, "max_files_per_repo": 40, "min_rate_remaining": 1000, "repos": "all", "ignore": [],
+    "enabled": False, "incremental": False, "refresh_seconds": 3600, "max_repos_per_tick": 10, "deadline_s": 30, "max_calls_per_tick": 60, "max_files_per_repo": 40, "min_rate_remaining": 1000, "repos": "all", "ignore": [], "ignore_uses": [],
     "signals": {name: {"enabled": True, "level": supply.DEFAULT_LEVEL[name]} for name in supply.SIGNALS},
     "penalty": {"per_finding": 2, "cap_per_repo": 10},
 }
@@ -63,6 +63,8 @@ def settings(config):
         merged["repos"] = repos
     if isinstance(block.get("ignore"), list):
         merged["ignore"] = [x for x in block["ignore"] if isinstance(x, str) and lint_workflows.IGNORE_PATTERN_RE.match(x)][:100]
+    if isinstance(block.get("ignore_uses"), list):
+        merged["ignore_uses"] = [x for x in block["ignore_uses"] if isinstance(x, str) and supply.USES_RE.match(x)][:100]
     signals = block.get("signals")
     if isinstance(signals, dict):
         for name in supply.SIGNALS:
@@ -212,8 +214,9 @@ class SentinelSupply(sentinel_base.BaseSentinel):
                 mine.update(scanned=now, files=info.get("files", 0), skipped=list(info.get("skipped") or [])[:20], truncated=bool(info.get("truncated")), unchanged=True)
                 self.state["per_repo"][repo] = mine
             return calls
-        found = supply.findings(repo, self.reader.texts(repo), self.config, toolconfig.github_owner(), self.cfg["ignore"])
-        self._commit(repo, found, info, now, fingerprint)
+        left = []
+        found = supply.findings(repo, self.reader.texts(repo), self.config, toolconfig.github_owner(), self.cfg["ignore"], self.cfg["ignore_uses"], left)
+        self._commit(repo, found, info, now, fingerprint, len(left))
         return calls
 
     def _fingerprint(self, repo):
@@ -221,10 +224,10 @@ class SentinelSupply(sentinel_base.BaseSentinel):
         shas = self.reader.shas(repo)
         if not shas:
             return ""
-        rules = json.dumps([self.cfg["signals"], self.cfg["ignore"], (self.config or {}).get("lint"), toolconfig.github_owner(), TOOL_VERSION], sort_keys=True, default=str)
+        rules = json.dumps([self.cfg["signals"], self.cfg["ignore"], self.cfg["ignore_uses"], (self.config or {}).get("lint"), toolconfig.github_owner(), TOOL_VERSION], sort_keys=True, default=str)
         return hashlib.sha256((rules + json.dumps(shas)).encode("utf-8")).hexdigest()[:32]
 
-    def _commit(self, repo, found, info, now, fingerprint=""):
+    def _commit(self, repo, found, info, now, fingerprint="", left_out=0):
         """Applies the rules to what was read of one repository, replaces its alerts, and writes the events of what changed (nothing the first time the repository is looked at)."""
         with self.lock:
             before = {k: a for k, a in self.state["alerts"].items() if a["repo"] == repo}
@@ -233,7 +236,7 @@ class SentinelSupply(sentinel_base.BaseSentinel):
             for key in before:
                 self.state["alerts"].pop(key, None)
             self.state["alerts"].update(alerts)
-            self.state["per_repo"][repo] = {"scanned": now, "files": info.get("files", 0), "skipped": list(info.get("skipped") or [])[:20], "truncated": bool(info.get("truncated")), "fingerprint": fingerprint}
+            self.state["per_repo"][repo] = {"scanned": now, "files": info.get("files", 0), "skipped": list(info.get("skipped") or [])[:20], "truncated": bool(info.get("truncated")), "fingerprint": fingerprint, "uses_left_out": int(left_out)}
         if first:
             return
         out = [self._event("security_new", alerts[k]) for k in alerts if k not in before] + [self._event("security_fixed", before[k]) for k in before if k not in alerts]
@@ -287,7 +290,7 @@ class SentinelSupply(sentinel_base.BaseSentinel):
     def _status(self):
         if not self.enabled:
             return {"enabled": False, "level": "off", "loading": "", "errors": [], "refresh_seconds": self.refresh_seconds, "repos_in_scope": 0, "repos_checked": 0, "last_full_scan": None, "paused": False,
-                    "unavailable": {}, "partial": 0}
+                    "unavailable": {}, "partial": 0, "uses_left_out": 0}
         repos = self.scope()
         with self.lock:
             records = [self.state["per_repo"].get(r) or {} for r in repos]
@@ -302,7 +305,7 @@ class SentinelSupply(sentinel_base.BaseSentinel):
             level = "unknown"      # nothing open because most of what was looked at could not be read: not a clean bill of health
         return {"enabled": True, "level": level, "loading": "" if checked or not repos else "starting", "errors": [{"section": r, "at": e["at"]} for r, e in sorted(self.errors.items())],
                 "refresh_seconds": self.refresh_seconds, "repos_in_scope": len(repos), "repos_checked": checked, "repos_readable": readable, "last_full_scan": last, "paused": self.paused,
-                "unavailable": self.unavailable(), "partial": partial, "incremental": bool(self.cfg["incremental"]), "unchanged": unchanged, "unchecked": sentinel_base.unchecked(repos, self.state["per_repo"]), "round_cut": self.round_cut}
+                "unavailable": self.unavailable(), "partial": partial, "incremental": bool(self.cfg["incremental"]), "unchanged": unchanged, "uses_left_out": sum(int(rec.get("uses_left_out") or 0) for rec in records), "unchecked": sentinel_base.unchecked(repos, self.state["per_repo"]), "round_cut": self.round_cut}
 
     def get_metrics(self):
         if not self.enabled:

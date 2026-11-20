@@ -31,6 +31,8 @@ GitHub がリポジトリに対して応答しない情報源（そこで機能�
 
 減点に効く情報源（Dependabot、コードスキャン、シークレット）の大半が読めないときは、レベルは `ok` ではなく `unknown` になり、スコアのセキュリティ部分は 100 として数えられる代わりに除外されます。状態には `sources_readable` と `sources_total` が表示されます。アラートが開いている間に情報源が応答しなくなった場合、そのアラートは 1 週間残り（`unread_since` が付きます）、修正済みとして通知されることはありません。読み取りが失敗し続けるリポジトリは、次の試行まで 5 分、30 分、その後は 6 時間待つので、壊れた少数のリポジトリがラウンド全体を使い切ることはありません。
 
+アカウントのプランにないソース(無料プランの非公開リポジトリのブランチ保護やコードスキャン。GitHub は別のプランが必要と答えます)は、拒否やオフの機能と区別されます。ページと状態の `unavailable_why` に `N/A(プラン)`、`N/A(アクセスなし)`、`N/A(オフ)` と表示されます。`sentinels.security.plan_na` がオン(既定)のとき、1 つ目の種類のソースは読み取り可能数とスコアのカバレッジから除外され、`sources_na_plan` として別に数えられます。3 つのどれも検出事項ではなく、問題なしの証拠でもありません。減点に効くものがプランにまったくない監視は `unknown` になり、スコアにセキュリティの部分は付きません。オフのときは読み取れなかったソースとして数えます。
+
 各センチネルは自分の**ライフサイクル**を示すようになりました：`healthy`（正常）、`degraded`（低下：一部の読み取りが失敗、情報源が読めない、または最初の巡回が終わっていない）、`paused`（GitHub の上限待ちで一時停止）、`error`（失敗し、まだ何も読めていない）、`off`（オフ）。「アラートなし」が意味を持つのは、ライフサイクルが `healthy` のときだけです。
 
 ## コスト
@@ -47,4 +49,4 @@ GitHub がリポジトリに対して応答しない情報源（そこで機能�
 
 ## 設定
 
-設定ページの「センチネル」サブタブの「セキュリティ」ブロック：`sentinels.security.enabled`、`sentinels.security.refresh_seconds`、`sentinels.security.max_repos_per_tick`、`sentinels.security.min_rate_remaining`、`sentinels.security.repos`、`sentinels.security.signals.dependabot.enabled`、`sentinels.security.signals.dependabot.min_severity`、`sentinels.security.signals.code_scanning.enabled`、`sentinels.security.signals.code_scanning.min_severity`、`sentinels.security.signals.secret.enabled`、`sentinels.security.signals.branch.enabled`、`sentinels.security.signals.workflow.enabled`、`sentinels.security.signals.codeowners.enabled`, `sentinels.security.signals.runs_deleted.enabled`, `sentinels.security.signals.runs_deleted.check_window_days`, `sentinels.security.signals.runs_deleted.max_checks`。各指摘がスコアのセキュリティ要素から引く点数（`sentinels.security.penalty`）はファイルから読み込まれます。サンプルファイルを参照してください。
+設定ページの「センチネル」サブタブの「セキュリティ」ブロック：`sentinels.security.enabled`、`sentinels.security.refresh_seconds`、`sentinels.security.max_repos_per_tick`、`sentinels.security.min_rate_remaining`、`sentinels.security.repos`, `sentinels.security.plan_na`、`sentinels.security.signals.dependabot.enabled`、`sentinels.security.signals.dependabot.min_severity`、`sentinels.security.signals.code_scanning.enabled`、`sentinels.security.signals.code_scanning.min_severity`、`sentinels.security.signals.secret.enabled`、`sentinels.security.signals.branch.enabled`、`sentinels.security.signals.workflow.enabled`、`sentinels.security.signals.codeowners.enabled`, `sentinels.security.signals.runs_deleted.enabled`, `sentinels.security.signals.runs_deleted.check_window_days`, `sentinels.security.signals.runs_deleted.max_checks`。各指摘がスコアのセキュリティ要素から引く点数（`sentinels.security.penalty`）はファイルから読み込まれます。サンプルファイルを参照してください。
