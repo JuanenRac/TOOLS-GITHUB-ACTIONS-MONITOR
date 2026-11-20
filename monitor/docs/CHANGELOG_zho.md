@@ -40,6 +40,14 @@
 
 - **`docs/grafana/` 中的可观测性包**：`ghamon_alert_rules.yml`（Prometheus 规则及其 PromQL：监视器不响应、红色工作流、配额和计费、周期缓慢或停滞、处于熔断中的仓库、按直方图统计的 runner 等待、离线 runner）、`alertmanager.example.yml`（路由到 webhook、Grafana OnCall 和 n8n；所有地址均为示例）和 `n8n_ghamon_alerts.json`（接收告警的工作流）。在 `docs/OUTPUTS.md` 中有八种语言的说明。
 
+- **限制与容量**（`limits.warn_percent` 和 `limits.memory_mb`）：doctor 新增 `capacity` 检查，把配置与其上限比较（相对于配额和采样预算的每小时调用数、保存的运行占用的内存、相对于 `discover_limit` 的仓库数），在达到上限之前发出警告；`/metrics` 将运行中的情况显示为 `ghamon_limit_used_percent`（保存的事件、流、读取队列、直方图序列）。
+
+- **一次读取供大家共用**（`refresh.share_by_workflow` 和 `refresh.share_seconds`，默认关闭）：当周期、页面、墙屏或 API 客户端同时请求同一次运行的作业时，第一个从 GitHub 读取，其余的使用它的结果；失败的读取不会被记住。`/metrics` 统计节省的读取次数。
+
+- **通知不重复**（`notify.dedupe_ledger`、`notify.dedupe_hours` 和 `notify.max_event_age_hours`，默认关闭）：数据文件夹中的小台账（只有哈希和时间，没有文本）可避免在重新加载页面、重启后以及流水线暂时离开窗口时重复同一通知；事件自身日期早于设定小时数的不再通知。指南说明了 Microsoft Teams 渠道接受 Power Automate Workflows 流程的地址。
+
+- **按变更类型的 CI 成本和碳估算**（`finops.by_change`、`finops.co2`、`finops.co2_watts` 和 `finops.co2_grams_per_kwh`，默认关闭）：过去 24 小时的运行按依赖、定时、手动、发布、feature、fix、docs、ci、test、refactor、perf、chore 或其他分类，给出分钟数、占比和私有仓库的估算美元（`GET /api/quota` 的 `by_change` 和 `/metrics` 的 `ghamon_ci_change_*`）；碳排放是根据你自己设定的瓦数和每千瓦时克数得出的数量级，绝不是排放报告。本地可复用工作流（只被仓库中其他工作流调用的文件）不计入这些数据。
+
 ### 修复
 
 - **发布面板（A5）、就绪表（A11）和发布候选工具统计的是 main 的 CHANGELOG 条目，而不是克隆当前所在分支的条目**：以前从克隆的工作树统计，所以停在某个旧代理分支上的克隆会显示 20 条，而 main 只有 3 条（13 条对 2 条），与最新发布比较的版本也是该分支的版本。现在它们从克隆所知的远程默认分支读取 `CHANGELOG.md`、清单和 `pyproject`（`git show origin/<分支>:<文件>`，从不 fetch，不改动克隆中的任何内容）；不知道该分支时读取工作树，并在该行注明（“克隆在分支 X，不在 main；按工作树统计”）；GitHub 上的 main 前进后克隆尚未获取时同样注明。整个监控器只用一个函数计数（`delivery/mainsource.py`）：`## [Unreleased]` 下的每个列表行算一条，包括嵌套行，CRLF 或 LF 均可，与以前一致。候选表的标题说明该数字是 main 的。

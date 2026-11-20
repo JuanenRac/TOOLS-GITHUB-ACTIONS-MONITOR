@@ -298,6 +298,10 @@ def notify(config, event, opener=None, connect=None, now=None):
     live = [(n, c) for n, c in cfg["channels"].items() if c.get("enabled")]
     if not live:
         return []
+    from github_actions_monitor.integrations import notify_dedupe      # notify.dedupe_ledger / max_event_age_hours (off by default): the same notification is not sent twice
+    if not notify_dedupe.allow(config, event, now):
+        STATS["deduped"] = STATS.get("deduped", 0) + 1
+        return []
     allow = cfg["allow_private_targets"]
     broken = [{"channel": n, "ok": False, "reason": check_channel(n, c, allow)} for n, c in live if check_channel(n, c, allow)]   # a channel that cannot send books nothing
     ready = [(n, c) for n, c in live if not check_channel(n, c, allow)]

@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.7",
  "previous": "2.1.6",
- "digest": "649f871e65651060be7b1f3f39e024d4a6f2e5b171deca97e1952a662a48f42d",
+ "digest": "5a03a108ed2a9eb62e9c9bee73bedbd7d3146ed7d5b0a4827ced657d561ec6d1",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -41,6 +41,72 @@
     "default": 150
    },
    {
+    "key": "finops.by_change",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "finops.co2",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "finops.co2_grams_per_kwh",
+    "kind": "int",
+    "bounds": [
+     1,
+     2000
+    ],
+    "default": 400
+   },
+   {
+    "key": "finops.co2_watts",
+    "kind": "int",
+    "bounds": [
+     1,
+     2000
+    ],
+    "default": 40
+   },
+   {
+    "key": "limits.memory_mb",
+    "kind": "int",
+    "bounds": [
+     64,
+     65536
+    ],
+    "default": 512
+   },
+   {
+    "key": "limits.warn_percent",
+    "kind": "int",
+    "bounds": [
+     50,
+     99
+    ],
+    "default": 80
+   },
+   {
+    "key": "notify.dedupe_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     720
+    ]
+   },
+   {
+    "key": "notify.dedupe_ledger",
+    "kind": "bool"
+   },
+   {
+    "key": "notify.max_event_age_hours",
+    "kind": "int",
+    "bounds": [
+     0,
+     8760
+    ]
+   },
+   {
     "key": "outputs.prometheus.histogram_max_series",
     "kind": "int",
     "bounds": [
@@ -60,6 +126,20 @@
     "key": "quota.chip",
     "kind": "bool",
     "default": true
+   },
+   {
+    "key": "refresh.share_by_workflow",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "refresh.share_seconds",
+    "kind": "int",
+    "bounds": [
+     1,
+     600
+    ],
+    "default": 20
    }
   ],
   "removed": [],

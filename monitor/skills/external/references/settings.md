@@ -252,6 +252,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `extra_reader.any_folder` (secure) | `false` | quota | Accept the token file from any folder |
 | `extra_reader.enabled` (secure) | `false` | quota | Read also with a second account |
 | `extra_reader.file` (secure) | `""` | quota | File with the token of the second account |
+| `finops.by_change` | `false` | advanced | Cost of the CI by kind of change |
+| `finops.co2` | `false` | advanced | Estimate the carbon of the CI minutes |
+| `finops.co2_grams_per_kwh` | `400` | advanced | Grams of CO2 per kWh of the grid (for the carbon estimate) |
+| `finops.co2_watts` | `40` | advanced | Watts of a runner (for the carbon estimate) |
 | `finops.jobs_per_cycle` | `0` | advanced | Jobs read per cycle for their system |
 | `fleet.group_by` | `"ecosystem"` | general | Group the fleet by |
 | `fleet.labels` | `[]` | general | Labels by repository name |
@@ -287,6 +291,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `lessons.max_entries` | `5000` | ai | Most lines in the book |
 | `lessons.recurring_from` | `2` | ai | A kind of failure repeats from |
 | `lessons.retention_days` | `180` | ai | Keep failures for |
+| `limits.memory_mb` | `512` | polling | Memory the held runs may take |
+| `limits.warn_percent` | `80` | polling | Warn at this share of a limit |
 | `lint.anonymous_public` (secure) | `-` | lint | Read public repositories without any credential |
 | `lint.api.max_calls_per_tick` | `-` | lint | API calls per cycle for workflow files |
 | `lint.api.max_files_per_repo` | `-` | lint | Workflow files read per repository |
@@ -389,9 +395,12 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `notify.channels.telegram.chat_id` | `-` | notify | notify.channels.telegram.chat_id |
 | `notify.channels.telegram.enabled` | `-` | notify | notify.channels.telegram.enabled |
 | `notify.channels.telegram.token_env` | `-` | notify | notify.channels.telegram.token_env |
+| `notify.dedupe_hours` | `-` | notify | Hours a notification is remembered |
+| `notify.dedupe_ledger` | `-` | notify | Do not repeat a notification |
 | `notify.digest.max_items` | `-` | notify | Alerts kept for a digest |
 | `notify.enabled` (secure) | `-` | notify | Notifications on |
 | `notify.events` | `-` | notify | Events that notify |
+| `notify.max_event_age_hours` | `-` | notify | Do not notify events older than (hours, 0 = off) |
 | `notify.max_per_hour` | `-` | notify | Messages per hour |
 | `notify.users.enabled` (secure) | `-` | notify | Notifications for each user |
 | `notify.users.max_per_hour` | `-` | notify | Messages per user per hour |
@@ -446,6 +455,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `readpool.reserve.app` | `-` | quota | readpool.reserve.app |
 | `readpool.reserve.extra` | `-` | quota | readpool.reserve.extra |
 | `readpool.reserve.user` | `-` | quota | readpool.reserve.user |
+| `refresh.share_by_workflow` | `false` | polling | Share one read of a workflow between callers |
+| `refresh.share_seconds` | `20` | polling | Seconds a shared read stays valid |
 | `refresh_seconds` | `45` | polling | Refresh of hot repositories |
 | `report_export.json` | `false` | outputs | JSON marked |
 | `report_export.name` | `"monitor-{tab}-{date}"` | outputs | Suggested file name |

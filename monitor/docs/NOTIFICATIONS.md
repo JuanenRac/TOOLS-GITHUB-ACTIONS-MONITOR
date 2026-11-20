@@ -59,3 +59,9 @@ Four optional settings of the block `alerts` (all off or empty by default) decid
 - **Services and short crons** (`alerts.service`): a workflow that only runs on a schedule or by hand and fails now and then is announced only after `failures` failures in a row, or when `rate_percent` of its last runs failed; it is announced once and cleared once instead of alerting in a loop. `workflows` adds more workflows to this class.
 - **Group by commit** (`alerts.group`): when `min` or more workflows of one repository turn red on the same commit, one notification lists them.
 - **Summary when there are many** (`alerts.digest`): after `threshold` notifications in the last hour, the rest are held back and told as one summary every `minutes` minutes. The held events stay in the events feed.
+
+## Do not repeat a notification
+
+With `notify.dedupe_ledger` on (off by default) the monitor keeps a ledger of what it already notified in a small file of the data folder: a hash of the kind of event, the repository, the workflow and the link of the run, never the text. The same notification is not sent again when a page is reloaded, after a restart, or when a pipeline leaves the window for a while and comes back; a new run of the same workflow is a new notification. A label is remembered `notify.dedupe_hours` hours (24 by default). `notify.max_event_age_hours` (0 = off) also drops an event whose own date is older than that: the news of something that happened days ago is not news.
+
+The Microsoft Teams channel accepts the address of a **Workflows** flow of Power Automate (hosts `logic.azure.com` and `api.powerplatform.com`) as well as the old Office 365 connectors (`webhook.office.com`, `outlook.office.com`): create the flow with the trigger "When a Teams webhook request is received", copy its address into the variable named by the channel and the monitor posts a plain text message to it.

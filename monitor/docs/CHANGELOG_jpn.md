@@ -40,6 +40,14 @@
 
 - **`docs/grafana/` のオブザーバビリティパック**：`ghamon_alert_rules.yml`（Prometheus 用ルールと PromQL：モニターの無応答、赤いワークフロー、利用枠と課金、サイクルの遅延・停止、サーキット中のリポジトリ、ヒストグラムによるランナー待ち、オフラインのランナー）、`alertmanager.example.yml`（Webhook、Grafana OnCall、n8n へのルート。アドレスはすべて例）、`n8n_ghamon_alerts.json`（アラートを受け取るフロー）。`docs/OUTPUTS.md` に 8 言語で説明があります。
 
+- **上限と容量**（`limits.warn_percent` と `limits.memory_mb`）：doctor に新しい `capacity` チェックが加わり、設定を上限と比較します（利用枠とサンプリング予算に対する 1 時間あたりの呼び出し、保持する実行のメモリ、`discover_limit` に対するリポジトリ数）。上限に達する前に警告します。実行中のものは `/metrics` に `ghamon_limit_used_percent` として出ます（保持イベント、ストリーム、読み取りキュー、ヒストグラムの系列）。
+
+- **全員で 1 回の読み取り**（`refresh.share_by_workflow` と `refresh.share_seconds`、既定ではオフ）：サイクル、ページ、壁画面、API クライアントが同じ実行のジョブを同時に求めると、最初のものが GitHub から読み、残りはその結果を使います。失敗した読み取りは記憶されません。節約した読み取り数は `/metrics` で数えます。
+
+- **通知を繰り返さない**（`notify.dedupe_ledger`、`notify.dedupe_hours`、`notify.max_event_age_hours`。既定ではオフ）：データフォルダー内の小さな台帳（ハッシュと時刻のみでテキストなし）により、ページの再読み込み、再起動、パイプラインが一時的にウィンドウから外れた場合でも同じ通知を送りません。イベント自体の日付が設定時間より古い場合は通知しません。ガイドに、Microsoft Teams チャンネルが Power Automate の Workflows フローのアドレスを受け付けることを記載しました。
+
+- **変更の種類別の CI コストと炭素の推定**（`finops.by_change`、`finops.co2`、`finops.co2_watts`、`finops.co2_grams_per_kwh`。既定ではオフ）：過去 24 時間の実行を、依存関係、スケジュール、手動、リリース、feature、fix、docs、ci、test、refactor、perf、chore、その他に分け、分、割合、プライベートリポジトリの推定ドルを示します（`GET /api/quota` の `by_change` と `/metrics` の `ghamon_ci_change_*`）。炭素は自分で設定したワット数と kWh あたりのグラム数によるおおよその桁で、排出量の報告ではありません。ローカルの再利用可能ワークフロー（リポジトリ内の他のワークフローからのみ呼ばれるファイル）はこれらの数値から除かれます。
+
 ### 修正
 
 - **リリースパネル（A5）、準備状況の表（A11）、リリース候補ツールは、クローンがいるブランチではなく main の CHANGELOG のエントリ数を数えます**: 以前はクローンの作業ツリーから数えていたため、エージェントの古いブランチに置かれたクローンでは、main が 3 件のところ 20 件（main が 2 件のところ 13 件）と表示され、最新リリースと比べるバージョンもそのブランチのものでした。現在は、クローンが知っているリモートの既定ブランチから `CHANGELOG.md`、マニフェスト、`pyproject` を読みます（`git show origin/<ブランチ>:<ファイル>`、fetch は行わず、クローンは一切変更しません）。そのブランチが分からないときは作業ツリーを読み、行に「ブランチ X のクローン（main ではない）、作業ツリーから集計」と表示します。GitHub が main を進めてからクローンを取得していない場合もそう表示します。数える関数はモニター全体で 1 つです（`delivery/mainsource.py`）。`## [Unreleased]` の下の各リスト行は、入れ子も含めて 1 件と数え、CRLF でも LF でも従来どおりです。候補の表の見出しに、件数が main のものだと明記します。

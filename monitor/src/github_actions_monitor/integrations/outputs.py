@@ -200,6 +200,12 @@ def _more_metrics(out, extra):
         out.add("runner_kind_jobs_waiting", "Jobs queued and not started, by kind of runner (the runner model).", row.get("jobs"), {"kind": kind})
         out.add("runner_kind_oldest_wait_seconds", "Wait of the oldest job not started, by kind of runner.", row.get("oldest_seconds"), {"kind": kind})
     out.lines.extend(job_metrics.COLLECTOR.render(PREFIX, _esc, config))
+    from github_actions_monitor.data_pipeline import change_cost, limits, sharedread
+    out.lines.extend(change_cost.lines(PREFIX, extra.get("change_cost")))
+    out.lines.extend(sharedread.lines(PREFIX, config))
+    live_figures = extra.get("limits_live") if isinstance(extra.get("limits_live"), dict) else None
+    if live_figures:
+        out.lines.extend(limits.lines(PREFIX, limits.live(config, live_figures)))
 
 
 def grafana_json(snapshot, data, extra=None):

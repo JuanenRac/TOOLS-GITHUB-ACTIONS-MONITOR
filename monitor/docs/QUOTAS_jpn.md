@@ -53,3 +53,8 @@
 - **プランは `unknown` のことがあります。** 非公開や無料のリポジトリはアカウントのプランを示しません。`account.plan` が `unknown` のままだと、クォータ、含まれる分数、同時実行の上限は、分かる数値(数えた分数)とともに*不明*と表示され、エラーにはなりません。割合を見るにはプランを選んでください。
 - **モニター1つにつきオーナー1つ。** リポジトリは名前で識別されます。別の組織を監視するには、独自の `github_owner` を持つ2つ目のモニターを起動してください。
 - **マージキュー**は既定ブランチのみ監視されます(`gh-readonly-queue/<既定>/...` 上の `merge_group` イベントの実行)。キューの実行も他の実行と同様に分数として数えられます。
+
+## 変更の種類別コストと炭素の推定
+
+- `finops.by_change`（既定ではオフ）は、過去 24 時間の各実行を変更の種類に分類し、種類ごとに分、実行数、割合、プライベートリポジトリの推定ドルを集計します。種類は実行自体の情報から決まります。依存関係のボット（または「bump」「update」で始まるタイトル）は *dependencies*、イベント `schedule` は *scheduled*、`workflow_dispatch` は *manual*、`release` は *release*、それ以外はコンベンショナルコミットのタイトルの種類（`feat`、`fix`、`docs`、`ci`、`test`、`refactor`、`perf`、`chore`）または *other* です。ローカルの再利用可能ワークフロー（リポジトリ内の他のワークフローからのみ呼ばれるファイル）は、ジョブが呼び出し側の実行にすでに含まれるため集計から除きます。`GET /api/quota`（`by_change`）と `/metrics`（`ghamon_ci_change_minutes`、`ghamon_ci_change_runs`、`ghamon_ci_change_estimated_usd`）にあります。
+- `finops.co2`（既定ではオフ）は、それらの分の炭素の**推定値**を追加します。分 x `finops.co2_watts`（既定 40 W）x `finops.co2_grams_per_kwh`（既定 400 g）です。GitHub はこれらの数値を公開していないため、結果は週ごとの比較用のおおよその桁であり、排出量の報告ではありません（`ghamon_ci_co2_grams_estimate`）。

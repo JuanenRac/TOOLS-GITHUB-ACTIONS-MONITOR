@@ -21,3 +21,9 @@
 对 fork 原仓库的跟踪(`upstream.enabled`)会在面板中说明,按 `upstream.requests_per_hour` 和 `upstream.forks_per_request` 的速度遍历所有 fork 需要多久;若超过 `upstream.refresh_hours`,跟踪就永远不会休息(727 个 fork、每次 8 个、每小时 6 次请求需要 15.2 小时)。最近一小时的请求在重启后会保留,因此重启不会归还配额。
 
 哨兵一次 tick 的调用(`sentinel.max_calls_per_tick`)对其所有阶段是同一个计数;读取连续失败三次的仓库会被搁置 30 秒(翻倍,最多 10 分钟),期间读取其他仓库。
+
+## 读取队列、限制和一次读取供大家共用
+
+- **背压**（`backpressure.enabled`，默认关闭）：一个周期的读取经过一个有界队列（先是有红色工作流的仓库，然后是热点仓库、从未读取的仓库和最久未读取的）。`backpressure.max_reads_per_cycle` 设置固定数量（0 = 无）；当一个周期超过周期间隔的 `backpressure.shed_percent` 百分比时，允许的读取数减半（不低于 `backpressure.min_reads`），每个较快的周期之后恢复十分之一。等待的仓库保留最后的画面，并在下一个周期最先读取。`/metrics` 显示 `ghamon_read_queue_*`。
+- **限制与 doctor**：`monitor_cli.py doctor` 有一个 `capacity` 检查，把配置与其上限比较（相对于配额和 `sampling.api_budget_per_hour` 的每小时调用数、相对于 `limits.memory_mb` 的已保存运行内存、相对于 `discover_limit` 的仓库数），从 `limits.warn_percent` 起警告。运行中的情况在 `/metrics` 中显示为 `ghamon_limit_used_percent{limit=...}`（保存的事件、流、读取队列、直方图序列）。
+- **一次读取供大家共用**（`refresh.share_by_workflow`，默认关闭）：当周期、页面、墙屏或 API 客户端同时请求同一次运行的作业时，第一个从 GitHub 读取，其余的使用它的结果，有效 `refresh.share_seconds` 秒。`/metrics` 统计节省的读取次数（`ghamon_shared_reads_spared_total`）。
