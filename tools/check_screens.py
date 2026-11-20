@@ -30,6 +30,7 @@ import socket
 import subprocess
 import sys
 import time
+import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -245,9 +246,18 @@ def start_demo():
     for _ in range(120):
         try:
             socket.create_connection(("127.0.0.1", port), 0.5).close()
-            return proc, port
         except OSError:
             time.sleep(0.5)
+            continue
+        for _ in range(40):      # the monitor keeps the configuration for a few seconds: ask until the page says that the kiosk profile is on
+            try:
+                with urllib.request.urlopen(f"http://127.0.0.1:{port}/?lang=en", timeout=10) as page:
+                    if b'"kiosk": {"enabled": true' in page.read():
+                        return proc, port
+            except OSError:
+                pass
+            time.sleep(1)
+        break
     proc.terminate()
     raise RuntimeError("the demo monitor did not start")
 
