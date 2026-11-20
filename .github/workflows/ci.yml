@@ -131,6 +131,28 @@ jobs:
           python -m unittest discover -s monitor/tests -p "test_194_ai_preset_page.py" -v
           python -m unittest discover -s monitor/tests -p "test_screens_rotation_browser.py" -v
 
+  screens:
+    name: The wall screens fit (every language, every kind of data, one size at a time)
+    runs-on: ubuntu-latest      # a text that leaves its box, two that cover each other or a page that scrolls turns the CI red
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        size: [1080p, 1440p, 4K, ultrawide, superwide, portrait, portrait4K]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: .github/ci-requirements.txt
+      - name: Measure the three wall screens in the eight languages with the invented data, the worst data and no data, and the safe margin
+        env:
+          MONITOR_BROWSER_TESTS: "1"
+          MONITOR_REQUIRE_BROWSER: "1"
+          MONITOR_SCREENS_MATRIX: ${{ matrix.size }}
+        run: python -m unittest discover -s monitor/tests -p "test_763_screens_fit.py" -v
+
   container:
     name: The image builds, runs read-only without root and survives a revoked login
     runs-on: ubuntu-24.04      # the runner image is fixed: the test starts a container and reads the logs of a service

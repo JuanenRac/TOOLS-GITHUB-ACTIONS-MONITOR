@@ -86,6 +86,7 @@ Une adresse par moniteur. Un paramètre peut rendre une fenêtre plus calme ou p
 | `?blink=off` | Les échecs gardent un halo fixe au lieu de clignoter. Il ne peut pas activer ce que `screens.blink` laisse désactivé. |
 | `?repo=WORD,WORD` | Seulement les dépôts dont le nom contient l'un des mots (lettres, chiffres et `. _ - /`, jusqu'à huit mots). `/screen/overview` et `/screen/now` ne gardent que les dépôts dont l'écran montre le nom (un nom masqué ne correspond jamais), les chiffres suivent les lignes gardées, et la note et la carte des groupes, qui concernent toute la flotte, ne sont pas affichées ; `/screen/sentinels` n'est pas filtré. |
 | `?sound=on` | Un bip court pour un nouvel échec, seulement si `screens.sound` l'autorise. Désactivé par défaut. |
+| `?safe=4` | Garde le contenu à ce pourcentage (0 à 10) de chaque bord de la fenêtre, pour un téléviseur qui coupe la bordure (overscan). Remplace `screens.safe_margin_percent` pour cette fenêtre. |
 
 ### Langue des écrans
 
@@ -104,6 +105,7 @@ La langue d'un écran se décide dans cet ordre : `?lang=xx` dans l'adresse ; pu
 | `screens.blink_calm_minutes` | Minutes après lesquelles un échec dont personne ne s'est occupé garde un halo fixe au lieu de clignoter (30 par défaut ; 0 = il clignote jusqu'à sa résolution). |
 | `screens.sound` | Un bip pour un nouvel échec (désactivé par défaut). |
 | `screens.burn_in_protection` | Déplace tout de quelques pixels chaque minute (activé par défaut). |
+| `screens.safe_margin_percent` | Garde le contenu à ce pourcentage de chaque bord de la fenêtre, pour un téléviseur qui coupe la bordure (overscan) : tout est dessiné un peu plus petit. 0 (défaut) utilise toute la fenêtre ; de 0 à 10. |
 | `screens.night_dim` | Atténue les écrans entre `screens.night_dim_from_hour` (22) et `screens.night_dim_to_hour` (7) ; désactivé par défaut. |
 | `screens.show_repo_names` | all, public (par défaut : les dépôts privés apparaissent comme private-1, private-2...) ou none (tous les noms sont masqués). Utilisez public ou none pour un écran que d'autres personnes peuvent voir. Avec une liste de dépôts écrite à la main dans `repos`, la visibilité est lue par une liste du compte toutes les `discover_refresh_seconds` ; un dépôt dont la visibilité n'a pas pu être lue compte comme privé. Les numéros (private-1...) ne vont qu'aux dépôts masqués, dans l'ordre d'un HMAC du nom avec une clé de l'installation gardée dans un fichier privé du dossier de données : ils ne disent rien de la place d'un dépôt parmi les autres. |
 | `screens.theme_overview`, `screens.theme_now`, `screens.theme_sentinels` | Le thème d'un écran : inherit (par défaut : celui de `screens.default_theme`) ou l'un des thèmes ci-dessus. |
@@ -141,6 +143,24 @@ L'onglet Ce navigateur des Réglages a un bloc pour envoyer le logo de votre org
 ### Ce qu'elles montrent et ce qu'elles cachent
 
 Les données viennent de `/api/screens/data?screen=overview` (ou `now`, `sentinels`) : une liste fermée de champs construite à partir du dernier cycle, de l'instantané des sentinelles, des alertes et du score. Elle ne contient jamais de lien, de titre de commit, de nom de job, de nom d'utilisateur ni de chemin de cet ordinateur, et les noms de workflow des dépôts masqués sont masqués aussi. En mode réseau, les pages exigent le même jeton d'accès que le reste du moniteur et la réponse est en lecture seule.
+
+### Ce qui tient, et ce qui se passe quand cela ne tient pas
+
+Les trois pages sont dessinées avec des unités qui suivent le petit côté de la fenêtre : la même mise en page remplit donc les tailles ci-dessous, rien n'est étiré et rien ne défile. Un outil les mesure avec le DOM dans les huit langues et avec des données qui mettent un écran à l'épreuve (noms de dépôts de 90 caractères, mots composés allemands et noms japonais sans espaces, le plus grand nombre de lignes que le moniteur peut envoyer, chiffres à sept chiffres, aucune donnée, une seule donnée, une lecture ancienne) : `python tools/check_screens.py` (`--list` montre chaque constat, `--report FICHIER` les écrit en JSON, `--size` et `--lang` choisissent ce qui est mesuré, `--surface kiosk` mesure le kiosque). Il échoue devant une page qui défile, un texte ou une boîte au-delà du bord, une boîte dont le contenu ne tient pas, un titre qui finit par des points de suspension, deux textes qui se recouvrent, une police inférieure à un centième du petit côté de la fenêtre (12 px dans une fenêtre de 1080 px) et des lignes masquées sans avertissement.
+
+| Taille | Type |
+|---|---|
+| 1920x1080 | Full HD |
+| 2560x1440 | QHD |
+| 3840x2160 | 4K |
+| 3440x1440 | ultra-large 21:9 |
+| 5120x1440 | super ultra-large 32:9 |
+| 1080x1920 | Full HD en portrait |
+| 2160x3840 | 4K en portrait |
+
+- Le nom d'un dépôt ou d'un workflow qui ne tient pas se termine par des points de suspension et porte son texte complet dans le `title` ; un titre, une étiquette ou un chiffre ne se termine jamais par des points de suspension : le titre passe sur une deuxième ligne et un chiffre plus large que sa boîte reçoit une police plus petite, jusqu'à un plancher.
+- Quand une liste a plus de lignes que sa boîte n'en contient, les plus importantes passent en premier (le rouge avant le vert, le plus récent d'abord) et la dernière ligne dit combien ont été laissées de côté (« +3 de plus ») ; rien n'est masqué sans cette ligne.
+- Marge de sécurité (overscan) : beaucoup de téléviseurs coupent quelques pour cent de chaque bord, sauf si leur mode d'image est « just scan » ou « pixel par pixel ». `screens.safe_margin_percent` (0 par défaut, de 0 à 10 ; `?safe=4` pour une fenêtre) garde le contenu à cette distance de chaque bord en dessinant tout plus petit, et `kiosk.safe_margin_percent` fait de même pour le kiosque. Essayez 3 à 5 si les premières lettres de l'horloge ou la bordure des cartes sont coupées.
 
 ### Leur comportement
 

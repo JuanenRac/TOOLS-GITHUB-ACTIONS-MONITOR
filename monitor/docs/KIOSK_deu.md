@@ -24,6 +24,8 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk=1` | schaltet das Profil ein (nur wenn `kiosk.enabled` an ist) |
 | `scale=%` | die Schriftgröße, von 100 bis 400 (ein Wert außerhalb des Bereichs wird in ihn gebracht) |
 | `contrast=1` / `contrast=0` | hoher Kontrast an oder aus für dieses Fenster (die Einstellung `kiosk.high_contrast` ist der Standard) |
+| `safe=PROZENT` | der sichere Rand dieses Fensters, 0 bis 10 (die Einstellung `kiosk.safe_margin_percent` ist der Standard) |
+| `fit=1` / `fit=0` | die Schrift wächst für dieses Fenster mit dem Fenster oder nicht (die Einstellung `kiosk.scale_with_window` ist der Standard) |
 | `rotate=SECONDS` | durch die Tabs von `tabs=` wechseln (der bestehende Parameter; der Befehl fügt ihn nur hinzu, wenn der Wechsel an ist) |
 | `chrome=0`, `screen=`, `tabs=`, `account=` | die bestehenden |
 
@@ -45,5 +47,7 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk.high_contrast` | aus | schwarzer Hintergrund und weiße Linien |
 | `kiosk.rotate_views` | aus | ein Preset mit mehreren Tabs wechselt den Tab von selbst; aus, zeigt der Bildschirm den ersten Tab des Presets |
 | `kiosk.rotate_seconds` | 30 | wie lange jeder Tab bleibt (5 bis 600) |
+| `kiosk.safe_margin_percent` | 0 | der Teil jedes Rands in Prozent, den die Seite für einen Fernseher frei hält, der den Rand abschneidet (Overscan); 0 bis 10 |
+| `kiosk.scale_with_window` | aus | die Schriftgröße oben gilt für ein Fenster, dessen kurze Seite 1080 px misst; an, wächst sie mit dem Fenster, sodass ein 4K-Fernseher wie ein Full-HD-Gerät aussieht |
 
 Die Größe wird mit dem Zoom der Seite angewendet, jede Zahl und jede Tabelle wächst also mit. Ein Wert außerhalb seines Bereichs ist kein Fehler: Er wird durch den Standard ersetzt.

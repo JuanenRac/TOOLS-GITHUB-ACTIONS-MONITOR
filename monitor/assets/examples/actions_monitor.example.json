@@ -526,7 +526,9 @@
     "font_scale_percent": 150,
     "high_contrast": false,
     "rotate_views": false,
-    "rotate_seconds": 30
+    "rotate_seconds": 30,
+    "safe_margin_percent": 0,
+    "scale_with_window": false
   },
   "cli": {
     "prefer_v1": true,
@@ -1156,6 +1158,7 @@
     "menu_max_windows": 4,
     "menu_rotate_seconds": 20,
     "menu_tv_scale": 1.5,
+    "safe_margin_percent": 0,
     "alert_hold_seconds": 30,
     "blink": true,
     "blink_calm_minutes": 30,

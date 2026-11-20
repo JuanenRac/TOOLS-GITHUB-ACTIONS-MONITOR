@@ -274,6 +274,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `kiosk.high_contrast` | `false` | general | High contrast in the kiosk |
 | `kiosk.rotate_seconds` | `30` | general | Seconds between tabs in the kiosk |
 | `kiosk.rotate_views` | `false` | general | Turn through the tabs of a preset |
+| `kiosk.safe_margin_percent` | `0` | general | Safe margin of the kiosk |
+| `kiosk.scale_with_window` | `false` | general | Kiosk type grows with the window |
 | `language` | `""` | general | Language of the tools |
 | `lessons.allow_write` (secure) | `false` | ai | Allow writing lessons |
 | `lessons.brief_max_bytes` | `3000` | ai | Size of ai/LESSONS.md |
@@ -522,6 +524,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `screens.refresh_seconds` | `10` | general | Seconds between updates of a wall screen |
 | `screens.rotate_every_seconds` | `20` | general | Seconds per screen when they rotate |
 | `screens.rotate_seconds` | `0` | general | Seconds between wall screens |
+| `screens.safe_margin_percent` | `0` | general | Safe margin of the screens |
 | `screens.show_repo_names` (secure) | `"public"` | general | Repository names on wall screens |
 | `screens.sound` | `false` | general | Sound on wall screens |
 | `screens.theme_now` | `"inherit"` | general | Theme of the screen: Right now |

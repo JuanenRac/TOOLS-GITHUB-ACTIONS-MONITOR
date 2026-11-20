@@ -24,6 +24,8 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk=1` | turns the profile on (only when `kiosk.enabled` is on) |
 | `scale=PERCENT` | the type size, from 100 to 400 (a value outside the range is brought into it) |
 | `contrast=1` / `contrast=0` | high contrast on or off for this window (the setting `kiosk.high_contrast` is the default) |
+| `safe=PERCENT` | the safe margin of this window, 0 to 10 (the setting `kiosk.safe_margin_percent` is the default) |
+| `fit=1` / `fit=0` | the type grows with the window for this window, or not (the setting `kiosk.scale_with_window` is the default) |
 | `rotate=SECONDS` | turn through the tabs of `tabs=` (the existing parameter; the command adds it only when the rotation is on) |
 | `chrome=0`, `screen=`, `tabs=`, `account=` | the existing ones |
 
@@ -45,5 +47,7 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk.high_contrast` | off | black background and white lines |
 | `kiosk.rotate_views` | off | a preset with several tabs changes tab by itself; off, the screen shows the first tab of the preset |
 | `kiosk.rotate_seconds` | 30 | how long each tab stays (5 to 600) |
+| `kiosk.safe_margin_percent` | 0 | the part of each edge, in percent, that the page keeps clear for a television that cuts the border (overscan); 0 to 10 |
+| `kiosk.scale_with_window` | off | the type size above is the one of a window of 1080 px on its short side; on, it grows with the window, so a 4K television looks like a Full HD one |
 
 The size is applied with the zoom of the page, so every figure and every table grows together. A value outside its range is not an error: it is replaced by the default.

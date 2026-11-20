@@ -24,6 +24,8 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk=1` | liga o perfil (só quando `kiosk.enabled` está ligado) |
 | `scale=%` | o tamanho do texto, de 100 a 400 (um valor fora do intervalo é trazido para ele) |
 | `contrast=1` / `contrast=0` | contraste alto ligado ou desligado para esta janela (a definição `kiosk.high_contrast` é a predefinida) |
+| `safe=PERCENTAGEM` | a margem de segurança desta janela, de 0 a 10 (a definição `kiosk.safe_margin_percent` é o valor por defeito) |
+| `fit=1` / `fit=0` | a letra cresce com a janela nesta janela, ou não (a definição `kiosk.scale_with_window` é o valor por defeito) |
 | `rotate=SECONDS` | percorrer os separadores de `tabs=` (o parâmetro que já existia; o comando só o acrescenta quando a rotação está ligada) |
 | `chrome=0`, `screen=`, `tabs=`, `account=` | os que já existiam |
 
@@ -45,5 +47,7 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk.high_contrast` | desligado | fundo preto e linhas brancas |
 | `kiosk.rotate_views` | desligado | uma predefinição com vários separadores muda de separador sozinha; desligado, o ecrã mostra o primeiro separador da predefinição |
 | `kiosk.rotate_seconds` | 30 | quanto tempo fica cada separador (de 5 a 600) |
+| `kiosk.safe_margin_percent` | 0 | a parte de cada borda, em percentagem, que a página deixa livre para uma televisão que corta a borda (overscan); de 0 a 10 |
+| `kiosk.scale_with_window` | desligado | o tamanho da letra acima é o de uma janela de 1080 px no seu lado curto; ligado, cresce com a janela, pelo que uma televisão 4K se vê como uma Full HD |
 
 O tamanho aplica-se com o zoom da página, pelo que cada número e cada tabela crescem juntos. Um valor fora do seu intervalo não é um erro: é substituído pela predefinição.

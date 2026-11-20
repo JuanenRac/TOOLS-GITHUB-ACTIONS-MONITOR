@@ -24,6 +24,8 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk=1` | attiva il profilo (solo quando `kiosk.enabled` è attivo) |
 | `scale=%` | la dimensione del testo, da 100 a 400 (un valore fuori intervallo viene riportato nell'intervallo) |
 | `contrast=1` / `contrast=0` | alto contrasto attivo o disattivo per questa finestra (l'impostazione `kiosk.high_contrast` è il valore predefinito) |
+| `safe=PERCENTUALE` | il margine di sicurezza di questa finestra, da 0 a 10 (l'impostazione `kiosk.safe_margin_percent` è il valore predefinito) |
+| `fit=1` / `fit=0` | il testo cresce con la finestra per questa finestra, oppure no (l'impostazione `kiosk.scale_with_window` è il valore predefinito) |
 | `rotate=SECONDS` | scorrere le schede di `tabs=` (il parametro già esistente; il comando lo aggiunge solo quando la rotazione è attiva) |
 | `chrome=0`, `screen=`, `tabs=`, `account=` | quelli già esistenti |
 
@@ -45,5 +47,7 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk.high_contrast` | disattivato | sfondo nero e linee bianche |
 | `kiosk.rotate_views` | disattivato | un preset con più schede cambia scheda da solo; disattivato, lo schermo mostra la prima scheda del preset |
 | `kiosk.rotate_seconds` | 30 | quanto resta ogni scheda (da 5 a 600) |
+| `kiosk.safe_margin_percent` | 0 | la parte di ogni bordo, in percentuale, che la pagina lascia libera per un televisore che taglia il bordo (overscan); da 0 a 10 |
+| `kiosk.scale_with_window` | disattivato | la dimensione del testo qui sopra è quella di una finestra di 1080 px sul lato corto; attivato, cresce con la finestra, così un televisore 4K appare come uno Full HD |
 
 La dimensione si applica con lo zoom della pagina, quindi ogni cifra e ogni tabella crescono insieme. Un valore fuori intervallo non è un errore: viene sostituito dal predefinito.

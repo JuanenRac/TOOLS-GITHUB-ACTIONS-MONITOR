@@ -86,6 +86,7 @@ One address for each monitor. A parameter can make a window quieter or smaller t
 | `?blink=off` | Failures keep a fixed glow instead of blinking. It cannot turn on what `screens.blink` keeps off. |
 | `?repo=WORD,WORD` | Only the repositories whose name holds one of the words (letters, digits and `. _ - /`, up to eight words). `/screen/overview` and `/screen/now` keep only the repositories whose name the screen shows (a hidden name is never matched), the figures follow the rows that are kept, and the score and the map of groups, which belong to the whole fleet, are not shown; `/screen/sentinels` is not filtered. |
 | `?sound=on` | A short beep for a new failure, only if `screens.sound` allows it. Off by default. |
+| `?safe=4` | Keeps the content this many percent (0 to 10) away from each edge of the window, for a television that cuts the border (overscan). It replaces `screens.safe_margin_percent` for this window. |
 
 ### Language of the screens
 
@@ -104,6 +105,7 @@ The language of a screen is decided in this order: `?lang=xx` in the address; th
 | `screens.blink_calm_minutes` | Minutes after which a failure that nobody attended to keeps a fixed glow instead of blinking (30 by default; 0 = it blinks until solved). |
 | `screens.sound` | A beep for a new failure (off by default). |
 | `screens.burn_in_protection` | Moves everything a few pixels every minute (on by default). |
+| `screens.safe_margin_percent` | Keeps the content this many percent away from each edge of the window, for a television that cuts the border (overscan): everything is drawn a little smaller. 0 (default) uses the whole window; 0 to 10. |
 | `screens.night_dim` | Dims the screens between `screens.night_dim_from_hour` (22) and `screens.night_dim_to_hour` (7); off by default. |
 | `screens.show_repo_names` | all, public (default: private repositories appear as private-1, private-2...) or none (every name is hidden). Use public or none for a screen that other people can see. With a list of repositories written by hand in `repos`, the visibility is read with one listing of the account every `discover_refresh_seconds`; a repository whose visibility could not be read counts as private. The numbers (private-1...) go only to the hidden repositories, in the order of an HMAC of the name with a key of the installation kept in a private file of the data folder, so they say nothing about where a repository falls among the others. |
 | `screens.theme_overview`, `screens.theme_now`, `screens.theme_sentinels` | The theme of one screen: inherit (default: the one of `screens.default_theme`) or any of the themes above. |
@@ -141,6 +143,24 @@ The tab This browser of Settings has a block to upload the logo of your organiza
 ### What they show and what they hide
 
 The data come from `/api/screens/data?screen=overview` (or `now`, `sentinels`): a closed list of fields built from the last cycle, the snapshot of the sentinels, the alerts and the score. It never contains a link, a commit title, a job name, a user name or a path of this computer, and the workflow names of hidden repositories are hidden too. In the network mode the pages need the same access token as the rest of the monitor, and the answer is read only.
+
+### What fits, and what happens when it does not
+
+The three pages are drawn in units that follow the short side of the window, so the same layout fills the sizes below; nothing is stretched and nothing scrolls. A tool measures them with the DOM in the eight languages and with data that stress a screen (names of repositories of 90 characters, German compound words and Japanese names without spaces, the most rows the monitor can send, figures of seven digits, no data at all, a single datum, an old reading): `python tools/check_screens.py` (`--list` shows each finding, `--report FILE` writes them as JSON, `--size` and `--lang` choose what to measure, `--surface kiosk` measures the kiosk). It fails on a page that scrolls, a text or a box beyond the edge, a box whose content does not fit, a heading that ends in dots, two texts that cover each other, a type smaller than a hundredth of the short side of the window (12 px in a window of 1080 px) and rows hidden without notice.
+
+| Size | Kind |
+|---|---|
+| 1920x1080 | Full HD |
+| 2560x1440 | QHD |
+| 3840x2160 | 4K |
+| 3440x1440 | ultra-wide 21:9 |
+| 5120x1440 | super ultra-wide 32:9 |
+| 1080x1920 | Full HD turned |
+| 2160x3840 | 4K turned |
+
+- A name of a repository or a workflow that does not fit ends in dots and carries its full text in the `title`; a heading, a label or a figure never ends in dots: a heading takes a second line and a figure wider than its box gets a smaller type, down to a floor.
+- When a list has more rows than its box holds, the most important come first (red before green, the newest first) and the last line says how many were left out ("+3 more"); nothing is hidden without that line.
+- Safe margin (overscan): many televisions cut a few percent of every edge unless their picture mode is "just scan" or "pixel for pixel". `screens.safe_margin_percent` (0 by default, 0 to 10; `?safe=4` for one window) keeps the content that far from each edge by drawing everything smaller, and `kiosk.safe_margin_percent` does the same for the kiosk. Try 3 to 5 if the first letters of the clock or the border of the cards are cut.
 
 ### How they behave
 

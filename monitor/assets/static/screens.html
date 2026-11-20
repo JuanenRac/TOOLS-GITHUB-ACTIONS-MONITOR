@@ -17,10 +17,12 @@
 :root[data-studio]{--bg2:var(--panel2);--card:var(--panel);--card2:var(--panel2);--tx:var(--text);--cy:var(--acc);--cy2:var(--acc2);--info:var(--run);--glow:color-mix(in srgb,var(--acc) 22%,transparent);--halo:color-mix(in srgb,var(--bad) 55%,transparent)}
 :root[data-theme=contrast]{--bg:#000;--bg2:#000;--card:#000;--card2:#000;--line:#ffffff;--tx:#fff;--mut:#e0e0e0;--cy:#00e5ff;--cy2:#00e5ff;--ok:#00ff7f;--warn:#ffd700;--bad:#ff4040;--info:#7ab8ff;--glow:rgba(255,255,255,.12);--halo:rgba(255,64,64,.8)}
 *{box-sizing:border-box;margin:0;padding:0}
-html{--k:1;--d:1;font-size:calc(var(--k)*var(--d)*min(100vw/120,100vh/67.5));background:var(--bg);color:var(--tx)}
+[hidden]{display:none!important}
+/* --safe is the part of each edge (in percent of the window) that a television may cut and the screens keep clear (screens.safe_margin_percent, ?safe=): the type shrinks with it, so the whole design fits in what is left */
+html{--k:1;--d:1;--safe:0;font-size:calc(var(--k)*var(--d)*(1 - var(--safe)/50)*min(100vw/120,100vh/67.5));background:var(--bg);color:var(--tx)}
 html[data-density=compact]{--d:.9}
 html[data-density=large]{--d:1.12}
-@media (orientation:portrait){html{font-size:calc(var(--k)*var(--d)*min(100vw/62,100vh/108))}}
+@media (orientation:portrait){html{font-size:calc(var(--k)*var(--d)*(1 - var(--safe)/50)*min(100vw/62,100vh/108))}}
 body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans CJK SC","Noto Sans CJK JP",sans-serif;background:radial-gradient(120% 90% at 50% 0%,var(--bg2),var(--bg));height:100vh;overflow:hidden;font-size:1rem;line-height:1.25;transition:filter 2s,opacity .6s}
 :lang(ja) body{font-family:system-ui,"Yu Gothic UI","Meiryo","Hiragino Sans","Noto Sans CJK JP","Noto Sans JP",sans-serif}
 :lang(zh) body{font-family:system-ui,"Microsoft YaHei UI","PingFang SC","Noto Sans CJK SC","Noto Sans SC",sans-serif}
@@ -28,15 +30,15 @@ body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto San
 body.dim{filter:brightness(.35)}
 body.offline #stage{opacity:.5;filter:grayscale(.7)}
 #wrap{position:absolute;inset:0;overflow:hidden}
-#stage{position:absolute;inset:0;transform:translate(calc(var(--sx,0)*.3rem),calc(var(--sy,0)*.3rem));display:flex;flex-direction:column;padding:1rem 1.2rem .8rem;gap:.7rem;transition:transform 30s linear,opacity .6s,filter .6s}
+#stage{position:absolute;inset:0;transform:translate(calc(var(--sx,0)*.3rem),calc(var(--sy,0)*.3rem));display:flex;flex-direction:column;padding:calc(1rem + var(--safe)*1vh) calc(1.2rem + var(--safe)*1vw) calc(.8rem + var(--safe)*1vh);gap:.7rem;transition:transform 30s linear,opacity .6s,filter .6s}
 header{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex:0 0 auto}
 .brand{display:flex;align-items:center;gap:.7rem;min-width:0}
-.brand b{font-size:1.5rem;letter-spacing:.02em;white-space:nowrap}
-.brand .tag{font-size:.95rem;color:var(--mut);border:1px solid var(--line);border-radius:.4rem;padding:.1rem .5rem;white-space:nowrap}
+.brand b{font-size:1.5rem;line-height:1.5;letter-spacing:.02em;white-space:nowrap;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.brand .tag{font-size:.95rem;line-height:1.4;color:var(--mut);border:1px solid var(--line);border-radius:.4rem;padding:.1rem .5rem;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .pulse{width:.8rem;height:.8rem;border-radius:50%;background:var(--cy);box-shadow:0 0 .9rem var(--cy);flex:0 0 auto}
-.clock{font-variant-numeric:tabular-nums;font-size:1.7rem;font-weight:600;text-align:right;white-space:nowrap}
+.clock{font-variant-numeric:tabular-nums;font-size:1.7rem;font-weight:600;text-align:right;white-space:nowrap;flex:0 0 auto}
 .clock small{display:block;font-size:.8rem;color:var(--mut);font-weight:400}
-.mid{flex:1;display:flex;justify-content:center;gap:.5rem;font-size:.9rem;color:var(--mut)}
+.mid{flex:1 1 0;min-width:0;display:flex;justify-content:center;gap:.5rem;font-size:.9rem;color:var(--mut)}
 .dots{display:flex;gap:.45rem;align-items:center}
 .dots i{width:.55rem;height:.55rem;border-radius:50%;background:var(--line);display:block}
 .dots i.on{background:var(--cy)}
@@ -47,7 +49,7 @@ header{display:flex;align-items:center;justify-content:space-between;gap:1rem;fl
 .screen[hidden]{display:none}
 .screen.out{opacity:0}
 .card{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:.8rem;padding:.8rem 1rem;min-width:0;min-height:0;display:flex;flex-direction:column;gap:.5rem;position:relative;overflow:hidden;box-shadow:0 0 1.4rem var(--glow)}
-.card h2{font-size:.95rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 0 auto}
+.card h2{font-size:.95rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);line-height:1.15;overflow-wrap:anywhere;flex:0 0 auto}
 .card .body{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;gap:.35rem}
 .big{font-size:3rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
 .mut{color:var(--mut)}
@@ -57,7 +59,7 @@ header{display:flex;align-items:center;justify-content:space-between;gap:1rem;fl
 .l-ok::before{content:"\2713"}.l-warn::before{content:"!"}.l-bad::before{content:"\2715"}.l-info::before{content:"i"}.l-unknown::before{content:"?"}
 .row{display:flex;align-items:center;gap:.6rem;min-width:0}
 .row .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row .v{flex:0 0 auto;font-variant-numeric:tabular-nums;color:var(--mut)}
+.row .v{flex:0 0 auto;font-variant-numeric:tabular-nums;color:var(--mut);white-space:nowrap}
 .list{display:flex;flex-direction:column;gap:.3rem;min-height:0;overflow:hidden;flex:1}
 .list>*{flex:0 0 auto}
 .empty{color:var(--mut);display:flex;align-items:center;gap:.5rem;font-size:1.05rem}
@@ -67,22 +69,26 @@ svg{display:block}
 .ring .trk{fill:none;stroke:var(--line);stroke-width:9}
 .ring .arc{fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset 1.4s cubic-bezier(.2,.8,.2,1),stroke .6s}
 .ring .mid2{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-.ring .mid2 b{font-size:2.6rem;line-height:1;font-variant-numeric:tabular-nums}
-.ring .mid2 span{font-size:1rem;color:var(--mut)}
-.scorebox{display:flex;align-items:center;gap:1rem;flex:1;min-height:0}
-.letter{font-size:5rem;font-weight:800;line-height:1}
+.ring .mid2 b{font-size:2.6rem;line-height:1.2;font-variant-numeric:tabular-nums}
+.ring .mid2 span{font-size:1rem;line-height:1.2;color:var(--mut)}
+.scorebox{display:flex;align-items:center;gap:1rem;flex:1;min-height:0;min-width:0}
+.scorebox>div:last-child{min-width:0;overflow-wrap:anywhere}
+.letter{font-size:5rem;font-weight:800;line-height:1.3}
+#score-trend{margin-top:.2rem}
 .fleet{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem;flex:1;min-height:0}
 .tile{border:1px solid var(--line);border-radius:.6rem;padding:.4rem .6rem;display:flex;flex-direction:column;justify-content:center;min-width:0;position:relative}
 .tile .big{font-size:2.6rem}
-.tile .lab{font-size:.9rem;color:var(--mut);display:flex;gap:.4rem;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .lab{font-size:.9rem;color:var(--mut);display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;line-height:1.15}
+.tile .lab span{min-width:0;overflow-wrap:anywhere}
 .tile.t-ok .big{color:var(--ok)}.tile.t-bad .big{color:var(--bad)}.tile.t-warn .big{color:var(--warn)}.tile.t-info .big{color:var(--info)}
 /* the map of the fleet by groups (the grouping of the Fleet view): one bar per group, the bad ones first; it takes the rows that fit and no more */
 #a-fleet.hasmap .fleet{flex:0 0 auto}
 #a-fleet.hasmap .tile{padding:.15rem .5rem}#a-fleet.hasmap .tile .big{font-size:1.7rem;line-height:1.1}#a-fleet.hasmap .tile .lab{font-size:.8rem}
 .gmap{display:flex;flex-direction:column;gap:.22rem;min-height:0;overflow:hidden;flex:1}
 .gmap[hidden]{display:none}
-.gmap .gh{font-size:.78rem;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 0 auto}
-.gmap .g{display:grid;grid-template-columns:minmax(3rem,32%) 1fr 2.4rem;gap:.4rem;align-items:center;font-size:.85rem;min-height:0}
+.gmap .gh{font-size:.8rem;color:var(--mut);line-height:1.15;overflow-wrap:anywhere;flex:0 0 auto}
+.gmap>*{flex:0 0 auto}
+.gmap .g{display:grid;grid-template-columns:minmax(3rem,32%) 1fr minmax(2.4rem,auto);gap:.4rem;align-items:center;font-size:.85rem;min-height:0}
 .gmap .g .gn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gmap .g .gb{display:flex;height:.7rem;border-radius:.35rem;overflow:hidden;background:var(--line)}
 .gmap .g .gb i{display:block;height:100%}.gmap .g .gb .s-bad{background:var(--bad)}.gmap .g .gb .s-warn{background:var(--warn)}.gmap .g .gb .s-ok{background:var(--ok)}.gmap .g .gb .s-unknown{background:var(--mut);opacity:.5}
@@ -90,11 +96,13 @@ svg{display:block}
 .flash-ok{animation:flashok 1.4s ease-out 1}
 .chart{flex:1;min-height:0;position:relative}
 .chart svg{position:absolute;inset:0;width:100%;height:100%}
-.chart .axis{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;font-size:.8rem;color:var(--mut)}
-.legend{display:flex;gap:1rem;font-size:.85rem;color:var(--mut)}
+.chart .axis{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;gap:.5rem;font-size:.8rem;line-height:1.1;color:var(--mut)}
+.more{color:var(--mut);font-size:.9rem;font-weight:600;letter-spacing:.02em}
+.heat .more{grid-column:1/-1;align-self:center}
+.legend{display:flex;flex-wrap:wrap;gap:.2rem 1rem;font-size:.85rem;color:var(--mut);flex:0 0 auto}
 .legend i{display:inline-block;width:.8rem;height:.8rem;border-radius:.2rem;margin-right:.35rem;vertical-align:-.1rem}
 .area{vector-effect:non-scaling-stroke}
-.heat{display:grid;gap:.18rem;flex:1;min-height:0;grid-auto-rows:1fr}
+.heat{display:grid;gap:.18rem;flex:1;min-height:0;grid-auto-rows:minmax(1.1rem,1fr);overflow:hidden}
 .heat .hr{display:grid;grid-template-columns:7.5rem repeat(24,1fr);gap:.14rem;align-items:stretch;min-height:0}
 .heat .hn{font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;align-self:center}
 .heat .c{border-radius:.15rem;background:var(--line);opacity:.4}
@@ -107,12 +115,12 @@ svg{display:block}
 .rowbar.stuck{border-color:var(--warn)}
 .rowbar .top{display:flex;gap:.6rem;align-items:baseline;min-width:0}
 .rowbar .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
-.rowbar .v{color:var(--mut);font-variant-numeric:tabular-nums;flex:0 0 auto}
+.rowbar .v{color:var(--mut);font-variant-numeric:tabular-nums;flex:0 0 auto;white-space:nowrap}
 .chip{display:inline-block;border:1px solid var(--line);border-radius:.4rem;padding:0 .4rem;font-size:.8rem;color:var(--mut);white-space:nowrap}
 .chip.ok{border-color:var(--ok);color:var(--ok)}.chip.warn{border-color:var(--warn);color:var(--warn)}.chip.bad{border-color:var(--bad);color:var(--bad)}
 .failrow{display:flex;gap:.6rem;align-items:center;border:1px solid var(--bad);border-radius:.5rem;padding:.25rem .6rem;min-width:0;background:color-mix(in srgb,var(--bad) 9%,transparent)}
 .failrow .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.failrow .v{color:var(--mut);font-variant-numeric:tabular-nums;flex:0 0 auto}
+.failrow .v{color:var(--mut);font-variant-numeric:tabular-nums;flex:0 0 auto;white-space:nowrap}
 .gauge{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
 .gauge svg{width:100%;height:100%;max-height:100%}
 .gauge .mid2{position:absolute;left:0;right:0;bottom:8%;text-align:center}
@@ -133,7 +141,7 @@ svg{display:block}
 .sen-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:1fr;gap:.7rem;min-height:0}
 .sen{border:1px solid var(--line);border-radius:.7rem;padding:.5rem .7rem;display:flex;flex-direction:column;gap:.3rem;min-width:0;min-height:0;overflow:hidden;background:linear-gradient(180deg,var(--card),var(--card2))}
 .sen .hd{display:flex;gap:.5rem;align-items:center;min-width:0}
-.sen .hd b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:1.05rem}
+.sen .hd b{flex:1;min-width:0;overflow-wrap:anywhere;line-height:1.15;font-size:1.05rem}
 .sen .num{font-size:3.4rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
 .sen .mini{height:2.6rem;width:2.6rem;position:relative;flex:0 0 auto}
 .sen .mini svg{width:100%;height:100%;transform:rotate(-90deg)}
@@ -148,11 +156,11 @@ svg{display:block}
 .radar .blip{opacity:.9}
 .bars{display:flex;flex-direction:column;gap:.45rem;flex:1;min-height:0;justify-content:center}
 .bars .br{display:flex;align-items:center;gap:.6rem}
-.bars .br .nm{flex:0 0 28%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.95rem}
+.bars .br .nm{flex:0 1 auto;max-width:45%;min-width:0;overflow-wrap:anywhere;line-height:1.1;font-size:.95rem}
 .bars .br .bar{flex:1}
-.bars .br .v{flex:0 0 2.6rem;text-align:right;font-variant-numeric:tabular-nums}
+.bars .br .v{flex:0 0 auto;min-width:2.6rem;text-align:right;font-variant-numeric:tabular-nums}
 .bars .br.critical i,.bars .br.error i{background:var(--bad)}.bars .br.warning i{background:var(--warn)}.bars .br.info i{background:var(--info)}
-.kiosk{position:fixed;left:50%;transform:translateX(-50%);bottom:.3rem;opacity:.25;background:none;border:1px solid var(--line);color:var(--mut);border-radius:.4rem;padding:.1rem .5rem;font-size:.8rem;cursor:pointer}
+.kiosk{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(.3rem + var(--safe)*1vh);opacity:.25;background:none;border:1px solid var(--line);color:var(--mut);border-radius:.4rem;padding:.1rem .5rem;font-size:.8rem;cursor:pointer}
 .kiosk:hover,.kiosk:focus{opacity:1}
 .foot{display:flex;justify-content:space-between;align-items:center;gap:1rem;color:var(--mut);font-size:.8rem;flex:0 0 auto}
 /* the logo of the organization: a box of its own in the header or the footer, so it never covers the content; its largest size is in pixels at 1920 x 1080 and grows with the screen; the picture keeps its shape */
@@ -268,7 +276,7 @@ function applyTheme(name){
   if(t==="light"||t==="dark"||t==="contrast")delete root.dataset.studio;else root.dataset.studio="1";
 }
 applyTheme(THEME_OF(D.screen));
-root.dataset.density=P.density;root.style.setProperty("--k",P.scale);
+root.dataset.density=P.density;root.style.setProperty("--k",P.scale);root.style.setProperty("--safe",String(P.safe||0));
 /* the logo of the organization: one image, in the corner and on the screens the settings say */
 const LG=D.logo,LG_IDS={"top-left":"lg-tl","top-right":"lg-tr","bottom-left":"lg-bl","bottom-right":"lg-br"};
 function logoPaint(kind){
@@ -341,11 +349,35 @@ function gaugeSvg(el,frac,color,text,sub){
   const b=el.querySelector("b");if(typeof text==="number")tween(b,text,v=>Math.round(v).toLocaleString(D.locale));else b.textContent=text;
   el.querySelector(".mid2 .mut").textContent=sub||"";
 }
-function fit(list){
-  /* a list shows only the rows that fit its box: nothing is cut in half and nothing scrolls */
-  if(!list)return;[...list.children].forEach(c=>{c.hidden=false});
-  let guard=list.children.length;
-  while(guard-->0&&list.scrollHeight>list.clientHeight+1){let last=null;for(let i=list.children.length-1;i>=0;i--){if(!list.children[i].hidden){last=list.children[i];break}}if(!last)break;last.hidden=true}
+function fit(list,keep){
+  /* a list shows only the rows that fit its box: nothing is cut in half and nothing scrolls; what does not fit is told in a last line, "+N more" (`keep` = how many first children are never hidden) */
+  if(!list)return;
+  list.querySelectorAll(":scope>.more").forEach(m=>m.remove());
+  const rows=[...list.children];rows.forEach(c=>{c.hidden=false});
+  const first=keep||0,over=()=>list.scrollHeight>list.clientHeight+1;
+  let hid=0;
+  const hideLast=()=>{for(let i=rows.length-1;i>=first;i--)if(!rows[i].hidden){rows[i].hidden=true;hid++;return true}return false};
+  while(over()&&hideLast());
+  if(hid>0){
+    const m=document.createElement("div");m.className="more";list.appendChild(m);
+    const say=()=>{m.textContent=T("ui.scr_more",{n:hid})};say();
+    while(over()&&hideLast())say();
+  }
+}
+/* a figure that is wider than the box it stands in gets a smaller type (never below `floor` rem) instead of leaving the box; `room` is the width it may take */
+function fitFont(el,room,floor){
+  if(!el)return;el.style.fontSize="";
+  const rg=document.createRange();rg.selectNodeContents(el);const w=rg.getBoundingClientRect().width,rootPx=parseFloat(getComputedStyle(root).fontSize)||16;
+  if(!(w>room)||!(room>0))return;
+  const cur=parseFloat(getComputedStyle(el).fontSize)/rootPx,next=Math.max(floor||1,cur*room/w*0.98);
+  el.style.fontSize=next.toFixed(3)+"rem";
+}
+function fitFigures(){
+  document.querySelectorAll(".tile .big").forEach(e=>{if(e.offsetParent)fitFont(e,e.parentElement.clientWidth-parseFloat(getComputedStyle(e.parentElement).paddingLeft)*2,1)});
+  document.querySelectorAll(".sen .num").forEach(e=>{if(e.offsetParent)fitFont(e,e.parentElement.clientWidth-parseFloat(getComputedStyle(e.parentElement).paddingLeft)*2,1.2)});
+  document.querySelectorAll(".ring .mid2 b").forEach(e=>{if(e.offsetParent)fitFont(e,e.closest(".ring").clientWidth*.6,1)});
+  document.querySelectorAll(".gauge .mid2 b").forEach(e=>{if(e.offsetParent)fitFont(e,e.closest(".gauge").clientWidth*.5,1)});
+  document.querySelectorAll("#queue .row b").forEach(e=>{if(e.offsetParent)fitFont(e,e.closest(".row").clientWidth*.4,1)});
 }
 const lampHtml=l=>'<span class="ico lamp l-'+esc(l)+' '+esc(l)+'" aria-hidden="true"></span>';
 const levelWord=l=>T("ui.lv_"+l);
@@ -475,7 +507,7 @@ function renderOverview(d){
     gm.innerHTML='<div class="gh">'+esc(T("ui.scr_grp_head",{by:T("ui.scr_grp_"+gr.by)}))+(gr.more?" · "+esc(T("ui.scr_grp_more",{n:gr.more})):"")+"</div>"+gr.groups.map(g=>{
       const n=Math.max(1,num(g.repos)),seg=["bad","warn","ok","unknown"].map(s=>'<i class="s-'+s+'" style="width:'+(100*num(g[s])/n)+'%" title="'+esc(T("ui.lv_"+s)+": "+num(g[s]))+'"></i>').join("");
       return '<div class="g"><span class="gn" title="'+esc(gname(g))+'">'+esc(gname(g))+'</span><span class="gb">'+seg+'</span><span class="gv">'+num(g.repos)+"</span></div>"}).join("");
-    (function(){let guard=gm.children.length;while(guard-->0&&gm.scrollHeight>gm.clientHeight+1){let last=null;for(let i=gm.children.length-1;i>0;i--){if(!gm.children[i].hidden){last=gm.children[i];break}}if(!last)break;last.hidden=true}})();
+    fit(gm,1);
   }else{gm.hidden=true;gm.textContent=""}
   /* trend */
   const lg=$("trend-leg");lg.innerHTML='<span><i style="background:var(--ok)"></i>'+esc(T("ui.scr_runs_ok"))+'</span><span><i style="background:var(--bad)"></i>'+esc(T("ui.scr_runs_bad"))+"</span><span>"+esc(T("ui.scr_h24"))+"</span>";
@@ -486,6 +518,7 @@ function renderOverview(d){
   /* heat */
   const heat=$("heat");
   heat.innerHTML=(d.heat||[]).map(r=>'<div class="hr'+(r.red?" red":"")+'"><div class="hn" title="'+esc(r.repo)+'">'+(r.red?'<span class="ico lamp l-bad" aria-hidden="true"></span>':"")+esc(r.repo)+"</div>"+r.cells.map(c=>'<div class="c c'+c+'"></div>').join("")+"</div>").join("")||'<div class="empty">'+esc(T("ui.scr_none"))+"</div>";
+  fit(heat);
   /* top red */
   const tr=$("top-red"),top=d.top_red||[];
   tr.innerHTML=top.length?top.map((r,i)=>'<div class="failrow" id="tr-'+i+'"><span class="ico lamp l-bad bad" aria-hidden="true"></span><span class="nm" title="'+esc(r.repo+" "+r.workflow)+'"><b>'+esc(r.repo)+"</b> "+esc(r.workflow)+'</span><span class="v">'+esc(r.seconds==null?"–":dur(r.seconds))+"</span></div>").join(""):'<div class="empty"><span class="ico lamp l-ok ok" aria-hidden="true"></span>'+esc(T("ui.scr_nothing_red"))+"</div>";
@@ -493,7 +526,7 @@ function renderOverview(d){
   fit(tr);
   /* queue */
   const q=d.queue||{};
-  $("queue").innerHTML=[["ui.scr_running",q.running,"info"],["ui.scr_queued",q.queued,"warn"],["ui.scr_approval",q.approval,"warn"],["ui.scr_min24",q.minutes24,"ok"],["ui.scr_min7",q.minutes7d,"mut"]].map(([k,v,c])=>'<div class="row"><span class="nm">'+esc(T(k))+'</span><b class="'+c+'" style="font-size:1.6rem;font-variant-numeric:tabular-nums">'+esc(num(v).toLocaleString(D.locale))+"</b></div>").join("");
+  $("queue").innerHTML=[["ui.scr_running",q.running,"info"],["ui.scr_queued",q.queued,"warn"],["ui.scr_approval",q.approval,"warn"],["ui.scr_min24",q.minutes24,"ok"],["ui.scr_min7",q.minutes7d,"mut"]].map(([k,v,c])=>'<div class="row"><span class="nm" title="'+esc(T(k))+'">'+esc(T(k))+'</span><b class="'+c+'" style="font-size:1.6rem;font-variant-numeric:tabular-nums">'+esc(num(v).toLocaleString(D.locale))+"</b></div>").join("");
   fit($("queue"));
   /* events */
   const ev=d.events||[];
@@ -521,15 +554,15 @@ function renderNow(d){
   $("n-appr-h").textContent=T("ui.scr_now_approval")+" · "+num(t.approval);$("n-merge-h").textContent=T("ui.scr_now_merges");$("n-tl-h").textContent=T("ui.scr_now_timeline");
   const run=$("n-run-l");listOrEmpty(run,d.running||[],runRow,"ui.scr_idle_now");setBars(run);
   listOrEmpty($("n-queue-l"),d.queued||[],r=>'<div class="row">'+lampHtml("warn")+'<span class="nm" title="'+esc(r.repo+" "+r.workflow)+'"><b>'+esc(r.repo)+"</b> "+esc(r.workflow)+'</span><span class="v">'+esc(dur(r.seconds))+"</span></div>","ui.scr_none");
-  listOrEmpty($("n-appr-l"),d.approval||[],r=>'<div class="row">'+lampHtml("warn")+'<span class="nm"><b>'+esc(r.repo)+'</b></span><span class="v">'+esc(r.ago==null?"":ago(r.ago))+"</span></div>","ui.scr_none");
+  listOrEmpty($("n-appr-l"),d.approval||[],r=>'<div class="row">'+lampHtml("warn")+'<span class="nm" title="'+esc(r.repo)+'"><b>'+esc(r.repo)+'</b></span><span class="v">'+esc(r.ago==null?"":ago(r.ago))+"</span></div>","ui.scr_none");
   const fl=d.failures||[];
   listOrEmpty($("n-fail-l"),fl,(r,i)=>'<div class="failrow" id="nf-'+i+'"><span class="ico lamp l-bad bad" aria-hidden="true"></span><span class="nm" title="'+esc(r.repo+" "+r.workflow)+'"><b>'+esc(r.repo)+"</b> "+esc(r.workflow)+(r.attempt>1?' <span class="chip">'+esc(T("ui.scr_attempt",{n:r.attempt}))+"</span>":"")+'</span><span class="v">'+esc(ago(r.ago))+"</span></div>","ui.scr_nothing_red");
   fl.forEach((r,i)=>failMark($("nf-"+i),"fail:"+r.repo+":"+r.workflow+":"+Math.floor(r.ago/60),r.ago));
   /* merges, releases and what comes next */
   const mg=d.merges||[],nx=d.next_releases||[],pd=d.pending_sign||[];
-  const rows=[...mg.map(m=>'<div class="row">'+lampHtml("ok")+'<span class="nm"><b>'+esc(m.repo)+'</b></span><span class="chip'+(m.release?" ok":"")+'">'+esc(T(m.release?"ui.scr_release":"ui.scr_merge"))+'</span><span class="v">'+esc(m.ago==null?"":ago(m.ago))+"</span></div>"),
-    ...nx.map(m=>'<div class="row">'+lampHtml("info")+'<span class="nm"><b>'+esc(m.repo)+'</b> <span class="mut">'+esc(T("ui.scr_next"))+'</span></span><span class="v">'+esc(T("ui.scr_entries",{n:m.entries}))+"</span></div>"),
-    ...pd.map(m=>'<div class="row">'+lampHtml("warn")+'<span class="nm"><b>'+esc(m.repo)+'</b> <span class="mut">'+esc(T("ui.scr_sign"))+'</span></span><span class="v">'+esc(dur(m.hours*3600))+"</span></div>")];
+  const rows=[...mg.map(m=>'<div class="row">'+lampHtml("ok")+'<span class="nm" title="'+esc(m.repo)+'"><b>'+esc(m.repo)+'</b></span><span class="chip'+(m.release?" ok":"")+'">'+esc(T(m.release?"ui.scr_release":"ui.scr_merge"))+'</span><span class="v">'+esc(m.ago==null?"":ago(m.ago))+"</span></div>"),
+    ...nx.map(m=>'<div class="row">'+lampHtml("info")+'<span class="nm" title="'+esc(m.repo+" "+T("ui.scr_next"))+'"><b>'+esc(m.repo)+'</b> <span class="mut">'+esc(T("ui.scr_next"))+'</span></span><span class="v">'+esc(T("ui.scr_entries",{n:m.entries}))+"</span></div>"),
+    ...pd.map(m=>'<div class="row">'+lampHtml("warn")+'<span class="nm" title="'+esc(m.repo+" "+T("ui.scr_sign"))+'"><b>'+esc(m.repo)+'</b> <span class="mut">'+esc(T("ui.scr_sign"))+'</span></span><span class="v">'+esc(dur(m.hours*3600))+"</span></div>")];
   const ml=$("n-merge-l");ml.innerHTML=rows.length?rows.join(""):'<div class="empty">'+esc(T("ui.scr_none"))+"</div>";fit(ml);
   drawTimeline(d.timeline||[]);
   $("f-right").textContent="";
@@ -597,7 +630,8 @@ function paint(d){
   else if(m.paused)banner("warn",T("ui.scr_paused"));
   else banner(null);
   $("stage").style.opacity="";
-  setTimeout(()=>document.querySelectorAll(".list,.ticker").forEach(fit),400);      /* the type may arrive after the first layout: fit the rows again */
+  fitFigures();
+  setTimeout(()=>{document.querySelectorAll(".list,.ticker,.heat").forEach(l=>fit(l));fit($("gmap"),1);fitFigures()},400);      /* the type may arrive after the first layout: fit the rows again */
 }
 async function load(){
   clearTimeout(STATE.timer);

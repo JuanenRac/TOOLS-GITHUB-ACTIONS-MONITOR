@@ -24,6 +24,8 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk=1` | 打开该配置（仅当 `kiosk.enabled` 打开时） |
 | `scale=%` | 字号，100 到 400（超出范围的值会被调整到范围内） |
 | `contrast=1` / `contrast=0` | 此窗口的高对比度开或关（默认取设置 `kiosk.high_contrast`） |
+| `safe=PERCENT` | 此窗口的安全边距，0 到 10（设置 `kiosk.safe_margin_percent` 是默认值） |
+| `fit=1` / `fit=0` | 此窗口的字号是否随窗口增大（设置 `kiosk.scale_with_window` 是默认值） |
 | `rotate=SECONDS` | 在 `tabs=` 的标签页之间轮播（已有的参数；仅当轮播开启时命令才会加上它） |
 | `chrome=0`, `screen=`, `tabs=`, `account=` | 已有的参数 |
 
@@ -45,5 +47,7 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk.high_contrast` | 关 | 黑色背景和白色线条 |
 | `kiosk.rotate_views` | 关 | 含有多个标签页的预设会自动切换标签页；关闭时，屏幕显示该预设的第一个标签页 |
 | `kiosk.rotate_seconds` | 30 | 每个标签页停留的时间（5 到 600） |
+| `kiosk.safe_margin_percent` | 0 | 页面为会裁掉边缘的电视（过扫描）在每条边上留空的百分比；0 到 10 |
+| `kiosk.scale_with_window` | 关闭 | 上面的字号是短边为 1080 px 的窗口中的大小；开启后它随窗口增大，4K 电视看起来就和全高清电视一样 |
 
 字号通过页面缩放来应用，所以每个数字和每个表格会一起放大。超出范围的值不是错误：它会被默认值取代。
