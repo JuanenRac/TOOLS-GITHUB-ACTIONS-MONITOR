@@ -280,7 +280,7 @@ class Contract(unittest.TestCase):
             for code, key in ss.TITLE_KEYS.items():
                 text = i18n.tl(lang, key)
                 self.assertNotEqual(text, key, (lang, key))
-                filled = text.format(repo="r", n=3, critical=1, high=2, branch="main")
+                filled = text.format(repo="r", n=3, critical=1, high=2, branch="main", workflow="CI", actor="ana")
                 self.assertIn("r", filled)
             for key in ("evt.security_new", "evt.security_fixed"):
                 self.assertNotEqual(i18n.tl(lang, key), key, (lang, key))
@@ -348,7 +348,7 @@ class Agreement(unittest.TestCase):
         from github_actions_monitor.app import settings_api
         keys = {k for k in settings_api.FIELDS if k.startswith("sentinels.security.")}
         expected = {"sentinels.security." + k for k in ("enabled", "refresh_seconds", "max_repos_per_tick", "deadline_s", "min_rate_remaining", "repos")}
-        expected |= {f"sentinels.security.signals.{s}.enabled" for s in ss.SIGNALS} | {"sentinels.security.signals.dependabot.min_severity", "sentinels.security.signals.code_scanning.min_severity"}
+        expected |= {f"sentinels.security.signals.{s}.enabled" for s in ss.SIGNALS} | {"sentinels.security.signals.dependabot.min_severity", "sentinels.security.signals.code_scanning.min_severity", "sentinels.security.signals.runs_deleted.check_window_days", "sentinels.security.signals.runs_deleted.max_checks"}
         self.assertEqual(keys, expected)
 
     def test_every_default_is_inside_what_the_page_accepts(self):

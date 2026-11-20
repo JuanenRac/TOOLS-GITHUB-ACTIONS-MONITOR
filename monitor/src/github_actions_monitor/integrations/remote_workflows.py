@@ -177,6 +177,14 @@ class Reader:
             entry = self.entries.get(repo) or {}
             return {name: _unpack(pair[1]) for name, pair in (entry.get("files") or {}).items()}
 
+    def shas(self, repo):
+        """[[file name, blob SHA], ...] sorted, of the files of a repository that were read completely (empty when the reading is partial or nothing is known): the content fingerprint of the folder."""
+        with self.lock:
+            entry = self.entries.get(repo) or {}
+            if entry.get("state") != "ok" or entry.get("skipped"):
+                return []
+            return [[name, pair[0]] for name, pair in sorted((entry.get("files") or {}).items())]
+
     def state(self, repo):
         """None when the repository was never read, else {"state": ok | partial | not_evaluable, "reason", "files", "skipped", "truncated", "at"}."""
         with self.lock:

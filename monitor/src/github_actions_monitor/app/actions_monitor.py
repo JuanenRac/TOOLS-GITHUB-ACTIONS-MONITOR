@@ -63,7 +63,7 @@ from github_actions_monitor.data_pipeline import alertflow
 from github_actions_monitor.data_pipeline import paging
 from github_actions_monitor.data_pipeline import redrule
 from github_actions_monitor.data_pipeline import stuckrule
-from github_actions_monitor.integrations import runner_model
+from github_actions_monitor.integrations import remote_workflows, runner_model
 from github_actions_monitor.data_pipeline import sampling
 from github_actions_monitor.util import resilience
 from github_actions_monitor.security import secretstore
@@ -96,7 +96,7 @@ DEFAULTS = {
     "workspace_root": "", "audit_dir": "", "signed_dir": "",      # "" = look for them (the environment, then the folder that holds the repositories): workspace.py
     "alerts": {"silences_expire_days": 0, "silences": [], "service": {"enabled": False, "failures": 3, "rate_percent": 0, "workflows": []}, "group": {"by_commit": False, "min": 3}, "digest": {"minutes": 0, "threshold": 10}},      # what reaches the channels when there are many alerts (alertflow.py): all off or empty
     "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group", "workflow_run", "repository_dispatch"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "dormant_repos": True, "forks_need_own_ci": True, "fork_own_ci_days": 90, "red_ages": True, "red_age_days": 30, "disabled_apart": True, "dependabot_alerts": True, "copilot_alerts": False, "extra_branches": [], "rerun_timing": False, "group": {"reusable": False, "min": 2}, "failed_jobs": {"enabled": False, "max_per_cycle": 4, "group_by": "auto"},
-           "stuck": {"learned": False, "percentile": 95, "margin": 2.0, "min_samples": 3, "min_minutes": 30, "max_minutes": 720, "queue_minutes": 0, "workflow_minutes": [], "runner_minutes": [], "awaiting_stuck": True, "ghost_enabled": True, "ghost_days": 7}},      # which runs may make a branch red (redrule.py)
+           "stuck": {"learned": False, "percentile": 95, "margin": 2.0, "min_samples": 3, "min_minutes": 30, "max_minutes": 720, "queue_minutes": 0, "workflow_minutes": [], "runner_minutes": [], "awaiting_stuck": True, "ghost_enabled": True, "ghost_days": 7, "no_runner_check": False}},      # which runs may make a branch red (redrule.py)
     "watchdog_minutes": 10,      # a refresh cycle that runs longer than this is dumped to the log and restarted in a new thread (0 = off)
     "watchdog_max_abandoned": 8,      # calls to GitHub that gave up waiting but never returned: with this many still alive no new call is started and the health check says so (0 = no limit)
     "runs_per_repo": 20,
@@ -107,11 +107,13 @@ DEFAULTS = {
     "report_history_days": 30,   # (before 1.5.0: parte_history_days, still read)
     "sentinel": {"enabled": True},
     "ai": {"provider": "none"},
-    "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30, "max_bad_per_minute": 120, "max_verified_per_minute": 120, "reject_stale": False, "persist_deliveries": True},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
+    "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30, "max_bad_per_minute": 120, "max_verified_per_minute": 120, "reject_stale": False, "persist_deliveries": True, "clock_skew_s": 300},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
     "chatops": {"enabled": False, "slack": {"enabled": False, "signing_secret_env": "MONITOR_SLACK_SIGNING_SECRET"}, "discord": {"enabled": False, "public_key_env": "MONITOR_DISCORD_PUBLIC_KEY"}, "allowed_teams": [], "allowed_channels": [], "allowed_users": [],
                 "allowed_words": ["help", "status", "alerts", "red", "queue", "score"], "max_rows": 8, "show_repo_names": "all", "links": True, "max_age_seconds": 300, "rate_per_user_per_minute": 6, "rate_per_channel_per_minute": 20, "rate_per_minute": 60},   # read only commands from Slack and Discord, see chatops/inbound.py (off by default; the proofs are only in the environment)
     "config_check": {"strict": False},      # OFF: a key nobody reads, a wrong type or a number out of range is named at the start; ON: the monitor refuses to start (configcheck.py)
     "cache": {"etag": {"enabled": True, "ttl_hours": 24, "skip_stateful": True, "revalidate_active": True}, "negative_ttl_s": 300},   # conditional reads: a 304 answer costs no quota; a refusal is remembered for negative_ttl_s seconds (etagcache.py)
+    "cli": {"prefer_v1": True, "default_format": "text", "watch": {"min_interval_seconds": 2, "default_interval_seconds": 5}},      # the command line (cli/formats.py, cli/watch.py): the format of the answers when no --format is given, and the interval of `watch`
+    "kiosk": {"enabled": False, "font_scale_percent": 150, "high_contrast": False, "rotate_views": False, "rotate_seconds": 30},      # the profile for a TV or a wall (surfaces/kiosk.py): ?kiosk=1 only counts when enabled
     "startup": {"resume_max_age_hours": 12},   # the last picture is shown at once after a restart, with its age (lastpicture.py); 0 = off
     "display": {"timezone": "local", "blink_red_tiles": True},   # blink_red_tiles: the red tiles and red items of the bar blink softly until the cause is solved; zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
     "modes": {"auto_low": True, "auto_low_enter": 1000, "auto_low_exit": 2500, "low": {"refresh_seconds": 240, "cold_refresh_seconds": 1800, "runs_per_repo": 10, "hot_hours": 2}},      # see modes.py: only what is shown in the Quota tab
@@ -142,17 +144,16 @@ DEFAULTS = {
     "mirror": {"enabled": False, "folder": "", "max_mb": 500, "keep_days": 14, "max_per_cycle": 3},     # OFF: a local copy of the artifacts of the runs (mirror.py)
     "runners": {"enabled": False, "scope": "owner",                         # OFF: the self-hosted runners of the account (runners.py)
                 "model": {"enabled": False, "jobs_per_cycle": 10, "thirdparty_labels": ["blacksmith", "buildjet", "namespace-profile", "depot", "warpbuild", "ubicloud", "runs-on", "actuated", "cirrus-runners", "codspeed"],
-                          "large_labels": [], "self_labels": [], "queue_warn_minutes": 20, "runaway_runs_per_hour": 20, "runaway_ignore_events": ["pull_request", "pull_request_target"],
+                          "large_labels": [], "self_labels": [], "queue_warn_minutes": 20, "runaway_runs_per_hour": 20, "runaway_ignore_events": ["pull_request", "pull_request_target"], "observed_reads_per_cycle": 0,
                           "thirdparty_usd_per_minute": 0.0, "alerts": True, "alert_level": "warning"}},      # OFF: kinds of runner, queue and cost by kind, runaway workflows, self-hosted queues (runner_model.py)
     "upstream": {"enabled": False, "refresh_hours": 12, "requests_per_hour": 6, "forks_per_request": 8, "news_days": 7, "notify": False, "repos": []},      # OFF: follow the original repository of each fork, its CI and its latest release (data_pipeline/upstream.py)
-    "cli": {"prefer_v1": True},      # the command line asks the frozen routes under /api/v1/ first (cli/monitor_cli.py)
     "api": {"v1_enabled": "auto", "experimental_routes": False, "default_limit": 50, "max_limit": 200, "cursor_ttl_seconds": 900, "gzip_min_bytes": 1024},      # auto = on in the service mode, off for one person at one computer: the read API under /api/v1/ (app/api_v1.py)
     "compare": {"enabled": False, "default_window_days": 7, "default_days_filter": "all", "workdays": ["1", "2", "3", "4", "5"], "min_runs_per_window": 20, "min_days_of_history": 14, "min_resolved": 3, "min_snapshots": 12, "min_repo_runs": 3, "top_changes": 10, "include_in_report": False, "cache_seconds": 60},      # OFF: this period against the one before (compare/): read only, from the ledger and the snapshots of the score
     "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
     "organizations": {"discover": False},                                    # OFF: list the organisations of the login (orgs.py)
     "finops": {"jobs_per_cycle": 0},
     "fleet": {"page_size": 50, "group_by": "ecosystem", "sort": "risk", "labels": [], "saved_filters": []},      # the fleet view of the Team tab (health/fleet.py)
-    "network": {"use_proxy": False, "etag": True, "graphql_checks": False, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
+    "network": {"use_proxy": False, "etag": True, "graphql_checks": True, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
     "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
     "pagination": {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3, "cursor_pages": 3},      # pages of 100 followed when a list is full, and said when something is cut (paging.py)
     "sampling": {"default_branch_probe": False, "active_probe": False, "min_coverage_minutes": 30, "api_budget_per_hour": 0},      # how much of a repository the list of runs shows, a second look at the default branch, a budget of requests (sampling.py)
@@ -1273,7 +1274,8 @@ def build(config, repos, started, refreshed, loading, progress_text):
     stuck_cfg = stuckrule.settings(config)
     learned = stuckrule.learn(runs, stuck_cfg) if stuck_cfg["learned"] else {}
     offline = stuckrule.offline_labels(RUNNERS_SEEN.get("payload"))
-    ask_queued = [len(stuck_cfg["runner_minutes"]) > 0 or bool(offline), 10]      # queued runs only read their jobs (one call each) when a runner label can change the verdict
+    known = stuckrule.known_labels(RUNNERS_SEEN.get("payload")) if stuck_cfg["no_runner_check"] else None
+    ask_queued = [len(stuck_cfg["runner_minutes"]) > 0 or bool(offline) or known is not None, 10]      # queued runs only read their jobs (one call each) when a runner label can change the verdict
     for run in active:
         run["jobs"], seen, total = run_jobs_info(run["repo"], run["id"]) if (run["status"] == "in_progress" and not loading) else ([], 0, None)
         run["jobs_seen"], run["jobs_total"] = seen, total      # total only when the jobs were cut: "seen N of M"
@@ -1281,7 +1283,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
             ask_queued[1] -= 1
             run["jobs"] = run_jobs(run["repo"], run["id"])
         labels = sorted({label for job in run["jobs"] for label in job.get("labels") or []})
-        run["stuck"], run["stuck_reason"], run["stuck_limit"] = stuckrule.evaluate(run, config["stuck_minutes"], stuck_cfg, learned, labels, offline, now=time.time())
+        run["stuck"], run["stuck_reason"], run["stuck_limit"] = stuckrule.evaluate(run, config["stuck_minutes"], stuck_cfg, learned, labels, offline, now=time.time(), known_labels=known)
     ghosts = [run for run in active if run.get("stuck_reason") == "ghost"]      # queued for days: GitHub never starts them; they are neither queued nor stuck, only counted apart
     if ghosts:
         active = [run for run in active if run.get("stuck_reason") != "ghost"]
@@ -1556,6 +1558,27 @@ def read_runner_jobs(config, data):
     return done
 
 
+RUNNER_FILES = {"reader": None}      # the workflow files of the repositories with a job on a self-hosted runner (remote_workflows.Reader), for runners.model.observed_reads_per_cycle
+
+
+def read_runner_workflows(config, data):
+    """runners.model.observed_reads_per_cycle (0 = off): reads the workflow files of the repositories that have a job on a self-hosted runner, at most that many calls per cycle, a repository again only
+    after six hours and a file only when its SHA changed. Read only. Returns the calls made."""
+    cfg = runner_model.settings(config)
+    if not cfg["enabled"] or cfg["observed_reads_per_cycle"] <= 0 or LITE["on"] or DEMO["on"]:
+        return 0
+    if RUNNER_FILES["reader"] is None:
+        RUNNER_FILES["reader"] = remote_workflows.Reader(lambda endpoint: gh_read(endpoint, retries=0), lambda: toolconfig.github_owner(LIVE_CONFIG or toolconfig.raw_config()))
+    reader = RUNNER_FILES["reader"]
+    repos = sorted({r["repo"] for held in RUNNER_JOBS["rows"].values() for r in held["rows"] if runner_model.kind_of(r.get("labels"), cfg) == "selfhosted"})
+    calls = 0
+    for repo in reader.due(repos, 21600):
+        if calls >= cfg["observed_reads_per_cycle"]:
+            break
+        calls += reader.refresh(repo, cfg["observed_reads_per_cycle"] - calls)
+    return calls
+
+
 def runner_list(config):
     """The self-hosted runners (runners.py) as the last cycle read them (read_runner_list); None when `runners.enabled` is off or the read failed (the model then says the reason is unknown). A request
     never reads GitHub: it is answered from this."""
@@ -1592,7 +1615,9 @@ def runner_model_payload(now=None):
         return {"schema": 1, "enabled": False}
     rows = [row for held in RUNNER_JOBS["rows"].values() for row in held["rows"]]
     tallies = [v for v in RUN_KINDS.values() if v.get("at", 0) >= now - 86400]
-    return runner_model.build(config, rows, data.get("runs") or [], tallies, quota.load(), runner_list(config), now, config.get("runs_per_repo") or 0)
+    reader = RUNNER_FILES["reader"]
+    declared = {repo: {name: runner_model.static_runs_on(text) for name, text in reader.texts(repo).items()} for repo in reader.known() if reader.state(repo)["state"] != "not_evaluable"} if reader else {}
+    return runner_model.build(config, rows, data.get("runs") or [], tallies, quota.load(), runner_list(config), now, config.get("runs_per_repo") or 0, declared, PRIVATE, set(data.get("repos") or []))
 
 
 def runner_alerts():
@@ -1677,7 +1702,7 @@ def panel_list(lang=None):
 AI_MODEL_POST = ("/api/ai/models/refresh", "/api/ai/models/test", "/api/ai/models/data", "/api/ai/doctor")      # the list of models of the provider, the test of one model, the table of data, the doctor
 THIS_COMPUTER_ACTIONS = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test") + AI_MODEL_POST
 THIS_COMPUTER_ADVANCED = ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures", "/api/ai/prompts/clear",
-                          "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run", "/api/ops/backup", "/api/ops/purge",
+                          "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run", "/api/report-files/summary", "/api/ops/backup", "/api/ops/purge",
                           "/api/updates/check", "/api/updates/plan", "/api/updates/apply", "/api/updates/rollback")
 THIS_COMPUTER_POST = THIS_COMPUTER_ACTIONS + THIS_COMPUTER_ADVANCED
 
@@ -1894,6 +1919,7 @@ def maintain_extras(config, data):
                       ("finops", lambda: spare and read_costs(config, data)),
                       ("runner_model", lambda: spare and read_runner_jobs(config, data)),
                       ("runners", lambda: spare and read_runner_list(config, data)),
+                      ("runner_workflows", lambda: spare and read_runner_workflows(config, data)),
                       ("orgs", lambda: spare and read_extra_lists(config)),
                       ("pool", lambda: spare and refresh_pool_status()),
                       ("reports", lambda: spare and __import__("github_actions_monitor.integrations.reports", fromlist=["_"]).cycle(config, toolconfig.github_owner(config), list(data.get("repos") or []), source_runs(config, data),
@@ -2079,6 +2105,27 @@ def report_gather():
     except Exception as error:   # noqa: BLE001 - the report still has the rest
         degraded.note("reports.compare", error)
     return gathered
+
+
+def report_summary_post(config, request):
+    """POST /api/report-files/summary: `action` = `draft` (the template), `draft_ai` (the template and the draft of the AI, only with ai.report_summary.enabled), `save` (the text as the person
+    edited it and where it came from) or `clear`. Nothing is written into a report here: the approved text goes into the next one."""
+    from github_actions_monitor.reporting import report_service, report_summary
+    from github_actions_monitor.sentinels import sentinel_ai
+    action, account = request.get("action"), report_account()
+    if action == "save":
+        saved = report_service.save_summary(account, request.get("text"), request.get("origin"))
+        return {"ok": saved is not None, "status": "saved" if saved else "empty", "summary": saved}
+    if action == "clear":
+        report_service.clear_summary(account)
+        return {"ok": True, "status": "cleared", "summary": None}
+    if action not in ("draft", "draft_ai"):
+        return {"ok": False, "status": "action"}
+    snapshot, alerts, team = report_gather()[:3]
+    doc = report_service.document(config, account, snapshot, alerts, team)
+    cfg, store = sentinel_ai.ai_config(config), ai_store()
+    drafts = report_summary.drafts(config, doc, i18n.language(), lambda text: sentinel_ai.explain("report", text, cfg, store), with_ai=action == "draft_ai")
+    return {"ok": True, "status": "draft", **drafts, "summary": report_service.pending_summary(account)}
 
 
 def report_account():
@@ -2454,7 +2501,7 @@ def render_page():
     """actions_monitor.html with the catalogues of the interface (keys "ui.*") for the 8 languages and the default language inlined."""
     page = (paths.STATIC / "actions_monitor.html").read_text(encoding="utf-8")
     data = {"default": i18n.language(), "langs": list(i18n.LANGS), "names": i18n.NATIVE_NAMES, "html": i18n.HTML_LANG, "locale": i18n.BROWSER_LOCALE, "catalogues": i18n.ui_catalogues(),
-            "ecosystems": {**{"other": i18n.t("ui.eco_other")}, **{key: item["label"] for key, item in toolconfig.ecosystems().items()}}, "owner": toolconfig.github_owner(), "tz": tzdisplay.setting(), "screens": {k: v for k, v in (toolconfig.raw_config().get("ui") or {}).items() if k in DEFAULTS["ui"] and k != "theme"}, "theme": screens.global_theme(toolconfig.raw_config()), "screen_menu": {k: v for k, v in screenmenu.menu_settings(toolconfig.raw_config()).items() if k in ("menu", "menu_target", "menu_max_windows")}, "blink": (toolconfig.raw_config().get("display") or {}).get("blink_red_tiles", True) is not False, "sound": {k: v for k, v in __import__("github_actions_monitor.integrations.soundalert", fromlist=["_"]).settings(toolconfig.raw_config()).items() if k != "server_beep"}, "host": github_host(), "lite": LITE["on"], "network": localguard.public_state(), "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
+            "ecosystems": {**{"other": i18n.t("ui.eco_other")}, **{key: item["label"] for key, item in toolconfig.ecosystems().items()}}, "owner": toolconfig.github_owner(), "tz": tzdisplay.setting(), "screens": {k: v for k, v in (toolconfig.raw_config().get("ui") or {}).items() if k in DEFAULTS["ui"] and k != "theme"}, "kiosk": ({} if LITE["on"] else __import__("github_actions_monitor.surfaces.kiosk", fromlist=["_"]).public(toolconfig.raw_config())), "theme": screens.global_theme(toolconfig.raw_config()), "screen_menu": {k: v for k, v in screenmenu.menu_settings(toolconfig.raw_config()).items() if k in ("menu", "menu_target", "menu_max_windows")}, "blink": (toolconfig.raw_config().get("display") or {}).get("blink_red_tiles", True) is not False, "sound": {k: v for k, v in __import__("github_actions_monitor.integrations.soundalert", fromlist=["_"]).settings(toolconfig.raw_config()).items() if k != "server_beep"}, "host": github_host(), "lite": LITE["on"], "network": localguard.public_state(), "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     return page.replace("/*I18N_DATA*/null", blob, 1)
 
@@ -2472,7 +2519,7 @@ def render_screen(kind, query):
     return page.replace("/*SCREEN_DATA*/null", blob, 1)
 
 
-def screens_payload(kind, cfg):
+def screens_payload(kind, cfg, repo=""):
     """GET /api/screens/data: what the screens show, from what the monitor holds. Nothing is read from GitHub here: the last cycle, the snapshot of the sentinel, the alerts and the score are already in memory or in the local files."""
     with LOCK:
         state = STATE["data"]
@@ -2503,7 +2550,7 @@ def screens_payload(kind, cfg):
     view = labels = None
     if not LITE["on"] and kind == "overview" and cfg.get("group_map", True):
         view, labels = screens_groups()
-    return screens.build(kind, state, snapshot, alerts, score, cfg, "lite" if LITE["on"] else "complete", fleet_view=view, labels=labels)
+    return screens.build(kind, state, snapshot, alerts, score, cfg, "lite" if LITE["on"] else "complete", fleet_view=view, labels=labels, repo=repo)
 
 
 GROUPS_CACHE = {"at": 0.0, "view": None, "labels": None}
@@ -3122,7 +3169,7 @@ class Handler(BaseHTTPRequestHandler):
                 return
             try:
                 size = int(self.headers.get("Content-Length") or 0)
-                request = json.loads(self.rfile.read(size) if 0 < size <= 2048 else b"{}")
+                request = json.loads(self.rfile.read(size) if 0 < size <= (8192 if path == "/api/report-files/summary" else 2048) else b"{}")      # the text of a summary is up to 1200 characters
                 answer = handle_advanced_post(path, request if isinstance(request, dict) else {}, auth_http.acting_user(self))
                 self.json_reply(answer)
                 if path in ("/api/updates/apply", "/api/updates/rollback") and isinstance(answer, dict) and answer.get("started"):      # the process of the update is waiting for this one to stop
@@ -3388,7 +3435,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.end_headers()
                 return
             if path == "/api/screens/data":
-                self.json_reply(screens_payload(kind, screens.settings(toolconfig.raw_config())))
+                self.json_reply(screens_payload(kind, screens.settings(toolconfig.raw_config()), ask.get("repo", "")))
             else:
                 self.reply(render_screen(kind, ask), "text/html; charset=utf-8")
             return
@@ -3716,7 +3763,9 @@ class Handler(BaseHTTPRequestHandler):
             config, account = toolconfig.raw_config(), report_account()
             if path == "/api/report-files":
                 cfg = report_service.settings(config)
-                self.json_reply({"schema": 1, "account": account, "enabled": cfg["enabled"], "cron": cfg["cron"], "formats": cfg["formats"], "reports": report_service.listing(account)})
+                from github_actions_monitor.reporting import report_summary
+                self.json_reply({"schema": 1, "account": account, "enabled": cfg["enabled"], "cron": cfg["cron"], "formats": cfg["formats"], "reports": report_service.listing(account),
+                                 "summary": {"ai": report_summary.enabled(config), "next": report_service.pending_summary(account)}})
                 return
             name = (parse_qs(self.path.partition("?")[2]).get("name") or [""])[0]
             found = report_service.read_file(account, name)
@@ -4330,6 +4379,10 @@ def handle_advanced_post(path, request, who=""):
         snapshot, alerts, team = report_gather()
         done = report_service.run(config, report_account(), snapshot, alerts, team)
         return {"ok": True, "files": done["files"], "at": done["at"]}
+    if path == "/api/report-files/summary":      # the summary of the next report: the drafts, the text a person approved, or its removal (admin, from this computer); Complete only
+        if LITE["on"]:
+            return {"ok": False, "status": "lite"}
+        return report_summary_post(config, request)
     if path == "/api/ai/prompts/clear":      # the local record of prompts is emptied (admin)
         from github_actions_monitor.integrations import ai_prompt_log
         return {"ok": True, "removed": ai_prompt_log.clear()}

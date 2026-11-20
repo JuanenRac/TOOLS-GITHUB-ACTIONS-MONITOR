@@ -34,7 +34,7 @@ class Cards(unittest.TestCase):
 
     def test_every_card_has_a_name_and_a_help_in_the_eight_languages(self):
         codes = [c for scope in ("scol", "ssec", "sdel", "ssup") for c in page_list(scope)]
-        self.assertEqual(len(codes), 23)
+        self.assertEqual(len(codes), 24)
         for lang in LANGS:
             cat = json.loads((ASSETS / "locales" / (lang + ".json")).read_text(encoding="utf-8"))
             for code in codes:

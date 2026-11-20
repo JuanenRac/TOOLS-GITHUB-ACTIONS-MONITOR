@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4804_passing-brightgreen.svg" alt="4804 tests">
+  <img src="https://img.shields.io/badge/Tests-4947_passing-brightgreen.svg" alt="4947 tests">
 </p>
 
 > Überwacht die Workflows aller deiner Repositories und zeigt dir auf einer lokalen Seite, was rot ist, was hängt und was auf dich wartet.
@@ -96,8 +96,8 @@ Methode, Annahmen und wie Sie es in Ihrer eigenen Nutzung messen: [`monitor/docs
 | | |
 |---|---|
 | **Reifegrad** | functional |
-| **Tests** | 4804 Testmethoden (`python -m unittest discover -s monitor/tests`) |
-| **Einstellungen** | 741 Einstellungen, alle mit Hilfe |
+| **Tests** | 4947 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Einstellungen** | 760 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -342,6 +342,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/HEALTH_deu.md`](monitor/docs/HEALTH_deu.md): Die Gesundheit eines Repositorys und des Teams: woraus sie besteht, der Tab Team, die Direktlinks und die API
 - [`monitor/docs/REPORT_SCHEDULE_deu.md`](monitor/docs/REPORT_SCHEDULE_deu.md): Geplante Berichte: die Punktzahl, was sich geändert hat, die Repositorys, die einen Menschen brauchen, und die offenen Meldungen als HTML und Markdown, der Zeitplan und die Dateien
 - [`monitor/docs/CLI_deu.md`](monitor/docs/CLI_deu.md): die Befehlszeile als Client des Monitors
+- [`monitor/docs/CLI_OPERATOR_deu.md`](monitor/docs/CLI_OPERATOR_deu.md): die Befehlszeile für den Betreiber: Formate, watch, completions und Exit-Codes
+- [`monitor/docs/KIOSK_deu.md`](monitor/docs/KIOSK_deu.md): der Monitor auf einem Fernseher oder einer Wand
 - [`monitor/docs/ACCOUNTS_deu.md`](monitor/docs/ACCOUNTS_deu.md): mehrere Konten, je ein Prozess
 - [`monitor/docs/QUOTAS_deu.md`](monitor/docs/QUOTAS_deu.md): Kontingente und Tarife von GitHub
 - [`monitor/docs/MODES_deu.md`](monitor/docs/MODES_deu.md): Arbeitsmodi: normal, schnell und Turbo

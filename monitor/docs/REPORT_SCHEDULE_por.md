@@ -35,6 +35,7 @@ Não há um PDF próprio: abra a página HTML e imprima-a para PDF a partir do n
 
 - O separador **Equipa** tem uma secção Relatórios: a lista, uma ligação para cada ficheiro e o botão **Escrever um relatório agora** (um administrador, a partir deste computador).
 - `GET /api/report-files` lista-os, `GET /api/report-files/file?name=...` abre um (só um ficheiro que o serviço escreveu para esta conta) e `POST /api/report-files/run` escreve um agora.
+- O **resumo do próximo relatório** são algumas linhas que uma pessoa escreve, edita e aprova; abrem o próximo relatório, uma só vez. No mesmo separador um cartão oferece **Rascunho com os números** (frases simples feitas a partir do relatório, sem modelo) e, com `ai.report_summary.enabled` ligado (desligado por omissão) e uma IA configurada, **Rascunho com a IA** (os números vão para a IA do monitor limpos de segredos, dentro do seu orçamento diário). Nada é escrito até **Guardar para o próximo relatório**; **Descartar** retira-o. `POST /api/report-files/summary` faz o mesmo com `action` = `draft`, `draft_ai`, `save` (texto e origem) ou `clear`, para um administrador neste computador; `GET /api/report-files` diz se há um resumo à espera. O texto é simples, cortado a 1200 caracteres e limpo de marcação e segredos, e o relatório imprime-o com escape, com uma linha que diz quem o escreveu.
 - No modo equipa, quem pode ver a conta pode ler os seus relatórios; escrever um agora é para um administrador neste computador. A edição Lite não tem nada disto.
 
 ## Comparação com o período anterior

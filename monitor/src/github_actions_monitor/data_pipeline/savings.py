@@ -61,16 +61,36 @@ def note_webhook(now=None, repo=None):
         LAST_WEBHOOK_REPO[repo] = now
 
 
+def clock_skew(config):
+    """`webhook.clock_skew_s` (300 by default, 0..3600): how far ahead of this computer's clock a moment may lie and still count as the same moment."""
+    block = config.get("webhook") if isinstance(config, dict) and isinstance(config.get("webhook"), dict) else {}
+    return _int(block, "clock_skew_s", 0, 3600, 300)
+
+
+def settled(last, now, config):
+    """The moment an event arrived, as it counts now. The clock is the one of this computer, never the one of the delivery: if it was set back after the event was marked (the mark lies ahead of it), the event still
+    happened, so it counts as having arrived now and ages from here; a mark more than a day ahead is not believed (0.0)."""
+    if last <= now + clock_skew(config):
+        return last
+    return now if last <= now + 24 * 3600.0 else 0.0
+
+
 def webhook_alive(config, now=None, repo=None):
     """True when the webhook counts as alive. With `savings.webhook_live_per_repo` on and a `repo` given, it is the events of THAT repository that count; a repository without an event of its own in the
     window is not alive, whatever the others did (without a repo the answer is the general one)."""
     cfg = settings(config)
     now = time.time() if now is None else now
-    from github_actions_monitor.util import clock
     if not cfg["webhook_first"]:
         return False
-    last = LAST_WEBHOOK_REPO.get(repo, 0.0) if (cfg["webhook_live_per_repo"] and repo is not None) else LAST_WEBHOOK["at"]
-    return last > 0 and not clock.in_future(last, now) and now - last <= cfg["webhook_window_minutes"] * 60
+    per_repo = cfg["webhook_live_per_repo"] and repo is not None
+    held = LAST_WEBHOOK_REPO.get(repo, 0.0) if per_repo else LAST_WEBHOOK["at"]
+    last = settled(held, now, config)
+    if last != held:      # the mark lay ahead of the clock: from now on it is the moment the event was seen, so it ages
+        if per_repo:
+            LAST_WEBHOOK_REPO[repo] = last
+        else:
+            LAST_WEBHOOK["at"] = last
+    return last > 0 and now - last <= cfg["webhook_window_minutes"] * 60
 
 
 def live_repos(config, now=None):
@@ -78,9 +98,7 @@ def live_repos(config, now=None):
     cfg = settings(config)
     if not cfg["webhook_live_per_repo"]:
         return 0
-    now = time.time() if now is None else now
-    from github_actions_monitor.util import clock
-    return sum(1 for at in list(LAST_WEBHOOK_REPO.values()) if at > 0 and not clock.in_future(at, now) and now - at <= cfg["webhook_window_minutes"] * 60)
+    return sum(1 for at in (settled(at, now, config) for at in list(LAST_WEBHOOK_REPO.values())) if at > 0 and now - at <= cfg["webhook_window_minutes"] * 60)
 
 
 def quiet_by_webhook(config, entry, now=None, repo=None):
