@@ -737,6 +737,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `tools_dir` | `-` | paths | Folder of the local signing tools |
 | `tui.refresh_seconds` | `-` | console | Refresh |
 | `tui.theme` | `-` | console | Colours |
+| `ui.about_org_logo` | `false` | general | Organization logo in About |
 | `ui.alerts_sort` | `"server"` | general | Order of the alerts |
 | `ui.now_sort` | `"ecosystem"` | general | Order of the runs happening now |
 | `ui.orientation` | `"auto"` | general | Orientation of the page |

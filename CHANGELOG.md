@@ -11,6 +11,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 ## [Unreleased]
 
 - **The two AI indicators of the bar are icons instead of words**: the texts "Built-in AI" and "External AI" became two buttons with a drawing (a chip for the AI built into the monitor, waves for an external AI tool). A badge tells the state by its shape and not only by its colour (a check is on, a slash on a dashed drawing is off, a triangle is an error: the built-in AI is configured but does not answer), the name for screen readers and the tooltip give the exact state in the language of the page, the icon takes the focus and answers to Enter and Space, and a click opens the AI section of the Settings. They keep the size of the bar in every language and in both themes.
+- **The About panel shows the logo of the monitor and, if you want, the one of your organization** (`ui.about_org_logo`, off by default, in the General tab): the drawing of the monitor is always at the top, and with the setting on the image you uploaded for the wall screens (This browser tab) is shown next to it with an alternative text in the language of the page. Both follow the width of the panel without deforming, and when no logo was uploaded or its file cannot be read a short note replaces the image and the panel keeps working.
 
 ## [2.1.5]
 

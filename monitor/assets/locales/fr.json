@@ -4650,5 +4650,9 @@
  "cfg.h.cli.watch.default_interval_seconds": "Secondes entre deux lectures de watch quand --interval n'est pas donné.",
  "ui.bar_ai_err": "en erreur",
  "ui.bar_ai_go": "Cliquez pour ouvrir les réglages de l'IA.",
- "ui.bar_ai_int_err_t": "L'IA intégrée au moniteur est configurée mais ne répond pas ; cela ne dit rien de sa clé"
+ "ui.bar_ai_int_err_t": "L'IA intégrée au moniteur est configurée mais ne répond pas ; cela ne dit rien de sa clé",
+ "ui.about_org_logo_alt": "Logo de l'organisation",
+ "ui.about_org_logo_none": "Aucun logo d'organisation disponible (importez-en un dans Réglages > Ce navigateur).",
+ "cfg.f.ui.about_org_logo": "Logo de l'organisation dans À propos",
+ "cfg.h.ui.about_org_logo": "Désactivé par défaut. Activé, le panneau À propos affiche le logo de l'organisation (l'image importée pour les écrans muraux dans Réglages > Ce navigateur) à côté du logo du moniteur. Si aucune image n'a été importée ou si elle est illisible, le panneau le dit et rien d'autre ne change."
 }

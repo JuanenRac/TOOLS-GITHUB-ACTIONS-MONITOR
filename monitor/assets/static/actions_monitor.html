@@ -310,6 +310,9 @@ th.sortable{cursor:pointer;user-select:none;white-space:nowrap}th.sortable:hover
 .sb-bar .sb-item{display:inline-flex;align-items:center;padding:2px 10px;border:1px dashed var(--line2);border-radius:999px;color:var(--mut);white-space:nowrap;line-height:1.5}.sb-bar .sb-item:empty{display:none}.sb-bar .sb-item.sb-on{color:var(--text);border-style:solid}
 .sb-bar .ai-ind{padding:0;display:inline-grid;place-items:center;color:var(--mut);flex:none}.sb-bar .ai-ind .ico{width:22px;height:22px;stroke-width:1.6}.sb-bar .ai-ind[data-state=on]{color:var(--text)}.sb-bar .ai-ind[data-state=err]{color:var(--bad)}
 .sb-bar .ai-ind:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.about-logos{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px 24px;margin:0 0 14px}.about-logos figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;max-width:100%}
+.about-logos .logo{width:clamp(56px,14vw,96px);height:auto;aspect-ratio:1/1}.about-logos img{display:block;width:auto;height:auto;max-width:min(100%,clamp(96px,30vw,240px));max-height:clamp(48px,12vw,96px);object-fit:contain}
+.about-logos .mut{font-size:12px;text-align:center;overflow-wrap:anywhere}
 @media print{.sb-bar,#statusbar,nav[role=tablist],#accbar,.dlg,.cfg-tip{display:none!important}}
 /* print: the page that is printed is the whole tab, not the part a scrolling box shows; the controls of the trend (selectors, copy, export) do nothing on paper */
 @media print{.tab{overflow:visible!important;max-height:none!important;height:auto!important}.trbar{display:none!important}.trsvg{max-height:none!important}.trgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.trcard{break-inside:avoid}.spbar,.sphelp button{display:none!important}}
@@ -2433,13 +2436,26 @@ async function openAbout(){
   dlgOpen("about");$("about-msg").textContent="";const body=$("about-body");body.innerHTML=`<span class="mut">${esc(T("ui.loading"))}</span>`;
   const a=await aboutLoad();if(!a){body.textContent=T("ui.err_monitor",{msg:"/api/about"});return}
   const h=a.health||{},L=a.links||{};
-  let html=dl([[T("ui.about_version"),"v"+a.version],[T("ui.about_edition"),T("ui.edition_"+(a.edition==="lite"?"lite":"complete"))],[T("ui.about_author"),a.author],[T("ui.about_license"),a.license],[T("ui.about_python"),a.python+" ("+a.implementation+")"],[T("ui.about_system"),a.system],[T("ui.about_update"),updLine(a.update),true]]);
+  let html=aboutLogos(a.logo)+dl([[T("ui.about_version"),"v"+a.version],[T("ui.about_edition"),T("ui.edition_"+(a.edition==="lite"?"lite":"complete"))],[T("ui.about_author"),a.author],[T("ui.about_license"),a.license],[T("ui.about_python"),a.python+" ("+a.implementation+")"],[T("ui.about_system"),a.system],[T("ui.about_update"),updLine(a.update),true]]);
   html+=`<h3>${esc(T("ui.about_links"))}</h3>`+dl(["repository","releases","changelog","documentation","bridge","issues"].map(k=>[T("ui.about_"+k),aLink(L[k]),true]));
   html+=`<h3>${esc(T("ui.about_paths"))}</h3>`+dl(Object.keys(a.paths||{}).map(k=>[T("ui.path_"+k),a.paths[k]]));
   html+=`<h3>${esc(T("ui.about_health"))}</h3>`+dl([[T("ui.health_ok"),yn(h.ok)],[T("ui.health_loaded"),yn(h.loaded)],[T("ui.health_offline"),yn(h.offline)],[T("ui.health_uptime"),fmt(h.uptime_seconds||0)],[T("ui.health_degraded"),String(h.degraded||0)]]);
   html+=`<h3>${esc(T("ui.about_credits"))}</h3>`+dl((a.credits||[]).map(c=>[c.name+" ("+c.license+")",T("ui.credit_"+c.id)+" · "+T(c.installed?"ui.about_installed":"ui.about_not_installed")]));
   const ops=a.edition==="lite"?null:await opsLoad();if(ops)html+=opsCard(ops);
-  body.innerHTML=html;opsWire();
+  body.innerHTML=html;aboutLogosWire(a.logo);opsWire();
+}
+/* the logos at the top of About: the one of the monitor (the drawing of the side panel, drawn again, so no image is loaded) and, when Settings asks for it (ui.about_org_logo), the one of the organization;
+   an organization logo that is not there or cannot be read leaves a short note and never breaks the panel */
+function aboutLogos(l){
+  const org=l&&l.org?l.org:null;let h='<div class="about-logos" id="about-logos"><figure id="about-logo-mon"></figure>';
+  if(org&&org.enabled)h+='<figure id="about-logo-org">'+(org.present?'<img id="about-logo-img" alt="'+esc(T("ui.about_org_logo_alt"))+'" src="'+esc(org.url)+'">':'<span class="mut">'+esc(T("ui.about_org_logo_none"))+'</span>')+'</figure>';
+  return h+'</div>';
+}
+function aboutLogosWire(l){
+  const slot=$("about-logo-mon"),src=document.querySelector(".brand .logo");
+  if(slot&&src){const c=src.cloneNode(true);c.removeAttribute("data-i18n-aria");c.setAttribute("aria-label",T("ui.logo_aria"));c.setAttribute("role","img");slot.appendChild(c)}
+  const img=$("about-logo-img");
+  if(img)img.addEventListener("error",()=>{const f=$("about-logo-org");if(f)f.innerHTML='<span class="mut">'+esc(T("ui.about_org_logo_none"))+'</span>'});
 }
 /* the Screens menu (docs/SCREENS.md): the catalogue comes from /api/screens/menu; the page builds the address of each screen from the values of its controls, copies it, opens it (screens.menu_target) or, for a
    set of monitors, opens one window per monitor (the Window Management API when the browser has it; otherwise the windows open where the browser puts them and the addresses are shown). It only navigates. */

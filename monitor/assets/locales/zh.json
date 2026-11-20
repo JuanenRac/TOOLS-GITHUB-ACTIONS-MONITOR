@@ -4650,5 +4650,9 @@
  "cfg.h.cli.watch.default_interval_seconds": "未给出 --interval 时，watch 两次读取之间的秒数。",
  "ui.bar_ai_err": "出错",
  "ui.bar_ai_go": "点击以打开 AI 设置。",
- "ui.bar_ai_int_err_t": "监视器内置的 AI 已配置但没有响应;这并不说明其密钥的情况"
+ "ui.bar_ai_int_err_t": "监视器内置的 AI 已配置但没有响应;这并不说明其密钥的情况",
+ "ui.about_org_logo_alt": "组织标志",
+ "ui.about_org_logo_none": "没有可用的组织标志(请在“设置 > 此浏览器”中上传)。",
+ "cfg.f.ui.about_org_logo": "在“关于”中显示组织标志",
+ "cfg.h.ui.about_org_logo": "默认关闭。开启后,“关于”面板会在监视器标志旁显示组织标志(即在“设置 > 此浏览器”中为墙面屏幕上传的图片)。如果没有上传图片或无法读取,面板会提示,其他内容不变。"
 }

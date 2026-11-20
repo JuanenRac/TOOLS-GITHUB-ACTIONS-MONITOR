@@ -138,6 +138,8 @@ L'onglet Ce navigateur des Réglages a un bloc pour envoyer le logo de votre org
 
 `screens.logo_overview`, `screens.logo_now` et `screens.logo_sentinels` choisissent sur quels écrans muraux il apparaît (seulement la vue d'ensemble par défaut), `screens.logo_corner` le coin (en haut à droite par défaut) et `screens.logo_max_width` et `screens.logo_max_height` la taille maximale en pixels à 1920 x 1080 (160 x 64 par défaut ; le logo grandit avec l'écran). L'image est ajustée dans cette taille sans être déformée et a sa place dans l'en-tête ou le pied de page, si bien qu'elle ne cache jamais le contenu. Son fond reste transparent : un logo à fond transparent rend bien dans les thèmes clairs comme dans les sombres.
 
+Le panneau À propos affiche toujours le logo du moniteur. Avec `ui.about_org_logo` activé (désactivé par défaut), il affiche aussi à côté ce logo de votre organisation, avec un texte alternatif dans la langue de la page et une taille qui suit la largeur du panneau sans déformer l'image. Si aucun logo n'a été importé ou si le fichier est illisible, le panneau le dit et rien d'autre ne change.
+
 ### Ce qu'elles montrent et ce qu'elles cachent
 
 Les données viennent de `/api/screens/data?screen=overview` (ou `now`, `sentinels`) : une liste fermée de champs construite à partir du dernier cycle, de l'instantané des sentinelles, des alertes et du score. Elle ne contient jamais de lien, de titre de commit, de nom de job, de nom d'utilisateur ni de chemin de cet ordinateur, et les noms de workflow des dépôts masqués sont masqués aussi. En mode réseau, les pages exigent le même jeton d'accès que le reste du moniteur et la réponse est en lecture seule.

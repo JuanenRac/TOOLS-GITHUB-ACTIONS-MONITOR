@@ -121,7 +121,7 @@ DEFAULTS = {
     "github_app": {"enabled": False, "app_id": "", "key_path": "", "installation_id": "", "share_reads": False},      # an optional GitHub App for the READS (its own allowance); only the PATH of the key is kept here (github_app.py)
     "central": {"source": "off", "max_age_minutes": 120, "git_dir": ""},      # the central panel of the profile repository as a base line that spends no allowance (central_source.py): off | git | http
     "ports": {"complete": 8765, "lite": 8766},      # the port of each edition (util/ports.py); --port wins, then MONITOR_PORT for the complete one
-    "ui": {"orientation": "auto", "rotate_seconds": 0, "screen1_tabs": "", "screen1_orientation": "auto", "screen2_tabs": "", "screen2_orientation": "auto", "screen3_tabs": "", "screen3_orientation": "auto", "now_sort": "ecosystem", "alerts_sort": "server", "theme": "auto"},   # the screens (docs/SCREENS.md): the orientation of the page, and which tabs each /screen/N shows
+    "ui": {"orientation": "auto", "rotate_seconds": 0, "screen1_tabs": "", "screen1_orientation": "auto", "screen2_tabs": "", "screen2_orientation": "auto", "screen3_tabs": "", "screen3_orientation": "auto", "now_sort": "ecosystem", "alerts_sort": "server", "theme": "auto", "about_org_logo": False},   # the screens (docs/SCREENS.md): the orientation of the page, and which tabs each /screen/N shows
     "screens": {"enabled": False, "blink": True, "blink_calm_minutes": 30, "rotate_seconds": 0, "default_theme": "inherit", "default_density": "normal", "refresh_seconds": 10, "burn_in_protection": True, "night_dim": False, "night_dim_from_hour": 22, "night_dim_to_hour": 7, "show_repo_names": "public", "sound": False,
                 "theme_overview": "inherit", "theme_now": "inherit", "theme_sentinels": "inherit", "mode": "three", "rotate_every_seconds": 20, "alert_hold_seconds": 30, "logo_overview": True, "logo_now": False, "logo_sentinels": False,
                 "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64, "group_map": True,
@@ -4071,11 +4071,26 @@ def quota_payload():
     return quota.summary(config, done, data.get("active") or [], set(PRIVATE), reader, toolconfig.github_owner(config), rate.get("limit"), costs={k: v for k, v in RUN_COSTS.items() if v})
 
 
+def about_logo():
+    """What the About panel needs to draw the logos: the logo of the monitor is always drawn by the page; the one of the organization only when `ui.about_org_logo` is on, with the address of the image
+    (it carries the tag of the file) when one is uploaded. A logo folder that cannot be read is "not present", never an error."""
+    want = ((LIVE_CONFIG or toolconfig.raw_config()).get("ui") or {}).get("about_org_logo") is True
+    found = {"present": False, "tag": ""}
+    if want:
+        try:
+            found = orglogo.info()
+        except Exception as error:      # noqa: BLE001 - a logo that cannot be read must never break the About panel
+            degraded.note("about.logo", error)
+    present = bool(found.get("present"))
+    return {"org": {"enabled": want, "present": present, "url": ("/api/screens/logo?v=" + str(found.get("tag") or "")[:16]) if present else ""}}
+
+
 def about_payload():
     from github_actions_monitor.ui import about
     places = {"config": CONFIG_FILE, "log": LOG_FILE, "etag_cache": etagcache.CACHE_FILE, "package_folder": HERE}
     data = about.info(LITE["on"], health_payload(), places, update_info(read=False), i18n.language())
     data["support"] = about.support_text(data)
+    data["logo"] = about_logo()
     return data
 
 

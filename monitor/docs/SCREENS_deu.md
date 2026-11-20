@@ -138,6 +138,8 @@ Der Reiter Dieser Browser der Einstellungen hat einen Block zum Hochladen des Lo
 
 `screens.logo_overview`, `screens.logo_now` und `screens.logo_sentinels` wählen, auf welchen Wandanzeigen es erscheint (standardmäßig nur auf der Übersicht), `screens.logo_corner` die Ecke (standardmäßig oben rechts) und `screens.logo_max_width` und `screens.logo_max_height` die größte Größe in Pixeln bei 1920 x 1080 (Standard 160 x 64; das Logo wächst mit dem Bildschirm). Das Bild wird in diese Größe eingepasst, ohne seine Form zu ändern, und hat einen eigenen Platz in der Kopf- oder Fußzeile, sodass es den Inhalt nie verdeckt. Der Hintergrund bleibt transparent: Ein Logo mit transparentem Hintergrund sieht in hellen wie in dunklen Designs richtig aus.
 
+Das Fenster „Über“ zeigt immer das Logo des Monitors. Ist `ui.about_org_logo` eingeschaltet (standardmäßig aus), zeigt es daneben auch dieses Logo Ihrer Organisation, mit einem Alternativtext in der Sprache der Seite und einer Größe, die der Breite des Fensters folgt, ohne das Bild zu verzerren. Wurde kein Logo hochgeladen oder lässt sich die Datei nicht lesen, sagt das Fenster es, und sonst ändert sich nichts.
+
 ### Was sie zeigen und was sie verbergen
 
 Die Daten kommen von `/api/screens/data?screen=overview` (oder `now`, `sentinels`): eine geschlossene Liste von Feldern, gebildet aus dem letzten Zyklus, dem Schnappschuss der Wächter, den Warnungen und der Bewertung. Sie enthält nie einen Link, einen Commit-Titel, einen Job-Namen, einen Benutzernamen oder einen Pfad dieses Rechners, und die Workflow-Namen ausgeblendeter Repositories werden ebenfalls ausgeblendet. Im Netzwerkmodus brauchen die Seiten dasselbe Zugriffstoken wie der Rest des Monitors, und die Antwort ist schreibgeschützt.

@@ -10,6 +10,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 ## [Unreleased]
 
 - **Les deux indicateurs d'IA de la barre sont des icônes au lieu de mots** : les textes « IA intégrée » et « IA externe » deviennent deux boutons avec un dessin (une puce pour l'IA intégrée au moniteur, des ondes pour un outil d'IA externe). Un badge dit l'état par sa forme et pas seulement par sa couleur (une coche est active, une barre oblique sur un dessin en pointillés est inactive, un triangle est une erreur : l'IA intégrée est configurée mais ne répond pas), le nom pour les lecteurs d'écran et l'infobulle donnent l'état exact dans la langue de la page, l'icône prend le focus et répond à Entrée et Espace, et un clic ouvre la section IA des réglages. Ils gardent la taille de la barre dans toutes les langues et dans les deux thèmes.
+- **Le panneau À propos affiche le logo du moniteur et, si vous le souhaitez, celui de votre organisation** (`ui.about_org_logo`, désactivé par défaut, dans l'onglet Général) : le dessin du moniteur est toujours en haut et, avec le réglage activé, l'image importée pour les écrans muraux (onglet Ce navigateur) s'affiche à côté avec un texte alternatif dans la langue de la page. Les deux suivent la largeur du panneau sans se déformer et, si aucun logo n'a été importé ou si son fichier est illisible, une courte note remplace l'image et le panneau continue de fonctionner.
 
 ## [2.1.5]
 

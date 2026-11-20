@@ -1194,7 +1194,8 @@
     "screen2_tabs": "",
     "screen3_orientation": "auto",
     "screen3_tabs": "",
-    "theme": "auto"
+    "theme": "auto",
+    "about_org_logo": false
   },
   "audit_dir": "",
   "readpool": {

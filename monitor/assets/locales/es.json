@@ -4650,5 +4650,9 @@
  "cfg.h.cli.watch.default_interval_seconds": "Segundos entre dos lecturas de watch cuando no se da --interval.",
  "ui.bar_ai_err": "con error",
  "ui.bar_ai_go": "Pulse para abrir los ajustes de la IA.",
- "ui.bar_ai_int_err_t": "La IA integrada en el monitor está configurada pero no responde; no dice nada de su clave"
+ "ui.bar_ai_int_err_t": "La IA integrada en el monitor está configurada pero no responde; no dice nada de su clave",
+ "ui.about_org_logo_alt": "Logotipo de la organización",
+ "ui.about_org_logo_none": "No hay logotipo de la organización disponible (suba uno en Ajustes > Este navegador).",
+ "cfg.f.ui.about_org_logo": "Logotipo de la organización en Acerca de",
+ "cfg.h.ui.about_org_logo": "Desactivado por defecto. Activado, el panel Acerca de muestra el logotipo de la organización (la imagen subida para las pantallas de pared en Ajustes > Este navegador) junto al logotipo del monitor. Si no se subió ninguna imagen o no se puede leer, el panel lo dice y nada más cambia."
 }

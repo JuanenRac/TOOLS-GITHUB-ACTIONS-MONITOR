@@ -10,6 +10,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 ## [Unreleased]
 
 - **Os dois indicadores de IA da barra são ícones em vez de palavras**: os textos «IA integrada» e «IA externa» passam a ser dois botões com um desenho (um chip para a IA integrada no monitor, ondas para uma ferramenta de IA externa). Um distintivo indica o estado pela forma e não só pela cor (uma marca é ativa, uma barra oblíqua sobre um desenho tracejado é inativa, um triângulo é um erro: a IA integrada está configurada, mas não responde), o nome para leitores de ecrã e a dica dão o estado exato na língua da página, o ícone recebe o foco e responde a Enter e Espaço, e um clique abre a secção de IA das definições. Mantêm o tamanho da barra em todas as línguas e nos dois temas.
+- **O painel Acerca de mostra o logótipo do monitor e, se quiser, o da sua organização** (`ui.about_org_logo`, desativado por predefinição, no separador Geral): o desenho do monitor está sempre no topo e, com a definição ativada, a imagem que carregou para os ecrãs de parede (separador Este navegador) aparece ao lado com um texto alternativo na língua da página. Ambos acompanham a largura do painel sem se deformar e, se não foi carregado nenhum logótipo ou o seu ficheiro não se consegue ler, uma nota breve substitui a imagem e o painel continua a funcionar.
 
 ## [2.1.5]
 

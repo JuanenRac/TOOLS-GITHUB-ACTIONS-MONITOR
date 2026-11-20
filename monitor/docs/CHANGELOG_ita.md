@@ -10,6 +10,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 ## [Unreleased]
 
 - **I due indicatori IA della barra sono icone al posto delle parole**: i testi «IA integrata» e «IA esterna» diventano due pulsanti con un disegno (un chip per l'IA integrata nel monitor, onde per uno strumento di IA esterno). Un badge indica lo stato con la forma e non solo con il colore (una spunta è attiva, una barra obliqua su un disegno tratteggiato è inattiva, un triangolo è un errore: l'IA integrata è configurata ma non risponde), il nome per i lettori di schermo e il suggerimento danno lo stato esatto nella lingua della pagina, l'icona riceve il focus e risponde a Invio e Spazio, e un clic apre la sezione IA delle impostazioni. Mantengono la dimensione della barra in ogni lingua e nei due temi.
+- **Il pannello Informazioni mostra il logo del monitor e, se vuoi, quello della tua organizzazione** (`ui.about_org_logo`, disattivato per impostazione predefinita, nella scheda Generale): il disegno del monitor è sempre in alto e, con l'impostazione attiva, l'immagine caricata per gli schermi a muro (scheda Questo browser) compare accanto con un testo alternativo nella lingua della pagina. Entrambi seguono la larghezza del pannello senza deformarsi e, se non è stato caricato alcun logo o il file non si può leggere, una breve nota sostituisce l'immagine e il pannello continua a funzionare.
 
 ## [2.1.5]
 

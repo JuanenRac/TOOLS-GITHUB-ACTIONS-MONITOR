@@ -4650,5 +4650,9 @@
  "cfg.h.cli.watch.default_interval_seconds": "Seconds between two reads of watch when --interval is not given.",
  "ui.bar_ai_err": "error",
  "ui.bar_ai_go": "Click to open the AI settings.",
- "ui.bar_ai_int_err_t": "The AI built into the monitor is configured but does not answer; it says nothing about its key"
+ "ui.bar_ai_int_err_t": "The AI built into the monitor is configured but does not answer; it says nothing about its key",
+ "ui.about_org_logo_alt": "Logo of the organization",
+ "ui.about_org_logo_none": "No organization logo available (upload one in Settings > This browser).",
+ "cfg.f.ui.about_org_logo": "Organization logo in About",
+ "cfg.h.ui.about_org_logo": "Off by default. With it on, the About panel shows the logo of the organization (the image uploaded for the wall screens in Settings > This browser) next to the logo of the monitor. If no image was uploaded, or it cannot be read, the panel says so and nothing else changes."
 }

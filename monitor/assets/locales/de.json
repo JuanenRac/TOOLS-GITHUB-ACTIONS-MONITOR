@@ -4650,5 +4650,9 @@
  "cfg.h.cli.watch.default_interval_seconds": "Sekunden zwischen zwei Abfragen von watch, wenn kein --interval angegeben ist.",
  "ui.bar_ai_err": "Fehler",
  "ui.bar_ai_go": "Klicken, um die KI-Einstellungen zu öffnen.",
- "ui.bar_ai_int_err_t": "Die im Monitor eingebaute KI ist eingerichtet, antwortet aber nicht; über ihren Schlüssel sagt das nichts"
+ "ui.bar_ai_int_err_t": "Die im Monitor eingebaute KI ist eingerichtet, antwortet aber nicht; über ihren Schlüssel sagt das nichts",
+ "ui.about_org_logo_alt": "Logo der Organisation",
+ "ui.about_org_logo_none": "Kein Logo der Organisation verfügbar (laden Sie eines unter Einstellungen > Dieser Browser hoch).",
+ "cfg.f.ui.about_org_logo": "Logo der Organisation unter „Über“",
+ "cfg.h.ui.about_org_logo": "Standardmäßig aus. Eingeschaltet zeigt das Fenster „Über“ das Logo der Organisation (das Bild, das für die Wandanzeigen unter Einstellungen > Dieser Browser hochgeladen wurde) neben dem Logo des Monitors. Wurde kein Bild hochgeladen oder lässt es sich nicht lesen, sagt das Fenster es, und sonst ändert sich nichts."
 }

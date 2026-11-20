@@ -138,6 +138,8 @@ O separador Este navegador das Definições tem um bloco para carregar o logóti
 
 `screens.logo_overview`, `screens.logo_now` e `screens.logo_sentinels` escolhem em que ecrãs de parede aparece (por omissão, só na visão geral), `screens.logo_corner` o canto (cima à direita por omissão) e `screens.logo_max_width` e `screens.logo_max_height` o tamanho máximo em píxeis a 1920 x 1080 (160 x 64 por omissão; o logótipo cresce com o ecrã). A imagem ajusta-se a esse tamanho sem se deformar e tem um lugar próprio no cabeçalho ou no rodapé, pelo que nunca tapa o conteúdo. O fundo mantém-se transparente: um logótipo com fundo transparente fica bem nos temas claros e nos escuros.
 
+O painel Acerca de mostra sempre o logótipo do monitor. Com `ui.about_org_logo` ativado (desativado por predefinição) mostra também ao lado este logótipo da sua organização, com um texto alternativo na língua da página e um tamanho que acompanha a largura do painel sem deformar a imagem. Se não foi carregado nenhum logótipo, ou o ficheiro não se consegue ler, o painel di-lo e mais nada muda.
+
 ### O que mostram e o que ocultam
 
 Os dados vêm de `/api/screens/data?screen=overview` (ou `now`, `sentinels`): uma lista fechada de campos construída com o último ciclo, o instantâneo das sentinelas, os alertas e a pontuação. Nunca contém uma ligação, um título de commit, o nome de um job, o nome de uma pessoa nem um caminho deste computador, e os nomes dos workflows dos repositórios ocultos também ficam ocultos. No modo de rede as páginas precisam do mesmo token de acesso que o resto do monitor e a resposta é só de leitura.

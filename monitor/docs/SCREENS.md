@@ -138,6 +138,8 @@ The tab This browser of Settings has a block to upload the logo of your organiza
 
 `screens.logo_overview`, `screens.logo_now` and `screens.logo_sentinels` choose on which wall screens it shows (only the overview by default), `screens.logo_corner` the corner (top-right by default) and `screens.logo_max_width` and `screens.logo_max_height` the largest size in pixels at 1920 x 1080 (160 x 64 by default; the logo grows with the screen). The picture is fitted inside that size without changing its shape and has a place of its own in the header or the footer, so it never covers the content. Its background stays transparent: a logo with a transparent background looks right in the light and in the dark themes.
 
+The About panel always shows the logo of the monitor. With `ui.about_org_logo` on (off by default) it also shows this logo of your organization next to it, with an alternative text in the language of the page and a size that follows the width of the panel without deforming the picture. If no logo was uploaded, or the file cannot be read, the panel says so and nothing else changes.
+
 ### What they show and what they hide
 
 The data come from `/api/screens/data?screen=overview` (or `now`, `sentinels`): a closed list of fields built from the last cycle, the snapshot of the sentinels, the alerts and the score. It never contains a link, a commit title, a job name, a user name or a path of this computer, and the workflow names of hidden repositories are hidden too. In the network mode the pages need the same access token as the rest of the monitor, and the answer is read only.

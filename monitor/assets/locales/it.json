@@ -4650,5 +4650,9 @@
  "cfg.h.cli.watch.default_interval_seconds": "Secondi tra due letture di watch quando non si indica --interval.",
  "ui.bar_ai_err": "in errore",
  "ui.bar_ai_go": "Fai clic per aprire le impostazioni dell'IA.",
- "ui.bar_ai_int_err_t": "L'IA integrata nel monitor è configurata ma non risponde; non dice nulla sulla sua chiave"
+ "ui.bar_ai_int_err_t": "L'IA integrata nel monitor è configurata ma non risponde; non dice nulla sulla sua chiave",
+ "ui.about_org_logo_alt": "Logo dell'organizzazione",
+ "ui.about_org_logo_none": "Nessun logo dell'organizzazione disponibile (caricane uno in Impostazioni > Questo browser).",
+ "cfg.f.ui.about_org_logo": "Logo dell'organizzazione in Informazioni",
+ "cfg.h.ui.about_org_logo": "Disattivato per impostazione predefinita. Attivato, il pannello Informazioni mostra il logo dell'organizzazione (l'immagine caricata per gli schermi a muro in Impostazioni > Questo browser) accanto al logo del monitor. Se non è stata caricata alcuna immagine o non si può leggere, il pannello lo dice e nient'altro cambia."
 }

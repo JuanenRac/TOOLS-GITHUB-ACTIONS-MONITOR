@@ -10,6 +10,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 ## [Unreleased]
 
 - **Die beiden KI-Anzeigen der Leiste sind Symbole statt Wörter**: Die Texte „Eingebaute KI“ und „Externe KI“ wurden zu zwei Schaltflächen mit einer Zeichnung (ein Chip für die im Monitor eingebaute KI, Wellen für ein externes KI-Werkzeug). Ein Abzeichen nennt den Zustand durch seine Form und nicht nur durch die Farbe (ein Haken ist aktiv, ein Schrägstrich auf gestrichelter Zeichnung ist inaktiv, ein Dreieck ist ein Fehler: die eingebaute KI ist eingerichtet, antwortet aber nicht), der Name für Screenreader und der Tooltip geben den genauen Zustand in der Sprache der Seite an, das Symbol nimmt den Fokus an und reagiert auf Eingabe- und Leertaste, und ein Klick öffnet den KI-Bereich der Einstellungen. Sie behalten die Größe der Leiste in jeder Sprache und in beiden Designs.
+- **Das Fenster „Über“ zeigt das Logo des Monitors und auf Wunsch das Ihrer Organisation** (`ui.about_org_logo`, standardmäßig aus, im Reiter Allgemein): Die Zeichnung des Monitors steht immer oben, und bei eingeschalteter Einstellung erscheint daneben das Bild, das Sie für die Wandanzeigen hochgeladen haben (Reiter Dieser Browser), mit einem Alternativtext in der Sprache der Seite. Beide folgen der Breite des Fensters ohne Verzerrung, und wurde kein Logo hochgeladen oder lässt sich die Datei nicht lesen, ersetzt ein kurzer Hinweis das Bild und das Fenster arbeitet weiter.
 
 ## [2.1.5]
 

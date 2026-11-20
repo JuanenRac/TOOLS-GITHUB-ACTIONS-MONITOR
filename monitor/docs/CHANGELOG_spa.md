@@ -10,6 +10,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 ## [Unreleased]
 
 - **Los dos indicadores de IA de la barra son iconos en lugar de palabras**: los textos «IA integrada» e «IA externa» pasan a ser dos botones con un dibujo (un chip para la IA integrada en el monitor, ondas para una herramienta de IA externa). Una insignia dice el estado por su forma y no solo por su color (una marca es activa, una barra oblicua sobre un dibujo discontinuo es inactiva, un triángulo es un error: la IA integrada está configurada pero no responde), el nombre para lectores de pantalla y el texto emergente dan el estado exacto en el idioma de la página, el icono recibe el foco y responde a Intro y Espacio, y un clic abre la sección de IA de los ajustes. Conservan el tamaño de la barra en todos los idiomas y en los dos temas.
+- **El panel Acerca de muestra el logotipo del monitor y, si lo desea, el de su organización** (`ui.about_org_logo`, desactivado por defecto, en la pestaña General): el dibujo del monitor está siempre arriba y, con el ajuste activado, la imagen que subió para las pantallas de pared (pestaña Este navegador) se muestra a su lado con un texto alternativo en el idioma de la página. Ambos siguen el ancho del panel sin deformarse y, si no se subió ningún logotipo o su fichero no se puede leer, una nota breve sustituye a la imagen y el panel sigue funcionando.
 
 ## [2.1.5]
 
