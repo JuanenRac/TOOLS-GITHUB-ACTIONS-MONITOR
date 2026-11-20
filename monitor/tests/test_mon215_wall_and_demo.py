@@ -72,6 +72,7 @@ class TheWallScreensDecideTabByTab(unittest.TestCase):
                 self.assertIn(f"`/screen/{decision['screen']}`" if decision["screen"] else f"`{decision['reason']}`", row.group(1), (tail, tab))
 
 
+@unittest.skipUnless(DEMO_FILE.is_file(), "needs the repository root (tools/demo_monitor.py), not part of the installed zip")
 class TheDemoHasDataForEveryTab(unittest.TestCase):
     def test_every_tab_says_what_the_demo_puts_in_it(self):
         table = demo_table()
@@ -88,7 +89,7 @@ def _port():
         return probe.getsockname()[1]
 
 
-@unittest.skipUnless(DEMO_FILE.is_file(), "no tools folder in this package")
+@unittest.skipUnless(DEMO_FILE.is_file(), "needs the repository root (tools/demo_monitor.py), not part of the installed zip")
 class TheRichDemoFillsTheTabs(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
