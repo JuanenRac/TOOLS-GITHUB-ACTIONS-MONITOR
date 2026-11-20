@@ -108,3 +108,7 @@ The menu has five groups with a title each (they fold, and the monitor remembers
 The three sentinels can be switched on or off (`sentinel.enabled`, `sentinels.collab.enabled`, `sentinels.security.enabled`). The menu entry of a sentinel is there only while it is on, and the group *Sentinels* disappears when none is; the page follows the state at its next refresh. An address of a sentinel that is off still opens its panel, which says it is off and has a button that opens its switch in Settings. The panels A1 to A13 belong to the CI sentinel; the badge of each entry counts only the alerts of its own sentinel.
 
 What you fold or unfold in the sections A1 to A13 stays so: the page draws them again at every refresh but remembers each one by its name (`ui.remember_folds`, on by default, keeps the choice in the browser too).
+
+## The signing queue of A5
+
+A run enters the signing queue only when (a) it is not a dry run (the step "Prepare the draft" ran), (b) a draft release is waiting or the repository has no published release, and (c) the version is not already published with its signature. The monitor looks at each run of the queue once every six hours (the jobs of the run and the releases of its repository: two reads, at most three runs a cycle, inside the same gate of the allowance). What leaves the queue is listed under it as "checked: already published vX" or "dry run"; a row nobody looked at yet stays and is marked as not checked.

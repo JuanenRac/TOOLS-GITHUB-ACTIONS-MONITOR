@@ -204,6 +204,55 @@ def target_states(targets, runs_by_repo, releases, eco, local, now, default_bran
     return sorted(rows, key=lambda r: (r["repo"], r["name"]))
 
 
+PROBE_TTL = 6 * 3600      # a run that was looked at (its jobs and the releases of its repository) is not asked again before this
+
+
+def dry_run_of(jobs_body):
+    """True | False | None: whether the run was a dry run, from its jobs. The step "Prepare the draft" (any step whose name has "draft") is skipped in a dry run and runs otherwise; None when the run has no such step."""
+    seen = []
+    for job in (jobs_body or {}).get("jobs") or [] if isinstance(jobs_body, dict) else []:
+        for step in (job or {}).get("steps") or []:
+            if "draft" in str((step or {}).get("name") or "").lower():
+                seen.append(str(step.get("conclusion") or ""))
+    if not seen:
+        return None
+    if any(c == "success" for c in seen):
+        return False
+    return True if all(c == "skipped" for c in seen) else None
+
+
+def probe_of(jobs_body, releases_body, now):
+    """What is known of one run of the queue: {"at", "dry_run", "drafts": [tags of the draft releases], "published": [tags of the published releases, newest first]}."""
+    drafts, published = [], []
+    for r in releases_body if isinstance(releases_body, list) else []:
+        if isinstance(r, dict) and r.get("tag_name"):
+            (drafts if r.get("draft") else published).append(str(r["tag_name"]))
+    return {"at": now, "dry_run": dry_run_of(jobs_body), "drafts": drafts, "published": published}
+
+
+def apply_probe(queue, probe, releases=None):
+    """(queue, cleared): a run only stays in the queue when (a) it is not a dry run, (b) there is a DRAFT release waiting or the repository has no published release at all, and (c) the version is not
+    already published with its signature (the latest release carries .sig/.sig2/.imgsig or the checksum of a signed APK and no draft is waiting). `cleared` = [{"name", "repo", "run_id", "reason": "dry_run" |
+    "published", "tag"}] for the rows that were taken out, so the page says "checked: already published vX" instead of leaving them as "unchecked". A row that was not looked at yet stays, with
+    `checked: False`; the ones that stay and were looked at carry `checked: True` and the `draft` tag when there is one."""
+    kept, cleared = [], []
+    for q in queue:
+        info = (probe or {}).get(f"{q['repo']}|{q.get('run_id')}")
+        if not info:
+            kept.append({**q, "checked": False})
+            continue
+        flags = ((releases or {}).get(q["repo"]) or {}).get("asset_flags") or {}
+        signed_release = bool(flags.get("sig") or flags.get("sig2") or flags.get("imgsig") or flags.get("sha256"))
+        tag = (info.get("published") or [""])[0]
+        if info.get("dry_run") is True:
+            cleared.append({"name": q["name"], "repo": q["repo"], "run_id": q.get("run_id"), "reason": "dry_run", "tag": ""})
+        elif not info.get("drafts") and info.get("published") and signed_release:
+            cleared.append({"name": q["name"], "repo": q["repo"], "run_id": q.get("run_id"), "reason": "published", "tag": tag})
+        else:
+            kept.append({**q, "checked": True, "draft": (info.get("drafts") or [""])[0]})
+    return kept, cleared
+
+
 def sign_queue(states, finalize_fn=None):
     """Targets built on GitHub and not published yet, most urgent first (hours waiting desc, then ecosystem, then name).
     step = sign (nothing real-signed yet) or publish (release-signed, waiting for the publication)."""

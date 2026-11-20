@@ -47,3 +47,7 @@ Auf der Seite Einstellungen, Unterreiter Wächter, Block Auslieferung: `sentinel
 ## Was er nicht tut
 
 Er schreibt nichts in GitHub (kein Tag, Release, Label, Pull Request oder Issue), veröffentlicht und signiert nichts, erstellt keine Vorschläge aus seinen Alarmen und liest den Inhalt keiner Datei außer dem CHANGELOG und den genannten Versionsdateien.
+
+## Ökosystem-Drift ist standardmäßig eine Information
+
+`release.ecosystem_drift` vergleicht den Pin jedes Repositorys in der Pin-Tabelle des Anbieters (z. B. `registry/contract_pins.json` des Vertrags-Repositorys, die Version, gegen die jeder Verbraucher zuletzt geprüft wurde) mit dem neuesten veröffentlichten Release des Anbieters. Ein zurückliegendes Repository wird standardmäßig mit der Stufe `info` gemeldet, weil die Pins vom Release-Zug des Ökosystems und nicht von Hand angehoben werden; `signals.ecosystem_drift.level` erhöht sie. Lesevorgänge mit Zeitüberschreitung stehen unter `unavailable` mit dem Grund `timeout`.

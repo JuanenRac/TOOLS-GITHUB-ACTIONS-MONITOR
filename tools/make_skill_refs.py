@@ -212,12 +212,25 @@ def role_of(method, path):
     return needed or "public"
 
 
+SENTINEL_SIGNAL_NOTES = {
+    "sentinel.security": "the alerts of the Security sentinel (Dependabot, code scanning, secrets, branch protection by rule or ruleset, workflow permissions): one row per code and repository, worst first; the stream carries one event per row that is watch or act",
+    "sentinel.delivery": "the alerts of the Delivery sentinel (unreleased changes, tags without release, version mismatch, ecosystem drift, assets): one row per code and repository; the stream carries the rows that are watch or act",
+    "sentinel.supply": "the alerts of the Supply chain sentinel (unpinned actions, wide permissions, pull_request_target): one row per code and repository",
+    "sentinel.security.coverage": "present only when the Security sentinel could not read everything (reads that failed with their cause, repositories not checked yet, a pause, sources it may not read): an empty list is not a clean one while it is open",
+    "sentinel.delivery.coverage": "present only when the Delivery sentinel could not read everything, with the causes",
+    "sentinel.supply.coverage": "present only when the Supply chain sentinel could not read everything, with the causes",
+    "sentinel.collab.coverage": "present only when the Collab sentinel could not read everything, with the causes",
+}
+
+
 def signal_ids():
     """Every signal id that signals.py can make, from its source, plus one for each panel of the Sentinel."""
     from github_actions_monitor.sentinels import sentinel_panels
     text = (MON / "src" / "github_actions_monitor" / "data_pipeline" / "signals.py").read_text(encoding="utf-8")
     found = set(re.findall(r'_signal\("([a-z0-9_.]+)"', text))
-    return sorted(found | {"sentinel." + key for key in sentinel_panels.ORDER})
+    from github_actions_monitor.data_pipeline import signals as signals_mod
+    own = {"sentinel." + n for n in signals_mod.SENTINEL_WITH_SIGNAL} | {f"sentinel.{n}.coverage" for n in signals_mod.SENTINEL_NAMES}      # the ones signals.py builds from a name
+    return sorted(found | own | {"sentinel." + key for key in sentinel_panels.ORDER})
 
 
 def panel_ids():
@@ -234,7 +247,9 @@ def signals_md():
     lines = ["# Signals and panels", "", "Generated from the code. `GET /api/ai/state` lists the signals the monitor says now, each with a level (`act` somebody has to do something, `watch` keep an eye on it, `info` nothing to do) and rows with",
              "the repository, a link, how old it is and the next step. `GET /api/sentinel/panels` gives the panels of the Sentinel as data.", "", "| signal | what it says |", "| --- | --- |"]
     for sid in signal_ids():
-        if sid.startswith("sentinel."):
+        if sid in SENTINEL_SIGNAL_NOTES:
+            lines.append(f"| `{sid}` | {SENTINEL_SIGNAL_NOTES[sid]} |")
+        elif sid.startswith("sentinel."):
             title = i18n.tl("en", f"ui.{sid.split('.')[1]}_title") if sid != "sentinel.collab" else i18n.tl("en", "ui.collab_title")
             lines.append(f"| `{sid}` | the panel `{sid.split('.')[1]}` of the Sentinel: {title} |")
         else:

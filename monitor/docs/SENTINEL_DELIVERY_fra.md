@@ -47,3 +47,7 @@ Dans la page Réglages, sous-onglet Sentinelle, bloc Livraison : `sentinels.deli
 ## Ce qu'elle ne fait pas
 
 Elle n'écrit rien sur GitHub (ni étiquette, version, label, pull request ou issue), ne publie ni ne signe rien, ne crée pas de propositions à partir de ses alertes et ne lit le contenu d'aucun fichier hormis le CHANGELOG et les fichiers de version que vous indiquez.
+
+## La dérive de l'écosystème est une information par défaut
+
+`release.ecosystem_drift` compare le pin de chaque dépôt dans la table de pins du fournisseur (par exemple `registry/contract_pins.json` du dépôt du contrat, la version contre laquelle chaque consommateur a été vérifié en dernier) avec la dernière release publiée du fournisseur. Un dépôt en retard est signalé par défaut au niveau `info`, car les pins sont relevés par le train de releases de l'écosystème et non à la main ; `signals.ecosystem_drift.level` le relève. Les lectures qui dépassent le délai sont listées dans `unavailable` avec le motif `timeout`.
