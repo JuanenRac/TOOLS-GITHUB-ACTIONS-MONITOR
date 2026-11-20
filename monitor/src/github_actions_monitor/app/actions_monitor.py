@@ -21,6 +21,7 @@ cycle ("hot"); the others only every cold_refresh_seconds with fewer runs, so ~1
 do not use up the GitHub allowance shared with the agents.
 """
 from github_actions_monitor.app import api_spec, api_v1
+from github_actions_monitor.app import codestale
 from github_actions_monitor.app import degraded
 from github_actions_monitor.app import lastpicture
 from github_actions_monitor.app import cycle_watch
@@ -112,7 +113,7 @@ DEFAULTS = {
                 "allowed_words": ["help", "status", "alerts", "red", "queue", "score"], "max_rows": 8, "show_repo_names": "all", "links": True, "max_age_seconds": 300, "rate_per_user_per_minute": 6, "rate_per_channel_per_minute": 20, "rate_per_minute": 60},   # read only commands from Slack and Discord, see chatops/inbound.py (off by default; the proofs are only in the environment)
     "config_check": {"strict": False},      # OFF: a key nobody reads, a wrong type or a number out of range is named at the start; ON: the monitor refuses to start (configcheck.py)
     "cache": {"etag": {"enabled": True, "ttl_hours": 24, "skip_stateful": True, "revalidate_active": True}, "negative_ttl_s": 300},   # conditional reads: a 304 answer costs no quota; a refusal is remembered for negative_ttl_s seconds (etagcache.py)
-    "cli": {"prefer_v1": True, "default_format": "text", "watch": {"min_interval_seconds": 2, "default_interval_seconds": 5}},      # the command line (cli/formats.py, cli/watch.py): the format of the answers when no --format is given, and the interval of `watch`
+    "cli": {"prefer_v1": True, "default_format": "text", "status_codes": "classic", "watch": {"min_interval_seconds": 2, "default_interval_seconds": 5, "branch_timeout_seconds": 900}},      # the command line (cli/formats.py, cli/watch.py): the format of the answers when no --format is given, and the interval of `watch`
     "kiosk": {"enabled": False, "font_scale_percent": 150, "high_contrast": False, "rotate_views": False, "rotate_seconds": 30, "safe_margin_percent": 0, "scale_with_window": False},      # the profile for a TV or a wall (surfaces/kiosk.py): ?kiosk=1 only counts when enabled
     "startup": {"resume_max_age_hours": 12},   # the last picture is shown at once after a restart, with its age (lastpicture.py); 0 = off
     "display": {"timezone": "local", "blink_red_tiles": True},   # blink_red_tiles: the red tiles and red items of the bar blink softly until the cause is solved; zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
@@ -523,6 +524,7 @@ def report_config_problems(config):
     from github_actions_monitor.app import configcheck
     try:
         found = configcheck.check(toolconfig.raw_config())
+        clashes = configcheck.conflicts(toolconfig.raw_config())
         strict = configcheck.settings(toolconfig.raw_config())["strict"]
     except Exception as error:   # noqa: BLE001 - a notice never stops the start
         degraded.note("start.configcheck", error)
@@ -530,8 +532,10 @@ def report_config_problems(config):
     for item in found[:20]:
         close = item["hint"]
         print(i18n.t("mon.config_" + item["problem"], path=item["path"], hint=(" - " + i18n.t("mon.config_did_you_mean", name=close)) if close else ""), flush=True)
-    if found and strict:
-        print(i18n.t("mon.config_strict", n=len(found)), flush=True)
+    for clash in clashes[:20]:
+        print(i18n.t("mon.conflict_" + clash["id"], paths=", ".join(clash["paths"])), flush=True)
+    if (found or clashes) and strict:
+        print(i18n.t("mon.config_strict", n=len(found) + len(clashes)), flush=True)
         return False
     return True
 
@@ -3983,7 +3987,7 @@ def health_payload(deep=False):
     answer also says whether the monitor is fit to serve: `ok` is false when the refresh loop is stuck or gone (see `health_reply`)."""
     with LOCK:
         loaded = bool(STATE.get("data"))
-    out = {"ok": True, "lite": LITE["on"], "version": TOOL_VERSION, "uptime_seconds": int(time.time() - STARTED), "loaded": loaded, "offline": LINK.state()["offline"], "degraded": degraded.snapshot()["total"]}
+    out = {"ok": True, "lite": LITE["on"], "version": TOOL_VERSION, "uptime_seconds": int(time.time() - STARTED), "loaded": loaded, "offline": LINK.state()["offline"], "degraded": degraded.snapshot()["total"], "code_stale": codestale.stale(TOOL_VERSION)}      # code_stale: the files on the disk are of another version than this process (it must be restarted)
     if CHILD["account"]:
         out["account"] = CHILD["account"]
     if not LITE["on"]:

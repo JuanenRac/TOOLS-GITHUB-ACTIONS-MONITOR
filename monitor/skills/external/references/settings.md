@@ -211,6 +211,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ci.stuck.workflow_minutes` | `[]` | sentinel | Fixed limits per workflow |
 | `cli.default_format` | `"text"` | general | Default format of the command line |
 | `cli.prefer_v1` | `true` | advanced | The command line asks /api/v1/ first |
+| `cli.status_codes` | `"classic"` | general | Exit codes of status |
+| `cli.watch.branch_timeout_seconds` | `900` | general | How long watch branch waits |
 | `cli.watch.default_interval_seconds` | `5` | general | Usual interval of watch |
 | `cli.watch.min_interval_seconds` | `2` | general | Fastest refresh of watch |
 | `cold_refresh_seconds` | `600` | polling | Refresh of cold repositories |

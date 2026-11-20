@@ -28,6 +28,7 @@ from github_actions_monitor.util import exclusive, paths
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder
 
 from github_actions_monitor.accounts import accounts  # noqa: E402
+from github_actions_monitor.app import codestale  # noqa: E402
 from github_actions_monitor.security import auth_http
 from github_actions_monitor.security import envguard
 from github_actions_monitor.security import netguard
@@ -243,7 +244,7 @@ class Supervisor:
         cycle = {"phase": "", "running_seconds": 0, "seconds_since_ok": None, "stuck": False, "dead": False, "blocked": False, "abandoned_calls": 0}
         credential = {"state": "", "reason": "", "since": None, "seconds": 0, "replaced_at": None, "source": None}
         document = {"ok": True, "lite": False, "version": TOOL_VERSION, "uptime_seconds": int(max(0, time.time() - self.started_at)), "loaded": bool(inner.get("loaded", False)),
-                    "offline": bool(inner.get("offline", False)), "degraded": int(inner.get("degraded") or 0),
+                    "offline": bool(inner.get("offline", False)), "degraded": int(inner.get("degraded") or 0), "code_stale": codestale.stale(TOOL_VERSION),
                     "cycle": {**cycle, **(inner.get("cycle") if isinstance(inner.get("cycle"), dict) else {})},
                     "credential": {**credential, **(inner.get("credential") if isinstance(inner.get("credential"), dict) else {})}}
         document.update({"supervisor": True, "accounts": len(self.children), "default": default, "listening": localguard.listening()["mode"]})

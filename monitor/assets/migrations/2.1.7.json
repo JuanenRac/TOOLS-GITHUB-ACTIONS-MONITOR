@@ -1,0 +1,34 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.1.7",
+ "previous": "2.1.6",
+ "digest": "42b527960e6ca1aeec0c81d5959135819d2305f87e38fdc8b892eefc266e1823",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "cli.status_codes",
+    "kind": "enum",
+    "bounds": [
+     "classic",
+     "operator"
+    ],
+    "default": "classic"
+   },
+   {
+    "key": "cli.watch.branch_timeout_seconds",
+    "kind": "int",
+    "bounds": [
+     10,
+     86400
+    ],
+    "default": 900
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {}
+}

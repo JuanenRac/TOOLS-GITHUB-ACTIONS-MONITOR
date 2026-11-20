@@ -533,9 +533,11 @@
   "cli": {
     "prefer_v1": true,
     "default_format": "text",
+    "status_codes": "classic",
     "watch": {
       "min_interval_seconds": 2,
-      "default_interval_seconds": 5
+      "default_interval_seconds": 5,
+      "branch_timeout_seconds": 900
     }
   },
   "chatops": {

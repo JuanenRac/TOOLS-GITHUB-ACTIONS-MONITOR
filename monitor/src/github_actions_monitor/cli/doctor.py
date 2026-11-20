@@ -22,10 +22,10 @@ from pathlib import Path
 
 from github_actions_monitor.util import paths
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder
-ORDER = ("python", "gh", "login", "quota", "access", "estimate", "network", "folder", "port", "docker", "rich", "textual", "targets", "token", "exposure", "risks", "backend", "degraded", "credential", "timezone", "github_app", "layout", "storage", "retention")
+ORDER = ("python", "gh", "login", "quota", "access", "estimate", "network", "folder", "port", "running", "docker", "rich", "textual", "targets", "token", "exposure", "risks", "conflicts", "backend", "degraded", "credential", "timezone", "github_app", "layout", "storage", "retention")
 FIX = {"access": "gh auth refresh -h github.com -s repo,read:org   |   https://github.com/settings/tokens (Configure SSO)", "estimate": "", "python": "https://www.python.org/downloads/", "gh": "winget install --id GitHub.cli   |   brew install gh   |   sudo apt install gh", "login": "gh auth login",
-       "quota": "gh api rate_limit", "network": "gh api rate_limit", "folder": "", "port": "python bin/actions_monitor.py --port 8800", "docker": "", "rich": "pip install rich",
-       "textual": "pip install textual", "targets": "python bin/actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "backend": "", "degraded": "", "credential": "", "timezone": "", "github_app": "", "layout": "python -m github_actions_monitor.util.rootmigrate --apply", "storage": "python tools/migrate_storage.py --from file --to sqlite", "retention": "",
+       "quota": "gh api rate_limit", "network": "gh api rate_limit", "folder": "", "port": "python bin/actions_monitor.py --port 8800", "running": "", "docker": "", "rich": "pip install rich",
+       "textual": "pip install textual", "targets": "python bin/actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "conflicts": "", "backend": "", "degraded": "", "credential": "", "timezone": "", "github_app": "", "layout": "python -m github_actions_monitor.util.rootmigrate --apply", "storage": "python tools/migrate_storage.py --from file --to sqlite", "retention": "",
        "volumes": "", "supervisor": "python bin/monitor_cli.py health --deep", "limits": "", "sqlite_hot": "python tools/backup_storage.py backup FILE.zip --backend sqlite", "backup_age": "python bin/monitor_cli.py backup create", "disk": "", "metrics": ""}
 ORDER_OPS = ("volumes", "supervisor", "limits", "sqlite_hot", "backup_age", "disk", "metrics")
 EXIT_OK, EXIT_FAIL, EXIT_WARN, EXIT_DOCTOR_ERROR = 0, 1, 3, 4
@@ -57,6 +57,31 @@ def _port_free(port):
             return False
 
 
+def _read_health(port):
+    """The /api/health document of a monitor on this computer (None when nothing answers like one). Loopback only, no proxy, a short wait."""
+    import urllib.request
+    try:
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        with opener.open("http://127.0.0.1:%d/api/health" % int(port), timeout=1.5) as answer:
+            document = json.loads(answer.read(65536).decode("utf-8"))
+        return document if isinstance(document, dict) else None
+    except Exception:   # noqa: BLE001 - a check never stops the doctor
+        return None
+
+
+def running_code(busy, reader=None):
+    """("ok" | "warn", detail): when a monitor is running on one of the busy ports, is it running the code that is on the disk? After an update a process keeps the old code until it is restarted
+    (`code_stale` of /api/health). Nothing running, or a program that is not a monitor, is "ok": the check of the ports already says what is busy."""
+    from github_actions_monitor.app import codestale
+    for port in busy:
+        document = (reader or _read_health)(port)
+        if document and "version" in document:
+            if document.get("code_stale") is True:
+                return "warn", "running %s, disk %s" % (document.get("version"), codestale.disk_version() or "?")
+            return "ok", "running %s" % document.get("version")
+    return "ok", "not running"
+
+
 def _writable(folder):
     try:
         with tempfile.TemporaryFile(dir=str(folder)):
@@ -65,7 +90,7 @@ def _writable(folder):
         return False
 
 
-def run(runner=default_runner, folder=HERE, ports=None, python=None, config=None, edition=None):
+def run(runner=default_runner, folder=HERE, ports=None, python=None, config=None, edition=None, reader=None):
     """The list of checks, in ORDER (and, for edition="complete", ORDER_OPS after them). `config` is the content of the configuration file ({} when there is none)."""
     config = config if isinstance(config, dict) else {}
     version = python or sys.version_info[:3]
@@ -102,6 +127,7 @@ def run(runner=default_runner, folder=HERE, ports=None, python=None, config=None
     free = [p for p in ports if _port_free(p)]
     busy = [p for p in ports if p not in free]
     out["port"] = ("ok" if free else "warn", ("free " + ", ".join(str(p) for p in free) if free else "") + (" · " if free and busy else "") + ("busy " + ", ".join(str(p) for p in busy) if busy else ""))
+    out["running"] = running_code(busy, reader=reader)
     out["docker"] = ("ok" if shutil.which("docker") else "warn", "")
     out["rich"] = ("ok" if _module("rich") else "warn", "")
     out["textual"] = ("ok" if _module("textual") else "warn", "")
@@ -113,6 +139,7 @@ def run(runner=default_runner, folder=HERE, ports=None, python=None, config=None
     network = listen.get("network") is True
     out["exposure"] = ("warn" if network else "ok", ("network " + str(listen.get("host", ""))) if network else "127.0.0.1")
     out["risks"] = risks(config)
+    out["conflicts"] = conflicts(config)
     out["backend"] = token_backend(config)
     from github_actions_monitor.app import degraded
     swallowed, origins = degraded.read(paths.folder("data", folder))
@@ -325,6 +352,16 @@ def risks(config):
     if network and isinstance(config.get("act"), dict) and config["act"].get("enabled") is True:
         found.append("act_network")
     return ("warn" if found else "ok", ", ".join(found))
+
+
+def conflicts(config):
+    """("ok" | "warn", ids): settings that are valid one by one and cannot work together (configcheck.conflicts); the detail names each one and the settings that disagree."""
+    from github_actions_monitor.app import configcheck
+    try:
+        found = configcheck.conflicts(config)
+    except Exception:   # noqa: BLE001 - a check never stops the doctor
+        return "warn", "?"
+    return ("warn" if found else "ok"), "; ".join("%s (%s)" % (item["id"], ", ".join(item["paths"])) for item in found)
 
 
 def token_backend(config, store_factory=None):
