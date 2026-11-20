@@ -1672,20 +1672,26 @@ function analyticsBox(){
    +tbl(T("ui.a12_h_flaky"),["ui.th_repo","ui.th_workflow","ui.th_flaky","ui.th_runs","ui.th_rate"],(A.flaky||[]).map(r=>[r.repo,r.workflow,r.flaky,r.total,Math.round(r.rate*100)+" %"]))
    +tbl(T("ui.a12_h_slower"),["ui.th_repo","ui.th_workflow","ui.th_p50","ui.th_usual","ui.th_factor"],(A.slower||[]).map(r=>[r.repo,r.workflow,fmtS(r.p50),fmtS(r.usual),"×"+r.factor]));
 }
+function lintMaint(L){
+  const m=L.maintenance;if(!m)return"";const p=[];
+  if(m.checked||m.archived||m.inactive)p.push(T("ui.a13_maint",{n:m.checked,archived:m.archived,inactive:m.inactive}));
+  if(m.unread||m.skipped)p.push(T("ui.a13_maint_off",{n:(m.unread||0)+(m.skipped||0)}));
+  return p.length?mut_(p.join(" ")):"";
+}
 function lintCov(L){
-  const c=L.coverage;if(!c||!(c.api||c.sparse||c.not_evaluable_total||c.waiting))return"";
+  const c=L.coverage;if(!c||!(c.api||c.sparse||c.not_evaluable_total||c.waiting))return lintMaint(L);
   const p=[T("ui.a13_cov",{clone:c.clone,sparse:c.sparse,api:c.api})];
   if(c.not_evaluable_total)p.push(T("ui.a13_cov_ne",{n:c.not_evaluable_total,reasons:Object.entries(c.by_reason||{}).sort((a,b)=>b[1]-a[1]).map(([r,n])=>T("lint.reason."+r)+" ×"+n).join(", ")}));
   if(c.waiting)p.push(T("ui.a13_cov_wait",{n:c.waiting}));
   if(c.partial)p.push(T("ui.a13_cov_partial",{n:c.partial}));
   if((c.api_cannot||[]).length)p.push(T("ui.a13_cov_cannot"));
-  return mut_(p.join(" "));
+  return mut_(p.join(" "))+lintMaint(L);
 }
 function lintBox(s){
   const L=s.lint;if(!L||!L.enabled)return mut_(T("ui.a13_off"));
   const all=(L.rows||[]).filter(r=>sVis(r.repo)),rows=all.filter(r=>LINTLV.has(r.severity));
   const chips=`<div class="lvl" role="group" aria-label="${esc(T("ui.lvl_filter"))}">`+["info","warn","bad"].map(k=>`<button type="button" class="ib" data-lvl="${k}" aria-pressed="${LINTLV.has(k)}">${esc(T("ui.lvl_"+k))} (${all.filter(r=>r.severity===k).length})</button>`).join("")+"</div>";
-  return lintCov(L)+(all.length?chips+(rows.length?`<table>${thk(["ui.th_repo","ui.th_file","ui.th_line","ui.th_rule","ui.th_severity"])}<tbody>${rows.slice(0,80).map(r=>`<tr><td>${esc(r.repo)}</td><td>${esc(r.file)}</td><td>${r.line}</td><td>${esc(T("lint.rule."+r.rule))}${r.detail&&r.detail!=="missing"?" · "+esc(r.detail):""}</td><td><span class="chip ${r.severity==="bad"?"bad":(r.severity==="warn"?"warn":"")}">${esc(T("ui.lvl_"+r.severity))}</span></td></tr>`).join("")}</tbody></table>`:mut_(T("ui.help_none"))):ok_(T("ui.a13_none")));
+  return lintCov(L)+(all.length?chips+(rows.length?`<table>${thk(["ui.th_repo","ui.th_file","ui.th_line","ui.th_rule","ui.th_severity"])}<tbody>${rows.slice(0,80).map(r=>`<tr><td>${esc(r.repo)}</td><td>${esc(r.file)}</td><td>${r.line}</td><td>${esc(T("lint.rule."+r.rule))}${r.detail&&r.detail!=="missing"?" · "+esc(r.detail):""}${r.rule==="archived_action"&&r.kind?" · "+esc(T("lint.kind."+r.kind)):""}</td><td><span class="chip ${r.severity==="bad"?"bad":(r.severity==="warn"?"warn":"")}">${esc(T("ui.lvl_"+r.severity))}</span></td></tr>`).join("")}</tbody></table>`:mut_(T("ui.help_none"))):ok_(T("ui.a13_none")));
 }
 async function copyText(btn){try{await navigator.clipboard.writeText(btn.dataset.copy);btn.textContent=T("ui.copied")}catch(err){btn.textContent=T("ui.copy_manual")}}
 $("t-sent").addEventListener("toggle",e=>{const d=e.target;if(d.tagName==="DETAILS"){d.open?OPEN.add(d.dataset.k):OPEN.delete(d.dataset.k);store.set("am-s-open",[...OPEN].join(","))}},true);
