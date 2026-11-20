@@ -4072,8 +4072,8 @@ def quota_payload():
 
 
 def about_logo():
-    """What the About panel needs to draw the logos: the logo of the monitor is always drawn by the page; the one of the organization only when `ui.about_org_logo` is on, with the address of the image
-    (it carries the tag of the file) when one is uploaded. A logo folder that cannot be read is "not present", never an error."""
+    """What the About panel needs to draw the logos: the logo of the monitor is always drawn by the page; the one of the organization only when `ui.about_org_logo` is on, with the tag of the file
+    (the page builds the address of the image from it, so a new logo is never shown from the cache) when one is uploaded. A logo folder that cannot be read is "not present", never an error."""
     want = ((LIVE_CONFIG or toolconfig.raw_config()).get("ui") or {}).get("about_org_logo") is True
     found = {"present": False, "tag": ""}
     if want:
@@ -4082,7 +4082,7 @@ def about_logo():
         except Exception as error:      # noqa: BLE001 - a logo that cannot be read must never break the About panel
             degraded.note("about.logo", error)
     present = bool(found.get("present"))
-    return {"org": {"enabled": want, "present": present, "url": ("/api/screens/logo?v=" + str(found.get("tag") or "")[:16]) if present else ""}}
+    return {"org": {"enabled": want, "present": present, "tag": str(found.get("tag") or "")[:16] if present else ""}}
 
 
 def about_payload():

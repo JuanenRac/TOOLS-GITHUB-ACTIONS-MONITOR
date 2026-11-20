@@ -76,20 +76,20 @@ class Payload(unittest.TestCase):
 
     def test_off_by_default_and_the_folder_is_not_even_read(self):
         out, fake = self.logo({})
-        self.assertEqual(out, {"org": {"enabled": False, "present": False, "url": ""}})
+        self.assertEqual(out, {"org": {"enabled": False, "present": False, "tag": ""}})
         fake.assert_not_called()
 
-    def test_on_with_a_logo_gives_the_address_with_the_tag_of_the_file(self):
+    def test_on_with_a_logo_gives_the_tag_of_the_file(self):
         out, _ = self.logo({"about_org_logo": True}, {"present": True, "tag": "abcdef0123456789xx"})
-        self.assertEqual(out["org"], {"enabled": True, "present": True, "url": "/api/screens/logo?v=abcdef0123456789"})
+        self.assertEqual(out["org"], {"enabled": True, "present": True, "tag": "abcdef0123456789"})
 
     def test_on_without_a_logo_says_so(self):
         out, _ = self.logo({"about_org_logo": True})
-        self.assertEqual(out["org"], {"enabled": True, "present": False, "url": ""})
+        self.assertEqual(out["org"], {"enabled": True, "present": False, "tag": ""})
 
     def test_a_folder_that_cannot_be_read_is_a_missing_logo_and_not_an_error(self):
         out, _ = self.logo({"about_org_logo": True}, error=OSError("denied"))
-        self.assertEqual(out["org"], {"enabled": True, "present": False, "url": ""})
+        self.assertEqual(out["org"], {"enabled": True, "present": False, "tag": ""})
 
     def test_only_true_switches_it_on(self):
         for odd in ("true", 1, "yes"):
@@ -143,11 +143,11 @@ class InTheBrowser(unittest.TestCase):
                   "const esc=s=>String(s).replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));\n"
                   + code_of_the_logos() + "\n"
                   "const WIDE=" + json.dumps(wide) + ";\n"
-                  "const CASES={mon:{org:{enabled:false,present:false,url:''}},org:{org:{enabled:true,present:true,url:WIDE}},none:{org:{enabled:true,present:false,url:''}},broken:{org:{enabled:true,present:true,url:'missing-logo.png'}}};\n"
+                  "const CASES={mon:{org:{enabled:false,present:false,tag:''}},org:{org:{enabled:true,present:true,tag:'x'}},none:{org:{enabled:true,present:false,tag:''}},broken:{org:{enabled:true,present:true,tag:'missing'}}};\n"
                   "const out=[];const wait=ms=>new Promise(r=>setTimeout(r,ms));\n"
                   "(async()=>{for(const theme of ['light','dark']){document.documentElement.dataset.theme=theme;for(const w of [300,640,1200]){for(const lang of Object.keys(CATS)){LANGNOW=lang;for(const name of Object.keys(CASES)){\n"
                   "  const host=document.createElement('div');host.id='about-body';host.style.cssText='width:'+w+'px;padding:0 14px;box-sizing:border-box;position:relative';document.body.appendChild(host);\n"
-                  "  host.innerHTML=aboutLogos(CASES[name]);aboutLogosWire(CASES[name]);\n"
+                  "  host.innerHTML=aboutLogos(CASES[name]);if(name==='org')host.querySelector('img').src=WIDE;aboutLogosWire(CASES[name]);\n"
                   "  for(let i=0;i<40&&!(name==='broken'?$('about-logo-org')&&!$('about-logo-img'):(name==='org'?$('about-logo-img')&&$('about-logo-img').complete:true));i++)await wait(25);\n"
                   "  const box=host.getBoundingClientRect(),inner=host.querySelector('.about-logos'),svg=host.querySelector('svg.logo'),img=host.querySelector('img'),note=host.querySelector('#about-logo-org .mut');\n"
                   "  const figs=[...host.querySelectorAll('figure')].map(f=>f.getBoundingClientRect());\n"

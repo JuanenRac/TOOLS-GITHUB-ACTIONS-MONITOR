@@ -2454,7 +2454,7 @@ async function openAbout(){
    an organization logo that is not there or cannot be read leaves a short note and never breaks the panel */
 function aboutLogos(l){
   const org=l&&l.org?l.org:null;let h='<div class="about-logos" id="about-logos"><figure id="about-logo-mon"></figure>';
-  if(org&&org.enabled)h+='<figure id="about-logo-org">'+(org.present?'<img id="about-logo-img" alt="'+esc(T("ui.about_org_logo_alt"))+'" src="'+esc(org.url)+'">':'<span class="mut">'+esc(T("ui.about_org_logo_none"))+'</span>')+'</figure>';
+  if(org&&org.enabled)h+='<figure id="about-logo-org">'+(org.present?'<img id="about-logo-img" alt="'+esc(T("ui.about_org_logo_alt"))+'" src="/api/screens/logo?v='+encodeURIComponent(org.tag||"")+'">':'<span class="mut">'+esc(T("ui.about_org_logo_none"))+'</span>')+'</figure>';
   return h+'</div>';
 }
 function aboutLogosWire(l){
