@@ -20,7 +20,7 @@ Optional and **off by default**. A language model can summarise the daily report
 
 ## The AI icons of the bar
 
-The bar at the top right shows two icons: the chip is the AI built into the monitor and the waves are an external AI tool that reads the monitor. A badge tells the state without depending on colour: a check is on, a slash (with a dashed drawing) is off, and a triangle is an error (the built-in AI is configured but does not answer). Hover for the exact state; click the icon, or press Enter or Space when it has the focus, to open the AI section of the Settings.
+The bar at the top right shows two icons: the chip is the AI built into the monitor and the waves are an external AI tool that reads the monitor. A badge tells the state without depending on colour: a check is on, a slash (with a dashed drawing) is off, and a triangle is an error (the built-in AI is configured but does not answer). Hover for the exact state; click the icon, or press Enter or Space when it has the focus, to open its own group of the AI section of the Settings (the chip goes to the provider and model, the waves to the feed read by external AI tools; the group is scrolled into view, flashed and its first control gets the focus).
 
 ## What it may see
 

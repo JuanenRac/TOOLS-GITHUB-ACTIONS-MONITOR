@@ -20,7 +20,7 @@ Optional und **standardmäßig aus**. Ein Sprachmodell kann den Tagesbericht zus
 
 ## Die KI-Symbole der Leiste
 
-Die Leiste oben rechts zeigt zwei Symbole: Der Chip ist die im Monitor eingebaute KI, die Wellen sind ein externes KI-Werkzeug, das den Monitor liest. Ein Abzeichen nennt den Zustand, ohne von der Farbe abzuhängen: ein Haken bedeutet aktiv, ein Schrägstrich (mit gestrichelter Zeichnung) inaktiv und ein Dreieck einen Fehler (die eingebaute KI ist eingerichtet, antwortet aber nicht). Der Mauszeiger zeigt den genauen Zustand; ein Klick auf das Symbol, oder Eingabe- bzw. Leertaste bei Fokus, öffnet den KI-Bereich der Einstellungen.
+Die Leiste oben rechts zeigt zwei Symbole: Der Chip ist die im Monitor eingebaute KI, die Wellen sind ein externes KI-Werkzeug, das den Monitor liest. Ein Abzeichen nennt den Zustand, ohne von der Farbe abzuhängen: ein Haken bedeutet aktiv, ein Schrägstrich (mit gestrichelter Zeichnung) inaktiv und ein Dreieck einen Fehler (die eingebaute KI ist eingerichtet, antwortet aber nicht). Der Mauszeiger zeigt den genauen Zustand; ein Klick auf das Symbol, oder Eingabe- bzw. Leertaste bei Fokus, öffnet die zugehörige Gruppe im KI-Bereich der Einstellungen (der Chip führt zu Anbieter und Modell, die Wellen zum Feed der externen KI-Werkzeuge; die Gruppe wird in den Blick gerollt, kurz hervorgehoben und ihr erstes Feld erhält den Fokus).
 
 ## Was sie sehen darf
 
