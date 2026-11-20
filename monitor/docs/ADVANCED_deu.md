@@ -102,3 +102,11 @@ Alles Folgende ist lokal und nur lesend und standardmäßig aus, sofern nichts a
 - `ui.orientation`, `ui.screen1_tabs`, `ui.now_sort`, `ui.alerts_sort`, `ui.remember_folds` - docs/SCREENS_deu.md
 - `ports.complete`, `ports.lite` - docs/DEPLOYMENT_deu.md
 - `notify.users.enabled` - docs/NOTIFICATIONS_deu.md
+
+## OpenTelemetry mit den Konventionen für CI/CD und ein Span je Job
+
+Zwei Schalter des OpenTelemetry-Exports (`otlp.*`, beide standardmäßig aus) machen die Traces in einem Backend leichter nutzbar. `otlp.cicd_conventions` fügt dem Span jedes Laufs die Attribute der semantischen OpenTelemetry-Konventionen für CI/CD hinzu (`cicd.pipeline.name`, `cicd.pipeline.run.id`, `cicd.pipeline.run.url.full`, `cicd.pipeline.result`, `cicd.pipeline.run.attempt`, `vcs.repository.name`, `vcs.repository.ref.name`) und nennt den Span `RUN <workflow>`; die `gha.*`-Attribute bleiben. `otlp.job_spans` sendet einen Span für jeden beendeten Job (`TASK <job>`), Kind des Spans seines Laufs im selben Trace, mit Runner, Gruppe, Labels, Zeit in der Warteschlange und Ergebnis; es braucht den Webhook, weil die Jobs aus den signierten `workflow_job`-Ereignissen stammen (ein Job, den der Webhook nie sah, hat keinen Span). Sonst ändert sich nichts: die Spans tragen weiterhin keinen Titel, Autor, keine Commit-Nachricht und kein Log.
+
+## Mehrere Arbeitsbereiche
+
+`workspaces.list` enthält Einträge `Name=Ordner` (ein Ordner auf diesem Rechner, nie eine Netzwerkadresse), und `workspaces.active` nennt den, den der Monitor für die lokalen Klone, die Prüfung und die Signaturaufzeichnungen nutzt. Es ist für eine zweite Klon-Sammlung (eine andere Organisation, die Kopie eines anderen Rechners), die du durch Ändern eines Worts wählen willst. Die Variable `MONITOR_ROOT` hat Vorrang vor beiden, und `workspaces.active` hat Vorrang vor `workspace_root`. Bei leerer Liste (Standard) ändert sich nichts. `monitor_cli.py toolbox workspaces` listet sie auf und sagt, welcher verwendet wird.

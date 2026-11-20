@@ -152,6 +152,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `auth.max_failed_logins` (secure) | `5` | advanced | Wrong passwords before a lock |
 | `auth.min_length` (secure) | `10` | advanced | Shortest password |
 | `auth.session_hours` (secure) | `12` | advanced | Session length |
+| `backpressure.enabled` | `false` | polling | Limit the reads of a cycle (backpressure) |
+| `backpressure.max_reads_per_cycle` | `0` | polling | Most reads per cycle (0 = no fixed limit) |
+| `backpressure.min_reads` | `20` | polling | Fewest reads per cycle when it cuts |
+| `backpressure.shed_percent` | `150` | polling | Cut the reads when a cycle lasts this share of the pause |
 | `cache.etag.enabled` | `true` | cache | Conditional reads on |
 | `cache.etag.revalidate_active` | `true` | cache | Read lists with running work in full |
 | `cache.etag.skip_stateful` | `true` | cache | Always read live state in full |
@@ -225,6 +229,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `compare.min_resolved` | `3` | sentinel | Least resolved alerts |
 | `compare.min_runs_per_window` | `20` | sentinel | Least finished runs per period |
 | `compare.min_snapshots` | `12` | sentinel | Least hourly snapshots |
+| `compare.progressive` | `false` | sentinel | Answer a long window at once and finish it in the background |
+| `compare.progressive_days` | `7` | sentinel | Days of the first answer |
 | `compare.top_changes` | `10` | sentinel | Rows in the changes |
 | `compare.workdays` | `["1", "2", "3", "4", "5"]` | sentinel | Workdays |
 | `config_check.strict` | `false` | basic | Refuse to start with a bad configuration |
@@ -252,6 +258,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `extra_reader.any_folder` (secure) | `false` | quota | Accept the token file from any folder |
 | `extra_reader.enabled` (secure) | `false` | quota | Read also with a second account |
 | `extra_reader.file` (secure) | `""` | quota | File with the token of the second account |
+| `finops.by_change` | `false` | advanced | Cost of the CI by kind of change |
+| `finops.co2` | `false` | advanced | Estimate the carbon of the CI minutes |
+| `finops.co2_grams_per_kwh` | `400` | advanced | Grams of CO2 per kWh of the grid (for the carbon estimate) |
+| `finops.co2_watts` | `40` | advanced | Watts of a runner (for the carbon estimate) |
 | `finops.jobs_per_cycle` | `0` | advanced | Jobs read per cycle for their system |
 | `fleet.group_by` | `"ecosystem"` | general | Group the fleet by |
 | `fleet.labels` | `[]` | general | Labels by repository name |
@@ -295,6 +305,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `lessons.max_entries` | `5000` | ai | Most lines in the book |
 | `lessons.recurring_from` | `2` | ai | A kind of failure repeats from |
 | `lessons.retention_days` | `180` | ai | Keep failures for |
+| `limits.memory_mb` | `512` | polling | Memory the held runs may take |
+| `limits.warn_percent` | `80` | polling | Warn at this share of a limit |
 | `lint.anonymous_public` (secure) | `-` | lint | Read public repositories without any credential |
 | `lint.api.max_calls_per_tick` | `-` | lint | API calls per cycle for workflow files |
 | `lint.api.max_files_per_repo` | `-` | lint | Workflow files read per repository |
@@ -397,9 +409,12 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `notify.channels.telegram.chat_id` | `-` | notify | notify.channels.telegram.chat_id |
 | `notify.channels.telegram.enabled` | `-` | notify | notify.channels.telegram.enabled |
 | `notify.channels.telegram.token_env` | `-` | notify | notify.channels.telegram.token_env |
+| `notify.dedupe_hours` | `-` | notify | Hours a notification is remembered |
+| `notify.dedupe_ledger` | `-` | notify | Do not repeat a notification |
 | `notify.digest.max_items` | `-` | notify | Alerts kept for a digest |
 | `notify.enabled` (secure) | `-` | notify | Notifications on |
 | `notify.events` | `-` | notify | Events that notify |
+| `notify.max_event_age_hours` | `-` | notify | Do not notify events older than (hours, 0 = off) |
 | `notify.max_per_hour` | `-` | notify | Messages per hour |
 | `notify.users.enabled` (secure) | `-` | notify | Notifications for each user |
 | `notify.users.max_per_hour` | `-` | notify | Messages per user per hour |
@@ -421,13 +436,18 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ops.purge.enabled` (secure) | `-` | paths | Allow "purge now" |
 | `ops.purge.require_backup_hours` (secure) | `-` | paths | Require a good copy newer than |
 | `organizations.discover` | `false` | advanced | List the organisations of the login |
+| `otlp.cicd_conventions` | `false` | advanced | Names and attributes of the CI/CD conventions |
 | `otlp.enabled` (secure) | `false` | advanced | Export OpenTelemetry (OTLP) |
 | `otlp.endpoint` (secure) | `""` | advanced | OTLP collector address |
 | `otlp.interval_seconds` | `60` | advanced | Seconds between exports |
+| `otlp.job_spans` | `false` | advanced | One span per job |
 | `outputs.dashboard.enabled` (secure) | `-` | outputs | Document for the status dashboard |
 | `outputs.json.enabled` (secure) | `-` | outputs | Grafana JSON source |
 | `outputs.prometheus.enabled` (secure) | `-` | outputs | Prometheus: /metrics |
+| `outputs.prometheus.histogram_max_series` | `-` | outputs | Prometheus: most series per histogram |
+| `outputs.prometheus.histograms` | `-` | outputs | Prometheus: histograms of jobs |
 | `outputs.prometheus.per_repo` | `-` | outputs | Prometheus: series per repository |
+| `outputs.prometheus.per_runner` | `-` | outputs | Prometheus: figures of each self-hosted runner |
 | `pagination.collab_pages` | `3` | polling | Pages of issues and pull requests per repository |
 | `pagination.cursor_pages` | `3` | polling | Pages followed by cursor (alerts) |
 | `pagination.job_pages` | `2` | polling | Pages of jobs per run |
@@ -437,6 +457,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `profiles_file` | `-` | paths | Batch profiles file |
 | `quota.alert_percent` | `90` | basic | Alert at this share of the included minutes |
 | `quota.billing_api` (secure) | `false` | basic | Read the real usage from the billing report of GitHub |
+| `quota.chip` | `true` | basic | Header chip shows the tightest bucket |
 | `quota.default_runner` | `"linux"` | basic | System assumed for the minute estimate |
 | `quota.failover` | `false` | quota | When an allowance runs out, read with another source |
 | `quota.failover_max_age_minutes` | `60` | quota | Oldest copy that may be shown |
@@ -450,6 +471,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `readpool.reserve.app` | `-` | quota | readpool.reserve.app |
 | `readpool.reserve.extra` | `-` | quota | readpool.reserve.extra |
 | `readpool.reserve.user` | `-` | quota | readpool.reserve.user |
+| `refresh.share_by_workflow` | `false` | polling | Share one read of a workflow between callers |
+| `refresh.share_seconds` | `20` | polling | Seconds a shared read stays valid |
 | `refresh_seconds` | `45` | polling | Refresh of hot repositories |
 | `report_export.json` | `false` | outputs | JSON marked |
 | `report_export.name` | `"monitor-{tab}-{date}"` | outputs | Suggested file name |
@@ -812,3 +835,5 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `webhook.ws_max_targets` | `10` | webhook | Most forwarders at once |
 | `webhook.ws_targets` (secure) | `[]` | webhook | Repositories or organizations to forward |
 | `workspace_root` | `""` | paths | Folder with your clones |
+| `workspaces.active` | `""` | paths | Workspace in use |
+| `workspaces.list` | `[]` | paths | Workspaces (name=folder) |

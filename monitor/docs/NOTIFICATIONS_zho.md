@@ -63,3 +63,9 @@ Teams Webhook 地址和 ntfy 令牌由系统加密保存（DPAPI、钥匙串、S
 - **服务与短周期 cron**（`alerts.service`）：只按计划或手动运行、偶尔失败的工作流，只有连续失败 `failures` 次，或最近运行失败比例达到 `rate_percent` 时才会通知；通知一次、恢复也只通知一次，而不是循环告警。`workflows` 可把更多工作流加入此类。
 - **按提交合并**（`alerts.group`）：同一仓库有 `min` 个或更多工作流在同一提交上变红时，只发一条通知并列出它们。
 - **数量多时的摘要**（`alerts.digest`）：最近一小时内发出 `threshold` 条通知后，其余的会被暂存，并每隔 `minutes` 分钟合并为一条摘要。被暂存的事件仍保留在事件流中。
+
+## 不重复通知
+
+开启 `notify.dedupe_ledger`（默认关闭）后，监视器会在数据文件夹的一个小文件中保存已通知内容的台账：事件类型、仓库、工作流和运行链接的哈希，绝不包含文本。重新加载页面、重启后，或流水线暂时离开窗口又回来时，不会重复发送同一通知；同一工作流的新运行是新的通知。标签会被记住 `notify.dedupe_hours` 小时（默认 24）。`notify.max_event_age_hours`（0 = 关闭）还会丢弃自身日期早于此时间的事件：几天前发生的事不算新闻。
+
+Microsoft Teams 渠道除了旧的 Office 365 连接器（`webhook.office.com`、`outlook.office.com`），也接受 Power Automate **Workflows** 流程的地址（主机 `logic.azure.com` 和 `api.powerplatform.com`）：用触发器“收到 Teams webhook 请求时”创建流程，把它的地址放入渠道指定的变量，监视器就会向它发送纯文本消息。

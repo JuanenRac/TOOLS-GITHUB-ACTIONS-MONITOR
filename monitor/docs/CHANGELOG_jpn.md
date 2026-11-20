@@ -49,6 +49,31 @@
 - **公開アドレスなしの Webhook(GitHub の WebSocket 経由)**(`webhook.transport` = `websocket`。`webhook.ws_targets`、`webhook.ws_max_targets`、`webhook.ws_cleanup`。既定はオフ):モニターは、挙げたリポジトリまたは組織ごとに `gh webhook forward` を起動して見守ります。これは一時的な Webhook を作り、このコンピューターが開いた接続からすべての配信をモニターの受信側に渡すため、何も公開せず、トンネルも不要です。GitHub に書き込み(一時フック)、Webhook を管理できるトークンが必要です。終了した転送は待ち時間を延ばして再起動され、トークンがフックを管理できない転送は `GET /api/live-status` の `forwarders` で `forbidden` になります。配信は起動ごとに作られるシークレットで署名され、このプロセスの受信側だけが共有シークレットと並べて受け付けます。
 
 - **電源が切れていたコンピューターが逃した Webhook 配信の復旧**(`webhook.redeliver.enabled`、既定はオフ。`webhook.redeliver.hooks`、`webhook.redeliver.max_per_run`、`webhook.redeliver.max_age_hours`、`webhook.redeliver.interval_minutes`。`POST /api/webhook/redeliver`):起動の 1 分後とその後 1 時間ごとに、モニターは指定した Webhook の最近の配信を読み、どの試行も 2xx で応答されなかった配信の再送を GitHub に依頼します。1 回の確認ごとの上限、延びていく待ち時間(5〜300 秒)、8 回目の依頼での打ち切りがあります。依頼した内容は非公開ファイルに保存されるので、再起動してもすぐには再依頼せず、運用者はすぐに依頼でき、その依頼は操作ログに 1 行残ります。GitHub に書き込むためオフで、指定したフックだけに触れます。カウンターは `GET /api/live-status` の `redelivery` にあります。
+- **ジョブのヒストグラム、課金、ランナーを `/metrics` に追加**（`outputs.prometheus.histograms`、`outputs.prometheus.per_runner`、`outputs.prometheus.histogram_max_series`。既定ではオフ）：署名付きの `workflow_job` と `workflow_run` イベントからメモリ上で作ります。`ghamon_job_wait_seconds`（ランナーグループとラベル別のキュー待ち時間、ジョブごとに 1 回）、`ghamon_job_run_seconds`、`ghamon_workflow_run_seconds`、`ghamon_jobs_total`、現在のランナー需要（`ghamon_runner_jobs_waiting`、`ghamon_runner_oldest_wait_seconds`）。ヒストグラムごとの系列数に上限があり、超えた分は `other` として数えます。当月の課金レポート（`quota.billing_api`）は `ghamon_billing_*`（合計、含まれる分、有料分、SKU 別、ドル）、セルフホストランナーは `ghamon_runners{state}`、ランナーごとの状態、ジョブ数、失敗数、実行秒数として書き出されます（`GET /api/runners/model` の `per_runner` にも）。スクレイプは GitHub を読みません。
+
+- **サイクルとそのサーキットを `/metrics` に追加**：直近の更新サイクルと各フェーズの所要時間、全サイクルのヒストグラム（`ghamon_tick_*`）、サイクル数と失敗数、最後に正常終了した時刻、一時的な失敗の後に再試行した読み取り（`ghamon_read_retries_total`）、連続失敗のため次の読み取りまで待つリポジトリ（`ghamon_repos_circuit_open`、`ghamon_repos_read_failing`）。
+
+- **バックプレッシャー付きの読み取りキュー**（`backpressure.enabled`、`backpressure.max_reads_per_cycle`、`backpressure.shed_percent`、`backpressure.min_reads`。既定ではオフ）：サイクルの読み取りは上限付きの 1 つのキューを通り（赤いリポジトリ、ホットなもの、未読のもの、最も古く読んだものの順）、収まらない分は次のサイクルまで待ちます。サイクルが待機時間の設定割合を超えると許可する読み取りが半分になり、速いサイクルのたびに 1 割ずつ戻ります。`ghamon_read_queue_*` で確認できます。
+
+- **アカウント別・バケット別の利用枠と、ヘッダーの最も逼迫したバケット**（`quota.chip`。既定ではオン）：`GET /api/quota` は `accounts`（各ソースのバケット（core、graphql、search など）、使用割合、リセット時刻）を返し、ヘッダーは core 以外で残りが最も少ないバケット、使用中の他のバケット数、ホバーでの内訳を表示します。新たな読み取りはなく、サイクルがすでに行っている無料の `rate_limit` 呼び出しを使います。
+
+- **`docs/grafana/` のオブザーバビリティパック**：`ghamon_alert_rules.yml`（Prometheus 用ルールと PromQL：モニターの無応答、赤いワークフロー、利用枠と課金、サイクルの遅延・停止、サーキット中のリポジトリ、ヒストグラムによるランナー待ち、オフラインのランナー）、`alertmanager.example.yml`（Webhook、Grafana OnCall、n8n へのルート。アドレスはすべて例）、`n8n_ghamon_alerts.json`（アラートを受け取るフロー）。`docs/OUTPUTS.md` に 8 言語で説明があります。
+
+- **上限と容量**（`limits.warn_percent` と `limits.memory_mb`）：doctor に新しい `capacity` チェックが加わり、設定を上限と比較します（利用枠とサンプリング予算に対する 1 時間あたりの呼び出し、保持する実行のメモリ、`discover_limit` に対するリポジトリ数）。上限に達する前に警告します。実行中のものは `/metrics` に `ghamon_limit_used_percent` として出ます（保持イベント、ストリーム、読み取りキュー、ヒストグラムの系列）。
+
+- **全員で 1 回の読み取り**（`refresh.share_by_workflow` と `refresh.share_seconds`、既定ではオフ）：サイクル、ページ、壁画面、API クライアントが同じ実行のジョブを同時に求めると、最初のものが GitHub から読み、残りはその結果を使います。失敗した読み取りは記憶されません。節約した読み取り数は `/metrics` で数えます。
+
+- **通知を繰り返さない**（`notify.dedupe_ledger`、`notify.dedupe_hours`、`notify.max_event_age_hours`。既定ではオフ）：データフォルダー内の小さな台帳（ハッシュと時刻のみでテキストなし）により、ページの再読み込み、再起動、パイプラインが一時的にウィンドウから外れた場合でも同じ通知を送りません。イベント自体の日付が設定時間より古い場合は通知しません。ガイドに、Microsoft Teams チャンネルが Power Automate の Workflows フローのアドレスを受け付けることを記載しました。
+
+- **変更の種類別の CI コストと炭素の推定**（`finops.by_change`、`finops.co2`、`finops.co2_watts`、`finops.co2_grams_per_kwh`。既定ではオフ）：過去 24 時間の実行を、依存関係、スケジュール、手動、リリース、feature、fix、docs、ci、test、refactor、perf、chore、その他に分け、分、割合、プライベートリポジトリの推定ドルを示します（`GET /api/quota` の `by_change` と `/metrics` の `ghamon_ci_change_*`）。炭素は自分で設定したワット数と kWh あたりのグラム数によるおおよその桁で、排出量の報告ではありません。ローカルの再利用可能ワークフロー（リポジトリ内の他のワークフローからのみ呼ばれるファイル）はこれらの数値から除かれます。
+
+- **CI/CD の規約に沿った OpenTelemetry とジョブごとのスパン**（`otlp.cicd_conventions` と `otlp.job_spans`、既定ではオフ）：実行のスパンに CI/CD 向け OpenTelemetry セマンティック規約の属性（パイプライン名、実行 ID とリンク、結果、試行回数、リポジトリとブランチ）を付け、`RUN <workflow>` という名前にできます。完了した各ジョブは、Webhook の署名付き `workflow_job` イベントから、実行のスパンの子スパン（ランナー、グループ、ラベル、キュー待ち時間、結果）として送れます。
+
+- **複数のワークスペース**（`workspaces.list` と `workspaces.active`、リストが空の間はオフ）：ローカルのクローンのフォルダーを `名前=フォルダー` で指定し、使うものを名前で選びます。`MONITOR_ROOT` は引き続き最優先で、`workspaces.active` は `workspace_root` より優先されます。
+
+- **大きなアカウントでの比較の長い期間**（`compare.progressive` と `compare.progressive_days`、既定ではオフ）：設定した日数より長い期間には、まず直近の日数で `partial` と示してすぐ応答し、全期間はバックグラウンドで計算して次のリクエストに返します。
+
+- **`monitor_cli.py toolbox`**：モニターを起動せずにこのコンピューター上で動く運用者向けの小さなツール。`limits`（設定と上限の比較）、`workspaces`、`ledger`（送信済みの通知。`--force` で消去）、`summary`（種類・リポジトリ・日別のイベント）、`export-events FILE`（名前の末尾に応じて jsonl、csv、parquet、duckdb。parquet と duckdb は各パッケージが必要で、ファイルは新規であること。上書きはせず、問い合わせ言語も受け付けません）。
 
 ### 修正
 

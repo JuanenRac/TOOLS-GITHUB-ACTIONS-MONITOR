@@ -242,6 +242,13 @@ def extra_cost(used_minutes, included, data):
     return round(max(0.0, used_minutes - included) * data["rates_usd_per_minute"]["linux"], 2)
 
 
+LAST = {"info": None}      # the last summary, held in memory for /metrics (billing gauges, NI-12)
+
+
+def last():
+    return LAST["info"]
+
+
 def summary(config, runs, active, private, reader=None, owner="", rate_limit=None, systems=None, data=None, costs=None):
     """Everything the panel shows, in one dictionary."""
     cfg = settings(config)
@@ -251,7 +258,9 @@ def summary(config, runs, active, private, reader=None, owner="", rate_limit=Non
     real = billing_usage(owner, reader) if (cfg["billing_api"] and reader and owner) else None
     month = projection(sums["billable"])
     used = real["minutes"] if real else month
-    return {"plan": cfg["plan"], "included_minutes": included, "billable": sums, "month_estimate": month, "billing": real, "billing_requested": cfg["billing_api"], "level": level(used, included, cfg),
+    out = {"plan": cfg["plan"], "included_minutes": included, "billable": sums, "month_estimate": month, "billing": real, "billing_requested": cfg["billing_api"], "level": level(used, included, cfg),
             "warn_percent": cfg["warn_percent"], "alert_percent": cfg["alert_percent"], "api_mode": api_mode(rate_limit), "app": app_notice(config, rate_limit), "concurrency": concurrency(active, cfg["plan"], data),
             "long_jobs": long_jobs(active, data), "extra_cost_usd": extra_cost(used, included, data), "limits": data["limits"], "multipliers": {s: multiplier(s, data) for s in SYSTEMS}, "source": data.get("source", ""),
             "public_free": data.get("public_repositories_free", True)}
+    LAST["info"] = out      # what /metrics writes about the billing (outputs.prometheus): a scrape never reads GitHub
+    return out

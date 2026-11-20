@@ -63,3 +63,7 @@ O separador Gráficos mostra a secção «Comparar períodos» quando a compara�
 ## As definições
 
 Definições, separador Sentinela, bloco Comparação de períodos: `compare.enabled`, `compare.default_window_days`, `compare.default_days_filter`, `compare.workdays`, `compare.min_runs_per_window`, `compare.min_days_of_history`, `compare.min_resolved`, `compare.min_snapshots`, `compare.min_repo_runs`, `compare.top_changes`, `compare.include_in_report` e `compare.cache_seconds`. Uma resposta é guardada `compare.cache_seconds` segundos e depois calculada de novo.
+
+## Janelas longas numa conta grande
+
+Com `compare.progressive` ligado (desligado por predefinição) uma comparação sobre uma janela mais longa do que `compare.progressive_days` (7 por predefinição) é respondida já com os seus últimos dias e a resposta di-lo (`partial`: os dias pedidos, os dias mostrados e que o resto está a ser calculado); a janela inteira é terminada em segundo plano e o pedido seguinte, ou a próxima atualização da página, recebe-a. Um pedido com `from` e `to` nunca é dividido.

@@ -1088,6 +1088,9 @@ function render(d){
   $("stamp").textContent=d.loading?T("ui.loading_repos",{n:d.loading}):d.resumed?T("ui.resumed",{time:clock(d.updated),mins:Math.max(1,Math.round(d.resumed.age_seconds/60))}):T("ui.updated",{time:clock(d.updated),secs:d.took});
   const eta=d.rate?Math.max(0,Math.round((new Date(d.rate.reset).getTime()-Date.now())/60000)):null;
   $("rate").textContent=d.rate?T("ui.quota",{remaining:d.rate.remaining,limit:d.rate.limit,time:clock(d.rate.reset,{hour:"2-digit",minute:"2-digit"}),eta:eta}):"";
+  {const r=$("rate"),t=d.quota_chip;r.title="";   // the chip shows the tightest bucket of the allowance (quota.chip), with every used bucket in its tooltip
+   if(t&&d.rate&&t.bucket!=="core"){r.textContent=T("ui.quota_tight",{bucket:t.bucket,remaining:t.remaining,limit:t.limit,time:t.reset?clock(typeof t.reset==="number"?t.reset*1000:t.reset,{hour:"2-digit",minute:"2-digit"}):"",others:t.others});r.classList.add("quota-tight")}else r.classList.remove("quota-tight");
+   if(t&&(t.breakdown||[]).length>1)r.title=t.breakdown.map(b=>b.source+" · "+b.bucket+" "+b.remaining+"/"+b.limit+" ("+b.used_percent+"%)").join(" | ")}
   const q=$("quota");q.hidden=!d.paused_quota;if(d.paused_quota)q.textContent=T("ui.quota_paused",{remaining:d.rate.remaining,min:d.min_rate,eta:eta!=null?T("ui.quota_until",{eta:eta}):""});
   const ho=d.hot_only||{on:false};HOTONLY=!!ho.on;$("hotonly").setAttribute("aria-pressed",HOTONLY);const hotTxt=T("ui.hotonly",{state:HOTONLY?T("ui.hot_yes",{min:Math.ceil((ho.seconds_left||0)/60)}):T("ui.no")});$("hotonly").setAttribute("aria-label",hotTxt);$("hotonly").title=hotTxt+" - "+T("ui.hotonly_title");
   $("mode").textContent=T("ui.mode",{repos:d.repos.length,hot:d.hot,mode:d.mode})+((d.etag&&d.etag.saved)?" · "+T("ui.etag_saved",{n:d.etag.saved}):"");

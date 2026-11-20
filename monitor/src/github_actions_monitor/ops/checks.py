@@ -181,10 +181,27 @@ def _fetch_metrics(url):
         return error.code
 
 
+def capacity(config, folder=None, repos=-1):
+    """The setup against its ceilings (data_pipeline/limits.py): reads an hour against the allowance, memory of the held runs, repositories against `discover_limit`. The number of repositories is the one of
+    the last picture of the monitor (`repos` gives it in a test); with no picture yet there is nothing to judge and it says so."""
+    from github_actions_monitor.data_pipeline import limits
+    if repos == -1:
+        try:
+            from github_actions_monitor.app import lastpicture
+            picture = lastpicture.load(paths.folder("data", folder), {"startup": {"resume_max_age_hours": 168}})
+            repos = len((picture or {}).get("repos") or []) if picture else None
+        except Exception:   # noqa: BLE001 - no picture to read is not a failure of the doctor
+            repos = None
+    if repos is None:
+        return "ok", "no picture yet"
+    status, detail = limits.verdict(limits.planned(config, repos))
+    return status, f"{repos} repositories: {detail}"
+
+
 def run_all(config, folder=None):
     """{id: (status, detail)} for the checks of ORDER_OPS. A check that cannot run answers warn, never raises: the doctor must always answer."""
     out = {}
-    for name, function in (("volumes", volumes), ("supervisor", supervisor), ("limits", limits), ("sqlite_hot", sqlite_hot), ("backup_age", backup_age), ("disk", disk), ("metrics", metrics)):
+    for name, function in (("volumes", volumes), ("supervisor", supervisor), ("limits", limits), ("capacity", capacity), ("sqlite_hot", sqlite_hot), ("backup_age", backup_age), ("disk", disk), ("metrics", metrics)):
         try:
             out[name] = function(config, folder)
         except Exception as error:   # noqa: BLE001 - one check that breaks must not hide the others

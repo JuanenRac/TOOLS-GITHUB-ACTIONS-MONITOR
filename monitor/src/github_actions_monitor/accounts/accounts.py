@@ -48,6 +48,7 @@ STATE_FILES = (
     ("github_actions_monitor.sentinels.sentinel_delivery", "STATE_FILE", "sentinel_state/delivery_state.json"),
     ("github_actions_monitor.sentinels.alert_center", "STATE_FILE", "alert_mutes.json"),
     ("github_actions_monitor.app.updatecheck", "STATE_FILE", "update_check.json"),
+    ("github_actions_monitor.integrations.notify_dedupe", "LEDGER_FILE", "notify_ledger.json"),      # the ledger of notifications already sent: one account never hides the notice of another
     ("github_actions_monitor.security.audit_log", "FILE", "audit_actions.jsonl"),      # the log of actions of an account is its own file: one account never reads the lines of another
 )
 #: files of the old layout (name next to the code) and where each one goes in the folder of an account; the lite edition's own files are not part of this

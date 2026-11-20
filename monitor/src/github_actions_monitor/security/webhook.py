@@ -393,6 +393,7 @@ def parse_event(event, body):
     """A small, validated record of a `workflow_run` or `workflow_job` event, or None for any other event or a payload that does not look right.
 
     {"event", "repo", "workflow", "run_id", "status", "conclusion", "branch", "sha", "attempt", "url", "seconds", "queue", "job", "steps": {name: seconds}}
+    plus, for a job, "job_id", "labels", "runner_group" and "runner_name" (kept out of the live list: only the histograms use them)
     Only these short fields are kept (never the commit message, the actor's e-mail or any free text of the payload)."""
     if event not in ("workflow_run", "workflow_job"):
         return None
@@ -424,6 +425,12 @@ def parse_event(event, body):
     else:
         record["workflow"] = _name(obj.get("workflow_name"))
         record["job"] = _name(obj.get("name"))
+        record["job_id"] = obj["id"]      # one count per job in the histograms (integrations/job_metrics.py); never sent to the live list (not in LIVE_FIELDS)
+        record["labels"] = [x for x in (obj.get("labels") or []) if isinstance(x, str) and re.match(r"^[A-Za-z0-9._*?=/-]{1,60}\Z", x)][:8] if isinstance(obj.get("labels"), list) else []
+        record["runner_group"] = _name(obj.get("runner_group_name"), 80)
+        record["runner_name"] = _name(obj.get("runner_name"), 80)
+        record["job_started"] = _stamp(obj.get("started_at"))      # the absolute times of a job feed the spans of the OpenTelemetry export (otlp.job_spans); not in LIVE_FIELDS
+        record["job_completed"] = _stamp(obj.get("completed_at"))
         created, started, done = _time(obj.get("created_at")), _time(obj.get("started_at")), _time(obj.get("completed_at"))
         record["queue"] = max(0, int(started - created)) if created is not None and started is not None else None
         record["seconds"] = max(0, int(done - started)) if started is not None and done is not None else None

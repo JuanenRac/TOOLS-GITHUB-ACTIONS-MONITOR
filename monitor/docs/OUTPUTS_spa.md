@@ -91,3 +91,41 @@ La barra superior de la página (en todas las pestañas) hace UN informe de la p
 - El informe lo sirve `GET /api/report/tab?tab=now&lang=es` (`&fmt=json`, `&fmt=txt` o `&fmt=options`), igual en las dos ediciones.
 
 Ajustes (Ajustes > Salidas para otras herramientas > «Guardar e imprimir el informe de una pestaña»): `report_export.txt`, `report_export.pdf` y `report_export.json` (qué casillas empiezan marcadas: TXT y PDF sí, JSON no), `report_export.name` (nombre sugerido, por defecto `monitor-{tab}-{date}`), `report_export.paper` (`a4` o `letter`, por defecto `a4`) y `report_export.pdf_path` (`auto`, `own` o `browser`, por defecto `auto`).
+
+## Métricas del servidor: ciclo, cola de lecturas, facturación, runners e histogramas
+
+Además de los indicadores de arriba, `/metrics` escribe (un valor que no se conoce se omite):
+
+| Métrica | Etiquetas | Significado |
+|---|---|---|
+| `ghamon_ticks_total`, `ghamon_tick_failures_total` | | ciclos de refresco terminados y ciclos que acabaron con error (contadores) |
+| `ghamon_tick_last_seconds`, `ghamon_tick_phase_seconds`, `ghamon_tick_seconds` | `phase` | duración del último ciclo, de cada una de sus fases y el histograma de todos |
+| `ghamon_tick_last_ok_timestamp_seconds`, `ghamon_tick_reads_last` | | cuándo acabó bien el último ciclo y cuántos repositorios leyó |
+| `ghamon_read_retries_total` | | lecturas que fallaron por una causa pasajera y se repitieron (contador) |
+| `ghamon_repos_circuit_open`, `ghamon_repos_read_failing`, `ghamon_repos_read_fail_streak_max` | | repositorios que esperan antes de la siguiente lectura por haber fallado varias veces seguidas (el circuito), repositorios cuya última lectura falló, la racha más larga |
+| `ghamon_read_queue_depth`, `ghamon_read_queue_allowed`, `ghamon_read_queue_oldest_wait_cycles`, `ghamon_read_queue_deferred_total`, `ghamon_read_queue_shed_cycles_total` | | la cola de lecturas con contrapresión (solo con `backpressure.enabled` encendido) |
+| `ghamon_billing_minutes_total`, `ghamon_billing_minutes_included`, `ghamon_billing_minutes_paid`, `ghamon_billing_sku_minutes`, `ghamon_billing_usd` | `sku`, `product` | el informe de facturación del mes (solo con `quota.billing_api` encendido; un scrape nunca lee GitHub, escribe el último informe que el ciclo tenía) |
+| `ghamon_runners` | `state` | runners propios libres, ocupados y desconectados (`runners.enabled`) |
+| `ghamon_runner_up`, `ghamon_runner_busy` | `runner` | por runner (`outputs.prometheus.per_runner`) |
+| `ghamon_runner_kind_jobs_waiting`, `ghamon_runner_kind_oldest_wait_seconds` | `kind` | jobs sin empezar y la espera más antigua por tipo de runner (`runners.model.enabled`) |
+
+Con `outputs.prometheus.histograms` encendido (y el webhook recibiendo eventos de jobs) escribe también **histogramas**, construidos en memoria con los eventos firmados `workflow_job` y `workflow_run`:
+
+| Métrica | Etiquetas | Significado |
+|---|---|---|
+| `ghamon_job_wait_seconds` | `runner_group`, `label` | tiempo en cola de un job, contado **una vez por job** |
+| `ghamon_job_run_seconds` | `runner_group`, `label`, `conclusion` | duración de los jobs terminados |
+| `ghamon_workflow_run_seconds` | `conclusion` | duración de las ejecuciones terminadas |
+| `ghamon_jobs_total` | `label`, `conclusion` | jobs terminados (contador) |
+| `ghamon_runner_jobs_waiting`, `ghamon_runner_oldest_wait_seconds` | `label` | la demanda de runners ahora: jobs en cola sin empezar y la espera más antigua |
+
+`outputs.prometheus.histogram_max_series` (200 por defecto) acota las series de cada histograma: las que pasan del límite se cuentan bajo el valor de etiqueta `other`. Con `outputs.prometheus.per_runner` encendido añade, por runner propio, `ghamon_runner_jobs_total`, `ghamon_runner_jobs_failed_total` y `ghamon_runner_busy_seconds_total` (también en `GET /api/runners/model` como `per_runner`).
+
+## Pack de observabilidad: reglas de alerta, Alertmanager, OnCall y n8n
+
+`docs/grafana/` lleva, además de los dos paneles, un pack que se copia y se adapta:
+
+- `ghamon_alert_rules.yml`: reglas para Prometheus (también vmalert) con su PromQL: un monitor que no responde, workflows en rojo y rachas, cuota y facturación cerca del final, un ciclo lento o parado, repositorios en el circuito, lecturas que esperan demasiado, jobs que esperan un runner (`histogram_quantile(0.95, sum by (le, label) (rate(ghamon_job_wait_seconds_bucket[30m])))`), runners desconectados y demanda sin ningún runner libre.
+- `alertmanager.example.yml`: rutas por gravedad a tres receptores (un webhook por defecto, Grafana OnCall y n8n). Todas las direcciones son `https://example.invalid/...`: no se envía nada hasta que pongas las tuyas, y ningún secreto va en el fichero.
+- `n8n_ghamon_alerts.json`: un flujo de n8n que recibe el webhook de Alertmanager y escribe un mensaje por alerta; su último nodo no hace nada hasta que pongas ahí tu nodo de chat, correo o ticket.
+- `prometheus.example.yml` y `docker-compose.observability.yml` arrancan Prometheus, Alertmanager y Grafana en el ordenador del monitor para probar el pack (los contenedores comparten la red del host, los puertos están en `127.0.0.1` y la contraseña de Grafana sale de tu shell, nunca del fichero).

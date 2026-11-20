@@ -56,6 +56,7 @@ AI_ACTIONS = ("models", "doctor", "test")
 LESSONS_ACTIONS = ("list", "brief", "failures", "close")
 BRIEFS_ACTIONS = ("index", "show", "all")
 SCREENS_ACTIONS = ("list", "urls")
+TOOLBOX_ACTIONS = ("limits", "workspaces", "ledger", "summary", "export-events")
 API_ACTIONS = ("openapi", "me", "contract-check")
 AI_HOOK_ACTIONS = ("install", "status", "uninstall")
 CREDENTIAL_ACTIONS = ("replace", "reload")
@@ -64,7 +65,7 @@ LEVELS = ("info", "warning", "error", "critical")
 from github_actions_monitor.cli import completions, formats, monitor_admin      # noqa: E402
 from github_actions_monitor.cli import watch as watch_loop      # noqa: E402
 from github_actions_monitor.surfaces import kiosk      # noqa: E402
-COMMANDS = COMMANDS + ("watch", "completions", "kiosk")      # the operator commands (docs/CLI_OPERATOR.md)
+COMMANDS = COMMANDS + ("toolbox", "watch", "completions", "kiosk")      # the operator commands (docs/CLI_OPERATOR.md)
 EXIT_CHANGED = watch_loop.EXIT_CHANGED      # 6: `watch --exit-on-change` saw something change (only when the flag is given)
 OPERATOR_WORDS = {"watch": watch_loop.WATCHABLE, "completions": completions.SHELLS, "kiosk": tuple(kiosk.PRESETS)}
 WORDS_BY_COMMAND = {"ai-hook": AI_HOOK_ACTIONS, "credential": CREDENTIAL_ACTIONS, "lessons": LESSONS_ACTIONS, "install-skill": SKILL_ACTIONS, "ai": AI_ACTIONS, **OPERATOR_WORDS}
@@ -469,6 +470,58 @@ def cmd_screens(ctx):
         mark = "" if row.get("available", True) else "(-) "
         lines.append(f"  {row.get('id', '?'):<13} {mark}{(base + row.get('url', '')) if action == 'urls' else row.get('path', '')}")
     return answer, lines, EXIT_OK
+
+
+def cmd_toolbox(ctx):
+    """toolbox limits [N] | workspaces | ledger [--force] | summary | export-events FILE: the small tools of the operator that work on this computer, with no monitor running.
+    `limits` puts the setup against its ceilings (N = the number of repositories; without it the one of the last picture); `workspaces` lists the workspaces and the one in use; `ledger` shows the
+    ledger of notifications already sent (`--force` forgets it); `summary` counts the events of the events file by kind, repository and day; `export-events FILE` writes them as jsonl, csv, parquet
+    or duckdb by the end of the name of FILE (parquet and duckdb need their package; the file must be new). Nothing is sent anywhere and nothing is read from GitHub."""
+    from github_actions_monitor.app import toolconfig, workspace
+    from github_actions_monitor.data_pipeline import events as events_mod, limits
+    from github_actions_monitor.integrations import event_export, notify_dedupe
+    action, config = ctx["action"], toolconfig.raw_config()
+    if action not in TOOLBOX_ACTIONS:
+        raise CliError(EXIT_USAGE, i18n.t("cli.toolbox_action"))
+    if action == "limits":
+        repos = int(ctx["file"]) if str(ctx["file"]).isdigit() else None
+        if repos is None:
+            from github_actions_monitor.ops import checks
+            status, detail = checks.capacity(config)
+            return {"ok": status != "fail", "status": status, "detail": detail}, [f"capacity: {status} ({detail})"], EXIT_OK if status != "fail" else EXIT_DEGRADED
+        rows = limits.planned(config, repos)
+        status, detail = limits.verdict(rows)
+        return {"ok": status != "fail", "status": status, "repos": repos, "rows": rows}, [f"{r['id']}: {r['used']} / {r['limit']} ({r['percent']} %, {r['level']})" for r in rows], EXIT_OK if status != "fail" else EXIT_DEGRADED
+    if action == "workspaces":
+        info = workspace.describe(config)
+        lines = [f"{'*' if w['active'] else ' '} {w['name']}{'' if w['folder_exists'] else ' (folder missing)'}" for w in info["workspaces"]] or ["-"]
+        return info, lines, EXIT_OK
+    if action == "ledger":
+        stats = notify_dedupe.stats()
+        if ctx["force"]:
+            try:
+                Path(notify_dedupe.LEDGER_FILE).unlink()
+            except OSError:
+                pass
+            notify_dedupe.reset()
+            return {"ok": True, "cleared": True}, [i18n.t("cli.toolbox_ledger_cleared")], EXIT_OK
+        return stats, [f"{k}: {v}" for k, v in stats.items()], EXIT_OK
+    rows = event_export.read_events(events_mod.EVENTS_FILE)
+    if action == "summary":
+        report = event_export.summary(rows)
+        lines = [f"events: {report['events']}", f"first: {report['first']}", f"last: {report['last']}"] + [f"kind {k}: {v}" for k, v in report["by_kind"].items()] + [f"repo {k}: {v}" for k, v in list(report["by_repo"].items())[:10]]
+        return report, lines, EXIT_OK
+    if not ctx["file"]:
+        raise CliError(EXIT_USAGE, i18n.t("cli.toolbox_dest"))
+    suffix = str(ctx["file"]).rsplit(".", 1)[-1].lower() if "." in str(ctx["file"]) else ""
+    fmt = {"jsonl": "jsonl", "csv": "csv", "parquet": "parquet", "duckdb": "duckdb", "db": "duckdb"}.get(suffix)
+    if fmt is None:
+        raise CliError(EXIT_USAGE, i18n.t("cli.toolbox_dest"))
+    try:
+        done = event_export.write(rows, ctx["file"], fmt)
+    except event_export.ExportError as error:
+        raise CliError(EXIT_USAGE, i18n.t("cli.toolbox_failed", reason=str(error))) from None
+    return {"ok": True, **done}, [i18n.t("cli.toolbox_exported", rows=done["rows"], file=done["file"], format=fmt)], EXIT_OK
 
 
 def cmd_briefs(ctx):
@@ -913,7 +966,7 @@ def cmd_watch(ctx):
     return None, None, code
 
 
-HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "compare": cmd_compare, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "briefs": cmd_briefs, "screens": cmd_screens, "api": cmd_api, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai, "watch": cmd_watch, "completions": cmd_completions, "kiosk": cmd_kiosk}
+HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "compare": cmd_compare, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "briefs": cmd_briefs, "screens": cmd_screens, "toolbox": cmd_toolbox, "api": cmd_api, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai, "watch": cmd_watch, "completions": cmd_completions, "kiosk": cmd_kiosk}
 
 
 def cmd_update(rest):
@@ -934,7 +987,7 @@ def cmd_update(rest):
 def build_parser():
     ap = argparse.ArgumentParser(prog="monitor_cli.py", description=i18n.t("cli.description"), epilog=i18n.t("cli.epilog"), formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", choices=COMMANDS, help=i18n.t("cli.help_command"))
-    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + BRIEFS_ACTIONS + API_ACTIONS + SKILL_ACTIONS + AI_ACTIONS + BACKUP_ACTIONS + SCREENS_ACTIONS + tuple(w for words in OPERATOR_WORDS.values() for w in words), default=None, help=i18n.t("cli.help_ai_action"))
+    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + BRIEFS_ACTIONS + API_ACTIONS + SKILL_ACTIONS + AI_ACTIONS + BACKUP_ACTIONS + SCREENS_ACTIONS + TOOLBOX_ACTIONS + tuple(w for words in OPERATOR_WORDS.values() for w in words), default=None, help=i18n.t("cli.help_ai_action"))
     ap.add_argument("file", nargs="?", default="", help=i18n.t("cli.help_file"))
     ap.add_argument("--json", action="store_true", help=i18n.t("cli.help_json"))
     for name in ("assistant", "cursor", "generic"):

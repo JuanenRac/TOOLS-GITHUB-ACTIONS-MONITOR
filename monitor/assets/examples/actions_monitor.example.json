@@ -598,7 +598,10 @@
   "outputs": {
     "prometheus": {
       "enabled": false,
-      "per_repo": true
+      "per_repo": true,
+      "histograms": false,
+      "per_runner": false,
+      "histogram_max_series": 200
     },
     "json": {
       "enabled": false
@@ -696,6 +699,9 @@
     "enabled": false,
     "events": ["red_new", "stuck_new", "pending_sign", "offline", "credential_blind"],
     "max_per_hour": 20,
+    "dedupe_ledger": false,
+    "dedupe_hours": 24,
+    "max_event_age_hours": 0,
     "channels": {
       "telegram": {
         "enabled": false,
@@ -823,6 +829,7 @@
   },
   "quota": {
     "billing_api": false,
+    "chip": true,
     "warn_percent": 75,
     "alert_percent": 90,
     "default_runner": "linux",
@@ -928,13 +935,27 @@
   "otlp": {
     "enabled": false,
     "endpoint": "",
-    "interval_seconds": 60
+    "interval_seconds": 60,
+    "cicd_conventions": false,
+    "job_spans": false
   },
   "organizations": {
     "discover": false
   },
   "finops": {
-    "jobs_per_cycle": 0
+    "jobs_per_cycle": 0,
+    "by_change": false,
+    "co2": false,
+    "co2_watts": 40,
+    "co2_grams_per_kwh": 400
+  },
+  "limits": {
+    "warn_percent": 80,
+    "memory_mb": 512
+  },
+  "refresh": {
+    "share_by_workflow": false,
+    "share_seconds": 20
   },
   "fleet": {
     "page_size": 50,
@@ -1098,6 +1119,8 @@
     "min_resolved": 3,
     "min_runs_per_window": 20,
     "min_snapshots": 12,
+    "progressive": false,
+    "progressive_days": 7,
     "top_changes": 10,
     "workdays": ["1", "2", "3", "4", "5"]
   },
@@ -1183,6 +1206,16 @@
     "workflow_hygiene": {
       "enabled": false
     }
+  },
+  "workspaces": {
+    "list": [],
+    "active": ""
+  },
+  "backpressure": {
+    "enabled": false,
+    "max_reads_per_cycle": 0,
+    "shed_percent": 150,
+    "min_reads": 20
   },
   "sampling": {
     "active_probe": false,

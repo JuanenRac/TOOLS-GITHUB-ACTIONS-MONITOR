@@ -8,7 +8,7 @@ targets (your own targets.json or only the neutral example), token (the one-use 
 `--doctor --json` prints the same checks as one JSON document (no secret, no path of a person) for scripts.
 Every check is {"id", "status": ok | warn | fail, "detail", "fix"}; `run()` takes the way of running a command as an argument so the tests need no `gh`.
 
-The complete edition adds the checks of the operation (ORDER_OPS: volumes, supervisor, limits, sqlite_hot, backup_age, disk, metrics; `ops/checks.py`, read only). The lite edition never runs them.
+The complete edition adds the checks of the operation (ORDER_OPS: volumes, supervisor, limits, capacity, sqlite_hot, backup_age, disk, metrics; `ops/checks.py`, read only). The lite edition never runs them.
 Exit codes (stable, for cron): 0 all right; 1 at least one check failed; 3 only warnings and `--strict` (or `ops.doctor.strict_exit`); 4 the doctor itself could not run. Without --strict a warning is still 0.
 """
 import json
@@ -26,8 +26,8 @@ ORDER = ("python", "gh", "login", "quota", "access", "estimate", "network", "fol
 FIX = {"access": "gh auth refresh -h github.com -s repo,read:org   |   https://github.com/settings/tokens (Configure SSO)", "estimate": "", "python": "https://www.python.org/downloads/", "gh": "winget install --id GitHub.cli   |   brew install gh   |   sudo apt install gh", "login": "gh auth login",
        "quota": "gh api rate_limit", "network": "gh api rate_limit", "folder": "", "port": "python bin/actions_monitor.py --port 8800", "docker": "", "rich": "pip install rich",
        "textual": "pip install textual", "targets": "python bin/actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "backend": "", "degraded": "", "credential": "", "timezone": "", "github_app": "", "layout": "python -m github_actions_monitor.util.rootmigrate --apply", "storage": "python tools/migrate_storage.py --from file --to sqlite", "retention": "",
-       "volumes": "", "supervisor": "python bin/monitor_cli.py health --deep", "limits": "", "sqlite_hot": "python tools/backup_storage.py backup FILE.zip --backend sqlite", "backup_age": "python bin/monitor_cli.py backup create", "disk": "", "metrics": ""}
-ORDER_OPS = ("volumes", "supervisor", "limits", "sqlite_hot", "backup_age", "disk", "metrics")
+       "volumes": "", "supervisor": "python bin/monitor_cli.py health --deep", "limits": "", "capacity": "python bin/monitor_cli.py doctor --json", "sqlite_hot": "python tools/backup_storage.py backup FILE.zip --backend sqlite", "backup_age": "python bin/monitor_cli.py backup create", "disk": "", "metrics": ""}
+ORDER_OPS = ("volumes", "supervisor", "limits", "capacity", "sqlite_hot", "backup_age", "disk", "metrics")
 EXIT_OK, EXIT_FAIL, EXIT_WARN, EXIT_DOCTOR_ERROR = 0, 1, 3, 4
 
 

@@ -102,3 +102,11 @@
 - `ui.orientation`, `ui.screen1_tabs`, `ui.now_sort`, `ui.alerts_sort`, `ui.remember_folds` - docs/SCREENS_jpn.md
 - `ports.complete`, `ports.lite` - docs/DEPLOYMENT_jpn.md
 - `notify.users.enabled` - docs/NOTIFICATIONS_jpn.md
+
+## CI/CD の規約に沿った OpenTelemetry とジョブごとのスパン
+
+OpenTelemetry エクスポート（`otlp.*`、どちらも既定ではオフ）の 2 つのスイッチで、トレースをバックエンドで扱いやすくできます。`otlp.cicd_conventions` は各実行のスパンに CI/CD 向け OpenTelemetry セマンティック規約の属性（`cicd.pipeline.name`、`cicd.pipeline.run.id`、`cicd.pipeline.run.url.full`、`cicd.pipeline.result`、`cicd.pipeline.run.attempt`、`vcs.repository.name`、`vcs.repository.ref.name`）を加え、スパン名を `RUN <workflow>` にします。`gha.*` 属性は残ります。`otlp.job_spans` は完了したジョブごとに 1 つのスパン（`TASK <job>`）を、同じトレース内でその実行のスパンの子として送ります。ランナー、そのグループ、ラベル、キュー待ち時間、結果が付きます。ジョブは署名付きの `workflow_job` イベントから得るため Webhook が必要です（Webhook が一度も見ていないジョブにはスパンがありません）。ほかは変わらず、スパンにはタイトル、作者、コミットメッセージ、ログは含まれません。
+
+## 複数のワークスペース
+
+`workspaces.list` には `名前=フォルダー` の項目（このコンピューター上のフォルダーで、ネットワークアドレスは不可）を入れ、`workspaces.active` でモニターがローカルのクローン、監査、署名記録に使うものを指定します。別のクローン群（別の組織や別のコンピューターのコピー）を 1 語変えるだけで切り替えたいときに使います。環境変数 `MONITOR_ROOT` は両方より優先され、`workspaces.active` は `workspace_root` より優先されます。リストが空（既定）なら何も変わりません。`monitor_cli.py toolbox workspaces` で一覧と使用中のものを確認できます。

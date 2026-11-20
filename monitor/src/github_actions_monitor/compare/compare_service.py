@@ -10,6 +10,7 @@ import copy
 import csv
 import io
 import json
+import threading
 import time
 
 from github_actions_monitor.compare import changes, config, metrics, windows
@@ -95,9 +96,52 @@ def _compute(storage, account, raw_config, ask, now, zone):
     return out
 
 
+def _long_window(ask, cfg):
+    """The length in days of a request for the last N days longer than `compare.progressive_days`, else None (a request with `from` / `to` is never split)."""
+    if not cfg["progressive"] or ask.get("from") or ask.get("to"):
+        return None
+    text = str(ask.get("window") or "").strip().lower().rstrip("d")
+    length = int(text) if text.isdigit() else cfg["default_window_days"]
+    return length if length > cfg["progressive_days"] else None
+
+
+_COMPLETING = set()
+
+
+def _finish_in_background(storage, account, raw_config, ask, zone, key):
+    """Computes the whole window on a thread and keeps it in the cache; the next request takes it from there."""
+    if key in _COMPLETING:
+        return
+    _COMPLETING.add(key)
+
+    def work():
+        try:
+            full = _compute(storage, account, raw_config, ask, time.time(), zone)
+            if len(_CACHE) >= MAX_CACHE:
+                _CACHE.pop(next(iter(_CACHE)))
+            _CACHE[key] = (time.monotonic(), copy.deepcopy(full))
+        except Exception:   # noqa: BLE001 - the first answer was already given; a failure here only means the next request computes it
+            pass
+        finally:
+            _COMPLETING.discard(key)
+    threading.Thread(target=work, daemon=True, name="compare-complete").start()
+
+
 def build(storage, account, raw_config, ask=None, now=None, zone=None):
-    """The answer for `ask` (window, from, to, baseline, base_from, base_to, days). Raises windows.WindowError for a request that makes no sense. Cached for `compare.cache_seconds` unless `now` is given."""
+    """The answer for `ask` (window, from, to, baseline, base_from, base_to, days). Raises windows.WindowError for a request that makes no sense. Cached for `compare.cache_seconds` unless `now` is given.
+    With `compare.progressive` on, a window longer than `compare.progressive_days` is answered at once with its last days (marked `partial`) while the whole one is finished in the background."""
     cfg = config.settings(raw_config)
+    if now is None and cfg["enabled"] and _long_window(ask or {}, cfg):
+        ask = ask or {}
+        full_key = (id(storage), account, tuple(sorted((str(k), str(v)) for k, v in ask.items())), json.dumps(cfg, sort_keys=True))
+        hit = _CACHE.get(full_key)
+        if hit and time.monotonic() - hit[0] < max(cfg["cache_seconds"], 60):
+            return copy.deepcopy(hit[1])
+        requested = _long_window(ask, cfg)
+        first = _compute(storage, account, raw_config, {**ask, "window": f"{cfg['progressive_days']}d"}, time.time(), zone)
+        first["partial"] = {"requested_days": requested, "shown_days": cfg["progressive_days"], "completing": True}
+        _finish_in_background(storage, account, raw_config, ask, zone, full_key)
+        return first
     key = None
     if now is None and cfg["cache_seconds"] > 0 and cfg["enabled"]:
         key = (id(storage), account, tuple(sorted((str(k), str(v)) for k, v in (ask or {}).items())), json.dumps(cfg, sort_keys=True))

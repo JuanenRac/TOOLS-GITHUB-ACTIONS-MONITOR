@@ -70,6 +70,8 @@ OLLAMA_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}/?\Z
 HTTPS_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250})?\Z")
 AI_URL_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#!$&()*+,;=%-]{4,250}|http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/-]{0,100})?)?\Z")   # https, or a server on this computer
 PROXY_HOST_RE = re.compile(r"^([A-Za-z0-9]([A-Za-z0-9.-]{0,98}[A-Za-z0-9])?)?\Z")      # the public NAME of an HTTPS proxy: a host name only, no port, path, user or space (empty = none)
+WORKSPACE_RE = re.compile(r"^[A-Za-z0-9._-]{1,40}=(?!\\\\|//)(?!.*://)[^\x00-\x1f]{1,255}\Z")      # workspaces.list: name=folder on this computer, never a network address
+WS_NAME_RE = re.compile(r"^[A-Za-z0-9._-]{0,40}\Z")      # workspaces.active: the name of one of the list, or nothing
 WORKDAY_RE = re.compile(r"^[1-7]\Z")      # compare.workdays: one day of the week, Monday = 1
 ENV_NAME_RE = re.compile(r"^([A-Z_][A-Z0-9_]{0,63})?\Z")
 AI_ENV_RE = re.compile(r"^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|MONITOR_[A-Z0-9_]*)\Z)([A-Z_][A-Z0-9_]{0,63})?\Z")   # the NAME of the variable of the key of a provider: never a variable of the system or of the monitor   # the NAME of an environment variable, never the key itself
@@ -141,6 +143,7 @@ _f("basic", "plan", "quota.default_runner", "enum", ("linux", "windows", "macos"
 _f("basic", "plan", "quota.warn_percent", "int", (1, 100), unit="%", restart=False)
 _f("basic", "plan", "quota.alert_percent", "int", (1, 100), unit="%", restart=False)
 _f("basic", "plan", "quota.billing_api", "bool", restart=False, secure=True)
+_f("basic", "plan", "quota.chip", "bool", restart=False)
 _f("basic", "safety", "session_guard", "bool", restart=False, secure=True)
 _f("basic", "discovery", "discovery.events", "bool", restart=False)
 _f("basic", "discovery", "discovery.suggest_groups", "bool", restart=False)
@@ -299,6 +302,14 @@ _f(_T_POLL, "pagination", "pagination.workflow_pages", "int", (1, 20), unit="", 
 _f(_T_POLL, "pagination", "pagination.job_pages", "int", (1, 20), unit="", restart=False)
 _f(_T_POLL, "pagination", "pagination.collab_pages", "int", (1, 20), unit="", restart=False)
 _f(_T_POLL, "pagination", "pagination.cursor_pages", "int", (0, 20), unit="", restart=False)
+_f(_T_POLL, "backpressure", "backpressure.enabled", "bool", restart=False)
+_f(_T_POLL, "backpressure", "backpressure.max_reads_per_cycle", "int", (0, 5000), restart=False, unit="")
+_f(_T_POLL, "backpressure", "backpressure.shed_percent", "int", (100, 1000), restart=False, unit="%")
+_f(_T_POLL, "backpressure", "backpressure.min_reads", "int", (1, 500), restart=False, unit="")
+_f(_T_POLL, "limits", "limits.warn_percent", "int", (50, 99), restart=False, unit="%")
+_f(_T_POLL, "limits", "limits.memory_mb", "int", (64, 65536), restart=False, unit="MB")
+_f(_T_POLL, "shared_refresh", "refresh.share_by_workflow", "bool", restart=False)
+_f(_T_POLL, "shared_refresh", "refresh.share_seconds", "int", (1, 600), restart=False, unit="s")
 _f(_T_POLL, "sampling", "sampling.default_branch_probe", "bool", restart=False)
 _f(_T_POLL, "sampling", "sampling.active_probe", "bool", restart=False)
 _f(_T_POLL, "sampling", "sampling.min_coverage_minutes", "int", (0, 10080), unit="min", restart=False)
@@ -526,6 +537,8 @@ _f(_T_SENT, "compare", "compare.min_repo_runs", "int", (1, 1000), restart=False,
 _f(_T_SENT, "compare", "compare.top_changes", "int", (3, 50), restart=False, unit="")
 _f(_T_SENT, "compare", "compare.include_in_report", "bool", restart=False)
 _f(_T_SENT, "compare", "compare.cache_seconds", "int", (0, 3600), restart=False)
+_f(_T_SENT, "compare", "compare.progressive", "bool", restart=False)
+_f(_T_SENT, "compare", "compare.progressive_days", "int", (1, 29), restart=False, unit="d")
 # --- The log of actions (Complete only): who changed what, with a chain of hashes; on by default, only names and never values
 _f(_T_SENT, "audit_log", "audit_log.enabled", "bool", restart=False, secure=True)
 _f(_T_SENT, "audit_log", "audit_log.max_mb", "int", (1, 500), restart=False, unit="MB")
@@ -540,6 +553,8 @@ _f(_T_SENT, "report_schedule", "report_schedule.keep", "int", (1, 500), restart=
 _f(_T_SENT, "report_schedule", "report_schedule.top", "int", (1, 50), restart=False, unit="")
 # --- Folders and files
 _f(_T_PATHS, "workspace", "workspace_root", "path")
+_f(_T_PATHS, "workspace", "workspaces.list", "names", restart=False)
+_f(_T_PATHS, "workspace", "workspaces.active", "text", WS_NAME_RE, restart=False)
 _f(_T_PATHS, "workspace", "signed_dir", "path")
 _f(_T_PATHS, "workspace", "audit_dir", "path")
 _f(_T_PATHS, "workspace", "tools_dir", "path")
@@ -574,6 +589,9 @@ _f(_T_PATHS, "ops_doctor", "ops.doctor.webhook_min_length", "int", (8, 128), res
 # --- Outputs and exports
 _f(_T_OUT, "prometheus", "outputs.prometheus.enabled", "bool", restart=False, secure=True)
 _f(_T_OUT, "prometheus", "outputs.prometheus.per_repo", "bool", restart=False)
+_f(_T_OUT, "prometheus", "outputs.prometheus.histograms", "bool", restart=False)
+_f(_T_OUT, "prometheus", "outputs.prometheus.per_runner", "bool", restart=False)
+_f(_T_OUT, "prometheus", "outputs.prometheus.histogram_max_series", "int", (10, 2000), restart=False, unit="")
 _f(_T_OUT, "json", "outputs.json.enabled", "bool", restart=False, secure=True)
 _f(_T_OUT, "dashboard", "outputs.dashboard.enabled", "bool", restart=False, secure=True)
 # Save and print the report of a tab (reporting/tab_report.py): which formats the dialog marks, the suggested file name, the paper and the way the PDF is made
@@ -704,6 +722,9 @@ _f("notify", "main", "notify.allow_private_targets", "bool", secure=True)
 _f("notify", "main", "network.use_proxy", "bool", restart=False, secure=True)
 _f("notify", "main", "notify.events", "names")
 _f("notify", "main", "notify.max_per_hour", "int", (1, 600), unit="")
+_f("notify", "main", "notify.dedupe_ledger", "bool", restart=False)
+_f("notify", "main", "notify.dedupe_hours", "int", (1, 720), restart=False, unit="h")
+_f("notify", "main", "notify.max_event_age_hours", "int", (0, 8760), restart=False, unit="h")
 _f("notify", "ch_telegram", "notify.channels.telegram.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
 _f("notify", "ch_telegram", "notify.channels.telegram.token_env", "text", NOTIFY_ENV_RE, label=["cfg.p.token_env"], help="cfg.h.p.token_env")
 _f("notify", "ch_telegram", "notify.channels.telegram.chat_id", "text", CHAT_RE, label=["cfg.p.chat_id"], help="cfg.h.p.chat_id")
@@ -836,8 +857,14 @@ _f("advanced", "runner_model", "runners.model.alert_level", "enum", ("info", "wa
 _f("advanced", "otlp", "otlp.enabled", "bool", restart=False, secure=True)
 _f("advanced", "otlp", "otlp.endpoint", "text", OTLP_RE, restart=False, secure=True)
 _f("advanced", "otlp", "otlp.interval_seconds", "int", (15, 3600), restart=False)
+_f("advanced", "otlp", "otlp.cicd_conventions", "bool", restart=False)
+_f("advanced", "otlp", "otlp.job_spans", "bool", restart=False)
 _f("advanced", "orgs", "organizations.discover", "bool", restart=False)
 _f("advanced", "finops", "finops.jobs_per_cycle", "int", (0, 50), restart=False, unit="calls")
+_f("advanced", "finops", "finops.by_change", "bool", restart=False)
+_f("advanced", "finops", "finops.co2", "bool", restart=False)
+_f("advanced", "finops", "finops.co2_watts", "int", (1, 2000), restart=False, unit="")
+_f("advanced", "finops", "finops.co2_grams_per_kwh", "int", (1, 2000), restart=False, unit="")
 _f(_T_AI, "alerts", "ai_alerts.enabled", "bool", restart=False)
 _f(_T_AI, "alerts", "ai_alerts.folder", "path", restart=False)
 _f(_T_AI, "alerts", "ai_alerts.brief_max_bytes", "int", (512, 20000), restart=False, unit="")
@@ -888,7 +915,7 @@ SCHEMA = [(tab, key, kind, bounds, restart) for tab, _block, key, kind, bounds, 
 FIELDS = {row[1]: row for row in SCHEMA}
 GROUPS = tuple(dict.fromkeys(row[0] for row in SCHEMA))
 assert set(GROUPS) <= set(TAB_ORDER)
-OUTPUT_DEFAULTS = {"prometheus": {"enabled": False, "per_repo": True}, "json": {"enabled": False}, "dashboard": {"enabled": False}}
+OUTPUT_DEFAULTS = {"prometheus": {"enabled": False, "per_repo": True, "histograms": False, "per_runner": False, "histogram_max_series": 200}, "json": {"enabled": False}, "dashboard": {"enabled": False}}
 STATUS_KEYS = {"webhook.signing_state", "chatops.slack.state", "chatops.discord.state"}      # computed, read-only: never written
 
 
@@ -984,7 +1011,7 @@ def check_value(path, value):
             return False, "path"      # the folder of the copies: never empty and a relative one never climbs out of the data folder
         return True, text
     if kind == "names":
-        pattern = WS_TARGET_RE if path == "webhook.ws_targets" else REDELIVER_HOOK_RE if path == "webhook.redeliver.hooks" else USES_RE if path == "sentinels.supply.ignore_uses" else WORKDAY_RE if path == "compare.workdays" else FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else RUNNER_LABEL_RE if path in RUNNER_LABEL_KEYS else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path in ("sentinel.hygiene.ruleset_names", "sentinels.delivery.expected_assets") else (PATH_RE if path in PATH_KEYS else (alertflow.SILENCE_RE if path == "alerts.silences" else (alertflow.PATTERN_RE if path == "alerts.service.workflows" else (PAIR_RE if path in PAIR_KEYS else NAME_RE)))))))
+        pattern = WS_TARGET_RE if path == "webhook.ws_targets" else REDELIVER_HOOK_RE if path == "webhook.redeliver.hooks" else USES_RE if path == "sentinels.supply.ignore_uses" else WORKSPACE_RE if path == "workspaces.list" else WORKDAY_RE if path == "compare.workdays" else FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else RUNNER_LABEL_RE if path in RUNNER_LABEL_KEYS else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path in ("sentinel.hygiene.ruleset_names", "sentinels.delivery.expected_assets") else (PATH_RE if path in PATH_KEYS else (alertflow.SILENCE_RE if path == "alerts.silences" else (alertflow.PATTERN_RE if path == "alerts.service.workflows" else (PAIR_RE if path in PAIR_KEYS else NAME_RE)))))))
         if not isinstance(value, list) or len(value) > 200 or not all(isinstance(v, str) and pattern.match(v) for v in value):
             return False, "names"
         if path == "sentinel.hygiene.ruleset_names" and not value:

@@ -102,3 +102,11 @@
 - `ui.orientation`, `ui.screen1_tabs`, `ui.now_sort`, `ui.alerts_sort`, `ui.remember_folds` - docs/SCREENS_zho.md
 - `ports.complete`, `ports.lite` - docs/DEPLOYMENT_zho.md
 - `notify.users.enabled` - docs/NOTIFICATIONS_zho.md
+
+## 符合 CI/CD 约定的 OpenTelemetry 和每个作业一个 span
+
+OpenTelemetry 导出的两个开关（`otlp.*`，默认均关闭）让 trace 在后端更好用。`otlp.cicd_conventions` 会给每次运行的 span 加上 OpenTelemetry CI/CD 语义约定的属性（`cicd.pipeline.name`、`cicd.pipeline.run.id`、`cicd.pipeline.run.url.full`、`cicd.pipeline.result`、`cicd.pipeline.run.attempt`、`vcs.repository.name`、`vcs.repository.ref.name`），并把 span 命名为 `RUN <workflow>`；`gha.*` 属性保留。`otlp.job_spans` 为每个已完成的作业发送一个 span（`TASK <job>`），在同一条 trace 中作为其运行 span 的子 span，带有 runner、其组、标签、排队时间和结果；它需要 webhook，因为作业来自已签名的 `workflow_job` 事件（webhook 从未见过的作业没有 span）。其余不变：span 仍不包含标题、作者、提交信息或日志。
+
+## 多个工作区
+
+`workspaces.list` 保存 `名称=文件夹` 形式的条目（本机上的文件夹，绝不是网络地址），`workspaces.active` 指定监视器用于本地克隆、审计和签名记录的那一个。适用于想只改一个词就切换的第二组克隆（另一个组织、另一台计算机的副本）。环境变量 `MONITOR_ROOT` 优先于两者，`workspaces.active` 优先于 `workspace_root`。列表为空（默认）时一切不变。`monitor_cli.py toolbox workspaces` 会列出它们并说明正在使用哪一个。

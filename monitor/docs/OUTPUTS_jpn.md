@@ -84,3 +84,41 @@ GitHub Actions 向けの他のツールの仕組みを調べて、いくつか�
 - レポートは `GET /api/report/tab?tab=now&lang=ja`(`&fmt=json`、`&fmt=txt`、`&fmt=options`)で提供され、2 つのエディションで同じです。
 
 設定(設定 > 他のツール向け出力 > 「タブのレポートの保存と印刷」): `report_export.txt`、`report_export.pdf`、`report_export.json`(最初にオンになるチェックボックス。TXT と PDF はオン、JSON はオフ)、`report_export.name`(提案名。既定は `monitor-{tab}-{date}`)、`report_export.paper`(`a4` または `letter`。既定は `a4`)、`report_export.pdf_path`(`auto`、`own`、`browser`。既定は `auto`)。
+
+## サーバーのメトリクス：サイクル、読み取りキュー、課金、ランナー、ヒストグラム
+
+上のゲージに加えて、`/metrics` は次を書き出します（不明な値は省略されます）。
+
+| メトリクス | ラベル | 意味 |
+|---|---|---|
+| `ghamon_ticks_total`、`ghamon_tick_failures_total` | | 完了した更新サイクルと、エラーで終わったサイクル（カウンター） |
+| `ghamon_tick_last_seconds`、`ghamon_tick_phase_seconds`、`ghamon_tick_seconds` | `phase` | 直近サイクルと各フェーズの所要時間、および全サイクルのヒストグラム |
+| `ghamon_tick_last_ok_timestamp_seconds`、`ghamon_tick_reads_last` | | 直近のサイクルが正常終了した時刻と、読み取ったリポジトリ数 |
+| `ghamon_read_retries_total` | | 一時的な理由で失敗し再試行された読み取り（カウンター） |
+| `ghamon_repos_circuit_open`、`ghamon_repos_read_failing`、`ghamon_repos_read_fail_streak_max` | | 連続して失敗したため次の読み取りまで待つリポジトリ（サーキット）、直近の読み取りが失敗したリポジトリ、最長の連続失敗数 |
+| `ghamon_read_queue_depth`、`ghamon_read_queue_allowed`、`ghamon_read_queue_oldest_wait_cycles`、`ghamon_read_queue_deferred_total`、`ghamon_read_queue_shed_cycles_total` | | バックプレッシャー付きの読み取りキュー（`backpressure.enabled` がオンのときのみ） |
+| `ghamon_billing_minutes_total`、`ghamon_billing_minutes_included`、`ghamon_billing_minutes_paid`、`ghamon_billing_sku_minutes`、`ghamon_billing_usd` | `sku`、`product` | 当月の課金レポート（`quota.billing_api` がオンのときのみ。スクレイプは GitHub を読まず、サイクルが保持する最新のレポートを書き出します） |
+| `ghamon_runners` | `state` | アイドル、実行中、オフラインのセルフホストランナー（`runners.enabled`） |
+| `ghamon_runner_up`、`ghamon_runner_busy` | `runner` | ランナーごと（`outputs.prometheus.per_runner`） |
+| `ghamon_runner_kind_jobs_waiting`、`ghamon_runner_kind_oldest_wait_seconds` | `kind` | ランナー種別ごとの未開始ジョブと最長待ち時間（`runners.model.enabled`） |
+
+`outputs.prometheus.histograms` をオンにし（Webhook がジョブイベントを受け取っている場合）、署名付きの `workflow_job` と `workflow_run` イベントからメモリ上で作る**ヒストグラム**も書き出します。
+
+| メトリクス | ラベル | 意味 |
+|---|---|---|
+| `ghamon_job_wait_seconds` | `runner_group`、`label` | ジョブのキュー待ち時間（**ジョブごとに 1 回**） |
+| `ghamon_job_run_seconds` | `runner_group`、`label`、`conclusion` | 完了したジョブの所要時間 |
+| `ghamon_workflow_run_seconds` | `conclusion` | 完了した実行の所要時間 |
+| `ghamon_jobs_total` | `label`、`conclusion` | 完了したジョブ数（カウンター） |
+| `ghamon_runner_jobs_waiting`、`ghamon_runner_oldest_wait_seconds` | `label` | 現在のランナー需要：キューにあり未開始のジョブと最長待ち時間 |
+
+`outputs.prometheus.histogram_max_series`（既定 200）は各ヒストグラムの系列数を制限し、超えた分はラベル値 `other` にまとめられます。`outputs.prometheus.per_runner` をオンにすると、セルフホストランナーごとに `ghamon_runner_jobs_total`、`ghamon_runner_jobs_failed_total`、`ghamon_runner_busy_seconds_total` が追加されます（`GET /api/runners/model` の `per_runner` にも出ます）。
+
+## オブザーバビリティパック：アラートルール、Alertmanager、OnCall、n8n
+
+`docs/grafana/` には 2 つのダッシュボードのほかに、コピーして調整するパックがあります。
+
+- `ghamon_alert_rules.yml`：Prometheus（vmalert も可）用のルールと PromQL。モニターが応答しない、赤いワークフローと連続失敗、利用枠や課金が上限に近い、サイクルが遅い・止まっている、サーキット中のリポジトリ、読み取りの待ちが長すぎる、ランナーを待つジョブ（`histogram_quantile(0.95, sum by (le, label) (rate(ghamon_job_wait_seconds_bucket[30m])))`）、オフラインのランナー、空きランナーのない需要。
+- `alertmanager.example.yml`：重大度別に 3 つの受信先（既定の Webhook、Grafana OnCall、n8n）へ振り分けるルート。すべてのアドレスは `https://example.invalid/...` で、自分のものを書くまで何も送信されません。ファイルに秘密情報を書かないでください。
+- `n8n_ghamon_alerts.json`：Alertmanager の Webhook を受け取りアラートごとに 1 件のメッセージを作る n8n のワークフロー。最後のノードは、チャット、メール、チケットのノードに置き換えるまで何もしません。
+- `prometheus.example.yml` と `docker-compose.observability.yml` は、パックを試すためにモニターのコンピューター上で Prometheus、Alertmanager、Grafana を起動します（コンテナーはホストのネットワークを共有し、ポートは `127.0.0.1` にあり、Grafana のパスワードはファイルではなくシェルから渡します）。

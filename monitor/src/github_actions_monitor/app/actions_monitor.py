@@ -44,6 +44,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from github_actions_monitor.data_pipeline import analytics
+from github_actions_monitor.data_pipeline import backpressure, quota_buckets, tickstats
+from github_actions_monitor.integrations import notify_dedupe  # noqa: F401 - its ledger file is one of the state files an account child redirects
 from github_actions_monitor.data_pipeline import activity
 from github_actions_monitor.data_pipeline import fork_ci
 from github_actions_monitor.data_pipeline import discovery
@@ -140,7 +142,7 @@ DEFAULTS = {
     "open_browser": True,
     "modes": {"start": "normal", "default_minutes": 60},     # normal | fast | turbo: see modes.py; the presets can be edited under modes.fast / modes.turbo
     "account": {"plan": "unknown"},     # free | pro | team | enterprise: the quotas of the plan come from quotas.json (quota.py)
-    "quota": {"billing_api": False, "warn_percent": 75, "alert_percent": 90, "default_runner": "linux", "failover": False, "failover_max_age_minutes": 60},
+    "quota": {"billing_api": False, "chip": True, "warn_percent": 75, "alert_percent": 90, "default_runner": "linux", "failover": False, "failover_max_age_minutes": 60},
     "session_guard": True,         # the page asks for a one-use token before it changes a setting or confirms an action
     "discovery": {"events": True, "suggest_groups": True, "auto_frequency": False, "hide": [], "skip_archived": True, "fork_policy": "show", "fork_ci_days": 90, "fork_checks_per_pass": 30},
     "auth": {"enabled": False, "session_hours": 12, "max_failed_logins": 5, "lockout_minutes": 15, "min_length": 10, "allow_bearer": False, "audit": True},     # OFF: one person, no login. On: users with roles once the first administrator exists (security/auth.py)
@@ -156,14 +158,18 @@ DEFAULTS = {
                           "thirdparty_usd_per_minute": 0.0, "alerts": True, "alert_level": "warning"}},      # OFF: kinds of runner, queue and cost by kind, runaway workflows, self-hosted queues (runner_model.py)
     "upstream": {"enabled": False, "refresh_hours": 12, "requests_per_hour": 6, "forks_per_request": 8, "news_days": 7, "notify": False, "repos": []},      # OFF: follow the original repository of each fork, its CI and its latest release (data_pipeline/upstream.py)
     "api": {"v1_enabled": "auto", "experimental_routes": False, "default_limit": 50, "max_limit": 200, "cursor_ttl_seconds": 900, "gzip_min_bytes": 1024},      # auto = on in the service mode, off for one person at one computer: the read API under /api/v1/ (app/api_v1.py)
-    "compare": {"enabled": False, "default_window_days": 7, "default_days_filter": "all", "workdays": ["1", "2", "3", "4", "5"], "min_runs_per_window": 20, "min_days_of_history": 14, "min_resolved": 3, "min_snapshots": 12, "min_repo_runs": 3, "top_changes": 10, "include_in_report": False, "cache_seconds": 60},      # OFF: this period against the one before (compare/): read only, from the ledger and the snapshots of the score
-    "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
+    "compare": {"enabled": False, "default_window_days": 7, "default_days_filter": "all", "workdays": ["1", "2", "3", "4", "5"], "min_runs_per_window": 20, "min_days_of_history": 14, "min_resolved": 3, "min_snapshots": 12, "min_repo_runs": 3, "top_changes": 10, "include_in_report": False, "cache_seconds": 60, "progressive": False, "progressive_days": 7},      # OFF: this period against the one before (compare/): read only, from the ledger and the snapshots of the score
+    "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60, "cicd_conventions": False, "job_spans": False},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
     "organizations": {"discover": False},                                    # OFF: list the organisations of the login (orgs.py)
-    "finops": {"jobs_per_cycle": 0},
+    "finops": {"jobs_per_cycle": 0, "by_change": False, "co2": False, "co2_watts": 40, "co2_grams_per_kwh": 400},      # the cost of the minutes; by_change and co2 are estimates from the runs already held (data_pipeline/change_cost.py)
+    "limits": {"warn_percent": 80, "memory_mb": 512},      # the ceilings the doctor and /metrics compare the setup with (data_pipeline/limits.py)
+    "refresh": {"share_by_workflow": False, "share_seconds": 20},      # OFF: one read of a workflow for every caller that asks at the same time (data_pipeline/sharedread.py)
     "fleet": {"page_size": 50, "group_by": "ecosystem", "sort": "risk", "show_all_active": True, "labels": [], "saved_filters": []},      # the fleet view of the Team tab (health/fleet.py)
     "network": {"use_proxy": False, "etag": True, "graphql_checks": True, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
     "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
     "pagination": {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3, "cursor_pages": 3},      # pages of 100 followed when a list is full, and said when something is cut (paging.py)
+    "workspaces": {"list": [], "active": ""},      # OFF while the list is empty: several workspaces (name=folder), the one named in active is used (app/workspace.py)
+    "backpressure": {"enabled": False, "max_reads_per_cycle": 0, "shed_percent": 150, "min_reads": 20},      # OFF: a bounded queue for the reads of a cycle, the rest waits for the next one (data_pipeline/backpressure.py)
     "sampling": {"default_branch_probe": False, "active_probe": False, "min_coverage_minutes": 30, "api_budget_per_hour": 0},      # how much of a repository the list of runs shows, a second look at the default branch, a budget of requests (sampling.py)
     "savings": {"webhook_first": False, "webhook_live_per_repo": False, "webhook_window_minutes": 60, "webhook_full_minutes": 360, "feeds": {"enabled": False, "method": "atom", "max_age_minutes": 240}},      # read less: OFF (savings.py)
     "logs": {"failed_step": {"enabled": False, "lines": 12, "max_bytes": 2000, "max_per_minute": 10}},      # the log of the failed step in the page: OFF, one press of a button, steplog.py
@@ -378,18 +384,26 @@ def savings_report(config):
             "total": figures["total"], "unknown": figures["unknown"]}
 
 
+def quota_chip_on(config):
+    """`quota.chip` (on by default): the chip of the header shows the tightest bucket of the allowance."""
+    block = config.get("quota") if isinstance(config, dict) and isinstance(config.get("quota"), dict) else {}
+    return block.get("chip", True) is not False
+
+
 def rate_probes(config):
     """{"user": {...}, "app": {...}, "extra": {...}}: the allowance of each source that is on, from the free call `rate_limit` (each answers for its own token). A source that cannot answer is left out."""
     from github_actions_monitor.data_pipeline import readpool
     out = {}
     for name in readpool.available(config) if len(readpool.available(config)) > 1 else ["user"]:
         try:
-            core = gh("api", "rate_limit", retries=0, source=name)["resources"]["core"] if name != "user" else gh("api", "rate_limit", retries=0, as_user=True)["resources"]["core"]
+            resources = gh("api", "rate_limit", retries=0, source=name)["resources"] if name != "user" else gh("api", "rate_limit", retries=0, as_user=True)["resources"]
+            core = resources["core"]
         except Exception:   # noqa: BLE001
             if name == "user":
                 raise
             readpool.note_failure(name)
             continue
+        quota_buckets.note(name, resources)      # every bucket of this source, for the chip and the breakdown by account (nothing is read here that the call did not already bring)
         out[name] = {"remaining": core["remaining"], "limit": core["limit"], "reset": datetime.fromtimestamp(core["reset"], timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
         readpool.note_probe(name, core["remaining"])
     return out
@@ -971,6 +985,9 @@ def rate_block_state(rate=None, now=None):
     return {"blocked": blocked, "until": datetime.fromtimestamp(until, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ") if until else None, "unread": RATE_BLOCK["unread"]}
 
 
+REFRESH_COUNT = [0]      # repositories the last cycle read (the metric ghamon_tick_reads_last)
+
+
 def refresh_runs(repos, config, progress=None):
     """Hot repositories every cycle with the full run list, cold ones only now and then with a short list."""
     now = time.time()
@@ -1024,6 +1041,9 @@ def refresh_runs(repos, config, progress=None):
         return 1 + (1 if probing and full else 0) + (2 if watching and full else 0)
     todo, waiting = sampling.plan(todo, red_repos_of([r for r, _n in todo]) if limit else set(), limit, BUDGET.used(), price)      # a spent budget: the repositories with red first, the others wait
     SAMPLING_STATE["dropped"] = [item[0] for item in waiting]
+    todo, _waiting = backpressure.plan(todo, config, hot=[r for r, _n in todo if is_hot(r, config, now)], red=red_repos_of([r for r, _n in todo]), held=RUN_CACHE,
+                                     last_seconds=tickstats.STATE.get("last_seconds"), interval=config.get("refresh_seconds"))      # backpressure.enabled (off): a bounded queue, the rest waits for the next cycle
+    REFRESH_COUNT[0] = len(todo)
     for start in range(0, len(todo), 40):  # chunks, so the page can show the first results while the rest loads
         chunk = todo[start:start + 40]
         with ThreadPoolExecutor(max_workers=config["max_workers"]) as pool:
@@ -1123,6 +1143,7 @@ def note_read(repo, runs, error):
     fails = (entry or {}).get("fails", 0) + 1
     retry_at = time.time() + resilience.retry_delay(fails)      # a repository that keeps failing is left alone for a while instead of being read in every cycle
     if resilience.is_transient(error) and fails < resilience.TRANSIENT_CYCLES:
+        tickstats.note_retry()
         if entry:
             entry.update({"fails": fails, "at": 0, "retry_at": retry_at})      # the old picture stays and the read is repeated in the next cycle; nothing is shown yet
         else:
@@ -1140,7 +1161,17 @@ def run_jobs(repo, run_id):
 
 
 def run_jobs_info(repo, run_id):
-    """(jobs, seen, total): the jobs of a run read in pages of 100 (up to pagination.job_pages); total is what GitHub says there are, so a matrix that is cut is said ("seen 100 of 240")."""
+    """(jobs, seen, total): the jobs of a run read in pages of 100 (up to pagination.job_pages); total is what GitHub says there are, so a matrix that is cut is said ("seen 100 of 240").
+    With refresh.share_by_workflow on, the callers that ask for the same run at the same moment share one read (data_pipeline/sharedread.py)."""
+    try:
+        from github_actions_monitor.data_pipeline import sharedread
+        return sharedread.read(LIVE_CONFIG or toolconfig.raw_config(), f"jobs:{repo}:{run_id}", lambda: _run_jobs_info(repo, run_id))
+    except Exception as error:   # noqa: BLE001 - the shared reader never stops a read
+        degraded.note("loop.extra", error)
+        return _run_jobs_info(repo, run_id)
+
+
+def _run_jobs_info(repo, run_id):
     try:
         pages = paging.settings(toolconfig.raw_config())["job_pages"]
         page = paging.read_pages(lambda path: gh("api", path, retries=1), f"repos/{toolconfig.github_owner()}/{repo}/actions/runs/{run_id}/jobs", "jobs", 100, pages)
@@ -1363,7 +1394,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "updated_local": tzdisplay.stamp(time.time()), "took": round(time.time() - started, 1),
         "repos": repos, "ecosystems": {repo: ecosystem_of(repo) for repo in repos},
         "runs": runs[:600], "runs_total": len(runs), "active": active, "ghosts": ghost_rows, "issues": ISSUE_CACHE["items"], "failing": unresolved_failures(runs, {r: m.get("branch") for r, m in meta.items() if m.get("branch")}),
-        "errors": errors, "rate": rate, "rate_user": rate_user, "rate_sources": rate_sources, "quota_trend": __import__("github_actions_monitor.data_pipeline.quotawatch", fromlist=["_"]).trend(), "stuck_minutes": config["stuck_minutes"],
+        "errors": errors, "rate": rate, "rate_user": rate_user, "rate_sources": rate_sources, "quota_chip": quota_buckets.chip() if quota_chip_on(config) else None, "quota_trend": __import__("github_actions_monitor.data_pipeline.quotawatch", fromlist=["_"]).trend(), "stuck_minutes": config["stuck_minutes"],
         "mode": config["mode"], "refreshed": refreshed, "hot": hot, "loading": progress_text if loading else "",
         "quota_block": rate_block_state(rate), "min_rate": config["min_rate_remaining"], "paused_quota": bool(rate and rate["remaining"] < config["min_rate_remaining"]),
         "refresh_seconds": config["refresh_seconds"], "hot_only": hot_only_state(),
@@ -1596,6 +1627,14 @@ def apply_live_event(record, config):
     LIVE_EVENTS.append({k: v for k, v in record.items() if k in webhook.LIVE_FIELDS} | {"at": resilience.stamp(time.time())})
     del LIVE_EVENTS[:-keep]
     LIVE_TOTAL[0] += 1
+    try:      # outputs.prometheus.histograms / per_runner (off by default): the histograms and the per-runner figures of the job events; never stops the event
+        from github_actions_monitor.integrations import job_metrics
+        job_metrics.COLLECTOR.feed(record, config)
+        if (config.get("otlp") or {}).get("job_spans") is True:      # otlp.job_spans (off): the finished jobs become spans of the OpenTelemetry export
+            from github_actions_monitor.integrations import otlp
+            otlp.note_job(record)
+    except Exception as error:   # noqa: BLE001
+        degraded.note("webhook.metrics", error)
     run = webhook.as_run(record)
     entry = RUN_CACHE.get(record["repo"])
     HOT_FORCED.add(record["repo"])      # whatever the event said, the repository is read again in the next cycle (the event is the news, the read is the proof)
@@ -1814,7 +1853,11 @@ def runner_model_payload(now=None):
     tallies = [v for v in RUN_KINDS.values() if v.get("at", 0) >= now - 86400]
     reader = RUNNER_FILES["reader"]
     declared = {repo: {name: runner_model.static_runs_on(text) for name, text in reader.texts(repo).items()} for repo in reader.known() if reader.state(repo)["state"] != "not_evaluable"} if reader else {}
-    return runner_model.build(config, rows, data.get("runs") or [], tallies, quota.load(), runner_list(config), now, config.get("runs_per_repo") or 0, declared, PRIVATE, set(data.get("repos") or []))
+    model = runner_model.build(config, rows, data.get("runs") or [], tallies, quota.load(), runner_list(config), now, config.get("runs_per_repo") or 0, declared, PRIVATE, set(data.get("repos") or []))
+    from github_actions_monitor.integrations import job_metrics
+    if job_metrics.settings(config)["per_runner"]:      # outputs.prometheus.per_runner (off): the figures of each self-hosted runner, from the signed job events
+        model["per_runner"] = job_metrics.COLLECTOR.runner_stats()
+    return model
 
 
 def runner_alerts():
@@ -2554,6 +2597,8 @@ def run_cycle(config, generation):
         print(banner.tag(LITE["on"]), i18n.t("mon.loaded", n=snapshot["loading"]), flush=True)
 
     WATCH.begin()
+    cycle_t0 = time.time()
+    phase_marks = {}
     try:      # the log says that a cycle began, so a long one is not mistaken for a monitor that stopped
         with private_io.open_append(LOG_FILE) as log:
             log.write(tzdisplay.localize(f"{datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')} cycle=started\n"))
@@ -2561,6 +2606,7 @@ def run_cycle(config, generation):
         WATCH.log_failed(error)
     brief_status(toolconfig.raw_config() if not LITE["on"] else config, "running, a cycle has started, the alerts below are from the last complete cycle")
     data = collect(config, publish)
+    phase_marks["collect"] = time.time() - cycle_t0
     if WATCH.current(generation):      # the finished picture goes to the page NOW: the box "loading repositories" must not wait for the upkeep that follows (it may be slow)
         with LOCK:
             STATE["data"], STATE["error"], STATE["hint"] = data, None, None
@@ -2571,7 +2617,9 @@ def run_cycle(config, generation):
     data["offline"] = LINK.state()
     data["etag"] = ETAG["cache"].stats() if ETAG["cache"] else None
     data["github_status"] = githubstatus.STATUS.snapshot(config)      # the state of GitHub for the bar (nothing is read here: the loop of the outside reads keeps it)
+    maintain_t0 = time.time()
     maintain(config, data)
+    phase_marks["maintain"] = time.time() - maintain_t0
     if not WATCH.current(generation):
         return None
     WATCH.phase("publish")
@@ -2597,6 +2645,7 @@ def run_cycle(config, generation):
     if time.time() < RATE_BLOCK["until"]:
         delay = max(delay, min(3900, int(RATE_BLOCK["until"] - time.time()) + 1))
     WATCH.ok()
+    tickstats.note_cycle(time.time() - cycle_t0, True, phase_marks, reads=REFRESH_COUNT[0])      # /metrics: the duration of the cycle and of its phases
     credential_ok(config)
     return delay
 
@@ -2612,6 +2661,7 @@ def loop(config, generation=None):
             if not WATCH.current(generation):
                 return
             WATCH.fail(error)
+            tickstats.note_cycle(max(0.0, time.time() - WATCH.cycle_started), False)
             outcome = credential_refusal(error, config)
             with LOCK:
                 STATE["error"], STATE["hint"] = str(error), "auth"   # the page writes the hint in its own language
@@ -2621,6 +2671,7 @@ def loop(config, generation=None):
             if not WATCH.current(generation):
                 return
             WATCH.fail(error)
+            tickstats.note_cycle(max(0.0, time.time() - WATCH.cycle_started), False)
             outcome = credential_refusal(error, config)
             degraded.note("loop.cycle", error)
             with LOCK:
@@ -4349,7 +4400,13 @@ def quota_payload():
     done = [r for r in (data.get("runs") or []) if r.get("status") == "completed" and (parse_time(r.get("started")) or datetime.fromtimestamp(0, timezone.utc)).timestamp() > since]
     rate = data.get("rate") or {}
     reader = None if DEMO["on"] else (lambda endpoint: gh_read(endpoint, retries=0))
-    return quota.summary(config, done, data.get("active") or [], set(PRIVATE), reader, toolconfig.github_owner(config), rate.get("limit"), costs={k: v for k, v in RUN_COSTS.items() if v})
+    info = quota.summary(config, done, data.get("active") or [], set(PRIVATE), reader, toolconfig.github_owner(config), rate.get("limit"), costs={k: v for k, v in RUN_COSTS.items() if v})
+    from github_actions_monitor.data_pipeline import quotawatch
+    info["accounts"] = quota_buckets.view(trend=quotawatch.trend())      # the allowance by account (source) and bucket, with the tightest one (the chip of the header)
+    report = change_cost_report(config)
+    if report.get("enabled"):
+        info["by_change"] = report      # finops.by_change / finops.co2 (off by default)
+    return info
 
 
 def about_logo():
@@ -4437,8 +4494,58 @@ def score_metrics():
 def metrics_extra():
     """What /metrics and the Grafana source add to the sentinel's picture: conditional reads, the connection, the analytics, the live events, the notifications and the score."""
     from github_actions_monitor.integrations import notifiers
+    from github_actions_monitor.data_pipeline import quota
+    config = LIVE_CONFIG or toolconfig.raw_config()
     return {"etag": ETAG["cache"].stats() if ETAG["cache"] else None, "offline": LINK.state()["offline"], "analytics": ANALYTICS["summary"], "live_events": len(LIVE_EVENTS),
-            "notify": dict(notifiers.STATS), "disconnects": DISCONNECTS[0], "score": score_metrics()}
+            "notify": dict(notifiers.STATS), "disconnects": DISCONNECTS[0], "score": score_metrics(), "config": config, "run_cache": RUN_CACHE, "quota": quota.last(),
+            "runners": None if LITE["on"] else runner_list(config), "runner_waits": runner_wait_figures(config),
+            "change_cost": change_cost_report(config), "limits_live": limits_live_figures(config)}
+
+
+def local_reusable_files():
+    """{repo: {file}} of the workflows that only other workflows call (the sentinel scans), {} while there is no sentinel. Never raises."""
+    try:
+        sentinel = SENTINEL["obj"]
+        return sentinel.surface.local_reusables() if sentinel is not None and not LITE["on"] else {}
+    except Exception as error:   # noqa: BLE001
+        degraded.note("loop.extra", error)
+        return {}
+
+
+def change_cost_report(config):
+    """The cost of the CI by kind of change and the carbon estimate (finops.by_change, finops.co2: off by default), from the runs of the last 24 hours the monitor already holds."""
+    from github_actions_monitor.data_pipeline import change_cost, quota
+    if not change_cost.settings(config)["by_change"] and not change_cost.settings(config)["co2"]:
+        return {"enabled": False}
+    with LOCK:
+        data = STATE.get("data") or {}
+    since = time.time() - 86400
+    done = [r for r in (data.get("runs") or []) if r.get("status") == "completed" and (parse_time(r.get("started")) or datetime.fromtimestamp(0, timezone.utc)).timestamp() > since]
+    rate = ((quota.load().get("rates_usd_per_minute") or {}).get("linux")) or None
+    return change_cost.build(config, done, set(PRIVATE), local_reusable_files(), rate)
+
+
+def limits_live_figures(config):
+    """What the running monitor holds against its ceilings, for /metrics (data_pipeline/limits.py)."""
+    from github_actions_monitor.data_pipeline import backpressure
+    from github_actions_monitor.integrations import job_metrics
+    from github_actions_monitor.security import webhook
+    snap = backpressure.snapshot()
+    return {"live_events": len(LIVE_EVENTS), "live_events_keep": webhook.live_settings(config)["live_events_keep"], "sse_clients": webhook.SSE_STREAMS[0], "sse_max": webhook.sse_settings(config)["max_clients"],
+            "read_queue_depth": snap["depth"], "read_queue_wanted": snap["last_wanted"] if snap["last_wanted"] else None,
+            "histogram_series": len(job_metrics.COLLECTOR.queue.series), "histogram_max": job_metrics.settings(config)["histogram_max_series"]}
+
+
+def runner_wait_figures(config):
+    """The wait in the queue by kind of runner, from the model of the runners (only while runners.model is on): {kind: {"jobs", "oldest_seconds"}}. Never raises."""
+    try:
+        if LITE["on"] or not runner_model.settings(config)["enabled"]:
+            return None
+        queue = runner_model_payload().get("queue") or {}
+        return {kind: {"jobs": row.get("jobs", 0), "oldest_seconds": row.get("oldest_wait_seconds", 0)} for kind, row in queue.items() if isinstance(row, dict)}
+    except Exception as error:   # noqa: BLE001
+        degraded.note("metrics.runners", error)
+        return None
 
 
 def ai_store():

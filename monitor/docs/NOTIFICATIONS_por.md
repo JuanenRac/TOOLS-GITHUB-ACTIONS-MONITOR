@@ -63,3 +63,9 @@ Quatro definições opcionais do bloco `alerts` (todas desligadas ou vazias por 
 - **Serviços e crons curtos** (`alerts.service`): um workflow que só corre agendado ou à mão e falha de vez em quando só é anunciado depois de `failures` falhas seguidas, ou quando `rate_percent` dos seus últimos runs falhou; anunciado uma vez e levantado uma vez em vez de avisar em ciclo. `workflows` junta mais workflows a esta classe.
 - **Agrupar por commit** (`alerts.group`): quando `min` ou mais workflows de um repositório ficam a vermelho no mesmo commit, uma notificação lista-os.
 - **Resumo quando há muitos** (`alerts.digest`): depois de `threshold` notificações na última hora, as restantes são retidas e comunicadas num resumo a cada `minutes` minutos. Os eventos retidos ficam no registo de eventos.
+
+## Não repetir uma notificação
+
+Com `notify.dedupe_ledger` ligado (desligado por predefinição) o monitor guarda num pequeno ficheiro da pasta de dados um registo do que já notificou: um hash do tipo de evento, do repositório, do workflow e da ligação da execução, nunca o texto. A mesma notificação não é enviada outra vez ao recarregar uma página, após um reinício ou quando um pipeline sai um momento da janela e volta; uma execução nova do mesmo workflow é uma notificação nova. Uma etiqueta é lembrada `notify.dedupe_hours` horas (24 por predefinição). `notify.max_event_age_hours` (0 = desligado) descarta ainda um evento cuja própria data é mais antiga do que isso: a notícia de algo ocorrido há dias não é notícia.
+
+O canal do Microsoft Teams aceita o endereço de um fluxo **Workflows** do Power Automate (hosts `logic.azure.com` e `api.powerplatform.com`) além dos antigos conectores do Office 365 (`webhook.office.com`, `outlook.office.com`): crie o fluxo com o acionador «Quando um pedido de webhook do Teams é recebido», copie o seu endereço para a variável que o canal indica e o monitor publica nele uma mensagem de texto simples.

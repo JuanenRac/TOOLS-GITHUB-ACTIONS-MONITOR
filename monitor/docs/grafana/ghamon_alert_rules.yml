@@ -1,0 +1,101 @@
+# Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+# GPL-3.0-or-later - see LICENSE
+#
+# Alert rules for Prometheus (or Grafana Mimir / VictoriaMetrics vmalert) over the /metrics of the monitor.
+# Copy the file next to your Prometheus configuration and name it in `rule_files:`. The names are the ones of docs/OUTPUTS.md.
+# The rules that need the histograms ask for `outputs.prometheus.histograms` (and the webhook); the ones for the queue of reads ask for `backpressure.enabled`.
+groups:
+  - name: github-actions-monitor
+    rules:
+      - alert: GhamonDown
+        expr: up{job="github-actions-monitor"} == 0
+        for: 5m
+        labels: {severity: critical}
+        annotations:
+          summary: "The monitor does not answer"
+          description: "Prometheus cannot scrape the monitor of GitHub Actions for 5 minutes."
+
+      - alert: GhamonRedWorkflows
+        expr: ghamon_red_workflows > 0
+        for: 15m
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $value }} red workflow(s) on the default branch"
+          description: "{{ $value }} workflows in {{ with query \"ghamon_red_repos\" }}{{ . | first | value }}{{ end }} repositories have been red for 15 minutes."
+
+      - alert: GhamonRedStreak
+        expr: max by (repo, workflow) (ghamon_workflow_red_streak) >= 5
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.repo }} / {{ $labels.workflow }} is red for {{ $value }} runs in a row"
+
+      - alert: GhamonAllowanceLow
+        expr: ghamon_api_rate_remaining / ghamon_api_rate_limit < 0.1
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: "Less than 10 % of the GitHub API allowance is left"
+
+      - alert: GhamonPausedForQuota
+        expr: ghamon_quota_paused == 1
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "The monitor is paused to protect the quota"
+
+      - alert: GhamonBillingNearIncluded
+        expr: ghamon_billing_minutes_total / ghamon_billing_minutes_included > 0.9
+        for: 30m
+        labels: {severity: warning}
+        annotations:
+          summary: "90 % of the included Actions minutes are used this month"
+
+      - alert: GhamonCycleSlow
+        expr: ghamon_tick_last_seconds > 300
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "A refresh cycle of the monitor takes {{ $value }} s"
+
+      - alert: GhamonCycleStalled
+        expr: time() - ghamon_tick_last_ok_timestamp_seconds > 900
+        for: 5m
+        labels: {severity: critical}
+        annotations:
+          summary: "No refresh cycle ended well for 15 minutes"
+
+      - alert: GhamonRepositoriesFailing
+        expr: ghamon_repos_circuit_open > 0
+        for: 30m
+        labels: {severity: info}
+        annotations:
+          summary: "{{ $value }} repositories wait before the next read because they keep failing"
+
+      - alert: GhamonReadQueueBacklog
+        expr: ghamon_read_queue_depth > 0 and ghamon_read_queue_oldest_wait_cycles > 10
+        for: 10m
+        labels: {severity: info}
+        annotations:
+          summary: "Reads wait more than 10 cycles: the account is too big for the limit of reads"
+
+      - alert: GhamonJobsWaitLong
+        expr: histogram_quantile(0.95, sum by (le, label) (rate(ghamon_job_wait_seconds_bucket[30m]))) > 600
+        for: 15m
+        labels: {severity: warning}
+        annotations:
+          summary: "95 % of the jobs on {{ $labels.label }} wait more than 10 minutes for a runner"
+
+      - alert: GhamonRunnerOffline
+        expr: ghamon_runners{state="offline"} > 0
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $value }} self-hosted runner(s) offline"
+
+      - alert: GhamonRunnerDemandUnserved
+        expr: ghamon_runner_jobs_waiting > 0 and on () ghamon_runners{state="idle"} == 0
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "Jobs wait for a runner and no runner is idle"

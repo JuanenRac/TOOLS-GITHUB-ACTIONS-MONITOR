@@ -63,3 +63,7 @@ L'onglet Graphiques affiche la section « Comparer les périodes » quand la com
 ## Les réglages
 
 Réglages, onglet Sentinelle, bloc Comparaison de périodes : `compare.enabled`, `compare.default_window_days`, `compare.default_days_filter`, `compare.workdays`, `compare.min_runs_per_window`, `compare.min_days_of_history`, `compare.min_resolved`, `compare.min_snapshots`, `compare.min_repo_runs`, `compare.top_changes`, `compare.include_in_report` et `compare.cache_seconds`. Une réponse est conservée `compare.cache_seconds` secondes puis recalculée.
+
+## Longues fenêtres sur un gros compte
+
+Avec `compare.progressive` activé (désactivé par défaut), une comparaison sur une fenêtre plus longue que `compare.progressive_days` (7 par défaut) reçoit tout de suite une réponse avec ses derniers jours et la réponse le dit (`partial` : les jours demandés, les jours montrés et que le reste est en cours de calcul) ; la fenêtre entière est terminée en arrière-plan et la requête suivante, ou le prochain rafraîchissement de la page, la reçoit. Une requête avec `from` et `to` n'est jamais coupée.

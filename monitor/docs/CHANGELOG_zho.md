@@ -49,6 +49,31 @@
 - **没有公开地址的 Webhook，通过 GitHub 的 WebSocket**(`webhook.transport` = `websocket`;`webhook.ws_targets`、`webhook.ws_max_targets`、`webhook.ws_cleanup`;默认关闭)：监视器为你列出的每个仓库或组织运行并看护 `gh webhook forward`，它会创建一个临时 Webhook，并通过本机打开的连接把每次投递交给监视器的接收端，因此不会暴露任何东西，也不需要隧道。它会写入 GitHub(临时钩子)，需要能管理 Webhook 的令牌;结束的转发器会以更长的等待时间重新启动，令牌无权管理钩子的转发器会在 `GET /api/live-status` 的 `forwarders` 中显示 `forbidden`。投递用每次启动时生成的密钥签名，只有本进程的接收端在共享密钥之外接受它。
 
 - **恢复关机的电脑错过的 Webhook 投递**(`webhook.redeliver.enabled`，默认关闭;`webhook.redeliver.hooks`、`webhook.redeliver.max_per_run`、`webhook.redeliver.max_age_hours`、`webhook.redeliver.interval_minutes`;`POST /api/webhook/redeliver`)：启动一分钟后，之后每小时一次，监视器读取你指定的 Webhook 最近的投递，并请求 GitHub 重新发送所有尝试都没有收到 2xx 响应的投递，每次检查有数量上限、逐渐增长的等待时间(5 到 300 秒)，第八次请求后停止。已请求的内容记在私有文件里，因此重启不会立刻再次请求;运维人员可以立即发起请求，该请求会在操作日志中留下一行。它会写入 GitHub，所以默认关闭，且只触及你指定的钩子;计数器在 `GET /api/live-status` 的 `redelivery` 中。
+- **`/metrics` 增加作业直方图、计费和 runner**（`outputs.prometheus.histograms`、`outputs.prometheus.per_runner` 和 `outputs.prometheus.histogram_max_series`，默认关闭）：在内存中用已签名的 `workflow_job` 和 `workflow_run` 事件构建，包括 `ghamon_job_wait_seconds`（按 runner 组和标签统计的排队时间，每个作业只计一次）、`ghamon_job_run_seconds`、`ghamon_workflow_run_seconds`、`ghamon_jobs_total` 和当前对 runner 的需求（`ghamon_runner_jobs_waiting`、`ghamon_runner_oldest_wait_seconds`），每个直方图有序列数上限（其余计为 `other`）。当月计费报告（`quota.billing_api`）以 `ghamon_billing_*` 写出（总计、包含、付费、按 SKU、美元），自托管 runner 写为 `ghamon_runners{state}`，并按 runner 给出状态、作业数、失败作业数和忙碌秒数（也出现在 `GET /api/runners/model` 的 `per_runner` 中）。抓取从不读取 GitHub。
+
+- **`/metrics` 增加周期及其熔断**：上一个刷新周期及其各阶段的耗时和所有周期的直方图（`ghamon_tick_*`）、周期数和失败周期数、上一次正常结束的时间、暂时性失败后重试的读取（`ghamon_read_retries_total`），以及因连续多次失败而等待下次读取的仓库（`ghamon_repos_circuit_open`、`ghamon_repos_read_failing`）。
+
+- **带背压的读取队列**（`backpressure.enabled`、`backpressure.max_reads_per_cycle`、`backpressure.shed_percent` 和 `backpressure.min_reads`，默认关闭）：一个周期的读取经过一个有界队列（先是红色仓库，然后是热点仓库、从未读取的仓库和最久未读取的），放不下的等到下一个周期；周期超过间隔的设定比例时，允许的读取数减半，每个较快的周期之后恢复十分之一。可通过 `ghamon_read_queue_*` 查看。
+
+- **按账户和桶的配额，以及页眉中最紧张的桶**（`quota.chip`，默认开启）：`GET /api/quota` 包含 `accounts`，即每个来源的各个桶（core、graphql、search 等）、已用比例和重置时间；页眉在最紧张的桶不是 core 时显示该桶、在用的其他桶数量，并在悬停时显示明细。不读取任何新数据：使用周期本来就会发出的免费 `rate_limit` 调用。
+
+- **`docs/grafana/` 中的可观测性包**：`ghamon_alert_rules.yml`（Prometheus 规则及其 PromQL：监视器不响应、红色工作流、配额和计费、周期缓慢或停滞、处于熔断中的仓库、按直方图统计的 runner 等待、离线 runner）、`alertmanager.example.yml`（路由到 webhook、Grafana OnCall 和 n8n；所有地址均为示例）和 `n8n_ghamon_alerts.json`（接收告警的工作流）。在 `docs/OUTPUTS.md` 中有八种语言的说明。
+
+- **限制与容量**（`limits.warn_percent` 和 `limits.memory_mb`）：doctor 新增 `capacity` 检查，把配置与其上限比较（相对于配额和采样预算的每小时调用数、保存的运行占用的内存、相对于 `discover_limit` 的仓库数），在达到上限之前发出警告；`/metrics` 将运行中的情况显示为 `ghamon_limit_used_percent`（保存的事件、流、读取队列、直方图序列）。
+
+- **一次读取供大家共用**（`refresh.share_by_workflow` 和 `refresh.share_seconds`，默认关闭）：当周期、页面、墙屏或 API 客户端同时请求同一次运行的作业时，第一个从 GitHub 读取，其余的使用它的结果；失败的读取不会被记住。`/metrics` 统计节省的读取次数。
+
+- **通知不重复**（`notify.dedupe_ledger`、`notify.dedupe_hours` 和 `notify.max_event_age_hours`，默认关闭）：数据文件夹中的小台账（只有哈希和时间，没有文本）可避免在重新加载页面、重启后以及流水线暂时离开窗口时重复同一通知；事件自身日期早于设定小时数的不再通知。指南说明了 Microsoft Teams 渠道接受 Power Automate Workflows 流程的地址。
+
+- **按变更类型的 CI 成本和碳估算**（`finops.by_change`、`finops.co2`、`finops.co2_watts` 和 `finops.co2_grams_per_kwh`，默认关闭）：过去 24 小时的运行按依赖、定时、手动、发布、feature、fix、docs、ci、test、refactor、perf、chore 或其他分类，给出分钟数、占比和私有仓库的估算美元（`GET /api/quota` 的 `by_change` 和 `/metrics` 的 `ghamon_ci_change_*`）；碳排放是根据你自己设定的瓦数和每千瓦时克数得出的数量级，绝不是排放报告。本地可复用工作流（只被仓库中其他工作流调用的文件）不计入这些数据。
+
+- **符合 CI/CD 约定的 OpenTelemetry 和每个作业一个 span**（`otlp.cicd_conventions` 和 `otlp.job_spans`，默认关闭）：运行的 span 可带上 OpenTelemetry CI/CD 语义约定的属性（流水线名称、运行 ID 和链接、结果、尝试次数、仓库和分支），并命名为 `RUN <workflow>`；每个已完成的作业可根据 webhook 的已签名 `workflow_job` 事件，作为其运行的子 span 发送（runner、组、标签、排队时间、结果）。
+
+- **多个工作区**（`workspaces.list` 和 `workspaces.active`，列表为空时关闭）：本地克隆的文件夹用 `名称=文件夹` 指定，按名称选择当前使用的；`MONITOR_ROOT` 仍然优先，`workspaces.active` 优先于 `workspace_root`。
+
+- **大型账户上比较的长窗口**（`compare.progressive` 和 `compare.progressive_days`，默认关闭）：比设定天数更长的窗口会先立即用最近几天作答并标记为 `partial`，整个窗口在后台计算后提供给下一次请求。
+
+- **`monitor_cli.py toolbox`**：无需运行监视器、在本机上工作的运维小工具：`limits`（配置与其上限的对比）、`workspaces`、`ledger`（已发送的通知，`--force` 将其清除）、`summary`（按类型、仓库和日期统计事件）以及 `export-events FILE`（按文件名结尾写成 jsonl、csv、parquet 或 duckdb；parquet 和 duckdb 需要各自的包，文件必须是新的，不会覆盖任何文件，也不接受任何查询语言）。
 
 ### 修复
 
