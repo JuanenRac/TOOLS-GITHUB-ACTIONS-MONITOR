@@ -30,6 +30,16 @@
 - **バージョン情報のパネルにモニターのロゴと、希望すれば組織のロゴが表示されます**(`ui.about_org_logo`、既定ではオフ、「一般」タブ):モニターの絵は常に上にあり、設定をオンにすると、壁面画面用にアップロードした画像(「このブラウザー」タブ)がその横に、ページの言語の代替テキスト付きで表示されます。どちらもパネルの幅に合わせて歪まずに変わり、ロゴがアップロードされていない、またはファイルを読み取れない場合は、画像の代わりに短い注記が表示され、パネルは動き続けます。
 - **ワークフローのリンターが、アーカイブ済み、または保守されなくなったアクションを知らせられるようになりました**(規則 `archived_action`。GitHub に問い合わせるため既定ではオフ。情報のみ):ワークフローが使う GitHub のアクションや再利用可能ワークフローのうちリポジトリがアーカイブ済みのものを一覧にし、`lint.maintenance.inactive` もオンにすると `lint.maintenance.inactive_years` 年(既定は 2)プッシュのないものも一覧にします。問い合わせはアクションごとに 1 回で、センチネル用にすでに調整されている割り当てを使い(1 回のスキャンで最大 `lint.maintenance.max_calls_per_tick` 件、各回答は `lint.maintenance.refresh_seconds` 秒保持)、情報レベルを超えることも `--fail-on` を失敗させることもなく、ネットワークがないときは何も判定せず読み取れなかった件数を示します。コマンドラインでは `--check-actions` と `--inactive-years N` を使います。
 
+- **ジョブのヒストグラム、課金、ランナーを `/metrics` に追加**（`outputs.prometheus.histograms`、`outputs.prometheus.per_runner`、`outputs.prometheus.histogram_max_series`。既定ではオフ）：署名付きの `workflow_job` と `workflow_run` イベントからメモリ上で作ります。`ghamon_job_wait_seconds`（ランナーグループとラベル別のキュー待ち時間、ジョブごとに 1 回）、`ghamon_job_run_seconds`、`ghamon_workflow_run_seconds`、`ghamon_jobs_total`、現在のランナー需要（`ghamon_runner_jobs_waiting`、`ghamon_runner_oldest_wait_seconds`）。ヒストグラムごとの系列数に上限があり、超えた分は `other` として数えます。当月の課金レポート（`quota.billing_api`）は `ghamon_billing_*`（合計、含まれる分、有料分、SKU 別、ドル）、セルフホストランナーは `ghamon_runners{state}`、ランナーごとの状態、ジョブ数、失敗数、実行秒数として書き出されます（`GET /api/runners/model` の `per_runner` にも）。スクレイプは GitHub を読みません。
+
+- **サイクルとそのサーキットを `/metrics` に追加**：直近の更新サイクルと各フェーズの所要時間、全サイクルのヒストグラム（`ghamon_tick_*`）、サイクル数と失敗数、最後に正常終了した時刻、一時的な失敗の後に再試行した読み取り（`ghamon_read_retries_total`）、連続失敗のため次の読み取りまで待つリポジトリ（`ghamon_repos_circuit_open`、`ghamon_repos_read_failing`）。
+
+- **バックプレッシャー付きの読み取りキュー**（`backpressure.enabled`、`backpressure.max_reads_per_cycle`、`backpressure.shed_percent`、`backpressure.min_reads`。既定ではオフ）：サイクルの読み取りは上限付きの 1 つのキューを通り（赤いリポジトリ、ホットなもの、未読のもの、最も古く読んだものの順）、収まらない分は次のサイクルまで待ちます。サイクルが待機時間の設定割合を超えると許可する読み取りが半分になり、速いサイクルのたびに 1 割ずつ戻ります。`ghamon_read_queue_*` で確認できます。
+
+- **アカウント別・バケット別の利用枠と、ヘッダーの最も逼迫したバケット**（`quota.chip`。既定ではオン）：`GET /api/quota` は `accounts`（各ソースのバケット（core、graphql、search など）、使用割合、リセット時刻）を返し、ヘッダーは core 以外で残りが最も少ないバケット、使用中の他のバケット数、ホバーでの内訳を表示します。新たな読み取りはなく、サイクルがすでに行っている無料の `rate_limit` 呼び出しを使います。
+
+- **`docs/grafana/` のオブザーバビリティパック**：`ghamon_alert_rules.yml`（Prometheus 用ルールと PromQL：モニターの無応答、赤いワークフロー、利用枠と課金、サイクルの遅延・停止、サーキット中のリポジトリ、ヒストグラムによるランナー待ち、オフラインのランナー）、`alertmanager.example.yml`（Webhook、Grafana OnCall、n8n へのルート。アドレスはすべて例）、`n8n_ghamon_alerts.json`（アラートを受け取るフロー）。`docs/OUTPUTS.md` に 8 言語で説明があります。
+
 ### 修正
 
 - **リリースパネル（A5）、準備状況の表（A11）、リリース候補ツールは、クローンがいるブランチではなく main の CHANGELOG のエントリ数を数えます**: 以前はクローンの作業ツリーから数えていたため、エージェントの古いブランチに置かれたクローンでは、main が 3 件のところ 20 件（main が 2 件のところ 13 件）と表示され、最新リリースと比べるバージョンもそのブランチのものでした。現在は、クローンが知っているリモートの既定ブランチから `CHANGELOG.md`、マニフェスト、`pyproject` を読みます（`git show origin/<ブランチ>:<ファイル>`、fetch は行わず、クローンは一切変更しません）。そのブランチが分からないときは作業ツリーを読み、行に「ブランチ X のクローン（main ではない）、作業ツリーから集計」と表示します。GitHub が main を進めてからクローンを取得していない場合もそう表示します。数える関数はモニター全体で 1 つです（`delivery/mainsource.py`）。`## [Unreleased]` の下の各リスト行は、入れ子も含めて 1 件と数え、CRLF でも LF でも従来どおりです。候補の表の見出しに、件数が main のものだと明記します。

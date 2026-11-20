@@ -30,6 +30,16 @@
 - **“关于”面板显示监视器的标志,并可按需显示您组织的标志**(`ui.about_org_logo`,默认关闭,位于“常规”选项卡):监视器的图形始终在最上方,开启该设置后,为墙面屏幕上传的图片(“此浏览器”选项卡)会显示在旁边,并带有页面语言的替代文字。两者都随面板宽度变化且不变形;如果没有上传标志或其文件无法读取,会用一条简短提示取代图片,面板继续正常工作。
 - **工作流检查器现在可以提示已归档或不再维护的 Action**(规则 `archived_action`,因为要查询 GitHub,默认关闭;仅提供信息):它列出工作流所用的 GitHub Action 和可复用工作流中仓库已归档的;如果同时开启 `lint.maintenance.inactive`,还会列出已有 `lint.maintenance.inactive_years` 年(默认 2 年)没有推送的。它通过已为哨兵协调好的配额,每个 Action 只向 GitHub 查询一次(每次扫描最多 `lint.maintenance.max_calls_per_tick` 个,每个回答保留 `lint.maintenance.refresh_seconds` 秒),不会超过信息级别,绝不会使 `--fail-on` 失败,没有网络时不做任何判断并说明有多少个 Action 无法读取。命令行中使用 `--check-actions` 和 `--inactive-years N`。
 
+- **`/metrics` 增加作业直方图、计费和 runner**（`outputs.prometheus.histograms`、`outputs.prometheus.per_runner` 和 `outputs.prometheus.histogram_max_series`，默认关闭）：在内存中用已签名的 `workflow_job` 和 `workflow_run` 事件构建，包括 `ghamon_job_wait_seconds`（按 runner 组和标签统计的排队时间，每个作业只计一次）、`ghamon_job_run_seconds`、`ghamon_workflow_run_seconds`、`ghamon_jobs_total` 和当前对 runner 的需求（`ghamon_runner_jobs_waiting`、`ghamon_runner_oldest_wait_seconds`），每个直方图有序列数上限（其余计为 `other`）。当月计费报告（`quota.billing_api`）以 `ghamon_billing_*` 写出（总计、包含、付费、按 SKU、美元），自托管 runner 写为 `ghamon_runners{state}`，并按 runner 给出状态、作业数、失败作业数和忙碌秒数（也出现在 `GET /api/runners/model` 的 `per_runner` 中）。抓取从不读取 GitHub。
+
+- **`/metrics` 增加周期及其熔断**：上一个刷新周期及其各阶段的耗时和所有周期的直方图（`ghamon_tick_*`）、周期数和失败周期数、上一次正常结束的时间、暂时性失败后重试的读取（`ghamon_read_retries_total`），以及因连续多次失败而等待下次读取的仓库（`ghamon_repos_circuit_open`、`ghamon_repos_read_failing`）。
+
+- **带背压的读取队列**（`backpressure.enabled`、`backpressure.max_reads_per_cycle`、`backpressure.shed_percent` 和 `backpressure.min_reads`，默认关闭）：一个周期的读取经过一个有界队列（先是红色仓库，然后是热点仓库、从未读取的仓库和最久未读取的），放不下的等到下一个周期；周期超过间隔的设定比例时，允许的读取数减半，每个较快的周期之后恢复十分之一。可通过 `ghamon_read_queue_*` 查看。
+
+- **按账户和桶的配额，以及页眉中最紧张的桶**（`quota.chip`，默认开启）：`GET /api/quota` 包含 `accounts`，即每个来源的各个桶（core、graphql、search 等）、已用比例和重置时间；页眉在最紧张的桶不是 core 时显示该桶、在用的其他桶数量，并在悬停时显示明细。不读取任何新数据：使用周期本来就会发出的免费 `rate_limit` 调用。
+
+- **`docs/grafana/` 中的可观测性包**：`ghamon_alert_rules.yml`（Prometheus 规则及其 PromQL：监视器不响应、红色工作流、配额和计费、周期缓慢或停滞、处于熔断中的仓库、按直方图统计的 runner 等待、离线 runner）、`alertmanager.example.yml`（路由到 webhook、Grafana OnCall 和 n8n；所有地址均为示例）和 `n8n_ghamon_alerts.json`（接收告警的工作流）。在 `docs/OUTPUTS.md` 中有八种语言的说明。
+
 ### 修复
 
 - **发布面板（A5）、就绪表（A11）和发布候选工具统计的是 main 的 CHANGELOG 条目，而不是克隆当前所在分支的条目**：以前从克隆的工作树统计，所以停在某个旧代理分支上的克隆会显示 20 条，而 main 只有 3 条（13 条对 2 条），与最新发布比较的版本也是该分支的版本。现在它们从克隆所知的远程默认分支读取 `CHANGELOG.md`、清单和 `pyproject`（`git show origin/<分支>:<文件>`，从不 fetch，不改动克隆中的任何内容）；不知道该分支时读取工作树，并在该行注明（“克隆在分支 X，不在 main；按工作树统计”）；GitHub 上的 main 前进后克隆尚未获取时同样注明。整个监控器只用一个函数计数（`delivery/mainsource.py`）：`## [Unreleased]` 下的每个列表行算一条，包括嵌套行，CRLF 或 LF 均可，与以前一致。候选表的标题说明该数字是 main 的。

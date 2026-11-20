@@ -152,6 +152,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `auth.max_failed_logins` (secure) | `5` | advanced | Wrong passwords before a lock |
 | `auth.min_length` (secure) | `10` | advanced | Shortest password |
 | `auth.session_hours` (secure) | `12` | advanced | Session length |
+| `backpressure.enabled` | `false` | polling | Limit the reads of a cycle (backpressure) |
+| `backpressure.max_reads_per_cycle` | `0` | polling | Most reads per cycle (0 = no fixed limit) |
+| `backpressure.min_reads` | `20` | polling | Fewest reads per cycle when it cuts |
+| `backpressure.shed_percent` | `150` | polling | Cut the reads when a cycle lasts this share of the pause |
 | `cache.etag.enabled` | `true` | cache | Conditional reads on |
 | `cache.etag.revalidate_active` | `true` | cache | Read lists with running work in full |
 | `cache.etag.skip_stateful` | `true` | cache | Always read live state in full |
@@ -415,7 +419,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `outputs.dashboard.enabled` (secure) | `-` | outputs | Document for the status dashboard |
 | `outputs.json.enabled` (secure) | `-` | outputs | Grafana JSON source |
 | `outputs.prometheus.enabled` (secure) | `-` | outputs | Prometheus: /metrics |
+| `outputs.prometheus.histogram_max_series` | `-` | outputs | Prometheus: most series per histogram |
+| `outputs.prometheus.histograms` | `-` | outputs | Prometheus: histograms of jobs |
 | `outputs.prometheus.per_repo` | `-` | outputs | Prometheus: series per repository |
+| `outputs.prometheus.per_runner` | `-` | outputs | Prometheus: figures of each self-hosted runner |
 | `pagination.collab_pages` | `3` | polling | Pages of issues and pull requests per repository |
 | `pagination.cursor_pages` | `3` | polling | Pages followed by cursor (alerts) |
 | `pagination.job_pages` | `2` | polling | Pages of jobs per run |
@@ -425,6 +432,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `profiles_file` | `-` | paths | Batch profiles file |
 | `quota.alert_percent` | `90` | basic | Alert at this share of the included minutes |
 | `quota.billing_api` (secure) | `false` | basic | Read the real usage from the billing report of GitHub |
+| `quota.chip` | `true` | basic | Header chip shows the tightest bucket |
 | `quota.default_runner` | `"linux"` | basic | System assumed for the minute estimate |
 | `quota.failover` | `false` | quota | When an allowance runs out, read with another source |
 | `quota.failover_max_age_minutes` | `60` | quota | Oldest copy that may be shown |

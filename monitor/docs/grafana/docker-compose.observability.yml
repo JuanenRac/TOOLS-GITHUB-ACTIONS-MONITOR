@@ -1,0 +1,42 @@
+# Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+# GPL-3.0-or-later - see LICENSE
+#
+# Prometheus + Alertmanager + Grafana on the computer that runs the monitor, to try the observability pack in a few minutes.
+#   1. switch on outputs.prometheus.enabled (and, for the histograms, outputs.prometheus.histograms) in the settings of the monitor;
+#   2. copy this file, ghamon_alert_rules.yml, prometheus.example.yml (as prometheus.yml) and alertmanager.example.yml (as alertmanager.yml) to one folder;
+#   3. docker compose -f docker-compose.observability.yml up -d     then open http://127.0.0.1:3000 (Grafana) and import monitor_dashboard.json.
+# The monitor answers only on 127.0.0.1, so the containers share the network of the host (`network_mode: host`): the ports below are the ones of the host and nothing is opened to other computers.
+# The password of Grafana comes from the variable GRAFANA_PASSWORD of your shell: nothing secret belongs in this file.
+services:
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    network_mode: host
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.listen-address=127.0.0.1:9090
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./ghamon_alert_rules.yml:/etc/prometheus/ghamon_alert_rules.yml:ro
+    depends_on: [alertmanager]
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    network_mode: host
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --web.listen-address=127.0.0.1:9093
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    network_mode: host
+    environment:
+      GF_SERVER_HTTP_ADDR: 127.0.0.1
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?set GRAFANA_PASSWORD in your shell}
+      GF_INSTALL_PLUGINS: yesoreyeram-infinity-datasource
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+volumes:
+  grafana-data: {}

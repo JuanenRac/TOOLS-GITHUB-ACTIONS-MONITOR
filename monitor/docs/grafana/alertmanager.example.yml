@@ -1,0 +1,41 @@
+# Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+# GPL-3.0-or-later - see LICENSE
+#
+# Example of an Alertmanager configuration for the alerts of ghamon_alert_rules.yml.
+# Replace every https://example.invalid/... address with your own: nothing here is sent anywhere until you do, and no secret belongs in this file
+# (use `url_file` or `*_file` options with a file only you can read).
+route:
+  receiver: default
+  group_by: [alertname, repo]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+    - matchers: [severity="critical"]
+      receiver: oncall
+      continue: true
+    - matchers: [alertname=~"GhamonRed.*"]
+      receiver: n8n
+
+receivers:
+  - name: default
+    webhook_configs:
+      - url: https://example.invalid/alertmanager/default
+        send_resolved: true
+
+  # Grafana OnCall: create an "Alertmanager" integration in OnCall and paste the address it gives you
+  - name: oncall
+    webhook_configs:
+      - url: https://example.invalid/integrations/v1/alertmanager/YOUR-INTEGRATION-ID/
+        send_resolved: true
+
+  # n8n: import n8n_ghamon_alerts.json, open its Webhook node and copy the production address here
+  - name: n8n
+    webhook_configs:
+      - url: https://example.invalid/webhook/ghamon-alerts
+        send_resolved: true
+
+inhibit_rules:
+  - source_matchers: [alertname="GhamonDown"]
+    target_matchers: [alertname=~"Ghamon.*"]
+    equal: []

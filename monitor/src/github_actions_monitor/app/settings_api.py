@@ -137,6 +137,7 @@ _f("basic", "plan", "quota.default_runner", "enum", ("linux", "windows", "macos"
 _f("basic", "plan", "quota.warn_percent", "int", (1, 100), unit="%", restart=False)
 _f("basic", "plan", "quota.alert_percent", "int", (1, 100), unit="%", restart=False)
 _f("basic", "plan", "quota.billing_api", "bool", restart=False, secure=True)
+_f("basic", "plan", "quota.chip", "bool", restart=False)
 _f("basic", "safety", "session_guard", "bool", restart=False, secure=True)
 _f("basic", "discovery", "discovery.events", "bool", restart=False)
 _f("basic", "discovery", "discovery.suggest_groups", "bool", restart=False)
@@ -295,6 +296,10 @@ _f(_T_POLL, "pagination", "pagination.workflow_pages", "int", (1, 20), unit="", 
 _f(_T_POLL, "pagination", "pagination.job_pages", "int", (1, 20), unit="", restart=False)
 _f(_T_POLL, "pagination", "pagination.collab_pages", "int", (1, 20), unit="", restart=False)
 _f(_T_POLL, "pagination", "pagination.cursor_pages", "int", (0, 20), unit="", restart=False)
+_f(_T_POLL, "backpressure", "backpressure.enabled", "bool", restart=False)
+_f(_T_POLL, "backpressure", "backpressure.max_reads_per_cycle", "int", (0, 5000), restart=False, unit="")
+_f(_T_POLL, "backpressure", "backpressure.shed_percent", "int", (100, 1000), restart=False, unit="%")
+_f(_T_POLL, "backpressure", "backpressure.min_reads", "int", (1, 500), restart=False, unit="")
 _f(_T_POLL, "sampling", "sampling.default_branch_probe", "bool", restart=False)
 _f(_T_POLL, "sampling", "sampling.active_probe", "bool", restart=False)
 _f(_T_POLL, "sampling", "sampling.min_coverage_minutes", "int", (0, 10080), unit="min", restart=False)
@@ -570,6 +575,9 @@ _f(_T_PATHS, "ops_doctor", "ops.doctor.webhook_min_length", "int", (8, 128), res
 # --- Outputs and exports
 _f(_T_OUT, "prometheus", "outputs.prometheus.enabled", "bool", restart=False, secure=True)
 _f(_T_OUT, "prometheus", "outputs.prometheus.per_repo", "bool", restart=False)
+_f(_T_OUT, "prometheus", "outputs.prometheus.histograms", "bool", restart=False)
+_f(_T_OUT, "prometheus", "outputs.prometheus.per_runner", "bool", restart=False)
+_f(_T_OUT, "prometheus", "outputs.prometheus.histogram_max_series", "int", (10, 2000), restart=False, unit="")
 _f(_T_OUT, "json", "outputs.json.enabled", "bool", restart=False, secure=True)
 _f(_T_OUT, "dashboard", "outputs.dashboard.enabled", "bool", restart=False, secure=True)
 # Save and print the report of a tab (reporting/tab_report.py): which formats the dialog marks, the suggested file name, the paper and the way the PDF is made
@@ -860,7 +868,7 @@ SCHEMA = [(tab, key, kind, bounds, restart) for tab, _block, key, kind, bounds, 
 FIELDS = {row[1]: row for row in SCHEMA}
 GROUPS = tuple(dict.fromkeys(row[0] for row in SCHEMA))
 assert set(GROUPS) <= set(TAB_ORDER)
-OUTPUT_DEFAULTS = {"prometheus": {"enabled": False, "per_repo": True}, "json": {"enabled": False}, "dashboard": {"enabled": False}}
+OUTPUT_DEFAULTS = {"prometheus": {"enabled": False, "per_repo": True, "histograms": False, "per_runner": False, "histogram_max_series": 200}, "json": {"enabled": False}, "dashboard": {"enabled": False}}
 STATUS_KEYS = {"webhook.signing_state", "chatops.slack.state", "chatops.discord.state"}      # computed, read-only: never written
 
 

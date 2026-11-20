@@ -84,3 +84,41 @@ scrape_configs:
 - 报告由 `GET /api/report/tab?tab=now&lang=zh` 提供(`&fmt=json`、`&fmt=txt` 或 `&fmt=options`),两个版本相同。
 
 设置(设置 > 供其他工具使用的输出 > "保存并打印标签页报告"):`report_export.txt`、`report_export.pdf` 和 `report_export.json`(哪些复选框默认勾选:TXT 和 PDF 是,JSON 否)、`report_export.name`(建议文件名,默认 `monitor-{tab}-{date}`)、`report_export.paper`(`a4` 或 `letter`,默认 `a4`)以及 `report_export.pdf_path`(`auto`、`own` 或 `browser`,默认 `auto`)。
+
+## 服务器指标：周期、读取队列、计费、runner 和直方图
+
+除上面的指标外，`/metrics` 还会写出（未知的值会被省略）：
+
+| 指标 | 标签 | 含义 |
+|---|---|---|
+| `ghamon_ticks_total`、`ghamon_tick_failures_total` | | 已完成的刷新周期数，以及以错误结束的周期数（计数器） |
+| `ghamon_tick_last_seconds`、`ghamon_tick_phase_seconds`、`ghamon_tick_seconds` | `phase` | 上一个周期及其每个阶段的耗时，以及所有周期的直方图 |
+| `ghamon_tick_last_ok_timestamp_seconds`、`ghamon_tick_reads_last` | | 上一个周期何时正常结束，以及它读取了多少个仓库 |
+| `ghamon_read_retries_total` | | 因暂时原因失败并被重试的读取（计数器） |
+| `ghamon_repos_circuit_open`、`ghamon_repos_read_failing`、`ghamon_repos_read_fail_streak_max` | | 因连续多次失败而等待下次读取的仓库（熔断）、最近一次读取失败的仓库、最长的连续失败次数 |
+| `ghamon_read_queue_depth`、`ghamon_read_queue_allowed`、`ghamon_read_queue_oldest_wait_cycles`、`ghamon_read_queue_deferred_total`、`ghamon_read_queue_shed_cycles_total` | | 带背压的读取队列（仅在 `backpressure.enabled` 开启时） |
+| `ghamon_billing_minutes_total`、`ghamon_billing_minutes_included`、`ghamon_billing_minutes_paid`、`ghamon_billing_sku_minutes`、`ghamon_billing_usd` | `sku`、`product` | 当月计费报告（仅在 `quota.billing_api` 开启时；抓取从不读取 GitHub，只写出周期最近保存的报告） |
+| `ghamon_runners` | `state` | 空闲、忙碌和离线的自托管 runner（`runners.enabled`） |
+| `ghamon_runner_up`、`ghamon_runner_busy` | `runner` | 按 runner 统计（`outputs.prometheus.per_runner`） |
+| `ghamon_runner_kind_jobs_waiting`、`ghamon_runner_kind_oldest_wait_seconds` | `kind` | 按 runner 类型统计的未开始作业数和最久等待（`runners.model.enabled`） |
+
+开启 `outputs.prometheus.histograms`（并且 webhook 正在接收作业事件）后，还会写出在内存中用已签名的 `workflow_job` 和 `workflow_run` 事件构建的**直方图**：
+
+| 指标 | 标签 | 含义 |
+|---|---|---|
+| `ghamon_job_wait_seconds` | `runner_group`、`label` | 作业的排队时间，**每个作业只计一次** |
+| `ghamon_job_run_seconds` | `runner_group`、`label`、`conclusion` | 已结束作业的时长 |
+| `ghamon_workflow_run_seconds` | `conclusion` | 已结束运行的时长 |
+| `ghamon_jobs_total` | `label`、`conclusion` | 已结束的作业数（计数器） |
+| `ghamon_runner_jobs_waiting`、`ghamon_runner_oldest_wait_seconds` | `label` | 当前对 runner 的需求：已排队未开始的作业数和最久等待 |
+
+`outputs.prometheus.histogram_max_series`（默认 200）限制每个直方图的序列数：超出的序列计入标签值 `other`。开启 `outputs.prometheus.per_runner` 后，会为每个自托管 runner 增加 `ghamon_runner_jobs_total`、`ghamon_runner_jobs_failed_total` 和 `ghamon_runner_busy_seconds_total`（也出现在 `GET /api/runners/model` 的 `per_runner` 中）。
+
+## 可观测性包：告警规则、Alertmanager、OnCall 和 n8n
+
+`docs/grafana/` 除两个仪表盘外，还带有一个可复制并改写的包：
+
+- `ghamon_alert_rules.yml`：用于 Prometheus（也可用 vmalert）的规则及其 PromQL：监视器不响应、红色工作流及连续失败、配额和计费接近上限、周期缓慢或停滞、处于熔断中的仓库、等待过久的读取、等待 runner 的作业（`histogram_quantile(0.95, sum by (le, label) (rate(ghamon_job_wait_seconds_bucket[30m])))`）、离线的 runner，以及没有空闲 runner 的需求。
+- `alertmanager.example.yml`：按严重程度路由到三个接收端（默认 webhook、Grafana OnCall 和 n8n）。所有地址都是 `https://example.invalid/...`：在你填上自己的地址之前不会发送任何内容，文件里也不应放任何密钥。
+- `n8n_ghamon_alerts.json`：一个 n8n 工作流，接收 Alertmanager 的 webhook 并为每条告警写一条消息；它的最后一个节点什么也不做，直到你换成自己的聊天、邮件或工单节点。
+- `prometheus.example.yml` 和 `docker-compose.observability.yml` 在监视器所在的计算机上启动 Prometheus、Alertmanager 和 Grafana，用于试用该包（容器共享主机网络，端口在 `127.0.0.1` 上，Grafana 密码来自你的 shell，绝不来自文件）。

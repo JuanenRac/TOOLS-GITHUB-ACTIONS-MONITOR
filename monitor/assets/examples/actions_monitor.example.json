@@ -566,7 +566,10 @@
   "outputs": {
     "prometheus": {
       "enabled": false,
-      "per_repo": true
+      "per_repo": true,
+      "histograms": false,
+      "per_runner": false,
+      "histogram_max_series": 200
     },
     "json": {
       "enabled": false
@@ -791,6 +794,7 @@
   },
   "quota": {
     "billing_api": false,
+    "chip": true,
     "warn_percent": 75,
     "alert_percent": 90,
     "default_runner": "linux",
@@ -1151,6 +1155,12 @@
     "workflow_hygiene": {
       "enabled": false
     }
+  },
+  "backpressure": {
+    "enabled": false,
+    "max_reads_per_cycle": 0,
+    "shed_percent": 150,
+    "min_reads": 20
   },
   "sampling": {
     "active_probe": false,

@@ -118,6 +118,7 @@ def metrics_text(snapshot, data, per_repo=True, now=None, extra=None):
 
 def _extra_metrics(out, extra, eco, per_repo):
     """The metrics of 1.6.0: conditional reads, connection, durations (p50 / p95), queue times, steps, flaky rate, live events and notifications."""
+    _more_metrics(out, extra)
     etag = extra.get("etag") if isinstance(extra.get("etag"), dict) else None
     if etag:
         out.add("etag_saved_total", "Reads answered with 304 Not Modified (no quota used) since the cache was created.", _int(etag.get("saved")), kind="counter")
@@ -164,6 +165,41 @@ def _extra_metrics(out, extra, eco, per_repo):
     for row in (summary.get("flaky") or [])[:200]:
         out.add("workflow_flaky_rate", "Share of the runs of a workflow that failed and then passed on the same commit (a label, not a verdict).", row.get("rate"),
                 {"repo": row["repo"], "workflow": row["workflow"], "ecosystem": eco.get(row["repo"], "other")})
+
+
+def _more_metrics(out, extra):
+    """The metrics of 2.1.7: the cycle (tick) and its circuit, the queue of reads, the billing, the gauges of the runners and the histograms of the jobs."""
+    from github_actions_monitor.data_pipeline import backpressure, tickstats
+    from github_actions_monitor.integrations import job_metrics
+    config = extra.get("config") if isinstance(extra.get("config"), dict) else {}
+    cache = extra.get("run_cache") if isinstance(extra.get("run_cache"), dict) else None
+    out.lines.extend(tickstats.lines(PREFIX, _esc, cache))
+    out.lines.extend(backpressure.lines(PREFIX, config))
+    info = extra.get("quota") if isinstance(extra.get("quota"), dict) else None
+    real = info.get("billing") if info and isinstance(info.get("billing"), dict) else None
+    if real:      # the billing report of the month (quota.billing_api on); a scrape reads the last one the cycle held
+        out.add("billing_minutes_total", "Minutes of Actions used this month, from the billing report.", real.get("minutes"))
+        included = info.get("included_minutes")
+        out.add("billing_minutes_included", "Minutes of Actions the plan includes.", included if isinstance(included, (int, float)) else None)
+        if isinstance(included, (int, float)) and isinstance(real.get("minutes"), (int, float)):
+            out.add("billing_minutes_paid", "Minutes of Actions above the included ones (paid).", round(max(0.0, real["minutes"] - included), 1))
+        for sku, minutes in sorted((real.get("by_sku") or {}).items()):
+            out.add("billing_sku_minutes", "Minutes of Actions this month by SKU (type of runner).", minutes, {"sku": sku})
+        for product, usd in sorted((real.get("usd") or {}).items()):
+            out.add("billing_usd", "Net amount this month in US dollars by product.", usd, {"product": product})
+    runners = extra.get("runners") if isinstance(extra.get("runners"), dict) else None
+    if runners:
+        for state, count in sorted((runners.get("counts") or {}).items()):
+            out.add("runners", "Self-hosted runners by state (idle, busy, offline).", count, {"state": state})
+        if job_metrics.settings(config)["per_runner"]:
+            for row in (runners.get("runners") or [])[:job_metrics.settings(config)["histogram_max_series"]]:
+                out.add("runner_up", "1 while the runner is online (idle or busy), 0 while it is offline.", 0 if row.get("state") == "offline" else 1, {"runner": row.get("name", "")})
+                out.add("runner_busy", "1 while the runner is running a job.", 1 if row.get("state") == "busy" else 0, {"runner": row.get("name", "")})
+    waits = extra.get("runner_waits") if isinstance(extra.get("runner_waits"), dict) else None
+    for kind, row in sorted((waits or {}).items()):
+        out.add("runner_kind_jobs_waiting", "Jobs queued and not started, by kind of runner (the runner model).", row.get("jobs"), {"kind": kind})
+        out.add("runner_kind_oldest_wait_seconds", "Wait of the oldest job not started, by kind of runner.", row.get("oldest_seconds"), {"kind": kind})
+    out.lines.extend(job_metrics.COLLECTOR.render(PREFIX, _esc, config))
 
 
 def grafana_json(snapshot, data, extra=None):
