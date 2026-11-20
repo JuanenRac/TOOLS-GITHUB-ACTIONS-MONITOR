@@ -530,6 +530,16 @@
     "safe_margin_percent": 0,
     "scale_with_window": false
   },
+  "pwa": {
+    "enabled": false,
+    "refresh_on_return": true
+  },
+  "pairing": {
+    "enabled": false,
+    "code_minutes": 5,
+    "max_devices": 10,
+    "device_days": 90
+  },
   "cli": {
     "prefer_v1": true,
     "default_format": "text",
@@ -1216,7 +1226,9 @@
     "screen3_orientation": "auto",
     "screen3_tabs": "",
     "theme": "auto",
-    "about_org_logo": false
+    "about_org_logo": false,
+    "compact": "auto",
+    "palette": true
   },
   "audit_dir": "",
   "readpool": {

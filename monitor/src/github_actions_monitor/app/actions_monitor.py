@@ -114,6 +114,8 @@ DEFAULTS = {
     "cache": {"etag": {"enabled": True, "ttl_hours": 24, "skip_stateful": True, "revalidate_active": True}, "negative_ttl_s": 300},   # conditional reads: a 304 answer costs no quota; a refusal is remembered for negative_ttl_s seconds (etagcache.py)
     "cli": {"prefer_v1": True, "default_format": "text", "watch": {"min_interval_seconds": 2, "default_interval_seconds": 5}},      # the command line (cli/formats.py, cli/watch.py): the format of the answers when no --format is given, and the interval of `watch`
     "kiosk": {"enabled": False, "font_scale_percent": 150, "high_contrast": False, "rotate_views": False, "rotate_seconds": 30, "safe_margin_percent": 0, "scale_with_window": False},      # the profile for a TV or a wall (surfaces/kiosk.py): ?kiosk=1 only counts when enabled
+    "pwa": {"enabled": False, "refresh_on_return": True},      # the monitor as an installable app (surfaces/pwa.py): manifest, service worker (only the offline page and the icons) and a refresh when the app returns to the front
+    "pairing": {"enabled": False, "code_minutes": 5, "max_devices": 10, "device_days": 90},      # phones and tablets that join the network mode with a one-use code shown as a QR code (security/devices.py)
     "startup": {"resume_max_age_hours": 12},   # the last picture is shown at once after a restart, with its age (lastpicture.py); 0 = off
     "display": {"timezone": "local", "blink_red_tiles": True},   # blink_red_tiles: the red tiles and red items of the bar blink softly until the cause is solved; zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
     "report_export": {"txt": True, "pdf": True, "json": False, "name": "monitor-{tab}-{date}", "paper": "a4", "pdf_path": "auto"},      # save and print the report of a tab (reporting/tab_report.py): boxes marked at the start, suggested file name, paper of the PDF, way the PDF is made
@@ -122,7 +124,7 @@ DEFAULTS = {
     "github_app": {"enabled": False, "app_id": "", "key_path": "", "installation_id": "", "share_reads": False},      # an optional GitHub App for the READS (its own allowance); only the PATH of the key is kept here (github_app.py)
     "central": {"source": "off", "max_age_minutes": 120, "git_dir": ""},      # the central panel of the profile repository as a base line that spends no allowance (central_source.py): off | git | http
     "ports": {"complete": 8765, "lite": 8766},      # the port of each edition (util/ports.py); --port wins, then MONITOR_PORT for the complete one
-    "ui": {"orientation": "auto", "rotate_seconds": 0, "screen1_tabs": "", "screen1_orientation": "auto", "screen2_tabs": "", "screen2_orientation": "auto", "screen3_tabs": "", "screen3_orientation": "auto", "now_sort": "ecosystem", "alerts_sort": "server", "theme": "auto", "remember_folds": True, "about_org_logo": False},   # the screens (docs/SCREENS.md): the orientation of the page, and which tabs each /screen/N shows
+    "ui": {"orientation": "auto", "rotate_seconds": 0, "screen1_tabs": "", "screen1_orientation": "auto", "screen2_tabs": "", "screen2_orientation": "auto", "screen3_tabs": "", "screen3_orientation": "auto", "now_sort": "ecosystem", "alerts_sort": "server", "theme": "auto", "remember_folds": True, "about_org_logo": False, "compact": "auto", "palette": True},   # the screens (docs/SCREENS.md): the orientation of the page, and which tabs each /screen/N shows
     "screens": {"enabled": False, "blink": True, "blink_calm_minutes": 30, "rotate_seconds": 0, "default_theme": "inherit", "default_density": "normal", "refresh_seconds": 10, "burn_in_protection": True, "night_dim": False, "night_dim_from_hour": 22, "night_dim_to_hour": 7, "show_repo_names": "public", "sound": False,
                 "theme_overview": "inherit", "theme_now": "inherit", "theme_sentinels": "inherit", "mode": "three", "rotate_every_seconds": 20, "alert_hold_seconds": 30, "logo_overview": True, "logo_now": False, "logo_sentinels": False,
                 "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64, "group_map": True,
@@ -182,7 +184,7 @@ def state_dir():
     """Where the small state files of this process live: the folder of the account when this is the monitor of one account, else next to the code, as always."""
     return Path(CHILD["folder"]) if CHILD["folder"] else paths.folder("data")
 LITE_SHARED = ("/api/ai/state", "/api/ai/index", "/api/ai/briefs", "/api/ai/stream", "/api/ai/brief", "/api/ai/alerts", "/api/ai/ack")      # the channels for an AI tool are the same in both editions
-LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/assistant", "/api/auth", "/api/notify", "/api/score", "/api/compare", "/api/report-files", "/api/ops", "/api/audit-log", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/chatops", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events", "/api/updates")   # they do not exist in lite
+LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/assistant", "/api/auth", "/api/notify", "/api/score", "/api/compare", "/api/report-files", "/api/ops", "/api/audit-log", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/chatops", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events", "/api/updates", "/api/pair", "/api/devices")   # they do not exist in lite
 
 
 LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language", "runs_per_repo", "cold_runs_per_repo", "hot_hours", "stuck_minutes", "refresh_seconds", "cold_refresh_seconds")   # what a first lite start copies from actions_monitor.json
@@ -235,6 +237,16 @@ DISCOVERY = {"events": [], "suggestions": []}   # what the last listing of the a
 HOT_ONLY = {"on": False, "until": 0.0}   # "only hot" switch (memory only): cold repositories are not refreshed until `until` (one long cycle)
 V1_SECRET = os.urandom(32)                # signs the cursors of /api/v1/repos; a new one at every start (a cursor lives minutes)
 LIVE_CONFIG = {}                          # the config the loop runs with, for the HTTP handler
+
+
+def _device_token_ok(token):
+    """The token of a paired device counts as the access token while `pairing.enabled` is on (localguard.access_ok asks)."""
+    from github_actions_monitor.security import devices
+    cfg = devices.settings(LIVE_CONFIG or toolconfig.raw_config())
+    return cfg["enabled"] and devices.valid(token, cfg)
+
+
+localguard.DEVICE_CHECK["fn"] = _device_token_ok
 AUTOSAVE = None                           # report_history.AutoSaver, created in main()
 ETAG = {"cache": None}                    # etagcache.EtagCache (None = plain reads)
 LINK = resilience.Link()                  # the connection: offline since..., back online
@@ -2539,7 +2551,18 @@ def render_page():
     page = (paths.STATIC / "actions_monitor.html").read_text(encoding="utf-8")
     data = {"default": i18n.language(), "langs": list(i18n.LANGS), "names": i18n.NATIVE_NAMES, "html": i18n.HTML_LANG, "locale": i18n.BROWSER_LOCALE, "catalogues": i18n.ui_catalogues(),
             "ecosystems": {**{"other": i18n.t("ui.eco_other")}, **{key: item["label"] for key, item in toolconfig.ecosystems().items()}}, "owner": toolconfig.github_owner(), "tz": tzdisplay.setting(), "screens": {k: v for k, v in (toolconfig.raw_config().get("ui") or {}).items() if k in DEFAULTS["ui"] and k != "theme"}, "kiosk": ({} if LITE["on"] else __import__("github_actions_monitor.surfaces.kiosk", fromlist=["_"]).public(toolconfig.raw_config())), "theme": screens.global_theme(toolconfig.raw_config()), "screen_menu": {k: v for k, v in screenmenu.menu_settings(toolconfig.raw_config()).items() if k in ("menu", "menu_target", "menu_max_windows")}, "blink": (toolconfig.raw_config().get("display") or {}).get("blink_red_tiles", True) is not False, "sound": {k: v for k, v in __import__("github_actions_monitor.integrations.soundalert", fromlist=["_"]).settings(toolconfig.raw_config()).items() if k != "server_beep"}, "host": github_host(), "lite": LITE["on"], "network": localguard.public_state(), "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
+    from github_actions_monitor.surfaces import pwa
+    from github_actions_monitor.security import devices
+    pwa_cfg = pwa.settings(toolconfig.raw_config())
+    data["pwa"] = pwa_cfg
+    data["pairing"] = {"enabled": devices.settings(toolconfig.raw_config())["enabled"] and bool(localguard.STATE["network"]) and not LITE["on"]}
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
+    page = page.replace("</head>", pwa.head(pwa_cfg) + "</head>", 1) if pwa_cfg["enabled"] else page
+    extras_file = paths.STATIC / "ui_extras.js"
+    extras = extras_file.read_text(encoding="utf-8") if extras_file.is_file() else ""
+    if pwa_cfg["enabled"]:
+        extras += "\n" + pwa.REGISTER_JS
+    page = page.replace("/*EXTRAS_JS*/", extras, 1)
     return page.replace("/*I18N_DATA*/null", blob, 1)
 
 
@@ -2847,10 +2870,124 @@ class Handler(BaseHTTPRequestHandler):
         self.json_reply({"error": "forbidden"}, 403)
         return False
 
+    def pwa_get(self, path):
+        """The files of the app (manifest, worker, icons, offline page), the pairing page and the list of devices. True when the path was one of them (and answered)."""
+        from github_actions_monitor.surfaces import pwa
+        from github_actions_monitor.security import devices
+        raw = toolconfig.raw_config()
+        if path == "/pair":
+            self.pair_page(devices.settings(raw))
+            return True
+        if path in ("/api/devices", "/api/pair/status"):
+            if not self.guard() or not self.this_computer():
+                return True
+            cfg = devices.settings(raw)
+            self.json_reply({"enabled": cfg["enabled"], "network": bool(localguard.STATE["network"]), "open": devices.is_open(), "max_devices": cfg["max_devices"], "code_minutes": cfg["code_minutes"],
+                             "devices": devices.list_devices() if cfg["enabled"] else []})
+            return True
+        cfg = pwa.settings(raw)
+        if not cfg["enabled"]:
+            self.send_response(404)
+            self.end_headers()
+            return True
+        if not self.guard():
+            return True
+        if path == "/manifest.webmanifest":
+            self.reply_bytes(json.dumps(pwa.manifest(i18n.language(), i18n.t("ui.pwa_name"), i18n.t("ui.pwa_short"))).encode("utf-8"), "application/manifest+json; charset=utf-8")
+        elif path == "/sw.js":
+            self.reply_bytes(pwa.service_worker(TOOL_VERSION).encode("utf-8"), "text/javascript; charset=utf-8")
+        elif path in ("/pwa/icon-192.png", "/pwa/icon-512.png"):
+            self.reply_bytes(pwa.icon(192 if "192" in path else 512), "image/png")
+        else:
+            self.reply(pwa.offline_page(i18n.t("ui.pwa_offline_title"), i18n.t("ui.pwa_offline_text"), i18n.t("ui.pwa_offline_retry"), i18n.language()), "text/html; charset=utf-8")
+        return True
+
+    def pair_page(self, cfg):
+        """GET /pair?c=CODE: the page a phone opens from the QR code. It only shows a button; the code is spent by the POST that the button sends, so a program that opens the address to preview it
+        (a chat, a scanner) cannot spend it."""
+        if not cfg["enabled"] or not localguard.STATE["network"] or LITE["on"]:
+            self.send_response(404)
+            self.end_headers()
+            return
+        if not self.guard():
+            return
+        from urllib.parse import parse_qs
+        code = (parse_qs(self.path.partition("?")[2]).get("c") or [""])[0][:40]
+        esc = lambda text: str(text).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")      # noqa: E731
+        page = ('<!doctype html><html lang="%s"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><title>%s</title>'
+                '<style>body{margin:0;min-height:100vh;display:grid;place-items:center;font:16px system-ui,sans-serif;background:#0d1117;color:#e6edf3;text-align:center;padding:24px}'
+                'button{margin-top:16px;padding:12px 24px;min-height:44px;font:inherit;border:0;border-radius:8px;background:#2f81f7;color:#fff}#out{margin-top:12px;min-height:1.4em}</style></head>'
+                '<body><main><h1>%s</h1><p>%s</p><button id="go" type="button">%s</button><p id="out" role="status"></p></main>'
+                '<script>const code=%s,bad=%s;document.getElementById("go").onclick=async()=>{const o=document.getElementById("out");try{const r=await fetch("/api/pair/redeem",{method:"POST",'
+                'headers:{"Content-Type":"application/json"},body:JSON.stringify({code})});const j=await r.json();if(j.ok){location.href="/"}else{o.textContent=bad[j.error]||bad.wrong}}catch(e){o.textContent=bad.wrong}}</script></body></html>') % (
+            esc(i18n.language()), esc(i18n.t("ui.pair_page_title")), esc(i18n.t("ui.pair_page_title")), esc(i18n.t("ui.pair_page_text")), esc(i18n.t("ui.pair_page_button")), json.dumps(code).replace("</", "<\\/"),
+            json.dumps({k: i18n.t("ui.pair_err_" + k) for k in ("closed", "wrong", "full", "locked", "off")}).replace("</", "<\\/"))
+        self.reply(page, "text/html; charset=utf-8")
+
+    def pair_post(self, path):
+        """POST /api/pair/start (this computer: opens a code and answers its address and QR code), /api/pair/redeem (the phone: spends the code and gets its cookie) and /api/devices/revoke
+        ({id}: this computer takes a device away). All three need `pairing.enabled` and the network mode."""
+        from github_actions_monitor.security import audit_log, devices
+        cfg = devices.settings(toolconfig.raw_config())
+        if not cfg["enabled"] or LITE["on"]:
+            self.json_reply({"ok": False, "error": "off"}, 404)
+            return
+        if not localguard.STATE["network"]:
+            self.json_reply({"ok": False, "error": "not_network"}, 409)
+            return
+        try:
+            size = int(self.headers.get("Content-Length") or 0)
+            request = json.loads(self.rfile.read(size) if 0 < size <= 1024 else b"{}")
+        except (ValueError, TypeError):
+            request = {}
+        request = request if isinstance(request, dict) else {}
+        if path == "/api/pair/redeem":
+            if not self.guard():
+                return
+            if not self.is_local() and localguard.is_locked_out(self.client_address, self.headers, token_ok=False):
+                self.json_reply({"ok": False, "error": "locked"}, 429)
+                return
+            token, answer = devices.redeem(cfg, request.get("code"), self.headers.get("User-Agent"))
+            if token is None:
+                if answer == "wrong":      # a guess counts against the address like a wrong access token
+                    localguard.note_failure(localguard.client_key(self.client_address, self.headers), localguard.max_failed(LIVE_CONFIG or DEFAULTS))
+                audit_log.note("redeem")
+                self.json_reply({"ok": False, "error": answer}, 403)
+                return
+            audit_log.note(answer["id"])
+            body = json.dumps({"ok": True, "device": answer}).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Set-Cookie", localguard.cookie_header(token, secure=False if self.local_door else None) + "; Max-Age=%d" % ((cfg["device_days"] or 3650) * 86400))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+        if not self.guard() or not self.this_computer() or not self.token_ok():
+            return
+        if path == "/api/pair/start":
+            from github_actions_monitor.util import qrcode
+            opened = devices.start(cfg)
+            host = (self.headers.get("Host") or "").strip()
+            name = host.rsplit(":", 1)[0].strip("[]") if host else ""
+            if not host or name in localguard.LOOPBACK_HOSTS or name == "::1":      # a phone cannot reach the loopback address: the address of this computer on the network
+                host = "%s:%s" % (lan_address(), self.server.server_address[1])
+            url = "%s://%s/pair?c=%s" % ("https" if localguard.STATE["secure"] else "http", host, opened["code"])
+            audit_log.note("start")
+            self.json_reply({"ok": True, "url": url, "code": opened["code"], "expires_in": opened["expires_in"], "svg": qrcode.svg(url, label=i18n.t("ui.pair_qr_alt"))})
+            return
+        if path == "/api/devices/revoke":
+            done = devices.revoke(str(request.get("id") or ""))
+            audit_log.note(str(request.get("id") or "")[:20])
+            self.json_reply({"ok": done, "error": "" if done else "unknown"}, 200 if done else 404)
+
     def access_gate(self):
         """Network mode only: every request must prove the access token (cookie, header or `?access=` on the first visit, which sets the cookie and goes to the clean address)."""
         self.deprecated_access = False
         if not localguard.STATE["network"] or self.path.split("?")[0] in ("/api/webhook", "/api/chatops/slack", "/api/chatops/discord"):      # the webhook and the chat have their own proof (the HMAC of GitHub, the signature of Slack or of Discord)
+            return True
+        if (self.command == "GET" and self.path.split("?")[0] == "/pair") or (self.command == "POST" and self.path.split("?")[0] == "/api/pair/redeem"):      # a phone with a one-use code has no token yet: the code is its proof (pair_page, pair_post)
             return True
         if self.command == "POST" and self.path.split("?")[0] == "/api/access":      # the one-use post that opens the session: it checks the token itself (handle_post)
             return True
@@ -3045,6 +3182,9 @@ class Handler(BaseHTTPRequestHandler):
             return
         if path == "/api/access":      # network mode: open the session with the access token in the BODY (never in the address); the cookie comes back and the token is not repeated
             self.open_session()
+            return
+        if path in ("/api/pair/start", "/api/pair/redeem", "/api/devices/revoke"):      # the pairing of a phone (security/devices.py)
+            self.pair_post(path)
             return
         if path == "/api/credential":      # replace the login of this account, or read its files again, without a restart (complete edition)
             if not self.guard() or not self.this_computer():
@@ -3372,6 +3512,9 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(404)
             self.end_headers()
             return
+        if path in ("/pair", "/api/devices", "/api/pair/status", "/manifest.webmanifest", "/sw.js", "/pwa/offline", "/pwa/icon-192.png", "/pwa/icon-512.png"):      # the app, the pairing page and the devices
+            if self.pwa_get(path):
+                return
         if path == "/api/sentinel/parte.txt":   # the same text as the daily report, to copy or download
             if not self.guard():
                 return

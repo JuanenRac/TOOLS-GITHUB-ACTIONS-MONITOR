@@ -68,6 +68,8 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/compare` | GET | viewer | this period against the one before, read only, from the ledger and the snapshots of the score (`?window=`, `?days=`, `?baseline=`, `?from=`/`?to=`, `?format=json|ndjson|csv`): every figure with its change, direction and state (`insufficient_data`, `baseline_unavailable` instead of a made-up number), and what changed (Complete only, off by default) |
 | `/api/credential` | POST | admin | replace the GitHub login without restarting (this computer only) |
 | `/api/data` | GET | viewer | the main picture: repositories, runs, failing, active, rate |
+| `/api/devices` | GET | viewer | the devices paired with a QR code and whether pairing is on (this computer only; empty while `pairing.enabled` is off) |
+| `/api/devices/revoke` | POST | admin | take one paired device away ({id}); its token stops working at once (this computer only) |
 | `/api/discovery` | GET | viewer | repositories the monitor found and suggestions |
 | `/api/discovery/group` | POST | maintainer | put discovered repositories in a group |
 | `/api/events` | GET | viewer | the event journal |
@@ -94,6 +96,10 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/ops/status` | GET | viewer | the operation of the installation: the mode (service or local), the last backup (when, how old, ok or the stable code of the failure, size, sealed or not), the schedule, the purge switch, the retention policy in force and the report of the last restore; no path and no secret (Complete only) |
 | `/api/otlp` | GET | viewer | state of the OpenTelemetry export |
 | `/api/outputs` | GET | viewer | Prometheus, Grafana JSON and dashboard outputs |
+| `/api/pair` | GET,POST | viewer / admin | prefix of the pairing of a phone (see the routes below) |
+| `/api/pair/redeem` | POST | admin | a phone spends the one-use pairing code ({code}) and gets its own access cookie (the code is its proof; needs `pairing.enabled` and the network mode) |
+| `/api/pair/start` | POST | admin | open a one-use pairing code and answer its address and QR code (this computer only; needs `pairing.enabled` and the network mode) |
+| `/api/pair/status` | GET | viewer | the same answer as /api/devices (this computer only) |
 | `/api/paths` | GET | viewer | the folders and files of this monitor in use and what is left in the old places |
 | `/api/quota` | GET | viewer | plan, billable minutes, allowance of the API, concurrency, long jobs |
 | `/api/quota-pool/status` | GET | viewer | every read source with its allowance, the sum, and what each way of reading less has spared (this computer only) |

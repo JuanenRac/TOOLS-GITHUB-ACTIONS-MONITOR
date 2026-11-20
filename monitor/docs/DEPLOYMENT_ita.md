@@ -223,3 +223,20 @@ gh workflow run docker-audit.yml -f ref=<tag>
 ```
 
 Gli stessi script girano su una macchina Linux con Docker (`tools/docker_audit/run_all.sh`); `tools/docker_audit/LEEME.txt` spiega come leggere ogni risultato.
+
+## Il monitor sul telefono
+
+Tutto in questa sezione è spento o innocuo per impostazione predefinita.
+
+- **App installabile** (`pwa.enabled`): la pagina offre un manifest, due icone e un piccolo service worker, così un browser può installare il monitor come app. I file sono `/manifest.webmanifest`, `/sw.js`, `/pwa/offline`, `/pwa/icon-192.png` e `/pwa/icon-512.png`; in modalità di rete sono serviti dietro il token di accesso come ogni pagina. Il worker conserva solo la pagina offline e le icone: mai la pagina, mai una risposta dell'API. Quando l'app torna in primo piano, o torna la rete, la pagina chiede subito dati freschi (`pwa.refresh_on_return`).
+- **Vista compatta** (`ui.compact`): `auto` la usa in una finestra stretta, `on` sempre, `off` mai; `?compact=1` o `?compact=0` la cambia per una finestra. Il menu passa in alto come una riga di schede, le tabelle scorrono di lato, uno schermo tattile riceve bersagli di almeno 44 pixel e i dialoghi seguono l'altezza lasciata dalla tastiera sullo schermo.
+- **Abbinamento con un codice QR** (`pairing.enabled`, solo in modalità di rete): apri la tavolozza (Ctrl+K) e scegli "Abbina un telefono", poi "Nuovo codice QR". Il codice vale una sola volta e per `pairing.code_minutes` minuti; un nuovo codice annulla il precedente. Il telefono lo scansiona, preme il pulsante della pagina che si apre e riceve un token proprio (un cookie), mai il token di accesso. La stessa finestra elenca i dispositivi abbinati e ne revoca uno: il suo token smette subito di funzionare. Al massimo `pairing.max_devices` dispositivi; un dispositivo va abbinato di nuovo dopo `pairing.device_days` giorni (0 = mai). Il monitor conserva solo l'hash di ogni token in `devices.json` della cartella dei dati, un codice errato conta contro l'indirizzo come un token di accesso errato, e ogni abbinamento e ogni revoca lasciano una riga nel registro delle azioni.
+
+| Percorso | Cosa fa |
+|---|---|
+| `GET /api/devices` | i dispositivi abbinati e se l'abbinamento è attivo (solo questo computer) |
+| `POST /api/pair/start` | apre un codice monouso e risponde con il suo indirizzo e il suo codice QR (solo questo computer, con il token monouso della pagina) |
+| `POST /api/pair/redeem` | il telefono usa il codice (`{"code": "..."}`) e riceve il suo cookie |
+| `POST /api/devices/revoke` | revoca un dispositivo (`{"id": "..."}`; solo questo computer) |
+
+- **Tavolozza e scorciatoie** (`ui.palette`): Ctrl+K apre una casella di ricerca di schede, repository e azioni; `?` elenca le scorciatoie, `/` va alla ricerca della scheda, `r` aggiorna e `[` `]` cambiano scheda.

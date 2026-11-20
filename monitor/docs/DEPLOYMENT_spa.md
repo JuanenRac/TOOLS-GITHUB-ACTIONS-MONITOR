@@ -223,3 +223,20 @@ gh workflow run docker-audit.yml -f ref=<tag>
 ```
 
 Los mismos scripts se ejecutan en un Linux con Docker (`tools/docker_audit/run_all.sh`); `tools/docker_audit/LEEME.txt` explica cómo leer cada resultado.
+
+## El monitor en el móvil
+
+Todo lo de esta sección está apagado o es inofensivo por defecto.
+
+- **App instalable** (`pwa.enabled`): la página ofrece un manifiesto, dos iconos y un pequeño service worker, de modo que un navegador puede instalar el monitor como una app. Los ficheros son `/manifest.webmanifest`, `/sw.js`, `/pwa/offline`, `/pwa/icon-192.png` y `/pwa/icon-512.png`; en el modo de red se sirven detrás del token de acceso como cualquier página. El worker solo guarda la página sin conexión y los iconos: nunca la página, nunca una respuesta de la API. Cuando la app vuelve al primer plano, o regresa la red, la página pide datos nuevos de inmediato (`pwa.refresh_on_return`).
+- **Vista compacta** (`ui.compact`): `auto` la usa en una ventana estrecha, `on` siempre, `off` nunca; `?compact=1` o `?compact=0` la cambia en una ventana. El menú pasa arriba como una fila de pestañas, las tablas se desplazan de lado, una pantalla táctil recibe objetivos de al menos 44 píxeles y los diálogos siguen la altura que deja el teclado en pantalla.
+- **Emparejamiento con un código QR** (`pairing.enabled`, solo en modo de red): abre la paleta (Ctrl+K) y elige "Emparejar un móvil", luego "Nuevo código QR". El código sirve una vez y durante `pairing.code_minutes` minutos; un código nuevo anula el anterior. El móvil lo escanea, pulsa el botón de la página que se abre y recibe un token propio (una cookie), nunca el token de acceso. La misma ventana lista los dispositivos emparejados y retira uno: su token deja de funcionar al instante. Como máximo `pairing.max_devices` dispositivos; un dispositivo se vuelve a emparejar pasados `pairing.device_days` días (0 = nunca). El monitor guarda solo el hash de cada token en `devices.json` de la carpeta de datos, un código erróneo cuenta contra la dirección como un token de acceso erróneo, y cada emparejamiento y cada revocación dejan una línea en el registro de acciones.
+
+| Ruta | Qué hace |
+|---|---|
+| `GET /api/devices` | los dispositivos emparejados y si el emparejamiento está activo (solo este ordenador) |
+| `POST /api/pair/start` | abre un código de un solo uso y responde con su dirección y su código QR (solo este ordenador, con el token de un solo uso de la página) |
+| `POST /api/pair/redeem` | el móvil gasta el código (`{"code": "..."}`) y recibe su cookie |
+| `POST /api/devices/revoke` | retira un dispositivo (`{"id": "..."}`; solo este ordenador) |
+
+- **Paleta y atajos** (`ui.palette`): Ctrl+K abre un cuadro de búsqueda de pestañas, repositorios y acciones; `?` lista los atajos, `/` va al cuadro de búsqueda de la pestaña, `r` actualiza y `[` `]` cambian de pestaña.

@@ -26,6 +26,12 @@ ENDPOINT_RE = re.compile(r'"(/api/[a-z0-9/_-]*[a-z0-9_-])"')
 
 #: endpoint -> (methods, what it is, for the AIs). Every endpoint named in the code must be here.
 NOTES = {
+    "/api/devices": ("GET", "the devices paired with a QR code and whether pairing is on (this computer only; empty while `pairing.enabled` is off)"),
+    "/api/devices/revoke": ("POST", "take one paired device away ({id}); its token stops working at once (this computer only)"),
+    "/api/pair": ("GET,POST", "prefix of the pairing of a phone (see the routes below)"),
+    "/api/pair/redeem": ("POST", "a phone spends the one-use pairing code ({code}) and gets its own access cookie (the code is its proof; needs `pairing.enabled` and the network mode)"),
+    "/api/pair/start": ("POST", "open a one-use pairing code and answer its address and QR code (this computer only; needs `pairing.enabled` and the network mode)"),
+    "/api/pair/status": ("GET", "the same answer as /api/devices (this computer only)"),
     "/api/about": ("GET", "version, edition, folders, health and a text to paste in a support request"),
     "/api/access": ("GET,POST", "the access token of the network mode (this computer only)"),
     "/api/accounts": ("GET", "the accounts of an installation with several, with their state (running, blind)"),

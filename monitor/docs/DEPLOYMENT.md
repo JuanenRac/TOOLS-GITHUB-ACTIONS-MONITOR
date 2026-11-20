@@ -223,3 +223,20 @@ gh workflow run docker-audit.yml -f ref=<tag>
 ```
 
 The same scripts run on a Linux machine with Docker (`tools/docker_audit/run_all.sh`); `tools/docker_audit/LEEME.txt` explains how to read each result.
+
+## The monitor on a phone
+
+Everything in this section is off or harmless by default.
+
+- **Installable app** (`pwa.enabled`): the page offers a manifest, two icons and a small service worker, so a browser can install the monitor as an app. The files are `/manifest.webmanifest`, `/sw.js`, `/pwa/offline`, `/pwa/icon-192.png` and `/pwa/icon-512.png`; in the network mode they are served behind the access token like every page. The worker keeps only the offline page and the icons: never the page, never an answer of the API. When the app comes back to the front, or the network returns, the page asks for fresh data at once (`pwa.refresh_on_return`).
+- **Compact view** (`ui.compact`): `auto` uses it in a narrow window, `on` always, `off` never; `?compact=1` or `?compact=0` changes it for one window. The menu goes to the top as a row of tabs, the tables scroll sideways, a touch screen gets targets of at least 44 pixels and the dialogs follow the height that the on-screen keyboard leaves.
+- **Pairing with a QR code** (`pairing.enabled`, network mode only): open the palette (Ctrl+K) and choose "Pair a phone", then "New QR code". The code works once and for `pairing.code_minutes` minutes; a new code cancels the previous one. The phone scans it, presses the button of the page that opens and gets a token of its own (a cookie), never the access token. The same window lists the paired devices and takes one away: its token stops working at once. At most `pairing.max_devices` devices; a device must be paired again after `pairing.device_days` days (0 = never). The monitor keeps only the hash of each token in `devices.json` of the data folder, a wrong code counts against the address like a wrong access token, and every pairing and every revocation leaves a line in the log of actions.
+
+| Route | What it does |
+|---|---|
+| `GET /api/devices` | the paired devices and whether pairing is on (this computer only) |
+| `POST /api/pair/start` | opens a one-use code and answers its address and QR code (this computer only, with the one-use token of the page) |
+| `POST /api/pair/redeem` | the phone spends the code (`{"code": "..."}`) and gets its cookie |
+| `POST /api/devices/revoke` | takes a device away (`{"id": "..."}`; this computer only) |
+
+- **Palette and shortcuts** (`ui.palette`): Ctrl+K opens a search box for tabs, repositories and actions; `?` lists the shortcuts, `/` goes to the search box of the tab, `r` refreshes and `[` `]` change tab.

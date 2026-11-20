@@ -1,0 +1,73 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.1.7",
+ "previous": "2.1.6",
+ "digest": "03d11b946aa6607e7457b450bc1d86121c2c540ee9ce6ab678270e1647ac3ea7",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "pairing.code_minutes",
+    "kind": "int",
+    "bounds": [
+     1,
+     30
+    ],
+    "default": 5
+   },
+   {
+    "key": "pairing.device_days",
+    "kind": "int",
+    "bounds": [
+     0,
+     365
+    ],
+    "default": 90
+   },
+   {
+    "key": "pairing.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "pairing.max_devices",
+    "kind": "int",
+    "bounds": [
+     1,
+     50
+    ],
+    "default": 10
+   },
+   {
+    "key": "pwa.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "pwa.refresh_on_return",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "ui.compact",
+    "kind": "enum",
+    "bounds": [
+     "auto",
+     "on",
+     "off"
+    ],
+    "default": "auto"
+   },
+   {
+    "key": "ui.palette",
+    "kind": "bool",
+    "default": true
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {}
+}

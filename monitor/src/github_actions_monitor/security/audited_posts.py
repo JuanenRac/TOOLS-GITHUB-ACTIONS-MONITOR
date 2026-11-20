@@ -29,6 +29,9 @@ AUDITED = {
     "/api/ai/actions/unlock": "ai_unlock",              # the actions of the AI are unlocked for a while
     "/api/screens/logo": "screens_logo_upload",                # the logo of the organization is uploaded (its kind and size go in, never its content)
     "/api/screens/logo/remove": "screens_logo_remove",         # the logo of the organization is removed
+    "/api/pair/start": "device_pair_start",                    # a one-use code for a phone is opened (never the code itself)
+    "/api/pair/redeem": "device_pair",                         # a phone spends the code and becomes a paired device (its id, never its token)
+    "/api/devices/revoke": "device_revoke",                    # a paired device is taken away
 }
 
 #: route -> why it is not in this table

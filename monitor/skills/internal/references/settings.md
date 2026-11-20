@@ -420,9 +420,15 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `pagination.cursor_pages` | `3` | polling | Pages followed by cursor (alerts) |
 | `pagination.job_pages` | `2` | polling | Pages of jobs per run |
 | `pagination.workflow_pages` | `3` | polling | Pages of workflows per repository |
+| `pairing.code_minutes` | `5` | general | Minutes a pairing code lasts |
+| `pairing.device_days` | `90` | general | Days a paired device keeps its access |
+| `pairing.enabled` (secure) | `false` | general | Pair phones with a QR code |
+| `pairing.max_devices` | `10` | general | Most paired devices |
 | `ports.complete` | `8765` | general | Port of the complete edition |
 | `ports.lite` | `8766` | general | Port of the lite edition |
 | `profiles_file` | `-` | paths | Batch profiles file |
+| `pwa.enabled` | `false` | general | Installable app (PWA) |
+| `pwa.refresh_on_return` | `true` | general | Refresh when the app returns |
 | `quota.alert_percent` | `90` | basic | Alert at this share of the included minutes |
 | `quota.billing_api` (secure) | `false` | basic | Read the real usage from the billing report of GitHub |
 | `quota.default_runner` | `"linux"` | basic | System assumed for the minute estimate |
@@ -753,8 +759,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `tui.theme` | `-` | console | Colours |
 | `ui.about_org_logo` | `false` | general | Organization logo in About |
 | `ui.alerts_sort` | `"server"` | general | Order of the alerts |
+| `ui.compact` | `"auto"` | general | Compact view |
 | `ui.now_sort` | `"ecosystem"` | general | Order of the runs happening now |
 | `ui.orientation` | `"auto"` | general | Orientation of the page |
+| `ui.palette` | `true` | general | Palette and shortcuts |
 | `ui.remember_folds` | `true` | general | Remember folded sections |
 | `ui.rotate_seconds` | `0` | general | Seconds between tabs of a screen |
 | `ui.screen1_orientation` | `"auto"` | general | Orientation of screen 1 |
