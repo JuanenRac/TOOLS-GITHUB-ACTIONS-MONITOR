@@ -31,12 +31,15 @@ Pour une télévision ou un mur avec un texte plus grand, un contraste élevé o
 | `ui.screen3_orientation` | Orientation de /screen/3. |
 | `ui.now_sort` | Ordre de En cours pour qui n'a pas choisi : ecosystem, severity, age, newest, repo, event ou state. |
 | `ui.alerts_sort` | Ordre de l'onglet Alertes pour qui n'a pas choisi : server, severity, streak, class, age, newest, repo, origin ou state. |
+| `ui.remember_folds` | Mémoriser les sections repliées : activé (par défaut), les sections repliées ou dépliées à la main restent ainsi après une actualisation et à la réouverture de la page ; désactivé, seulement tant que la page reste ouverte. |
 
 ## Ordre des listes
 
 La section **En cours** du premier onglet est triée par écosystème, avec un titre pour chacun. La liste au-dessus de la section le change : écosystème, gravité (d'abord les exécutions bloquées, puis celles avec un job en échec, puis en cours, puis en file), ancienneté (la plus longue d'abord), plus récent d'abord, dépôt, déclencheur (push, pull_request, schedule...) et état (en cours avant en file). Le choix est mémorisé pour chaque personne : en mode équipe le serveur le garde avec l'utilisateur (`GET` et `POST /api/auth/me/view`, il le suit donc dans un autre navigateur), sinon ce navigateur. Tant que personne ne choisit, l'ordre est `ui.now_sort` du fichier de configuration (écosystème s'il manque ou s'il est faux). Les boutons **Tout déplier** et **Tout replier** à côté de la liste déplient ou replient d'un coup tous les dépôts de la section, dans n'importe quel ordre ; le choix est mémorisé pour chaque personne au même endroit et survit à une actualisation (un dépôt que vous ouvrez ou fermez ensuite à la main garde votre choix).
 
 La liste de l'onglet **Alertes** garde l'ordre envoyé par le moniteur tant que quelqu'un n'en choisit pas un autre avec la liste au-dessus : gravité (critique, erreur, avertissement, info), la plus longue série d'échecs consécutifs d'abord, classe (une alerte d'erreur ou critique est réelle et passe avant celles à surveiller), les plus anciennes d'abord, les plus récentes d'abord, dépôt, origine (la sentinelle qui l'a levée) et état (ouvertes avant mises en sourdine). Elle est mémorisée de la même façon ; tant que personne ne choisit, `ui.alerts_sort` du fichier de configuration s'applique (`server` s'il manque ou s'il est faux).
+
+Les **sections repliées et dépliées** restent comme la personne les a laissées. Les sections de la Sentinelle CI, les cartes des autres sentinelles, les listes d'avis du premier onglet et les versions de l'outil de mise à jour sont redessinées à chaque actualisation, et une actualisation ne rouvre jamais ce qui était replié ni ne replie ce qui était déplié : chaque bloc a un nom stable et la page garde le choix de chacun, en mémoire et, avec `ui.remember_folds` activé (par défaut), dans le navigateur aussi. Seul un clic de la personne enregistre un choix ; ce que la page ouvre d'elle-même (la première carte avec des alertes d'une sentinelle que personne n'a encore touchée) n'en est pas un.
 
 ## Tailles testées
 

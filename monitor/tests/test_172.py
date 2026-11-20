@@ -62,10 +62,12 @@ class Corner(unittest.TestCase):
 
     def test_the_hot_only_button_and_the_speed_list_live_in_the_corner_and_nowhere_else(self):
         corner = self.corner()
-        for ident in ('id="hotonly"', 'id="mode-sel"', 'id="mode-left"'):
+        for ident in ('id="mode-sel"', 'id="mode-left"'):
             self.assertIn(ident, corner)
             self.assertEqual(PAGE.count(ident), 1, ident)
-        self.assertLess(corner.index('id="hotonly"'), corner.index('id="mode-sel"'))
+        for ident in ('id="hotonly"', 'id="fs"', 'id="scrm-open"'):      # these three moved to the left of the save and print buttons of the bar at the top
+            self.assertNotIn(ident, corner)
+            self.assertEqual(PAGE.count(ident), 1, ident)
 
     def test_the_health_chips_of_the_ecosystems_and_the_badges_are_in_the_corner_too(self):
         corner = self.corner()

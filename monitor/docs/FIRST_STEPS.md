@@ -17,4 +17,6 @@
 
 **5. Know where help is.** The round **?** button (or the key `?`) opens the Help; the **i** button opens About with your version, files and a button that copies the information for support (it carries no secret). In the console: `--help-topics`, `--help-search WORDS`, `--about`.
 
+**6. Save or print a report.** The two buttons at the top of the page save the report of the open tab (TXT, PDF and, if you want, JSON, each through the **Save as** window of your browser) or print it as a clean page ([Outputs for other tools](OUTPUTS.md)).
+
 **Good to know.** If you use a plan with private repositories, choose it in Settings > Basic to see your quotas ([Quotas and plans](QUOTAS.md)). The sentinel is explained in [The sentinel](SENTINEL.md). The tool only reads GitHub; it writes only after you confirm.

@@ -29,3 +29,4 @@ GPL-3.0-or-later - see LICENSE
 9. ヘルプは内蔵されています。ページの丸い ? ボタン（またはキー ?）でドキュメント全体をオフラインで開き、i ボタンでバージョン情報を表示してサポート用の情報をコピーします（秘密情報は含まれません）。コンソールでは python bin/actions_monitor.py --doctor（インストールを確認し、問題ごとの対処法を表示）、--demo（架空のデータのページ。gh 不要）、--about、--help-topics、--help-search 単語。詳細: docs/FIRST_STEPS_jpn.md、docs/SENTINEL_jpn.md、docs/QUOTAS_jpn.md。
 10. コマンドライン: python bin/monitor_cli.py status | health | doctor | alerts(ガイド: docs/CLI.md)。モニターがネットワークで待ち受けている場合は、アクセストークンを環境変数 MONITOR_ACCESS_TOKEN に設定してください(別名 MONITOR_TOKEN も使えます。--token は最後の手段です)。管理下にないネットワークでは https を使ってください。
 11. レッスンと AI: python bin/monitor_cli.py lessons brief(過去の失敗から学んだこと。プッシュの前に)、python bin/monitor_cli.py install-skill internal|external --dest フォルダー(AI 向けガイド)。ガイド: docs/LESSONS_jpn.md、docs/SKILLS_jpn.md。
+12. タブのレポート: ページ上部の 2 つのボタンで保存(TXT、PDF、JSON。いずれもブラウザーの「名前を付けて保存」ウィンドウ経由)するか、すっきりしたページとして印刷できます。詳細と設定: docs/OUTPUTS.md。

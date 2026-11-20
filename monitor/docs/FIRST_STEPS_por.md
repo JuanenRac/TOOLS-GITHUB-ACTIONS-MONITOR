@@ -17,4 +17,6 @@
 
 **5. Saiba onde está a ajuda.** O botão redondo **?** (ou a tecla `?`) abre a Ajuda; o botão **i** abre Acerca de, com a sua versão, os seus ficheiros e um botão que copia a informação para o suporte (sem segredos). Na consola: `--help-topics`, `--help-search PALAVRAS`, `--about`.
 
+**6. Guardar ou imprimir um relatório.** Os dois botões no topo da página guardam o relatório do separador aberto (TXT, PDF e, se quiser, JSON, cada um pela janela **Guardar como** do navegador) ou imprimem-no como uma página limpa ([Saídas para outras ferramentas](OUTPUTS.md)).
+
 **Convém saber.** Se usa um plano com repositórios privados, escolha-o em Definições > Básico para ver as suas quotas ([Quotas e planos](QUOTAS_por.md)). A sentinela está explicada em [A sentinela](SENTINEL_por.md). A ferramenta só lê o GitHub; só escreve depois de confirmar.

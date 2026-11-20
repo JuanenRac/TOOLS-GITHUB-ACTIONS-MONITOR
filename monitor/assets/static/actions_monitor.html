@@ -270,6 +270,14 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 .dlg[hidden]{display:none}.dlg.ask{z-index:60}.ask-text{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}.dlg-bar .sp{flex:1}#ask-ok.danger{border-color:var(--bad)}
 .dlg-box{background:var(--panel);border:1px solid var(--line2);border-radius:14px;box-shadow:var(--shadow);width:min(640px,100%);max-height:calc(100vh - 28px);display:flex;flex-direction:column;overflow:hidden}
 .dlg-box.wide{width:min(1100px,100%);height:calc(100vh - 28px)}
+#rep-dlg .dlg-box{width:min(520px,94vw)}.rep-opt{display:flex;gap:8px;align-items:center;margin:6px 0}.rep-opt select{max-width:100%}#rep-out{white-space:pre-line;overflow-wrap:anywhere;margin:8px 0 0}#rep-note{overflow-wrap:anywhere;margin:6px 0 0}
+/* the report of a tab (reporting/tab_report.py): one clean page, the same one that is printed and that the PDF repeats */
+#rep-view{position:fixed;inset:0;z-index:50;background:#fff;color:#111;overflow:auto;padding:16px}#rep-view[hidden]{display:none}.rep-bar{display:flex;gap:8px;flex-wrap:wrap;max-width:900px;margin:0 auto 12px}.rep-bar .sp{flex:1}
+#rep-doc{max-width:900px;margin:0 auto;font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;overflow-wrap:anywhere}#rep-doc h1{font-size:22px;margin:0 0 4px}#rep-doc h2{font-size:16px;margin:16px 0 6px}#rep-doc .rep-sub{margin:0 0 8px;color:#555}
+#rep-doc .rep-meta{display:grid;grid-template-columns:minmax(0,max-content) minmax(0,1fr);gap:2px 12px;margin:0 0 8px;color:#333}#rep-doc .rep-meta dd{margin:0}#rep-doc ul{margin:0;padding-left:20px}#rep-doc li{margin:2px 0}
+#rep-doc li.rep-act{font-weight:600}#rep-doc li.rep-watch{font-style:italic}#rep-doc table{width:100%;border-collapse:collapse;table-layout:fixed;margin:4px 0 12px}
+#rep-doc th,#rep-doc td{border-bottom:1px solid #ccc;padding:4px 6px;text-align:left;vertical-align:top;white-space:normal;overflow-wrap:anywhere;word-break:break-word}#rep-doc th{background:#eee;color:#111;position:static}#rep-doc .rep-foot{margin-top:16px;color:#555;font-size:12px}
+@media print{body.rep-on>*:not(#rep-view){display:none!important}#rep-view{position:static;overflow:visible;padding:0}.rep-bar{display:none}}
 #about-dlg .dlg-box{width:min(864px,94vw)}      /* About: 35% wider than the 640px of the other dialogs, never wider than the screen */
 .dlg-top{display:flex;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)}
 .dlg-top h2{margin:0;font-size:16px;flex:0 0 auto}.dlg-top .sp{flex:1}
@@ -308,7 +316,7 @@ th.sortable{cursor:pointer;user-select:none;white-space:nowrap}th.sortable:hover
 #statusbar .sb-right{display:flex;flex-wrap:nowrap;align-items:center;justify-content:flex-end;gap:5px 6px;margin-left:auto;min-width:0;flex:1 1 0}
 #statusbar .sb-item{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:100%;padding:2px 10px;border:1px solid var(--line2);border-radius:999px;background:var(--bg);color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.5}
 #statusbar .sb-item:empty{display:none}
-.sb-bar{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;margin-left:auto}.sb-bar .ib{width:28px;height:28px}
+.sb-bar{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;margin-left:auto}.sb-bar .ib{width:28px;height:28px}.kiosk #scrm-open,.kiosk #fs,.kiosk #hotonly,.allmode #scrm-open,.allmode #fs,.allmode #hotonly{display:none!important}
 .sb-bar .sb-item{display:inline-flex;align-items:center;padding:2px 10px;border:1px dashed var(--line2);border-radius:999px;color:var(--mut);white-space:nowrap;line-height:1.5}.sb-bar .sb-item:empty{display:none}.sb-bar .sb-item.sb-on{color:var(--text);border-style:solid}
 @media print{.sb-bar,#statusbar,nav[role=tablist],#accbar,.dlg,.cfg-tip{display:none!important}}
 /* print: the page that is printed is the whole tab, not the part a scrolling box shows; the controls of the trend (selectors, copy, export) do nothing on paper */
@@ -500,11 +508,11 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <header>
 <div class="hgrid">
 <div class="hmain">
-<div class="h-row h-top"><div class="top-left"><svg class="ico top-ico" aria-hidden="true" focusable="false"><use id="vt-ico" href="#i-now"/></svg><span class="view-title" id="view-title"></span></div><div class="sb-bar" id="sb-bar" role="group" data-i18n-aria="ui.bar_aria"><button type="button" class="ib" id="bar-save" data-i18n-title="ui.bar_save" data-i18n-aria="ui.bar_save"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-save"/></svg></button><button type="button" class="ib" id="bar-print" data-i18n-title="ui.bar_print" data-i18n-aria="ui.bar_print"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-report"/></svg></button><span class="sb-item sb-opt" id="bar-ai-int" role="status"></span><span class="sb-item sb-opt" id="bar-ai-ext" role="status"></span></div></div>
+<div class="h-row h-top"><div class="top-left"><svg class="ico top-ico" aria-hidden="true" focusable="false"><use id="vt-ico" href="#i-now"/></svg><span class="view-title" id="view-title"></span></div><div class="sb-bar" id="sb-bar" role="group" data-i18n-aria="ui.bar_aria"><button id="scrm-open" class="ib" type="button" aria-haspopup="dialog" hidden data-i18n-aria="ui.scrm_btn_tip" data-i18n-title="ui.scrm_btn_tip"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-screens"/></svg></button><button id="fs" class="ib" type="button" aria-pressed="false" data-i18n-aria="ui.fs_enter" data-i18n-title="ui.fs_enter"><svg class="ico" aria-hidden="true" focusable="false"><use id="fs-ico" href="#i-full"/></svg></button><button id="hotonly" class="ib" type="button" aria-pressed="false" data-i18n-aria="ui.ic_hotonly_off" data-i18n-title="ui.ic_hotonly_off"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-flame"/></svg></button><button type="button" class="ib" id="bar-save" data-i18n-title="ui.bar_save" data-i18n-aria="ui.bar_save"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-save"/></svg></button><button type="button" class="ib" id="bar-print" data-i18n-title="ui.bar_print" data-i18n-aria="ui.bar_print"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-report"/></svg></button><span class="sb-item sb-opt" id="bar-ai-int" role="status"></span><span class="sb-item sb-opt" id="bar-ai-ext" role="status"></span></div></div>
 <div class="tiles" id="tiles1" role="group" data-i18n-aria="ui.tiles_aria1"><div class="tile skel " id="kt-active" role="button" tabindex="0" data-go="now" data-i18n-title="ui.k_active_title" data-i18n-aria="ui.k_active_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-run"/></svg><b id="k-active" data-v>–</b><small data-i18n="ui.k_active"></small></div><div class="tile skel " id="kt-queued" role="button" tabindex="0" data-go="now" data-i18n-title="ui.k_queued_title" data-i18n-aria="ui.k_queued_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-queue"/></svg><b id="k-queued" data-v>–</b><small data-i18n="ui.k_queued"></small></div><div class="tile skel kclick" id="kp-fail" role="button" tabindex="0" data-i18n-title="ui.k_fail_title" data-i18n-aria="ui.k_fail_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-fail"/></svg><b id="k-fail" data-v>–</b><small data-i18n="ui.k_fail"></small></div><div class="tile skel " id="kt-ok" role="button" tabindex="0" data-go="hist" data-i18n-title="ui.k_ok_title" data-i18n-aria="ui.k_ok_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-okc"/></svg><b id="k-ok" data-v>–</b><small data-i18n="ui.k_ok"></small></div><div class="tile skel " id="kt-min" role="button" tabindex="0" data-go="charts" data-i18n-title="ui.k_min_title" data-i18n-aria="ui.k_min_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-timer"/></svg><b id="k-min" data-v>–</b><small data-i18n="ui.k_min"></small></div><div class="tile skel " id="kt-issues" role="button" tabindex="0" data-go="sent" data-i18n-title="ui.k_issues_title" data-i18n-aria="ui.k_issues_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-alert"/></svg><b id="k-issues" data-v>–</b><small data-i18n="ui.k_issues"></small></div><div class="tile skel kclick" id="kp-red" role="button" tabindex="0" data-i18n-title="ui.k_red_title" data-i18n-aria="ui.k_red_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-flag"/></svg><b id="k-red" data-v>–</b><small data-i18n="ui.k_red"></small></div><div class="tile skel kclick" id="kp-sign" role="button" tabindex="0" data-i18n-title="ui.k_sign_title" data-i18n-aria="ui.k_sign_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-pen"/></svg><b id="k-sign" data-v>–</b><small data-i18n="ui.k_sign"></small></div></div>
 <div class="tiles" id="tiles2" role="group" data-i18n-aria="ui.tiles_aria2"><div class="tile skel " id="kt-repos" role="button" tabindex="0" data-go="repos" data-i18n-title="ui.t_repos_title" data-i18n-aria="ui.t_repos_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repo"/></svg><b id="tv-repos" data-v>–</b><small data-i18n="ui.t_repos"></small></div><div class="tile skel " id="kt-hot" role="button" tabindex="0" data-go="repos" data-i18n-title="ui.t_hot_title" data-i18n-aria="ui.t_hot_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-flame"/></svg><b id="tv-hot" data-v>–</b><small data-i18n="ui.t_hot"></small></div><div class="tile skel " id="kt-mode" role="button" tabindex="0" data-go="cfg:general" data-i18n-title="ui.t_mode_title" data-i18n-aria="ui.t_mode_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-sliders"/></svg><b id="tv-mode" data-v>–</b><small data-i18n="ui.t_mode"></small></div><div class="tile skel " id="kt-etag" role="button" tabindex="0" data-go="cfg:cache" data-i18n-title="ui.t_etag_title" data-i18n-aria="ui.t_etag_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-save2"/></svg><b id="tv-etag" data-v>–</b><small data-i18n="ui.t_etag"></small></div><div class="tile skel wide" id="kt-quota" role="button" tabindex="0" data-go="cfg:polling" data-i18n-title="ui.t_quota_title" data-i18n-aria="ui.t_quota_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gauge"/></svg><b id="tv-quota" data-v>–</b><small><span data-i18n="ui.t_quota"></span> · <span id="tv-renews"></span></small><span class="qbar" aria-hidden="true"><i id="tq-fill"></i></span></div><div class="tile skel " id="kt-conn" role="group" data-i18n-title="ui.t_conn_title" data-i18n-aria="ui.t_conn_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-wifi"/></svg><b id="tv-conn" data-v>–</b><small data-i18n="ui.t_conn"></small><span class="vh" id="tv-conn-since"></span></div><div class="tile skel " id="kt-upd" role="group" data-i18n-title="ui.t_updated_title" data-i18n-aria="ui.t_updated_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg><b id="tv-upd" data-v>–</b><small data-i18n="ui.t_updated"></small></div><div class="tile wide run" id="kt-loading" role="group" hidden data-i18n-title="ui.t_loading_title" data-i18n-aria="ui.t_loading_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-spin"/></svg><b id="tv-load">–</b><small data-i18n="ui.t_loading"></small><span class="qbar" aria-hidden="true"><i id="tl-fill"></i></span></div></div>
 </div>
-<div class="hcorner" role="group" data-i18n-aria="ui.corner_aria"><div class="tools"><button id="scrm-open" class="ib" type="button" aria-haspopup="dialog" hidden data-i18n-aria="ui.scrm_btn_tip" data-i18n-title="ui.scrm_btn_tip"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-screens"/></svg></button><button id="fs" class="ib" type="button" aria-pressed="false" data-i18n-aria="ui.fs_enter" data-i18n-title="ui.fs_enter"><svg class="ico" aria-hidden="true" focusable="false"><use id="fs-ico" href="#i-full"/></svg></button><button id="hotonly" class="ib" type="button" aria-pressed="false" data-i18n-aria="ui.ic_hotonly_off" data-i18n-title="ui.ic_hotonly_off"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-flame"/></svg></button><label class="modebox" data-i18n-title="ui.mode_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gauge"/></svg><select id="mode-sel" data-i18n-aria="ui.mode_title"><option value="normal"></option><option value="fast"></option><option value="turbo"></option><option value="low"></option></select><span id="mode-left" class="mut" role="timer"></span></label></div><div class="hbadges"><span class="badge b-queued" id="k-budget" hidden role="status"></span><span class="badge b-queued" id="k-a10" hidden role="status"></span><span class="rdy" id="k-ready" role="group" data-i18n-aria="ui.ready_title" hidden></span><span class="rdy" id="k-score" role="group" data-i18n-aria="ui.score_title" hidden></span></div><div class="authbox" id="auth-box" hidden><button type="button" class="authbtn" id="auth-btn" aria-haspopup="menu" aria-expanded="false"></button><div class="authmenu" id="auth-menu" role="menu" hidden></div></div></div>
+<div class="hcorner" role="group" data-i18n-aria="ui.corner_aria"><div class="tools"><label class="modebox" data-i18n-title="ui.mode_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gauge"/></svg><select id="mode-sel" data-i18n-aria="ui.mode_title"><option value="normal"></option><option value="fast"></option><option value="turbo"></option><option value="low"></option></select><span id="mode-left" class="mut" role="timer"></span></label></div><div class="hbadges"><span class="badge b-queued" id="k-budget" hidden role="status"></span><span class="badge b-queued" id="k-a10" hidden role="status"></span><span class="rdy" id="k-ready" role="group" data-i18n-aria="ui.ready_title" hidden></span><span class="rdy" id="k-score" role="group" data-i18n-aria="ui.score_title" hidden></span></div><div class="authbox" id="auth-box" hidden><button type="button" class="authbtn" id="auth-btn" aria-haspopup="menu" aria-expanded="false"></button><div class="authmenu" id="auth-menu" role="menu" hidden></div></div></div>
 </div>
 <div class="vh" role="status"><span id="stamp" data-i18n="ui.loading_short"></span> <span id="mode"></span> <span id="rate"></span> <span class="badge b-queued" id="quota" hidden></span></div>
 </header>
@@ -608,6 +616,8 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <div id="ask-dlg" class="dlg ask" role="alertdialog" aria-modal="true" aria-labelledby="ask-h" aria-describedby="ask-t" hidden><div class="dlg-box"><div class="dlg-top"><h2 id="ask-h" data-i18n="ui.confirm_title"></h2></div><div class="dlg-body"><p id="ask-t" class="ask-text"></p></div><div class="dlg-bar"><span class="sp"></span><button id="ask-no" type="button" data-i18n="ui.confirm_cancel"></button><button id="ask-ok" type="button" data-i18n="ui.confirm_ok"></button></div></div></div>
 <div id="scrm-dlg" class="dlg" role="dialog" aria-modal="true" aria-labelledby="scrm-h" hidden><div class="dlg-box"><div class="dlg-top"><h2 id="scrm-h" data-i18n="ui.scrm_title"></h2><span class="sp"></span><button id="scrm-close" class="ib" type="button" data-i18n-title="ui.close" data-i18n-aria="ui.close"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg></button></div><div class="dlg-body" id="scrm-body"></div><div class="dlg-bar"><span id="scrm-msg" class="mut" role="status"></span></div></div></div>
 <div id="about-dlg" class="dlg" role="dialog" aria-modal="true" aria-labelledby="about-h" hidden><div class="dlg-box"><div class="dlg-top"><h2 id="about-h" data-i18n="ui.about_title"></h2><span class="sp"></span><button id="about-close" class="ib" type="button" data-i18n-title="ui.close" data-i18n-aria="ui.close"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg></button></div><div class="dlg-body" id="about-body"></div><div class="dlg-bar"><button id="about-copy" type="button"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-copy"/></svg><span data-i18n="ui.about_copy"></span></button><span id="about-msg" class="mut" role="status"></span></div></div></div>
+<div id="rep-dlg" class="dlg" role="dialog" aria-modal="true" aria-labelledby="rep-h" hidden><div class="dlg-box"><div class="dlg-top"><h2 id="rep-h" data-i18n="ui.rx_dlg_title"></h2><span class="sp"></span><button id="rep-close" class="ib" type="button" data-i18n-title="ui.close" data-i18n-aria="ui.close"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg></button></div><div class="dlg-body"><p class="mut" id="rep-tab"></p><label class="rep-opt"><input type="checkbox" id="rep-txt"><span data-i18n="ui.rx_fmt_txt"></span></label><label class="rep-opt"><input type="checkbox" id="rep-pdf"><span data-i18n="ui.rx_fmt_pdf"></span></label><label class="rep-opt"><input type="checkbox" id="rep-json"><span data-i18n="ui.rx_fmt_json"></span></label><label class="rep-opt"><span data-i18n="ui.rx_pdf_path"></span><select id="rep-path"><option value="auto" data-i18n="ui.rx_path_auto"></option><option value="own" data-i18n="ui.rx_path_own"></option><option value="browser" data-i18n="ui.rx_path_browser"></option></select></label><p class="mut" id="rep-note" role="status"></p><p id="rep-out" role="status"></p></div><div class="dlg-bar"><button id="rep-go" type="button" data-i18n="ui.rx_save"></button><button id="rep-cancel" type="button" data-i18n="ui.rx_cancel"></button></div></div></div>
+<div id="rep-view" role="document" hidden><div class="rep-bar"><button id="rep-vprint" type="button" data-i18n="ui.rx_print"></button><span class="sp"></span><button id="rep-vclose" type="button" data-i18n="ui.rx_close"></button></div><article id="rep-doc"></article></div>
 <div id="help-dlg" class="dlg" role="dialog" aria-modal="true" aria-labelledby="help-h" hidden><div class="dlg-box wide"><div class="dlg-top"><h2 id="help-h" data-i18n="ui.help_title"></h2><input id="help-q" type="search" autocomplete="off" data-i18n-ph="ui.help_search_ph" data-i18n-aria="ui.help_search_ph" style="flex:1;max-width:420px"><span class="sp"></span><button id="help-close" class="ib" type="button" data-i18n-title="ui.close" data-i18n-aria="ui.close"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg></button></div><div class="help-cols"><div id="help-list" role="navigation" data-i18n-aria="ui.help_index"></div><div id="help-body" tabindex="0"></div></div></div></div>
 <div id="wiz-dlg" class="dlg" role="dialog" aria-modal="true" aria-labelledby="wiz-h" hidden><div class="dlg-box"><div class="dlg-top"><h2 id="wiz-h" data-i18n="ui.wiz_title"></h2><span class="sp"></span><span class="mut" id="wiz-step"></span></div><div class="dlg-body" id="wiz-body"></div><div class="dlg-bar"><button id="wiz-back" type="button" data-i18n="ui.wiz_back"></button><button id="wiz-next" type="button" data-i18n="ui.wiz_next"></button><span class="sp" style="flex:1"></span><button id="wiz-skip" type="button" data-i18n="ui.wiz_skip"></button></div></div></div>
 <footer id="statusbar" role="contentinfo" data-i18n-aria="ui.sb_label">
@@ -645,6 +655,16 @@ const I18N=/*I18N_DATA*/null||{default:"en",langs:["en"],names:{en:"English"},ht
 /* several accounts (complete edition only): the supervisor embeds the list; one account or the lite edition leaves it null and nothing below changes */
 const ACC=/*ACCOUNTS_DATA*/null;
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+/* fold memory: what a person folds or unfolds stays so after every repaint (the lists are drawn again at each refresh) and, with ui.remember_folds on (the default), in this browser too. Every folding block carries a stable id in data-fold; only a click on a summary records a choice, so what the page opens by itself is never taken for one. */
+const FOLD=(()=>{const KEY="am-fold",mem=new Map();let loaded=false;
+  const on=()=>((typeof I18N==="object"&&I18N&&I18N.screens)||{}).remember_folds!==false;
+  const load=()=>{if(loaded)return;loaded=true;if(!on())return;try{const l=JSON.parse(store.get(KEY)||"[]");if(Array.isArray(l))l.forEach(r=>{if(Array.isArray(r)&&typeof r[0]==="string"&&!mem.has(r[0]))mem.set(r[0],r[1]===1)})}catch(e){}};
+  const save=()=>{if(on())store.set(KEY,JSON.stringify([...mem].slice(-400).map(([k,v])=>[k,v?1:0])))};
+  const o={get(id,def){load();id=String(id).slice(0,160);return mem.has(id)?mem.get(id):!!def},set(id,open){load();id=String(id).slice(0,160);mem.delete(id);mem.set(id,!!open);save()},
+    any(prefix){load();for(const k of mem.keys())if(k.startsWith(prefix))return true;return false},
+    attr(id,def){return ' data-fold="'+esc(String(id).slice(0,160))+'"'+(o.get(id,def)?" open":"")}};
+  document.addEventListener("click",e=>{const s=e.target&&e.target.closest&&e.target.closest("summary"),d=s&&s.parentElement;if(!d||d.tagName!=="DETAILS"||!d.dataset.fold)return;setTimeout(()=>o.set(d.dataset.fold,d.open),0)},true);
+  return o})();
 const QS=new URLSearchParams(location.search);   // deep link: ?tab=sent&repo=NAME&lang=de (the old #tab still works)
 var LANG=[QS.get("lang"),store.get("am-lang"),I18N.default,"en"].find(x=>x&&I18N.langs.includes(x));
 function T(k,v){const c=I18N.catalogues[LANG]||{},e=I18N.catalogues.en||{};let s=c[k]!==undefined?c[k]:e[k];if(s===undefined)return k;if(v)s=s.replace(/\{(\w+)\}/g,(m,n)=>v[n]!==undefined?v[n]:m);return s}
@@ -1004,11 +1024,11 @@ const redRepos=()=>LITE?(DATA?[...new Set(DATA.failing.map(r=>r.repo))]:[]):(SEN
 const signWait=()=>{const w={};((SENT&&SENT.a5&&SENT.a5.pending_sign)||[]).forEach(q=>{w[q.repo]=Math.max(w[q.repo]||0,q.hours||0)});return w};
 const signRepos=()=>{if(!SENT||!SENT.a5)return[];const w=signWait();return [...new Set([...(SENT.a5.sign_queue||[]).map(q=>q.repo),...(SENT.a5.pending_sign||[]).map(q=>q.repo)])].sort((a,b)=>(w[b]||0)-(w[a]||0)||(a<b?-1:1))};
 function focusSignQueue(){
-  OPEN.add("a5");store.set("am-s-open",[...OPEN].join(","));
+  FOLD.set("a5",true);
   showTab("sci");KPI_TAB="sci";renderSent();
   const q=$("sign-queue");if(q){q.scrollIntoView({block:"nearest"});q.focus&&q.focus({preventScroll:true})}
 }
-function onKpiRed(){setList(T("ui.l_red"),redRepos());if(redRepos().length){OPEN.add("a2");showTab("sci");KPI_TAB="sci";renderSent();const d=document.querySelector('details[data-k="a2"]');if(d)d.scrollIntoView({block:"nearest"})}}
+function onKpiRed(){setList(T("ui.l_red"),redRepos());if(redRepos().length){FOLD.set("a2",true);showTab("sci");KPI_TAB="sci";renderSent();const d=document.querySelector('details[data-k="a2"]');if(d)d.scrollIntoView({block:"nearest"})}}
 function onKpiSign(){const same=FILTER.list&&FILTER.listLabel===T("ui.l_unsigned");setList(T("ui.l_unsigned"),signRepos());if(!same&&signRepos().length)focusSignQueue()}
 [["kp-red",onKpiRed],["kp-sign",onKpiSign]].forEach(([id,fn])=>{$(id).addEventListener("click",fn);$(id).addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fn()}})});
 function readyChips(s){      // one chip per group of the readiness: a number, or the words "not enough data" with the reason in the tooltip
@@ -1051,7 +1071,7 @@ function runCounts(d){
 }
 const runFig=(shown,total)=>shown!==total?T("ui.k_of",{n:shown,total:total}):total;
 function runTitle(id,titleKey,shown,total){const el=$(id),t=el&&el.closest(".tile");if(t)t.title=T(titleKey)+(shown!==total?" - "+T("ui.k_filtered_title",{n:shown,total:total}):"")}
-function showingLine(c){const g=c.ghost?'<div class="mut" id="now-ghost" role="status">'+esc(T("ui.n_ghost",{n:c.ghost,days:c.ghostDays}))+"</div>":"";const lst=(id,key,n,days,rows)=>n?'<details class="mut" id="'+id+'"><summary>'+esc(T(key,{n:n,days:days}))+"</summary>"+rows.map(r=>'<div>'+esc(r.repo+" / "+r.workflow+" - "+String(r.since||"").slice(0,10))+"</div>").join("")+"</details>":"";const ag=lst("now-aged","ui.n_aged",c.aged,c.agedDays,c.agedRows)+lst("now-quiet","ui.n_quiet",c.quiet,c.quietDays,c.quietRows);const w=ag+(c.awaiting?'<div class="mut" id="now-awaiting" role="status">'+esc(T("ui.n_awaiting",{n:c.awaiting}))+"</div>":"")+g;const ia=!c.aged&&!c.quiet&&c.inactive?'<div class="mut" id="now-inactive" role="status">'+esc(T("ui.n_inactive",{n:c.inactive}))+"</div>":"";const dm=c.dormant||c.inactiveRepos?'<div class="mut" id="now-dormant" role="status">'+esc(T("ui.n_dormant",{n:c.dormant,m:c.inactiveRepos}))+"</div>":"";return w+ia+dm+(c.filters||c.differs?'<div class="mut" id="now-count" role="status">'+esc(T(c.filters?"ui.n_showing_filters":"ui.n_showing",{n:c.shown,total:c.total}))+"</div>":"")}
+function showingLine(c){const g=c.ghost?'<div class="mut" id="now-ghost" role="status">'+esc(T("ui.n_ghost",{n:c.ghost,days:c.ghostDays}))+"</div>":"";const lst=(id,key,n,days,rows)=>n?'<details class="mut" id="'+id+'"'+FOLD.attr(id,false)+'><summary>'+esc(T(key,{n:n,days:days}))+"</summary>"+rows.map(r=>'<div>'+esc(r.repo+" / "+r.workflow+" - "+String(r.since||"").slice(0,10))+"</div>").join("")+"</details>":"";const ag=lst("now-aged","ui.n_aged",c.aged,c.agedDays,c.agedRows)+lst("now-quiet","ui.n_quiet",c.quiet,c.quietDays,c.quietRows);const w=ag+(c.awaiting?'<div class="mut" id="now-awaiting" role="status">'+esc(T("ui.n_awaiting",{n:c.awaiting}))+"</div>":"")+g;const ia=!c.aged&&!c.quiet&&c.inactive?'<div class="mut" id="now-inactive" role="status">'+esc(T("ui.n_inactive",{n:c.inactive}))+"</div>":"";const dm=c.dormant||c.inactiveRepos?'<div class="mut" id="now-dormant" role="status">'+esc(T("ui.n_dormant",{n:c.dormant,m:c.inactiveRepos}))+"</div>":"";return w+ia+dm+(c.filters||c.differs?'<div class="mut" id="now-count" role="status">'+esc(T(c.filters?"ui.n_showing_filters":"ui.n_showing",{n:c.shown,total:c.total}))+"</div>":"")}
 function render(d){
   try{soundWatch(d)}catch(e){}
   DATA=d;const day=Date.now()-864e5;
@@ -1083,8 +1103,8 @@ function alerts(d){
     a.push(`<div class="alert warn" data-alert-repo="${esc(r.repo)}"><b>${esc(T("ui.a_unresolved"))}</b> · ${esc(text)} — <a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">${esc(T("ui.link_run"))}</a> <span class="mut">${esc(T("ui.a_no_issue"))}</span></div>`)});
   {const qb=d.quota_block;if(qb&&qb.blocked)a.push(`<div class="alert warn" id="quota-alert"><b>${esc(T("ui.a_quota_out",{time:qb.until?clock(qb.until,{hour:"2-digit",minute:"2-digit"}):"?",n:qb.unread||0}))}</b></div>`)}
   {const errs=Object.entries(d.errors||{});const by=new Map();errs.forEach(([k,v])=>{const m=String(v);if(!by.has(m))by.set(m,[]);by.get(m).push(k)});      // the same error in many repositories is ONE alert with the names behind a fold
-    const group=(m,ks)=>ks.length>1?`<details class="alert warn"><summary><b>${esc(T("ui.a_nodata_group",{n:ks.length}))}</b>: ${esc(m)}</summary><div class="mut">${esc(ks.join(", "))}</div></details>`:`<div class="alert warn"><b>${esc(T("ui.a_nodata",{key:ks[0]}))}</b>: ${esc(m)}</div>`;
-    if(by.size>3)a.push(`<details class="alert warn"><summary><b>${esc(T("ui.a_nodata_many",{n:errs.length}))}</b>: ${esc(errs[0][1])}</summary>${[...by.entries()].map(([m,ks])=>`<div class="mut">${esc(ks.length>1?T("ui.a_nodata_group",{n:ks.length}):ks[0])}: ${esc(m)}</div>`).join("")}</details>`);else by.forEach((ks,m)=>a.push(group(m,ks)))}
+    const group=(m,ks)=>ks.length>1?`<details class="alert warn"${FOLD.attr("al-grp:"+m,false)}><summary><b>${esc(T("ui.a_nodata_group",{n:ks.length}))}</b>: ${esc(m)}</summary><div class="mut">${esc(ks.join(", "))}</div></details>`:`<div class="alert warn"><b>${esc(T("ui.a_nodata",{key:ks[0]}))}</b>: ${esc(m)}</div>`;
+    if(by.size>3)a.push(`<details class="alert warn"${FOLD.attr("al-many",false)}><summary><b>${esc(T("ui.a_nodata_many",{n:errs.length}))}</b>: ${esc(errs[0][1])}</summary>${[...by.entries()].map(([m,ks])=>`<div class="mut">${esc(ks.length>1?T("ui.a_nodata_group",{n:ks.length}):ks[0])}: ${esc(m)}</div>`).join("")}</details>`);else by.forEach((ks,m)=>a.push(group(m,ks)))}
   OPENALERTS=a.length;try{renderBar()}catch(e){}      // the bar at the foot says the same as this list: it is never "no notices" while alerts are open
   $("alerts").innerHTML=a.length?a.join(""):`<span style="color:var(--ok)">${esc(T("ui.a_none"))}</span>`;
 }
@@ -1491,7 +1511,7 @@ function trCursor(svg,i){
   root.addEventListener("pointerleave",()=>{const tip=root.querySelector(".trtip"),cur=root.querySelector(".trcur");if(tip)tip.hidden=true;if(cur)cur.setAttribute("visibility","hidden")},true)
 })();
 function section(k,title,level,count,body){
-  return `<details data-k="${k}" ${OPEN.has(k)?"open":""}><summary><span class="sem ${level}" style="cursor:inherit"><i></i>${esc(LVN(level))}</span> ${esc(title)} <span class="mut" style="font-weight:400">${esc(count)}</span></summary><div class="dbody">${body}</div></details>`;
+  return `<details data-k="${k}"${FOLD.attr(k,OPEN.has(k))}><summary><span class="sem ${level}" style="cursor:inherit"><i></i>${esc(LVN(level))}</span> ${esc(title)} <span class="mut" style="font-weight:400">${esc(count)}</span></summary><div class="dbody">${body}</div></details>`;
 }
 function renderSent(){const keep=[$("s-details"),$("s-parte")].map(e=>e.scrollTop);try{renderSent0()}finally{[$("s-details"),$("s-parte")].forEach((e,i)=>e.scrollTop=keep[i])}}
 const ok_=t=>`<span style="color:var(--ok)">${esc(t)}</span>`,mut_=t=>`<span class="mut">${esc(t)}</span>`;
@@ -1623,7 +1643,7 @@ const SPDEF={scol:["collab.issue.critical","collab.issue.external","collab.issue
  sdel:["release.unreleased_pending","release.tag_without_release","release.release_without_notes","release.version_mismatch","release.ecosystem_drift","release.assets_missing"],
  ssup:["actions.supply.unpinned","actions.supply.mutable_ref","actions.supply.permissions_wide","actions.supply.permissions_missing","actions.supply.pr_target_checkout"]};
 const SPKEY={"security.secret":"secret","security.code_scanning":"code_scanning","security.dependabot":"dependabot","security.branch_unprotected":"branch","security.codeowners_missing":"codeowners","security.workflow_write":"workflow","security.runs_deleted":"runs_deleted"};
-const SPF={},SPR={},SPTOUCH=new Set();
+const SPF={},SPR={};
 function spf(scope){return SPF[scope]||(SPF[scope]={level:"",repo:""})}
 function spLevel(a){return a.level==="critical"||a.level==="error"?"bad":(a.level==="warning"?"warn":"ok")}
 function spWorst(list){return list.some(a=>spLevel(a)==="bad")?"bad":(list.some(a=>spLevel(a)==="warn")?"warn":"ok")}
@@ -1641,16 +1661,16 @@ function spPanel(scope,c,offKey,noneKey){
     h+=`<div class="spbar"><label>${esc(T("ui.sp_f_repo"))} <input type="search" data-spscope="${scope}" data-spk="repo" value="${esc(fl.repo)}" aria-label="${esc(T("ui.sp_f_repo"))}"></label> <label>${esc(T("ui.sp_f_level"))} <select data-spscope="${scope}" data-spk="level" aria-label="${esc(T("ui.sp_f_level"))}">${[["","ui.sp_all"],["bad","ui.sp_l_bad"],["warn","ui.sp_l_warn"],["ok","ui.sp_l_info"]].map(([v,k])=>`<option value="${v}"${fl.level===v?" selected":""}>${esc(T(k))}</option>`).join("")}</select></label></div>`
       +`<table class="sptable">${thk(["ui.sp_th_signal","ui.sp_th_level","ui.sp_th_n","ui.sp_th_repos"])}<tbody>${byCode}</tbody></table>`
   }
-  const anyOpen=codes.some(x=>OPEN.has(scope+":"+x)),firstAlert=codes.find(x=>all.some(a=>a.code===x));
+  const anyOpen=codes.some(x=>FOLD.get(scope+":"+x,OPEN.has(scope+":"+x))),firstAlert=codes.find(x=>all.some(a=>a.code===x));
   h+=codes.map(code=>{
     const k=SPKEY[code],un=k&&st.unavailable&&st.unavailable[k],rf=String(SPR[code]||"").toLowerCase();
     const mine=all.filter(a=>a.code===code),rows=mine.filter(a=>!rf||String(a.repo).toLowerCase().includes(rf));
     const level=un?"unknown":(mine.length?spWorst(mine):(healthy?"ok":"unknown"));
-    const dk=scope+":"+code,isOpen=OPEN.has(dk)||(!anyOpen&&!SPTOUCH.has(scope)&&code===firstAlert);
+    const dk=scope+":"+code,isOpen=FOLD.get(dk,OPEN.has(dk)||(!anyOpen&&!FOLD.any(scope+":")&&code===firstAlert));
     const body=`<div class="mut sphelp">${esc(T("ui.sph."+code))}</div>`
       +`<div class="spbar"><label>${esc(T("ui.sp_f_repo"))} <input type="search" data-sprepo="${esc(code)}" value="${esc(SPR[code]||"")}" aria-label="${esc(T("ui.sp_f_repo"))}: ${esc(T("ui.sp."+code))}"></label></div>`
       +(un?`<div class="mut">${esc(T("ui.sp_unavailable",{why:String(un)}))}</div>`:(rows.length?spRows(rows,scope==="scol"):(mine.length?mut_(T("ui.sp_nomatch")):ok_(T("ui.sp_none")))));
-    return `<details data-k="${esc(dk)}" data-sp="1" ${isOpen?"open":""}><summary><span class="sem ${level}" style="cursor:inherit"><i></i>${esc(LVN(level))}</span> ${esc(T("ui.sp."+code))} <span class="mut" style="font-weight:400">${esc(T("ui.sp_count",{n:mine.length}))}</span></summary><div class="dbody">${body}</div></details>`
+    return `<details data-k="${esc(dk)}" data-sp="1"${FOLD.attr(dk,isOpen)}><summary><span class="sem ${level}" style="cursor:inherit"><i></i>${esc(LVN(level))}</span> ${esc(T("ui.sp."+code))} <span class="mut" style="font-weight:400">${esc(T("ui.sp_count",{n:mine.length}))}</span></summary><div class="dbody">${body}</div></details>`
   }).join("");
   const unl=Object.keys(st.unavailable||{});
   const cut=scope==="scol"?(st.truncated_count?" \u00b7 "+esc(T("ui.collab_cut",{n:st.truncated_count,p:st.pages||1})):"")+(st.search_cut||[]).map(x=>" \u00b7 "+esc(T("ui.collab_cut_search",{seen:x.seen,total:x.total}))).join(""):"";
@@ -1662,7 +1682,6 @@ function spPanel(scope,c,offKey,noneKey){
 document.addEventListener("change",e=>{const t=e.target;if(!t||!t.dataset)return;
   if(t.dataset.sprepo!==undefined){SPR[t.dataset.sprepo]=String(t.value||"").trim();renderSentOthers();return}
   if(t.dataset.spscope!==undefined){spf(t.dataset.spscope)[t.dataset.spk]=t.dataset.spk==="repo"?String(t.value||"").trim().toLowerCase():t.value;renderSentOthers()}});
-["t-scol","t-ssec","t-sdel","t-ssup"].forEach(id=>{const el=$(id);if(el)el.addEventListener("toggle",e=>{const d=e.target;if(d.tagName==="DETAILS"&&d.dataset.sp){SPTOUCH.add(d.dataset.k.split(":")[0]);d.open?OPEN.add(d.dataset.k):OPEN.delete(d.dataset.k);store.set("am-s-open",[...OPEN].join(","))}},true)});
 const fmtS=x=>x==null?"–":(x>=3600?(x/3600).toFixed(1)+" h":(x>=120?Math.round(x/60)+" min":Math.round(x)+" s"));
 function analyticsBox(){
   const A=ANA;if(!A||A.enabled===false)return mut_(T("ui.a12_off"));
@@ -1689,14 +1708,13 @@ function lintBox(s){
   return lintCov(L)+(all.length?chips+(rows.length?`<table>${thk(["ui.th_repo","ui.th_file","ui.th_line","ui.th_rule","ui.th_severity"])}<tbody>${rows.slice(0,80).map(r=>`<tr><td>${esc(r.repo)}</td><td>${esc(r.file)}</td><td>${r.line}</td><td>${esc(T("lint.rule."+r.rule))}${r.detail&&r.detail!=="missing"?" · "+esc(r.detail):""}</td><td><span class="chip ${r.severity==="bad"?"bad":(r.severity==="warn"?"warn":"")}">${esc(T("ui.lvl_"+r.severity))}</span></td></tr>`).join("")}</tbody></table>`:mut_(T("ui.help_none"))):ok_(T("ui.a13_none")));
 }
 async function copyText(btn){try{await navigator.clipboard.writeText(btn.dataset.copy);btn.textContent=T("ui.copied")}catch(err){btn.textContent=T("ui.copy_manual")}}
-$("t-sent").addEventListener("toggle",e=>{const d=e.target;if(d.tagName==="DETAILS"){d.open?OPEN.add(d.dataset.k):OPEN.delete(d.dataset.k);store.set("am-s-open",[...OPEN].join(","))}},true);
 $("t-sent").addEventListener("click",async e=>{
   const rl=e.target.closest("[data-repo-open]");if(rl){openPanel(rl.dataset.repoOpen);return}
   const cp=e.target.closest("[data-copy]");if(cp){await copyText(cp);return}
   const g=e.target.closest("[data-goto]");if(g){
     if(g.dataset.goto==="a2"&&SENT)setList(T("ui.l_red"),[...new Set(SENT.a2.red.map(r=>r.repo))]);
     else if(g.dataset.goto==="a5"&&SENT)setList(T("ui.l_pending"),[...new Set((SENT.a5.pending_sign||[]).map(r=>r.repo))]);
-    const gk=g.dataset.goto;showTab(gk==="collab"?"scol":(gk==="security"?"ssec":(gk==="delivery"?"sdel":(gk==="supply"?"ssup":"sci"))));const d=document.querySelector(`details[data-k="${gk}"]`);if(d){d.open=true;d.scrollIntoView({block:"nearest"})}return}
+    const gk=g.dataset.goto;showTab(gk==="collab"?"scol":(gk==="security"?"ssec":(gk==="delivery"?"sdel":(gk==="supply"?"ssup":"sci"))));const d=document.querySelector(`details[data-k="${gk}"]`);if(d){d.open=true;FOLD.set(gk,true);d.scrollIntoView({block:"nearest"})}return}
   const run=e.target.closest("button[data-ai-run]");if(run){
     if(!await askConfirm(T("ui.ai_prop_confirm",{cmd:run.dataset.cmd}),{danger:true}))return;
     try{const r=await fetch("/api/ai/actions/confirm",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:run.dataset.aiRun,command:run.dataset.cmd})});const j=await r.json();
@@ -2386,7 +2404,7 @@ document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.tar
 document.addEventListener("keyup",e=>{if(e.target.tagName==="BUTTON")e.target.classList.remove("pressing")});
 
 /* About, Help, the first-start guide, the update notice, the restart bar and the level filter of the linter */
-const dlgs={scrm:$("scrm-dlg"),about:$("about-dlg"),help:$("help-dlg"),wiz:$("wiz-dlg"),notes:$("notes-dlg"),rh:$("rh-dlg")};
+const dlgs={scrm:$("scrm-dlg"),about:$("about-dlg"),help:$("help-dlg"),wiz:$("wiz-dlg"),notes:$("notes-dlg"),rh:$("rh-dlg"),rep:$("rep-dlg")};
 /* ONE confirmation for the whole page, inside the page: a native dialog of the browser (confirm, alert, prompt) is not drawn, or drops the page out of full screen, and blocks the thread. askConfirm(text,{danger}) returns a
    Promise<boolean>: Accept = true, Cancel / Esc = false. With `danger` the focus starts on Cancel; Tab stays inside the two buttons; the focus goes back to where it was; Enter presses the focused button. */
 let ASK=null;
@@ -2545,7 +2563,7 @@ let HQ;$("help-q").addEventListener("input",e=>{clearTimeout(HQ);HQ=setTimeout((
 $("help-body").addEventListener("click",e=>{const a=e.target.closest("[data-topic]");if(!a)return;e.preventDefault();$("help-q").value="";helpShow(a.dataset.topic,a.dataset.section)});
 $("help-body").addEventListener("keydown",e=>{if(e.key==="Enter"){const a=e.target.closest(".hit");if(a)helpShow(a.dataset.topic,a.dataset.section)}});
 document.addEventListener("keydown",e=>{
-  if(e.key==="Escape"){for(const k of Object.keys(dlgs))if(!dlgs[k].hidden){dlgClose(k);return}}
+  if(e.key==="Escape"){if(!$("rep-view").hidden){repViewClose();return}for(const k of Object.keys(dlgs))if(!dlgs[k].hidden){dlgClose(k);return}}
   const t=e.target,typing=t&&(t.tagName==="INPUT"||t.tagName==="TEXTAREA"||t.tagName==="SELECT"||t.isContentEditable);
   if(e.key==="?"&&!typing&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();dlgs.help.hidden?openHelp(document.querySelector("nav [aria-selected=true]").dataset.tab,null):dlgClose("help")}});
 /* the restart bar: shown on every tab while a saved setting waits for a restart */
@@ -2770,7 +2788,7 @@ function updVers(){
   const box=$("upd-vers");if(!box)return;const v=UPD.vers,s=UPD.st;if(!v){box.innerHTML="";return}
   box.innerHTML=v.map(r=>{
     const rel=r.relation==="current"?T("ui.upd_current"):(r.relation==="newer"?T("ui.upd_newer"):T("ui.upd_older")),can=s&&s.can_apply&&r.relation!=="current"&&r.has_zip&&!(s.progress&&s.progress.running);
-    return `<details data-k="upd-${esc(r.version)}"><summary><span class="chip ${r.relation==="newer"?"warn":(r.relation==="current"?"ok":"")}">${esc(rel)}</span> <b>${esc(r.version)}</b>${r.prerelease?` <span class="chip">${esc(T("ui.upd_prerelease"))}</span>`:""} <span class="mut" style="font-weight:400">${esc(String(r.published||"").slice(0,10))}</span>${can?` <button type="button" data-upd="${esc(r.version)}">${esc(T("ui.upd_to",{v:r.version}))}</button>`:""}</summary><div class="dbody"><div class="mut">${esc(T("ui.upd_notes"))}${r.has_sums&&r.has_zip?" · "+esc(T("ui.upd_zip_sums")):""}</div><pre style="white-space:pre-wrap;margin:6px 0">${esc(r.notes||"")}</pre></div></details>`}).join("")
+    return `<details data-k="upd-${esc(r.version)}"${FOLD.attr("upd-"+r.version,false)}><summary><span class="chip ${r.relation==="newer"?"warn":(r.relation==="current"?"ok":"")}">${esc(rel)}</span> <b>${esc(r.version)}</b>${r.prerelease?` <span class="chip">${esc(T("ui.upd_prerelease"))}</span>`:""} <span class="mut" style="font-weight:400">${esc(String(r.published||"").slice(0,10))}</span>${can?` <button type="button" data-upd="${esc(r.version)}">${esc(T("ui.upd_to",{v:r.version}))}</button>`:""}</summary><div class="dbody"><div class="mut">${esc(T("ui.upd_notes"))}${r.has_sums&&r.has_zip?" · "+esc(T("ui.upd_zip_sums")):""}</div><pre style="white-space:pre-wrap;margin:6px 0">${esc(r.notes||"")}</pre></div></details>`}).join("")
 }
 function updProg(){
   const box=$("upd-prog");if(!box)return;const p=(UPD.st&&UPD.st.progress&&UPD.st.progress.kind&&UPD.st.progress)||UPD.last;if(!p||!p.kind){box.innerHTML="";return}
@@ -2887,8 +2905,58 @@ async function sbTick(){try{const r=await fetch("/api/statusbar",{cache:"no-stor
 {const watch=new MutationObserver(()=>{if(!watch.q){watch.q=requestAnimationFrame(()=>{watch.q=0;renderBar()})}});
   NOTE_SRC.forEach(([id])=>{const el=$(id);if(el)watch.observe(el,{attributes:true,childList:true,characterData:true,subtree:true})});
   $("sb-more").addEventListener("click",openNotes);$("sb-open").addEventListener("click",openNotes);$("notes-close").addEventListener("click",()=>dlgClose("notes"));$("notes-level").addEventListener("change",renderNotes);
-  $("bar-print").addEventListener("click",()=>window.print());
-  $("bar-save").addEventListener("click",async()=>{try{const r=await fetch("/api/ai/briefs?tab="+encodeURIComponent(CURTAB||"now")+"&lang="+encodeURIComponent(LANG),{cache:"no-store"});if(!r.ok)throw new Error(r.status);const b=new Blob([JSON.stringify(await r.json(),null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="monitor-"+(CURTAB||"now")+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}catch(e){const b=$("bar-save");b.classList.add("bad");b.title=T("ui.bar_save_fail");setTimeout(()=>{b.classList.remove("bad");b.title=T("ui.bar_save")},4000)}});
+  /* Save and print the report of the open tab: the monitor builds ONE report (GET /api/report/tab) and the text file, the data file, the PDF and the printed page are all drawn from it */
+  const REP={opts:null,queue:[],busy:false};
+  const repQuery=(tab,fmt,extra)=>"tab="+encodeURIComponent(tab)+"&lang="+encodeURIComponent(LANG)+(fmt?"&fmt="+fmt:"")+(extra||"");
+  async function repGet(tab,fmt){const r=await fetch("/api/report/tab?"+repQuery(tab,fmt),{cache:"no-store"});if(!r.ok)throw new Error(r.status);return fmt==="txt"?await r.text():await r.json()}
+  function repName(tab){const d=new Date(),p=n=>String(n).padStart(2,"0"),day=d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());return String((REP.opts&&REP.opts.options.name)||"monitor-{tab}-{date}").replace("{tab}",tab).replace("{date}",day).replace(/[^A-Za-z0-9._-]/g,"")||"monitor-report"}
+  function repRender(doc,el){
+    const h=["<h1>"+esc(doc.title)+"</h1>"];if(doc.subtitle)h.push('<p class="rep-sub">'+esc(doc.subtitle)+"</p>");
+    h.push('<dl class="rep-meta">'+doc.meta.map(m=>"<dt>"+esc(m.label)+"</dt><dd>"+esc(m.value)+"</dd>").join("")+"</dl>");
+    if(doc.figures.length)h.push("<h2>"+esc(doc.figures_title)+"</h2><ul>"+doc.figures.map(f=>'<li class="rep-'+esc(f.level)+'"><b>'+esc(f.label)+"</b>: "+esc(f.value)+"</li>").join("")+"</ul>");
+    h.push("<h2>"+esc(doc.alerts_title)+"</h2>"+(doc.alerts.length?"<ul>"+doc.alerts.map(a=>'<li class="rep-'+esc(a.level)+'">'+(a.repo?"<b>"+esc(a.repo)+"</b>: ":"")+esc(a.text)+"</li>").join("")+"</ul>":"<p>"+esc(doc.alerts_empty)+"</p>"));
+    for(const sec of doc.sections){h.push("<h2>"+esc(sec.title)+"</h2>");
+      h.push(sec.rows.length?"<table><thead><tr>"+sec.columns.map(c=>"<th>"+esc(c)+"</th>").join("")+"</tr></thead><tbody>"+sec.rows.map(r=>"<tr>"+r.map(c=>"<td>"+esc(c)+"</td>").join("")+"</tr>").join("")+"</tbody></table>":"<p>"+esc(sec.empty)+"</p>")}
+    h.push('<p class="rep-foot">'+esc(doc.footer)+"</p>");el.innerHTML=h.join("")}
+  function repViewClose(){$("rep-view").hidden=true;document.body.classList.remove("rep-on")}
+  function repFail(b,key){b.classList.add("bad");b.title=T("ui.bar_save_fail");setTimeout(()=>{b.classList.remove("bad");b.title=T(key)},4000)}
+  async function repView(print,tab){tab=tab||CURTAB||"now";try{repRender(await repGet(tab,"json"),$("rep-doc"));document.body.classList.add("rep-on");$("rep-view").hidden=false;$("rep-view").scrollTop=0;if(print)setTimeout(()=>{try{window.print()}catch(e){}},80);return true}catch(e){repFail($("bar-print"),"ui.bar_print");return false}}
+  const repBrowserRoute=()=>!!(REP.opts&&REP.opts.browser_only)||$("rep-path").value==="browser";
+  function repNote(){const o=REP.opts;$("rep-path").disabled=!!(o&&o.browser_only);if(o&&o.browser_only)$("rep-path").value="browser";$("rep-note").textContent=o&&o.browser_only?T("ui.rx_note_script"):(repBrowserRoute()?T("ui.rx_note_browser"):"")}
+  function repButton(){const q=REP.queue;$("rep-go").textContent=q.length?T("ui.rx_save_next",{format:T("ui.rx_fmt_short_"+q[0])}):T("ui.rx_save")}
+  async function repOpen(){
+    const tab=CURTAB||"now";dlgOpen("rep");REP.queue=[];REP.opts=null;$("rep-out").textContent="";$("rep-tab").textContent=T("ui.tab_"+tab);repButton();
+    try{REP.opts=await repGet(tab,"options");const o=REP.opts.options;$("rep-txt").checked=!!o.txt;$("rep-pdf").checked=!!o.pdf;$("rep-json").checked=!!o.json;$("rep-path").value=o.pdf_path;repNote()}
+    catch(e){$("rep-out").textContent=T("ui.bar_save_fail")}}
+  async function repSaveOne(tab,fmt){
+    const base=repName(tab),types={txt:["text/plain",".txt","ui.rx_fmt_txt"],pdf:["application/pdf",".pdf","ui.rx_fmt_pdf"],json:["application/json",".json","ui.rx_fmt_json"]}[fmt];
+    let blob;
+    if(fmt==="pdf"){
+      if(repBrowserRoute()){await repView(true,tab);return T("ui.rx_printed")}
+      const r=await fetch("/api/report/tab.pdf?"+repQuery(tab,"","&paper="+encodeURIComponent((REP.opts&&REP.opts.options.paper)||"a4")),{cache:"no-store"});
+      if(!r.ok){await repView(true,tab);return T(r.status===403?"ui.rx_pdf_remote":"ui.rx_pdf_script")}
+      blob=await r.blob()}
+    else if(fmt==="txt")blob=new Blob([await repGet(tab,"txt")],{type:"text/plain;charset=utf-8"});
+    else blob=new Blob([JSON.stringify(await repGet(tab,"json"),null,2)],{type:"application/json"});
+    const name=base+types[1];
+    if(typeof window.showSaveFilePicker==="function"){
+      try{const h=await window.showSaveFilePicker({suggestedName:name,types:[{description:T(types[2]),accept:{[types[0]]:[types[1]]}}]});const w=await h.createWritable();await w.write(blob);await w.close();return T("ui.rx_saved",{name:h.name})}
+      catch(e){if(e&&e.name==="AbortError")return T("ui.rx_cancelled",{name:name})}}
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    return T("ui.rx_downloaded",{name:name})}
+  /* each native "Save as" window needs its own click (the browser asks for a gesture every time), so the button goes on to the next format after each one */
+  async function repGo(){
+    if(REP.busy||!REP.opts)return;const tab=CURTAB||"now",out=$("rep-out");
+    if(!REP.queue.length){REP.queue=["txt","pdf","json"].filter(f=>$("rep-"+f).checked);if(!REP.queue.length){out.textContent=T("ui.rx_none_chosen");return}out.textContent=""}
+    REP.busy=true;const fmt=REP.queue.shift();
+    try{const line=await repSaveOne(tab,fmt);out.textContent=(out.textContent?out.textContent+"\n":"")+line}
+    catch(e){out.textContent=(out.textContent?out.textContent+"\n":"")+T("ui.bar_save_fail")}
+    REP.busy=false;repButton()}
+  $("bar-print").addEventListener("click",()=>repView(true));
+  $("bar-save").addEventListener("click",repOpen);
+  $("rep-go").addEventListener("click",repGo);$("rep-cancel").addEventListener("click",()=>dlgClose("rep"));$("rep-close").addEventListener("click",()=>dlgClose("rep"));
+  $("rep-path").addEventListener("change",repNote);["txt","pdf","json"].forEach(f=>$("rep-"+f).addEventListener("change",()=>{REP.queue=[];repButton()}));
+  $("rep-vprint").addEventListener("click",()=>window.print());$("rep-vclose").addEventListener("click",repViewClose);
   $("sb-sound").addEventListener("click",()=>{SOUND.muted=!SOUND.muted;try{store.set("am-sound",SOUND.muted?"off":"on")}catch(e){}soundUnlock(!SOUND.muted);soundLockPaint()});
   {const t=$("snd-test");if(t)t.addEventListener("click",()=>soundUnlock(true))}
   {const b=$("snd-lock-b");if(b)b.addEventListener("click",()=>soundUnlock(true));["pointerdown","pointerup","click","touchend","keydown"].forEach(ev=>document.addEventListener(ev,()=>soundUnlock(false),{capture:true}))}

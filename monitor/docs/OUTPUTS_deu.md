@@ -80,3 +80,14 @@ Jede Zeile der Warteschlange hat ein `trust`: `verified` (Signatur gegen den öf
 ## Im Netzwerkmodus
 
 `/metrics` und `dashboard.json` listen deine Repositories und ihren Zustand auf: Es sind keine öffentlichen Seiten. Bei aktivem Netzwerkmodus brauchen sie das Zugriffstoken wie jeder andere Endpunkt; schalte `outputs.prometheus.enabled` / `outputs.dashboard.enabled` aus, wenn dieses Inventar gar nicht erreichbar sein soll.
+
+## Bericht eines Tabs speichern und drucken
+
+Die Leiste am oberen Rand der Seite (in jedem Tab) erstellt EINEN Bericht des geöffneten Tabs und zeichnet ihn auf vier Arten aus denselben Daten, sodass die Formate nie voneinander abweichen:
+
+- **Bericht speichern** öffnet ein Fenster mit drei Kästchen: **TXT** (angehakt), **PDF** (angehakt) und **JSON** (nicht angehakt: die Daten des Berichts für andere Werkzeuge). Nach dem Bestätigen öffnet sich das Fenster **Speichern unter** des Browsers einmal je Format, mit dem vorgeschlagenen Namen `monitor-<Tab>-<Datum>.<Endung>` und dem passenden Dateityp (der Browser verlangt einen Klick pro Fenster, daher springt die Schaltfläche zum nächsten Format). Ein Browser ohne dieses Fenster lädt die Datei herunter, und die Seite sagt, wo sie gelandet ist.
+- **PDF**: Der Monitor schreibt das PDF selbst, ohne Bibliothek und mit der Standardschrift Helvetica, für Englisch, Spanisch, Deutsch, Französisch, Italienisch und Portugiesisch (`GET /api/report/tab.pdf`, nur von diesem Rechner; jede Nutzung hinterlässt eine Zeile im Aktionsprotokoll). Japanisch und Chinesisch brauchen Schriften, die ein so geschriebenes PDF nicht hat; für sie, oder wenn Sie im Fenster „Der Browser“ wählen, stammt das PDF aus dem Druckfenster des Browsers: Wählen Sie dort **Als PDF speichern**. Die Seite sagt das; sie schreibt nie ein PDF mit zerstörten Zeichen.
+- **Drucken** zeigt denselben Bericht ohne Menüs und Leisten (Titel mit dem Tab-Namen, Datum und Uhrzeit, Version des Monitors, wichtigste Zahlen, Warnungen und die Tabellen des Tabs) und öffnet das Druckfenster.
+- Den Bericht liefert `GET /api/report/tab?tab=now&lang=de` (`&fmt=json`, `&fmt=txt` oder `&fmt=options`), in beiden Editionen gleich.
+
+Einstellungen (Einstellungen > Ausgaben für andere Werkzeuge > „Bericht eines Tabs speichern und drucken“): `report_export.txt`, `report_export.pdf` und `report_export.json` (welche Kästchen angehakt starten: TXT und PDF ja, JSON nein), `report_export.name` (vorgeschlagener Name, Standard `monitor-{tab}-{date}`), `report_export.paper` (`a4` oder `letter`, Standard `a4`) und `report_export.pdf_path` (`auto`, `own` oder `browser`, Standard `auto`).

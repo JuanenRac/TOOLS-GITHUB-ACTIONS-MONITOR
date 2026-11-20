@@ -31,12 +31,15 @@ Para una TV o una pared con letra más grande, un contraste alto o una rotación
 | `ui.screen3_orientation` | Orientación de /screen/3. |
 | `ui.now_sort` | Orden de Ocurriendo ahora para quien no ha elegido: ecosystem, severity, age, newest, repo, event o state. |
 | `ui.alerts_sort` | Orden de la pestaña Alertas para quien no ha elegido: server, severity, streak, class, age, newest, repo, origin o state. |
+| `ui.remember_folds` | Recordar lo plegado: activado (por defecto), las secciones plegadas o desplegadas a mano se quedan así tras un refresco y al volver a abrir la página; desactivado, solo mientras la página sigue abierta. |
 
 ## Orden de las listas
 
 La sección **Ocurriendo ahora** de la primera pestaña se ordena por ecosistema, con un encabezado por cada uno. La lista que hay sobre la sección lo cambia: ecosistema, gravedad (primero las atascadas, luego las que tienen un trabajo fallido, luego las en curso y al final las en cola), antigüedad (la que lleva más tiempo, primero), más reciente primero, repositorio, disparador (push, pull_request, schedule...) y estado (en curso antes que en cola). La elección se recuerda para cada persona: en el modo de equipo la guarda el servidor con el usuario (`GET` y `POST /api/auth/me/view`, así le acompaña a otro navegador); si no, la guarda este navegador. Mientras nadie elige, el orden es `ui.now_sort` del fichero de configuración (ecosistema si falta o es erróneo). Los botones **Desplegar todo** y **Plegar todo** junto a la lista despliegan o pliegan de golpe todos los repositorios de la sección, con cualquier orden; la elección se recuerda por persona en el mismo sitio y sobrevive a un refresco (un repositorio que abras o cierres a mano después conserva tu elección).
 
 La lista de la pestaña **Alertas** conserva el orden que envía el monitor salvo que alguien elija otro con la lista que hay sobre ella: gravedad (crítica, error, aviso, info), la racha de fallos seguidos más larga primero, clase (una alerta de error o crítica es real y va antes de las que hay que vigilar), las más antiguas primero, las más recientes primero, repositorio, origen (el centinela que la levantó) y estado (abiertas antes que silenciadas). Se recuerda del mismo modo y, mientras nadie elige, vale `ui.alerts_sort` del fichero de configuración (`server` si falta o es erróneo).
+
+Las **secciones plegadas y desplegadas** se quedan como las dejó la persona. Las secciones del Centinela de CI, las tarjetas de los otros centinelas, las listas de avisos de la primera pestaña y las versiones del actualizador se dibujan de nuevo en cada refresco, y un refresco nunca vuelve a abrir lo que estaba plegado ni pliega lo que estaba desplegado: cada bloque tiene un nombre estable y la página guarda la elección de cada uno, en memoria y, con `ui.remember_folds` activado (por defecto), también en el navegador. Solo un clic de la persona registra una elección; lo que la página abre por sí sola (la primera tarjeta con alertas de un centinela que nadie ha tocado aún) no cuenta como tal.
 
 ## Tamaños probados
 

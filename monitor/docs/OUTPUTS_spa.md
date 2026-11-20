@@ -80,3 +80,14 @@ Cada fila de la cola tiene un `trust`: `verified` (la firma se comprobó con la 
 ## En el modo red
 
 `/metrics` y `dashboard.json` listan tus repositorios y su estado: no son páginas públicas. Con el modo red activo exigen el token de acceso como cualquier otro endpoint; apaga `outputs.prometheus.enabled` / `outputs.dashboard.enabled` si no quieres que ese inventario sea accesible en absoluto.
+
+## Guardar e imprimir el informe de una pestaña
+
+La barra superior de la página (en todas las pestañas) hace UN informe de la pestaña abierta y lo dibuja de cuatro maneras con los mismos datos, así que los formatos nunca difieren:
+
+- **Guardar el informe** abre una ventana con tres casillas: **TXT** (marcada), **PDF** (marcada) y **JSON** (sin marcar: los datos del informe, para otras herramientas). Al aceptar, se abre la ventana **Guardar como** del navegador una vez por formato, con el nombre sugerido `monitor-<pestaña>-<fecha>.<extensión>` y el tipo de archivo correcto (el navegador pide un clic por ventana, así que el botón pasa al formato siguiente). Un navegador sin esa ventana descarga el archivo y la página dice dónde ha caído.
+- **PDF**: el monitor escribe el PDF él mismo, sin librerías y con la fuente estándar Helvetica, en inglés, español, alemán, francés, italiano y portugués (`GET /api/report/tab.pdf`, solo desde este equipo; cada uso deja una línea en el registro de acciones). El japonés y el chino necesitan fuentes que un PDF escrito así no tiene, así que para ellos, o cuando eliges «El navegador» en la ventana, el PDF sale de la ventana de impresión del navegador: elige allí **Guardar como PDF**. La página lo dice; nunca escribe un PDF con caracteres rotos.
+- **Imprimir** muestra el mismo informe sin menús ni barras (título con el nombre de la pestaña, fecha y hora, versión del monitor, cifras principales, alertas y las tablas de la pestaña) y abre la ventana de impresión.
+- El informe lo sirve `GET /api/report/tab?tab=now&lang=es` (`&fmt=json`, `&fmt=txt` o `&fmt=options`), igual en las dos ediciones.
+
+Ajustes (Ajustes > Salidas para otras herramientas > «Guardar e imprimir el informe de una pestaña»): `report_export.txt`, `report_export.pdf` y `report_export.json` (qué casillas empiezan marcadas: TXT y PDF sí, JSON no), `report_export.name` (nombre sugerido, por defecto `monitor-{tab}-{date}`), `report_export.paper` (`a4` o `letter`, por defecto `a4`) y `report_export.pdf_path` (`auto`, `own` o `browser`, por defecto `auto`).

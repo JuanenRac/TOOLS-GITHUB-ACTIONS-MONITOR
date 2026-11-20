@@ -17,4 +17,6 @@
 
 **5. Savoir où est l'aide.** Le bouton rond **?** (ou la touche `?`) ouvre l'Aide ; le bouton **i** ouvre À propos, avec votre version, vos fichiers et un bouton qui copie les informations pour le support (sans secret). En console : `--help-topics`, `--help-search MOTS`, `--about`.
 
+**6. Enregistrer ou imprimer un rapport.** Les deux boutons en haut de la page enregistrent le rapport de l'onglet ouvert (TXT, PDF et, si vous le souhaitez, JSON, chacun par la fenêtre **Enregistrer sous** de votre navigateur) ou l'impriment comme une page propre ([Sorties pour d'autres outils](OUTPUTS.md)).
+
 **Bon à savoir.** Si vous avez une offre avec des dépôts privés, choisissez-la dans Réglages > Essentiel pour voir vos quotas ([Quotas et offres](QUOTAS_fra.md)). La sentinelle est expliquée dans [La sentinelle](SENTINEL_fra.md). L'outil ne fait que lire GitHub ; il n'écrit qu'après votre confirmation.

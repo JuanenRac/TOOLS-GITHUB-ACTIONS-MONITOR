@@ -94,7 +94,7 @@ jobs:
       - name: No text leaves its box, the Quota tab included, the sound logic, the bottom bar in one line, the loading box and the unfolded panel of the sentinels
         env:
           MONITOR_BROWSER_TESTS: "1"
-        run: python -m unittest discover -s monitor/tests -p "test_overflow.py" && python -m unittest discover -s monitor/tests -p "test_190_charts.py" && python -m unittest discover -s monitor/tests -p "test_286_status_labels.py" && python -m unittest discover -s monitor/tests -p "test_mon93_unfolded.py" && python -m unittest discover -s monitor/tests -p "test_177_sound.py" && python -m unittest discover -s monitor/tests -p "test_ui_bar_and_loading.py" && python -m unittest discover -s monitor/tests -p "test_181_load_and_reload.py"
+        run: python -m unittest discover -s monitor/tests -p "test_overflow.py" && python -m unittest discover -s monitor/tests -p "test_190_charts.py" && python -m unittest discover -s monitor/tests -p "test_286_status_labels.py" && python -m unittest discover -s monitor/tests -p "test_mon93_unfolded.py" && python -m unittest discover -s monitor/tests -p "test_177_sound.py" && python -m unittest discover -s monitor/tests -p "test_ui_bar_and_loading.py" && python -m unittest discover -s monitor/tests -p "test_181_load_and_reload.py" && python -m unittest discover -s monitor/tests -p "test_mon216_report.py"
 
   page:
     name: The page works in a browser (every tab, every sub-tab of Settings, no error)
@@ -115,6 +115,7 @@ jobs:
           python -m unittest discover -s monitor/tests -p "test_180_page_smoke.py" -v
           python -m unittest discover -s monitor/tests -p "test_180_motion.py" -v
           python -m unittest discover -s monitor/tests -p "test_183_now_panel.py" -v
+          python -m unittest discover -s monitor/tests -p "test_216_fold_memory_browser.py" -v
           python -m unittest discover -s monitor/tests -p "test_194_sort_now.py" -v
           python -m unittest discover -s monitor/tests -p "test_196_sort_alerts.py" -v
           python -m unittest discover -s monitor/tests -p "test_195_ports.py" -v

@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4962_passing-brightgreen.svg" alt="4962 tests">
+  <img src="https://img.shields.io/badge/Tests-5015_passing-brightgreen.svg" alt="5015 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -60,6 +60,7 @@
 - **图表与历史**：计算分钟数、失败和成功，配有动画条形图和每日历史（尊重“减少动态效果”设置）。
 - **八种语言**（en、es、de、fr、it、ja、zh、pt），以英语为基础；在设置中切换。
 - **面向仪表板的输出**：`ci_red.json`、Prometheus 端点和 Grafana 用 JSON 数据源，并附带可导入的 Grafana 仪表板。
+- **保存并打印标签页报告**:TXT、PDF(由监视器自行生成)和 JSON 通过浏览器的“另存为”窗口保存,并提供简洁的打印页面;所有格式使用同一份报告。
 - **批处理工具**：一次计划并触发多个构建；没有 `--go` 就不会触发任何东西。
 - **页面内的“关于”和“帮助”**：**i** 按钮显示版本、版本类型、链接、文件、运行状况和复制支持信息的按钮；**?** 按钮（或 `?` 键）可离线打开全部文档，支持搜索并使用你的语言。控制台提供 `--about` 和 `--help-topics`，以及分标签页的交互式终端应用（可选 `textual`）。
 - **新版本提示**：发布较新版本时显示低调的徽章；它每天只读取一次公开发布页，从不安装任何内容，可以关闭（隔离网络安装中始终关闭）。
@@ -96,8 +97,8 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 4962 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **设置** | 763 个设置,均有帮助 |
+| **测试** | 5015 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **设置** | 770 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
 

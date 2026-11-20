@@ -31,12 +31,15 @@ Per una TV o una parete con testo più grande, un alto contrasto o una rotazione
 | `ui.screen3_orientation` | Orientamento di /screen/3. |
 | `ui.now_sort` | Ordine di In corso adesso per chi non ha scelto: ecosystem, severity, age, newest, repo, event o state. |
 | `ui.alerts_sort` | Ordine della scheda Avvisi per chi non ha scelto: server, severity, streak, class, age, newest, repo, origin o state. |
+| `ui.remember_folds` | Ricordare le sezioni ripiegate: attivo (predefinito), le sezioni ripiegate o aperte a mano restano così dopo un aggiornamento e alla riapertura della pagina; disattivo, solo finché la pagina rimane aperta. |
 
 ## Ordine degli elenchi
 
 La sezione **In corso adesso** della prima scheda è ordinata per ecosistema, con un titolo per ciascuno. L'elenco sopra la sezione lo cambia: ecosistema, gravità (prima le esecuzioni bloccate, poi quelle con un job fallito, poi in corso, poi in coda), anzianità (la più lunga per prima), più recente per prima, repository, innesco (push, pull_request, schedule...) e stato (in corso prima di in coda). La scelta viene ricordata per ogni persona: in modalità team la conserva il server con l'utente (`GET` e `POST /api/auth/me/view`, quindi lo segue in un altro browser), altrimenti questo browser. Finché nessuno sceglie, l'ordine è `ui.now_sort` del file di configurazione (ecosistema se manca o è errato). I pulsanti **Espandi tutto** e **Comprimi tutto** accanto all'elenco espandono o comprimono in un colpo tutti i repository della sezione, con qualsiasi ordine; la scelta viene ricordata per ogni persona nello stesso posto e sopravvive a un aggiornamento (un repository aperto o chiuso a mano dopo conserva la tua scelta).
 
 L'elenco della scheda **Avvisi** mantiene l'ordine inviato dal monitor finché qualcuno non ne sceglie un altro con l'elenco sopra: gravità (critico, errore, avviso, info), prima la serie di errori consecutivi più lunga, classe (un avviso di errore o critico è reale e va prima di quelli da tenere d'occhio), prima i più vecchi, prima i più recenti, repository, origine (la sentinella che lo ha sollevato) e stato (aperti prima di silenziati). Viene ricordato allo stesso modo; finché nessuno sceglie, vale `ui.alerts_sort` del file di configurazione (`server` se manca o è errato).
+
+Le **sezioni ripiegate e aperte** restano come la persona le ha lasciate. Le sezioni della Sentinella CI, le schede delle altre sentinelle, gli elenchi degli avvisi della prima scheda e le versioni dell'aggiornatore vengono ridisegnate a ogni aggiornamento, e un aggiornamento non riapre mai ciò che era ripiegato né ripiega ciò che era aperto: ogni blocco ha un nome stabile e la pagina conserva la scelta di ciascuno, in memoria e, con `ui.remember_folds` attivo (predefinito), anche nel browser. Solo un clic della persona registra una scelta; ciò che la pagina apre da sola (la prima scheda con avvisi di una sentinella che nessuno ha ancora toccato) non conta come tale.
 
 ## Dimensioni provate
 
