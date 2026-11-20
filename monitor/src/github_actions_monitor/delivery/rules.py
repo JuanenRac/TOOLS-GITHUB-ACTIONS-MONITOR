@@ -19,6 +19,8 @@ import json
 import re
 from datetime import datetime, timezone
 
+from github_actions_monitor.delivery import mainsource
+
 SIGNALS = ("unreleased_pending", "tag_without_release", "release_without_notes", "version_mismatch", "ecosystem_drift", "assets_missing")
 CODES = {name: "release." + name for name in SIGNALS}
 SIGNAL_OF = {code: name for name, code in CODES.items()}
@@ -31,10 +33,8 @@ FILE_VERSION_RE = re.compile(r"""(?im)^\s*(?:__version__|version|VERSION|tool_ve
 
 
 def unreleased_count(text):
-    """Number of list entries under `## [Unreleased]` of a CHANGELOG text (the same count as `cli/release_candidates.unreleased_count`, which a test keeps equal)."""
-    text = str(text or "").replace("\r\n", "\n")
-    m = re.search(r"^## \[Unreleased\]\s*\n(.*?)(?=^## \[|\Z)", text, re.S | re.M)
-    return len(re.findall(r"^\s*[-*] ", m.group(1) if m else "", re.M))
+    """Number of list entries under `## [Unreleased]` of a CHANGELOG text: the one function of the monitor (`delivery/mainsource.py`)."""
+    return mainsource.unreleased_count(text)
 
 
 def version_key(text):

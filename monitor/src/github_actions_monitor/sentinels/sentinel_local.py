@@ -39,6 +39,7 @@ from github_actions_monitor import i18n
 from github_actions_monitor.cli import lint_workflows
 from github_actions_monitor.integrations import action_health, remote_workflows
 from github_actions_monitor.sentinels import readiness
+from github_actions_monitor.delivery import mainsource
 from github_actions_monitor.data_pipeline import paging
 from github_actions_monitor.data_pipeline import redrule
 from github_actions_monitor.data_pipeline import fork_ci
@@ -371,7 +372,7 @@ def classify_pr(repo, pr, now, bots=DEPENDENCY_BOTS):
     }
 
 
-def release_candidates_rule(unreleased, release_age_days, days, min_entries, skip_prefixes=()):
+def release_candidates_rule(unreleased, release_age_days, days, min_entries, skip_prefixes=(), notes=None):
     """A5, rule of the owner: >= min_entries in [Unreleased] and last release older than `days` (or none)."""
     rows = []
     for repo, count in unreleased.items():
@@ -379,7 +380,10 @@ def release_candidates_rule(unreleased, release_age_days, days, min_entries, ski
             continue
         age = release_age_days.get(repo)
         if age is None or age > days:
-            rows.append({"repo": repo, "entries": count, "age_days": None if age is None else round(age, 1)})
+            row = {"repo": repo, "entries": count, "age_days": None if age is None else round(age, 1)}
+            if (notes or {}).get(repo):
+                row["note"] = notes[repo]      # the count could not be taken from main: it says why
+            rows.append(row)
     return sorted(rows, key=lambda r: -r["entries"])
 
 
@@ -681,22 +685,29 @@ def parse_audit_files(audit_dir, patterns=None):
     return out
 
 
-def minutes(runs_by_repo, now):
+def minutes(runs_by_repo, now, caps=None):
+    """Minutes of the runs of the sample per repository. A repository whose sample is FULL (as long as the lists the monitor asks for) and whose oldest run is still inside the window has more runs than
+    the sample shows: its figure is a minimum (`partial24`, `partial7d`), never to be read as the real use (a repository with 151 runs in a day showed the 20 latest)."""
     rows = {}
+    sizes = {int(c) for c in ((caps or {}).get("runs_per_repo"), (caps or {}).get("cold_runs_per_repo")) if isinstance(c, (int, float)) and c}
     for repo, runs in runs_by_repo.items():
         d1 = d7 = n1 = 0
+        oldest = None
         for run in runs:
             started = parse_time(run.get("started"))
             if not started:
                 continue
             age = (now - started).total_seconds()
+            oldest = age if oldest is None else max(oldest, age)
             if age <= 86400:
                 d1 += run.get("seconds") or 0
                 n1 += 1
             if age <= 7 * 86400:
                 d7 += run.get("seconds") or 0
         if d7:
-            rows[repo] = {"min24": round(d1 / 60), "min7d": round(d7 / 60), "runs24": n1}
+            full = len([x for x in runs if not x.get("probe")]) in sizes
+            rows[repo] = {"min24": round(d1 / 60), "min7d": round(d7 / 60), "runs24": n1, "partial24": bool(full and oldest is not None and oldest <= 86400),
+                          "partial7d": bool(full and oldest is not None and oldest <= 7 * 86400)}
     return rows
 
 
@@ -899,7 +910,7 @@ def compute_snapshot(inp):
     for repo, rel in releases.items():
         published = parse_time(rel.get("publishedAt"))
         ages[repo] = (now - published).total_seconds() / 86400 if published else None
-    candidates = release_candidates_rule({r: n for r, n in inp["unreleased"].items() if r in info}, ages, cfg["candidate_days"], cfg["candidate_min_entries"], cfg["skip_candidate_prefixes"])
+    candidates = release_candidates_rule({r: n for r, n in inp["unreleased"].items() if r in info}, ages, cfg["candidate_days"], cfg["candidate_min_entries"], cfg["skip_candidate_prefixes"], inp.get("unreleased_notes"))
     live_targets = {n: t for n, t in (inp.get("targets") or {}).items() if t.get("repo", n) in info}
     green = green_without_release(live_targets, runs_by_repo, releases, branches)
     states = signstate.target_states(live_targets, runs_by_repo, releases, eco, inp.get("local"), now, branches,
@@ -932,7 +943,7 @@ def compute_snapshot(inp):
         probs, unk = hygiene_review(info[repo], p, cfg["required_files"], cfg.get("hygiene"), inp.get("org_files"))
         hyg_rows.append({"repo": repo, "problems": [{"code": c, "text": t} for c, t in probs], "unknown": [{"code": c, "text": t} for c, t in unk], "checked": bool(p),
                          "protection": protection_source((p or {}).get("branch_rules"))})
-    mins = minutes(runs_by_repo, now)
+    mins = minutes(runs_by_repo, now, caps)
     errors = [{"section": k, "message": v["message"], "at": v["at"]} for k, v in sorted(inp["errors"].items())]
     sev_total = {"critical": 0, "high": 0}
     for t in totals.values():
@@ -966,7 +977,7 @@ def compute_snapshot(inp):
                "days": cfg["candidate_days"]},
         "a6": {"rows": hyg_rows, "pending": pending, "unknown": sum(1 for r in hyg_rows if r["unknown"]), "forks_idle": sorted(idle)},
         "a7": {"rows": sorted(({"repo": r, **v} for r, v in mins.items()), key=lambda x: -x["min24"]), "total24": sum(v["min24"] for v in mins.values()),
-               "total7d": sum(v["min7d"] for v in mins.values()), "api": inp.get("api"), "budget": minutes_budget(mins, eco, cfg),
+               "total7d": sum(v["min7d"] for v in mins.values()), "partial24": sum(1 for v in mins.values() if v.get("partial24")), "partial7d": sum(1 for v in mins.values() if v.get("partial7d")), "api": inp.get("api"), "budget": minutes_budget(mins, eco, cfg),
                "day": trend_day.build(runs_by_repo, now, inp.get("surface_raw"), totals, mins), "release_days": trend_day.release_days(releases)},
         "a8": inp.get("audits") or {"audits": {}, "rounds": {}, "files": []},
         "a9": inp.get("roadmaps") or {"boards": [], "level": "unknown"},
@@ -1015,10 +1026,10 @@ def compute_snapshot(inp):
 def repo_query(file_names):
     aliases = " ".join(f'f{i}:object(expression:"HEAD:{name}"){{id}}' for i, name in enumerate(file_names))
     return ("query($after:String){rateLimit{remaining cost} repositoryOwner(login:\"%s\"){repositories(first:15,after:$after,ownerAffiliations:OWNER,isArchived:false)"
-            "{totalCount pageInfo{hasNextPage endCursor} nodes{name pushedAt createdAt isFork hasVulnerabilityAlertsEnabled licenseInfo{key} defaultBranchRef{name} latestRelease{tagName publishedAt isDraft releaseAssets(first:100){nodes{name}}}"
+            "{totalCount pageInfo{hasNextPage endCursor} nodes{name pushedAt createdAt isFork hasVulnerabilityAlertsEnabled licenseInfo{key} defaultBranchRef{name target{oid}} latestRelease{tagName publishedAt isDraft releaseAssets(first:100){nodes{name}}}"
             " vulnerabilityAlerts(states:OPEN,first:50){totalCount nodes{createdAt securityVulnerability{severity}}}"
             " pullRequests(states:OPEN,first:10){nodes{number title url author{login __typename} createdAt isDraft mergeable reviewDecision commits(last:1){nodes{commit{statusCheckRollup{state}}}} files(first:20){nodes{path}}}}"
-            " rulesets(first:5){nodes{name enforcement}} labels(first:20,query:\"dependencies\"){nodes{name}} %s}}}}") % (toolconfig.github_owner(), aliases)
+            " rulesets(first:5){nodes{name enforcement}} labels(first:20,query:\"dependencies\"){nodes{name}} dep_label:label(name:\"dependencies\"){name} %s}}}}") % (toolconfig.github_owner(), aliases)
 
 
 def fork_pushed(node):
@@ -1039,7 +1050,7 @@ def parse_repo_node(node, file_names):
         if key in ("critical", "high") and len(hi) < 20:
             hi.append({"sev": key, "created": v.get("createdAt")})
     return {
-        "name": node["name"], "pushed": fork_pushed(node), "fork": node.get("isFork") is True, "branch": (node.get("defaultBranchRef") or {}).get("name") or "main",
+        "name": node["name"], "pushed": fork_pushed(node), "fork": node.get("isFork") is True, "branch": (node.get("defaultBranchRef") or {}).get("name") or "main", "head_oid": ((node.get("defaultBranchRef") or {}).get("target") or {}).get("oid") or "",
         "release": {"tagName": rel["tagName"], "publishedAt": rel["publishedAt"],
                     "asset_flags": signstate.asset_flags([n.get("name", "") for n in (rel.get("releaseAssets") or {}).get("nodes") or []])} if rel and not rel.get("isDraft") else None,
         "vuln_total": (node.get("vulnerabilityAlerts") or {}).get("totalCount", 0), "vuln_sev": sev,
@@ -1047,7 +1058,8 @@ def parse_repo_node(node, file_names):
         "prs": (node.get("pullRequests") or {}).get("nodes") or [],
         "rulesets": (node.get("rulesets") or {}).get("nodes") or [],
         "license": (node.get("licenseInfo") or {}).get("key"),
-        "label_dependencies": any((l.get("name") or "").lower() == "dependencies" for l in (node.get("labels") or {}).get("nodes") or []),
+        # the search of labels of GitHub misses a label that exists (EH3D-PHOENIX-3DP had it and the search returned nothing), so the exact lookup by name is asked too
+        "label_dependencies": bool(node.get("dep_label")) or any((l.get("name") or "").lower() == "dependencies" for l in (node.get("labels") or {}).get("nodes") or []),
         "files": {name: bool(node.get(f"f{i}")) for i, name in enumerate(file_names)},
     }
 
@@ -1073,6 +1085,7 @@ class Sentinel:
         self.upstream, self.upstream_calls = {}, []      # fork -> what its original repository shows (data_pipeline/upstream.py); the times of the requests of the last hour
         self.org_files = {"at": 0.0, "names": None}      # root files of the `.github` repository of the owner (the defaults of the organisation); None = not read
         self.local_versions = {}
+        self.unreleased_notes = {}
         self.pins_cache = {"at": 0.0, "value": None}
         self.lint_cache = {"at": 0.0, "value": None, "version": -1}
         self.action_health = None      # the look-up of archived actions of the rule `archived_action` (lint.maintenance), made on the first scan that needs it
@@ -1112,6 +1125,7 @@ class Sentinel:
             self.repo_info, self.alerts, self.perms = mapping("repo_info"), mapping("alerts"), mapping("perms")
             self.unreleased, self.saved_at = mapping("unreleased"), cached.get("saved")
             self.local_versions = mapping("local_versions")
+            self.unreleased_notes = mapping("unreleased_notes")
             self.upstream = mapping("upstream")
             if isinstance(cached.get("upstream_calls"), list):
                 self.upstream_calls = [float(t) for t in cached["upstream_calls"][:1000] if isinstance(t, (int, float)) and not isinstance(t, bool) and time.time() - 3600 < t <= time.time() + 60]
@@ -1297,16 +1311,24 @@ class Sentinel:
             spec = importlib.util.spec_from_file_location("release_candidates", paths.PACKAGE / "cli" / "release_candidates.py")
             mod = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(mod)
-            counts, versions = {}, {}
+            counts, versions, notes = {}, {}, {}
             for repo in self.repo_info:
-                path = GITHUB_DIR / repo / "CHANGELOG.md"
-                if toolconfig.is_ours(repo) and path.is_file() and (GITHUB_DIR / repo / ".git").exists():
-                    counts[repo] = mod.unreleased_count(path.read_text(encoding="utf-8", errors="replace"))
+                clone = GITHUB_DIR / repo
+                if toolconfig.is_ours(repo) and (clone / ".git").exists():
+                    text, note = mainsource.read_changelog(clone)   # the default branch of the remote, not the branch the clone happens to be on
+                    if text is None:
+                        continue
+                    counts[repo] = mod.unreleased_count(text)
+                    if not note:      # read from main: say so when the last fetch of the clone is behind what GitHub has (the monitor never fetches in a clone)
+                        note = mainsource.behind_note(clone, (self.repo_info.get(repo) or {}).get("head_oid"))
+                    if note:
+                        notes[repo] = note
                     if counts[repo]:
-                        versions[repo] = readiness.local_version(GITHUB_DIR / repo)   # A11: is the version already above the last release?
+                        versions[repo] = readiness.local_version(clone)   # A11: is the version already above the last release?
             with self.lock:
                 self.unreleased = counts
                 self.local_versions = versions
+                self.unreleased_notes = notes
             self.ok("changelogs")
         except Exception as error:
             self.error("changelogs", error)
@@ -1793,7 +1815,7 @@ class Sentinel:
 
     def _persist(self):
         with self.lock:
-            self._save(CACHE_FILE, {"saved": time.time(), "repo_info": self.repo_info, "alerts": self.alerts, "perms": self.perms, "unreleased": self.unreleased, "local_versions": self.local_versions, "surface": self.surface.dump(), "a2_resolved": self.a2_resolved, "org_files": self.org_files, "upstream": self.upstream,
+            self._save(CACHE_FILE, {"saved": time.time(), "repo_info": self.repo_info, "alerts": self.alerts, "perms": self.perms, "unreleased": self.unreleased, "local_versions": self.local_versions, "unreleased_notes": self.unreleased_notes, "surface": self.surface.dump(), "a2_resolved": self.a2_resolved, "org_files": self.org_files, "upstream": self.upstream,
                                     "upstream_calls": [t for t in self.upstream_calls if t > time.time() - 3600]})      # the requests of the last hour survive a restart: it does not give back the hourly allowance
         snap = self.snapshot()
         self.last_snap = snap
@@ -1843,7 +1865,7 @@ class Sentinel:
             inp = {
                 "now": now, "today": now.strftime("%Y-%m-%d"), "cfg": self.cfg, "repos": repos, "eco": {r: self.ctx["eco_fn"](r) for r in repos},
                 "repo_info": dict(self.repo_info), "alerts": dict(self.alerts), "perms": dict(self.perms), "runs": runs, "data": self.ctx["data_fn"](),
-                "history": self.history, "unreleased": dict(self.unreleased), "targets": self.targets,
+                "history": self.history, "unreleased": dict(self.unreleased), "unreleased_notes": dict(self.unreleased_notes), "targets": self.targets,
                 "scans": dict(self.surface.scans), "surface_raw": dict(self.surface.raw), "surface_glob": dict(self.surface.glob), "audits": self._audits(), "roadmaps": self.roadmaps.get(),
                 "local": self._local(), "finalize_fn": self.finalize_fn, "reduced": not workspace.has_workspace(),
                 "errors": dict(self.errors), "loading": self.loading, "ai": sentinel_ai.status(self.ai_cfg, self.ai_store) if self.ai_cfg["provider"] != "none" else
@@ -1851,7 +1873,7 @@ class Sentinel:
                 "cache_age": round(time.time() - self.saved_at) if (self.saved_at and not self.gql_at) else None,
                 "api": {"calls_last_hour": len([t for t in self.calls if t > time.time() - 3600]), "budget_per_hour": self.cfg["budget_per_hour"]},
                 "sample_caps": {"runs_per_repo": self.config.get("runs_per_repo"), "cold_runs_per_repo": self.config.get("cold_runs_per_repo")},
-                "surface_paused": self.surface_paused, "a2_resolved": dict(self.a2_resolved), "a2_pending_reason": self.a2_reason, "failed_jobs": dict(self.failed_jobs), "local_versions": dict(self.local_versions), "pins": pins,
+                "surface_paused": self.surface_paused, "a2_resolved": dict(self.a2_resolved), "a2_pending_reason": self.a2_reason, "failed_jobs": dict(self.failed_jobs), "local_versions": dict(self.local_versions), "unreleased_notes": dict(self.unreleased_notes), "pins": pins,
                 "upstream": dict(self.upstream), "upstream_calls": self._upstream_requests(), "lint": self._lint(repos), "org_files": self.org_files["names"] if self.cfg["hygiene"]["community_fallback"] else None,
             }
         return compute_snapshot(inp)

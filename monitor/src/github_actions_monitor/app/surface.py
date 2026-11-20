@@ -27,6 +27,7 @@ from pathlib import Path
 from github_actions_monitor import i18n
 from github_actions_monitor.util import platform_compat
 from github_actions_monitor.app import toolconfig
+from github_actions_monitor.delivery import mainsource
 
 BAD = ("failure", "timed_out", "startup_failure")      # the same family as redrule.BAD: a job that waits for an approval is not a failure
 HEX40 = re.compile(r"^[0-9a-fA-F]{40}\Z")
@@ -291,20 +292,17 @@ def scan_clone(path):
         workflows.append(scan_workflow(text, file.name))
     stacks = sorted({name for fname, name in STACKS if (base / fname).is_file()})
     manifest = None
-    try:
-        found = sorted(base.glob("*.project.json"))
-    except OSError:
-        found = []
+    found = sorted(n for n in mainsource.root_names(base) if n.endswith(".project.json"))      # the manifest and the CHANGELOG as they are on main, not on the branch the clone is on
     if found:
-        text = read_text(found[0])
+        text = mainsource.read_file(base, found[0])[0]
         try:
             import json
             data = json.loads(text) if text else {}
-            manifest = {"file": found[0].name, "version": str(data.get("version") or ""), "maturity": str(data.get("maturity") or ""), "evidence": str(data.get("evidence") or ""),
+            manifest = {"file": found[0], "version": str(data.get("version") or ""), "maturity": str(data.get("maturity") or ""), "evidence": str(data.get("evidence") or ""),
                         "role": str(data.get("role") or "")}
-        except ValueError:
+        except (ValueError, AttributeError):
             manifest = None
-    changelog = read_text(base / "CHANGELOG.md", 65536)
+    changelog = (mainsource.read_changelog(base)[0] or "")[:65536]
     top = None
     if changelog:
         match = next((m for m in CHANGELOG_TOP.finditer(changelog) if m.group(1).strip().lower() != "unreleased"), None)

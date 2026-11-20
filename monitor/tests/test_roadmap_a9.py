@@ -32,6 +32,11 @@ class Build(_testenv.Spanish, unittest.TestCase):
         self.assertEqual(r["level"], "warn")
         self.assertIn("el workflow de siembra nunca ha corrido", r["boards"][0]["problems"])
 
+    def test_unreadable_runs_are_not_reported_as_never_run(self):
+        r = rm.build(DEFS, None, None, None, {}, None, "HTTP 403: rate limit exceeded", 3.0)
+        self.assertTrue(all("nunca ha corrido" not in p for b in r["boards"] for p in b["problems"]))
+        self.assertEqual(r["runs_error"], "HTTP 403: rate limit exceeded")
+
     def test_stale_board(self):
         r = self.build({"urtc": run(age=20.0), **{k: run() for k, _ in rm.BOARDS if k != "urtc"}})
         urtc = next(b for b in r["boards"] if b["key"] == "urtc")

@@ -22,6 +22,24 @@ class LabelAndStore(unittest.TestCase):
         self.assertFalse(sentinel_local.parse_repo_node(self.node(["bug", "dependencies-js"]), [])["label_dependencies"])
         self.assertTrue(sentinel_local.parse_repo_node(self.node(["bug", "Dependencies"]), [])["label_dependencies"])
 
+    def test_an_exact_lookup_finds_the_label_that_the_search_of_github_misses(self):
+        node = {"name": "R", "labels": {"nodes": []}, "dep_label": {"name": "dependencies"}}      # the search answered nothing, the lookup by name did
+        self.assertTrue(sentinel_local.parse_repo_node(node, [])["label_dependencies"])
+        self.assertFalse(sentinel_local.parse_repo_node({"name": "R", "labels": {"nodes": []}, "dep_label": None}, [])["label_dependencies"])
+        self.assertIn("dep_label:label(name:\"dependencies\")", sentinel_local.repo_query([]))
+
+    def test_a_full_sample_makes_the_minutes_a_minimum(self):
+        from datetime import datetime, timedelta, timezone
+        now = datetime(2026, 11, 20, 12, 0, tzinfo=timezone.utc)
+        def run(hours):
+            return {"started": (now - timedelta(hours=hours)).strftime("%Y-%m-%dT%H:%M:%SZ"), "seconds": 60}
+        hot = [run(h / 4) for h in range(20)]                  # 20 runs, all in the last 5 hours: the sample is full and does not reach back 24 h
+        calm = [run(1), run(30)]                               # two runs: the sample is complete
+        rows = sentinel_local.minutes({"HOT": hot, "CALM": calm}, now, {"runs_per_repo": 20, "cold_runs_per_repo": 5})
+        self.assertTrue(rows["HOT"]["partial24"] and rows["HOT"]["partial7d"])
+        self.assertFalse(rows["CALM"]["partial24"] or rows["CALM"]["partial7d"])
+        self.assertFalse(sentinel_local.minutes({"HOT": hot}, now)["HOT"]["partial24"])      # no sample sizes known: nothing is claimed
+
     def test_store_survives_a_corrupt_file_and_saves_atomically(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "cache.json"
