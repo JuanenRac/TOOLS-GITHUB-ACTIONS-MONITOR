@@ -4647,5 +4647,8 @@
  "cfg.f.cli.watch.min_interval_seconds": "Fastest refresh of watch",
  "cfg.h.cli.watch.min_interval_seconds": "watch never reads more often than this many seconds, even if --interval asks for less. It reads the monitor on this computer, not GitHub.",
  "cfg.f.cli.watch.default_interval_seconds": "Usual interval of watch",
- "cfg.h.cli.watch.default_interval_seconds": "Seconds between two reads of watch when --interval is not given."
+ "cfg.h.cli.watch.default_interval_seconds": "Seconds between two reads of watch when --interval is not given.",
+ "ui.bar_ai_err": "error",
+ "ui.bar_ai_go": "Click to open the AI settings.",
+ "ui.bar_ai_int_err_t": "The AI built into the monitor is configured but does not answer; it says nothing about its key"
 }

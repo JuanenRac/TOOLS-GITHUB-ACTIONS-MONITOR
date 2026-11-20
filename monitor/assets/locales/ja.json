@@ -4647,5 +4647,8 @@
  "cfg.f.cli.watch.min_interval_seconds": "watch の最短更新間隔",
  "cfg.h.cli.watch.min_interval_seconds": "--interval がこれより短い値を求めても、watch はこの秒数より頻繁には読み取りません。読み取り先は GitHub ではなく、このコンピューターのモニターです。",
  "cfg.f.cli.watch.default_interval_seconds": "watch の通常の間隔",
- "cfg.h.cli.watch.default_interval_seconds": "--interval を指定しないときの、watch の2回の読み取りの間隔（秒）。"
+ "cfg.h.cli.watch.default_interval_seconds": "--interval を指定しないときの、watch の2回の読み取りの間隔（秒）。",
+ "ui.bar_ai_err": "エラー",
+ "ui.bar_ai_go": "クリックすると AI の設定が開きます。",
+ "ui.bar_ai_int_err_t": "モニターに内蔵された AI は設定されていますが応答していません。キーについては何も示しません"
 }

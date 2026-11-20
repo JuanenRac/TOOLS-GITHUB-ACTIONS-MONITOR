@@ -4647,5 +4647,8 @@
  "cfg.f.cli.watch.min_interval_seconds": "Schnellste Aktualisierung von watch",
  "cfg.h.cli.watch.min_interval_seconds": "watch liest nie öfter als in diesen Sekunden, auch wenn --interval weniger verlangt. Es liest den Monitor auf diesem Rechner, nicht GitHub.",
  "cfg.f.cli.watch.default_interval_seconds": "Üblicher Abstand von watch",
- "cfg.h.cli.watch.default_interval_seconds": "Sekunden zwischen zwei Abfragen von watch, wenn kein --interval angegeben ist."
+ "cfg.h.cli.watch.default_interval_seconds": "Sekunden zwischen zwei Abfragen von watch, wenn kein --interval angegeben ist.",
+ "ui.bar_ai_err": "Fehler",
+ "ui.bar_ai_go": "Klicken, um die KI-Einstellungen zu öffnen.",
+ "ui.bar_ai_int_err_t": "Die im Monitor eingebaute KI ist eingerichtet, antwortet aber nicht; über ihren Schlüssel sagt das nichts"
 }

@@ -18,6 +18,10 @@ Opcional e **desligado por predefinição**. Um modelo de linguagem pode resumir
 - A chave nunca é guardada: define-se o NOME de uma variável de ambiente. Os três fornecedores remotos ENVIAM dados dos seus repositórios a terceiros.
 
 
+## Os ícones de IA da barra
+
+A barra no canto superior direito mostra dois ícones: o chip é a IA integrada no monitor e as ondas são uma ferramenta de IA externa que lê o monitor. Um distintivo indica o estado sem depender da cor: uma marca de verificação significa ativa, uma barra oblíqua (com o desenho tracejado) inativa e um triângulo um erro (a IA integrada está configurada, mas não responde). Passe o rato para ver o estado exato; clique no ícone, ou prima Enter ou Espaço quando tem o foco, para abrir a secção de IA das definições.
+
 ## O que pode ver
 
 - Toda a entrada é limpa: carateres de controlo removidos, segredos ocultados por padrão, comprimento limitado, conteúdo entre delimitadores aleatórios e declarado não fiável. A resposta é cortada e as suas ligações neutralizadas.

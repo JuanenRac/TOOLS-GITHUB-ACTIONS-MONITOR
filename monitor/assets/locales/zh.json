@@ -4647,5 +4647,8 @@
  "cfg.f.cli.watch.min_interval_seconds": "watch 的最快刷新",
  "cfg.h.cli.watch.min_interval_seconds": "即使 --interval 要求更短，watch 读取的间隔也不会小于这个秒数。它读取本机的监控器，而不是 GitHub。",
  "cfg.f.cli.watch.default_interval_seconds": "watch 的常用间隔",
- "cfg.h.cli.watch.default_interval_seconds": "未给出 --interval 时，watch 两次读取之间的秒数。"
+ "cfg.h.cli.watch.default_interval_seconds": "未给出 --interval 时，watch 两次读取之间的秒数。",
+ "ui.bar_ai_err": "出错",
+ "ui.bar_ai_go": "点击以打开 AI 设置。",
+ "ui.bar_ai_int_err_t": "监视器内置的 AI 已配置但没有响应;这并不说明其密钥的情况"
 }

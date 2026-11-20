@@ -4647,5 +4647,8 @@
  "cfg.f.cli.watch.min_interval_seconds": "Atualização mais rápida do watch",
  "cfg.h.cli.watch.min_interval_seconds": "O watch nunca lê com mais frequência do que estes segundos, mesmo que --interval peça menos. Lê o monitor deste computador, não o GitHub.",
  "cfg.f.cli.watch.default_interval_seconds": "Intervalo habitual do watch",
- "cfg.h.cli.watch.default_interval_seconds": "Segundos entre duas leituras do watch quando não se indica --interval."
+ "cfg.h.cli.watch.default_interval_seconds": "Segundos entre duas leituras do watch quando não se indica --interval.",
+ "ui.bar_ai_err": "com erro",
+ "ui.bar_ai_go": "Clique para abrir as definições da IA.",
+ "ui.bar_ai_int_err_t": "A IA integrada no monitor está configurada, mas não responde; não diz nada sobre a sua chave"
 }
