@@ -120,17 +120,7 @@
    }
   ],
   "removed": [],
-  "changed": [
-   {
-    "key": "sentinel.candidate_min_entries",
-    "old": {
-     "default": 1
-    },
-    "new": {
-     "default": 5
-    }
-   }
-  ]
+  "changed": []
  },
  "manual": {}
 }
