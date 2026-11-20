@@ -123,13 +123,15 @@ def _ready():
     return check_screens is not None and check_overflow is not None and bool(check_overflow.edge())
 
 
-@unittest.skipUnless(_ready(), "no tools folder, or no Edge, Chrome or Chromium on this computer")
+@unittest.skipUnless(_ready() or os.environ.get("MONITOR_REQUIRE_BROWSER"), "no tools folder, or no Edge, Chrome or Chromium on this computer")
 @unittest.skipIf(os.environ.get("CI") and not os.environ.get("MONITOR_BROWSER_TESTS"), "the browser tests run on your computer (or with MONITOR_BROWSER_TESTS=1)")
 class TheScreensFitInABrowser(unittest.TestCase):
     MATRIX = os.environ.get("MONITOR_SCREENS_MATRIX", "")      # "1": everything; or a list of sizes ("4K,portrait") to measure all the languages in those
 
     @classmethod
     def setUpClass(cls):
+        if not _ready():      # a job that asks for the browser (MONITOR_REQUIRE_BROWSER) must not pass by skipping
+            raise RuntimeError("MONITOR_REQUIRE_BROWSER is set and there is no browser (or no tools folder) on this computer")
         cls.demo, port = check_screens.start_demo()
         cls.relay = check_overflow.relay(port, probe=check_screens.PROBE, head=check_screens.HEAD.encode("utf-8"))
         cls.kiosk_relay = check_overflow.relay(port, probe=check_screens.KIOSK_PROBE, head=check_screens.HEAD.encode("utf-8"))

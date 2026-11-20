@@ -4,10 +4,24 @@
  "format": 1,
  "version": "2.1.6",
  "previous": "2.1.5",
- "digest": "6fc565f4121d0223f1c51142c0a1f04b1197256bca5bfb239b0e08c9129ba1c6",
+ "digest": "406ec9d55e31c560e334894da2f17b7284547b8b9bafdb4b2bba57aaf661d818",
  "data_schema": 2,
  "settings": {
   "added": [
+   {
+    "key": "kiosk.safe_margin_percent",
+    "kind": "int",
+    "bounds": [
+     0,
+     10
+    ],
+    "default": 0
+   },
+   {
+    "key": "kiosk.scale_with_window",
+    "kind": "bool",
+    "default": false
+   },
    {
     "key": "lint.maintenance.inactive",
     "kind": "bool"
@@ -83,14 +97,18 @@
     "default": true
    },
    {
+    "key": "screens.safe_margin_percent",
+    "kind": "int",
+    "bounds": [
+     0,
+     10
+    ],
+    "default": 0
+   },
+   {
     "key": "ui.about_org_logo",
     "kind": "bool",
     "default": false
-   },
-   {
-    "key": "ui.remember_folds",
-    "kind": "bool",
-    "default": true
    }
   ],
   "removed": [],
