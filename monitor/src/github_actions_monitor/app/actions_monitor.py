@@ -3739,6 +3739,12 @@ class Handler(BaseHTTPRequestHandler):
                 return
             from github_actions_monitor.integrations import github_app
             self.json_reply(github_app.status(LIVE_CONFIG or toolconfig.raw_config()))
+        elif path == "/api/credential/probe":      # this computer only: does the login (and the App) work, with which scopes and how much allowance (never a token or a key); a second ask within 10 seconds gets the last answer
+            if not self.guard() or not self.this_computer():
+                return
+            from github_actions_monitor.integrations import credential_probe
+            config = LIVE_CONFIG or toolconfig.raw_config()
+            self.json_reply(credential_probe.probe(config, lambda args: run_gh(args[1:]), toolconfig.github_owner(config)))
         elif path == "/api/ai/state":      # read only, versioned: everything the monitor says, as signals (signals.py); the same in the lite and the complete edition
             if not self.guard():
                 return
