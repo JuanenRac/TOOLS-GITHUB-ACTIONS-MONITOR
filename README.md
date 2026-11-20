@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4974_passing-brightgreen.svg" alt="4974 tests">
+  <img src="https://img.shields.io/badge/Tests-5015_passing-brightgreen.svg" alt="5015 tests">
 </p>
 
 > Watches the workflows of every repository you own and tells you, on one local page, what is red, what is stuck and what is waiting for you.
@@ -60,6 +60,7 @@
 - **Charts and history**: compute minutes, failures and successes with animated bars and a daily history (it respects reduced motion).
 - **Eight languages** (en, es, de, fr, it, ja, zh, pt) with English as the base; switch in Settings.
 - **Outputs for dashboards**: `ci_red.json`, a Prometheus endpoint and a JSON source for Grafana, with an importable Grafana dashboard.
+- **Save and print the report of a tab**: TXT, PDF (written by the monitor itself) and JSON through the Save as window of the browser, and a clean printed page; the same report in every format.
 - **Batch tools**: plan and dispatch many builds at once; nothing is fired without `--go`.
 - **About and Help in the page**: the **i** button shows the version, the edition, the links, the files, the health and a button that copies the information for support; the **?** button (or the key `?`) opens the whole documentation, searchable and in your language, with no Internet. The console has `--about` and `--help-topics`, and a tab-by-tab interactive terminal application (optional `textual`).
 - **Notice of a newer version**: a discreet badge when a newer release is published; it only reads the public releases page once a day, never installs anything and can be switched off (always off when air-gapped).
@@ -96,8 +97,8 @@ Method, assumptions and how to measure it in your own use: [`monitor/docs/PRODUC
 | | |
 |---|---|
 | **Maturity** | functional |
-| **Tests** | 4974 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Settings** | 764 settings, all with help |
+| **Tests** | 5015 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Settings** | 770 settings, all with help |
 | **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
 | **Tested in the CI on** | ubuntu, windows, Python 3.11, 3.13 |
 

@@ -39,8 +39,9 @@ class Bar(unittest.TestCase):
             self.assertNotEqual(catalogue["ui.bar_save"], english["ui.bar_save"], lang)
 
     def test_save_asks_for_the_brief_of_the_open_tab_in_the_language_of_the_page(self):
-        self.assertIn('fetch("/api/ai/briefs?tab="+encodeURIComponent(CURTAB||"now")+"&lang="+encodeURIComponent(LANG)', PAGE)
-        self.assertIn('a.download="monitor-"+(CURTAB||"now")+".json"', PAGE)
+        self.assertIn('fetch("/api/report/tab?"+repQuery(tab,fmt)', PAGE)
+        self.assertIn('"tab="+encodeURIComponent(tab)+"&lang="+encodeURIComponent(LANG)', PAGE)
+        self.assertIn('.replace("{tab}",tab).replace("{date}",day)', PAGE)      # the name the Save as window proposes: monitor-<tab>-<date>.<extension>
 
     def test_print_hides_the_menu_the_bar_and_the_dialogs(self):
         rule = re.search(r"@media print\{([^}]*)\}", PAGE[PAGE.index(".sb-bar{display:inline-flex"):]).group(1)

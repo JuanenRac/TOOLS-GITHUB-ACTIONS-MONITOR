@@ -1,0 +1,63 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.1.6",
+ "previous": "2.1.5",
+ "digest": "c1476d5cf71d19b5e48a607a8a5e848ab0af3c5d8ce64fe50bc230e597d723ba",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "report_export.json",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "report_export.name",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9._{}-]{1,80}\\Z"
+    },
+    "default": "monitor-{tab}-{date}"
+   },
+   {
+    "key": "report_export.paper",
+    "kind": "enum",
+    "bounds": [
+     "a4",
+     "letter"
+    ],
+    "default": "a4"
+   },
+   {
+    "key": "report_export.pdf",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "report_export.pdf_path",
+    "kind": "enum",
+    "bounds": [
+     "auto",
+     "own",
+     "browser"
+    ],
+    "default": "auto"
+   },
+   {
+    "key": "report_export.txt",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "ui.remember_folds",
+    "kind": "bool",
+    "default": true
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {}
+}

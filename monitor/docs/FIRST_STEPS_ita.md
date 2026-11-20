@@ -17,4 +17,6 @@
 
 **5. Sai dove sta la guida.** Il pulsante rotondo **?** (o il tasto `?`) apre la Guida; il pulsante **i** apre Informazioni, con la tua versione, i tuoi file e un pulsante che copia le informazioni per l'assistenza (senza segreti). Da console: `--help-topics`, `--help-search PAROLE`, `--about`.
 
+**6. Salvare o stampare un rapporto.** I due pulsanti in alto nella pagina salvano il rapporto della scheda aperta (TXT, PDF e, se vuoi, JSON, ciascuno dalla finestra **Salva con nome** del browser) oppure lo stampano come pagina pulita ([Uscite per altri strumenti](OUTPUTS.md)).
+
 **Utile sapere.** Se usi un piano con repository privati, sceglilo in Impostazioni > Di base per vedere le tue quote ([Quote e piani](QUOTAS_ita.md)). La sentinella è spiegata in [La sentinella](SENTINEL_ita.md). Lo strumento legge soltanto GitHub; scrive solo dopo la tua conferma.

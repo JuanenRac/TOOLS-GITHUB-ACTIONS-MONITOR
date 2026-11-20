@@ -432,6 +432,12 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `readpool.reserve.extra` | `-` | quota | readpool.reserve.extra |
 | `readpool.reserve.user` | `-` | quota | readpool.reserve.user |
 | `refresh_seconds` | `45` | polling | Refresh of hot repositories |
+| `report_export.json` | `false` | outputs | JSON marked |
+| `report_export.name` | `"monitor-{tab}-{date}"` | outputs | Suggested file name |
+| `report_export.paper` | `"a4"` | outputs | Paper of the PDF |
+| `report_export.pdf` | `true` | outputs | PDF marked |
+| `report_export.pdf_path` | `"auto"` | outputs | Way of making the PDF |
+| `report_export.txt` | `true` | outputs | TXT marked |
 | `report_history_days` | `30` | general | Days of report history kept |
 | `report_schedule.cron` | `-` | sentinel | Schedule (cron) |
 | `report_schedule.enabled` | `-` | sentinel | Reports on |
