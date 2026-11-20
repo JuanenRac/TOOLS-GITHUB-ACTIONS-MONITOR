@@ -37,6 +37,21 @@ python bin/monitor_cli.py watch alerts --exit-on-change --format ndjson
 - `--no-clear`：两次读取之间不清屏（只有在终端上且仅在 `text` 和 `table` 下才会清屏）。
 - 读取不到的监控器会以越来越长的停顿重试（间隔翻倍，最长一分钟），错误输出到标准错误。**Ctrl-C** 以退出码 0 结束循环。
 
+## `watch branch`：你刚推送的提交
+
+```
+git push && python bin/monitor_cli.py watch branch
+python bin/monitor_cli.py watch branch --repo acme/widgets --branch main --wait 300
+python bin/monitor_cli.py watch branch --single-pass --format json
+```
+
+`watch branch` 会向 git 询问当前文件夹所在的仓库（`origin`）、分支和提交，并在监视器中跟踪该提交的工作流：等待它们出现，运行时显示，并自行结束。退出码在所有工作流都通过时为 **0**，在有工作流失败、被取消或未能按时结束时为 **1**（失败与超时不加区分，因此 `git push && monitor_cli.py watch branch` 可以放进脚本）。它读取监视器已有的运行记录，从不读取 GitHub，所以不消耗配额；该仓库必须是监视器所监视的仓库之一。远程地址只用于找出所有者和名称，从不输出（它可能含有令牌）。
+
+- `--repo 所有者/名称` 和 `--branch 名称` 会替换 git 的结果。使用其中任何一个（或没有提交）时，跟踪的是该分支每个工作流的最新运行，而不是某一个提交的运行。
+- `--single-pass`（或 `--once`）：读取一次后结束，返回当时的代码（运行未结束时为 1）。
+- `--wait 秒数`：等待运行结束的时间，超时则以 1 放弃（10 到 86400）。不使用它时，等待时间为设置 `cli.watch.branch_timeout_seconds`（900）。
+- 游离提交没有分支：请提供 `--branch`。没有指向 GitHub 的 `origin` 远程的文件夹需要 `--repo`。
+
 ## `completions`：补全命令
 
 ```
@@ -62,6 +77,10 @@ python bin/monitor_cli.py completions powershell | Out-String | Invoke-Expressio
 
 0 到 5 与 [CLI_zho.md](CLI_zho.md) 中的相同；有测试使本表与代码保持一致。
 
+### 面向运维人员的 `status` 退出码
+
+默认情况下，`status` 保持上表的退出码，因此任何脚本都不会改变。使用 `--status-codes operator`（或把设置 `cli.status_codes` 设为 `operator`）后，命令只表达三件事：**0** 正常，**1** 无服务（无法连接监视器或凭据被拒），**2** 在运行但需要关注。需要关注指：监视器无法连接 GitHub、还没有数据、凭据失明、因配额低于下限而暂停刷新、回答中带有错误、回答不是监视器的回答，或者 **磁盘上的代码与正在运行的进程版本不同**（更新后没有重启监视器；`/api/health` 用 `code_stale` 表示，`--doctor` 有 `running` 检查）。使用错误仍为 1。原因在 `--json` 的 `attention` 字段中。红色工作流的失败不在其内：那类情况请用 `alerts --fail-on`。
+
 ## 使用 `jq` 的示例
 
 这些示例只使用属于应答稳定结构的字段，并由测试针对模拟监控器运行（在安装了 `jq` 时）。
@@ -84,6 +103,8 @@ monitor_cli.py team --json | jq -r '.data.ranking[] | .repo'
 | `cli.default_format` | `text` | 未给出 `--format` 或 `--json` 时的格式：`text`、`table`、`plain`、`json` 或 `ndjson` |
 | `cli.watch.min_interval_seconds` | 2 | `watch` 的最短停顿（1 到 3600） |
 | `cli.watch.default_interval_seconds` | 5 | 未给出 `--interval` 时 `watch` 的停顿（1 到 3600） |
+| `cli.status_codes` | `classic` | `status` 的退出码：`classic`（表中的）或 `operator`（0 正常，1 无服务，2 在运行但需要关注） |
+| `cli.watch.branch_timeout_seconds` | 900 | `watch branch` 等待该提交的运行结束的时间（10 到 86400） |
 
 ## 此版本不做的事
 

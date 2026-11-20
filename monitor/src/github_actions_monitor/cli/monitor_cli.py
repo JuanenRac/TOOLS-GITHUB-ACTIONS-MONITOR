@@ -64,8 +64,11 @@ LITE_COMMANDS = ("status", "doctor", "health", "check", "briefs")
 LEVELS = ("info", "warning", "error", "critical")
 from github_actions_monitor.cli import completions, formats, monitor_admin      # noqa: E402
 from github_actions_monitor.cli import watch as watch_loop      # noqa: E402
+from github_actions_monitor.cli import branchwatch      # noqa: E402
+from github_actions_monitor.app import codestale      # noqa: E402
 from github_actions_monitor.surfaces import kiosk      # noqa: E402
 COMMANDS = COMMANDS + ("toolbox", "watch", "completions", "kiosk")      # the operator commands (docs/CLI_OPERATOR.md)
+STATUS_CODES = ("classic", "operator")      # `cli.status_codes` / --status-codes: classic = the codes 0 to 5 of every command; operator = status alone says 0 healthy, 1 nothing serving, 2 up but needs attention
 EXIT_CHANGED = watch_loop.EXIT_CHANGED      # 6: `watch --exit-on-change` saw something change (only when the flag is given)
 OPERATOR_WORDS = {"watch": watch_loop.WATCHABLE, "completions": completions.SHELLS, "kiosk": tuple(kiosk.PRESETS)}
 WORDS_BY_COMMAND = {"ai-hook": AI_HOOK_ACTIONS, "credential": CREDENTIAL_ACTIONS, "lessons": LESSONS_ACTIONS, "install-skill": SKILL_ACTIONS, "ai": AI_ACTIONS, **OPERATOR_WORDS}
@@ -242,6 +245,20 @@ def ago_text(seconds):
 
 
 # -- the commands: each returns (payload for --json, text lines, exit code)
+EXIT_OPERATOR_DOWN, EXIT_OPERATOR_ATTENTION = 1, 2      # the operator scheme of `status`: 0 healthy, 1 nothing is serving, 2 up but needs attention
+
+
+def status_scheme(ctx):
+    """classic or operator: the flag --status-codes, else `cli.status_codes` of the configuration, else classic (the codes every script already knows)."""
+    asked = ctx.get("status_codes") or (((ctx.get("raw") or {}).get("cli") or {}).get("status_codes") if isinstance(ctx.get("raw"), dict) and isinstance((ctx.get("raw") or {}).get("cli"), dict) else "")
+    return asked if asked in STATUS_CODES else "classic"
+
+
+def operator_status_code(code):
+    """The operator scheme for a `status` that could not read the monitor: nothing answers or the credential is refused = 1 (nothing is serving); an answer that is not the monitor's = 2."""
+    return EXIT_OPERATOR_ATTENTION if code == EXIT_DEGRADED else EXIT_OPERATOR_DOWN
+
+
 def cmd_status(ctx):
     health = fetch(ctx["base"], "/api/health", {"account": ctx["account"]}, ctx["timeout"], ctx["token"])
     answer = fetch(ctx["base"], "/api/data", {"account": ctx["account"]}, ctx["timeout"], ctx["token"])
@@ -262,19 +279,33 @@ def cmd_status(ctx):
              i18n.t("cli.status_updated", when=payload["updated_local"] or "-")]
     if payload["listening"]:
         lines.append(i18n.t("cli.status_listening", where=i18n.t("cli.listening_" + payload["listening"])))
+    attention = []      # what makes a monitor that answers "up but needs attention" (the operator scheme of the exit codes)
+    if health.get("code_stale") is True:
+        attention.append("code_stale")
+        lines.append(i18n.t("cli.status_code_stale"))
+    if data.get("paused_quota") is True:
+        attention.append("quota_paused")
+        lines.append(i18n.t("cli.status_quota_paused"))
     code = EXIT_OK
     if payload["credential"] == "blind":
+        attention.append("blind")
         lines.append(i18n.t("cli.status_blind"))
         code = EXIT_AUTH
     if not data and not answer.get("error"):      # the monitor has not read GitHub yet: nothing to report is not "all right" (same as `health`)
         lines.append(i18n.t("cli.health_no_data"))
+        attention.append("no_data")
         code = EXIT_DEGRADED
     if payload["offline"]:
+        attention.append("offline")
         lines.append(i18n.t("cli.status_offline"))
         code = EXIT_DEGRADED
     if payload["error"]:
+        attention.append("error")
         lines.append(i18n.t("cli.status_error", error=str(payload["error"])[:160]))
         code = EXIT_AUTH if answer.get("hint") == "auth" else EXIT_DEGRADED
+    if status_scheme(ctx) == "operator":      # the document of the classic scheme is frozen (a golden test): the reasons only appear with the operator scheme
+        payload["attention"] = attention
+        code = EXIT_OPERATOR_ATTENTION if attention else EXIT_OK
     return payload, lines, code
 
 
@@ -941,14 +972,43 @@ def cmd_kiosk(ctx):
     return {"preset": preset, "tabs": list(kiosk.PRESETS[preset]), "url": link, "enabled": config["enabled"]}, lines, EXIT_OK
 
 
+def cmd_branch(ctx):
+    """One read of `watch branch`: the runs of the commit of the current folder (or of --repo / --branch) as the monitor holds them. Exit 0 = all passed, 1 = a failure or not finished."""
+    repo, branch = ctx.get("repo_asked") or "", ctx.get("branch") or ""      # what was typed, not the cleaned copy: a repository that is not valid is refused, never replaced by the one of the folder
+    if repo and not branchwatch.valid_repo(repo) or branch and not branchwatch.valid_branch(branch):
+        raise CliError(EXIT_USAGE, i18n.t("cli.branch_bad_args"))
+    here = branchwatch.git_context(ctx.get("cwd"))
+    owner, _, name = repo.rpartition("/") if repo else ("", "", "")
+    if not repo:
+        owner, name = here["owner"], here["name"]
+    if not name:
+        raise CliError(EXIT_USAGE, i18n.t("cli.branch_no_repo"))
+    branch_name = branch or here["branch"]
+    if not branch_name:
+        raise CliError(EXIT_USAGE, i18n.t("cli.branch_no_branch"))
+    sha = here["sha"] if not branch and not repo else ""      # a commit only makes sense for the folder itself: with --repo or --branch the newest run of each workflow is followed
+    answer = fetch(ctx["base"], "/api/data", {"account": ctx["account"]}, ctx["timeout"], ctx["token"])
+    data = answer.get("data") or {}
+    if not isinstance(data, dict) or not isinstance(data.get("runs") or [], list):
+        raise ValueError("shape")
+    verdict = branchwatch.evaluate(data.get("runs") or [], owner, name, branch_name, sha)
+    full = (owner + "/" if owner else "") + name
+    payload = {"repo": full, "branch": branch_name, "sha": sha[:7], **verdict, "exit": branchwatch.exit_code(verdict["state"])}
+    lines = [i18n.t("cli.branch_head", repo=full, branch=branch_name, sha=sha[:7] or "-", state=i18n.t("cli.branch_state_" + verdict["state"]))]
+    for row in verdict["runs"]:
+        lines.append("  " + i18n.t("cli.branch_row", workflow=row["workflow"], status=row["status"], conclusion=row["conclusion"] or "-"))
+    return payload, lines, payload["exit"]
+
+
 def cmd_watch(ctx):
     """watch status|alerts [--interval S] [--once] [--exit-on-change] [--no-clear]: the same read again and again, from the API of the monitor (never GitHub). Ctrl-C ends it with 0; with
     --exit-on-change it ends with 6 when something changed; a monitor that cannot be reached is retried with a longer pause each time."""
     command = ctx["action"]
     if command not in watch_loop.WATCHABLE:
         raise CliError(EXIT_USAGE, i18n.t("cli.watch_usage"))
-    handler = HANDLERS[command]
+    handler = cmd_branch if command == "branch" else HANDLERS[command]
     interval = watch_loop.interval_for(ctx.get("interval"), ctx.get("raw"))
+    on_branch = command == "branch"
 
     def read():
         try:
@@ -962,7 +1022,11 @@ def cmd_watch(ctx):
     def clear():
         if ctx.get("clear") and ctx["format"] in ("text", "table") and sys.stdout.isatty():
             print("\x1b[2J\x1b[H", end="")
-    code = watch_loop.run(command, read, show, interval, once=ctx.get("once", False), exit_on_change=ctx.get("exit_on_change", False), error=lambda text: print(text, file=sys.stderr, flush=True), clear=clear)
+    extra = {}
+    if on_branch:      # it waits for the runs of the commit to finish: it ends by itself with 0 (all passed) or 1 (a failure, or not finished in time)
+        extra = {"stop": lambda payload: payload.get("exit") if isinstance(payload, dict) and payload.get("done") else None, "timeout": watch_loop.branch_timeout(ctx.get("raw"), ctx.get("wait")),
+                 "on_timeout": lambda: print(i18n.t("cli.branch_timeout"), file=sys.stderr, flush=True)}
+    code = watch_loop.run(command, read, show, interval, once=ctx.get("once", False), exit_on_change=ctx.get("exit_on_change", False), error=lambda text: print(text, file=sys.stderr, flush=True), clear=clear, **extra)
     return None, None, code
 
 
@@ -1032,6 +1096,10 @@ def build_parser():
     ap.add_argument("--once", action="store_true", help=i18n.t("cli.help_once"))
     ap.add_argument("--exit-on-change", action="store_true", dest="exit_on_change", help=i18n.t("cli.help_exit_on_change"))
     ap.add_argument("--no-clear", action="store_true", dest="no_clear", help=i18n.t("cli.help_no_clear"))
+    ap.add_argument("--single-pass", action="store_true", dest="single_pass", help=i18n.t("cli.help_single_pass"))
+    ap.add_argument("--branch", metavar="NAME", default="", help=i18n.t("cli.help_branch"))
+    ap.add_argument("--wait", type=float, default=None, metavar="SECONDS", help=i18n.t("cli.help_wait"))
+    ap.add_argument("--status-codes", choices=STATUS_CODES, default="", dest="status_codes", help=i18n.t("cli.help_status_codes"))
     ap.add_argument("--version", action="store_true", help=i18n.t("cli.help_version"))
     return ap
 
@@ -1057,13 +1125,16 @@ def main(argv=None):
     if args.lite and args.command not in LITE_COMMANDS:
         print(i18n.t("cli.lite_only"), file=sys.stderr)
         return EXIT_USAGE
+    scheme = {"operator": False}      # set once the configuration is read: the exit code of a `status` that fails follows the scheme in use
     try:
         ctx = {"base": base_url(args.url, args.lite), "account": args.account, "timeout": max(1.0, min(60.0, args.timeout)), "token": resolve_token(flag=args.token, token_file=args.token_file),
                "sentinel": args.sentinel, "level": args.level, "muted": args.muted, "fail_on": args.fail_on, "lite": args.lite, "compare": args.compare, "severity": args.severity, "window": args.window if re.fullmatch(r"[0-9]{1,3}d?", args.window) else "", "days": args.days, "baseline": args.baseline, "format": args.format,
                "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run, "deep": args.deep, "file": args.file, "strict": args.strict, "force": args.force, "encrypt": args.encrypt, "key_env": args.key_env if re.fullmatch(r"[A-Z_][A-Z0-9_]{0,63}", args.key_env) else "", "to_dir": args.to_dir, "new_token_file": args.new_token_file, "dest": args.dest, "read_only": args.read_only, "repo": args.repo if re.fullmatch(r"[A-Za-z0-9._/-]{0,201}", args.repo) else "",
                "provider": args.provider if re.fullmatch(r"[A-Za-z0-9-]{0,40}", args.provider) else "", "model": args.model if re.fullmatch(r"[A-Za-z0-9._:/@+-]{0,100}", args.model) else "", "refresh": args.refresh}
-        raw = _config() if args.command in ("watch", "kiosk") or not (args.format or args.json) else {}
-        ctx.update({"raw": raw, "format": "csv" if args.format == "csv" else formats.choose(args.format, args.json, formats.configured_format(raw)), "interval": args.interval, "once": args.once, "exit_on_change": args.exit_on_change, "clear": not args.no_clear})
+        raw = _config() if args.command in ("watch", "kiosk", "status") or not (args.format or args.json) else {}
+        ctx.update({"raw": raw, "format": "csv" if args.format == "csv" else formats.choose(args.format, args.json, formats.configured_format(raw)), "interval": args.interval, "once": args.once or args.single_pass, "exit_on_change": args.exit_on_change, "clear": not args.no_clear,
+                    "branch": args.branch, "repo_asked": args.repo, "wait": args.wait, "status_codes": args.status_codes})
+        scheme["operator"] = args.command == "status" and status_scheme(ctx) == "operator"
         CLIENT.update({"session": "", "ca": (args.ca_file or os.environ.get("MONITOR_CA_FILE") or "").strip()})
         if CLIENT["ca"] and not os.path.isfile(CLIENT["ca"]):
             raise CliError(EXIT_USAGE, i18n.t("cli.ca_file_bad", file=CLIENT["ca"]))
@@ -1082,11 +1153,12 @@ def main(argv=None):
         except (AttributeError, TypeError, KeyError, ValueError, IndexError):      # a field of the wrong type in an answer that is an object: degraded, never a traceback
             raise CliError(EXIT_DEGRADED, i18n.t("cli.bad_shape")) from None
     except CliError as error:
+        code = operator_status_code(error.code) if scheme["operator"] and error.code != EXIT_USAGE else error.code
         if args.json or args.format in ("json", "ndjson"):
-            print(json.dumps({"ok": False, "exit": error.code, "error": error.text}, ensure_ascii=False))
+            print(json.dumps({"ok": False, "exit": code, "error": error.text}, ensure_ascii=False))
         else:
             print(error.text, file=sys.stderr)
-        return error.code
+        return code
     if lines is None:      # `watch` wrote its own results while it ran
         return code
     if args.command == "compare" and ctx["format"] != "json":      # `compare` writes its own table, ndjson and csv

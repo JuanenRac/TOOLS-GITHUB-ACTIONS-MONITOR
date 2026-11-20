@@ -178,6 +178,8 @@ _f(_T_GENERAL, "kiosk", "kiosk.rotate_seconds", "int", (5, 600), unit="s", resta
 _f(_T_GENERAL, "cli", "cli.default_format", "enum", ("text", "table", "plain", "json", "ndjson"), restart=False)
 _f(_T_GENERAL, "cli", "cli.watch.min_interval_seconds", "int", (1, 3600), unit="s", restart=False)
 _f(_T_GENERAL, "cli", "cli.watch.default_interval_seconds", "int", (1, 3600), unit="s", restart=False)
+_f(_T_GENERAL, "cli", "cli.watch.branch_timeout_seconds", "int", (10, 86400), unit="s", restart=False)
+_f(_T_GENERAL, "cli", "cli.status_codes", "enum", ("classic", "operator"), restart=False)
 _f(_T_GENERAL, "wall", "screens.enabled", "bool", restart=False)
 _f(_T_GENERAL, "look", "ui.theme", "enum", screens.GLOBAL_THEMES, restart=False)
 _f(_T_GENERAL, "look", "ui.remember_folds", "bool", restart=False)

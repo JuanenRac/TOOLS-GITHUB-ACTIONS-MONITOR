@@ -37,6 +37,21 @@ python bin/monitor_cli.py watch alerts --exit-on-change --format ndjson
 - `--no-clear`: no borrar la pantalla entre dos lecturas (solo se borra en una terminal y solo en `text` y `table`).
 - Un monitor que no se puede leer se reintenta con una pausa cada vez mayor (el intervalo duplicado, como máximo un minuto) y el error va a la salida de error. **Ctrl-C** termina el bucle con el código 0.
 
+## `watch branch`: el commit que acabas de subir
+
+```
+git push && python bin/monitor_cli.py watch branch
+python bin/monitor_cli.py watch branch --repo acme/widgets --branch main --wait 300
+python bin/monitor_cli.py watch branch --single-pass --format json
+```
+
+`watch branch` pregunta a git en qué repositorio (`origin`), rama y commit está la carpeta donde estás, y sigue en el monitor los workflows de ese commit: espera a que aparezcan, los muestra mientras corren y termina solo. El código de salida es **0** cuando todos los workflows han pasado y **1** cuando uno ha fallado, se ha cancelado o no ha terminado a tiempo (un fallo no se distingue de un tiempo agotado, para que `git push && monitor_cli.py watch branch` sirva en un script). Lee las ejecuciones que el monitor ya tiene, nunca GitHub, así que no gasta cuota; el repositorio tiene que ser uno de los que vigila el monitor. La dirección del remoto solo se lee para sacar propietario y nombre y nunca se imprime (puede llevar un token).
+
+- `--repo PROPIETARIO/NOMBRE` y `--branch NOMBRE` sustituyen lo que dice git. Con cualquiera de los dos (o sin commit) se sigue la ejecución más reciente de cada workflow de la rama en lugar de las de un commit.
+- `--single-pass` (o `--once`): una lectura y salir, con el código de ese momento (1 mientras las ejecuciones no han terminado).
+- `--wait SEGUNDOS`: cuánto esperar a que terminen las ejecuciones antes de rendirse con 1 (de 10 a 86400). Sin él, la espera es el ajuste `cli.watch.branch_timeout_seconds` (900).
+- Un commit suelto no tiene rama: indica `--branch`. Una carpeta sin un remoto llamado `origin` en GitHub necesita `--repo`.
+
 ## `completions`: completar los comandos
 
 ```
@@ -62,6 +77,10 @@ El script se escribe a partir del analizador real de la línea de comandos, así
 
 Los códigos 0 a 5 son los de [CLI_spa.md](CLI_spa.md); una prueba mantiene esta tabla y el código de acuerdo.
 
+### Los códigos de salida de `status` para un operador
+
+Por defecto `status` conserva los códigos de la tabla de arriba, así que ningún script cambia. Con `--status-codes operator` (o el ajuste `cli.status_codes` en `operator`) el comando dice solo tres cosas: **0** sano, **1** nada sirve (no se alcanza el monitor o rechaza la credencial) y **2** arriba pero necesita atención. Necesita atención significa: el monitor no alcanza GitHub, aún no hay datos, la credencial está ciega, la actualización está en pausa porque la cuota está por debajo de su mínimo, la respuesta trae un error, una respuesta que no es la de un monitor, o **el código del disco es de otra versión que el proceso en marcha** (se aplicó una actualización y no se reinició el monitor; `/api/health` lo dice como `code_stale` y `--doctor` tiene la comprobación `running`). Un error de uso sigue siendo 1. Los motivos están en el campo `attention` de `--json`. Los fallos de workflows en rojo no cuentan: para ellos usa `alerts --fail-on`.
+
 ## Ejemplos con `jq`
 
 Estos ejemplos usan solo campos que forman parte de la forma estable de las respuestas, y una prueba los ejecuta contra un monitor de mentira (cuando `jq` está instalado).
@@ -84,6 +103,8 @@ monitor_cli.py team --json | jq -r '.data.ranking[] | .repo'
 | `cli.default_format` | `text` | el formato cuando no se da `--format` ni `--json`: `text`, `table`, `plain`, `json` o `ndjson` |
 | `cli.watch.min_interval_seconds` | 2 | la pausa más corta de `watch` (de 1 a 3600) |
 | `cli.watch.default_interval_seconds` | 5 | la pausa de `watch` cuando no se da `--interval` (de 1 a 3600) |
+| `cli.status_codes` | `classic` | los códigos de salida de `status`: `classic` (los de la tabla) u `operator` (0 sano, 1 nada sirve, 2 arriba pero necesita atención) |
+| `cli.watch.branch_timeout_seconds` | 900 | cuánto espera `watch branch` a que terminen las ejecuciones del commit (de 10 a 86400) |
 
 ## Lo que esta versión no hace
 
