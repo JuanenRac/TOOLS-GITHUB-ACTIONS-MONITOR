@@ -9,6 +9,8 @@
 
 Die Seite passt sich der Größe ihres Fensters an, vom Telefon bis 4K, hochkant oder quer, und ein Monitor kann mehrere Bildschirme bedienen, jeder mit den Tabs Ihrer Wahl. Nichts wird doppelt abgefragt: alle Bildschirme lesen denselben Zustand.
 
+
+Für einen Fernseher oder eine Wand mit größerer Schrift, hohem Kontrast oder einem Wechsel durch einige Tabs siehe [KIOSK_deu.md](KIOSK_deu.md).
 ## Adressen
 
 - `/` - die ganze Seite.
@@ -82,6 +84,7 @@ Eine Adresse je Monitor. Ein Parameter kann ein Fenster ruhiger oder kleiner mac
 | `?rotate=30` | Das Fenster wechselt alle 30 Sekunden von selbst zwischen Übersicht, Gerade jetzt und Wächtern (mindestens 5; 0 = bleibt auf einer Anzeige). Mit `screens.mode` = rotate wechselt es ohnehin; dies ändert das Tempo eines Fensters. |
 | `?jump=off` | Nur mit `screens.mode` = rotate: Das Fenster wechselt, springt aber nie zu einem neuen Rot. |
 | `?blink=off` | Fehler behalten einen festen Schein statt zu blinken. Es kann nicht einschalten, was `screens.blink` ausgeschaltet lässt. |
+| `?repo=WORD,WORD` | Nur die Repositories, deren Name eines der Wörter enthält (Buchstaben, Ziffern und `. _ - /`, bis zu acht Wörter). `/screen/overview` und `/screen/now` behalten nur Repositories, deren Name der Bildschirm zeigt (ein verborgener Name passt nie), die Zahlen folgen den behaltenen Zeilen, und die Bewertung und die Gruppenkarte, die zur ganzen Flotte gehören, werden nicht gezeigt; `/screen/sentinels` wird nicht gefiltert. |
 | `?sound=on` | Ein kurzer Signalton bei einem neuen Fehler, nur wenn `screens.sound` es erlaubt. Standardmäßig aus. |
 
 ### Sprache der Anzeigen

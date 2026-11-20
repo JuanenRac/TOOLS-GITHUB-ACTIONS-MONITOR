@@ -68,11 +68,20 @@ def compare_lines(doc, t, lang):
     return lines
 
 
+def summary_texts(doc, lang):
+    """(heading, note about who wrote it) of the summary that a person approved, in the language of the report."""
+    origin = doc["summary"].get("origin")
+    return i18n.tl(lang, "report.h_summary"), i18n.tl(lang, "report.summary_" + (origin if origin in ("template", "ai", "edited") else "edited"))
+
+
 def markdown(doc, lang="en"):
     t = _texts(lang)
     out = [f"# {_md(t('title', account=doc['account']))}", "", f"{_md(t('generated', when=doc['generated_at']))}", "", f"## {t('h_score')}", "", _md(score_line(doc, t))]
     if doc["score"]["missing_parts"]:
         out += ["", _md(t("missing", parts=", ".join(doc["score"]["missing_parts"])))]
+    if doc.get("summary"):
+        title, note = summary_texts(doc, lang)
+        out += ["", f"## {_md(title)}", ""] + [_md(p) for p in doc["summary"]["text"].split("\n\n")] + ["", f"*{_md(note)}*"]
     out += ["", f"## {t('h_changes')}", ""] + [f"- {_md(x)}" for x in changes_lines(doc, t)]
     if doc.get("compare"):
         out += ["", f"## {t('h_compare')}", ""] + [f"- {_md(x)}" for x in compare_lines(doc, t, lang)]
@@ -100,6 +109,9 @@ def page(doc, lang="en"):
             f"<h2>{e(t('h_score'))}</h2>", f"<div class=\"big\">{e(_num(s['score']) if s['state'] == 'scored' else '-')}</div>", f"<div>{e(score_line(doc, t))}</div>"]
     if s["missing_parts"]:
         body.append(f"<div class=\"mut\">{e(t('missing', parts=', '.join(s['missing_parts'])))}</div>")
+    if doc.get("summary"):
+        title, note = summary_texts(doc, lang)
+        body += [f"<h2>{e(title)}</h2>"] + [f"<p>{e(p)}</p>" for p in doc["summary"]["text"].split("\n\n")] + [f"<div class=\"mut\">{e(note)}</div>"]
     body += [f"<h2>{e(t('h_changes'))}</h2>", "<ul>" + "".join(f"<li>{e(x)}</li>" for x in changes_lines(doc, t)) + "</ul>"]
     if doc.get("compare"):
         body += [f"<h2>{e(t('h_compare'))}</h2>", "<ul>" + "".join(f"<li>{e(x)}</li>" for x in compare_lines(doc, t, lang)) + "</ul>"]

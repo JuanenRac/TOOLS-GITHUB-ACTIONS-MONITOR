@@ -31,8 +31,13 @@
 | `credential` | ein anderer GitHub-Zugang für ein Konto, während alles läuft: `credential replace\|reload [--account ID] [--new-token-file DATEI\|-]`; gibt nie ein Token aus | nein |
 | `install-skill` | kopiert einen Skill des Monitors (`internal` oder `external`) in den Ordner, aus dem ein KI-Werkzeug seine Skills liest: `install-skill external --dest ORDNER`; der Monitor muss nicht laufen | nein |
 | `gh-token` | gibt ein einstündiges Installations-Token der GitHub-App aus, damit die Lesezugriffe eines Werkzeugs das Kontingent der App verbrauchen (nur mit `github_app.share_reads` an); ohne `--json` ausführen | nein |
+| `watch` | dieselbe Abfrage immer wieder (`watch status\|alerts`, `--interval`, `--once`, `--exit-on-change`); siehe [CLI_OPERATOR_deu.md](CLI_OPERATOR_deu.md) | nein |
+| `completions` | das Vervollständigungsskript für `bash`, `zsh`, `fish` oder `powershell`, aus dem echten Parser erzeugt (es gibt nur aus) | nein |
+| `kiosk` | die Adresse des Monitors für einen Fernseher oder eine Wand (`ops`, `team`, `release`, `quiet`); siehe [KIOSK_deu.md](KIOSK_deu.md) | nein |
 
 Optionen aller Befehle: `--json` (die Antwort als ein JSON-Dokument: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (Port 8766), `--timeout SEKUNDEN` (1 bis 60), `--lang CODE`. Im Netzwerkmodus gehört das Zugriffstoken in die Umgebungsvariable `MONITOR_ACCESS_TOKEN`, die der Monitor selbst liest (`MONITOR_TOKEN` wird als Alias akzeptiert; `--token TOKEN` ist der letzte Ausweg, weil eine Option in der Prozessliste erscheint). Die Reihenfolge: `MONITOR_ACCESS_TOKEN`, dann `MONITOR_TOKEN`, dann `--token`. Es reist im Header `X-Monitor-Access`, nie in der Adresse und nie auf dem Bildschirm. Ein `--url` mit unverschlüsseltem `http` zu einem anderen Rechner gibt eine Warnung auf stderr aus (Token und Antworten würden unverschlüsselt reisen): Nutze außerhalb eines Netzes, das du kontrollierst, `https`.
+
+Jeder Befehl akzeptiert auch `--format text|table|plain|json|ndjson` (`--json` ist `--format json`); siehe [CLI_OPERATOR_deu.md](CLI_OPERATOR_deu.md).
 
 Die Befehlszeile ist ein Client der Lese-API für Clients: Die Routen, die der Vertrag einfriert (`docs/schemas/api_contract.json`), werden zuerst unter `/api/v1/` abgefragt, und antwortet der Monitor dort mit 404 (die API ist geschlossen, `api.v1_enabled`), wird die alte Route abgefragt und das Präfix nicht erneut versucht. Das Dokument ist auf beiden Wegen dasselbe, die Ausgabe keines Befehls ändert sich also. `cli.prefer_v1` (standardmäßig an) schaltet es aus, und die Variable `MONITOR_CLI_PREFER_V1` (`0` oder `1`) hat Vorrang. Die Routen, die der Vertrag nicht einfriert, werden immer auf dem alten Weg abgefragt.
 
@@ -48,6 +53,7 @@ Für Menschen geschriebene Zeiten (die Zeile `Last read`, die Stummschaltungen, 
 | 3 | der Monitor weist diesen Client ab, oder die GitHub-Anmeldung des Kontos ist fehlgeschlagen oder abgelaufen (ein Zugangsdatenproblem, kein erschöpftes Kontingent) |
 | 4 | der Monitor antwortet, ist aber eingeschränkt: offline, Kontingent erschöpft, noch keine Daten, ein Endpunkt, den er nicht hat, oder eine Antwort, die kein JSON ist |
 | 5 | `alerts --fail-on STUFE` hat einen offenen Alarm dieser Stufe oder schlimmer gefunden (ein stummgeschalteter zählt nicht) |
+| 6 | `watch --exit-on-change` hat eine Änderung gesehen (nur wenn diese Option gegeben ist); siehe [CLI_OPERATOR_deu.md](CLI_OPERATOR_deu.md) |
 
 ## Beispiele
 

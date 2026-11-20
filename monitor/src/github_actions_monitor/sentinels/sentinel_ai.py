@@ -64,6 +64,7 @@ AI_DEFAULTS = {
     "airgapped": False, "airgap_hosts": [],      # OFF: with it on the AI only talks to this computer or to a private address declared in the list (ai_airgap.py); the general `airgapped` switch turns it on too
     "redact": {"extra_terms": [], "extra_patterns": []},      # words of the owner (a server, a project) that are always hidden before the AI sees a text; they add to the secrets the cleaner already hides, never replace them
     "prompt_log": {"enabled": False, "keep": 200},      # OFF: a local record of the cleaned prompts and answers, for the administrator (ai_prompt_log.py)
+    "report_summary": {"enabled": False},      # OFF: in Reports a person may ask the AI for a draft of the summary of the next report, edit it and approve it (reporting/report_summary.py)
     "similar": {"enabled": False, "max": 5},      # OFF: "explain this alert" also lists the alerts that look like it (similar_alerts.py, no model)
     "untrusted_text_max": 2000,      # what a repository wrote (a title, a name) is cut to this size before the AI sees it, as data between marks (assistant.py)
     "skill": True, "skill_max_chars": 3000,      # the core of the skill of the AI of the monitor (skills/internal/SKILL.md) goes into every prompt, cut to this size (a small local model: 1500)

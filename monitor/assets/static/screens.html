@@ -354,7 +354,7 @@ const titles={overview:"ui.scr_title_overview",now:"ui.scr_title_now",sentinels:
 function frame(){
   const k=STATE.kind;
   $("h-title").textContent=T(titles[k]);
-  $("h-tag").textContent=T("ui.scr_monitor",{n:P.monitor});
+  $("h-tag").textContent=T("ui.scr_monitor",{n:P.monitor})+(P.repo?" · "+P.repo:"");
   document.title=T(titles[k])+" - GitHub Actions Monitor";
   $("fs").textContent=T("ui.scr_fullscreen");
   $("h-dots").innerHTML=P.rotate>0?KINDS.map(x=>'<i class="'+(x===k?"on":"")+'"></i>').join(""):"";
@@ -663,7 +663,7 @@ function observe(kind,d){
   if(fresh.length){fresh.forEach(k=>shown.add(k));jump(kind,fresh)}
   if(R.hold&&R.hold.kind===kind&&![...R.hold.keys].some(k=>cur.has(k)))endHold();
 }
-function getData(kind){return fetch("/api/screens/data?screen="+encodeURIComponent(kind)+"&lang="+encodeURIComponent(D.lang),{cache:"no-store"})}
+function getData(kind){return fetch("/api/screens/data?screen="+encodeURIComponent(kind)+"&lang="+encodeURIComponent(D.lang)+(P.repo?"&repo="+encodeURIComponent(P.repo):""),{cache:"no-store"})}
 async function peek(kind){
   try{const r=await getData(kind);if(r.ok)observe(kind,await r.json())}catch(e){}
 }

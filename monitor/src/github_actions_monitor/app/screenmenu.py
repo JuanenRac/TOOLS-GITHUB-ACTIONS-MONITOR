@@ -33,7 +33,7 @@ PARAMS = {
     "view": ("choice", VIEWS, None), "tabs": ("list", TAB_IDS, None), "orient": ("choice", ORIENTATIONS, None), "repo": ("text", None, 80),
     "windows": ("int", 1, 9), "layout": ("choice", LAYOUTS, None), "set": ("choice", SETS, None),
 }
-WALL_PARAMS = ("theme", "density", "refresh", "scale", "lang", "monitor", "blink")
+WALL_PARAMS = ("theme", "density", "refresh", "scale", "lang", "monitor", "blink", "repo")
 #: the catalogue: id, group, path, the parameters of the address that are fixed, the names of the parameters a person may change, the edition(s) that have it and what it needs
 CATALOGUE = (
     {"id": "dashboard", "group": "page", "path": "/", "fixed": {}, "params": ("lang", "repo"), "needs": ""},
@@ -47,7 +47,7 @@ CATALOGUE = (
     {"id": "sentinels", "group": "wall", "path": "/screen/sentinels", "fixed": {}, "params": WALL_PARAMS, "needs": "wall"},
     {"id": "wall_turning", "group": "wall", "path": "/screen/overview", "fixed": {}, "params": WALL_PARAMS + ("rotate", "jump"), "needs": "wall"},
     {"id": "tv", "group": "wall", "path": "/screen/overview", "fixed": {}, "params": WALL_PARAMS + ("rotate", "jump"), "needs": "wall"},
-    {"id": "multi", "group": "multi", "path": "/screen/overview", "fixed": {}, "params": ("windows", "layout", "set") + WALL_PARAMS[:5], "needs": "wall"},
+    {"id": "multi", "group": "multi", "path": "/screen/overview", "fixed": {}, "params": ("windows", "layout", "set") + WALL_PARAMS[:5] + ("repo",), "needs": "wall"},
 )
 IDS = tuple(e["id"] for e in CATALOGUE)
 

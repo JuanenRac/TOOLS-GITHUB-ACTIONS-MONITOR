@@ -79,6 +79,8 @@ L'onglet Alertes peut afficher un panneau de questions fixes auxquelles l'IA dé
 
 Avec `ai.similar.enabled` activé (désactivé par défaut), « expliquer cette alerte » liste aussi jusqu'à `ai.similar.max` alertes qui lui ressemblent, pour que la réponse puisse dire « cela s'est déjà produit dans un autre dépôt ». Elles sont trouvées par une simple comparaison de mots (le code de l'alerte, le workflow, les mots du titre et de la cause) parmi les alertes ouvertes et les résolues dont le flux se souvient : pas de modèle, pas d'embeddings, seulement les données de ce compte, le même ordre pour les mêmes données, et chacune est citée par son identifiant.
 
+Avec `ai.report_summary.enabled` activé (désactivé par défaut), Rapports propose **Brouillon avec l'IA** pour le résumé du prochain rapport : les chiffres du rapport, débarrassés des secrets, vont à cette IA par le même nettoyeur, budget, cache et chaîne que toute autre question, une personne modifie le brouillon et l'approuve, et le texte approuvé ouvre le prochain rapport une fois. Rien n'est écrit ni envoyé sans cette approbation.
+
 L'assistant a cinq questions fixes, toutes en lecture seule : « expliquer cette alerte » (`explain_alert`), « résumer la situation » (`summarize_week`), « pourquoi c'est lent ici » (`why_slow`), « la situation d'un dépôt » (`explain_repo` : ses exécutions et ses alertes ouvertes) et « quoi faire en premier » (`prioritize` : les alertes ouvertes, l'état et le score, mis en ordre avec les identifiants). Elles utilisent les mêmes quatre outils, les mêmes limites et le même budget quotidien ; il n'y a toujours pas de discussion libre.
 
 ## Mode isolé de l'IA (facultatif, désactivé par défaut)

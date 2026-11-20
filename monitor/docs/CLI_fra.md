@@ -31,8 +31,13 @@
 | `credential` | une autre connexion GitHub pour un compte pendant que tout tourne : `credential replace\|reload [--account ID] [--new-token-file FICHIER\|-]` ; n'affiche jamais de jeton | non |
 | `install-skill` | copie une skill du moniteur (`internal` ou `external`) dans le dossier où un outil d'IA lit ses skills : `install-skill external --dest DOSSIER` ; le moniteur n'a pas besoin de tourner | non |
 | `gh-token` | affiche un jeton d'installation d'une heure de la GitHub App pour que les lectures d'un outil consomment le quota de l'App (seulement avec `github_app.share_reads` activé) ; à lancer sans `--json` | non |
+| `watch` | la même lecture, encore et encore (`watch status\|alerts`, `--interval`, `--once`, `--exit-on-change`) ; voir [CLI_OPERATOR_fra.md](CLI_OPERATOR_fra.md) | non |
+| `completions` | le script de complétion pour `bash`, `zsh`, `fish` ou `powershell`, écrit à partir de l'analyseur réel (il se contente d'afficher) | non |
+| `kiosk` | l'adresse du moniteur pour une télévision ou un mur (`ops`, `team`, `release`, `quiet`) ; voir [KIOSK_fra.md](KIOSK_fra.md) | non |
 
 Options de toutes les commandes : `--json` (la réponse comme un document JSON : `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (port 8766), `--timeout SECONDES` (1 à 60), `--lang CODE`. En mode réseau, mettez le jeton d'accès dans la variable d'environnement `MONITOR_ACCESS_TOKEN`, celle que lit le moniteur lui-même (`MONITOR_TOKEN` est accepté comme alias ; `--token JETON` est le dernier recours, car une option apparaît dans la liste des processus). L'ordre : `MONITOR_ACCESS_TOKEN`, puis `MONITOR_TOKEN`, puis `--token`. Il voyage dans l'en-tête `X-Monitor-Access`, jamais dans l'adresse ni à l'écran. Un `--url` en `http` non chiffré vers un autre ordinateur affiche un avertissement sur stderr (le jeton et les réponses circuleraient en clair) : utilisez `https` hors d'un réseau que vous contrôlez.
+
+Chaque commande accepte aussi `--format text|table|plain|json|ndjson` (`--json` est `--format json`) ; voir [CLI_OPERATOR_fra.md](CLI_OPERATOR_fra.md).
 
 La ligne de commande est un client de l'API de lecture pour les clients : les routes que le contrat fige (`docs/schemas/api_contract.json`) sont demandées d'abord sous `/api/v1/` et, si le moniteur y répond 404 (l'API est fermée, `api.v1_enabled`), l'ancienne route est demandée et le préfixe n'est plus essayé. Le document est le même par les deux chemins : la sortie d'aucune commande ne change. `cli.prefer_v1` (activé par défaut) le désactive, et la variable `MONITOR_CLI_PREFER_V1` (`0` ou `1`) l'emporte. Les routes que le contrat ne fige pas sont toujours demandées à l'ancienne.
 
@@ -48,6 +53,7 @@ Les heures écrites pour les personnes (la ligne `Last read`, les sourdines, le 
 | 3 | le moniteur refuse ce client, ou la connexion GitHub du compte a échoué ou expiré (un problème d'identifiant, pas un quota épuisé) |
 | 4 | le moniteur répond mais est dégradé : hors ligne, quota épuisé, pas encore de données, un point d'accès qu'il n'a pas, ou une réponse qui n'est pas du JSON |
 | 5 | `alerts --fail-on NIVEAU` a trouvé une alerte ouverte de ce niveau ou pire (une alerte en sourdine ne compte pas) |
+| 6 | `watch --exit-on-change` a vu un changement (seulement quand cette option est donnée) ; voir [CLI_OPERATOR_fra.md](CLI_OPERATOR_fra.md) |
 
 ## Exemples
 

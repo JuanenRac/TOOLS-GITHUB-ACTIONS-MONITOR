@@ -12,6 +12,7 @@ What it reads, per repository, and the alert each signal can raise (all of it ca
   security.branch_unprotected  the default branch has no protection at all
   security.workflow_write      the workflows get write permission on the repository by default
   security.codeowners_missing  there is no CODEOWNERS file (off by default: many repositories do not want one)
+  security.runs_deleted        a workflow run that matters (a push to the default branch, a manual run, a `pull_request_target`) was deleted after the monitor saw it (off by default; see `deleted_runs.py`)
 One alert per repository and signal, with the counts in `details`. A signal that GitHub does not answer for a repository (the feature is off, or the login may not read it: 403, 404) is NOT an
 alert and NOT a clean bill of health: it is listed under `unavailable` in the status, so "no alerts" is never mistaken for "could not be checked".
 
@@ -31,7 +32,7 @@ from datetime import datetime, timezone
 from github_actions_monitor.data_pipeline import etagcache
 from github_actions_monitor.data_pipeline import events, paging
 from github_actions_monitor import i18n
-from github_actions_monitor.sentinels import sentinel_base
+from github_actions_monitor.sentinels import deleted_runs, sentinel_base
 from github_actions_monitor.app import toolconfig
 from github_actions_monitor.storage import state_io
 
@@ -44,18 +45,19 @@ UNREAD_KEEP = 7 * 24 * 3600                              # an alert whose source
 CODEOWNERS_EVERY = 24 * 3600          # a repository without a CODEOWNERS file is looked at again this often (three reads)
 CODEOWNERS_PATHS = (".github/CODEOWNERS", "CODEOWNERS", "docs/CODEOWNERS")
 SEVERITIES = ("low", "medium", "high", "critical")
-SIGNALS = ("dependabot", "code_scanning", "secret", "branch", "workflow", "codeowners")
+SIGNALS = ("dependabot", "code_scanning", "secret", "branch", "workflow", "codeowners", "runs_deleted")
 DEFAULTS = {
     "enabled": False, "refresh_seconds": 1800, "max_repos_per_tick": 5, "deadline_s": 30, "min_rate_remaining": 1500, "repos": "all",
     "signals": {"dependabot": {"enabled": True, "min_severity": "high"}, "code_scanning": {"enabled": True, "min_severity": "high"}, "secret": {"enabled": True},
-                "branch": {"enabled": True}, "workflow": {"enabled": True}, "codeowners": {"enabled": False}},
-    "penalty": {"critical": 25, "high": 10, "medium": 3, "low": 1, "branch": 5, "workflow": 3, "codeowners": 1},
+                "branch": {"enabled": True}, "workflow": {"enabled": True}, "codeowners": {"enabled": False},
+                "runs_deleted": {"enabled": False, "check_window_days": deleted_runs.WINDOW_DAYS, "max_checks": deleted_runs.MAX_CHECKS}},
+    "penalty": {"critical": 25, "high": 10, "medium": 3, "low": 1, "branch": 5, "workflow": 3, "codeowners": 1, "runs_deleted": 10},
 }
 BOUNDS = {"refresh_seconds": (300, 86400), "max_repos_per_tick": (1, 100), "deadline_s": (0, 600), "min_rate_remaining": (100, 5000)}
 TITLE_KEYS = {"security.dependabot": "security.t.dependabot", "security.code_scanning": "security.t.code_scanning", "security.secret": "security.t.secret",
-              "security.branch_unprotected": "security.t.branch", "security.workflow_write": "security.t.workflow", "security.codeowners_missing": "security.t.codeowners"}
+              "security.branch_unprotected": "security.t.branch", "security.workflow_write": "security.t.workflow", "security.codeowners_missing": "security.t.codeowners", "security.runs_deleted": "security.t.runs_deleted"}
 SIGNAL_OF = {"security.dependabot": "dependabot", "security.code_scanning": "code_scanning", "security.secret": "secret", "security.branch_unprotected": "branch",
-             "security.workflow_write": "workflow", "security.codeowners_missing": "codeowners"}
+             "security.workflow_write": "workflow", "security.codeowners_missing": "codeowners", "security.runs_deleted": "runs_deleted"}
 
 
 def settings(config):
@@ -83,6 +85,10 @@ def settings(config):
                 merged["signals"][name]["enabled"] = entry["enabled"]
             if "min_severity" in merged["signals"][name] and entry.get("min_severity") in SEVERITIES:
                 merged["signals"][name]["min_severity"] = entry["min_severity"]
+            for key, (low, high) in (("check_window_days", (1, 90)), ("max_checks", (1, 500))):
+                value = entry.get(key)
+                if key in merged["signals"][name] and isinstance(value, int) and not isinstance(value, bool) and low <= value <= high:
+                    merged["signals"][name][key] = value
     penalty = block.get("penalty")
     if isinstance(penalty, dict):
         for key in DEFAULTS["penalty"]:
@@ -156,6 +162,9 @@ def evaluate(repo, facts, cfg, now, known=None):
         add("security.workflow_write", "warning")
     if rules["codeowners"]["enabled"] and facts.get("codeowners") is False:
         add("security.codeowners_missing", "info")
+    gone = facts.get("runs_deleted")
+    if rules["runs_deleted"]["enabled"] and isinstance(gone, list) and gone:
+        add("security.runs_deleted", "error", **deleted_runs.detail(gone))
     return found
 
 
@@ -174,6 +183,8 @@ def penalty(alerts, cfg):
             total += weights["workflow"]
         elif a["code"] == "security.codeowners_missing":
             total += weights["codeowners"]
+        elif a["code"] == "security.runs_deleted":
+            total += weights["runs_deleted"]
     return total
 
 
@@ -363,6 +374,18 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
                     facts["workflow_permissions"] = body.get("default_workflow_permissions")
                 elif status != 304:
                     facts.pop("workflow_permissions", None)
+            if rules["runs_deleted"]["enabled"]:
+                status, body = read("runs", f"repos/{owner}/{repo}/actions/runs?per_page=100")      # a 304 means the list did not change, so nothing left it
+
+                def ask(run_id):
+                    return self.fetch(f"repos/{owner}/{repo}/actions/runs/{run_id}")[0]
+                if status == 200 and isinstance(body, dict) and isinstance(body.get("workflow_runs"), list):
+                    watch = rules["runs_deleted"]
+                    facts["runs_seen"], facts["runs_deleted"], _checks = deleted_runs.update(facts.get("runs_seen") or [], facts.get("runs_deleted"), body["workflow_runs"], facts.get("default_branch") or "main",
+                                                                                           now, watch["check_window_days"], watch["max_checks"], ask)
+            else:
+                facts.pop("runs_seen", None)
+                facts.pop("runs_deleted", None)
             if rules["codeowners"]["enabled"] and (facts.get("codeowners") is not True) and now - mine.get("codeowners_at", 0) >= CODEOWNERS_EVERY:
                 found_file = False
                 for path in CODEOWNERS_PATHS:
@@ -393,7 +416,7 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
 
     def _title(self, alert):
         d = alert.get("detail") or {}
-        return i18n.t(TITLE_KEYS[alert["code"]], repo=alert["repo"], n=d.get("n", 0), critical=d.get("critical", 0), high=d.get("high", 0), branch=d.get("branch", ""))
+        return i18n.t(TITLE_KEYS[alert["code"]], repo=alert["repo"], n=d.get("n", 0), critical=d.get("critical", 0), workflow=d.get("workflow", ""), actor=d.get("actor", ""), high=d.get("high", 0), branch=d.get("branch", ""))
 
     def _event(self, kind, alert):
         title = self._title(alert)

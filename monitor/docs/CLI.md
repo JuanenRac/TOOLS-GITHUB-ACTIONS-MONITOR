@@ -31,8 +31,13 @@
 | `credential` | another GitHub login for one account while everything runs: `credential replace\|reload [--account ID] [--new-token-file FILE\|-]`; it never prints a token | no |
 | `install-skill` | copies a skill of the monitor (`internal` or `external`) to the folder an AI tool reads its skills from: `install-skill external --dest FOLDER`; the monitor need not be running | no |
 | `gh-token` | prints a one-hour installation token of the GitHub App so that the reads of a tool spend the allowance of the App (only with `github_app.share_reads` on); run it without `--json` | no |
+| `watch` | the same read again and again (`watch status\|alerts`, `--interval`, `--once`, `--exit-on-change`); see [CLI_OPERATOR.md](CLI_OPERATOR.md) | no |
+| `completions` | the completion script for `bash`, `zsh`, `fish` or `powershell`, written from the real parser (it only prints) | no |
+| `kiosk` | the address of the monitor for a TV or a wall (`ops`, `team`, `release`, `quiet`); see [KIOSK.md](KIOSK.md) | no |
 
 Options of every command: `--json` (the answer as one JSON document: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (port 8766), `--timeout SECONDS` (1 to 60), `--lang CODE`. In the network mode put the access token in the environment variable `MONITOR_ACCESS_TOKEN`, the one the monitor itself reads (`MONITOR_TOKEN` is accepted as an alias; `--token TOKEN` is the last resort, because a flag shows in the list of processes). The order is: `MONITOR_ACCESS_TOKEN`, then `MONITOR_TOKEN`, then `--token`. It travels in the header `X-Monitor-Access`, never in the address and never on screen. A `--url` with plain `http` to another computer prints a warning on stderr (the token and the answers would travel unencrypted): use `https` outside a network you control.
+
+Every command also takes `--format text|table|plain|json|ndjson` (`--json` is `--format json`); see [CLI_OPERATOR.md](CLI_OPERATOR.md).
 
 The command line is a client of the read API for clients: the routes the contract freezes (`docs/schemas/api_contract.json`) are asked under `/api/v1/` first, and when the monitor answers 404 there (the API is closed, `api.v1_enabled`) the old route is asked and the prefix is not tried again. The document is the same by both ways, so the output of no command changes. `cli.prefer_v1` (on by default) turns it off, and the variable `MONITOR_CLI_PREFER_V1` (`0` or `1`) wins over it. The routes the contract does not freeze are always asked the old way.
 
@@ -48,6 +53,7 @@ Times written for people (the `Last read` line, the silences, the log, the repor
 | 3 | the monitor refuses this client, or the GitHub login of the account failed or expired (a credential problem, not an exhausted allowance) |
 | 4 | the monitor answers but is degraded: offline, allowance exhausted, no data yet, an endpoint it does not have, or an answer that is not JSON |
 | 5 | `alerts --fail-on LEVEL` found an open alert of that level or worse (a silenced alert does not count) |
+| 6 | `watch --exit-on-change` saw a change (only when that flag is given); see [CLI_OPERATOR.md](CLI_OPERATOR.md) |
 
 ## Examples
 
