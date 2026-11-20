@@ -169,6 +169,7 @@ _f(_T_GENERAL, "cli", "cli.watch.min_interval_seconds", "int", (1, 3600), unit="
 _f(_T_GENERAL, "cli", "cli.watch.default_interval_seconds", "int", (1, 3600), unit="s", restart=False)
 _f(_T_GENERAL, "wall", "screens.enabled", "bool", restart=False)
 _f(_T_GENERAL, "look", "ui.theme", "enum", screens.GLOBAL_THEMES, restart=False)
+_f(_T_GENERAL, "look", "ui.remember_folds", "bool", restart=False)
 _f(_T_GENERAL, "wall", "screens.default_theme", "enum", screens.THEME_CHOICES, restart=False)
 _f(_T_GENERAL, "wall", "screens.theme_overview", "enum", screens.THEME_CHOICES, restart=False)
 _f(_T_GENERAL, "wall", "screens.theme_now", "enum", screens.THEME_CHOICES, restart=False)
