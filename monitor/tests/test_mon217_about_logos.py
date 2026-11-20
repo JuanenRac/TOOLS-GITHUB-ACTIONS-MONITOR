@@ -161,7 +161,7 @@ class InTheBrowser(unittest.TestCase):
         cls.tmp = tempfile.TemporaryDirectory()
         page = Path(cls.tmp.name) / "logos.html"
         page.write_text(page_html, encoding="utf-8")
-        run = subprocess.run([browser(), "--headless=new", "--disable-gpu", "--no-first-run", f"--user-data-dir={Path(cls.tmp.name) / 'profile'}", "--virtual-time-budget=60000", "--dump-dom", page.as_uri()],
+        run = subprocess.run([browser(), "--headless=new", "--disable-gpu", "--no-first-run", *(["--no-sandbox", "--disable-dev-shm-usage"] if sys.platform.startswith("linux") else []), f"--user-data-dir={Path(cls.tmp.name) / 'profile'}", "--virtual-time-budget=60000", "--dump-dom", page.as_uri()],
                              capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=240, creationflags=0x08000000 if sys.platform == "win32" else 0)
         found = re.search(r'<pre id="res">(.*?)</pre>', run.stdout, re.S)
         cls.rows = json.loads(html_lib.unescape(found.group(1))) if found else None
