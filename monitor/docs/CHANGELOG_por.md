@@ -9,6 +9,16 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+### Adicionado
+
+- **Guardar o relatório de um separador pela janela Guardar como do navegador**: o botão no topo da página abre uma janela com as caixas TXT (marcada), PDF (marcada) e JSON (opcional, desmarcada) e, depois de aceitar, a janela Guardar como do navegador para cada formato, com o nome sugerido `monitor-<separador>-<data>.<extensão>` e o tipo de ficheiro certo; um navegador sem essa janela transfere o ficheiro e diz onde ele ficou. O PDF é escrito pelo próprio monitor, sem bibliotecas e com o tipo de letra padrão Helvetica (`GET /api/report/tab.pdf`, só a partir deste computador, registado no registo de ações); o japonês e o chinês, e a opção «O navegador» da janela, usam em vez disso a janela de impressão do navegador, e nunca se escreve um PDF com carateres estragados.
+
+- **Imprimir o relatório de um separador**: o botão de imprimir mostra o mesmo relatório limpo do PDF (título com o nome do separador, data e hora, versão do monitor, números principais, alertas e as tabelas do separador, sem menus nem barras) e abre a janela de impressão; o ficheiro de texto, o de dados, o PDF e a página impressa saem de UM só relatório servido por `GET /api/report/tab`, para todos os separadores e nos oito idiomas.
+
+- **Definições do relatório**: `report_export.txt`, `report_export.pdf` e `report_export.json` escolhem que caixas começam marcadas, `report_export.name` o nome de ficheiro sugerido, `report_export.paper` o papel do PDF (A4 ou Letter) e `report_export.pdf_path` a forma de fazer o PDF (automática, o monitor ou o navegador).
+
+- **Ecrã inteiro, Ecrãs e repositórios quentes junto a guardar e imprimir**: os botões do ecrã inteiro, do menu Ecrãs e do filtro de repositórios quentes estão agora na barra no topo da página, à esquerda dos botões que guardam e imprimem o relatório, e mantêm a sua ordem; continuam ocultos no modo quiosque e na vista de todos os repositórios como antes.
+
 ## [2.1.5]
 
 - **A pontuação, os relatórios, o espelho e a análise podem ler todas as execuções, não só as 600 mais recentes** (`score.source`, `recent600` por predefinição, `ledger` a pedido): numa conta que lê milhares de execuções por ciclo a página guarda as 600 mais recentes, e a pontuação saía delas. Com `ledger` saem de todas as que o ciclo leu, contadas uma vez no livro, que agora guarda também totais por hora (êxitos e falhas por hora) que sobrevivem ao seu limite de 20000 execuções; uma janela que o limite não conseguiu guardar inteira di-lo (`data_quality.truncated`) e dá os totais que as horas guardam (`data_quality.aggregate`). Com a predefinição, o instantâneo diz quando o ciclo leu mais do que a pontuação viu (`data_quality.cut`, `data_quality.runs_read`, o motivo `recent_cut` e uma linha na página). A predefinição passará a `ledger` na versão seguinte. Um livro e os instantâneos de versões anteriores leem-se tal como estão. Não se acrescenta nenhuma chamada ao GitHub; está no guia da pontuação, na ajuda das definições, nos guias e nas skills.

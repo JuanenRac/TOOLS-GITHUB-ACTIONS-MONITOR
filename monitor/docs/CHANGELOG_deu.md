@@ -9,6 +9,16 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+### Hinzugefügt
+
+- **Den Bericht eines Tabs über das Fenster „Speichern unter“ des Browsers speichern**: Die Schaltfläche am oberen Rand der Seite öffnet ein Fenster mit den Kästchen TXT (angehakt), PDF (angehakt) und JSON (optional, nicht angehakt) und nach dem Bestätigen für jedes Format das Fenster „Speichern unter“ des Browsers, mit dem vorgeschlagenen Namen `monitor-<Tab>-<Datum>.<Endung>` und dem passenden Dateityp; ein Browser ohne dieses Fenster lädt die Datei herunter und sagt, wo sie gelandet ist. Das PDF schreibt der Monitor selbst, ohne Bibliothek und mit der Standardschrift Helvetica (`GET /api/report/tab.pdf`, nur von diesem Rechner, im Aktionsprotokoll vermerkt); Japanisch und Chinesisch sowie die Wahl „Der Browser“ im Fenster nutzen stattdessen das Druckfenster des Browsers, und ein PDF mit zerstörten Zeichen wird nie geschrieben.
+
+- **Den Bericht eines Tabs drucken**: Die Druckschaltfläche zeigt denselben sauberen Bericht wie das PDF (Titel mit dem Tab-Namen, Datum und Uhrzeit, Version des Monitors, wichtigste Zahlen, Warnungen und die Tabellen des Tabs, ohne Menüs und Leisten) und öffnet das Druckfenster; Textdatei, Datendatei, PDF und gedruckte Seite entstehen aus EINEM Bericht, den `GET /api/report/tab` liefert, für jeden Tab und in den acht Sprachen.
+
+- **Einstellungen des Berichts**: `report_export.txt`, `report_export.pdf` und `report_export.json` wählen, welche Kästchen angehakt starten, `report_export.name` den vorgeschlagenen Dateinamen, `report_export.paper` das Papier des PDF (A4 oder Letter) und `report_export.pdf_path` die Art, das PDF zu erstellen (automatisch, der Monitor oder der Browser).
+
+- **Vollbild, Bildschirme und heiße Repositories neben Speichern und Drucken**: Die Schaltflächen für Vollbild, für das Menü Bildschirme und für den Filter der heißen Repositories sitzen jetzt in der Leiste am oberen Rand der Seite, links von den Schaltflächen zum Speichern und Drucken des Berichts, und behalten ihre Reihenfolge; im Kiosk und in der Ansicht aller Repositories bleiben sie wie bisher verborgen.
+
 ## [2.1.5]
 
 - **Bewertung, Berichte, Spiegel und Analytik können jeden Lauf lesen, nicht nur die neuesten 600** (`score.source`, standardmäßig `recent600`, auf Wunsch `ledger`): Bei einem Konto, das in einem Zyklus Tausende Läufe liest, behält die Seite die neuesten 600, und die Bewertung entstand aus ihnen. Mit `ledger` entstehen sie aus jedem Lauf, den der Zyklus gelesen hat, einmal im Hauptbuch gezählt, das nun auch Stundensummen (Erfolge und Fehler pro Stunde) führt, die seine Obergrenze von 20000 Läufen überdauern; ein Fenster, das die Obergrenze nicht ganz halten konnte, sagt das (`data_quality.truncated`) und nennt die Summen der Stunden (`data_quality.aggregate`). Mit dem Standard sagt die Momentaufnahme, wann der Zyklus mehr gelesen hat, als die Bewertung sah (`data_quality.cut`, `data_quality.runs_read`, der Grund `recent_cut` und eine Zeile auf der Seite). Der Standard wird in der nächsten Version `ledger`. Ein Hauptbuch und die Momentaufnahmen früherer Versionen werden unverändert gelesen. Es kommt kein Aufruf an GitHub hinzu; es steht in der Anleitung der Bewertung, der Einstellungshilfe, den Anleitungen und den Skills.

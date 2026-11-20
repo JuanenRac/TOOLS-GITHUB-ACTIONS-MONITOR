@@ -99,6 +99,7 @@ FILE_NAME_RE = re.compile(r"^[A-Za-z0-9._-][A-Za-z0-9._/-]{0,79}\Z")
 LISTEN_HOST_RE = re.compile(r"^(127\.0\.0\.1|localhost|0\.0\.0\.0|10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|192\.168\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[01])\.[0-9]{1,3}\.[0-9]{1,3})\Z")   # this computer or a private address: never a public one
 OTLP_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250}|http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/%-]{0,100})?)?\Z")   # HTTPS anywhere, plain HTTP only on this computer
 ACT_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}:[A-Za-z0-9._-]{1,80}\.ya?ml:[a-z_]{1,30}\Z")      # repository:workflow-file:event, no wildcard
+REPORT_NAME_RE = re.compile(r"^[A-Za-z0-9._{}-]{1,80}\Z")      # report_export.name: the suggested file name of a saved report, with {tab} and {date} (letters, digits, dot, dash, underscore)
 IDENT_RE = re.compile(r"^[A-Za-z0-9_.-]{1,60}\Z")
 SOURCE_KEYS = {"ecosystem": NAME_RE, "kind": re.compile(r"^(pin_table|lock_files)\Z"), "provider": NAME_RE, "file": FILE_NAME_RE, "key": IDENT_RE,
                "lock_name": FILE_NAME_RE, "version_key": IDENT_RE}
@@ -566,6 +567,13 @@ _f(_T_OUT, "prometheus", "outputs.prometheus.enabled", "bool", restart=False, se
 _f(_T_OUT, "prometheus", "outputs.prometheus.per_repo", "bool", restart=False)
 _f(_T_OUT, "json", "outputs.json.enabled", "bool", restart=False, secure=True)
 _f(_T_OUT, "dashboard", "outputs.dashboard.enabled", "bool", restart=False, secure=True)
+# Save and print the report of a tab (reporting/tab_report.py): which formats the dialog marks, the suggested file name, the paper and the way the PDF is made
+_f(_T_OUT, "report_export", "report_export.txt", "bool", restart=False)
+_f(_T_OUT, "report_export", "report_export.pdf", "bool", restart=False)
+_f(_T_OUT, "report_export", "report_export.json", "bool", restart=False)
+_f(_T_OUT, "report_export", "report_export.name", "text", REPORT_NAME_RE, restart=False)
+_f(_T_OUT, "report_export", "report_export.paper", "enum", ("a4", "letter"), restart=False)
+_f(_T_OUT, "report_export", "report_export.pdf_path", "enum", ("auto", "own", "browser"), restart=False)
 # --- Integrations: external AI, incoming webhook
 _f(_T_AI, "provider", "ai.provider", "enum", ("none", "ollama", "openai-compatible", "anthropic", "copilot"), secure=True)
 _f(_T_AI, "provider", "ai.model", "text", MODEL_RE)
@@ -1002,7 +1010,7 @@ def check_value_list(value):
 
 
 LITE_KEYS = ("ports.complete", "ports.lite", "github_owner", "language", "repos", "ecosystems", "exclude", "refresh_seconds", "open_browser", "updates.check", "airgapped") + tuple(
-    k for k in FIELDS if k.startswith(("ai_alerts.", "sound.", "display.", "modes.", "central.", "extra_reader.", "github_app.", "network.etag", "network.graphql")))      # the short settings page of the lite product; the connection with an AI tool, the sound and the look are the same in both editions
+    k for k in FIELDS if k.startswith(("ai_alerts.", "sound.", "display.", "report_export.", "modes.", "central.", "extra_reader.", "github_app.", "network.etag", "network.graphql")))      # the short settings page of the lite product; the connection with an AI tool, the sound and the look are the same in both editions
 
 
 def validate(changes, lite=False):

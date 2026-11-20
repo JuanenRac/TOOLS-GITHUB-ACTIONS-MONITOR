@@ -31,6 +31,7 @@
   {"path": "/api/ops/status", "complete": {"schema": "int", "mode": "str", "backup": "object", "purge": "object", "retention": "object", "restore": "object"}, "lite": 404},
   {"path": "/api/report-files", "complete": {"schema": "int", "account": "str", "enabled": "bool", "cron": "str", "formats": "str", "reports": "list"}, "lite": 404},
   {"path": "/api/ai/index", "complete": {"schema": "int", "kind": "str", "edition": "str", "version": "str", "generated_epoch": "int", "briefs": "list", "channels": "list", "read_only": "bool", "note": "str"}, "lite": "same"},
+  {"path": "/api/report/tab", "complete": {"schema": "int", "kind": "str", "tab": "str", "lang": "str", "title": "str", "meta": "list", "figures": "list", "alerts": "list", "sections": "list", "footer": "str"}, "lite": "same"},
   {"path": "/api/ai/briefs", "complete": {"schema": "int", "kind": "str", "edition": "str", "version": "str", "generated_epoch": "int", "count": "int", "briefs": "list"}, "lite": "same"},
   {"path": "/api/ai/state", "complete": {"schema": "int", "edition": "str", "version": "str", "generated_epoch": "int", "signals": "list", "act": "int", "watch": "int", "panels_not_in_this_edition": "list", "note": "str", "lessons": "list"}, "lite": "same"},
   {"path": "/api/ai/brief?fmt=json", "complete": {"brief": "str", "updated": "any", "updated_local": "any", "age_seconds": "any", "alerts": "list"}, "lite": "same"},
@@ -75,6 +76,7 @@
   {"path": "/api/v1/repos?limit=0", "status": 400, "keys": {"error": "str", "code": "str", "message": "str"}}
  ],
  "unfrozen": [
+  {"path": "/api/report/tab.pdf", "reason": "a PDF file written by the monitor for this computer only (not a JSON document); the data of the same report is frozen under /api/report/tab"},
   {"path": "/api/ai/stream", "reason": "a stream of server-sent events, not a JSON document"},
   {"path": "/api/ai/prompts", "reason": "the local record of prompts and answers of the AI (an administrator only; empty and off until ai.prompt_log.enabled is turned on), a view of a file of this computer and not part of the read API"},
   {"path": "/api/assistant", "reason": "the description of the optional assistant (off by default, so the route answers 404 until it is turned on): its fixed actions, its closed list of tools and its limits; it spends nothing and grows with the assistant"},

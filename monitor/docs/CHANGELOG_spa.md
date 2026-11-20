@@ -9,6 +9,16 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+### Añadido
+
+- **Guardar el informe de una pestaña por la ventana Guardar como del navegador**: el botón de la barra superior abre una ventana con las casillas TXT (marcada), PDF (marcada) y JSON (opcional, sin marcar) y, al aceptar, la ventana Guardar como del navegador para cada formato, con el nombre sugerido `monitor-<pestaña>-<fecha>.<extensión>` y el tipo de archivo correcto; un navegador sin esa ventana descarga el archivo y dice dónde ha caído. El PDF lo escribe el propio monitor sin librerías y con la fuente estándar Helvetica (`GET /api/report/tab.pdf`, solo desde este equipo, anotado en el registro de acciones); el japonés y el chino, y la opción «El navegador» de la ventana, usan en su lugar la ventana de impresión del navegador, y nunca se escribe un PDF con caracteres rotos.
+
+- **Imprimir el informe de una pestaña**: el botón de imprimir muestra el mismo informe limpio que el PDF (título con el nombre de la pestaña, fecha y hora, versión del monitor, cifras principales, alertas y las tablas de la pestaña, sin menús ni barras) y abre la ventana de impresión; el archivo de texto, el de datos, el PDF y la página impresa salen de UN solo informe servido por `GET /api/report/tab`, para todas las pestañas y en los ocho idiomas.
+
+- **Ajustes del informe**: `report_export.txt`, `report_export.pdf` y `report_export.json` eligen qué casillas empiezan marcadas, `report_export.name` el nombre de archivo sugerido, `report_export.paper` el papel del PDF (A4 o Carta) y `report_export.pdf_path` la forma de hacer el PDF (automática, el monitor o el navegador).
+
+- **Pantalla completa, Pantallas y calientes junto a guardar e imprimir**: los botones de pantalla completa, del menú Pantallas y del filtro de repositorios calientes están ahora en la barra superior de la página, a la izquierda de los botones que guardan e imprimen el informe, y conservan su orden; siguen ocultos en el modo quiosco y en la vista de todos los repositorios como antes.
+
 ## [2.1.5]
 
 - **La puntuación, los informes, el espejo y la analítica pueden leer todas las ejecuciones, no solo las 600 más recientes** (`score.source`, `recent600` por defecto, `ledger` a petición): en una cuenta que lee miles de ejecuciones en un ciclo la página guarda las 600 más recientes, y la puntuación salía de ellas. Con `ledger` salen de todas las que leyó el ciclo, contadas una vez en el libro, que ahora guarda también totales por hora (éxitos y fallos por hora) que sobreviven a su tope de 20000 ejecuciones; una ventana que el tope no pudo guardar entera lo dice (`data_quality.truncated`) y da los totales que guardan las horas (`data_quality.aggregate`). Con el valor por defecto la instantánea dice cuándo el ciclo leyó más de lo que vio la puntuación (`data_quality.cut`, `data_quality.runs_read`, el motivo `recent_cut` y una línea en la página). El valor por defecto pasará a `ledger` en la versión siguiente. Un libro y las instantáneas de versiones anteriores se leen tal cual. No se añade ninguna llamada a GitHub; está en la guía de la puntuación, la ayuda de los ajustes, las guías y las skills.

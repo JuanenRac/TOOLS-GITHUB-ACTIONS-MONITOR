@@ -80,3 +80,14 @@ Each row of the queue has a `trust`: `verified` (the signature was checked again
 ## In the network mode
 
 `/metrics` and `dashboard.json` list your repositories and their state: they are not public pages. With the network mode on they need the access token like every other endpoint; switch off `outputs.prometheus.enabled` / `outputs.dashboard.enabled` if you do not want that inventory to be reachable at all.
+
+## Save and print the report of a tab
+
+The bar at the top of the page (on every tab) makes ONE report of the tab that is open and draws it four ways from the same data, so the formats never differ:
+
+- **Save the report** opens a window with three boxes: **TXT** (marked), **PDF** (marked) and **JSON** (not marked: the data of the report, for other tools). After you accept, the **Save as** window of the browser opens once per format, with the suggested name `monitor-<tab>-<date>.<extension>` and the right file type (the browser wants one click per window, so the button goes on to the next format). A browser without that window downloads the file and the page tells you where it went.
+- **PDF**: the monitor writes the PDF itself, with no library and the standard Helvetica font, for English, Spanish, German, French, Italian and Portuguese (`GET /api/report/tab.pdf`, only from this computer; every use leaves a line in the log of actions). Japanese and Chinese need fonts that a PDF written this way does not have, so for them, or when you choose "The browser" in the window, the PDF comes from the print window of the browser: choose **Save as PDF** there. The page says so; it never writes a PDF with broken characters.
+- **Print** shows the same report without menus or bars (title with the name of the tab, date and time, version of the monitor, main figures, alerts and the tables of the tab) and opens the print window.
+- The report is served by `GET /api/report/tab?tab=now&lang=en` (`&fmt=json`, `&fmt=txt` or `&fmt=options`), the same in both editions.
+
+Settings (Settings > Outputs for other tools > "Save and print the report of a tab"): `report_export.txt`, `report_export.pdf` and `report_export.json` (which boxes start marked: TXT and PDF yes, JSON no), `report_export.name` (suggested name, default `monitor-{tab}-{date}`), `report_export.paper` (`a4` or `letter`, default `a4`) and `report_export.pdf_path` (`auto`, `own` or `browser`, default `auto`).

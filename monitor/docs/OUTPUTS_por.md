@@ -80,3 +80,14 @@ Cada linha da fila tem um `trust`: `verified` (assinatura verificada com a chave
 ## No modo de rede
 
 `/metrics` e `dashboard.json` listam os seus repositórios e o seu estado: não são páginas públicas. Com o modo de rede ligado exigem o token de acesso como qualquer outro endpoint; desligue `outputs.prometheus.enabled` / `outputs.dashboard.enabled` se não quiser que esse inventário seja acessível de todo.
+
+## Guardar e imprimir o relatório de um separador
+
+A barra no topo da página (em todos os separadores) faz UM relatório do separador aberto e desenha-o de quatro maneiras com os mesmos dados, pelo que os formatos nunca diferem:
+
+- **Guardar o relatório** abre uma janela com três caixas: **TXT** (marcada), **PDF** (marcada) e **JSON** (desmarcada: os dados do relatório, para outras ferramentas). Depois de aceitar, abre-se a janela **Guardar como** do navegador uma vez por formato, com o nome sugerido `monitor-<separador>-<data>.<extensão>` e o tipo de ficheiro certo (o navegador pede um clique por janela, por isso o botão passa ao formato seguinte). Um navegador sem essa janela transfere o ficheiro e a página diz onde ele ficou.
+- **PDF**: o monitor escreve o PDF ele próprio, sem bibliotecas e com o tipo de letra padrão Helvetica, em inglês, espanhol, alemão, francês, italiano e português (`GET /api/report/tab.pdf`, só a partir deste computador; cada utilização deixa uma linha no registo de ações). O japonês e o chinês precisam de tipos de letra que um PDF escrito assim não tem; para eles, ou quando escolhe «O navegador» na janela, o PDF sai da janela de impressão do navegador: escolha aí **Guardar como PDF**. A página di-lo; nunca escreve um PDF com carateres estragados.
+- **Imprimir** mostra o mesmo relatório sem menus nem barras (título com o nome do separador, data e hora, versão do monitor, números principais, alertas e as tabelas do separador) e abre a janela de impressão.
+- O relatório é servido por `GET /api/report/tab?tab=now&lang=pt` (`&fmt=json`, `&fmt=txt` ou `&fmt=options`), igual nas duas edições.
+
+Definições (Definições > Saídas para outras ferramentas > «Guardar e imprimir o relatório de um separador»): `report_export.txt`, `report_export.pdf` e `report_export.json` (que caixas começam marcadas: TXT e PDF sim, JSON não), `report_export.name` (nome sugerido, por omissão `monitor-{tab}-{date}`), `report_export.paper` (`a4` ou `letter`, por omissão `a4`) e `report_export.pdf_path` (`auto`, `own` ou `browser`, por omissão `auto`).

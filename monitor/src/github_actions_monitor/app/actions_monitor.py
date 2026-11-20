@@ -1795,6 +1795,40 @@ def briefs_get(path, query, client=""):
     return redactor.redact_data(document), 200
 
 
+def report_get(path, query):
+    """('json' | 'text' | 'pdf', document, status) for GET /api/report/tab and /api/report/tab.pdf: the report of one tab of the page (reporting/tab_report.py), built ONCE and drawn as data, plain text or PDF so the
+    formats never differ. `?tab=` (default now), `?lang=`, `?fmt=json|txt|options` (the PDF takes `?paper=a4|letter`). The structure is cleaned by the same redactor as the briefs."""
+    from urllib.parse import parse_qs
+    from github_actions_monitor.reporting import pdf_writer, tab_report
+    from github_actions_monitor.security import redactor
+    args = {k: v[0] for k, v in parse_qs(query).items() if v}
+    lang = args.get("lang") if args.get("lang") in i18n.LANGS else i18n.language()
+    tab = args.get("tab") or "now"
+    config = toolconfig.raw_config()
+    options = tab_report.settings(config)
+    if args.get("fmt") == "options":
+        return "json", {"options": options, "pdf_route": tab_report.pdf_route(lang, options["pdf_path"]), "browser_only": lang in tab_report.BROWSER_ONLY, "lang": lang, "tab": tab}, 200
+    library = None
+    if tab == "les":
+        try:
+            from github_actions_monitor.integrations import lessons
+            library = sorted(lessons.load_library().values(), key=lambda x: x["category"]) if lessons.settings(config)["enabled"] else []
+        except Exception as error:   # noqa: BLE001 - the lessons never stop a report
+            degraded.note("report.lessons", error)
+    document = tab_report.build(tab, ai_state(lang), lang, i18n.tl, data=STATE.get("data") or {}, library=library)
+    if document is None:
+        return "json", {"ok": False, "error": "tab", "tabs": list(__import__("github_actions_monitor.data_pipeline.briefs", fromlist=["_"]).tabs())}, 404
+    document = redactor.redact_data(document)
+    if path.endswith(".pdf"):
+        paper = args.get("paper") if args.get("paper") in tab_report.PAPER else options["paper"]
+        if not pdf_writer.encodable(document):
+            return "json", {"ok": False, "error": "pdf_script", "route": "browser"}, 422      # a text the standard fonts cannot set: the page uses the print of the browser, never a PDF with broken characters
+        return "pdf", pdf_writer.render_pdf(document, paper), 200
+    if args.get("fmt") == "txt":
+        return "text", tab_report.render_text(document), 200
+    return "json", document, 200
+
+
 def skills_get(query):
     """('md' | 'json', document) for GET /api/skills: the list of skills, one file of a skill, or the whole skill in one text (`all=1`, what the page downloads)."""
     from urllib.parse import parse_qs
@@ -2651,6 +2685,18 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", kind)
             self.send_header("Content-Length", str(len(payload)))
             self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(payload)
+        except CLIENT_GONE:
+            DISCONNECTS[0] += 1
+
+    def reply_bytes(self, payload, kind):
+        try:
+            self.send_response(200)
+            self.send_header("Content-Type", kind)
+            self.send_header("Content-Length", str(len(payload)))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Disposition", "inline; filename=monitor-report.pdf")
             self.end_headers()
             self.wfile.write(payload)
         except CLIENT_GONE:
@@ -3535,6 +3581,23 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             self.json_reply(*briefs_get(path, self.path.partition("?")[2], self.headers.get("User-Agent") or ""))
+        elif path == "/api/report/tab":      # read only: the report of one tab as data, text or the options of the saving dialog (reporting/tab_report.py); the same in both editions, cleaned like the briefs
+            if not self.guard():
+                return
+            kind, document, status = report_get(path, self.path.partition("?")[2])
+            if kind == "text":
+                self.reply(document, "text/plain; charset=utf-8")
+            else:
+                self.json_reply(document, status)
+        elif path == "/api/report/tab.pdf":      # this computer only: the same report written as a PDF by the monitor itself (no library, standard fonts); a script the fonts lack answers 422 and the page prints through the browser
+            if not self.guard() or not self.this_computer():
+                return
+            kind, document, status = report_get(path, self.path.partition("?")[2])
+            if kind == "pdf":
+                audit_action(self, "report_export", "pdf", {"tab": re.sub(r"[^a-z0-9]", "", self.path.partition("tab=")[2].partition("&")[0])[:12] or "now", "bytes": len(document)})
+                self.reply_bytes(document, "application/pdf")
+            else:
+                self.json_reply(document, status)
         elif path == "/api/skills":      # read only: the two skills of the monitor as text (?name=internal|external[&file=references/api.md][&all=1])
             if not self.guard():
                 return

@@ -17,4 +17,6 @@
 
 **5. Wissen, wo die Hilfe ist.** Die runde **?**-Taste (oder die Taste `?`) öffnet die Hilfe; die **i**-Taste öffnet „Über“ mit Version, Dateien und einer Taste, die die Informationen für den Support kopiert (ohne Geheimnisse). In der Konsole: `--help-topics`, `--help-search WORTE`, `--about`.
 
+**6. Einen Bericht speichern oder drucken.** Die zwei Schaltflächen am oberen Rand der Seite speichern den Bericht des geöffneten Tabs (TXT, PDF und, wenn Sie möchten, JSON, jeweils über das Fenster **Speichern unter** Ihres Browsers) oder drucken ihn als saubere Seite ([Ausgaben für andere Werkzeuge](OUTPUTS.md)).
+
 **Gut zu wissen.** Bei einem Tarif mit privaten Repositorys wählen Sie ihn unter Einstellungen > Grundlagen, um Ihre Kontingente zu sehen ([Kontingente und Tarife](QUOTAS_deu.md)). Der Wächter steht in [Der Wächter](SENTINEL_deu.md). Das Werkzeug liest GitHub nur; es schreibt erst nach Ihrer Bestätigung.

@@ -11,6 +11,16 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+### Added
+
+- **Save the report of a tab through the Save as window of the browser**: the button at the top of the page opens a window with the boxes TXT (marked), PDF (marked) and JSON (optional, not marked) and, once accepted, the Save as window of the browser for each format, with the suggested name `monitor-<tab>-<date>.<extension>` and the right file type; a browser without that window downloads the file and says where it went. The PDF is written by the monitor itself with no library and the standard Helvetica font (`GET /api/report/tab.pdf`, this computer only, recorded in the log of actions); Japanese and Chinese, and the choice "The browser" in the window, use the print window of the browser instead, and a PDF with broken characters is never written.
+
+- **Print the report of a tab**: the print button shows the same clean report as the PDF (title with the name of the tab, date and time, version of the monitor, main figures, alerts and the tables of the tab, with no menus or bars) and opens the print window; the text file, the data file, the PDF and the printed page are all made from ONE report served by `GET /api/report/tab`, for every tab and in the eight languages.
+
+- **Settings of the report**: `report_export.txt`, `report_export.pdf` and `report_export.json` choose which boxes start marked, `report_export.name` the suggested file name, `report_export.paper` the paper of the PDF (A4 or Letter) and `report_export.pdf_path` the way the PDF is made (automatic, the monitor or the browser).
+
+- **Full screen, Screens and hot repositories next to save and print**: the buttons of the full screen, of the Screens menu and of the hot repositories filter now sit in the bar at the top of the page, to the left of the buttons that save and print the report, and keep their order; they stay hidden in the kiosk and in the all-repositories view as before.
+
 ## [2.1.5]
 
 - **The score, the reports, the mirror and the analytics can read every run, not only the newest 600** (`score.source`, `recent600` by default, `ledger` on request): on an account that reads thousands of runs in a cycle the page keeps the newest 600, and the score was made from them. With `ledger` they are made from every run the cycle read, counted once in the ledger, which now also keeps hourly totals (successes and failures per hour) that survive its ceiling of 20000 runs; a window the ceiling could not hold whole says so (`data_quality.truncated`) and gives the totals the hours hold (`data_quality.aggregate`). With the default the snapshot says when the cycle read more than the score saw (`data_quality.cut`, `data_quality.runs_read`, the reason `recent_cut` and a line on the page). The default becomes `ledger` in the next version. A ledger and the snapshots of earlier versions are read as they are. No call to GitHub is added; it is in the guide of the score, the settings help, the guides and the skills.

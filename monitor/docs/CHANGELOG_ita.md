@@ -9,6 +9,16 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+### Aggiunto
+
+- **Salvare il rapporto di una scheda dalla finestra Salva con nome del browser**: il pulsante in alto nella pagina apre una finestra con le caselle TXT (selezionata), PDF (selezionata) e JSON (facoltativa, non selezionata) e, dopo la conferma, la finestra Salva con nome del browser per ogni formato, con il nome suggerito `monitor-<scheda>-<data>.<estensione>` e il tipo di file giusto; un browser senza quella finestra scarica il file e dice dove è finito. Il PDF lo scrive il monitor stesso, senza librerie e con il carattere standard Helvetica (`GET /api/report/tab.pdf`, solo da questo computer, annotato nel registro delle azioni); giapponese e cinese, e la scelta «Il browser» nella finestra, usano invece la finestra di stampa del browser, e non viene mai scritto un PDF con caratteri rotti.
+
+- **Stampare il rapporto di una scheda**: il pulsante di stampa mostra lo stesso rapporto pulito del PDF (titolo con il nome della scheda, data e ora, versione del monitor, cifre principali, avvisi e tabelle della scheda, senza menu né barre) e apre la finestra di stampa; il file di testo, il file di dati, il PDF e la pagina stampata nascono da UN solo rapporto servito da `GET /api/report/tab`, per ogni scheda e nelle otto lingue.
+
+- **Impostazioni del rapporto**: `report_export.txt`, `report_export.pdf` e `report_export.json` scelgono quali caselle partono selezionate, `report_export.name` il nome file suggerito, `report_export.paper` la carta del PDF (A4 o Letter) e `report_export.pdf_path` il modo di creare il PDF (automatico, il monitor o il browser).
+
+- **Schermo intero, Schermi e repository caldi accanto a salva e stampa**: i pulsanti dello schermo intero, del menu Schermi e del filtro dei repository caldi si trovano ora nella barra in alto nella pagina, a sinistra dei pulsanti che salvano e stampano il rapporto, e mantengono il loro ordine; restano nascosti in modalità chiosco e nella vista di tutti i repository come prima.
+
 ## [2.1.5]
 
 - **Il punteggio, i rapporti, lo specchio e l'analitica possono leggere ogni esecuzione, non solo le 600 più recenti** (`score.source`, `recent600` per impostazione predefinita, `ledger` su richiesta): in un account che legge migliaia di esecuzioni per ciclo la pagina tiene le 600 più recenti e il punteggio derivava da quelle. Con `ledger` derivano da tutte quelle lette dal ciclo, contate una volta nel registro, che ora conserva anche totali orari (successi e fallimenti per ora) che sopravvivono al suo tetto di 20000 esecuzioni; una finestra che il tetto non ha potuto tenere intera lo dice (`data_quality.truncated`) e indica i totali delle ore (`data_quality.aggregate`). Con il valore predefinito l'istantanea dice quando il ciclo ha letto più di quanto il punteggio ha visto (`data_quality.cut`, `data_quality.runs_read`, il motivo `recent_cut` e una riga nella pagina). Il valore predefinito diventerà `ledger` nella versione successiva. Un registro e le istantanee delle versioni precedenti si leggono così come sono. Non si aggiunge alcuna chiamata a GitHub; è nella guida del punteggio, nell'aiuto delle impostazioni, nelle guide e nelle skill.

@@ -9,6 +9,16 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+### Ajouté
+
+- **Enregistrer le rapport d'un onglet par la fenêtre Enregistrer sous du navigateur** : le bouton en haut de la page ouvre une fenêtre avec les cases TXT (cochée), PDF (cochée) et JSON (facultative, non cochée) puis, après validation, la fenêtre Enregistrer sous du navigateur pour chaque format, avec le nom suggéré `monitor-<onglet>-<date>.<extension>` et le bon type de fichier ; un navigateur sans cette fenêtre télécharge le fichier et dit où il est allé. Le PDF est écrit par le moniteur lui-même, sans bibliothèque et avec la police standard Helvetica (`GET /api/report/tab.pdf`, seulement depuis cet ordinateur, consigné dans le journal des actions) ; le japonais et le chinois, ainsi que le choix « Le navigateur » dans la fenêtre, utilisent à la place la fenêtre d'impression du navigateur, et un PDF aux caractères cassés n'est jamais écrit.
+
+- **Imprimer le rapport d'un onglet** : le bouton d'impression affiche le même rapport propre que le PDF (titre avec le nom de l'onglet, date et heure, version du moniteur, chiffres principaux, alertes et tableaux de l'onglet, sans menus ni barres) et ouvre la fenêtre d'impression ; le fichier texte, le fichier de données, le PDF et la page imprimée sortent d'UN seul rapport servi par `GET /api/report/tab`, pour tous les onglets et dans les huit langues.
+
+- **Réglages du rapport** : `report_export.txt`, `report_export.pdf` et `report_export.json` choisissent les cases cochées au départ, `report_export.name` le nom de fichier suggéré, `report_export.paper` le papier du PDF (A4 ou Letter) et `report_export.pdf_path` la façon de produire le PDF (automatique, le moniteur ou le navigateur).
+
+- **Plein écran, Écrans et dépôts chauds à côté d'enregistrer et d'imprimer** : les boutons du plein écran, du menu Écrans et du filtre des dépôts chauds sont maintenant dans la barre en haut de la page, à gauche des boutons qui enregistrent et impriment le rapport, et gardent leur ordre ; ils restent masqués en mode kiosque et dans la vue de tous les dépôts comme avant.
+
 ## [2.1.5]
 
 - **Le score, les rapports, le miroir et l'analytique peuvent lire toutes les exécutions, pas seulement les 600 plus récentes** (`score.source`, `recent600` par défaut, `ledger` sur demande) : sur un compte qui lit des milliers d'exécutions par cycle, la page garde les 600 plus récentes et le score en était tiré. Avec `ledger`, ils sont tirés de toutes celles que le cycle a lues, comptées une fois dans le registre, qui garde désormais aussi des totaux horaires (succès et échecs par heure) qui survivent à son plafond de 20000 exécutions ; une fenêtre que le plafond n'a pas pu garder entière le dit (`data_quality.truncated`) et donne les totaux que détiennent les heures (`data_quality.aggregate`). Avec le défaut, l'instantané dit quand le cycle a lu plus que ce que le score a vu (`data_quality.cut`, `data_quality.runs_read`, la raison `recent_cut` et une ligne dans la page). Le défaut deviendra `ledger` dans la version suivante. Un registre et les instantanés des versions antérieures sont lus tels quels. Aucun appel à GitHub n'est ajouté ; c'est dans le guide du score, l'aide des réglages, les guides et les skills.

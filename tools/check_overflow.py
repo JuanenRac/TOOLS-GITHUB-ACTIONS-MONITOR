@@ -86,6 +86,16 @@ PROBE = r"""
       if(t==="cfg"&&CFG.groups.length)for(const id of cfgTabIds()){cfgShowTab(id);await wait(100);ctx.section="cfg:"+id;scan(ctx)}}
     for(const [name,fn] of [["about",()=>openAbout()],["help",()=>openHelp("cfg",null)],["notes",()=>openNotes()]]){
       try{showTab("now");await fn();await wait(300);ctx.section="dlg:"+name;scan(ctx);const x=document.querySelector(".dlg:not([hidden]) .ib");if(x)x.click();await wait(200)}catch(e){}}
+    /* the saving window and the report view (the print page) of a few tabs: one with its own builder, the lessons and one made from signals */
+    try{
+      const print=window.print;window.print=()=>{};
+      for(const t of ["now","al","les","sent"]){
+        showTab(t);await wait(150);document.getElementById("bar-save").click();await wait(350);ctx.section="report-dlg:"+t;scan(ctx);
+        document.getElementById("rep-close").click();await wait(100);
+        document.getElementById("bar-print").click();await wait(450);ctx.section="report-view:"+t;scan(ctx);
+        document.getElementById("rep-vclose").click();await wait(100)}
+      window.print=print;
+    }catch(e){found.push({kind:"script",at:"report",text:String(e),detail:"the saving window or the report view did not open",section:"report"})}
     out.textContent=JSON.stringify({ok:true,found:found});
   }catch(e){out.textContent=JSON.stringify({ok:false,error:String(e),found:found})}
   document.title="overflow-done";
