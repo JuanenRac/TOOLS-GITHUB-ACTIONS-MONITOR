@@ -172,6 +172,7 @@ class BriefAndPrint(unittest.TestCase):
         for needle in ("overflow:visible", ".trbar{display:none", "break-inside:avoid"):
             self.assertIn(needle, css, needle)
 
+    @unittest.skipUnless((HERE.parent / "tools" / "demo_monitor.py").is_file(), "needs the repository root (tools/demo_monitor.py), not part of the installed zip")
     def test_the_demo_with_data_fills_the_new_series_with_gaps_at_the_start(self):
         text = (HERE.parent / "tools" / "demo_monitor.py").read_text(encoding="utf-8")
         for key in ("dur_avg", "dur_p95", "queue_avg", "flaky", "artifact_mb", "sev_medium", "sev_low", "min_repo", "releases", "thresholds"):

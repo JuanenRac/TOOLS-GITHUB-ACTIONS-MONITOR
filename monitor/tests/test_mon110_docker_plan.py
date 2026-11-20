@@ -22,6 +22,7 @@ def load_plan():
     return module
 
 
+@unittest.skipUnless(AUDIT.is_dir() and (ROOT / ".github" / "workflows").is_dir(), "needs the repository root (tools/docker_audit, .github/workflows), not part of the installed zip")
 class OneList(unittest.TestCase):
     def test_every_check_has_its_script_and_is_run_and_explained(self):
         plan = load_plan()
