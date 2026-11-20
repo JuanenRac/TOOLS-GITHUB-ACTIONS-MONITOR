@@ -62,7 +62,7 @@ def has_brief(tab):
 
 def covered_by_the_common_bar(tab):
     """The common bar (save, print and the two AI indicators) saves the brief of the tab that is open: the tab must have a brief, and the bar must be in the page."""
-    return has_brief(tab) and all(x in PAGE for x in ('id="bar-save"', 'id="bar-print"', 'id="bar-ai-int"', 'id="bar-ai-ext"', "/api/ai/briefs?tab="))
+    return has_brief(tab) and all(x in PAGE for x in ('id="bar-save"', 'id="bar-print"', 'id="bar-ai-int"', 'id="bar-ai-ext"', "/api/report/tab"))
 
 
 def wall_screen_decided(tab):

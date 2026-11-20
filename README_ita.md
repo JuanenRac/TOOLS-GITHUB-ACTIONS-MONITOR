@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4974_passing-brightgreen.svg" alt="4974 tests">
+  <img src="https://img.shields.io/badge/Tests-5073_passing-brightgreen.svg" alt="5073 tests">
 </p>
 
 > Controlla i workflow di tutti i tuoi repository e ti dice, su una pagina locale, cosa è rosso, cosa è bloccato e cosa ti aspetta.
@@ -60,6 +60,8 @@
 - **Grafici e storico**: minuti di calcolo, errori e successi con barre animate e uno storico giornaliero (rispetta il movimento ridotto).
 - **Otto lingue** (en, es, de, fr, it, ja, zh, pt) con l'inglese come base; si cambia nelle impostazioni.
 - **Uscite per dashboard**: `ci_red.json`, un endpoint Prometheus e una fonte JSON per Grafana, con una dashboard Grafana importabile.
+- **Salvare e stampare il rapporto di una scheda**: TXT, PDF (scritto dal monitor stesso) e JSON dalla finestra Salva con nome del browser, e una pagina stampata pulita; lo stesso rapporto in ogni formato.
+- **Icone dell'IA nella barra, loghi in Informazioni e avviso sulle action abbandonate**: le due icone dell'IA della barra mostrano il loro stato e con un clic aprono le impostazioni; Informazioni mostra il logo del monitor e, se lo consenti, quello della tua organizzazione; il linter può anche segnalare, solo a titolo informativo, quali action usate dai tuoi workflow sono archiviate o non più mantenute.
 - **Strumenti a lotti**: pianificano e avviano molte build insieme; nulla parte senza `--go`.
 - **Informazioni e Guida nella pagina**: il pulsante **i** mostra versione, edizione, collegamenti, file, stato di salute e un pulsante che copia le informazioni per l'assistenza; il pulsante **?** (o il tasto `?`) apre tutta la documentazione, con ricerca e nella tua lingua, senza Internet. La console ha `--about` e `--help-topics`, e un'applicazione interattiva da terminale a schede (`textual` opzionale).
 - **Avviso di nuova versione**: un badge discreto quando esce una versione più recente; legge la pagina pubblica dei rilasci una volta al giorno, non installa mai nulla e si può spegnere (sempre spento in un'installazione isolata).
@@ -96,8 +98,8 @@ Metodo, ipotesi e come misurarlo nel proprio uso: [`monitor/docs/PRODUCTIVITY_it
 | | |
 |---|---|
 | **Maturità** | functional |
-| **Test** | 4974 metodi di test (`python -m unittest discover -s monitor/tests`) |
-| **Impostazioni** | 764 impostazioni, tutte con aiuto |
+| **Test** | 5073 metodi di test (`python -m unittest discover -s monitor/tests`) |
+| **Impostazioni** | 776 impostazioni, tutte con aiuto |
 | **Lingue** | 8 (inglese, spagnolo, tedesco, francese, italiano, giapponese, cinese e portoghese) |
 | **Provato nel CI su** | ubuntu, windows, Python 3.11, 3.13 |
 

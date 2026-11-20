@@ -80,3 +80,14 @@ Chaque ligne de la file a un `trust` : `verified` (signature vérifiée avec la 
 ## En mode réseau
 
 `/metrics` et `dashboard.json` listent vos dépôts et leur état : ce ne sont pas des pages publiques. Avec le mode réseau actif, ils exigent le jeton d'accès comme tout autre point d'accès ; désactivez `outputs.prometheus.enabled` / `outputs.dashboard.enabled` si vous ne voulez pas que cet inventaire soit joignable du tout.
+
+## Enregistrer et imprimer le rapport d'un onglet
+
+La barre en haut de la page (dans tous les onglets) produit UN rapport de l'onglet ouvert et le dessine de quatre façons à partir des mêmes données, de sorte que les formats ne diffèrent jamais :
+
+- **Enregistrer le rapport** ouvre une fenêtre avec trois cases : **TXT** (cochée), **PDF** (cochée) et **JSON** (non cochée : les données du rapport, pour d'autres outils). Après validation, la fenêtre **Enregistrer sous** du navigateur s'ouvre une fois par format, avec le nom suggéré `monitor-<onglet>-<date>.<extension>` et le bon type de fichier (le navigateur veut un clic par fenêtre : le bouton passe donc au format suivant). Un navigateur sans cette fenêtre télécharge le fichier et la page indique où il est allé.
+- **PDF** : le moniteur écrit lui-même le PDF, sans bibliothèque et avec la police standard Helvetica, pour l'anglais, l'espagnol, l'allemand, le français, l'italien et le portugais (`GET /api/report/tab.pdf`, seulement depuis cet ordinateur ; chaque usage laisse une ligne dans le journal des actions). Le japonais et le chinois exigent des polices qu'un PDF écrit ainsi n'a pas ; pour eux, ou si vous choisissez « Le navigateur » dans la fenêtre, le PDF vient de la fenêtre d'impression du navigateur : choisissez-y **Enregistrer au format PDF**. La page le dit ; elle n'écrit jamais un PDF aux caractères cassés.
+- **Imprimer** affiche le même rapport sans menus ni barres (titre avec le nom de l'onglet, date et heure, version du moniteur, chiffres principaux, alertes et tableaux de l'onglet) et ouvre la fenêtre d'impression.
+- Le rapport est servi par `GET /api/report/tab?tab=now&lang=fr` (`&fmt=json`, `&fmt=txt` ou `&fmt=options`), identique dans les deux éditions.
+
+Réglages (Réglages > Sorties pour d'autres outils > « Enregistrer et imprimer le rapport d'un onglet ») : `report_export.txt`, `report_export.pdf` et `report_export.json` (quelles cases démarrent cochées : TXT et PDF oui, JSON non), `report_export.name` (nom suggéré, par défaut `monitor-{tab}-{date}`), `report_export.paper` (`a4` ou `letter`, par défaut `a4`) et `report_export.pdf_path` (`auto`, `own` ou `browser`, par défaut `auto`).

@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.5",
  "previous": "2.1.3",
- "digest": "1cef3054fcd460abe8da07186ed268e68e6a454d9a657d5b39fa532665dd22be",
+ "digest": "4181de932d15668eb62a50d4c37b95b2b2dccc8943d9a535cc3be74c56938c9c",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -206,38 +206,6 @@
    },
    {
     "key": "lint.anonymous_public",
-    "kind": "bool"
-   },
-   {
-    "key": "lint.maintenance.inactive",
-    "kind": "bool"
-   },
-   {
-    "key": "lint.maintenance.inactive_years",
-    "kind": "int",
-    "bounds": [
-     1,
-     10
-    ]
-   },
-   {
-    "key": "lint.maintenance.max_calls_per_tick",
-    "kind": "int",
-    "bounds": [
-     1,
-     100
-    ]
-   },
-   {
-    "key": "lint.maintenance.refresh_seconds",
-    "kind": "int",
-    "bounds": [
-     3600,
-     2592000
-    ]
-   },
-   {
-    "key": "lint.rules.archived_action.enabled",
     "kind": "bool"
    },
    {
@@ -480,11 +448,6 @@
      168
     ],
     "default": 12
-   },
-   {
-    "key": "ui.about_org_logo",
-    "kind": "bool",
-    "default": false
    },
    {
     "key": "ui.remember_folds",

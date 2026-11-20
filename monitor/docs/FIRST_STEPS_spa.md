@@ -17,4 +17,6 @@
 
 **5. Sabe dónde está la ayuda.** El botón redondo **?** (o la tecla `?`) abre la Ayuda; el botón **i** abre Acerca de, con tu versión, tus archivos y un botón que copia la información para soporte (no lleva ningún secreto). En la consola: `--help-topics`, `--help-search PALABRAS`, `--about`.
 
+**6. Guardar o imprimir un informe.** Los dos botones de la barra superior guardan el informe de la pestaña abierta (TXT, PDF y, si quieres, JSON, cada uno por la ventana **Guardar como** de tu navegador) o lo imprimen como una página limpia ([Salidas para otras herramientas](OUTPUTS.md)).
+
 **Conviene saber.** Si usas un plan con repositorios privados, elígelo en Ajustes > Básico para ver tus cuotas ([Cuotas y planes](QUOTAS_spa.md)). El centinela se explica en [El centinela](SENTINEL_spa.md). La herramienta solo lee GitHub; escribe únicamente cuando tú confirmas.

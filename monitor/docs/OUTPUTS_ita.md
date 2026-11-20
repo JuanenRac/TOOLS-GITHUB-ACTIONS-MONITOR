@@ -80,3 +80,14 @@ Ogni riga della coda ha un `trust`: `verified` (firma verificata con la chiave p
 ## In modalità rete
 
 `/metrics` e `dashboard.json` elencano i tuoi repository e il loro stato: non sono pagine pubbliche. Con la modalità rete attiva richiedono il token di accesso come ogni altro endpoint; spegni `outputs.prometheus.enabled` / `outputs.dashboard.enabled` se non vuoi che quell'inventario sia raggiungibile affatto.
+
+## Salvare e stampare il rapporto di una scheda
+
+La barra in alto nella pagina (in ogni scheda) crea UN rapporto della scheda aperta e lo disegna in quattro modi dagli stessi dati, così i formati non differiscono mai:
+
+- **Salva il rapporto** apre una finestra con tre caselle: **TXT** (selezionata), **PDF** (selezionata) e **JSON** (non selezionata: i dati del rapporto, per altri strumenti). Dopo la conferma si apre la finestra **Salva con nome** del browser una volta per formato, con il nome suggerito `monitor-<scheda>-<data>.<estensione>` e il tipo di file giusto (il browser vuole un clic per finestra, quindi il pulsante passa al formato successivo). Un browser senza quella finestra scarica il file e la pagina dice dove è finito.
+- **PDF**: il monitor scrive da sé il PDF, senza librerie e con il carattere standard Helvetica, per inglese, spagnolo, tedesco, francese, italiano e portoghese (`GET /api/report/tab.pdf`, solo da questo computer; ogni uso lascia una riga nel registro delle azioni). Giapponese e cinese richiedono caratteri che un PDF scritto così non ha; per loro, o se nella finestra scegli «Il browser», il PDF viene dalla finestra di stampa del browser: scegli lì **Salva come PDF**. La pagina lo dice; non scrive mai un PDF con caratteri rotti.
+- **Stampa** mostra lo stesso rapporto senza menu né barre (titolo con il nome della scheda, data e ora, versione del monitor, cifre principali, avvisi e tabelle della scheda) e apre la finestra di stampa.
+- Il rapporto è servito da `GET /api/report/tab?tab=now&lang=it` (`&fmt=json`, `&fmt=txt` oppure `&fmt=options`), uguale nelle due edizioni.
+
+Impostazioni (Impostazioni > Uscite per altri strumenti > «Salvare e stampare il rapporto di una scheda»): `report_export.txt`, `report_export.pdf` e `report_export.json` (quali caselle partono selezionate: TXT e PDF sì, JSON no), `report_export.name` (nome suggerito, predefinito `monitor-{tab}-{date}`), `report_export.paper` (`a4` o `letter`, predefinito `a4`) e `report_export.pdf_path` (`auto`, `own` o `browser`, predefinito `auto`).
