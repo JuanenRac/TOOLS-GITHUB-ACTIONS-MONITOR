@@ -37,7 +37,7 @@ from github_actions_monitor.data_pipeline import causes
 from github_actions_monitor.data_pipeline import events
 from github_actions_monitor import i18n
 from github_actions_monitor.cli import lint_workflows
-from github_actions_monitor.integrations import remote_workflows
+from github_actions_monitor.integrations import action_health, remote_workflows
 from github_actions_monitor.sentinels import readiness
 from github_actions_monitor.data_pipeline import paging
 from github_actions_monitor.data_pipeline import redrule
@@ -997,7 +997,7 @@ def compute_snapshot(inp):
     if lint and idle:      # the workflow files of a fork nobody works on are the ones of the upstream
         left = {r: items for r, items in lint["by_repo"].items() if r not in idle}
         lint = {**lint, "by_repo": left, "summary": lint_workflows.summarize(left)}
-    s["lint"] = {"enabled": False} if not lint else {"enabled": True, "summary": lint["summary"], "in_report": lint.get("in_report", True), "coverage": lint.get("coverage"),
+    s["lint"] = {"enabled": False} if not lint else {"enabled": True, "summary": lint["summary"], "in_report": lint.get("in_report", True), "coverage": lint.get("coverage"), "maintenance": lint.get("maintenance"),
                                                     "rows": [dict(f, repo=r) for r, items in sorted(lint["by_repo"].items()) for f in items][:200]}
     for key in ("a3", "a4", "a5", "a6"):  # an "ok" with the data still loading would be a false green
         if s[key]["level"] == "ok" and (inp.get("loading") or not info or (key == "a3" and s["a3"]["alerts_checked"] < len(info))):
@@ -1075,6 +1075,7 @@ class Sentinel:
         self.local_versions = {}
         self.pins_cache = {"at": 0.0, "value": None}
         self.lint_cache = {"at": 0.0, "value": None, "version": -1}
+        self.action_health = None      # the look-up of archived actions of the rule `archived_action` (lint.maintenance), made on the first scan that needs it
         self.remote = remote_workflows.Reader(lambda endpoint: self._gh("api", endpoint, retries=1), toolconfig.github_owner)      # workflow files read without a clone (lint.source)
         self.sparse = {"running": False, "done": {}, "version": 0}      # repo -> {"at", "ok", "reason"} of the sparse clones of .github
         self.errors = {}
@@ -1206,19 +1207,36 @@ class Sentinel:
         if self.lint_cache["value"] is None or time.time() - self.lint_cache["at"] > cfg["refresh_seconds"] or self.lint_cache.get("version") != version:
             try:
                 clones = self._clone_repos(repos)
-                by_repo = lint_workflows.scan_clones(GITHUB_DIR, clones, cfg["rules"], cfg.get("ignore")) if clones else {}
+                health = self._action_health(cfg)
+                by_repo = lint_workflows.scan_clones(GITHUB_DIR, clones, cfg["rules"], cfg.get("ignore"), health) if clones else {}
                 sparse = [r for r in repos if r not in clones and (self._sparse_root() / r / ".github" / "workflows").is_dir()] if cfg["source"] == "sparse" else []
                 if sparse:
-                    by_repo.update(lint_workflows.scan_clones(self._sparse_root(), sparse, cfg["rules"], cfg.get("ignore")))
+                    by_repo.update(lint_workflows.scan_clones(self._sparse_root(), sparse, cfg["rules"], cfg.get("ignore"), health))
                 if cfg["source"] == "auto":
-                    by_repo.update(lint_workflows.lint_remote(self.remote, [r for r in repos if r not in clones], cfg["rules"], cfg.get("ignore")))
+                    by_repo.update(lint_workflows.lint_remote(self.remote, [r for r in repos if r not in clones], cfg["rules"], cfg.get("ignore"), health))
                 value = {"by_repo": by_repo, "summary": lint_workflows.summarize(by_repo), "in_report": cfg["in_report"],
-                         "coverage": remote_workflows.coverage(self.remote, repos, clones, sparse, cfg["source"])}
+                         "coverage": remote_workflows.coverage(self.remote, repos, clones, sparse, cfg["source"]), "maintenance": health.summary() if health else None}
             except Exception as error:   # a workflow file must never stop the picture
                 degraded.note("sentinel.lint", error)
                 value = None
             self.lint_cache = {"at": time.time(), "value": value, "version": version}
+            if value and (value.get("maintenance") or {}).get("skipped"):      # some actions were not read for lack of budget: look again soon, not in an hour
+                self.lint_cache["at"] = time.time() - cfg["refresh_seconds"] + 120
         return self.lint_cache["value"]
+
+    def _action_health(self, cfg):
+        """The look-up of archived and unmaintained actions for this scan of the linter (rule `archived_action`, information only), or None when the rule is off. Reading costs calls of the shared allowance:
+        the reads of a scan are capped by `lint.maintenance.max_calls_per_tick`, by the hourly budget of the Sentinel and by the same gate of the allowance as A10; without budget only what is already known is used."""
+        if not (cfg["rules"].get("archived_action") or {}).get("enabled"):
+            return None
+        mine = cfg["maintenance"]
+        if self.action_health is None:
+            self.action_health = action_health.Health(lambda endpoint: self._gh("api", endpoint, retries=1))
+        self.action_health.configure(mine["inactive"], mine["inactive_years"], mine["refresh_seconds"])
+        rate = (self.ctx["data_fn"]() or {}).get("rate")
+        low = bool(rate and rate["remaining"] < self.cfg["min_rate_remaining"] * self.cfg["surface"]["min_rate_factor"])
+        self.action_health.begin(0 if low else min(mine["max_calls_per_tick"], self._budget()))
+        return self.action_health
 
     def _export_ci_red(self, snap):
         try:

@@ -141,6 +141,8 @@ La scheda Questo browser delle Impostazioni ha un blocco per caricare il logo de
 
 `screens.logo_overview`, `screens.logo_now` e `screens.logo_sentinels` scelgono su quali schermi da parete compare (di default solo la panoramica), `screens.logo_corner` l'angolo (in alto a destra per impostazione predefinita) e `screens.logo_max_width` e `screens.logo_max_height` la dimensione massima in pixel a 1920 x 1080 (160 x 64 per impostazione predefinita; il logo cresce con lo schermo). L'immagine si adatta a quella dimensione senza deformarsi e ha un posto suo nell'intestazione o nel piè di pagina, così non copre mai il contenuto. Lo sfondo resta trasparente: un logo con sfondo trasparente si vede bene nei temi chiari e in quelli scuri.
 
+Il pannello Informazioni mostra sempre il logo del monitor. Con `ui.about_org_logo` attivo (disattivato per impostazione predefinita) mostra accanto anche questo logo della tua organizzazione, con un testo alternativo nella lingua della pagina e una dimensione che segue la larghezza del pannello senza deformare l'immagine. Se non è stato caricato alcun logo o il file non si può leggere, il pannello lo dice e nient'altro cambia.
+
 ### Cosa mostrano e cosa nascondono
 
 I dati arrivano da `/api/screens/data?screen=overview` (oppure `now`, `sentinels`): un elenco chiuso di campi costruito con l'ultimo ciclo, l'istantanea delle sentinelle, gli avvisi e il punteggio. Non contiene mai un collegamento, un titolo di commit, il nome di un job, il nome di una persona né un percorso di questo computer, e anche i nomi dei workflow dei repository nascosti sono nascosti. In modalità di rete le pagine richiedono lo stesso token di accesso del resto del monitor e la risposta è di sola lettura.

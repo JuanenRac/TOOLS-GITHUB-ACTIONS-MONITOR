@@ -645,7 +645,16 @@
       "permissions_top": {
         "enabled": false,
         "severity": "info"
+      },
+      "archived_action": {
+        "enabled": false
       }
+    },
+    "maintenance": {
+      "inactive": false,
+      "inactive_years": 2,
+      "refresh_seconds": 604800,
+      "max_calls_per_tick": 10
     },
     "ignore": []
   },
@@ -1203,7 +1212,8 @@
     "screen2_tabs": "",
     "screen3_orientation": "auto",
     "screen3_tabs": "",
-    "theme": "auto"
+    "theme": "auto",
+    "about_org_logo": false
   },
   "audit_dir": "",
   "readpool": {

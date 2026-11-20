@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-5015_passing-brightgreen.svg" alt="5015 tests">
+  <img src="https://img.shields.io/badge/Tests-5073_passing-brightgreen.svg" alt="5073 tests">
 </p>
 
 > Vigila los workflows de todos tus repositorios y te dice, en una página local, qué está en rojo, qué está atascado y qué te espera.
@@ -61,6 +61,7 @@
 - **Ocho idiomas** (en, es, de, fr, it, ja, zh, pt) con el inglés como base; se cambia en Ajustes.
 - **Salidas para paneles**: `ci_red.json`, un punto de acceso Prometheus y una fuente JSON para Grafana, con un panel de Grafana importable.
 - **Guardar e imprimir el informe de una pestaña**: TXT, PDF (escrito por el propio monitor) y JSON por la ventana Guardar como del navegador, y una página impresa limpia; el mismo informe en todos los formatos.
+- **Iconos de IA en la barra, logos en Acerca de y aviso de acciones abandonadas**: los dos iconos de IA de la barra muestran su estado y abren sus ajustes con un clic; Acerca de muestra el logo del monitor y, si lo permites, el de tu organización; el linter también puede indicar, solo a título informativo, qué acciones que usan tus workflows están archivadas o ya no se mantienen.
 - **Herramientas por lotes**: planifican y lanzan muchas compilaciones a la vez; nada se lanza sin `--go`.
 - **Acerca de y Ayuda en la página**: el botón **i** muestra la versión, la edición, los enlaces, los archivos, el estado de salud y un botón que copia la información para soporte; el botón **?** (o la tecla `?`) abre toda la documentación, con búsqueda y en tu idioma, sin Internet. La consola tiene `--about` y `--help-topics`, y una aplicación interactiva de terminal por pestañas (`textual` opcional).
 - **Aviso de versión nueva**: una insignia discreta cuando se publica una versión más nueva; solo lee la página pública de versiones una vez al día, nunca instala nada y se puede apagar (siempre apagado en una instalación aislada).
@@ -97,8 +98,8 @@ Método, supuestos y cómo medirlo en tu propio uso: [`monitor/docs/PRODUCTIVITY
 | | |
 |---|---|
 | **Madurez** | functional |
-| **Tests** | 5015 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Ajustes** | 770 ajustes, todos con ayuda |
+| **Tests** | 5073 métodos de test (`python -m unittest discover -s monitor/tests`) |
+| **Ajustes** | 776 ajustes, todos con ayuda |
 | **Idiomas** | 8 (inglés, español, alemán, francés, italiano, japonés, chino y portugués) |
 | **Probado en el CI en** | ubuntu, windows, Python 3.11, 3.13 |
 

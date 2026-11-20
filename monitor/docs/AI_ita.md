@@ -18,6 +18,10 @@ Facoltativo e **spento per impostazione predefinita**. Un modello linguistico pu
 - La chiave non viene mai salvata: si indica il NOME di una variabile d'ambiente. I tre provider remoti INVIANO dati dei tuoi repository a terzi.
 
 
+## Le icone IA della barra
+
+La barra in alto a destra mostra due icone: il chip è l'IA integrata nel monitor e le onde sono uno strumento di IA esterno che legge il monitor. Un badge indica lo stato senza dipendere dal colore: una spunta significa attiva, una barra obliqua (con il disegno tratteggiato) inattiva e un triangolo un errore (l'IA integrata è configurata ma non risponde). Passa il puntatore per lo stato esatto; fai clic sull'icona, o premi Invio o Spazio quando ha il focus, per aprire la sezione IA delle impostazioni.
+
 ## Cosa può vedere
 
 - Ogni input viene pulito: caratteri di controllo rimossi, segreti oscurati per modello, lunghezza limitata, contenuto tra delimitatori casuali e dichiarato non attendibile. La risposta viene tagliata e i suoi link disinnescati.

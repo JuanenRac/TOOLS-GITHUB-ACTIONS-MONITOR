@@ -4,10 +4,42 @@
  "format": 1,
  "version": "2.1.6",
  "previous": "2.1.5",
- "digest": "c1476d5cf71d19b5e48a607a8a5e848ab0af3c5d8ce64fe50bc230e597d723ba",
+ "digest": "6fc565f4121d0223f1c51142c0a1f04b1197256bca5bfb239b0e08c9129ba1c6",
  "data_schema": 2,
  "settings": {
   "added": [
+   {
+    "key": "lint.maintenance.inactive",
+    "kind": "bool"
+   },
+   {
+    "key": "lint.maintenance.inactive_years",
+    "kind": "int",
+    "bounds": [
+     1,
+     10
+    ]
+   },
+   {
+    "key": "lint.maintenance.max_calls_per_tick",
+    "kind": "int",
+    "bounds": [
+     1,
+     100
+    ]
+   },
+   {
+    "key": "lint.maintenance.refresh_seconds",
+    "kind": "int",
+    "bounds": [
+     3600,
+     2592000
+    ]
+   },
+   {
+    "key": "lint.rules.archived_action.enabled",
+    "kind": "bool"
+   },
    {
     "key": "report_export.json",
     "kind": "bool",
@@ -49,6 +81,11 @@
     "key": "report_export.txt",
     "kind": "bool",
     "default": true
+   },
+   {
+    "key": "ui.about_org_logo",
+    "kind": "bool",
+    "default": false
    },
    {
     "key": "ui.remember_folds",

@@ -175,7 +175,8 @@ class Linter(unittest.TestCase):
     def test_the_settings_page_knows_the_new_rules(self):
         for rule in lw.OPTIONAL:
             self.assertIn(f"lint.rules.{rule}.enabled", sa.FIELDS)
-            self.assertIn(f"lint.rules.{rule}.severity", sa.FIELDS)
+            if rule != "archived_action":      # that one only informs: it has no severity to choose
+                self.assertIn(f"lint.rules.{rule}.severity", sa.FIELDS)
         self.assertTrue(sa.check_value("lint.unpinned_own", "ignore")[0])
         self.assertFalse(sa.check_value("lint.unpinned_own", "never")[0])
         self.assertTrue(sa.check_value("lint.own_owners", ["acme-org"])[0])

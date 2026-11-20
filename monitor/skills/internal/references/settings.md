@@ -288,8 +288,13 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `lint.enabled` | `-` | lint | Linter on |
 | `lint.ignore` | `-` | lint | Ignored findings |
 | `lint.in_report` | `-` | lint | Warn in the report |
+| `lint.maintenance.inactive` | `-` | lint | Also report actions without activity |
+| `lint.maintenance.inactive_years` | `-` | lint | Years without activity |
+| `lint.maintenance.max_calls_per_tick` | `-` | lint | Reads of actions per scan |
+| `lint.maintenance.refresh_seconds` | `-` | lint | Ask about an action again after |
 | `lint.own_owners` | `-` | lint | Accounts whose actions are your own |
 | `lint.refresh_seconds` | `-` | lint | Scan every |
+| `lint.rules.archived_action.enabled` | `-` | lint | lint.rules.archived_action.enabled |
 | `lint.rules.injection.enabled` | `-` | lint | lint.rules.injection.enabled |
 | `lint.rules.injection.severity` | `-` | lint | lint.rules.injection.severity |
 | `lint.rules.no_timeout.enabled` | `-` | lint | lint.rules.no_timeout.enabled |
@@ -743,6 +748,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `tools_dir` | `-` | paths | Folder of the local signing tools |
 | `tui.refresh_seconds` | `-` | console | Refresh |
 | `tui.theme` | `-` | console | Colours |
+| `ui.about_org_logo` | `false` | general | Organization logo in About |
 | `ui.alerts_sort` | `"server"` | general | Order of the alerts |
 | `ui.now_sort` | `"ecosystem"` | general | Order of the runs happening now |
 | `ui.orientation` | `"auto"` | general | Orientation of the page |

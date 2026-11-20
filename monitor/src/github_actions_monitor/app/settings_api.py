@@ -171,6 +171,7 @@ _f(_T_GENERAL, "cli", "cli.watch.default_interval_seconds", "int", (1, 3600), un
 _f(_T_GENERAL, "wall", "screens.enabled", "bool", restart=False)
 _f(_T_GENERAL, "look", "ui.theme", "enum", screens.GLOBAL_THEMES, restart=False)
 _f(_T_GENERAL, "look", "ui.remember_folds", "bool", restart=False)
+_f(_T_GENERAL, "look", "ui.about_org_logo", "bool", restart=False)
 _f(_T_GENERAL, "wall", "screens.default_theme", "enum", screens.THEME_CHOICES, restart=False)
 _f(_T_GENERAL, "wall", "screens.theme_overview", "enum", screens.THEME_CHOICES, restart=False)
 _f(_T_GENERAL, "wall", "screens.theme_now", "enum", screens.THEME_CHOICES, restart=False)
@@ -724,9 +725,14 @@ _f("lint", "lint_sparse", "lint.sparse.refresh_seconds", "int", (600, 604800))
 _f("lint", "lint_sparse", "lint.sparse.max_repos_per_tick", "int", (1, 20))
 _f("lint", "own_actions", "lint.own_owners", "names")
 _f("lint", "own_actions", "lint.unpinned_own", "enum", ("same", "info", "ignore"))
-for _rule in ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "own_action_main", "permissions_top"):
+_f("lint", "lint_maintenance", "lint.maintenance.inactive", "bool", restart=False)
+_f("lint", "lint_maintenance", "lint.maintenance.inactive_years", "int", (1, 10), restart=False)
+_f("lint", "lint_maintenance", "lint.maintenance.refresh_seconds", "int", (3600, 2592000), restart=False)
+_f("lint", "lint_maintenance", "lint.maintenance.max_calls_per_tick", "int", (1, 100), restart=False, unit="calls")
+for _rule in ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "own_action_main", "permissions_top", "archived_action"):
     _f("lint", "rule_" + _rule, f"lint.rules.{_rule}.enabled", "bool", label=["cfg.p.rule_on"], help="cfg.h.rule_on")
-    _f("lint", "rule_" + _rule, f"lint.rules.{_rule}.severity", "enum", ("info", "warn", "bad"), label=["cfg.p.severity"], help="cfg.h.p.severity")
+    if _rule != "archived_action":      # that rule only informs: it has no severity to choose
+        _f("lint", "rule_" + _rule, f"lint.rules.{_rule}.severity", "enum", ("info", "warn", "bad"), label=["cfg.p.severity"], help="cfg.h.p.severity")
 # --- Terminal view
 _f("console", "tui", "tui.theme", "enum", ("dark", "light"), False)
 _f("console", "tui", "tui.refresh_seconds", "int", (2, 300), False)

@@ -18,6 +18,10 @@ Optional und **standardmäßig aus**. Ein Sprachmodell kann den Tagesbericht zus
 - Der Schlüssel wird nie gespeichert: Sie tragen den NAMEN einer Umgebungsvariable ein. Die drei entfernten Anbieter SENDEN Daten Ihrer Repositorys an Dritte.
 
 
+## Die KI-Symbole der Leiste
+
+Die Leiste oben rechts zeigt zwei Symbole: Der Chip ist die im Monitor eingebaute KI, die Wellen sind ein externes KI-Werkzeug, das den Monitor liest. Ein Abzeichen nennt den Zustand, ohne von der Farbe abzuhängen: ein Haken bedeutet aktiv, ein Schrägstrich (mit gestrichelter Zeichnung) inaktiv und ein Dreieck einen Fehler (die eingebaute KI ist eingerichtet, antwortet aber nicht). Der Mauszeiger zeigt den genauen Zustand; ein Klick auf das Symbol, oder Eingabe- bzw. Leertaste bei Fokus, öffnet den KI-Bereich der Einstellungen.
+
 ## Was sie sehen darf
 
 - Jede Eingabe wird bereinigt: Steuerzeichen entfernt, Geheimnisse per Muster geschwärzt, Länge begrenzt, der Inhalt zwischen zufällige Trennzeichen gesetzt und als nicht vertrauenswürdig erklärt. Die Antwort wird gekürzt, ihre Links entschärft.
