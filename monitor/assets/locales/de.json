@@ -4710,6 +4710,7 @@
  "cfg.f.ai.prompt_log.keep": "Gespeicherte Prompts",
  "cfg.h.ai.prompt_log.keep": "Wie viele der neuesten Zeilen das Protokoll behält; ältere entfallen.",
  "ui.cfg_u_lines": "Zeilen",
+ "ui.cfg_u_repos": "Repos",
  "ai.doc_model_retired": "Das Modell {model} steht in Ihrer Liste zurückgezogener Modelle (config/ai_models.json): es wird übersprungen und das nächste der Kette antwortet.",
  "ai.doc_model_use": "Verwenden Sie stattdessen {use}.",
  "ui.asst_a_explain_repo": "Lage eines Repositorys",

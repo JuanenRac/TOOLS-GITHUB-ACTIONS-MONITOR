@@ -31,6 +31,12 @@ NOT_SETTINGS = {
     "sentinels.security.penalty": "a key of the data",
     "sentinels.supply.penalty.cap_per_repo": "only in the file, on purpose",
     "sentinels.supply.penalty.per_finding": "only in the file, on purpose",
+    "api.github.com": "a host name",
+    "api.powerplatform.com": "a host name",
+    "sentinel.delivery": "the name of a signal",
+    "sentinel.security": "the name of a signal",
+    "sentinel.supply": "the name of a signal",
+    "webhook.office.com": "a host name",
     "webhook.allow_config_secret": "only in the file, on purpose",
     "webhook.allowed_owners": "only in the file",
 }

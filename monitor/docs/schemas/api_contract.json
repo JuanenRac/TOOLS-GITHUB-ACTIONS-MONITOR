@@ -100,6 +100,13 @@
   {"path": "/api/updates/progress", "reason": "the progress file of the process that applies an update: it exists only while one runs or after it ran"},
   {"path": "/api/updates/status", "reason": "the state of the Updates menu: the version found, the switches and the progress of an update depend on the installation and on what GitHub says"},
   {"path": "/api/updates/stream", "reason": "server-sent events with the progress of an update: a stream, not a document with a frozen shape (the frames carry the JSON of /api/updates/progress)"},
+  {"path": "/api/clone-anomalies", "reason": "the clones that behave in an unexpected way: new in this version, its shape stays free until it has been used for one release"},
+  {"path": "/api/devices", "reason": "the phones paired with the monitor (an administrator only): a view of a local record, not part of the read API"},
+  {"path": "/api/expected-red", "reason": "the workflows that are expected to be red: new in this version, its shape stays free until it has been used for one release"},
+  {"path": "/api/glossary", "reason": "the terms of the glossary of the page, text for people"},
+  {"path": "/api/meta-columns", "reason": "the metadata columns of the fleet view: new in this version, its shape stays free until it has been used for one release"},
+  {"path": "/api/pair/status", "reason": "the state of the pairing of a phone (QR code): a one-time exchange, not a document with a frozen shape"},
+  {"path": "/api/whats-new", "reason": "what is new since the last visit, text for people"},
   {"path": "/metrics", "reason": "the Prometheus text format"},
   {"path": "/screen/", "reason": "the wall-screen pages, HTML"}
  ]

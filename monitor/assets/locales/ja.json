@@ -4710,6 +4710,7 @@
  "cfg.f.ai.prompt_log.keep": "保持するプロンプト数",
  "cfg.h.ai.prompt_log.keep": "記録が保持する最新の行数。古いものは破棄されます。",
  "ui.cfg_u_lines": "行",
+ "ui.cfg_u_repos": "リポジトリ",
  "ai.doc_model_retired": "モデル {model} は廃止モデルの一覧(config/ai_models.json)に載っています。スキップされ、チェーンの次のモデルが応答します。",
  "ai.doc_model_use": "代わりに {use} を使ってください。",
  "ui.asst_a_explain_repo": "リポジトリの状況",

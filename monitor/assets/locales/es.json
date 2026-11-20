@@ -4710,6 +4710,7 @@
  "cfg.f.ai.prompt_log.keep": "Prompts guardados",
  "cfg.h.ai.prompt_log.keep": "Cuántas de las líneas más recientes conserva el registro; las más antiguas se descartan.",
  "ui.cfg_u_lines": "líneas",
+ "ui.cfg_u_repos": "repositorios",
  "ai.doc_model_retired": "El modelo {model} está en tu lista de modelos retirados (config/ai_models.json): se salta y responde el siguiente de la cadena.",
  "ai.doc_model_use": "Usa {use} en su lugar.",
  "ui.asst_a_explain_repo": "Situación de un repositorio",

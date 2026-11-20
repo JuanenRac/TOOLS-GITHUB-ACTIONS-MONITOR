@@ -4710,6 +4710,7 @@
  "cfg.f.ai.prompt_log.keep": "Prompt conservati",
  "cfg.h.ai.prompt_log.keep": "Quante delle righe più recenti conserva il registro; le più vecchie vengono scartate.",
  "ui.cfg_u_lines": "righe",
+ "ui.cfg_u_repos": "repository",
  "ai.doc_model_retired": "Il modello {model} è nel tuo elenco di modelli ritirati (config/ai_models.json): viene saltato e risponde il successivo della catena.",
  "ai.doc_model_use": "Usa {use} al suo posto.",
  "ui.asst_a_explain_repo": "Situazione di un repository",

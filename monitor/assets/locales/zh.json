@@ -4710,6 +4710,7 @@
  "cfg.f.ai.prompt_log.keep": "保留的提示词数",
  "cfg.h.ai.prompt_log.keep": "记录保留的最新行数;更早的会被丢弃。",
  "ui.cfg_u_lines": "行",
+ "ui.cfg_u_repos": "仓库",
  "ai.doc_model_retired": "模型 {model} 在您的已退役模型列表(config/ai_models.json)中:它会被跳过,由链中的下一个模型回答。",
  "ai.doc_model_use": "请改用 {use}。",
  "ui.asst_a_explain_repo": "某个仓库的情况",
