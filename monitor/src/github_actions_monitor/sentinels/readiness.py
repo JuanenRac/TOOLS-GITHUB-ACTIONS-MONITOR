@@ -22,6 +22,7 @@ from pathlib import Path
 
 import sys as _sys
 from github_actions_monitor import i18n
+from github_actions_monitor.delivery import mainsource
 from github_actions_monitor.sentinels import signstate
 from github_actions_monitor.app import toolconfig
 
@@ -110,22 +111,20 @@ def changelog_version(text):
 
 
 def local_version(clone):
-    """The version a local clone declares: its *.project.json, else pyproject.toml, else the first heading of its CHANGELOG; "" when none says."""
+    """The version a clone declares on the default branch of the remote (the working tree when that branch is not known): its *.project.json, else pyproject.toml, else the first heading of
+    its CHANGELOG; "" when none says."""
     clone = Path(clone)
-    try:
-        for path in sorted(clone.glob("*.project.json")):
-            try:
-                v = json.loads(path.read_text(encoding="utf-8")).get("version")
-            except (OSError, ValueError, AttributeError):
-                continue
-            if isinstance(v, str) and version_key(v):
-                return v
-    except OSError:
-        pass
-    m = re.search(r'^version\s*=\s*"([^"]+)"', _read(clone / "pyproject.toml"), re.M)
+    for name in sorted(n for n in mainsource.root_names(clone) if n.endswith(".project.json")):
+        try:
+            v = json.loads(mainsource.read_file(clone, name)[0] or "").get("version")
+        except (ValueError, AttributeError):
+            continue
+        if isinstance(v, str) and version_key(v):
+            return v
+    m = re.search(r'^version\s*=\s*"([^"]+)"', mainsource.read_file(clone, "pyproject.toml")[0] or "", re.M)
     if m and version_key(m.group(1)):
         return m.group(1)
-    return changelog_version(_read(clone / "CHANGELOG.md"))
+    return changelog_version(mainsource.read_file(clone, "CHANGELOG.md")[0] or "")
 
 
 def _find_files(base, name, max_depth, skip):
