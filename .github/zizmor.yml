@@ -1,0 +1,5 @@
+rules:
+  dangerous-triggers:
+    ignore:
+      # Intended: the notifier only runs after the project CI finished green on main, never checks out or runs code of the run it follows, and has no permissions.
+      - dashboard-dispatch.yml:14
