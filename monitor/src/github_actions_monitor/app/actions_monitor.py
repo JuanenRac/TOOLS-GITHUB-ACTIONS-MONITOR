@@ -2752,6 +2752,7 @@ class Handler(BaseHTTPRequestHandler):
         last = [time.time()]
 
         def stop():
+            from github_actions_monitor.security import auth
             config = toolconfig.raw_config()
             every = auth.settings(config)["stream_revalidate_min"] * 60
             if time.time() - last[0] < every:

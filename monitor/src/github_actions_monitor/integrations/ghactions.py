@@ -93,14 +93,16 @@ def writer_state(config, env=None, lock_path=None):
     env = os.environ if env is None else env
     if (env.get("MONITOR_PROFILE") or "").strip().lower() == "qa":
         return "observer", "qa"
-    if not settings(config)["writer_lock"]:
+    if not settings(config).get("writer_lock", True):
         return "writer", ""
     path = Path(lock_path) if lock_path else paths.place(LOCK_NAME)
     for _attempt in range(2):
         try:
-            fd = os.open(str(path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-            with os.fdopen(fd, "w") as handle:
-                handle.write(str(os.getpid()))
+            fd = os.open(str(path), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+            try:
+                os.write(fd, str(os.getpid()).encode("ascii"))
+            finally:
+                os.close(fd)
             WRITER["owner"] = True
             return "writer", ""
         except FileExistsError:
@@ -179,8 +181,8 @@ def plan(config, owner, action, repo, number, reason="", operator="", run_gh=Non
     if not NUMBER_RE.match(number):
         return None, "number"
     why = clean_text(reason, REASON_RANGE[1])
-    who = clean_text(operator, OPERATOR_MAX) or cfg["operator"]
-    if cfg["require_reason"]:
+    who = clean_text(operator, OPERATOR_MAX) or cfg.get("operator", "")
+    if cfg.get("require_reason", True):
         if len(why) < REASON_RANGE[0]:
             return None, "reason_required"
         if not who:
@@ -188,7 +190,7 @@ def plan(config, owner, action, repo, number, reason="", operator="", run_gh=Non
     state, _why = writer_state(config)
     if state != "writer":
         return None, "observer"
-    if cfg["preflight"] and run_gh is not None and preflight_reason(run_gh, owner, repo, action):
+    if cfg.get("preflight", True) and run_gh is not None and preflight_reason(run_gh, owner, repo, action):
         return None, "preflight"
     method, endpoint, scope, subject = ACTIONS[action]
     fields = {"state": "closed"} if action in ("close_issue", "close_pr") else ({"merge_method": cfg["merge_method"]} if action == "merge_pr" else {})
@@ -230,7 +232,9 @@ def still_fits(item, run_gh):
     """The server looks at the target again right before it acts: an issue or pull request still open, a run still going (cancel) or finished and red (rerun). What cannot be read, or is not understood,
     does not block (GitHub decides then). False only when the answer is clear and the state no longer fits."""
     owner = item.get("owner") or ""
-    action, repo, number = item["action"], item["repo"], item["number"]
+    action, repo, number = item.get("action"), item.get("repo"), item.get("number")
+    if not (action and repo and number):
+        return True
     if not owner:
         return True
     kind = {"close_issue": f"issues/{number}", "close_pr": f"pulls/{number}", "merge_pr": f"pulls/{number}", "cancel": f"actions/runs/{number}", "rerun_failed": f"actions/runs/{number}", "rerun_run": f"actions/runs/{number}"}.get(action)
@@ -272,7 +276,7 @@ def execute(config, plan_id, run_gh, log_file=None):
     item = PENDING.take(plan_id, "ghaction")
     if item is None:
         return {"ok": False, "status": "unknown_plan"}
-    audit_log.note(f"{item.get('action')} {item.get('repo')}#{item.get('number')} by {item.get('operator') or '-'}: {item.get('reason') or '-'}")      # the line of the log of actions says what was confirmed
+    audit_log.note(f"{item.get('action')} {item.get('repo')}#{item.get('number')}", {"operator": clean_text(item.get("operator"), OPERATOR_MAX), "reason": clean_text(item.get("reason"), REASON_RANGE[1])})      # the line of the log of actions says what was confirmed, by whom and why
     have = scopes(run_gh)
     if writer_state(config)[0] != "writer":
         result = {"ok": False, "status": "observer"}
@@ -285,7 +289,7 @@ def execute(config, plan_id, run_gh, log_file=None):
         code, _out, err = run_gh(args, 40)
         if code == 0:
             result = {"ok": True, "status": "done"}
-            if settings(config)["comment_on_target"] and item["action"] in ("close_issue", "close_pr", "merge_pr"):
+            if settings(config).get("comment_on_target", False) and item["action"] in ("close_issue", "close_pr", "merge_pr"):
                 note = f"Done through GitHub Actions Monitor by {item.get('operator') or 'an operator'}: {item.get('reason') or 'no reason given'}"
                 run_gh(["api", "-X", "POST", f"repos/{item['owner']}/{item['repo']}/issues/{item['number']}/comments", "-f", f"body={note}"], 40)
         else:
