@@ -34,6 +34,7 @@
 | `watch` | la misma lectura una y otra vez (`watch status\|alerts`, `--interval`, `--once`, `--exit-on-change`); véase [CLI_OPERATOR_spa.md](CLI_OPERATOR_spa.md) | no |
 | `completions` | el script de compleción para `bash`, `zsh`, `fish` o `powershell`, escrito desde el analizador real (solo imprime) | no |
 | `kiosk` | la dirección del monitor para una TV o una pared (`ops`, `team`, `release`, `quiet`); véase [KIOSK_spa.md](KIOSK_spa.md) | no |
+| `metrics` | las cifras como líneas `nombre=valor` para cron y el correo; con `--if-problem` no escribe nada cuando todo va bien; véase [CLI_OPERATOR.md](CLI_OPERATOR.md) | no |
 
 Opciones de todos los comandos: `--json` (la respuesta como un documento JSON: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (puerto 8766), `--timeout SEGUNDOS` (de 1 a 60), `--lang CÓDIGO`. En el modo red pon el token de acceso en la variable de entorno `MONITOR_ACCESS_TOKEN`, la que lee el propio monitor (`MONITOR_TOKEN` se acepta como alias; `--token TOKEN` es el último recurso, porque una opción se ve en la lista de procesos). El orden es: `MONITOR_ACCESS_TOKEN`, luego `MONITOR_TOKEN`, luego `--token`. Viaja en la cabecera `X-Monitor-Access`, nunca en la dirección ni en pantalla. Un `--url` con `http` sin cifrar hacia otro ordenador imprime un aviso por stderr (el token y las respuestas viajarían sin cifrar): usa `https` fuera de una red que controles.
 

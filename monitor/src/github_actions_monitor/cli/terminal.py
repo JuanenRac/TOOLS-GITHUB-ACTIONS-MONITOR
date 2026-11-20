@@ -69,8 +69,7 @@ def emit(text, stream=None, end="\n"):
     """Write one answer; a reader that went away (`| head`) ends it without an error. Returns False when the reader is gone."""
     stream = sys.stdout if stream is None else stream
     try:
-        stream.write(text + end)
-        stream.flush()
+        print(text, end=end, file=stream, flush=True)      # print, not write: the tests of the commands replace it
         return True
     except (BrokenPipeError, OSError) as error:
         if not isinstance(error, BrokenPipeError) and getattr(error, "errno", None) not in (errno.EPIPE, errno.EINVAL) and getattr(error, "winerror", None) not in (109, 232):
