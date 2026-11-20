@@ -31,8 +31,13 @@
 | `credential` | すべてが動いたまま、1つのアカウントの GitHub ログインを差し替える:`credential replace\|reload [--account ID] [--new-token-file FILE\|-]`。トークンは表示しません | 不可 |
 | `install-skill` | モニターのスキル(`internal` または `external`)を、AI ツールがスキルを読むフォルダーにコピーします:`install-skill external --dest FOLDER`。モニターが動いている必要はありません | 不可 |
 | `gh-token` | ツールの読み取りが GitHub App の割り当てを使うよう、1時間有効な GitHub App のインストールトークンを出力します(`github_app.share_reads` がオンのときのみ)。`--json` なしで実行してください | 不可 |
+| `watch` | 同じ読み取りを繰り返します（`watch status\|alerts`、`--interval`、`--once`、`--exit-on-change`）。[CLI_OPERATOR_jpn.md](CLI_OPERATOR_jpn.md) を参照 | 不可 |
+| `completions` | `bash`、`zsh`、`fish`、`powershell` の補完スクリプト。実際のパーサーから作られ、出力するだけです | 不可 |
+| `kiosk` | テレビや壁面向けのモニターのアドレス（`ops`、`team`、`release`、`quiet`）。[KIOSK_jpn.md](KIOSK_jpn.md) を参照 | 不可 |
 
 全コマンド共通のオプション：`--json`（応答を 1 つの JSON 文書で：`{"ok", "exit", "data"}`）、`--account ID`、`--url URL`、`--lite`（ポート 8766）、`--timeout 秒`（1〜60）、`--lang コード`。ネットワークモードではアクセストークンを、モニター自身が読む環境変数 `MONITOR_ACCESS_TOKEN` に設定します(`MONITOR_TOKEN` は別名として受け付けます。`--token TOKEN` は最後の手段で、オプションはプロセス一覧に表示されるためです)。優先順位は `MONITOR_ACCESS_TOKEN`、`MONITOR_TOKEN`、`--token` の順です。ヘッダー `X-Monitor-Access` で送られ、アドレスや画面には出ません。別のコンピューターへの暗号化されていない `http` の `--url` では stderr に警告を出します(トークンと応答が平文で送られるため)。管理下にないネットワークでは `https` を使ってください。
+
+どのコマンドも `--format text|table|plain|json|ndjson` を受け付けます（`--json` は `--format json`）。[CLI_OPERATOR_jpn.md](CLI_OPERATOR_jpn.md) を参照。
 
 コマンドラインは、クライアント向け読み取りAPIのクライアントです。契約で固定されたルート(`docs/schemas/api_contract.json`)はまず `/api/v1/` に問い合わせ、モニターがそこで404を返した場合(APIが閉じている。`api.v1_enabled`)は従来のルートに問い合わせ、以後プレフィックスを試しません。どちらの経路でも文書は同じなので、どのコマンドの出力も変わりません。`cli.prefer_v1`(既定でオン)で無効にでき、環境変数 `MONITOR_CLI_PREFER_V1`(`0` または `1`)が優先されます。契約で固定されていないルートは常に従来の方法で問い合わせます。
 
@@ -48,6 +53,7 @@
 | 3 | モニターがこのクライアントを拒否、またはアカウントの GitHub ログインが失敗・期限切れ（資格情報の問題で、割り当て切れではありません） |
 | 4 | モニターは応答するが劣化している：オフライン、割り当て切れ、まだデータなし、そのエンドポイントがない、または JSON でない応答 |
 | 5 | `alerts --fail-on レベル` がそのレベル以上の未解決アラートを見つけた（ミュート中は数えません） |
+| 6 | `watch --exit-on-change` が変化を検出した（このオプションを付けたときだけ）。[CLI_OPERATOR_jpn.md](CLI_OPERATOR_jpn.md) を参照 |
 
 ## 例
 

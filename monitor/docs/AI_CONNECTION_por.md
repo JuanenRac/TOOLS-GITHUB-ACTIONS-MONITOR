@@ -79,6 +79,8 @@ O separador Alertas pode mostrar um painel de perguntas fixas a que a IA já con
 
 Com `ai.similar.enabled` ligado (desligado por predefinição), «explicar este alerta» também lista até `ai.similar.max` alertas que se lhe parecem, para que a resposta possa dizer «isto já aconteceu noutro repositório». São encontrados por uma comparação simples de palavras (o código do alerta, o fluxo de trabalho, as palavras do título e da causa) entre os alertas abertos e os resolvidos de que o feed se lembra: sem modelo, sem embeddings, só com os dados desta conta, com a mesma ordem para os mesmos dados, e cada um é citado pelo seu id.
 
+Com `ai.report_summary.enabled` ligado (desligado por omissão), Relatórios oferece **Rascunho com a IA** para o resumo do próximo relatório: os números do relatório, limpos de segredos, vão para esta IA pelo mesmo limpador, orçamento, cache e cadeia de qualquer outra pergunta, uma pessoa edita o rascunho e aprova-o, e o texto aprovado abre o próximo relatório uma vez. Nada é escrito nem enviado sem essa aprovação.
+
 O assistente tem cinco perguntas fixas, todas só de leitura: «explica este alerta» (`explain_alert`), «resume a situação» (`summarize_week`), «porque é que aqui está lento» (`why_slow`), «a situação de um repositório» (`explain_repo`: as suas execuções e os seus alertas abertos) e «o que fazer primeiro» (`prioritize`: os alertas abertos, o estado e a pontuação, postos em ordem com os ids). Usam as mesmas quatro ferramentas, os mesmos limites e o mesmo orçamento diário; continua a não haver chat livre.
 
 ## Modo isolado da IA (opcional, desligado por predefinição)

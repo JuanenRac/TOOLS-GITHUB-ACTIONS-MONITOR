@@ -31,8 +31,13 @@
 | `credential` | otro acceso a GitHub para una cuenta mientras todo funciona: `credential replace\|reload [--account ID] [--new-token-file FICHERO\|-]`; nunca imprime un token | no |
 | `install-skill` | copia una skill del monitor (`internal` o `external`) a la carpeta donde una herramienta de IA lee sus skills: `install-skill external --dest CARPETA`; el monitor no tiene que estar en marcha | no |
 | `gh-token` | imprime un token de instalación de una hora de la GitHub App para que las lecturas de una herramienta gasten la cuota de la App (solo con `github_app.share_reads` activado); ejecútalo sin `--json` | no |
+| `watch` | la misma lectura una y otra vez (`watch status\|alerts`, `--interval`, `--once`, `--exit-on-change`); véase [CLI_OPERATOR_spa.md](CLI_OPERATOR_spa.md) | no |
+| `completions` | el script de compleción para `bash`, `zsh`, `fish` o `powershell`, escrito desde el analizador real (solo imprime) | no |
+| `kiosk` | la dirección del monitor para una TV o una pared (`ops`, `team`, `release`, `quiet`); véase [KIOSK_spa.md](KIOSK_spa.md) | no |
 
 Opciones de todos los comandos: `--json` (la respuesta como un documento JSON: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (puerto 8766), `--timeout SEGUNDOS` (de 1 a 60), `--lang CÓDIGO`. En el modo red pon el token de acceso en la variable de entorno `MONITOR_ACCESS_TOKEN`, la que lee el propio monitor (`MONITOR_TOKEN` se acepta como alias; `--token TOKEN` es el último recurso, porque una opción se ve en la lista de procesos). El orden es: `MONITOR_ACCESS_TOKEN`, luego `MONITOR_TOKEN`, luego `--token`. Viaja en la cabecera `X-Monitor-Access`, nunca en la dirección ni en pantalla. Un `--url` con `http` sin cifrar hacia otro ordenador imprime un aviso por stderr (el token y las respuestas viajarían sin cifrar): usa `https` fuera de una red que controles.
+
+Todos los comandos aceptan también `--format text|table|plain|json|ndjson` (`--json` es `--format json`); véase [CLI_OPERATOR_spa.md](CLI_OPERATOR_spa.md).
 
 La línea de comandos es un cliente de la API de lectura para clientes: las rutas que el contrato congela (`docs/schemas/api_contract.json`) se piden primero bajo `/api/v1/`, y si el monitor responde 404 allí (la API está cerrada, `api.v1_enabled`) se pide la ruta antigua y no se vuelve a probar el prefijo. El documento es el mismo por ambos caminos, así que la salida de ningún comando cambia. `cli.prefer_v1` (activado por defecto) lo desactiva, y la variable `MONITOR_CLI_PREFER_V1` (`0` o `1`) manda sobre él. Las rutas que el contrato no congela se piden siempre por el camino antiguo.
 
@@ -48,6 +53,7 @@ Las horas escritas para las personas (la línea `Last read`, los silencios, el r
 | 3 | el monitor rechaza a este cliente, o el acceso de GitHub de la cuenta falló o caducó (un problema de credencial, no una cuota agotada) |
 | 4 | el monitor responde pero está degradado: sin conexión, cuota agotada, aún sin datos, un endpoint que no tiene, o una respuesta que no es JSON |
 | 5 | `alerts --fail-on NIVEL` encontró una alerta abierta de ese nivel o peor (una alerta silenciada no cuenta) |
+| 6 | `watch --exit-on-change` vio un cambio (solo cuando se da esa opción); véase [CLI_OPERATOR_spa.md](CLI_OPERATOR_spa.md) |
 
 ## Ejemplos
 

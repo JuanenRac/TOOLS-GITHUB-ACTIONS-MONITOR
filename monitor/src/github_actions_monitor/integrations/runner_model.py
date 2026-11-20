@@ -27,7 +27,7 @@ CORES_RE = re.compile(r"-\d{1,3}-cores?\b")
 OS_RE = re.compile(r"^(ubuntu|windows|macos|linux)")
 CODE_QUEUE, CODE_RUNAWAY, CODE_DOWN = "runner.queue", "runner.runaway", "runner.selfhosted_down"
 LEVELS = ("info", "warning", "error")
-DEFAULTS = {"enabled": False, "jobs_per_cycle": 10, "thirdparty_labels": DEFAULT_THIRDPARTY, "large_labels": [], "self_labels": [], "queue_warn_minutes": 20, "runaway_runs_per_hour": 20,
+DEFAULTS = {"enabled": False, "jobs_per_cycle": 10, "thirdparty_labels": DEFAULT_THIRDPARTY, "large_labels": [], "self_labels": [], "queue_warn_minutes": 20, "runaway_runs_per_hour": 20, "observed_reads_per_cycle": 0,
             "runaway_ignore_events": ["pull_request", "pull_request_target"], "thirdparty_usd_per_minute": 0.0, "alerts": True, "alert_level": "warning"}
 
 
@@ -47,6 +47,7 @@ def settings(config):
     return {"enabled": cfg.get("enabled") is True, "jobs_per_cycle": _int(cfg.get("jobs_per_cycle"), 0, 100, DEFAULTS["jobs_per_cycle"]),
             "thirdparty_labels": _labels(cfg.get("thirdparty_labels"), DEFAULT_THIRDPARTY), "large_labels": _labels(cfg.get("large_labels"), []), "self_labels": _labels(cfg.get("self_labels"), []),
             "queue_warn_minutes": _int(cfg.get("queue_warn_minutes"), 1, 10080, DEFAULTS["queue_warn_minutes"]),
+            "observed_reads_per_cycle": _int(cfg.get("observed_reads_per_cycle"), 0, 20, 0),
             "runaway_runs_per_hour": _int(cfg.get("runaway_runs_per_hour"), 0, 1000, DEFAULTS["runaway_runs_per_hour"]),
             "runaway_ignore_events": [x for x in cfg.get("runaway_ignore_events", DEFAULTS["runaway_ignore_events"]) if isinstance(x, str) and re.match(r"^[a-z_]{1,40}\Z", x)] if isinstance(cfg.get("runaway_ignore_events", []), list) else list(DEFAULTS["runaway_ignore_events"]),
             "thirdparty_usd_per_minute": float(rate) if isinstance(rate, (int, float)) and not isinstance(rate, bool) and 0 <= rate <= 10 else 0.0,
@@ -84,7 +85,8 @@ def compact(repo, run_id, body):
     for job in (body or {}).get("jobs") or []:
         if isinstance(job, dict):
             rows.append({"repo": repo, "run": run_id, "name": str(job.get("name") or "")[:80], "status": job.get("status"), "labels": [str(x)[:40] for x in (job.get("labels") or [])][:12],
-                         "created": job.get("created_at"), "started": job.get("started_at"), "runner": str(job.get("runner_name") or "")[:60]})
+                         "created": job.get("created_at"), "started": job.get("started_at"), "runner": str(job.get("runner_name") or "")[:60],
+                         "group": str(job.get("runner_group_name") or "")[:60]})
     return rows
 
 
@@ -158,6 +160,93 @@ def runaway(runs, now, cfg, sample_cap=0):
     return {"rows": rows[:50], "limited": bool(sample_cap) and sample_cap < limit}
 
 
+def _items(value):
+    """The labels of a `runs-on` value written on one line: a word, a quoted word or a list `[a, b]`."""
+    value = value.strip()
+    parts = value[1:-1].split(",") if value.startswith("[") and value.endswith("]") else [value]
+    return [p.strip().strip("'\"") for p in parts if p.strip().strip("'\"")]
+
+
+def static_runs_on(text):
+    """What a workflow file SAYS about the machine of each job: {job id: {"labels": [...], "group": "", "dynamic": bool}}. `dynamic` is a `runs-on` that is an expression (`${{ matrix.os }}`,
+    `${{ vars.RUNNER }}`): the file does not tell what it will run on. A small reader of lines, not a YAML parser: a form it does not understand leaves the job out (it is never guessed)."""
+    out, in_jobs, job = {}, False, None
+    lines = str(text or "").replace("\r\n", "\n").split("\n")[:20000]
+    for index, line in enumerate(lines):
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        width = len(line) - len(line.lstrip(" "))
+        if width == 0:
+            in_jobs, job = line.startswith("jobs:"), None
+            continue
+        if not in_jobs:
+            continue
+        head = re.match(r"^([A-Za-z0-9_-]{1,100}):\s*(?:#.*)?$", line.strip())
+        if width == 2 and head:
+            job = head.group(1)
+            continue
+        match = re.match(r"^runs-on\s*:\s*(.*?)\s*$", line.strip())
+        if job is None or width < 3 or not match:
+            continue
+        value = re.sub(r"\s+#.*$", "", match.group(1))
+        labels, group = ([], "")
+        if value:
+            labels = _items(value)
+        else:
+            for nxt in lines[index + 1:index + 12]:
+                if not nxt.strip() or nxt.lstrip().startswith("#"):
+                    continue
+                if len(nxt) - len(nxt.lstrip(" ")) <= width:
+                    break
+                item = nxt.strip()
+                if item.startswith("- "):
+                    labels.append(item[2:].strip().strip("'\""))
+                elif item.startswith("group:"):
+                    group = item[6:].strip().strip("'\"")
+                elif item.startswith("labels:") and item[7:].strip():
+                    labels += _items(item[7:])
+        dynamic = any("${{" in x for x in labels) or "${{" in group
+        out[job] = {"labels": [x.lower()[:60] for x in labels if "${{" not in x][:12], "group": group[:60], "dynamic": dynamic}
+    return out
+
+
+OBSERVED_REASONS = ("dynamic", "undeclared", "public")
+
+
+def observed(rows, declared, cfg, private=None, known=None):
+    """The self-hosted runners the jobs REALLY ran on, crossed with what the workflow files say (`runners.model.observed_reads_per_cycle`): the jobs are the ones of the unfinished runs the monitor holds,
+    the files are the ones it read (`declared` = {repo: {file: static_runs_on(text)}}). One row per repository with a job on a self-hosted runner, with the reason it is worth a look:
+    `dynamic` (no file names a self-hosted label, but one has an expression: the file does not say it), `undeclared` (no file says it and none has an expression: a reusable workflow or a file not read)
+    and `public` (a public repository: a self-hosted runner there runs code of strangers). A repository whose files were not read is `unread`, never judged. Read only."""
+    found = {}
+    for row in rows:
+        if kind_of(row.get("labels"), cfg) != "selfhosted":
+            continue
+        e = found.setdefault(row["repo"], {"repo": row["repo"], "jobs": 0, "runners": set(), "groups": set(), "labels": set()})
+        e["jobs"] += 1
+        if row.get("runner"):
+            e["runners"].add(row["runner"])
+        if row.get("group"):
+            e["groups"].add(row["group"])
+        e["labels"].update(str(x).lower() for x in row.get("labels") or [])
+    out = []
+    for repo, e in sorted(found.items()):
+        files = (declared or {}).get(repo)
+        reasons = []
+        if files is None:
+            state = "unread"
+        else:
+            state = "read"
+            jobs = [j for f in files.values() for j in f.values()]
+            says = any(kind_of(j["labels"], cfg) == "selfhosted" or j["group"] for j in jobs)
+            if not says:
+                reasons.append("dynamic" if any(j["dynamic"] for j in jobs) else "undeclared")
+        if private is not None and known is not None and repo in known and repo not in private:
+            reasons.append("public")
+        out.append({"repo": repo, "jobs": e["jobs"], "runners": sorted(e["runners"])[:5], "groups": sorted(e["groups"])[:3], "labels": sorted(e["labels"])[:8], "files": state, "reasons": reasons})
+    return out
+
+
 def selfhosted_down(rows, runners, now, cfg):
     """The jobs that wait for a self-hosted runner for at least `queue_warn_minutes`, and why nothing picks them up: `no_online_runner` (no runner that is online has all the labels of the job),
     `all_busy` (there is one and it is busy: a queue, not a failure) or `unknown` (the list of runners is not read: `runners.enabled` is off)."""
@@ -179,13 +268,14 @@ def selfhosted_down(rows, runners, now, cfg):
     return sorted(found.values(), key=lambda e: (-e["oldest_wait_minutes"], e["repo"]))
 
 
-def build(config, job_rows, runs, tallies, rates, runners, now, sample_cap=0):
+def build(config, job_rows, runs, tallies, rates, runners, now, sample_cap=0, declared=None, private=None, known=None):
     """The whole model in one answer: settings, the queue by kind, the cost by kind, the workflows that fire again and again and the self-hosted queues."""
     cfg = settings(config)
     if not cfg["enabled"]:
         return {"schema": 1, "enabled": False}
     return {"schema": 1, "enabled": True, "queue": queue_by_kind(job_rows, now, cfg), "usage": usage(tallies, rates, cfg), "runaway": runaway(runs, now, cfg, sample_cap),
             "selfhosted": selfhosted_down(job_rows, runners, now, cfg), "jobs_seen": len(job_rows), "runners_known": runners is not None,
+            "observed": {"enabled": cfg["observed_reads_per_cycle"] > 0, "rows": observed(job_rows, declared, cfg, private, known) if cfg["observed_reads_per_cycle"] > 0 else []},
             "limits": {"queue_warn_minutes": cfg["queue_warn_minutes"], "runaway_runs_per_hour": cfg["runaway_runs_per_hour"]}}
 
 

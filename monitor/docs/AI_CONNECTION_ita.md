@@ -79,6 +79,8 @@ La scheda Avvisi può mostrare un pannello di domande fisse a cui l'IA già conf
 
 Con `ai.similar.enabled` acceso (spento per impostazione predefinita), «spiega questo avviso» elenca anche fino a `ai.similar.max` avvisi che gli somigliano, così la risposta può dire «è già successo in un altro repository». Si trovano con un semplice confronto di parole (il codice dell'avviso, il workflow, le parole del titolo e della causa) tra gli avvisi aperti e quelli risolti che il feed ricorda: nessun modello, nessun embedding, solo i dati di questo account, lo stesso ordine per gli stessi dati, e ciascuno è citato con il suo id.
 
+Con `ai.report_summary.enabled` acceso (spento di default), Rapporti offre **Bozza con l'IA** per il riepilogo del prossimo rapporto: i numeri del rapporto, ripuliti dai segreti, vanno a questa IA attraverso lo stesso pulitore, budget, cache e catena di ogni altra domanda, una persona modifica la bozza e la approva, e il testo approvato apre il prossimo rapporto una volta. Senza quell'approvazione non si scrive né si invia nulla.
+
 L'assistente ha cinque domande fisse, tutte di sola lettura: «spiega questo avviso» (`explain_alert`), «riassumi la situazione» (`summarize_week`), «perché qui è lento» (`why_slow`), «la situazione di un repository» (`explain_repo`: le sue esecuzioni e i suoi avvisi aperti) e «cosa fare per primo» (`prioritize`: gli avvisi aperti, lo stato e il punteggio, messi in ordine con gli id). Usano gli stessi quattro strumenti, gli stessi limiti e lo stesso budget giornaliero; non c'è ancora una chat libera.
 
 ## Modalità isolata dell'IA (facoltativa, spenta per impostazione predefinita)

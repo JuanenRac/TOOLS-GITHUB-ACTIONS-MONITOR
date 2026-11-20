@@ -17,6 +17,7 @@ AUDITED = {
     "/api/ai/lessons": "lesson_add",                    # a lesson is added to the library an AI reads
     "/api/ai/failures": "failures_import",              # lines of a book of failures from elsewhere
     "/api/report-files/run": "report_run",              # a report is written now
+    "/api/report-files/summary": "report_summary",      # the summary of the next report is approved or removed (the action and its length, never the text)
     "/api/ops/backup": "backup_run",                    # a complete backup package is written now (the file, never its content)
     "/api/updates/check": "update_check",                # the published versions are read from GitHub on request
     "/api/updates/apply": "update_apply",                # an update of the monitor is started (the target, never a path)

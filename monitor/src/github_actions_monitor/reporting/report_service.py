@@ -8,7 +8,7 @@ from pathlib import Path
 
 from github_actions_monitor import i18n
 from github_actions_monitor.app import degraded
-from github_actions_monitor.reporting import report_builder as builder, report_render as render, report_schedule as schedule
+from github_actions_monitor.reporting import report_builder as builder, report_render as render, report_schedule as schedule, report_summary as summary
 from github_actions_monitor.security import private_io
 from github_actions_monitor.storage import locks
 from github_actions_monitor.util import paths
@@ -77,6 +77,13 @@ def _update_entry(directory, key, **changes):
                 time.sleep(0.02 * (attempt + 1))
 
 
+def document(config, account, snapshot, alerts, team, now=None, base=None, compare=None):
+    """The report as data, with what changed since the last one, and nothing written (the draft of a summary is made from it)."""
+    now = time.time() if now is None else now
+    previous = ((_state(folder(base)).get("accounts") or {}).get(_account(account)) or {}).get("memory")
+    return builder.build(account, snapshot, alerts, team, now, previous, settings(config)["top"], compare)
+
+
 def run(config, account, snapshot, alerts, team, now=None, base=None, lang=None, compare=None):
     """Writes one report now (the formats of the settings) and returns {"files": [names], "at": iso}. The memory of what was in it goes to the state file so the next one can say what changed."""
     now = time.time() if now is None else now
@@ -87,6 +94,9 @@ def run(config, account, snapshot, alerts, team, now=None, base=None, lang=None,
     state = _state(directory)
     previous = (state.get("accounts") or {}).get(key, {}).get("memory")
     doc = builder.build(account, snapshot, alerts, team, now, previous, cfg["top"], compare)
+    approved = pending_summary(account, base)
+    if approved:      # the text a person approved goes into THIS report, once: it says something about this period
+        doc["summary"] = approved
     language = lang or i18n.language()
     stamp = time.strftime("%Y%m%d-%H%M%S", time.gmtime(now))
     wanted = ("html", "markdown") if cfg["formats"] == "both" else (cfg["formats"],)
@@ -104,9 +114,36 @@ def run(config, account, snapshot, alerts, team, now=None, base=None, lang=None,
             except OSError as error:
                 degraded.note("reports.cleanup", error)
         raise
-    _update_entry(directory, key, memory=builder.memory(doc, alerts), last_run=now, last_files=files)
+    _update_entry(directory, key, memory=builder.memory(doc, alerts), last_run=now, last_files=files, **({"summary": None} if approved else {}))
     prune(directory, key, cfg["keep"])
     return {"files": files, "at": doc["generated_at"]}
+
+
+def pending_summary(account, base=None):
+    """The summary a person approved for the next report: {"text", "origin", "at"} or None. A value that is not what `save_summary` writes is not believed."""
+    entry = ((_state(folder(base)).get("accounts") or {}).get(_account(account)) or {}).get("summary")
+    if not isinstance(entry, dict) or entry.get("origin") not in summary.ORIGINS or not isinstance(entry.get("text"), str):
+        return None
+    text = summary.clean(entry["text"])
+    return {"text": text, "origin": entry["origin"], "at": entry.get("at")} if text else None
+
+
+def save_summary(account, text, origin, now=None, base=None):
+    """Keeps the approved text (cleaned and cut) for the next report. Returns the entry kept, or None when nothing is left of the text."""
+    cleaned = summary.clean(text)
+    if not cleaned:
+        return None
+    entry = {"text": cleaned, "origin": origin if origin in summary.ORIGINS else "edited", "at": time.time() if now is None else now}
+    directory = folder(base)
+    private_io.private_dir(directory)
+    _update_entry(directory, _account(account), summary=entry)
+    return entry
+
+
+def clear_summary(account, base=None):
+    directory = folder(base)
+    if directory.is_dir() and pending_summary(account, base):
+        _update_entry(directory, _account(account), summary=None)
 
 
 def prune(directory, key, keep):

@@ -7,7 +7,7 @@
 
 Generated from the code. It reads what the running monitor says (and never writes to GitHub). `--json` prints one JSON document; the exit codes are stable.
 
-Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `briefs`, `api`, `install-skill`, `gh-token`, `ai`, `backup`, `update`, `compare`, `screens`.
+Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `briefs`, `api`, `install-skill`, `gh-token`, `ai`, `backup`, `update`, `compare`, `screens`, `watch`, `completions`, `kiosk`.
 
 | flag | what |
 | --- | --- |
@@ -47,11 +47,15 @@ Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `
 | `--window` | compare: length of the period, in days (7, 30d...) |
 | `--days` | compare: which days count (all, workdays or weekend) |
 | `--baseline` | compare: what to compare against (previous or year_ago) |
-| `--format` | compare: output format (table, json, ndjson or csv) |
 | `--lang` | language of the texts (en, es, de, fr, it, ja, zh, pt) |
 | `--provider` | ai models/test/doctor: provider or preset to use instead of the configured one |
 | `--model` | ai models/test/doctor: model to use instead of the configured one |
 | `--refresh` | ai models: read the list from the provider first (one request) |
+| `--format` | The way the answer is written: text (the default), table, plain (separated by tabs), json or ndjson (one object per line); csv (compare only) |
+| `--interval` | watch: seconds between two reads (never below cli.watch.min_interval_seconds) |
+| `--once` | watch: read once and finish |
+| `--exit-on-change` | watch: finish with exit code 6 when what is watched changes |
+| `--no-clear` | watch: do not clear the screen between two reads |
 | `--version` | print the version |
 
 Other entry points: `bin/mcp_server.py` (MCP over standard input and output; `--allow-ack`, `--allow-lessons`), `bin/ai_hook.py` (gate script of an AI tool), `bin/read_report.py`, `bin/actions_monitor.py --doctor`.

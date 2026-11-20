@@ -35,6 +35,7 @@ No hay un PDF propio: abre la página HTML e imprímela a PDF desde el navegador
 
 - La pestaña **Equipo** tiene una sección Informes: la lista, un enlace a cada fichero y el botón **Escribir un informe ahora** (un administrador, desde este equipo).
 - `GET /api/report-files` los lista, `GET /api/report-files/file?name=...` abre uno (solo un fichero que el servicio escribió para esta cuenta) y `POST /api/report-files/run` escribe uno ahora.
+- El **resumen del siguiente informe** son unas líneas que una persona escribe, edita y aprueba; abren el siguiente informe, una sola vez. En la misma pestaña una tarjeta ofrece **Borrador con las cifras** (frases sencillas hechas del informe, sin modelo) y, con `ai.report_summary.enabled` encendido (apagado por defecto) y una IA configurada, **Borrador con la IA** (las cifras van a la IA del monitor limpias de secretos, dentro de su presupuesto diario). No se escribe nada hasta **Guardar para el siguiente informe**; **Descartar** lo quita. `POST /api/report-files/summary` hace lo mismo con `action` = `draft`, `draft_ai`, `save` (texto y origen) o `clear`, para un administrador en este equipo; `GET /api/report-files` dice si hay un resumen esperando. El texto es plano, se corta a 1200 caracteres y se limpia de marcas y secretos, y el informe lo imprime escapado, con una línea que dice quién lo escribió.
 - En el modo equipo, quien puede ver la cuenta puede leer sus informes; escribir uno ahora es para un administrador en este equipo. La edición Lite no tiene nada de esto.
 
 ## Comparación con el periodo anterior

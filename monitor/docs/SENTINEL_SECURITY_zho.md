@@ -19,6 +19,9 @@
 | 默认分支没有保护 | `security.branch_unprotected` | 警告 | 是 |
 | 工作流默认获得写入权限 | `security.workflow_write` | 警告 | 是 |
 | 没有 CODEOWNERS 文件 | `security.codeowners_missing` | 提示 | 否 |
+| 监视器见过的重要运行(推送到默认分支、手动运行、`pull_request_target` 运行)被删除 | `security.runs_deleted` | error | 否 |
+
+**被删除的运行**(`security.runs_deleted`,默认关闭):密钥泄露后,删除打印出密钥的那次运行是清除痕迹的常见做法,而 GitHub 不留下可见记录。开启 `sentinels.security.signals.runs_deleted.enabled` 后,哨兵会保存一份简短的私有列表,记录它见过的重要运行;当某次运行不再出现在运行列表中时,就单独查询这一次运行:明确的 404 才算删除;拒绝(403)、网络错误或 5xx 从不计入。比 `sentinels.security.signals.runs_deleted.check_window_days`(14)更早的运行不再查询(账户的保留策略可能已将其清除),已发现的删除会以同样的天数保留为提醒。每个仓库每轮最多单独查询 `sentinels.security.signals.runs_deleted.max_checks`(50)次运行。提醒会写出工作流、触发者和分支,绝不包含运行的任何内容。
 
 每个仓库每个信号一个告警，详情中带有按严重程度的计数。每个信号都可以关闭（`sentinels.security.signals.<信号>.enabled`），Dependabot 和代码扫描还可以设置不同的最低严重程度。已归档的仓库不再请求其他内容。
 
@@ -46,4 +49,4 @@ GitHub 对某个仓库不回应的来源（该功能在那里是关闭的，或�
 
 ## 设置
 
-在设置页面的“哨兵”子标签中，“安全”区块：`sentinels.security.enabled`、`sentinels.security.refresh_seconds`、`sentinels.security.max_repos_per_tick`、`sentinels.security.min_rate_remaining`、`sentinels.security.repos`, `sentinels.security.plan_na`、`sentinels.security.signals.dependabot.enabled`、`sentinels.security.signals.dependabot.min_severity`、`sentinels.security.signals.code_scanning.enabled`、`sentinels.security.signals.code_scanning.min_severity`、`sentinels.security.signals.secret.enabled`、`sentinels.security.signals.branch.enabled`、`sentinels.security.signals.workflow.enabled` 和 `sentinels.security.signals.codeowners.enabled`。每个发现从评分的安全部分扣除的点数（`sentinels.security.penalty`）从文件中读取；见示例文件。
+在设置页面的“哨兵”子标签中，“安全”区块：`sentinels.security.enabled`、`sentinels.security.refresh_seconds`、`sentinels.security.max_repos_per_tick`、`sentinels.security.min_rate_remaining`、`sentinels.security.repos`, `sentinels.security.plan_na`、`sentinels.security.signals.dependabot.enabled`、`sentinels.security.signals.dependabot.min_severity`、`sentinels.security.signals.code_scanning.enabled`、`sentinels.security.signals.code_scanning.min_severity`、`sentinels.security.signals.secret.enabled`、`sentinels.security.signals.branch.enabled`、`sentinels.security.signals.workflow.enabled` 和 `sentinels.security.signals.codeowners.enabled`, `sentinels.security.signals.runs_deleted.enabled`, `sentinels.security.signals.runs_deleted.check_window_days`, `sentinels.security.signals.runs_deleted.max_checks`。每个发现从评分的安全部分扣除的点数（`sentinels.security.penalty`）从文件中读取；见示例文件。

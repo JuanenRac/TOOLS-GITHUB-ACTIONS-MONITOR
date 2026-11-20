@@ -42,6 +42,7 @@
       "awaiting_stuck": true,
       "ghost_enabled": true,
       "ghost_days": 7,
+      "no_runner_check": false,
       "workflow_minutes": [],
       "runner_minutes": []
     },
@@ -151,6 +152,11 @@
         },
         "required_checks": {
           "enabled": true
+        },
+        "commit_state": {
+          "enabled": false,
+          "include_other_apps": true,
+          "include_statuses": false
         },
         "release_assets": {
           "enabled": true,
@@ -273,6 +279,11 @@
         },
         "codeowners": {
           "enabled": false
+        },
+        "runs_deleted": {
+          "enabled": false,
+          "check_window_days": 14,
+          "max_checks": 50
         }
       },
       "penalty": {
@@ -282,7 +293,8 @@
         "low": 1,
         "branch": 5,
         "workflow": 3,
-        "codeowners": 1
+        "codeowners": 1,
+        "runs_deleted": 10
       }
     },
     "collab": {
@@ -345,6 +357,7 @@
     },
     "supply": {
       "enabled": false,
+      "incremental": false,
       "ignore": [],
       "ignore_uses": [],
       "max_calls_per_tick": 60,
@@ -407,6 +420,9 @@
     "events": ["build", "codeql", "report"],
     "allowed_repos": [],
     "answer_language": "",
+    "report_summary": {
+      "enabled": false
+    },
     "catalog": {
       "enabled": false,
       "ttl_minutes": 360,
@@ -503,6 +519,21 @@
     "max_verified_per_minute": 120,
     "persist_deliveries": true,
     "reject_stale": false
+  },
+  "kiosk": {
+    "enabled": false,
+    "font_scale_percent": 150,
+    "high_contrast": false,
+    "rotate_views": false,
+    "rotate_seconds": 30
+  },
+  "cli": {
+    "prefer_v1": true,
+    "default_format": "text",
+    "watch": {
+      "min_interval_seconds": 2,
+      "default_interval_seconds": 5
+    }
   },
   "chatops": {
     "enabled": false,
@@ -825,6 +856,7 @@
       "large_labels": [],
       "self_labels": [],
       "queue_warn_minutes": 20,
+      "observed_reads_per_cycle": 0,
       "runaway_runs_per_hour": 20,
       "runaway_ignore_events": ["pull_request", "pull_request_target"],
       "thirdparty_usd_per_minute": 0.0,
@@ -840,9 +872,6 @@
     "news_days": 7,
     "notify": false,
     "repos": []
-  },
-  "cli": {
-    "prefer_v1": true
   },
   "api": {
     "v1_enabled": "auto",

@@ -39,6 +39,8 @@ CI、コラボ、セキュリティに続く4つ目の監視です。GitHub に�
 
 1回の巡回で読むのは最大 `sentinels.supply.max_repos_per_tick` 個のリポジトリ（既定 10）、呼び出しは最大 `sentinels.supply.max_calls_per_tick` 回（60）です。リポジトリのワークフロー一覧に1回、新規または変更されたファイルごとに1回で、SHA が変わらないファイルは再読込しません。最後に読んでから最も長いものが先で、未解決のアラートがあるものは少し早めです。周期は `sentinels.supply.refresh_seconds` ごと（既定は1時間）。残りの API 枠が `sentinels.supply.min_rate_remaining` を下回る間は一時停止します。状態（`supply_state.json`）は未解決のアラートを保持するので、再起動しても再通知されず、リポジトリの最初の確認ではイベントを書きません。`sentinels.supply.max_files_per_repo` は1つのリポジトリで読むファイル数を制限し、超えたリポジトリは一部だけ読まれ、部分的として数えられます。 ラウンドは `sentinels.supply.deadline_s` 秒(既定 30、0 = 上限なし)を過ぎると新しいリポジトリを始めません。届かなかったものは次のラウンドを待ち、状態にはアラート 0 件ではなく `unchecked`(と `round_cut`)として名前付きで一覧されます。
 
+`sentinels.supply.incremental`(既定はオフ)をオンにすると、ワークフローファイル(そのブロブ SHA)とルールが前回の正常な走査と同じリポジトリは再検査されず、通知もそのまま残ります。見ないことで通知が閉じられることはなく、ルール、無視リスト、プログラムのバージョンのいずれかが変わると全リポジトリが再検査されます。ステータスには変更のなかったリポジトリ数(`unchanged`)が表示されます。よく知っているリポジトリ向けの選択であり、継承される既定値ではありません。
+
 ## 指摘を無視する
 
 `sentinels.supply.ignore` は、リンターのルール名を使った `リポジトリ:ファイル:ルール` のパターン（`*` は任意）を受け付けます。例: `myrepo:release.yml:unpinned_uses`。`unpinned_uses` は `unpinned` と `mutable_ref` の両方の背後にあるルールで、`permissions` は2つの権限シグナルの背後にあるルールです。`lint.ignore` のパターンはここには適用されません。
@@ -51,7 +53,7 @@ CI、コラボ、セキュリティに続く4つ目の監視です。GitHub に�
 
 ## 設定
 
-「設定」ページの「監視」サブタブ、「サプライチェーン」ブロック: `sentinels.supply.enabled`, `sentinels.supply.refresh_seconds`, `sentinels.supply.max_repos_per_tick`, `sentinels.supply.max_calls_per_tick`, `sentinels.supply.max_files_per_repo`, `sentinels.supply.min_rate_remaining`, `sentinels.supply.repos`, `sentinels.supply.ignore`, `sentinels.supply.ignore_uses`, `sentinels.supply.signals.unpinned.enabled`, `sentinels.supply.signals.unpinned.level`, `sentinels.supply.signals.mutable_ref.enabled`, `sentinels.supply.signals.mutable_ref.level`, `sentinels.supply.signals.permissions_wide.enabled`, `sentinels.supply.signals.permissions_wide.level`, `sentinels.supply.signals.permissions_missing.enabled`, `sentinels.supply.signals.permissions_missing.level`, `sentinels.supply.signals.pr_target_checkout.enabled`, `sentinels.supply.signals.pr_target_checkout.level`.
+「設定」ページの「監視」サブタブ、「サプライチェーン」ブロック: `sentinels.supply.enabled`, `sentinels.supply.incremental`, `sentinels.supply.refresh_seconds`, `sentinels.supply.max_repos_per_tick`, `sentinels.supply.max_calls_per_tick`, `sentinels.supply.max_files_per_repo`, `sentinels.supply.min_rate_remaining`, `sentinels.supply.repos`, `sentinels.supply.ignore`, `sentinels.supply.ignore_uses`, `sentinels.supply.signals.unpinned.enabled`, `sentinels.supply.signals.unpinned.level`, `sentinels.supply.signals.mutable_ref.enabled`, `sentinels.supply.signals.mutable_ref.level`, `sentinels.supply.signals.permissions_wide.enabled`, `sentinels.supply.signals.permissions_wide.level`, `sentinels.supply.signals.permissions_missing.enabled`, `sentinels.supply.signals.permissions_missing.level`, `sentinels.supply.signals.pr_target_checkout.enabled`, `sentinels.supply.signals.pr_target_checkout.level`.
 
 ## しないこと
 
