@@ -45,13 +45,15 @@ CI、コラボ、セキュリティに続く4つ目の監視です。GitHub に�
 
 `sentinels.supply.ignore` は、リンターのルール名を使った `リポジトリ:ファイル:ルール` のパターン（`*` は任意）を受け付けます。例: `myrepo:release.yml:unpinned_uses`。`unpinned_uses` は `unpinned` と `mutable_ref` の両方の背後にあるルールで、`permissions` は2つの権限シグナルの背後にあるルールです。`lint.ignore` のパターンはここには適用されません。
 
+`sentinels.supply.ignore_uses` は、ログインから見えず、モニターが参照を判断できない別の非公開組織の action や再利用可能ワークフローの `owner/repo` 名(`*` で任意、例: `other-org/*`)を受け付けます。固定されていない参照や移動する参照は検出事項から外れ、状態の `uses_left_out` として別に数えられるため、推測で報告されることも隠されることもありません。
+
 ## イベント、通知、スコア
 
 新しい指摘はイベント `security_new` を、解決したものは `security_fixed` を書きます（イベントには `sentinel: supply` とアラートのコードが入ります）。このため、各ユーザーの通知設定の「セキュリティ」欄とチャンネルが誰に知らせるかを決めます。リポジトリの最初の確認では何も通知しません。メトリクスには `supply_alerts`、`supply_findings`、`supply_penalty`（参考値: `sentinels.supply.penalty.per_finding`（2）と `cap_per_repo`（10）はファイルから読みます）、`supply_repos_checked`、`supply_repos_unreadable`、`supply_calls_last_hour` が入ります。スコアはこの減点を使いません。API は `GET /api/sentinel/supply` に応答し、「アラート」タブと `monitor_cli.py alerts --sentinel supply` はこれで絞り込めます。
 
 ## 設定
 
-「設定」ページの「監視」サブタブ、「サプライチェーン」ブロック: `sentinels.supply.enabled`, `sentinels.supply.incremental`, `sentinels.supply.refresh_seconds`, `sentinels.supply.max_repos_per_tick`, `sentinels.supply.max_calls_per_tick`, `sentinels.supply.max_files_per_repo`, `sentinels.supply.min_rate_remaining`, `sentinels.supply.repos`, `sentinels.supply.ignore`, `sentinels.supply.signals.unpinned.enabled`, `sentinels.supply.signals.unpinned.level`, `sentinels.supply.signals.mutable_ref.enabled`, `sentinels.supply.signals.mutable_ref.level`, `sentinels.supply.signals.permissions_wide.enabled`, `sentinels.supply.signals.permissions_wide.level`, `sentinels.supply.signals.permissions_missing.enabled`, `sentinels.supply.signals.permissions_missing.level`, `sentinels.supply.signals.pr_target_checkout.enabled`, `sentinels.supply.signals.pr_target_checkout.level`.
+「設定」ページの「監視」サブタブ、「サプライチェーン」ブロック: `sentinels.supply.enabled`, `sentinels.supply.incremental`, `sentinels.supply.refresh_seconds`, `sentinels.supply.max_repos_per_tick`, `sentinels.supply.max_calls_per_tick`, `sentinels.supply.max_files_per_repo`, `sentinels.supply.min_rate_remaining`, `sentinels.supply.repos`, `sentinels.supply.ignore`, `sentinels.supply.ignore_uses`, `sentinels.supply.signals.unpinned.enabled`, `sentinels.supply.signals.unpinned.level`, `sentinels.supply.signals.mutable_ref.enabled`, `sentinels.supply.signals.mutable_ref.level`, `sentinels.supply.signals.permissions_wide.enabled`, `sentinels.supply.signals.permissions_wide.level`, `sentinels.supply.signals.permissions_missing.enabled`, `sentinels.supply.signals.permissions_missing.level`, `sentinels.supply.signals.pr_target_checkout.enabled`, `sentinels.supply.signals.pr_target_checkout.level`.
 
 ## しないこと
 
