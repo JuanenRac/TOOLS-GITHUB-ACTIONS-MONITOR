@@ -516,7 +516,8 @@
     "max_bad_per_minute": 120,
     "max_verified_per_minute": 120,
     "persist_deliveries": true,
-    "reject_stale": false
+    "reject_stale": false,
+    "clock_skew_s": 300
   },
   "kiosk": {
     "enabled": false,
@@ -1076,7 +1077,7 @@
   "network": {
     "etag": true,
     "graphql_batch": 20,
-    "graphql_checks": false,
+    "graphql_checks": true,
     "use_proxy": false
   },
   "ops": {

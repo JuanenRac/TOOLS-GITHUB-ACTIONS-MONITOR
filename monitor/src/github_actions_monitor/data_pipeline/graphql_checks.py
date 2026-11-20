@@ -1,6 +1,6 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
-"""Reading the workflows of COLD repositories through GraphQL (OFF by default, `network.graphql_checks`).
+"""Reading the workflows of COLD repositories through GraphQL (ON by default, `network.graphql_checks`; a measure on a real account saved 95 % of the calls with no error, see docs/QUOTA.md).
 
 GraphQL has an allowance of its own, apart from the REST one, and one query can ask for many repositories (an alias each). For a repository that nothing has touched for a while, one read of the
 check suites of the last commit of its default branch tells which workflows are red or green, so a batch of up to `network.graphql_batch` repositories costs one GraphQL call instead of one REST call
@@ -17,12 +17,12 @@ STATS = {"calls": 0, "repos": 0, "fallbacks": 0, "cost": 0, "errors": 0}
 
 
 def settings(config):
-    """{"enabled": bool, "batch": int}; anything that is not a clean value gives the defaults (off, 20)."""
+    """{"enabled": bool, "batch": int}; a missing key gives the defaults (on, 20) and a value that is not a clean boolean or number turns it off / gives 20."""
     block = config.get("network") if isinstance(config, dict) else None
     block = block if isinstance(block, dict) else {}
     batch = block.get("graphql_batch")
     batch = batch if isinstance(batch, int) and not isinstance(batch, bool) and 1 <= batch <= 30 else DEFAULT_BATCH
-    return {"enabled": block.get("graphql_checks") is True, "batch": batch}
+    return {"enabled": block.get("graphql_checks", True) is True, "batch": batch}
 
 
 def stats(config=None):
