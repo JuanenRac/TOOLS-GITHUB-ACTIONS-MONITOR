@@ -3,7 +3,7 @@
 # GPL-3.0-or-later - see LICENSE
 """A small linter for the workflow files of a repository (`.github/workflows/*.yml`), to run BEFORE you push. Read-only and local: it opens files, nothing else.
 
-  py -3 bin/lint_workflows.py [PATH ...] [--remote OWNER/REPO ... [--anon]] [--json] [--fail-on info|warn|bad] [--lang CODE]
+  py -3 bin/lint_workflows.py [PATH ...] [--remote OWNER/REPO ... [--anon]] [--check-actions] [--inactive-years N] [--json] [--fail-on info|warn|bad] [--lang CODE]
 
 With no PATH it looks at `.github/workflows` of the current folder. A PATH is a workflow file or a folder that holds them (or a repository root). `--remote OWNER/REPO` reads the workflow
 files of a repository from GitHub through `gh` instead (no clone; one call for the list and one for each file) and says why when it cannot (SSO not authorised, no access). With `--anon` (and
@@ -25,6 +25,9 @@ Optional rules (off until `lint.rules.<rule>.enabled` is true):
   secrets_inherit    `secrets: inherit` in a call of a reusable workflow (the called workflow receives every secret of the caller)
   own_action_main    a `uses:` of an action of your own account that follows a branch (`@main`, `@master`) instead of a tag or a commit
   permissions_top    no `permissions:` block at the top of the file even though the jobs have their own (a job added later would get the broader default token)
+  archived_action    an action (or reusable workflow) of GitHub whose repository is ARCHIVED and, if `lint.maintenance.inactive` is on, one with no push for `lint.maintenance.inactive_years` years (2). It
+                     only informs (always `info`, it never makes the linter fail), asks GitHub once per action (`--check-actions` here; the monitor reads it through its own allowance, with a cache),
+                     and says so, instead of judging, when GitHub cannot be reached
 
 `unpinned_uses` tells an action of your own account (`lint.own_owners`, plus `github_owner`) from one of a third party in the `kind` of the finding; `lint.unpinned_own` can lower the own ones to
 information (`info`) or leave them out (`ignore`); the default (`same`) treats them like the rest.
@@ -44,14 +47,15 @@ import sys
 from pathlib import Path
 
 from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.integrations import action_health  # noqa: E402
 
 SHA_RE = re.compile(r"^[0-9a-f]{40}\Z")
 USES_RE = re.compile(r"^\s*-?\s*uses:\s*['\"]?([^'\"\s#]+)")
 SEVERITIES = ("info", "warn", "bad")
 EXIT_NOT_READ = 2      # `--remote` could not read a repository (or its name is not OWNER/REPO): never "clean"
-RULES = ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "own_action_main", "permissions_top")
-DEFAULT_SEVERITY = {"unpinned_uses": "warn", "permissions": "warn", "secrets_in_clear": "bad", "injection": "warn", "pr_target": "bad", "no_timeout": "warn", "secrets_inherit": "warn", "own_action_main": "info", "permissions_top": "info"}
-OPTIONAL = ("no_timeout", "secrets_inherit", "own_action_main", "permissions_top")      # off until the person switches them on: a new rule never adds findings by itself
+RULES = ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "own_action_main", "permissions_top", "archived_action")
+DEFAULT_SEVERITY = {"unpinned_uses": "warn", "permissions": "warn", "secrets_in_clear": "bad", "injection": "warn", "pr_target": "bad", "no_timeout": "warn", "secrets_inherit": "warn", "own_action_main": "info", "permissions_top": "info", "archived_action": "info"}
+OPTIONAL = ("no_timeout", "secrets_inherit", "own_action_main", "permissions_top", "archived_action")      # off until the person switches them on: a new rule never adds findings by itself
 OWN_MODES = ("same", "info", "ignore")
 OWNER_RE = re.compile(r"^[A-Za-z0-9-]{1,39}\Z")
 MOVING_REFS = ("main", "master", "develop", "dev", "trunk", "head")
@@ -98,7 +102,7 @@ UNTRUSTED = re.compile(r"\$\{\{\s*github\.(?:event\.(?:issue|pull_request|commen
 def settings(config):
     """`lint` of the configuration: {"enabled", "refresh_seconds", "rules": {rule: {"enabled", "severity"}}}, merged over the defaults."""
     out = {"enabled": True, "refresh_seconds": 3600, "in_report": True, "ignore": [], "rules": {r: {"enabled": r not in OPTIONAL, "severity": DEFAULT_SEVERITY[r]} for r in RULES},
-           "source": "clone", "api": dict(API_DEFAULTS), "sparse": dict(SPARSE_DEFAULTS)}
+           "source": "clone", "api": dict(API_DEFAULTS), "sparse": dict(SPARSE_DEFAULTS), "maintenance": action_health.settings(None)}
     out["rules"]["_own"] = {"owners": [], "unpinned": "same"}      # not a rule: who counts as "own" and what to do with an own action that is not pinned
     if config is not None:
         from github_actions_monitor.app import toolconfig
@@ -116,6 +120,7 @@ def settings(config):
             value = given.get(key)
             if isinstance(value, int) and not isinstance(value, bool) and ranges[key][0] <= value <= ranges[key][1]:
                 out[block][key] = value
+    out["maintenance"] = action_health.settings(user.get("maintenance"))
     if isinstance(user.get("own_owners"), list):
         out["rules"]["_own"]["owners"] += [x.lower() for x in user["own_owners"] if isinstance(x, str) and OWNER_RE.match(x)]
     if user.get("unpinned_own") in OWN_MODES:
@@ -135,7 +140,7 @@ def settings(config):
             if isinstance(item, dict):
                 if isinstance(item.get("enabled"), bool):
                     out["rules"][rule]["enabled"] = item["enabled"]
-                if item.get("severity") in SEVERITIES:
+                if item.get("severity") in SEVERITIES and rule != "archived_action":      # that one only informs, whatever the file says
                     out["rules"][rule]["severity"] = item["severity"]
     return out
 
@@ -151,8 +156,9 @@ def bounded(text):
     return [line[:MAX_LINE] for line in lines]
 
 
-def lint_text(text, name="workflow.yml", rules=None):
-    """The findings of one workflow file: [{"file", "line", "rule", "severity", "detail"}]. `rules` = settings()["rules"] (all on when None)."""
+def lint_text(text, name="workflow.yml", rules=None, maintenance=None):
+    """The findings of one workflow file: [{"file", "line", "rule", "severity", "detail"}]. `rules` = settings()["rules"] (all on when None). `maintenance` = an `action_health.Health` (or None): only
+    then, and only when the rule `archived_action` is on, are the actions named by the file looked up for being archived or without activity."""
     rules = rules or settings(None)["rules"]
     lines = bounded(text)
     found = []
@@ -168,7 +174,7 @@ def lint_text(text, name="workflow.yml", rules=None):
     def add(rule, line, detail="", severity=None, kind=""):
         cfg = rules.get(rule) or {}
         if cfg.get("enabled", rule not in OPTIONAL) and not silenced(line, rule):
-            base = cfg.get("severity", DEFAULT_SEVERITY[rule])
+            base = "info" if rule == "archived_action" else cfg.get("severity", DEFAULT_SEVERITY[rule])      # that rule never goes above information
             if severity and ORDER[severity] < ORDER[base]:
                 base = severity      # a weaker class never gets more serious than the rule says, only less
             found.append({"file": name, "line": line, "rule": rule, "severity": base, "detail": detail, "kind": kind})
@@ -196,6 +202,10 @@ def lint_text(text, name="workflow.yml", rules=None):
                     add("unpinned_uses", number, spec, severity="info" if (own and own_mode == "info") else None, kind="own" if own else "third_party")
                 if own and spec.split("@", 1)[1].lower() in MOVING_REFS:
                     add("own_action_main", number, spec)
+            if maintenance is not None and (rules.get("archived_action") or {}).get("enabled", False):
+                verdict = maintenance.verdict(spec)
+                if verdict:
+                    add("archived_action", number, verdict[1], kind=verdict[0])
             if spec.startswith("actions/checkout"):
                 window = "\n".join(lines[number:number + 6])
                 if re.search(r"ref:\s*\$\{\{\s*github\.event\.pull_request\.head\.(?:sha|ref)", window) or re.search(r"ref:\s*\$\{\{\s*github\.head_ref", window):
@@ -269,7 +279,7 @@ def workflow_files(path):
         return []
 
 
-def lint_path_status(path, rules=None, root=None):
+def lint_path_status(path, rules=None, root=None, maintenance=None):
     """(findings, problems) of every workflow file under `path`; file names are shown relative to `root` when given. A file that cannot be read is skipped and named in `problems` as
     (file, reason): one bad file never stops the others and never reads as a clean one. A path that does not exist gives ([], [(path, "not_found")]), never a clean bill of health."""
     out, problems = [], []
@@ -283,13 +293,13 @@ def lint_path_status(path, rules=None, root=None):
             problems.append((str(file), type(error).__name__))
             continue
         label = str(file.relative_to(root)).replace("\\", "/") if root and Path(root) in file.parents else file.name
-        out += lint_text(text, label, rules)
+        out += lint_text(text, label, rules, maintenance)
     return out, problems
 
 
-def lint_path(path, rules=None, root=None):
+def lint_path(path, rules=None, root=None, maintenance=None):
     """The findings of every workflow file under `path` (see lint_path_status for the files that could not be read)."""
-    return lint_path_status(path, rules, root)[0]
+    return lint_path_status(path, rules, root, maintenance)[0]
 
 
 def ignored(repo, finding, patterns):
@@ -298,32 +308,32 @@ def ignored(repo, finding, patterns):
     return any(fnmatch.fnmatchcase(f"{repo}:{name}:{finding['rule']}", pattern) for name in names for pattern in patterns or ())
 
 
-def scan_clones(workspace_root, repos, rules=None, ignore=None):
+def scan_clones(workspace_root, repos, rules=None, ignore=None, maintenance=None):
     """{repo: [findings]} for the repositories that have a clone with workflows. Plain file reads, no network. `ignore` = the patterns of lint.ignore."""
     result = {}
     for repo in repos:
         clone = Path(workspace_root) / repo
         if (clone / ".github" / "workflows").is_dir():
-            found = [f for f in lint_path(clone, rules, clone) if not ignored(repo, f, ignore)]
+            found = [f for f in lint_path(clone, rules, clone, maintenance) if not ignored(repo, f, ignore)]
             if found:
                 result[repo] = found
     return result
 
 
-def lint_remote(reader, repos, rules=None, ignore=None):
+def lint_remote(reader, repos, rules=None, ignore=None, maintenance=None):
     """{repo: [findings]} for the repositories whose workflow files were read without a clone (`remote_workflows.Reader`). Same rules and same `ignore` as `scan_clones`; no network here."""
     result = {}
     for repo in repos:
         texts = reader.texts(repo)
         found = []
         for name in sorted(texts):
-            found += [f for f in lint_text(texts[name], ".github/workflows/" + name, rules) if not ignored(repo, f, ignore)]
+            found += [f for f in lint_text(texts[name], ".github/workflows/" + name, rules, maintenance) if not ignored(repo, f, ignore)]
         if found:
             result[repo] = found
     return result
 
 
-def lint_remote_status(name, read=None, anon=False, config=None):
+def lint_remote_status(name, read=None, anon=False, config=None, maintenance=None):
     """`(findings, failure)` for `OWNER/REPO` read through the API of GitHub (no clone). `failure` is None when the repository was read, otherwise the reason why it was not (the name is not OWNER/REPO, the
     repository does not exist or the token cannot see it, SSO not authorised, no network...). Each failure is printed on the standard error. "Not read" is never the same as "read and clean"."""
     from github_actions_monitor.integrations import remote_workflows
@@ -351,7 +361,7 @@ def lint_remote_status(name, read=None, anon=False, config=None):
     if reason:
         print(i18n.t("lint.remote_failed", name=f"{owner}/{repo}", reason=i18n.t("lint.reason." + reason)), file=sys.stderr)
         return [], reason
-    return lint_remote(reader, [repo]).get(repo, []), None
+    return lint_remote(reader, [repo], maintenance=maintenance).get(repo, []), None
 
 
 def anonymous_allowed(config):
@@ -377,6 +387,19 @@ def summarize(by_repo):
     return {"findings": sum(counts.values()), "repos": len(by_repo), **counts, "by_rule": by_rule, "top": sorted(((r, len(v)) for r, v in by_repo.items()), key=lambda x: (-x[1], x[0]))[:5]}
 
 
+def _gh_json(endpoint):
+    """The JSON of one read of the API of GitHub through `gh` (raises when it cannot be read)."""
+    from github_actions_monitor.integrations import remote_workflows
+    return remote_workflows.gh_read(endpoint)
+
+
+def _say_maintenance(summary):
+    """On the standard error, what the check of archived actions could and could not do (so a run with no network is never read as 'all actions are healthy')."""
+    if summary["unread"] or summary["skipped"]:
+        print(i18n.t("lint.maintenance_offline", n=summary["unread"] + summary["skipped"]), file=sys.stderr)
+    print(i18n.t("lint.maintenance_summary", n=summary["checked"], archived=summary["archived"], inactive=summary["inactive"]), file=sys.stderr)
+
+
 def main(argv=None):
     i18n.cli_language()
     ap = argparse.ArgumentParser(description=i18n.t("lint.description"))
@@ -385,14 +408,22 @@ def main(argv=None):
     ap.add_argument("--fail-on", choices=SEVERITIES, default="bad", help=i18n.t("lint.help_fail_on"))
     ap.add_argument("--remote", action="append", metavar="OWNER/REPO", help=i18n.t("lint.help_remote"))
     ap.add_argument("--anon", action="store_true", help=i18n.t("lint.help_anon"))
+    ap.add_argument("--check-actions", action="store_true", help=i18n.t("lint.help_check_actions"))
+    ap.add_argument("--inactive-years", type=int, metavar="N", default=None, help=i18n.t("lint.help_inactive_years"))
     ap.add_argument("--lang", metavar="CODE", help=i18n.t("cli.help_lang"))
     args = ap.parse_args(argv)
     if args.lang:
         i18n.set_language(args.lang)
     findings = []
     unread = 0
+    health, rules = None, None
+    if args.check_actions or args.inactive_years:      # the information rule about archived actions: asked on purpose, it reads GitHub through `gh`
+        rules = settings(None)["rules"]
+        rules["archived_action"]["enabled"] = True
+        health = action_health.Health(_gh_json, inactive=bool(args.inactive_years), inactive_years=min(10, max(1, args.inactive_years or 2)))
+        health.begin(100)
     for path in args.paths or ([] if args.remote else ["."]):
-        found, problems = lint_path_status(path)
+        found, problems = lint_path_status(path, rules, None, health)
         findings += found
         for name, reason in problems:      # a path that is not there, or a file that cannot be read, is said and is never a clean one
             print(i18n.t("lint.path_unread", name=name, reason=i18n.t("lint.reason." + ("not_found" if reason == "not_found" else "error"))), file=sys.stderr)
@@ -402,9 +433,11 @@ def main(argv=None):
         from github_actions_monitor.app import toolconfig
         config = toolconfig.raw_config()
     for name in args.remote or []:
-        found, failure = lint_remote_status(name, anon=args.anon, config=config)
+        found, failure = lint_remote_status(name, anon=args.anon, config=config, maintenance=health)
         findings += found
         unread += 1 if failure else 0
+    if health is not None:
+        _say_maintenance(health.summary())
     if args.json:
         print(json.dumps(findings, ensure_ascii=False, indent=1))
     else:
@@ -412,7 +445,7 @@ def main(argv=None):
             print(f"{f['file']}:{f['line']}: [{f['severity']}] {i18n.t('lint.rule.' + f['rule'])}" + (f" ({f['detail']}{', ' + f['kind'] if f.get('kind') else ''})" if f["detail"] and f["detail"] != "missing" else ""))
         print(i18n.t("lint.summary", n=len(findings)))
     limit = SEVERITIES.index(args.fail_on)
-    if any(SEVERITIES.index(f["severity"]) >= limit for f in findings):
+    if any(SEVERITIES.index(f["severity"]) >= limit for f in findings if f["rule"] != "archived_action"):      # that rule only informs
         return 1
     return EXIT_NOT_READ if unread else 0      # a repository that could not be read is not a clean one
 

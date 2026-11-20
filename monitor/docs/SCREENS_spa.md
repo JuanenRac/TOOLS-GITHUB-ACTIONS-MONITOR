@@ -143,6 +143,8 @@ La pestaña Este navegador de los Ajustes tiene un bloque para subir el logo de 
 
 `screens.logo_overview`, `screens.logo_now` y `screens.logo_sentinels` eligen en qué pantallas de pared aparece (por defecto solo en general), `screens.logo_corner` la esquina (arriba a la derecha por defecto) y `screens.logo_max_width` y `screens.logo_max_height` el tamaño máximo en píxeles a 1920 x 1080 (160 x 64 por defecto; el logo crece con la pantalla). La imagen se ajusta dentro de ese tamaño sin deformarse y tiene un sitio propio en la cabecera o el pie, así que nunca tapa el contenido. Su fondo sigue transparente: un logo con fondo transparente se ve bien en los temas claros y en los oscuros.
 
+El panel Acerca de muestra siempre el logotipo del monitor. Con `ui.about_org_logo` activado (desactivado por defecto) muestra también a su lado este logotipo de su organización, con un texto alternativo en el idioma de la página y un tamaño que sigue el ancho del panel sin deformar la imagen. Si no se subió ningún logotipo, o el fichero no se puede leer, el panel lo dice y nada más cambia.
+
 ### Qué muestran y qué ocultan
 
 Los datos salen de `/api/screens/data?screen=overview` (o `now`, `sentinels`): una lista cerrada de campos construida con el último ciclo, la instantánea de los centinelas, las alertas y la puntuación. Nunca contiene un enlace, un título de commit, el nombre de un job, el nombre de una persona ni una ruta de este equipo, y los nombres de workflow de los repositorios ocultos también se ocultan. En el modo red las páginas necesitan el mismo token de acceso que el resto del monitor y la respuesta es de solo lectura.

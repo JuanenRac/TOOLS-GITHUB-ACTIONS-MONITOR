@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-5033_passing-brightgreen.svg" alt="5033 tests">
+  <img src="https://img.shields.io/badge/Tests-5091_passing-brightgreen.svg" alt="5091 tests">
 </p>
 
 > Surveille les workflows de tous vos dépôts et vous dit, sur une page locale, ce qui est rouge, ce qui est bloqué et ce qui vous attend.
@@ -61,6 +61,7 @@
 - **Huit langues** (en, es, de, fr, it, ja, zh, pt) avec l'anglais comme base ; changement dans les réglages.
 - **Sorties pour tableaux de bord** : `ci_red.json`, un point d'accès Prometheus et une source JSON pour Grafana, avec un tableau Grafana importable.
 - **Enregistrer et imprimer le rapport d'un onglet** : TXT, PDF (écrit par le moniteur lui-même) et JSON par la fenêtre Enregistrer sous du navigateur, et une page imprimée propre ; le même rapport dans chaque format.
+- **Icônes d'IA dans la barre, logos dans À propos et avis sur les actions abandonnées** : les deux icônes d'IA de la barre indiquent leur état et ouvrent leurs réglages d'un clic ; À propos affiche le logo du moniteur et, si vous l'autorisez, celui de votre organisation ; le linter peut aussi signaler, à titre d'information seulement, les actions utilisées par vos workflows qui sont archivées ou plus entretenues.
 - **Outils par lots** : planifient et lancent plusieurs builds à la fois ; rien n'est lancé sans `--go`.
 - **À propos et Aide dans la page** : le bouton **i** montre la version, l'édition, les liens, les fichiers, l'état de santé et un bouton qui copie les informations pour le support ; le bouton **?** (ou la touche `?`) ouvre toute la documentation, avec recherche et dans votre langue, sans Internet. La console offre `--about` et `--help-topics`, et une application interactive de terminal par onglets (`textual` facultatif).
 - **Avis de nouvelle version** : un badge discret quand une version plus récente est publiée ; il ne lit la page publique des versions qu'une fois par jour, n'installe jamais rien et peut être désactivé (toujours désactivé sur une installation isolée).
@@ -97,8 +98,8 @@ Méthode, hypothèses et comment le mesurer dans votre propre usage: [`monitor/d
 | | |
 |---|---|
 | **Maturité** | functional |
-| **Tests** | 5033 méthodes de test (`python -m unittest discover -s monitor/tests`) |
-| **Réglages** | 773 réglages, tous avec aide |
+| **Tests** | 5091 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Réglages** | 779 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, Python 3.11, 3.13 |
 

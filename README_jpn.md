@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-5033_passing-brightgreen.svg" alt="5033 tests">
+  <img src="https://img.shields.io/badge/Tests-5091_passing-brightgreen.svg" alt="5091 tests">
 </p>
 
 > 所有するすべてのリポジトリのワークフローを監視し、赤いもの・止まっているもの・対応待ちのものを、ローカルの1ページで教えます。
@@ -61,6 +61,7 @@
 - **8言語**（en、es、de、fr、it、ja、zh、pt）。英語が基本で、設定で切り替えます。
 - **ダッシュボード向け出力**：`ci_red.json`、Prometheus エンドポイント、Grafana 用 JSON ソースと、インポート可能な Grafana ダッシュボード。
 - **タブのレポートの保存と印刷**: TXT、PDF(モニター自身が作成)、JSON をブラウザーの「名前を付けて保存」ウィンドウから保存でき、すっきりした印刷ページも用意。すべての形式で同じレポートです。
+- **バーの AI アイコン、「バージョン情報」のロゴ、放置されたアクションの通知**: バーの 2 つの AI アイコンは状態を表示し、クリックで設定を開きます。「バージョン情報」にはモニターのロゴと、許可した場合は組織のロゴが表示されます。リンターは、ワークフローが使うアクションのうちアーカイブ済み、または保守されなくなったものを、情報としてのみ知らせることもできます。
 - **バッチツール**：多数のビルドをまとめて計画・実行します。`--go` なしでは何も実行されません。
 - **ページ内のバージョン情報とヘルプ**: **i** ボタンでバージョン、エディション、リンク、ファイル、動作状況、サポート用情報をコピーするボタンを表示し、**?** ボタン（またはキー `?`）でドキュメント全体を検索付き・お使いの言語でインターネットなしに開きます。コンソールには `--about` と `--help-topics`、タブ付きの対話型ターミナルアプリ（任意の `textual`）があります。
 - **新バージョンのお知らせ**: 新しいリリースが公開されると控えめなバッジを表示します。公開リリースページを1日1回読むだけで、何もインストールせず、オフにでき（隔離環境では常にオフ）ます。
@@ -97,8 +98,8 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **テスト** | テストメソッド 5033 件(`python -m unittest discover -s monitor/tests`) |
-| **設定** | 設定 773 件、すべてヘルプ付き |
+| **テスト** | テストメソッド 5091 件(`python -m unittest discover -s monitor/tests`) |
+| **設定** | 設定 779 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows、Python 3.11, 3.13 |
 

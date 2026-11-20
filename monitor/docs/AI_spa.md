@@ -18,6 +18,10 @@ Opcional y **apagado por defecto**. Un modelo de lenguaje puede resumir el parte
 - La clave nunca se guarda: se pone el NOMBRE de una variable de entorno. Los tres proveedores remotos ENVÍAN datos de tus repositorios a un tercero.
 
 
+## Los iconos de IA de la barra
+
+La barra de arriba a la derecha muestra dos iconos: el chip es la IA integrada en el monitor y las ondas son una herramienta de IA externa que lee el monitor. Una insignia dice el estado sin depender del color: una marca de verificación es activa, una barra oblicua (con el dibujo discontinuo) es inactiva y un triángulo es un error (la IA integrada está configurada pero no responde). Pase el ratón para ver el estado exacto; pulse el icono, o Intro o Espacio cuando tenga el foco, para abrir la sección de IA de los ajustes.
+
 ## Qué puede ver
 
 - Toda entrada se limpia: se quitan los caracteres de control, se tachan los secretos por patrón, se limita la longitud, el contenido va entre delimitadores aleatorios y se declara dato no fiable. La respuesta se corta y sus enlaces se neutralizan.

@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-5033_passing-brightgreen.svg" alt="5033 tests">
+  <img src="https://img.shields.io/badge/Tests-5091_passing-brightgreen.svg" alt="5091 tests">
 </p>
 
 > Überwacht die Workflows aller deiner Repositories und zeigt dir auf einer lokalen Seite, was rot ist, was hängt und was auf dich wartet.
@@ -61,6 +61,7 @@
 - **Acht Sprachen** (en, es, de, fr, it, ja, zh, pt) mit Englisch als Basis; Wechsel in den Einstellungen.
 - **Ausgaben für Dashboards**: `ci_red.json`, ein Prometheus-Endpunkt und eine JSON-Quelle für Grafana samt importierbarem Grafana-Dashboard.
 - **Bericht eines Tabs speichern und drucken**: TXT, PDF (vom Monitor selbst geschrieben) und JSON über das Fenster Speichern unter des Browsers sowie eine saubere gedruckte Seite; derselbe Bericht in jedem Format.
+- **KI-Symbole in der Leiste, Logos unter Info und ein Hinweis auf verlassene Actions**: Die zwei KI-Symbole der Leiste zeigen ihren Zustand und öffnen per Klick ihre Einstellungen; Info zeigt das Logo des Monitors und, wenn Sie es erlauben, das Ihrer Organisation; der Linter kann außerdem, nur zur Information, melden, welche von Ihren Workflows genutzten Actions archiviert sind oder nicht mehr gepflegt werden.
 - **Stapelwerkzeuge**: viele Builds auf einmal planen und starten; ohne `--go` wird nichts ausgelöst.
 - **Über und Hilfe in der Seite**: die **i**-Taste zeigt Version, Ausgabe, Links, Dateien, Zustand und eine Taste, die die Informationen für den Support kopiert; die **?**-Taste (oder die Taste `?`) öffnet die gesamte Dokumentation, durchsuchbar und in Ihrer Sprache, ohne Internet. Die Konsole kennt `--about` und `--help-topics` und eine interaktive Terminalanwendung mit Reitern (optional `textual`).
 - **Hinweis auf eine neuere Version**: ein dezentes Abzeichen, wenn eine neuere Version erscheint; es liest nur einmal am Tag die öffentliche Release-Seite, installiert nie etwas und lässt sich abschalten (bei netzgetrennter Installation immer aus).
@@ -97,8 +98,8 @@ Methode, Annahmen und wie Sie es in Ihrer eigenen Nutzung messen: [`monitor/docs
 | | |
 |---|---|
 | **Reifegrad** | functional |
-| **Tests** | 5033 Testmethoden (`python -m unittest discover -s monitor/tests`) |
-| **Einstellungen** | 773 Einstellungen, alle mit Hilfe |
+| **Tests** | 5091 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Einstellungen** | 779 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, Python 3.11, 3.13 |
 

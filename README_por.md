@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-5033_passing-brightgreen.svg" alt="5033 tests">
+  <img src="https://img.shields.io/badge/Tests-5091_passing-brightgreen.svg" alt="5091 tests">
 </p>
 
 > Vigia os workflows de todos os seus repositórios e diz-lhe, numa página local, o que está a vermelho, o que está encravado e o que o espera.
@@ -61,6 +61,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 - **Oito idiomas** (en, es, de, fr, it, ja, zh, pt) com o inglês como base; muda-se nas definições.
 - **Saídas para painéis**: `ci_red.json`, um ponto de acesso Prometheus e uma fonte JSON para o Grafana, com um painel Grafana importável.
 - **Guardar e imprimir o relatório de um separador**: TXT, PDF (escrito pelo próprio monitor) e JSON pela janela Guardar como do navegador, e uma página impressa limpa; o mesmo relatório em todos os formatos.
+- **Ícones de IA na barra, logótipos em Acerca de e aviso sobre ações abandonadas**: os dois ícones de IA da barra mostram o seu estado e abrem as definições com um clique; Acerca de mostra o logótipo do monitor e, se o permitir, o da sua organização; o linter pode também indicar, apenas a título informativo, quais as ações usadas pelos seus fluxos de trabalho que estão arquivadas ou já não são mantidas.
 - **Ferramentas por lotes**: planeiam e lançam várias compilações de uma vez; nada é lançado sem `--go`.
 - **Acerca de e Ajuda na página**: o botão **i** mostra a versão, a edição, as ligações, os ficheiros, o estado de saúde e um botão que copia a informação para o suporte; o botão **?** (ou a tecla `?`) abre toda a documentação, com pesquisa e no seu idioma, sem Internet. A consola tem `--about` e `--help-topics`, e uma aplicação interativa de terminal por separadores (`textual` opcional).
 - **Aviso de versão nova**: um emblema discreto quando sai uma versão mais recente; só lê a página pública de versões uma vez por dia, nunca instala nada e pode ser desligado (sempre desligado numa instalação isolada).
@@ -97,8 +98,8 @@ Método, pressupostos e como medi-lo na sua própria utilização: [`monitor/doc
 | | |
 |---|---|
 | **Maturidade** | functional |
-| **Testes** | 5033 métodos de teste (`python -m unittest discover -s monitor/tests`) |
-| **Definições** | 773 definições, todas com ajuda |
+| **Testes** | 5091 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Definições** | 779 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, Python 3.11, 3.13 |
 

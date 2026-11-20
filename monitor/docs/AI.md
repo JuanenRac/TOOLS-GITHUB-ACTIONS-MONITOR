@@ -18,6 +18,10 @@ Optional and **off by default**. A language model can summarise the daily report
 - The key is never saved: you set the NAME of an environment variable. The three remote providers SEND data of your repositories to a third party.
 
 
+## The AI icons of the bar
+
+The bar at the top right shows two icons: the chip is the AI built into the monitor and the waves are an external AI tool that reads the monitor. A badge tells the state without depending on colour: a check is on, a slash (with a dashed drawing) is off, and a triangle is an error (the built-in AI is configured but does not answer). Hover for the exact state; click the icon, or press Enter or Space when it has the focus, to open the AI section of the Settings.
+
 ## What it may see
 
 - Every input is cleaned: control characters removed, secrets redacted by pattern, length capped, the content placed between random delimiters and declared untrusted data. The answer is cut and its links defused.
