@@ -32,6 +32,7 @@ MIN_SECRET = 32
 SECRET_ENV = "MONITOR_WEBHOOK_SECRET"      # the default name of the variable that holds the shared secret
 ENV_NAME_RE = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}\Z")
 MAX_BODY = 262144
+CLOCK_SKEW_S = 300               # the default of `webhook.clock_skew_s`: seconds two clocks (the one of the delivery and the one of this computer) may differ before an event looks stale or a mark looks like it is in the future
 MAX_VERIFIED_PER_MINUTE = 120    # the default of `webhook.max_verified_per_minute`: requests that carry a good signature one address (a tunnel is ONE address) may send per minute
 SEEN_SAVE_EVERY = 2.0            # seconds: the memory of deliveries is written at most this often
 MAX_DELIVERIES = 2000        # the replay memory is bounded: the oldest delivery ids fall out first
@@ -117,7 +118,7 @@ def guard_settings(config):
     owners = [o for o in (cfg.get("allowed_owners") or []) if isinstance(o, str) and re.match(r"^[A-Za-z0-9-]{1,39}$", o)] if isinstance(cfg.get("allowed_owners"), list) else []
     return {"replay_seconds": number("replay_seconds", 3600, 60, 86400), "max_per_minute": number("max_per_minute", 30, 1, 600), "max_bad_per_minute": number("max_bad_per_minute", 120, 1, 6000),
             "max_verified_per_minute": number("max_verified_per_minute", MAX_VERIFIED_PER_MINUTE, 1, 6000), "reject_stale": cfg.get("reject_stale") is True, "persist_deliveries": cfg.get("persist_deliveries", True) is True,
-            "allowed_owners": owners}
+            "clock_skew_s": number("clock_skew_s", CLOCK_SKEW_S, 0, 3600), "allowed_owners": owners}
 
 
 _guard_lock = threading.Lock()
@@ -191,11 +192,13 @@ def coverage(config, now=None):
     "fallback": "poll"[, "live_repos"]}. `live` = the last event is newer than `savings.webhook_window_minutes`; `quiet` = it is older (nothing arrived for a while, which is also what a lost tunnel looks like); `waiting` =
     switched on and nothing yet. The polling is always the fallback: it reads whatever the events did not tell, so a missed delivery never leaves the state wrong for longer than one slow turn."""
     from github_actions_monitor.data_pipeline import savings
-    from github_actions_monitor.util import clock
     now = time.time() if now is None else now
     window = savings.settings(config or {})["webhook_window_minutes"]
     with _guard_lock:
-        times = [t for t in _accepted if not clock.in_future(t, now)]      # a mark ahead of the clock (the clock was set back) is not believed: it would keep the state "live" until the clock caught up
+        skew = guard_settings(config)["clock_skew_s"]
+        times = [now if t > now + skew else t for t in _accepted if t <= now + 24 * 3600.0]      # an event is a fact: if the clock was set back since it was marked, it arrived "now" and ages from here; a mark more than a day ahead is not believed
+        _accepted.clear()
+        _accepted.extend(times)
         since = _started[0]
     out = {"state": "off", "last_age_seconds": None, "last_hour": sum(1 for t in times if t > now - 3600), "window_minutes": window, "watching_seconds": max(0, int(now - since)), "fallback": "poll"}
     if not active(config):
@@ -267,9 +270,10 @@ def verify(secret, body, header):
         return False
 
 
-def event_is_stale(event, body, window, now=None):
-    """True when a `workflow_run` or `workflow_job` event reports a moment older than `window` seconds (its `updated_at`, or `completed_at` of a job): a captured delivery sent again long afterwards. Whatever
-    cannot be read is not stale (the other guards stay)."""
+def event_is_stale(event, body, window, now=None, skew=0):
+    """True when a `workflow_run` or `workflow_job` event reports a moment older than `window` seconds plus `skew` (its `updated_at`, or `completed_at` of a job): a captured delivery sent again long afterwards.
+    The clock of this computer is the reference and `webhook.clock_skew_s` is what it may be ahead of the one of the delivery, so a slow clock never makes a fresh event look old. Whatever cannot be read is not
+    stale (the other guards stay)."""
     if event not in ("workflow_run", "workflow_job"):
         return False
     now = time.time() if now is None else now
@@ -278,7 +282,7 @@ def event_is_stale(event, body, window, now=None):
         moment = _time(obj.get("updated_at") if event == "workflow_run" else (obj.get("completed_at") or obj.get("started_at")))
     except (ValueError, KeyError, TypeError, AttributeError):
         return False
-    return moment is not None and moment < now - window
+    return moment is not None and moment < now - window - max(0, skew)
 
 
 def handle(config, body, headers, watched, address=None):
@@ -305,7 +309,7 @@ def handle(config, body, headers, watched, address=None):
         save_memory()      # the memory survives a restart (once load_memory was told where)
     if seen_id or seen_body:     # a valid request captured and sent again: answered, never acted on
         return 202, {"ok": True, "ignored": True, "duplicate": True}, None
-    if guard["reject_stale"] and event_is_stale(headers.get("X-GitHub-Event"), body, guard["replay_seconds"]):
+    if guard["reject_stale"] and event_is_stale(headers.get("X-GitHub-Event"), body, guard["replay_seconds"], skew=guard["clock_skew_s"]):
         return 202, {"ok": True, "ignored": True, "stale": True}, None
     event = headers.get("X-GitHub-Event")
     if event not in EVENTS:

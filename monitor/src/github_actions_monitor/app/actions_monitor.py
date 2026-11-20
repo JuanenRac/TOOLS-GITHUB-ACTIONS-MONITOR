@@ -107,7 +107,7 @@ DEFAULTS = {
     "report_history_days": 30,   # (before 1.5.0: parte_history_days, still read)
     "sentinel": {"enabled": True},
     "ai": {"provider": "none"},
-    "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30, "max_bad_per_minute": 120, "max_verified_per_minute": 120, "reject_stale": False, "persist_deliveries": True},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
+    "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30, "max_bad_per_minute": 120, "max_verified_per_minute": 120, "reject_stale": False, "persist_deliveries": True, "clock_skew_s": 300},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
     "chatops": {"enabled": False, "slack": {"enabled": False, "signing_secret_env": "MONITOR_SLACK_SIGNING_SECRET"}, "discord": {"enabled": False, "public_key_env": "MONITOR_DISCORD_PUBLIC_KEY"}, "allowed_teams": [], "allowed_channels": [], "allowed_users": [],
                 "allowed_words": ["help", "status", "alerts", "red", "queue", "score"], "max_rows": 8, "show_repo_names": "all", "links": True, "max_age_seconds": 300, "rate_per_user_per_minute": 6, "rate_per_channel_per_minute": 20, "rate_per_minute": 60},   # read only commands from Slack and Discord, see chatops/inbound.py (off by default; the proofs are only in the environment)
     "config_check": {"strict": False},      # OFF: a key nobody reads, a wrong type or a number out of range is named at the start; ON: the monitor refuses to start (configcheck.py)
@@ -153,7 +153,7 @@ DEFAULTS = {
     "organizations": {"discover": False},                                    # OFF: list the organisations of the login (orgs.py)
     "finops": {"jobs_per_cycle": 0},
     "fleet": {"page_size": 50, "group_by": "ecosystem", "sort": "risk", "labels": [], "saved_filters": []},      # the fleet view of the Team tab (health/fleet.py)
-    "network": {"use_proxy": False, "etag": True, "graphql_checks": False, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
+    "network": {"use_proxy": False, "etag": True, "graphql_checks": True, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
     "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
     "pagination": {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3, "cursor_pages": 3},      # pages of 100 followed when a list is full, and said when something is cut (paging.py)
     "sampling": {"default_branch_probe": False, "active_probe": False, "min_coverage_minutes": 30, "api_budget_per_hour": 0},      # how much of a repository the list of runs shows, a second look at the default branch, a budget of requests (sampling.py)

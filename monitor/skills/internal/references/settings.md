@@ -348,7 +348,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `modes.low.runs_per_repo` | `-` | quota | Low: runs read per repository |
 | `network.etag` | `true` | quota | Conditional reads (ETag) |
 | `network.graphql_batch` | `20` | quota | Repositories per GraphQL batch |
-| `network.graphql_checks` | `false` | quota | Read quiet repositories through GraphQL (own allowance) |
+| `network.graphql_checks` | `true` | quota | Read quiet repositories through GraphQL (own allowance) |
 | `network.use_proxy` (secure) | `false` | notify | Use the proxy of the environment for notifications |
 | `notify.allow_private_targets` (secure) | `-` | notify | Allow private destinations |
 | `notify.channels.apprise.enabled` (secure) | `-` | notify | notify.channels.apprise.enabled |
@@ -757,6 +757,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `upstream.requests_per_hour` | `6` | advanced | Requests an hour |
 | `watchdog_max_abandoned` | `8` | polling | Most calls to GitHub left hanging |
 | `watchdog_minutes` | `10` | polling | Restart a stuck refresh after |
+| `webhook.clock_skew_s` | `300` | webhook | Clock skew allowed |
 | `webhook.enabled` (secure) | `false` | webhook | Receiver on |
 | `webhook.live_events_keep` | `-` | webhook | Events kept |
 | `webhook.max_bad_per_minute` | `120` | webhook | Requests with a bad signature per address |
