@@ -67,7 +67,7 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/chatops/slack` | POST | public | a slash command of Slack, read only (signed with the v0 HMAC of Slack, off by default) |
 | `/api/compare` | GET | viewer | this period against the one before, read only, from the ledger and the snapshots of the score (`?window=`, `?days=`, `?baseline=`, `?from=`/`?to=`, `?format=json|ndjson|csv`): every figure with its change, direction and state (`insufficient_data`, `baseline_unavailable` instead of a made-up number), and what changed (Complete only, off by default) |
 | `/api/credential` | POST | admin | replace the GitHub login without restarting (this computer only) |
-| `/api/credential/probe` | GET | viewer | does the login (and the GitHub App) work: who it is, classic or fine-grained, scopes it lacks, repositories seen, allowance left, installations of the App (this computer only; at most one real check every 10 seconds) |
+| `/api/credential/probe` | POST | admin | does the login (and the GitHub App) work: who it is, classic or fine-grained, scopes it lacks, repositories seen, allowance left, installations of the App (this computer only; at most one real check every 10 seconds) |
 | `/api/data` | GET | viewer | the main picture: repositories, runs, failing, active, rate |
 | `/api/discovery` | GET | viewer | repositories the monitor found and suggestions |
 | `/api/discovery/group` | POST | maintainer | put discovered repositories in a group |

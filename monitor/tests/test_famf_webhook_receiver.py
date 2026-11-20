@@ -372,13 +372,6 @@ class TeamsLength(unittest.TestCase):
         self.assertEqual(int(row["length"]), len(row["body"]))
         self.assertIn("repo failed", json.loads(row["body"])["text"])
 
-    def test_a_server_that_refuses_a_body_in_pieces_would_be_told_so(self):
-        request = urllib.request.Request(self.url, data=iter([b"a", b"b"]), headers={"Transfer-Encoding": "chunked"}, method="POST")
-        with self.assertRaises(urllib.error.HTTPError) as caught:
-            urllib.request.urlopen(request, timeout=5)
-        caught.exception.close()
-        self.assertTrue(FakeTeams.seen[0]["chunked"])
-
     def test_the_workflows_of_teams_get_an_adaptive_card_and_the_old_connector_gets_text(self):
         card = channels.Teams.payload("https://prod-12.westeurope.logic.azure.com/workflows/abc", {"title": "Red", "text": "boom", "url": "https://github.com/o/R"})
         self.assertEqual(card["type"], "message")

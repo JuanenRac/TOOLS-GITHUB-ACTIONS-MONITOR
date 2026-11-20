@@ -318,8 +318,8 @@ class TheWebhookHasItsOwnProofInTheNetworkMode(NetworkCase):
 #: every route that answers 403 "local_only" to a client of the network (the keys, the actions on GitHub, the tests of channels, the state of the pool and of the App)
 LOCAL_ONLY_POST = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/ai/models/refresh", "/api/ai/models/test", "/api/ai/models/data", "/api/ai/doctor", "/api/notify/test", "/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan",
                    "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures", "/api/ai/prompts/clear", "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run", "/api/report-files/summary", "/api/credential", "/api/ops/backup", "/api/ops/purge",
-                   "/api/updates/check", "/api/updates/plan", "/api/updates/apply", "/api/updates/rollback", "/api/webhook/redeliver")
-LOCAL_ONLY_GET = ("/api/quota-pool/status", "/api/github-app/status", "/api/credential/probe", "/api/report/tab.pdf")
+                   "/api/updates/check", "/api/updates/plan", "/api/updates/apply", "/api/updates/rollback", "/api/webhook/redeliver", "/api/credential/probe")
+LOCAL_ONLY_GET = ("/api/quota-pool/status", "/api/github-app/status", "/api/report/tab.pdf")
 
 
 class EveryLocalOnlyRouteRefusesAClientOfTheNetwork(NetworkCase):
@@ -350,7 +350,7 @@ class EveryLocalOnlyRouteRefusesAClientOfTheNetwork(NetworkCase):
             self.assertRegex(SOURCE, r"if path in " + table + r":[^\n]*\n\s+if not self\.guard\(\) or not self\.this_computer\(\)", table + " must be guarded by this_computer")
             found.update(routes)
         self.assertEqual(found, set(LOCAL_ONLY_POST) | set(LOCAL_ONLY_GET), "a new route that is local only goes in the table (and a route that stops being local only must be taken out on purpose)")
-        self.assertEqual(SOURCE.count("self.this_computer()"), 7, "a new call to this_computer() needs its row in the table above")
+        self.assertEqual(SOURCE.count("self.this_computer()"), 6, "a new call to this_computer() needs its row in the table above")
 
 
 if __name__ == "__main__":

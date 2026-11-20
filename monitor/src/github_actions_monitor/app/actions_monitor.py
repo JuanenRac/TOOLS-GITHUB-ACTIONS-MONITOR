@@ -1900,7 +1900,7 @@ AI_MODEL_POST = ("/api/ai/models/refresh", "/api/ai/models/test", "/api/ai/model
 THIS_COMPUTER_ACTIONS = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test") + AI_MODEL_POST
 THIS_COMPUTER_ADVANCED = ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures", "/api/ai/prompts/clear",
                           "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run", "/api/report-files/summary", "/api/ops/backup", "/api/ops/purge",
-                          "/api/updates/check", "/api/updates/plan", "/api/updates/apply", "/api/updates/rollback", "/api/webhook/redeliver")
+                          "/api/updates/check", "/api/updates/plan", "/api/updates/apply", "/api/updates/rollback", "/api/webhook/redeliver", "/api/credential/probe")
 THIS_COMPUTER_POST = THIS_COMPUTER_ACTIONS + THIS_COMPUTER_ADVANCED
 
 
@@ -3769,12 +3769,6 @@ class Handler(BaseHTTPRequestHandler):
                 return
             from github_actions_monitor.integrations import github_app
             self.json_reply(github_app.status(LIVE_CONFIG or toolconfig.raw_config()))
-        elif path == "/api/credential/probe":      # this computer only: does the login (and the App) work, with which scopes and how much allowance (never a token or a key); a second ask within 10 seconds gets the last answer
-            if not self.guard() or not self.this_computer():
-                return
-            from github_actions_monitor.integrations import credential_probe
-            config = LIVE_CONFIG or toolconfig.raw_config()
-            self.json_reply(credential_probe.probe(config, lambda args: run_gh(args[1:]), toolconfig.github_owner(config)))
         elif path == "/api/ai/state":      # read only, versioned: everything the monitor says, as signals (signals.py); the same in the lite and the complete edition
             if not self.guard():
                 return
@@ -4662,6 +4656,9 @@ def handle_advanced_post(path, request, who=""):
         answer = webhook_redeliver_now(config)
         _audit_plain("webhook_redeliver", who, "", {"asked": answer["asked"]}, "ok")
         return {"ok": True, **answer}
+    if path == "/api/credential/probe":      # does the login (and the GitHub App) work: a few small reads, nothing written; at most one real check every 10 seconds (a GET never starts gh, so this is a POST)
+        from github_actions_monitor.integrations import credential_probe
+        return credential_probe.probe(config, lambda args: run_gh(args[1:]), toolconfig.github_owner(config))
     if path == "/api/ops/backup":      # make a copy now (admin, from this computer); Complete only. The answer says whether it worked, never a path of the person or a secret
         if LITE["on"]:
             return {"ok": False, "status": "lite"}
