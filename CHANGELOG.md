@@ -12,6 +12,16 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- **Every red says what started it** (pull request, push to main, scheduled, manual, merge queue, chained workflow): the class travels with the red rows, with the failing runs of `/api/data` (`cls`) and with the `ci.red` alerts, which show it as a small tag and can be filtered by it in the Alerts tab ("Started by").
+
+- **Expected red, with a reason, an owner and an end** (`expected_red.enabled`, off by default; `expected_red.max_days`, 30): a workflow that is red on purpose for a while (a pipeline under construction) is marked from the Alerts tab or the palette; while the mark lasts its red is listed apart, is not counted and does not alert, and when it runs out the red comes back and one alert says so. It is not a silence by pattern: it names one workflow (or `*` for a whole repository), it needs a reason and an owner and it can never last longer than the maximum. `GET` and `POST /api/expected-red`; a note of this monitor, never a change on GitHub.
+
+- **A warning about abnormal clones by user** (`audit_feed.clone_alert.enabled`, off by default; `threshold`, `window_hours`, `check_minutes`, `bot_patterns`): it reads the audit log of the organization (the git events, which only some plans offer) at most every `check_minutes` minutes and names the users who cloned more different repositories than the threshold in the window, leaving out robots by name; the alert names the user and the repositories, never an address. `GET /api/clone-anomalies`.
+
+- **Metadata columns in the Repositories table** (`fleet.meta_columns`, empty by default; `fleet.meta_per_call`, `fleet.meta_ttl_hours`): up to five columns whose value is one line of a file of each repository, found by a path and a regular expression (a template version, the pin of an SDK). The files are read with conditional reads, the value is kept by the SHA of the file, a few files are read per round, a missing file is a dash and a regular expression that could take exponential time is refused. `GET /api/meta-columns`.
+
+- **People from outside the team who got no answer** (`sentinels.collab.rules.external_days`, `sentinels.collab.rules.team_members`): with the watch of outsiders on, an issue or a pull request of someone outside the team that nobody has answered after the chosen number of days is an alert (until now only issues, after one day); the people of the team list are never chased and only a flag is kept, never their name.
+
 - **The monitor can be installed as an app on a phone, a tablet or a computer** (`pwa.enabled`, off by default; `pwa.refresh_on_return`, on): the page offers a manifest, icons and a small service worker that keeps only an offline page and the icons, never the page or any data, and when the app comes back to the front or the network returns the page asks for fresh data at once. The files are served behind the access token of the network mode.
 
 - **A compact view for a phone** (`ui.compact`, `auto` by default; `?compact=1` or `?compact=0` for one window): in a narrow window the menu goes to the top as a row of tabs, the spacing tightens, the tables scroll sideways, a touch screen gets targets of at least 44 pixels and the dialogs follow the height left by the on-screen keyboard.

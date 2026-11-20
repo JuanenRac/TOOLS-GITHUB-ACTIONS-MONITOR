@@ -224,6 +224,9 @@ _f(_T_GENERAL, "fleet", "fleet.sort", "enum", ("risk", "name", "last_run", "stat
 _f(_T_GENERAL, "fleet", "fleet.show_all_active", "bool", restart=False)
 _f(_T_GENERAL, "fleet", "fleet.labels", "names", restart=False)
 _f(_T_GENERAL, "fleet", "fleet.saved_filters", "names", restart=False)
+_f(_T_GENERAL, "fleet", "fleet.meta_columns", "metacols", restart=False)
+_f(_T_GENERAL, "fleet", "fleet.meta_per_call", "int", (1, 200), unit="calls", restart=False)
+_f(_T_GENERAL, "fleet", "fleet.meta_ttl_hours", "int", (1, 168), restart=False)
 _f("quota", "modes", "modes.auto_low", "bool", restart=False)
 _f("quota", "modes", "modes.auto_low_enter", "int", (50, 4000), restart=False, unit="calls")
 _f("quota", "modes", "modes.auto_low_exit", "int", (100, 5000), restart=False, unit="calls")
@@ -394,6 +397,15 @@ _f(_T_SENT, "collab", "sentinels.collab.rules.pr_review_pending_days", "int", (1
 _f(_T_SENT, "collab", "sentinels.collab.rules.pr_draft_max_days", "int", (1, 365))
 _f(_T_SENT, "collab", "sentinels.collab.rules.pr_conflict_days", "int", (1, 90))
 _f(_T_SENT, "collab", "sentinels.collab.rules.watch_external_comments", "bool")
+_f(_T_SENT, "collab", "sentinels.collab.rules.external_days", "int", (1, 90))
+_f(_T_SENT, "collab", "sentinels.collab.rules.team_members", "names")
+_f(_T_SENT, "expected_red", "expected_red.enabled", "bool", restart=False)
+_f(_T_SENT, "expected_red", "expected_red.max_days", "int", (1, 365), restart=False)
+_f(_T_SENT, "clones", "audit_feed.clone_alert.enabled", "bool", restart=False)
+_f(_T_SENT, "clones", "audit_feed.clone_alert.threshold", "int", (1, 1000), unit="repos", restart=False)
+_f(_T_SENT, "clones", "audit_feed.clone_alert.window_hours", "int", (1, 168), restart=False)
+_f(_T_SENT, "clones", "audit_feed.clone_alert.check_minutes", "int", (5, 1440), restart=False)
+_f(_T_SENT, "clones", "audit_feed.clone_alert.bot_patterns", "names", restart=False)
 _f(_T_SENT, "collab", "sentinels.collab.rules.ignore_labels", "names")
 # --- Security sentinel (1.9.1; the weights of the penalty it puts on the score, sentinels.security.penalty.*, are read from the file)
 _f(_T_SENT, "security", "sentinels.security.enabled", "bool")
@@ -1009,6 +1021,17 @@ def check_value(path, value):
             if not isinstance(group, list) or not group or len(group) > 8 or not all(isinstance(n, str) and FILE_NAME_RE.match(n) and ".." not in n for n in group):
                 return False, "list"
         return True, [list(g) for g in value]
+    if kind == "metacols":      # fleet.meta_columns: [{"name", "path", "regex"}], at most 5, each one checked by data_pipeline/meta_columns.py (a risky expression is refused)
+        from github_actions_monitor.data_pipeline import meta_columns
+        if not isinstance(value, list) or len(value) > meta_columns.MAX_COLUMNS:
+            return False, "list"
+        clean = []
+        for item in value:
+            column, _why = meta_columns.valid_column(item)
+            if column is None or set(item) - {"name", "path", "regex"}:
+                return False, "list"
+            clean.append({"name": column["name"], "path": column["path"], "regex": column["regex"]})
+        return True, clean
     if kind == "sources":
         if not isinstance(value, list) or len(value) > 20:
             return False, "list"

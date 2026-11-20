@@ -9,7 +9,8 @@ the pull requests that could conflict, the detail of the pull request. Nothing e
 What it flags (all of it can be tuned or silenced under `sentinels.collab.rules`):
   collab.issue.stale       an open issue with no activity for `issue_stale_days`
   collab.issue.critical    an open issue with one of the `issue_critical_labels` (always, whatever its age)
-  collab.issue.external    (only with `watch_external_comments`) an issue opened by someone outside the team that nobody has answered after a day
+  collab.issue.external    (only with `watch_external_comments`) an issue or a pull request opened by someone outside the team that nobody has answered after `external_days` days
+                           (`team_members` names the people who are part of the team even when GitHub does not say so; only a flag is kept, never a name)
   collab.pr.review_pending a pull request with a requested review that has waited `pr_review_pending_days`
   collab.pr.draft_old      a draft pull request older than `pr_draft_max_days`
   collab.pr.conflict       a pull request that has had conflicts for `pr_conflict_days`
@@ -46,10 +47,10 @@ DETAIL_EVERY = 6 * 3600              # a pull request is looked at again for con
 OUTSIDE = ("NONE", "FIRST_TIMER", "FIRST_TIME_CONTRIBUTOR", "CONTRIBUTOR", "MANNEQUIN")      # author_association of someone who is not part of the team
 DEFAULTS = {
     "enabled": False, "refresh_seconds": 600, "max_repos_per_tick": 10, "deadline_s": 30, "min_rate_remaining": 1000, "repos": "all", "search_api": False,
-    "rules": {"issue_stale_days": 14, "issue_critical_labels": ["security", "critical"], "pr_review_pending_days": 3, "pr_draft_max_days": 30, "pr_conflict_days": 7, "watch_external_comments": False, "ignore_labels": ["monitor:ignore"]},
+    "rules": {"issue_stale_days": 14, "issue_critical_labels": ["security", "critical"], "pr_review_pending_days": 3, "pr_draft_max_days": 30, "pr_conflict_days": 7, "watch_external_comments": False, "external_days": 1, "team_members": [], "ignore_labels": ["monitor:ignore"]},
 }
 BOUNDS = {"refresh_seconds": (60, 86400), "max_repos_per_tick": (1, 100), "deadline_s": (0, 600), "min_rate_remaining": (100, 5000), "issue_stale_days": (1, 365), "pr_review_pending_days": (1, 90),
-          "pr_draft_max_days": (1, 365), "pr_conflict_days": (1, 90)}
+          "pr_draft_max_days": (1, 365), "pr_conflict_days": (1, 90), "external_days": (1, 90)}
 TITLE_KEYS = {"collab.issue.stale": "collab.t.issue_stale", "collab.issue.critical": "collab.t.issue_critical", "collab.issue.external": "collab.t.issue_external",
               "collab.pr.review_pending": "collab.t.pr_review", "collab.pr.draft_old": "collab.t.pr_draft", "collab.pr.conflict": "collab.t.pr_conflict"}
 LEVELS = {"collab.issue.stale": "warning", "collab.issue.critical": "error", "collab.issue.external": "warning", "collab.pr.review_pending": "warning", "collab.pr.draft_old": "info",
@@ -79,12 +80,15 @@ def settings(config):
         merged["repos"] = repos
     rules = block.get("rules")
     if isinstance(rules, dict):
-        for key in ("issue_stale_days", "pr_review_pending_days", "pr_draft_max_days", "pr_conflict_days"):
+        for key in ("issue_stale_days", "pr_review_pending_days", "pr_draft_max_days", "pr_conflict_days", "external_days"):
             if number(rules.get(key), key) is not None:
                 merged["rules"][key] = rules[key]
         labels = rules.get("issue_critical_labels")
         if isinstance(labels, list) and all(isinstance(x, str) for x in labels):
             merged["rules"]["issue_critical_labels"] = labels[:50]
+        team = rules.get("team_members")
+        if isinstance(team, list) and all(isinstance(x, str) and 0 < len(x) <= 60 for x in team):
+            merged["rules"]["team_members"] = [x.lower() for x in team[:100]]
         ignore = rules.get("ignore_labels")
         if isinstance(ignore, list) and all(isinstance(x, str) for x in ignore):
             merged["rules"]["ignore_labels"] = ignore[:50]
@@ -117,17 +121,22 @@ def load_state(path):
     return {"alerts": {}, "per_repo": {}, "last_full_scan": None}
 
 
-def slim_issue(raw):
+def _member(raw, team):
+    """True when the author is in the list of the team (`team_members`); only this flag is kept, never the name."""
+    return bool(team) and str((raw.get("user") or {}).get("login") or "").lower() in team
+
+
+def slim_issue(raw, team=()):
     """What is kept of an issue: enough to apply every rule again later without asking GitHub (no body, no author name)."""
-    return {"number": raw.get("number"), "title": str(raw.get("title") or "")[:140], "url": str(raw.get("html_url") or ""), "created": raw.get("created_at"), "updated": raw.get("updated_at"),
+    return {"member": _member(raw, team), "number": raw.get("number"), "title": str(raw.get("title") or "")[:140], "url": str(raw.get("html_url") or ""), "created": raw.get("created_at"), "updated": raw.get("updated_at"),
             "labels": [str(l.get("name", ""))[:60] for l in raw.get("labels") or [] if isinstance(l, dict)][:30], "bot": (raw.get("user") or {}).get("type") == "Bot",
             "assoc": raw.get("author_association"), "comments": int(raw.get("comments") or 0)}
 
 
-def slim_pull(raw, before=None):
+def slim_pull(raw, before=None, team=()):
     """The same for a pull request; the notes about conflicts (`dirty_since`, `checked`, `seen`) are carried over from the previous look."""
     before = before or {}
-    return {"number": raw.get("number"), "title": str(raw.get("title") or "")[:140], "url": str(raw.get("html_url") or ""), "created": raw.get("created_at"), "updated": raw.get("updated_at"),
+    return {"assoc": raw.get("author_association"), "member": _member(raw, team), "touched": bool(raw.get("updated_at") and raw.get("updated_at") != raw.get("created_at")), "number": raw.get("number"), "title": str(raw.get("title") or "")[:140], "url": str(raw.get("html_url") or ""), "created": raw.get("created_at"), "updated": raw.get("updated_at"),
             "draft": bool(raw.get("draft")), "labels": [str(l.get("name", ""))[:60] for l in raw.get("labels") or [] if isinstance(l, dict)][:30], "review_requested": bool(raw.get("requested_reviewers") or raw.get("requested_teams")), "bot": (raw.get("user") or {}).get("type") == "Bot",
             "dirty_since": before.get("dirty_since"), "checked": before.get("checked", 0), "seen": before.get("seen")}
 
@@ -144,7 +153,7 @@ def evaluate(repo, issues, prs, rules, now, known=None):
 
     def add(code, item, ref, labels=None):
         key = f"{code}:{repo}:{item['number']}"
-        found[key] = {"id": key, "code": code, "level": LEVELS[code], "repo": repo, "number": item["number"], "title": item["title"], "url": item["url"], "ref": ref, "labels": labels or [], "updated": item.get("updated"),
+        found[key] = {"id": key, "code": code, "level": LEVELS[code], "repo": repo, "kind": "pr" if "draft" in item else "issue", "number": item["number"], "title": item["title"], "url": item["url"], "ref": ref, "labels": labels or [], "updated": item.get("updated"),
                       "created_at": (known.get(key) or {}).get("created_at") or stamp(now)}
 
     for issue in issues:
@@ -156,12 +165,14 @@ def evaluate(repo, issues, prs, rules, now, known=None):
             add("collab.issue.critical", issue, issue["updated"], hit)
         elif idle is not None and idle >= rules["issue_stale_days"]:
             add("collab.issue.stale", issue, issue["updated"])
-        if rules["watch_external_comments"] and issue.get("assoc") in OUTSIDE and not issue.get("comments") and age is not None and age >= 1:
+        if rules["watch_external_comments"] and issue.get("assoc") in OUTSIDE and not issue.get("member") and not issue.get("comments") and age is not None and age >= rules.get("external_days", 1):
             add("collab.issue.external", issue, issue["created"])
     for pull in prs:
         if pull.get("bot") or ignored & {l.lower() for l in pull.get("labels") or []}:
             continue
         age, idle = days(pull["created"]), days(pull["updated"])
+        if rules["watch_external_comments"] and pull.get("assoc") in OUTSIDE and not pull.get("member") and not pull.get("touched") and not pull.get("review_requested") and age is not None and age >= rules.get("external_days", 1):
+            add("collab.issue.external", pull, pull["created"])      # a pull request from outside that nobody has touched: the same code, the title says it is a pull request
         if pull["draft"]:
             if age is not None and age >= rules["pr_draft_max_days"]:
                 add("collab.pr.draft_old", pull, pull["created"])
@@ -333,18 +344,19 @@ class SentinelCollab(sentinel_base.BaseSentinel):
         if found is not None:      # the lists came from the Search API: the same slim items, nothing more is asked for them
             raw = found.get(repo) or {"issues": [], "prs": []}
             before = {p["number"]: p for p in prs}
-            issues, prs = [slim_issue(i) for i in raw["issues"]], [slim_pull(p, before.get(p.get("number"))) for p in raw["prs"]]
+            team = set(self.cfg["rules"]["team_members"])
+            issues, prs = [slim_issue(i, team) for i in raw["issues"]], [slim_pull(p, before.get(p.get("number")), team) for p in raw["prs"]]
             self.details(owner, repo, prs, budget, now)
             self._commit(repo, issues, prs, etag, now)
             return
         cut = dict(mine.get("cut") or {})
         status, data, tag, cut_now = self.fetch_pages(f"repos/{owner}/{repo}/issues?state=open&sort=updated&direction=desc", etag.get("issues", "") if mine.get("issues") is not None else "")
         if status == 200:
-            issues, etag["issues"], cut["issues"] = [slim_issue(i) for i in data if isinstance(i, dict) and "pull_request" not in i], tag, cut_now      # the issues list also holds the pull requests: they are the other list
+            issues, etag["issues"], cut["issues"] = [slim_issue(i, set(self.cfg["rules"]["team_members"])) for i in data if isinstance(i, dict) and "pull_request" not in i], tag, cut_now      # the issues list also holds the pull requests: they are the other list
         status, data, tag, cut_now = self.fetch_pages(f"repos/{owner}/{repo}/pulls?state=open&sort=updated&direction=desc", etag.get("pulls", "") if mine.get("prs") is not None else "")
         if status == 200:
             before = {p["number"]: p for p in prs}
-            prs, etag["pulls"], cut["prs"] = [slim_pull(p, before.get(p.get("number"))) for p in data if isinstance(p, dict)], tag, cut_now
+            prs, etag["pulls"], cut["prs"] = [slim_pull(p, before.get(p.get("number")), set(self.cfg["rules"]["team_members"])) for p in data if isinstance(p, dict)], tag, cut_now
         self.details(owner, repo, prs, budget, now)
         self._commit(repo, issues, prs, etag, now, cut)
 
@@ -379,7 +391,8 @@ class SentinelCollab(sentinel_base.BaseSentinel):
     def _title(self, alert):
         when = parse_time(alert.get("ref"))
         days = int((time.time() - when) // 86400) if when else 0
-        return i18n.t(TITLE_KEYS[alert["code"]], repo=alert["repo"], number=alert["number"], title=alert["title"], days=days, labels=", ".join(alert.get("labels") or []))
+        key = "collab.t.pr_external" if alert["code"] == "collab.issue.external" and alert.get("kind") == "pr" else TITLE_KEYS[alert["code"]]
+        return i18n.t(key, repo=alert["repo"], number=alert["number"], title=alert["title"], days=days, labels=", ".join(alert.get("labels") or []))
 
     def _event(self, kind, alert):
         title = self._title(alert)

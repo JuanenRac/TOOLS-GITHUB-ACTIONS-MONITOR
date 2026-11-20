@@ -65,6 +65,7 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/chatops` | POST | admin | read only commands from a chat; the paths below are its routes |
 | `/api/chatops/discord` | POST | public | an interaction of Discord, read only (signed with Ed25519, off by default) |
 | `/api/chatops/slack` | POST | public | a slash command of Slack, read only (signed with the v0 HMAC of Slack, off by default) |
+| `/api/clone-anomalies` | GET | maintainer | the users who cloned more different repositories than the threshold in the window, read from the audit log of the organization (maintainer; `audit_feed.clone_alert.enabled`; `available` is false when the plan has no git events) |
 | `/api/compare` | GET | viewer | this period against the one before, read only, from the ledger and the snapshots of the score (`?window=`, `?days=`, `?baseline=`, `?from=`/`?to=`, `?format=json|ndjson|csv`): every figure with its change, direction and state (`insufficient_data`, `baseline_unavailable` instead of a made-up number), and what changed (Complete only, off by default) |
 | `/api/credential` | POST | admin | replace the GitHub login without restarting (this computer only) |
 | `/api/data` | GET | viewer | the main picture: repositories, runs, failing, active, rate |
@@ -73,6 +74,7 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/discovery` | GET | viewer | repositories the monitor found and suggestions |
 | `/api/discovery/group` | POST | maintainer | put discovered repositories in a group |
 | `/api/events` | GET | viewer | the event journal |
+| `/api/expected-red` | GET,POST | viewer / maintainer | the workflows marked as red on purpose with a reason, an owner and an end (GET: the list with each state; POST {action: add|remove, repo, workflow, reason, owner, days}: a maintainer, `expected_red.enabled`, a note of this monitor) |
 | `/api/gh-action` | POST | admin | prefix of the actions on GitHub (plan and confirm, see below) |
 | `/api/gh-action/confirm` | POST | admin | confirm an action on GitHub (this computer only) |
 | `/api/gh-action/plan` | POST | admin | plan an action on GitHub; nothing is sent until it is confirmed (this computer only) |
@@ -86,6 +88,7 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/live-events` | GET | viewer | the newest webhook events |
 | `/api/live-events/stream` | GET | viewer | server-sent events of the webhook events as they are accepted (off by default) |
 | `/api/live-status` | GET | viewer | state of the incoming webhook receiver |
+| `/api/meta-columns` | GET | viewer | the metadata columns of the Repositories table (`fleet.meta_columns`) and the value of each repository found so far; a thread reads a few files per call |
 | `/api/mirror` | GET | viewer | state of the local mirror of artifacts |
 | `/api/mode` | GET,POST | viewer / maintainer | the working mode (normal, fast, turbo, low) and its time left |
 | `/api/notify` | GET | viewer | state of the notification channels |

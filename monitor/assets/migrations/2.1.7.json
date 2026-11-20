@@ -4,10 +4,89 @@
  "format": 1,
  "version": "2.1.7",
  "previous": "2.1.6",
- "digest": "03d11b946aa6607e7457b450bc1d86121c2c540ee9ce6ab678270e1647ac3ea7",
+ "digest": "4ab76db46381c12d2f2f71f98e75ce8519070aa43613550fa46c676a511b7fc0",
  "data_schema": 2,
  "settings": {
   "added": [
+   {
+    "key": "audit_feed.clone_alert.bot_patterns",
+    "kind": "names",
+    "default": [
+     "-bot",
+     "_bot",
+     "deploy",
+     "guardian"
+    ]
+   },
+   {
+    "key": "audit_feed.clone_alert.check_minutes",
+    "kind": "int",
+    "bounds": [
+     5,
+     1440
+    ],
+    "default": 30
+   },
+   {
+    "key": "audit_feed.clone_alert.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "audit_feed.clone_alert.threshold",
+    "kind": "int",
+    "bounds": [
+     1,
+     1000
+    ],
+    "default": 5
+   },
+   {
+    "key": "audit_feed.clone_alert.window_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     168
+    ],
+    "default": 24
+   },
+   {
+    "key": "expected_red.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "expected_red.max_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     365
+    ],
+    "default": 30
+   },
+   {
+    "key": "fleet.meta_columns",
+    "kind": "metacols",
+    "default": []
+   },
+   {
+    "key": "fleet.meta_per_call",
+    "kind": "int",
+    "bounds": [
+     1,
+     200
+    ],
+    "default": 20
+   },
+   {
+    "key": "fleet.meta_ttl_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     168
+    ],
+    "default": 6
+   },
    {
     "key": "pairing.code_minutes",
     "kind": "int",
@@ -49,6 +128,18 @@
     "key": "pwa.refresh_on_return",
     "kind": "bool",
     "default": true
+   },
+   {
+    "key": "sentinels.collab.rules.external_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     90
+    ]
+   },
+   {
+    "key": "sentinels.collab.rules.team_members",
+    "kind": "names"
    },
    {
     "key": "ui.compact",

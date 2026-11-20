@@ -26,6 +26,9 @@ ENDPOINT_RE = re.compile(r'"(/api/[a-z0-9/_-]*[a-z0-9_-])"')
 
 #: endpoint -> (methods, what it is, for the AIs). Every endpoint named in the code must be here.
 NOTES = {
+    "/api/clone-anomalies": ("GET", "the users who cloned more different repositories than the threshold in the window, read from the audit log of the organization (maintainer; `audit_feed.clone_alert.enabled`; `available` is false when the plan has no git events)"),
+    "/api/expected-red": ("GET,POST", "the workflows marked as red on purpose with a reason, an owner and an end (GET: the list with each state; POST {action: add|remove, repo, workflow, reason, owner, days}: a maintainer, `expected_red.enabled`, a note of this monitor)"),
+    "/api/meta-columns": ("GET", "the metadata columns of the Repositories table (`fleet.meta_columns`) and the value of each repository found so far; a thread reads a few files per call"),
     "/api/devices": ("GET", "the devices paired with a QR code and whether pairing is on (this computer only; empty while `pairing.enabled` is off)"),
     "/api/devices/revoke": ("POST", "take one paired device away ({id}); its token stops working at once (this computer only)"),
     "/api/pair": ("GET,POST", "prefix of the pairing of a phone (see the routes below)"),

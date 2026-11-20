@@ -96,6 +96,7 @@
     if(document.getElementById("help-tab"))act("help",()=>document.getElementById("help-tab").click());
     act("shortcuts",shortcutsOpen);
     if(PR.enabled)act("pair",pairOpen);
+    if(document.getElementById("er-open")&&window.expectedRedOpen)act("expected",window.expectedRedOpen);
     return out;
   }
   function palScore(label,words){
@@ -138,4 +139,64 @@
     else if(e.key==="r"){try{tick(true)}catch(x){}}
     else if(e.key==="["||e.key==="]"){const l=tabsShown(),i=l.indexOf(typeof CURTAB!=="undefined"?CURTAB:"now");if(l.length){e.preventDefault();showTab(l[(i+(e.key==="]"?1:-1)+l.length)%l.length])}}
   });
+})();
+
+/* ---- the notes about the repositories: expected red (a button in Alerts) and the metadata columns of the Repositories table ---- */
+(function(){
+  const h=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const tx=(k,v)=>T(k,v),jget=async u=>{try{const r=await fetch(u,{cache:"no-store"});return r.ok?await r.json():null}catch(e){return null}};
+  const pp=(o)=>fetch("/api/expected-red",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(o)}).then(r=>r.json().then(j=>Object.assign({status:r.status},j))).catch(()=>({ok:false,error:"off"}));
+
+  /* expected red: a workflow that is red on purpose, with a reason, an owner and an end (data/expected_red.json; a note of this monitor) */
+  async function erOpen(){
+    const d=document.createElement("div");d.id="er-dlg";d.className="dlg";d.setAttribute("role","dialog");d.setAttribute("aria-modal","true");d.setAttribute("aria-labelledby","er-h");
+    document.querySelectorAll("#er-dlg").forEach(x=>x.remove());document.body.appendChild(d);
+    const back=document.activeElement,close=()=>{d.remove();if(back&&back.focus)try{back.focus()}catch(e){}};
+    d.onclick=e=>{if(e.target===d)close()};d.onkeydown=e=>{if(e.key==="Escape"){e.stopPropagation();close()}};
+    const draw=async()=>{
+      const j=await jget("/api/expected-red");if(!j||!j.enabled){d.innerHTML='<div class="dlg-box"><div class="dlg-body" style="padding:16px">'+h(tx("ui.er_err_off"))+'</div></div>';return}
+      const repos=DATA&&DATA.ecosystems?Object.keys(DATA.ecosystems):[];
+      const rows=j.entries.map(e=>'<li><span><b>'+h(e.repo)+'</b> '+h(e.workflow)+' <span class="chip'+(e.state==="expired"?" bad":"")+'">'+h(e.state==="expired"?tx("ui.er_expired"):tx("ui.er_until",{when:new Date(e.until*1000).toLocaleString()}))+'</span><br><span class="mut">'+h(e.owner)+' · '+h(e.reason)+'</span></span><button type="button" data-rm="'+h(e.id)+'">'+h(tx("ui.er_remove"))+'</button></li>').join("");
+      d.innerHTML='<div class="dlg-box"><div class="dlg-top"><h2 id="er-h">'+h(tx("ui.er_title"))+'</h2><span class="sp"></span><button type="button" class="ib" data-x aria-label="'+h(tx("ui.close"))+'">&times;</button></div><div class="dlg-body" style="padding:12px 16px;overflow:auto"><p class="mut">'+h(tx("ui.er_intro"))+'</p>'
+        +(rows?'<ul class="pair-list">'+rows+'</ul>':'<p class="mut">'+h(tx("ui.er_none"))+'</p>')
+        +'<form id="er-form" class="er-form"><label>'+h(tx("ui.er_repo"))+'<input name="repo" list="er-repos" required maxlength="140"></label><datalist id="er-repos">'+repos.slice(0,300).map(r=>'<option value="'+h(r)+'">').join("")+'</datalist>'
+        +'<label>'+h(tx("ui.er_workflow"))+'<input name="workflow" required maxlength="120" placeholder="ci.yml"></label><label>'+h(tx("ui.er_reason"))+'<input name="reason" required maxlength="200"></label>'
+        +'<label>'+h(tx("ui.er_owner"))+'<input name="owner" required maxlength="40"></label><label>'+h(tx("ui.er_days"))+'<input name="days" type="number" min="1" max="'+h(j.max_days)+'" value="'+h(Math.min(7,j.max_days))+'"></label>'
+        +'<button type="submit">'+h(tx("ui.er_add"))+'</button> <span id="er-msg" role="status" class="mut"></span></form></div></div>';
+      d.querySelector("[data-x]").onclick=close;
+      d.querySelectorAll("[data-rm]").forEach(b=>b.onclick=async()=>{b.disabled=true;await pp({action:"remove",id:b.dataset.rm});await draw();erCount()});
+      d.querySelector("#er-form").onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),r=await pp({action:"add",repo:f.get("repo"),workflow:f.get("workflow"),reason:f.get("reason"),owner:f.get("owner"),days:+f.get("days")});
+        if(r.ok){await draw();erCount();try{if(typeof tick==="function")tick(true)}catch(x){}}else{const m=d.querySelector("#er-msg");m.textContent=tx("ui.er_err_"+(r.error||"off"))===("ui.er_err_"+(r.error||"off"))?tx("ui.er_err_off"):tx("ui.er_err_"+r.error)}};
+      const first=d.querySelector("input");if(first)first.focus();
+    };
+    await draw();
+  }
+  window.expectedRedOpen=erOpen;
+  async function erCount(){
+    const j=await jget("/api/expected-red");if(!j||!j.enabled)return;
+    const row=document.getElementById("al-filters");if(!row)return;
+    let b=document.getElementById("er-open");
+    if(!b){b=document.createElement("button");b.type="button";b.id="er-open";b.onclick=erOpen;row.appendChild(b)}
+    b.textContent=tx("ui.er_button",{n:j.entries.filter(e=>e.state==="active").length});
+  }
+  erCount();setInterval(erCount,60000);
+
+  /* metadata columns: one column of the Repositories table for each entry of fleet.meta_columns (read by the monitor, a few files per round) */
+  let known="",tries=0;
+  async function metaLoad(){
+    if(typeof REPO_TABLE==="undefined")return;
+    const j=await jget("/api/meta-columns");if(!j||!j.columns||!j.columns.length)return;
+    window.META_ROWS=j.rows||{};
+    const ids=j.columns.map(c=>"meta_"+c.id).join(",");
+    if(ids!==known){
+      REPO_TABLE.cols.splice(0,REPO_TABLE.cols.length,...REPO_TABLE.cols.filter(c=>!String(c.id).startsWith("meta_")));
+      REPO_TABLE.show=REPO_TABLE.show.filter(i=>!String(i).startsWith("meta_"));
+      j.columns.forEach(c=>{const id="meta_"+c.id;REPO_TABLE.cols.push({id:id,label:c.name,sort:r=>(window.META_ROWS[r.repo]||{})[c.id]||"",cell:r=>{const v=(window.META_ROWS[r.repo]||{})[c.id];return v?h(v):dash_}});REPO_TABLE.show.push(id)});
+      known=ids;REPO_TABLE.made="";
+    }
+    if(typeof DATA!=="undefined"&&DATA&&typeof render==="function")render(DATA);
+    if(j.pending>0&&tries++<40)setTimeout(metaLoad,6000);
+  }
+  setTimeout(metaLoad,1500);
+  document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("#n-repos");if(t){tries=0;setTimeout(metaLoad,300)}});
 })();

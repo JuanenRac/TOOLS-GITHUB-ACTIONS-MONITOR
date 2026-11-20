@@ -106,3 +106,20 @@ Le menu a cinq groupes avec un titre chacun (ils se replient et le moniteur s'en
 Les trois sentinelles peuvent être activées ou non (`sentinel.enabled`, `sentinels.collab.enabled`, `sentinels.security.enabled`). L'entrée d'une sentinelle n'est dans le menu que tant qu'elle est activée, et le groupe *Sentinelles* disparaît quand aucune ne l'est ; la page suit l'état à sa prochaine actualisation. L'adresse d'une sentinelle désactivée ouvre toujours son panneau, qui dit qu'elle est désactivée et a un bouton qui ouvre son interrupteur dans les Réglages. Les panneaux A1 à A13 sont ceux de la sentinelle CI ; le badge de chaque entrée ne compte que les alertes de sa sentinelle.
 
 Ce que vous repliez ou dépliez dans les sections A1 à A13 reste tel quel : la page les redessine à chaque actualisation mais se souvient de chacune par son nom (`ui.remember_folds`, activé par défaut, garde le choix dans le navigateur aussi).
+
+## Notes sur les dépôts
+
+Tout ceci sont des notes du moniteur : elles lisent, n'écrivent jamais sur GitHub et sont désactivées ou vides par défaut.
+
+- **Ce qui a déclenché un rouge.** Chaque rouge porte une classe : `pr` (une pull request), `main` (un push), `nightly` (un planifié), `manual` (une personne ou un appel extérieur), `queue` (la file de fusion), `chained` (un autre workflow) ou `other`. L'onglet Alertes l'affiche comme une étiquette et filtre par elle (« Déclenché par »). Les événements qui comptent comme rouge restent `ci.red_events`, et `ci.extra_branches` ajoute toujours les branches de maintenance surveillées.
+- **Rouge attendu** (`expected_red.enabled`). Depuis l'onglet Alertes ou la palette, marquez un workflow (ou `*` pour un dépôt) comme rouge volontairement, avec un motif, un responsable et un nombre de jours (jamais plus de `expected_red.max_days`). Tant que la marque dure, son rouge est listé à part, n'est pas compté et n'alerte pas ; quand elle expire, le rouge revient et une alerte dit que la marque a expiré, jusqu'à ce que vous la retiriez ou la marquiez de nouveau.
+- **Clones anormaux par utilisateur** (`audit_feed.clone_alert.enabled`). Lit le journal d'audit de l'organisation pour `git.clone` (seuls certains forfaits l'offrent ; si le vôtre non, la réponse dit `available: false`). Un utilisateur qui clone plus de dépôts différents que `threshold` dans `window_hours` est nommé dans une alerte ; les robots sont écartés par les motifs de nom et par la terminaison `[bot]`.
+- **Colonnes de métadonnées** (`fleet.meta_columns`). Une liste JSON de `{"name", "path", "regex"}`, cinq au plus. Le premier groupe de l'expression (ou la correspondance entière) sur sa première ligne correspondante est la valeur de la colonne ; seuls les 8 premiers Ko du fichier sont regardés.
+- **Personnes extérieures à l'équipe** (`sentinels.collab.rules.watch_external_comments`, `external_days`, `team_members`). Une issue ou une pull request de quelqu'un hors de l'équipe que personne n'a traitée ni touchée après `external_days` jours est une alerte du code `collab.issue.external`.
+
+| Route | Ce qu'elle fait |
+|---|---|
+| `GET /api/expected-red` | les marques avec leur état (`active` ou `expired`) |
+| `POST /api/expected-red` | `{"action": "add", "repo", "workflow", "reason", "owner", "days"}` ou `{"action": "remove", "id"}` (un mainteneur, avec le jeton à usage unique de la page ; noté dans le journal des actions) |
+| `GET /api/clone-anomalies` | les utilisateurs au-dessus du seuil, d'après le journal d'audit (un mainteneur) |
+| `GET /api/meta-columns` | les colonnes et la valeur trouvée jusqu'ici pour chaque dépôt |

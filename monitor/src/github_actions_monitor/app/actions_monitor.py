@@ -114,6 +114,8 @@ DEFAULTS = {
     "cache": {"etag": {"enabled": True, "ttl_hours": 24, "skip_stateful": True, "revalidate_active": True}, "negative_ttl_s": 300},   # conditional reads: a 304 answer costs no quota; a refusal is remembered for negative_ttl_s seconds (etagcache.py)
     "cli": {"prefer_v1": True, "default_format": "text", "watch": {"min_interval_seconds": 2, "default_interval_seconds": 5}},      # the command line (cli/formats.py, cli/watch.py): the format of the answers when no --format is given, and the interval of `watch`
     "kiosk": {"enabled": False, "font_scale_percent": 150, "high_contrast": False, "rotate_views": False, "rotate_seconds": 30, "safe_margin_percent": 0, "scale_with_window": False},      # the profile for a TV or a wall (surfaces/kiosk.py): ?kiosk=1 only counts when enabled
+    "expected_red": {"enabled": False, "max_days": 30},      # a workflow known to be red for a while, marked with a reason, an owner and an end (data_pipeline/expected_red.py): listed apart, not alerted until the mark runs out
+    "audit_feed": {"clone_alert": {"enabled": False, "threshold": 5, "window_hours": 24, "bot_patterns": ["-bot", "_bot", "deploy", "guardian"], "check_minutes": 30}},      # one person who clones many different repositories (sentinels/clone_anomaly.py)
     "pwa": {"enabled": False, "refresh_on_return": True},      # the monitor as an installable app (surfaces/pwa.py): manifest, service worker (only the offline page and the icons) and a refresh when the app returns to the front
     "pairing": {"enabled": False, "code_minutes": 5, "max_devices": 10, "device_days": 90},      # phones and tablets that join the network mode with a one-use code shown as a QR code (security/devices.py)
     "startup": {"resume_max_age_hours": 12},   # the last picture is shown at once after a restart, with its age (lastpicture.py); 0 = off
@@ -155,7 +157,7 @@ DEFAULTS = {
     "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
     "organizations": {"discover": False},                                    # OFF: list the organisations of the login (orgs.py)
     "finops": {"jobs_per_cycle": 0},
-    "fleet": {"page_size": 50, "group_by": "ecosystem", "sort": "risk", "show_all_active": True, "labels": [], "saved_filters": []},      # the fleet view of the Team tab (health/fleet.py)
+    "fleet": {"page_size": 50, "group_by": "ecosystem", "sort": "risk", "show_all_active": True, "labels": [], "saved_filters": [], "meta_columns": [], "meta_per_call": 20, "meta_ttl_hours": 6},      # the fleet view of the Team tab (health/fleet.py)
     "network": {"use_proxy": False, "etag": True, "graphql_checks": True, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
     "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
     "pagination": {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3, "cursor_pages": 3},      # pages of 100 followed when a list is full, and said when something is cut (paging.py)
@@ -1340,11 +1342,13 @@ def build(config, repos, started, refreshed, loading, progress_text):
     ghost_rows = [{"repo": r["repo"], "name": r.get("name"), "id": r.get("id"), "url": r.get("url"), "branch": r.get("branch"), "event": r.get("event"), "since": r.get("started")} for r in ghosts[:200]]
     activity_view = None
     idle_forks = []
-    aged_rows, quiet_rows = [], []
+    aged_rows, quiet_rows, expected_rows = [], [], []
     meta = repo_meta(repos, config)
     try:
         held = redrule.states({r: [x for x in runs if x["repo"] == r] for r in repos}, {r: m.get("branch") for r, m in repo_meta(repos).items() if m.get("branch")}, True)
         figures["awaiting"], figures["inactive"] = len(held["awaiting"]), len(held["inactive"])
+        expected_rows = [{k: row.get(k) for k in ("repo", "workflow", "since", "url", "streak", "conclusion", "reason", "owner", "until", "class")} for row in held["expected"]]      # red on purpose for a while (expected_red.py): listed apart
+        figures["expected"] = len(expected_rows)
         figures["services_failing"] = len(held["services"])
         aged_rows = [{k: row.get(k) for k in ("repo", "workflow", "since", "url", "streak", "conclusion")} for row in held["inactive"] if row.get("aged")]      # the reds that aged into "inactive" (ci.red_age_days) do not vanish without a trace
         figures["aged"], figures["aged_days"] = len(aged_rows), redrule.POLICY.get("red_age_days") or 0
@@ -1374,7 +1378,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
         "refresh_seconds": config["refresh_seconds"], "hot_only": hot_only_state(),
         "offline": LINK.state(), "etag": ETAG["cache"].stats() if ETAG["cache"] else None, "graphql": graphql_checks.stats(config),
         "listing": dict(LISTING), "drift": knownstates.drift(), "hidden": HIDDEN["hidden"], "discovered": HIDDEN["discovered"], "hidden_names": HIDDEN["names"],
-        "figures": figures, "repo_meta": meta, "sampling": sampling_summary(config, repos, meta), "activity": activity_view, "forks_idle": idle_forks[:200], "forks_idle_all": idle_forks, "aged_reds": aged_rows[:100], "quiet_reds": quiet_rows[:100],
+        "figures": figures, "repo_meta": meta, "sampling": sampling_summary(config, repos, meta), "activity": activity_view, "forks_idle": idle_forks[:200], "forks_idle_all": idle_forks, "aged_reds": aged_rows[:100], "quiet_reds": quiet_rows[:100], "expected_reds": expected_rows[:100],
     }
 
 
@@ -1631,6 +1635,62 @@ def runner_model_payload(now=None):
     reader = RUNNER_FILES["reader"]
     declared = {repo: {name: runner_model.static_runs_on(text) for name, text in reader.texts(repo).items()} for repo in reader.known() if reader.state(repo)["state"] != "not_evaluable"} if reader else {}
     return runner_model.build(config, rows, data.get("runs") or [], tallies, quota.load(), runner_list(config), now, config.get("runs_per_repo") or 0, declared, PRIVATE, set(data.get("repos") or []))
+
+
+def mark_alerts():
+    """The alerts that come from the notes of this monitor: an "expected red" mark that ran out and the users above the threshold of clones (both off by default). Reads only memory and one small file; never raises."""
+    if LITE["on"]:
+        return []
+    try:
+        from github_actions_monitor.data_pipeline import expected_red
+        from github_actions_monitor.sentinels import clone_anomaly
+        account = CHILD["account"] or ""
+        return expected_red.alerts(account) + clone_anomaly.alerts(account)
+    except Exception as error:   # noqa: BLE001 - the list of alerts must still answer
+        degraded.note("marks.alerts", error)
+        return []
+
+
+def clone_tick(config):
+    """The audit log is read at most every `audit_feed.clone_alert.check_minutes` minutes, from a thread of its own, so that a slow answer never holds the cycle (off by default). Never raises."""
+    try:
+        from github_actions_monitor.sentinels import clone_anomaly
+        cfg = clone_anomaly.settings(config)
+        if cfg["enabled"] and clone_anomaly.due(cfg):
+            threading.Thread(target=clone_anomaly.check, args=(gh_read, toolconfig.github_owner(config), cfg), name="clone-anomaly", daemon=True).start()
+    except Exception as error:   # noqa: BLE001
+        degraded.note("clones", error)
+
+
+META = {"reader": None, "running": False}
+
+
+def meta_columns_payload():
+    """GET /api/meta-columns: the columns of fleet.meta_columns and the value of each repository found so far. The reads (a few files per call, `fleet.meta_per_call`) are made by a thread of their own."""
+    from github_actions_monitor.data_pipeline import meta_columns
+    config = LIVE_CONFIG or toolconfig.raw_config()
+    cfg = meta_columns.settings(config)
+    if META["reader"] is None:
+        META["reader"] = meta_columns.Reader()
+    reader = META["reader"]
+    with LOCK:
+        repos = list((STATE["data"] or {}).get("repos") or [])
+    due = 0
+    if cfg["columns"] and repos and not DEMO["on"]:
+        now = time.time()
+        due = sum(1 for r in repos for c in cfg["columns"] if reader.due(r, c, cfg["ttl_hours"], now))
+        if due and not META["running"]:
+            META["running"] = True
+
+            def work():
+                try:
+                    reader.fill(repos, cfg["columns"], gh_read, cfg["per_call"], cfg["ttl_hours"])
+                except Exception as error:   # noqa: BLE001
+                    degraded.note("meta_columns", error)
+                finally:
+                    META["running"] = False
+            threading.Thread(target=work, name="meta-columns", daemon=True).start()
+    return {"columns": [{"id": c["id"], "name": c["name"]} for c in cfg["columns"]], "rows": reader.rows(repos, cfg["columns"]), "pending": due, "running": META["running"]}
 
 
 def runner_alerts():
@@ -2140,7 +2200,7 @@ def report_gather():
     storage, account = runtime.process_storage(CHILD["account"] or None)
     snapshot = score_api.latest(storage, account, config)
     try:
-        alerts = alert_center.collect(SENTINEL["registry"], extra=credential_alerts() + score_alerts() + runner_alerts())
+        alerts = alert_center.collect(SENTINEL["registry"], extra=credential_alerts() + score_alerts() + runner_alerts() + mark_alerts())
     except Exception as error:   # noqa: BLE001 - the report still has the rest
         degraded.note("reports.alerts", error)
         alerts = []
@@ -2203,7 +2263,7 @@ def health_views(now=None, only=None):
     failing, active = data.get("failing") or [], data.get("active") or []
     registry = SENTINEL["registry"]
     try:
-        alerts = alert_center.collect(registry, extra=credential_alerts() + score_alerts() + runner_alerts())
+        alerts = alert_center.collect(registry, extra=credential_alerts() + score_alerts() + runner_alerts() + mark_alerts())
     except Exception as error:   # noqa: BLE001 - the health still answers without the alerts
         degraded.note("health.alerts", error)
         alerts = []
@@ -2272,6 +2332,7 @@ def maintain(config, data):
     """After each cycle: the conditional-read cache is saved, a few completed runs have their jobs sampled and the analytics are refreshed."""
     quota_watch(config)
     digest_tick(config)
+    clone_tick(config)
     try:      # the connection that goes down is announced once, by the same switch as a new red
         from github_actions_monitor.integrations import soundalert
         lost = bool((data.get("offline") or {}).get("offline"))
@@ -2870,6 +2931,34 @@ class Handler(BaseHTTPRequestHandler):
         self.json_reply({"error": "forbidden"}, 403)
         return False
 
+    def expected_red_post(self):
+        """POST /api/expected-red {action: add, repo, workflow, reason, owner, days} or {action: remove, id}. Needs `expected_red.enabled`, the role of a maintainer and the one-use token of the page."""
+        from github_actions_monitor.data_pipeline import expected_red
+        from github_actions_monitor.security import audit_log
+        cfg = expected_red.settings(toolconfig.raw_config())
+        if not cfg["enabled"] or LITE["on"]:
+            self.json_reply({"ok": False, "error": "off"}, 404)
+            return
+        if not self.guard() or not self.token_ok():
+            return
+        try:
+            size = int(self.headers.get("Content-Length") or 0)
+            request = json.loads(self.rfile.read(size) if 0 < size <= 4096 else b"{}")
+        except (ValueError, TypeError):
+            request = {}
+        request = request if isinstance(request, dict) else {}
+        if request.get("action") == "remove":
+            done = expected_red.remove(request.get("id"))
+            audit_log.note(str(request.get("id") or "")[:20])
+            self.json_reply({"ok": done, "error": "" if done else "unknown"}, 200 if done else 404)
+            return
+        if request.get("action") != "add":
+            self.json_reply({"ok": False, "error": "action"}, 400)
+            return
+        entry, why = expected_red.add(request.get("repo"), request.get("workflow"), request.get("reason"), request.get("owner"), request.get("days"), cfg["max_days"])
+        audit_log.note(f"{request.get('repo')}:{request.get('workflow')}"[:120])
+        self.json_reply({"ok": entry is not None, "error": why, "entry": entry}, 200 if entry else 400)
+
     def pwa_get(self, path):
         """The files of the app (manifest, worker, icons, offline page), the pairing page and the list of devices. True when the path was one of them (and answered)."""
         from github_actions_monitor.surfaces import pwa
@@ -3185,6 +3274,9 @@ class Handler(BaseHTTPRequestHandler):
             return
         if path in ("/api/pair/start", "/api/pair/redeem", "/api/devices/revoke"):      # the pairing of a phone (security/devices.py)
             self.pair_post(path)
+            return
+        if path == "/api/expected-red":      # mark or unmark a workflow as "expected red": a note of this monitor, never a change on GitHub
+            self.expected_red_post()
             return
         if path == "/api/credential":      # replace the login of this account, or read its files again, without a restart (complete edition)
             if not self.guard() or not self.this_computer():
@@ -3515,6 +3607,20 @@ class Handler(BaseHTTPRequestHandler):
         if path in ("/pair", "/api/devices", "/api/pair/status", "/manifest.webmanifest", "/sw.js", "/pwa/offline", "/pwa/icon-192.png", "/pwa/icon-512.png"):      # the app, the pairing page and the devices
             if self.pwa_get(path):
                 return
+        if path in ("/api/expected-red", "/api/clone-anomalies", "/api/meta-columns"):      # the notes of this monitor: read only (the marks are written by POST /api/expected-red)
+            if not self.guard():
+                return
+            from github_actions_monitor.data_pipeline import expected_red
+            from github_actions_monitor.sentinels import clone_anomaly
+            raw = toolconfig.raw_config()
+            if path == "/api/expected-red":
+                cfg = expected_red.settings(raw)
+                self.json_reply({"enabled": cfg["enabled"], "max_days": cfg["max_days"], "entries": expected_red.entries() if cfg["enabled"] else []})
+            elif path == "/api/clone-anomalies":
+                self.json_reply(clone_anomaly.check(gh_read, toolconfig.github_owner(raw), clone_anomaly.settings(raw)))
+            else:
+                self.json_reply(meta_columns_payload())
+            return
         if path == "/api/sentinel/parte.txt":   # the same text as the daily report, to copy or download
             if not self.guard():
                 return
@@ -4098,7 +4204,7 @@ def alerts_payload(ask):
     from github_actions_monitor.sentinels import alert_center
     refresh_feed()
     registry = SENTINEL["registry"]
-    extra = credential_alerts() + score_alerts() + runner_alerts()
+    extra = credential_alerts() + score_alerts() + runner_alerts() + mark_alerts()
     everything = alert_center.collect(registry, extra=extra)
     chosen = alert_center.select(everything, ask.get("sentinel", ""), ask.get("level", ""), ask.get("muted", "show") if ask.get("muted") in ("show", "hide", "only") else "show")
     return {"schema": 1, "account": CHILD["account"] or None, "alerts": chosen, "summary": alert_center.summary(everything), "mutes": alert_center.active(), "history": alert_center.history(20),

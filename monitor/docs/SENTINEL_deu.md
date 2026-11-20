@@ -106,3 +106,20 @@ Das Menü hat fünf Gruppen mit je einem Titel (sie lassen sich einklappen, und 
 Die drei Wächter lassen sich ein- oder ausschalten (`sentinel.enabled`, `sentinels.collab.enabled`, `sentinels.security.enabled`). Der Menüeintrag eines Wächters ist nur da, solange er an ist, und die Gruppe *Wächter* verschwindet, wenn keiner an ist; die Seite folgt dem Zustand bei ihrer nächsten Aktualisierung. Die Adresse eines ausgeschalteten Wächters öffnet weiterhin sein Panel, das sagt, dass er aus ist, und eine Schaltfläche hat, die seinen Schalter in den Einstellungen öffnet. Die Panels A1 bis A13 gehören zum CI-Wächter; die Markierung jedes Eintrags zählt nur die Alarme seines Wächters.
 
 Was Sie in den Bereichen A1 bis A13 ein- oder ausklappen, bleibt so: Die Seite zeichnet sie bei jeder Aktualisierung neu, merkt sich aber jeden einzelnen unter seinem Namen (`ui.remember_folds`, standardmäßig an, behält die Wahl auch im Browser).
+
+## Notizen zu den Repositories
+
+All das sind Notizen des Monitors: Sie lesen, schreiben nie auf GitHub und sind standardmäßig aus oder leer.
+
+- **Was ein Rot ausgelöst hat.** Jedes Rot trägt eine Klasse: `pr` (ein Pull Request), `main` (ein Push), `nightly` (ein Zeitplan), `manual` (eine Person oder ein Aufruf von außen), `queue` (die Merge-Warteschlange), `chained` (ein anderer Workflow) oder `other`. Der Tab Alarme zeigt sie als Etikett und filtert danach („Gestartet durch“). Welche Ereignisse überhaupt als Rot zählen, bleibt `ci.red_events`, und `ci.extra_branches` fügt weiterhin die beobachteten Wartungszweige hinzu.
+- **Erwartetes Rot** (`expected_red.enabled`). Markieren Sie im Tab Alarme oder in der Palette einen Workflow (oder `*` für ein Repository) als absichtlich rot, mit Grund, Verantwortlichem und einer Zahl von Tagen (nie mehr als `expected_red.max_days`). Solange die Markierung gilt, wird sein Rot gesondert aufgeführt, nicht gezählt und alarmiert nicht; läuft sie ab, kehrt das Rot zurück und ein Alarm meldet, dass die Markierung abgelaufen ist, bis Sie sie entfernen oder neu setzen.
+- **Auffällige Klone pro Benutzer** (`audit_feed.clone_alert.enabled`). Liest das Audit-Log der Organisation nach `git.clone` (nur manche Tarife bieten es; bei Ihrem Tarif ohne sagt die Antwort `available: false`). Ein Benutzer, der innerhalb von `window_hours` mehr verschiedene Repositories als `threshold` klont, wird in einem Alarm genannt; Roboter werden über die Namensmuster und die Endung `[bot]` ausgelassen.
+- **Metadatenspalten** (`fleet.meta_columns`). Eine JSON-Liste aus `{"name", "path", "regex"}`, höchstens fünf. Die erste Gruppe des Ausdrucks (oder der ganze Treffer) in der ersten passenden Zeile ist der Wert der Spalte; nur die ersten 8 KB der Datei werden angesehen.
+- **Personen außerhalb des Teams** (`sentinels.collab.rules.watch_external_comments`, `external_days`, `team_members`). Ein Issue oder Pull Request einer Person außerhalb des Teams, den niemand nach `external_days` Tagen beantwortet oder angefasst hat, ist ein Alarm mit dem Code `collab.issue.external`.
+
+| Route | Was sie tut |
+|---|---|
+| `GET /api/expected-red` | die Markierungen mit ihrem Zustand (`active` oder `expired`) |
+| `POST /api/expected-red` | `{"action": "add", "repo", "workflow", "reason", "owner", "days"}` oder `{"action": "remove", "id"}` (ein Maintainer, mit dem Einmal-Token der Seite; im Aktionsprotokoll vermerkt) |
+| `GET /api/clone-anomalies` | die Benutzer über dem Schwellenwert, aus dem Audit-Log (ein Maintainer) |
+| `GET /api/meta-columns` | die Spalten und der bisher gefundene Wert je Repository |
