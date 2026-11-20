@@ -28,6 +28,7 @@ AUDITED = {
     "/api/ai/prompts/clear": "prompt_log_clear",        # the local record of prompts is emptied (how many lines, never their text)
     "/api/ai/actions/unlock": "ai_unlock",              # the actions of the AI are unlocked for a while
     "/api/screens/logo": "screens_logo_upload",                # the logo of the organization is uploaded (its kind and size go in, never its content)
+    "/api/webhook/redeliver": "webhook_redeliver",      # GitHub is asked to send again the deliveries that never arrived (how many, never a payload)
     "/api/screens/logo/remove": "screens_logo_remove",         # the logo of the organization is removed
 }
 

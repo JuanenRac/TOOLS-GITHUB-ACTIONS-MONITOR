@@ -74,6 +74,26 @@ The clock used is always the one of this computer, never the one of the delivery
 
 With `events_feed.enabled` on, the monitor reads the events of the account (`GET /orgs/OWNER/events`, or `/users/OWNER/events`; `events_feed.owner_kind` says which, and `auto` tries the organization first) every `events_feed.interval_seconds` (60 by default; `X-Poll-Interval` wins when it is longer) with an ETag. A read that finds nothing new answers `304` and costs no allowance; when something changed (a push, a pull request, a tag or a release) only the repository named in the event is read again in the next cycle, at most `events_feed.max_per_tick` per turn. The first read only learns where the list stands. It needs no webhook and no tunnel, and it can run next to one. The counters are `feed` in `GET /api/live-status`.
 
+## Without a public address: the WebSocket of GitHub (off by default)
+
+A monitor at home, behind a router, cannot be reached by GitHub. With `webhook.transport` set to `websocket` the GitHub CLI does the reverse: `gh webhook forward` makes a temporary webhook, keeps a connection open from this computer and hands every delivery to the receiver of the monitor, so nothing is exposed and no tunnel is needed.
+
+- `webhook.ws_targets` lists what to forward: `owner/repo` for one repository or `owner` for a whole organization (a personal account needs one entry for each repository, at most `webhook.ws_max_targets`). Empty by default: changing the transport alone starts nothing. The receiver must be on (`webhook.enabled` and the shared secret) and the monitor restarted.
+- It **writes to GitHub** (the temporary hooks) and needs a token that can manage webhooks (`admin:repo_hook`, `admin:org_hook`). With a token that cannot, the state of the target says `forbidden` and it is asked again only every few minutes.
+- The deliveries are signed with a secret made at every start, kept in memory and handed to `gh` on its command line, so another process of the same user on this computer could read it; it only lets that user send events to a receiver that is on this computer. The shared secret itself never leaves the environment. GitHub does not sign every frame of the WebSocket separately: the connection is authenticated by the token.
+- A forwarder that ends is started again with a longer wait each time (5 seconds up to 5 minutes). A hook accepts one subscriber: do not run `gh webhook forward` by hand for the same target. The deliveries of this transport do not appear as redeliverable in the page of the hook in GitHub, so the recovery below only works with the `http` transport.
+- `webhook.ws_cleanup` (off) deletes, at start, the hooks that point to the forwarder of GitHub in the listed targets, which cleans what a crash left; it deletes hooks, so turn it on only when you know no other session uses them.
+- The state of each forwarder is `forwarders` in `GET /api/live-status`.
+
+## Deliveries that never arrived (off by default)
+
+A monitor at home is not always on: the computer is off at night, the tunnel drops. GitHub keeps the recent deliveries of a webhook, says which ones failed, and lets a failed one be sent again. With `webhook.redeliver.enabled` on, the monitor looks at the webhooks you name in `webhook.redeliver.hooks` (`repo:OWNER/REPO#ID` or `org:OWNER#ID`, where ID is the number at the end of the address of the webhook in GitHub) a minute after the start and then every `webhook.redeliver.interval_minutes` (60 by default), and asks GitHub to send again the deliveries that no attempt answered with a 2xx.
+
+- **It writes to GitHub** (the request to deliver again) and needs a token that can manage the webhook. Off by default; the deliveries of a GitHub App are not covered.
+- At most `webhook.redeliver.max_per_run` (20) deliveries per look, none older than `webhook.redeliver.max_age_hours` (24; GitHub keeps them three days), the ones never asked for first. A delivery is asked for again with a growing wait (5, 10, 20, 40, 80, 160 and 300 seconds) and given up (`dead`) after the eighth time. What was asked is kept in a private file of the data folder (the delivery id and the count, never a payload), so a restart does not ask again at once.
+- A delivery that arrives again is answered as a duplicate by the receiver, so asking twice does no harm.
+- `POST /api/webhook/redeliver` (administrators, this computer only, with the one-use token) looks now, whatever the schedule, and leaves a line in the log of actions. The counters are `redelivery` in `GET /api/live-status`.
+
 ## Checklist for the Live view
 
 1. Put a secret of at least 32 characters in the environment variable named by `webhook.secret_env` and switch the webhook on.

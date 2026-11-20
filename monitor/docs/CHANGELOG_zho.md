@@ -46,6 +46,10 @@
 
 - **凭据助手：自动找到 GitHub App 的安装，并用按钮测试令牌**(`github_app.installation_id` 可以留空;`GET /api/credential/probe`，仅限本机;配额标签页的“测试令牌”按钮)：监视器现在会找到所监视账户的安装，或 App 仅有的那个，而不是取看到的第一个;当有多个账户且没有一个是监视器的账户时，会列出它们以便填写一个。测试会说明登录是谁、是经典令牌(以及缺少哪些权限范围)还是细粒度令牌或 App、能看到多少个仓库(以及单点登录是否截断了列表)、剩余多少配额，对于 App 还会给出名称、安装和缺少的权限。每 10 秒最多做一次真实检查;不会向 GitHub 写入任何内容，也不会显示任何令牌或密钥。
 
+- **没有公开地址的 Webhook，通过 GitHub 的 WebSocket**(`webhook.transport` = `websocket`;`webhook.ws_targets`、`webhook.ws_max_targets`、`webhook.ws_cleanup`;默认关闭)：监视器为你列出的每个仓库或组织运行并看护 `gh webhook forward`，它会创建一个临时 Webhook，并通过本机打开的连接把每次投递交给监视器的接收端，因此不会暴露任何东西，也不需要隧道。它会写入 GitHub(临时钩子)，需要能管理 Webhook 的令牌;结束的转发器会以更长的等待时间重新启动，令牌无权管理钩子的转发器会在 `GET /api/live-status` 的 `forwarders` 中显示 `forbidden`。投递用每次启动时生成的密钥签名，只有本进程的接收端在共享密钥之外接受它。
+
+- **恢复关机的电脑错过的 Webhook 投递**(`webhook.redeliver.enabled`，默认关闭;`webhook.redeliver.hooks`、`webhook.redeliver.max_per_run`、`webhook.redeliver.max_age_hours`、`webhook.redeliver.interval_minutes`;`POST /api/webhook/redeliver`)：启动一分钟后，之后每小时一次，监视器读取你指定的 Webhook 最近的投递，并请求 GitHub 重新发送所有尝试都没有收到 2xx 响应的投递，每次检查有数量上限、逐渐增长的等待时间(5 到 300 秒)，第八次请求后停止。已请求的内容记在私有文件里，因此重启不会立刻再次请求;运维人员可以立即发起请求，该请求会在操作日志中留下一行。它会写入 GitHub，所以默认关闭，且只触及你指定的钩子;计数器在 `GET /api/live-status` 的 `redelivery` 中。
+
 ### 修复
 
 - **墙屏为了让列表放得下而隐藏的行现在真的会消失**：页面用 hidden 属性隐藏行，但本身是 flex 盒子的行会忽略它，导致事件列表、队列、失败和热力图的行在卡片底部被切成两半并压在页脚上。现在隐藏优先于任何样式。

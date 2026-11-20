@@ -74,6 +74,26 @@ Maßgeblich ist immer die Uhr dieses Rechners, nie die der Zustellung. `webhook.
 
 Mit eingeschaltetem `events_feed.enabled` liest der Monitor alle `events_feed.interval_seconds` (standardmäßig 60; `X-Poll-Interval` gilt, wenn es länger ist) mit einem ETag die Ereignisse des Kontos (`GET /orgs/OWNER/events` oder `/users/OWNER/events`; `events_feed.owner_kind` sagt welche, `auto` versucht zuerst die Organisation). Ein Lesevorgang ohne Neues antwortet `304` und kostet kein Kontingent; hat sich etwas geändert (ein Push, ein Pull Request, ein Tag oder ein Release), wird im nächsten Zyklus nur das im Ereignis genannte Repository neu gelesen, höchstens `events_feed.max_per_tick` pro Durchlauf. Der erste Lesevorgang lernt nur, wo die Liste steht. Es braucht weder Webhook noch Tunnel und kann neben einem laufen. Die Zähler stehen unter `feed` in `GET /api/live-status`.
 
+## Ohne öffentliche Adresse: der WebSocket von GitHub (standardmäßig aus)
+
+GitHub kann einen Monitor zu Hause hinter einem Router nicht erreichen. Mit `webhook.transport` auf `websocket` macht die GitHub-CLI es umgekehrt: `gh webhook forward` legt einen temporären Webhook an, hält von diesem Rechner aus eine Verbindung offen und übergibt jede Zustellung dem Empfänger des Monitors, sodass nichts offengelegt wird und kein Tunnel nötig ist.
+
+- `webhook.ws_targets` listet auf, was weitergeleitet wird: `owner/repo` für ein Repository oder `owner` für eine ganze Organisation (ein persönliches Konto braucht einen Eintrag je Repository, höchstens `webhook.ws_max_targets`). Standardmäßig leer: Allein den Transport zu ändern startet nichts. Der Empfänger muss aktiv sein (`webhook.enabled` und das gemeinsame Geheimnis) und der Monitor neu gestartet werden.
+- Es **schreibt in GitHub** (die temporären Hooks) und braucht ein Token, das Webhooks verwalten darf (`admin:repo_hook`, `admin:org_hook`). Mit einem Token, das das nicht darf, meldet der Zustand des Ziels `forbidden`, und es wird nur alle paar Minuten erneut versucht.
+- Die Zustellungen werden mit einem bei jedem Start erzeugten Geheimnis signiert, das im Speicher bleibt und `gh` auf der Kommandozeile übergeben wird; ein anderer Prozess desselben Benutzers auf diesem Rechner könnte es lesen, es erlaubt diesem Benutzer nur, Ereignisse an einen Empfänger auf diesem Rechner zu senden. Das gemeinsame Geheimnis selbst verlässt die Umgebung nie. GitHub signiert nicht jeden Frame des WebSockets einzeln: Die Verbindung wird durch das Token authentifiziert.
+- Ein beendeter Weiterleiter wird mit jeweils längerer Wartezeit neu gestartet (5 Sekunden bis 5 Minuten). Ein Hook nimmt einen Abonnenten an: Führe `gh webhook forward` nicht von Hand für dasselbe Ziel aus. Die Zustellungen dieses Transports erscheinen auf der Seite des Hooks in GitHub nicht als erneut sendbar, daher funktioniert die Wiederherstellung unten nur mit dem Transport `http`.
+- `webhook.ws_cleanup` (aus) löscht beim Start die Hooks, die in den angegebenen Zielen auf den Weiterleiter von GitHub zeigen, und räumt so auf, was ein Absturz hinterließ; es löscht Hooks, schalte es also nur ein, wenn keine andere Sitzung sie nutzt.
+- Der Zustand jedes Weiterleiters steht unter `forwarders` in `GET /api/live-status`.
+
+## Zustellungen, die nie ankamen (standardmäßig aus)
+
+Ein Monitor zu Hause ist nicht immer an: Der Rechner ist nachts aus, der Tunnel bricht ab. GitHub bewahrt die letzten Zustellungen eines Webhooks auf, sagt welche fehlschlugen und lässt eine fehlgeschlagene erneut senden. Mit `webhook.redeliver.enabled` an prüft der Monitor die in `webhook.redeliver.hooks` genannten Webhooks (`repo:OWNER/REPO#ID` oder `org:OWNER#ID`, wobei ID die Zahl am Ende der Adresse des Webhooks in GitHub ist) eine Minute nach dem Start und dann alle `webhook.redeliver.interval_minutes` (standardmäßig 60) und bittet GitHub, Zustellungen erneut zu senden, die kein Versuch mit einem 2xx beantwortete.
+
+- **Es schreibt in GitHub** (die Bitte um erneutes Senden) und braucht ein Token, das den Webhook verwalten darf. Standardmäßig aus; die Zustellungen einer GitHub App sind nicht abgedeckt.
+- Höchstens `webhook.redeliver.max_per_run` (20) Zustellungen pro Durchlauf, keine älter als `webhook.redeliver.max_age_hours` (24; GitHub bewahrt sie drei Tage auf), zuerst die nie angeforderten. Eine Zustellung wird mit wachsender Wartezeit (5, 10, 20, 40, 80, 160 und 300 Sekunden) erneut angefordert und nach dem achten Mal aufgegeben (`dead`). Was angefordert wurde, steht in einer privaten Datei im Datenordner (Zustellungs-ID und Zähler, nie eine Nutzlast), sodass ein Neustart nicht sofort erneut anfordert.
+- Eine erneut ankommende Zustellung beantwortet der Empfänger als Duplikat, zweimal anzufordern schadet also nicht.
+- `POST /api/webhook/redeliver` (Administratoren, nur von diesem Rechner, mit dem Einmal-Token) prüft sofort, unabhängig vom Zeitplan, und hinterlässt eine Zeile im Aktionsprotokoll. Die Zähler stehen unter `redelivery` in `GET /api/live-status`.
+
 ## Checkliste für die Live-Ansicht
 
 1. Lege ein Geheimnis mit mindestens 32 Zeichen in der Umgebungsvariable ab, die `webhook.secret_env` nennt, und schalte den Webhook ein.

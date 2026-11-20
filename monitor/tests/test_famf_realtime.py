@@ -336,7 +336,7 @@ class TurnOfTheApp(unittest.TestCase):
 
     def test_nothing_happens_when_everything_is_off_or_in_the_demo(self):
         with mock.patch.object(am, "run_gh", side_effect=AssertionError("no read expected")):
-            self.assertEqual(am.outside_tick({}, NOW), {"feed": [], "status": "", "heartbeat": ""})
+            self.assertEqual(am.outside_tick({}, NOW), {"feed": [], "status": "", "heartbeat": "", "redelivered": 0})
             with mock.patch.dict(am.DEMO, {"on": True}):
                 self.assertEqual(am.outside_tick({"events_feed": {"enabled": True}}, NOW)["feed"], [])
 

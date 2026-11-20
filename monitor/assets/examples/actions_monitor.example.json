@@ -522,7 +522,18 @@
     "clock_skew_s": 300,
     "max_body_kb": 1024,
     "queue_max": 500,
-    "stale_after_h": 6
+    "stale_after_h": 6,
+    "transport": "http",
+    "ws_targets": [],
+    "ws_max_targets": 10,
+    "ws_cleanup": false,
+    "redeliver": {
+      "enabled": false,
+      "hooks": [],
+      "max_per_run": 20,
+      "max_age_hours": 24,
+      "interval_minutes": 60
+    }
   },
   "events_feed": {
     "enabled": false,

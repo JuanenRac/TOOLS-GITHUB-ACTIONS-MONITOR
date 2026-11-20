@@ -74,6 +74,26 @@ O relógio usado é sempre o deste computador, nunca o da entrega. `webhook.cloc
 
 Com `events_feed.enabled` ativo, o monitor lê os eventos da conta (`GET /orgs/OWNER/events`, ou `/users/OWNER/events`; `events_feed.owner_kind` diz qual, e `auto` tenta primeiro a organização) a cada `events_feed.interval_seconds` (60 por omissão; vale `X-Poll-Interval` se for maior) com um ETag. Uma leitura que não encontra nada de novo responde `304` e não gasta quota; quando algo mudou (um push, um pull request, uma etiqueta ou uma release) só se volta a ler, no ciclo seguinte, o repositório indicado no evento, no máximo `events_feed.max_per_tick` por turno. A primeira leitura só aprende onde está a lista. Não precisa de webhook nem de túnel e pode funcionar ao lado de um. Os contadores são `feed` em `GET /api/live-status`.
 
+## Sem endereço público: o WebSocket do GitHub (desativado por omissão)
+
+O GitHub não consegue chegar a um monitor em casa, atrás de um router. Com `webhook.transport` em `websocket`, a CLI do GitHub faz o contrário: `gh webhook forward` cria um webhook temporário, mantém uma ligação aberta a partir deste computador e entrega cada envio ao recetor do monitor, por isso nada fica exposto e não é preciso túnel.
+
+- `webhook.ws_targets` lista o que reencaminhar: `dono/repo` para um repositório ou `dono` para uma organização inteira (uma conta pessoal precisa de uma entrada por repositório, no máximo `webhook.ws_max_targets`). Vazio por omissão: mudar só o transporte não arranca nada. O recetor tem de estar ativo (`webhook.enabled` e o segredo partilhado) e o monitor reiniciado.
+- **Escreve no GitHub** (os hooks temporários) e precisa de um token que possa gerir webhooks (`admin:repo_hook`, `admin:org_hook`). Com um token que não pode, o estado do destino diz `forbidden` e só se tenta de novo a cada poucos minutos.
+- Os envios são assinados com um segredo criado em cada arranque, guardado em memória e passado ao `gh` na sua linha de comandos, por isso outro processo do mesmo utilizador neste computador poderia lê-lo; só permite a esse utilizador enviar eventos a um recetor que está neste computador. O segredo partilhado nunca sai do ambiente. O GitHub não assina cada trama do WebSocket em separado: a ligação é autenticada pelo token.
+- Um reencaminhador que termina é arrancado de novo com uma espera cada vez maior (de 5 segundos a 5 minutos). Um hook aceita um só subscritor: não executes `gh webhook forward` à mão para o mesmo destino. Os envios deste transporte não aparecem como reenviáveis na página do hook no GitHub, por isso a recuperação abaixo só funciona com o transporte `http`.
+- `webhook.ws_cleanup` (desativado) apaga no arranque os hooks que apontam para o reencaminhador do GitHub nos destinos indicados, o que limpa o que uma falha deixou; apaga hooks, por isso ativa-o só se souberes que nenhuma outra sessão os usa.
+- O estado de cada reencaminhador é `forwarders` em `GET /api/live-status`.
+
+## Entregas que nunca chegaram (desativado por omissão)
+
+Um monitor em casa nem sempre está ligado: o computador desliga-se de noite, o túnel cai. O GitHub guarda os envios recentes de um webhook, diz quais falharam e permite reenviar um que falhou. Com `webhook.redeliver.enabled` ativo, o monitor verifica os webhooks que indicares em `webhook.redeliver.hooks` (`repo:DONO/REPO#ID` ou `org:DONO#ID`, onde ID é o número no fim do endereço do webhook no GitHub) um minuto depois do arranque e depois a cada `webhook.redeliver.interval_minutes` (60 por omissão), e pede ao GitHub que reenvie os envios a que nenhuma tentativa respondeu com um 2xx.
+
+- **Escreve no GitHub** (o pedido de reenvio) e precisa de um token que possa gerir o webhook. Desativado por omissão; as entregas de uma GitHub App não estão cobertas.
+- No máximo `webhook.redeliver.max_per_run` (20) envios por verificação, nenhum mais antigo que `webhook.redeliver.max_age_hours` (24; o GitHub guarda-os três dias), primeiro os nunca pedidos. Um envio é pedido de novo com uma espera crescente (5, 10, 20, 40, 80, 160 e 300 segundos) e abandonado (`dead`) à oitava vez. O que foi pedido fica num ficheiro privado da pasta de dados (o id do envio e a contagem, nunca uma carga), por isso um reinício não volta a pedir logo.
+- Um envio que chega de novo é respondido pelo recetor como duplicado, por isso pedir duas vezes não faz mal.
+- `POST /api/webhook/redeliver` (administradores, só neste computador, com o token de uso único) verifica já, seja qual for o horário, e deixa uma linha no registo de ações. Os contadores são `redelivery` em `GET /api/live-status`.
+
 ## Lista de verificação da vista em direto
 
 1. Coloque um segredo com pelo menos 32 carateres na variável de ambiente indicada por `webhook.secret_env` e ative o webhook.

@@ -48,7 +48,8 @@ from github_actions_monitor.data_pipeline import activity
 from github_actions_monitor.data_pipeline import fork_ci
 from github_actions_monitor.data_pipeline import discovery
 from github_actions_monitor.data_pipeline import etagcache, knownstates
-from github_actions_monitor.data_pipeline import eventfeed, githubstatus
+from github_actions_monitor.data_pipeline import eventfeed, githubstatus, redeliver
+from github_actions_monitor.security import wsforward
 from github_actions_monitor.integrations import heartbeat
 from github_actions_monitor.data_pipeline import graphql_checks
 from github_actions_monitor import i18n
@@ -109,7 +110,8 @@ DEFAULTS = {
     "report_history_days": 30,   # (before 1.5.0: parte_history_days, still read)
     "sentinel": {"enabled": True},
     "ai": {"provider": "none"},
-    "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30, "max_bad_per_minute": 120, "max_verified_per_minute": 120, "reject_stale": False, "persist_deliveries": True, "clock_skew_s": 300, "max_body_kb": 1024, "queue_max": 500, "stale_after_h": 6},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
+    "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30, "max_bad_per_minute": 120, "max_verified_per_minute": 120, "reject_stale": False, "persist_deliveries": True, "clock_skew_s": 300, "max_body_kb": 1024, "queue_max": 500, "stale_after_h": 6,
+                "transport": "http", "ws_targets": [], "ws_max_targets": 10, "ws_cleanup": False, "redeliver": {"enabled": False, "hooks": [], "max_per_run": 20, "max_age_hours": 24, "interval_minutes": 60}},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
     "events_feed": {"enabled": False, "interval_seconds": 60, "owner_kind": "auto", "max_per_tick": 20},      # optional: the events of the account read with an ETag, to read only the repository that changed (eventfeed.py)
     "github_status": {"enabled": False, "interval_seconds": 300, "mark_reds": True},      # optional: the state of GitHub (githubstatus.com) in the bar, and the reds that appear during an incident of Actions (githubstatus.py)
     "heartbeat": {"enabled": False, "url_env": "MONITOR_HEARTBEAT_URL", "interval_seconds": 300, "send_state": True, "fail_suffix": ""},      # optional: a ping to an outside service that raises the alarm when the monitor stops (heartbeat.py)
@@ -1395,7 +1397,7 @@ def webhook_status(config):
     cfg = webhook.settings(config)
     newest = LIVE_EVENTS[-1] if LIVE_EVENTS else None
     return {"enabled": cfg["enabled"], "active": webhook.active(config), "secret_ok": len(cfg["secret"]) >= webhook.MIN_SECRET, "text": webhook.status_text(config), "stats": dict(WEBHOOK_STATS),
-            "keep": webhook.live_settings(config)["live_events_keep"], "held": len(LIVE_EVENTS), "queue": webhook.INBOX.snapshot(config), "open_runs": webhook.open_count(), "feed": eventfeed.FEED.snapshot(config), "secret_source": webhook.secret_source(config), "coverage": webhook.coverage(config),
+            "keep": webhook.live_settings(config)["live_events_keep"], "held": len(LIVE_EVENTS), "queue": webhook.INBOX.snapshot(config), "open_runs": webhook.open_count(), "feed": eventfeed.FEED.snapshot(config), "forwarders": wsforward.FORWARDERS.snapshot(config), "redelivery": redeliver.RECOVERY.snapshot(config), "secret_source": webhook.secret_source(config), "coverage": webhook.coverage(config),
             "last": ({k: newest.get(k) for k in ("repo", "workflow", "event", "status", "conclusion", "at")} if newest else None)}
 
 
@@ -1475,7 +1477,7 @@ def webhook_worker(config):
 def outside_tick(config, now=None):
     """One turn of the cheap reads that keep the monitor in step with the world, each only when it is switched on: the events of the account (which repository changed), the state of GitHub and the outside
     heartbeat. Nothing here runs in the demo. Returns what happened, for the tests: {"feed": [repositories read again], "status": "start" | "over" | "", "heartbeat": "sent" | ... | ""}."""
-    out = {"feed": [], "status": "", "heartbeat": ""}
+    out = {"feed": [], "status": "", "heartbeat": "", "redelivered": 0}
     if DEMO["on"]:
         return out
     from github_actions_monitor.integrations import notifiers
@@ -1489,6 +1491,8 @@ def outside_tick(config, now=None):
             webhook_settle(repo)      # the stored conditional reads of the repository are dropped and it is read again in the next cycle
             HOT_FORCED.add(repo)
             out["feed"].append(repo)
+    if redeliver.settings(config)["enabled"] and not (rate_block_state()["blocked"] or data.get("paused_quota")):
+        out["redelivered"] = redeliver.RECOVERY.run(config, run_gh, now)      # GitHub is asked to send again what never arrived (off by default: it writes to GitHub)
     if githubstatus.settings(config)["enabled"]:
         out["status"] = githubstatus.STATUS.tick(netguard.opener_for(False), config, now)
         if out["status"]:
@@ -1497,6 +1501,32 @@ def outside_tick(config, now=None):
         healthy = LITE["on"] or health_payload(deep=True)["ok"]
         out["heartbeat"] = heartbeat.HEARTBEAT.tick(config, healthy, TOOL_VERSION, notifiers.settings(config)["allow_private_targets"], now=now)
     return out
+
+
+def webhook_redeliver_now(config):
+    """The operator asks now (POST /api/webhook/redeliver): the named webhooks are looked at at once, whatever the schedule, and GitHub is asked to send again what never arrived. {"asked", ...counters}."""
+    asked = redeliver.RECOVERY.run(config, run_gh, force=True)
+    return {"asked": asked, **redeliver.RECOVERY.snapshot(config)}
+
+
+def wsforward_start(config, port):
+    """Starts the forwarders of `gh webhook forward` when the receiver is on and the transport is `websocket` (once the server has its port). The temporary hooks of an earlier crash are deleted first only when
+    `webhook.ws_cleanup` is on. Never raises."""
+    from github_actions_monitor.security import webhook
+    try:
+        cfg = wsforward.settings(config)
+        if DEMO["on"] or cfg["transport"] != "websocket" or not cfg["targets"] or not webhook.active(config):
+            return []
+        if cfg["cleanup"]:
+            wsforward.cleanup(run_gh, cfg["targets"])
+        started = wsforward.FORWARDERS.start(config, port)
+        webhook.set_local_secret(wsforward.FORWARDERS.local_secret())
+        import atexit
+        atexit.register(wsforward.FORWARDERS.stop)
+        return started
+    except Exception as error:   # noqa: BLE001 - a forwarder that cannot start never stops the monitor
+        degraded.note("webhook.forward", error)
+        return []
 
 
 def announce_github_status(transition, config):
@@ -1870,7 +1900,7 @@ AI_MODEL_POST = ("/api/ai/models/refresh", "/api/ai/models/test", "/api/ai/model
 THIS_COMPUTER_ACTIONS = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test") + AI_MODEL_POST
 THIS_COMPUTER_ADVANCED = ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures", "/api/ai/prompts/clear",
                           "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run", "/api/report-files/summary", "/api/ops/backup", "/api/ops/purge",
-                          "/api/updates/check", "/api/updates/plan", "/api/updates/apply", "/api/updates/rollback")
+                          "/api/updates/check", "/api/updates/plan", "/api/updates/apply", "/api/updates/rollback", "/api/webhook/redeliver")
 THIS_COMPUTER_POST = THIS_COMPUTER_ACTIONS + THIS_COMPUTER_ADVANCED
 
 
@@ -4628,6 +4658,10 @@ def handle_advanced_post(path, request, who=""):
         return {"ok": entry is not None, "mute": entry}
     if path.startswith("/api/updates/"):      # the Updates menu (admin, from this computer, with the one-use token); Complete only
         return handle_updates_post(path, request, who, config)
+    if path == "/api/webhook/redeliver":      # ask GitHub now to send again the deliveries that never arrived (admin, from this computer); it WRITES to GitHub, so it only touches the hooks you named
+        answer = webhook_redeliver_now(config)
+        _audit_plain("webhook_redeliver", who, "", {"asked": answer["asked"]}, "ok")
+        return {"ok": True, **answer}
     if path == "/api/ops/backup":      # make a copy now (admin, from this computer); Complete only. The answer says whether it worked, never a path of the person or a secret
         if LITE["on"]:
             return {"ok": False, "status": "lite"}
@@ -4981,6 +5015,8 @@ def main():
     from github_actions_monitor.security import webhook as _webhook
     _webhook.load_memory(paths.folder("data") / "webhook_deliveries.json") if _webhook.guard_settings(config)["persist_deliveries"] else None      # the memory of deliveries survives a restart
     _webhook.freeze_secret_name(config)      # the shared secret of the webhook is read from the environment once, under the name this process started with, and no program the monitor starts inherits it
+    redeliver.RECOVERY.load(paths.folder("data") / "webhook_redelivered.json")      # what was already asked for again is not asked again after a restart
+    redeliver.RECOVERY.next_run = time.time() + 60      # the first look a minute after the start
     outside_start(config)      # the cheap outside reads (events of the account, state of GitHub, heartbeat): each one only when switched on
     webhook_worker_start(config)      # the events of the receiver are applied by a thread of their own (a bounded queue, see webhook_receive)
     from github_actions_monitor.chatops import inbound as _chat
@@ -5156,6 +5192,7 @@ def main():
             print(i18n.t("mon.local_door_failed", port=listen["local_port"]), flush=True)
     server.tls_context = tls_ctx      # each connection is wrapped in its own thread (get_request), so a client that never finishes the handshake cannot stall the others
     url = f"{'https' if tls_ctx is not None else 'http'}://{localguard.display_host(server.server_address[0])}:{server.server_address[1]}/"      # from the address the server really listens on
+    wsforward_start(config, server.server_address[1])      # `gh webhook forward` hands the deliveries to the receiver of this very process (webhook.transport = websocket)
     try:      # the feed for AIs is off by default since 1.7.6: an installation that was already using it keeps it, and is told
         from github_actions_monitor.integrations import ai_alerts
         if ai_alerts.settings(config)["legacy"]:

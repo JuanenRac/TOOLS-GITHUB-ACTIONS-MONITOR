@@ -116,6 +116,7 @@ NOTES = {
     "/api/gh-action": ("POST", "prefix of the actions on GitHub (plan and confirm, see below)"),
     "/api/gh-action/confirm": ("POST", "confirm an action on GitHub (this computer only)"),
     "/api/gh-action/plan": ("POST", "plan an action on GitHub; nothing is sent until it is confirmed"),
+    "/api/webhook/redeliver": ("POST", "ask GitHub now to send again the webhook deliveries that never arrived, for the hooks named in `webhook.redeliver.hooks` (administrators, this computer only; it writes to GitHub)"),
     "/api/credential/probe": ("GET", "does the login (and the GitHub App) work: who it is, classic or fine-grained, scopes it lacks, repositories seen, allowance left, installations of the App (this computer only; at most one real check every 10 seconds)"),
     "/api/github-app/status": ("GET", "state of the optional GitHub App for reads (this computer only)"),
     "/api/github-token": ("GET,POST", "state or change of the token the monitor keeps (administrators, this computer only)"),

@@ -134,6 +134,13 @@ _accepted = collections.deque(maxlen=5000)     # when each event that named a wa
 _started = [time.time()]
 
 
+_local = [""]      # the secret of the forwarder that `gh webhook forward` signs with (made at every start, kept in memory only; see wsforward.py)
+
+
+def set_local_secret(value):
+    _local[0] = value if isinstance(value, str) else ""
+
+
 _store = {"path": None, "dirty": False, "saved": 0.0}      # the file where the memory of deliveries survives a restart (set by load_memory; tests do not set it)
 
 
@@ -303,7 +310,8 @@ def handle(config, body, headers, watched, address=None, size=None):
     guard = guard_settings(config)
     if (size if size is not None else len(body)) > guard["max_body"]:
         return 413, {"ok": False, "error": text("too_big")}, None
-    if not verify(settings(config)["secret"], body, headers.get("X-Hub-Signature-256")):
+    signature = headers.get("X-Hub-Signature-256")
+    if not (verify(settings(config)["secret"], body, signature) or (_local[0] and verify(_local[0], body, signature))):
         if address is not None and localguard.over_rate("webhook_bad", address, guard["max_bad_per_minute"]):
             return 429, {"ok": False, "error": "rate"}, None
         return 401, {"ok": False, "error": text("bad_signature")}, None

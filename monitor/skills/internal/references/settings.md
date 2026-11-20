@@ -797,9 +797,18 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `webhook.persist_deliveries` | `true` | webhook | Remember deliveries after a restart |
 | `webhook.queue_max` | `500` | webhook | Events waiting to be applied |
 | `webhook.record_events` | `-` | webhook | Keep events |
+| `webhook.redeliver.enabled` (secure) | `false` | webhook | Ask GitHub to send again what never arrived |
+| `webhook.redeliver.hooks` (secure) | `[]` | webhook | Webhooks to look at |
+| `webhook.redeliver.interval_minutes` | `60` | webhook | Minutes between looks |
+| `webhook.redeliver.max_age_hours` | `24` | webhook | Oldest delivery to ask for (hours) |
+| `webhook.redeliver.max_per_run` | `20` | webhook | Most deliveries asked for per look |
 | `webhook.reject_stale` | `false` | webhook | Refuse old events |
 | `webhook.replay_seconds` | `3600` | webhook | Delivery ids remembered |
 | `webhook.secret_env` (secure) | `"MONITOR_WEBHOOK_SECRET"` | webhook | Environment variable with the shared secret |
 | `webhook.signing_state` | `-` | webhook | Shared secret |
 | `webhook.stale_after_h` | `6` | webhook | Hours before a run left open counts as lost |
+| `webhook.transport` (secure) | `"http"` | webhook | How GitHub reaches the receiver |
+| `webhook.ws_cleanup` (secure) | `false` | webhook | Delete the temporary hooks a crash left |
+| `webhook.ws_max_targets` | `10` | webhook | Most forwarders at once |
+| `webhook.ws_targets` (secure) | `[]` | webhook | Repositories or organizations to forward |
 | `workspace_root` | `""` | paths | Folder with your clones |

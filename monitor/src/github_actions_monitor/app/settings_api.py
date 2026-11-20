@@ -85,6 +85,8 @@ WEBHOOK_ENV_RE = _env_name_except(envguard.WEBHOOK_SECRET_ENV)      # webhook.se
 TOKEN_ENV_RE = _env_name_except(envguard.ACCESS_TOKEN_ENV)          # listen.token_env
 SLACK_ENV_RE = _env_name_except(envguard.SLACK_SIGNING_ENV)          # chatops.slack.signing_secret_env
 HEARTBEAT_ENV_RE = _env_name_except(envguard.HEARTBEAT_URL_ENV)      # heartbeat.url_env
+WS_TARGET_RE = re.compile(r"^[A-Za-z0-9-]{1,39}(/[A-Za-z0-9._-]{1,100})?\Z")      # webhook.ws_targets: `owner/repo` or `owner`
+REDELIVER_HOOK_RE = re.compile(r"^(repo:[A-Za-z0-9-]{1,39}/[A-Za-z0-9._-]{1,100}|org:[A-Za-z0-9-]{1,39})#[0-9]{1,12}\Z")      # webhook.redeliver.hooks
 HEARTBEAT_SUFFIX_RE = re.compile(r"^(/[a-z]{1,10})?\Z")      # heartbeat.fail_suffix: empty, or one short word after a slash (/fail)
 DISCORD_ENV_RE = _env_name_except(envguard.DISCORD_KEY_ENV)         # chatops.discord.public_key_env
 NOTIFY_ENV_RE = _env_name_except("")                                # the variable of a channel of notices: no secret of the monitor belongs to it
@@ -650,6 +652,15 @@ _f(_T_HOOK, "inbound", "webhook.clock_skew_s", "int", (0, 3600), unit="s")
 _f(_T_HOOK, "inbound", "webhook.max_body_kb", "int", (1, 25600), unit="KB")
 _f(_T_HOOK, "inbound", "webhook.queue_max", "int", (1, 10000), unit="")
 _f(_T_HOOK, "inbound", "webhook.stale_after_h", "int", (1, 168), unit="h")
+_f(_T_HOOK, "inbound", "webhook.transport", "enum", ("http", "websocket"), secure=True)
+_f(_T_HOOK, "inbound", "webhook.ws_targets", "names", secure=True)
+_f(_T_HOOK, "inbound", "webhook.ws_max_targets", "int", (1, 50), unit="")
+_f(_T_HOOK, "inbound", "webhook.ws_cleanup", "bool", secure=True)
+_f(_T_HOOK, "redeliver", "webhook.redeliver.enabled", "bool", restart=False, secure=True)
+_f(_T_HOOK, "redeliver", "webhook.redeliver.hooks", "names", restart=False, secure=True)
+_f(_T_HOOK, "redeliver", "webhook.redeliver.max_per_run", "int", (1, 100), unit="", restart=False)
+_f(_T_HOOK, "redeliver", "webhook.redeliver.max_age_hours", "int", (1, 72), unit="h", restart=False)
+_f(_T_HOOK, "redeliver", "webhook.redeliver.interval_minutes", "int", (5, 1440), unit="min", restart=False)
 _f(_T_POLL, "events_feed", "events_feed.enabled", "bool", restart=False)
 _f(_T_POLL, "events_feed", "events_feed.interval_seconds", "int", (30, 3600), unit="s", restart=False)
 _f(_T_POLL, "events_feed", "events_feed.owner_kind", "enum", ("auto", "org", "user"), restart=False)
@@ -973,7 +984,7 @@ def check_value(path, value):
             return False, "path"      # the folder of the copies: never empty and a relative one never climbs out of the data folder
         return True, text
     if kind == "names":
-        pattern = USES_RE if path == "sentinels.supply.ignore_uses" else WORKDAY_RE if path == "compare.workdays" else FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else RUNNER_LABEL_RE if path in RUNNER_LABEL_KEYS else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path in ("sentinel.hygiene.ruleset_names", "sentinels.delivery.expected_assets") else (PATH_RE if path in PATH_KEYS else (alertflow.SILENCE_RE if path == "alerts.silences" else (alertflow.PATTERN_RE if path == "alerts.service.workflows" else (PAIR_RE if path in PAIR_KEYS else NAME_RE)))))))
+        pattern = WS_TARGET_RE if path == "webhook.ws_targets" else REDELIVER_HOOK_RE if path == "webhook.redeliver.hooks" else USES_RE if path == "sentinels.supply.ignore_uses" else WORKDAY_RE if path == "compare.workdays" else FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else RUNNER_LABEL_RE if path in RUNNER_LABEL_KEYS else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path in ("sentinel.hygiene.ruleset_names", "sentinels.delivery.expected_assets") else (PATH_RE if path in PATH_KEYS else (alertflow.SILENCE_RE if path == "alerts.silences" else (alertflow.PATTERN_RE if path == "alerts.service.workflows" else (PAIR_RE if path in PAIR_KEYS else NAME_RE)))))))
         if not isinstance(value, list) or len(value) > 200 or not all(isinstance(v, str) and pattern.match(v) for v in value):
             return False, "names"
         if path == "sentinel.hygiene.ruleset_names" and not value:

@@ -74,6 +74,26 @@
 
 开启 `events_feed.enabled` 后，监视器每隔 `events_feed.interval_seconds`（默认 60;若 `X-Poll-Interval` 更长则以它为准）用 ETag 读取账户事件（`GET /orgs/OWNER/events` 或 `/users/OWNER/events`;由 `events_feed.owner_kind` 指定，`auto` 先尝试组织）。没有新内容的读取返回 `304`，不消耗配额;有变化时（push、拉取请求、标签或发布），只有事件中提到的仓库会在下一个周期被重新读取，每轮最多 `events_feed.max_per_tick` 个。第一次读取只了解列表的位置。它不需要 Webhook 或隧道，也可以与之并用。计数器在 `GET /api/live-status` 的 `feed` 中。
 
+## 没有公开地址：GitHub 的 WebSocket（默认关闭）
+
+GitHub 无法到达位于家中路由器后面的监视器。把 `webhook.transport` 设为 `websocket` 后，GitHub CLI 反过来工作:`gh webhook forward` 创建一个临时 Webhook，从本机保持一个打开的连接，并把每次投递交给监视器的接收端，因此不会暴露任何东西，也不需要隧道。
+
+- `webhook.ws_targets` 列出要转发的内容:一个仓库用 `owner/repo`，整个组织用 `owner`(个人账户每个仓库需要一项，最多 `webhook.ws_max_targets` 项)。默认为空:只改传输方式不会启动任何东西。接收端必须开启(`webhook.enabled` 和共享密钥)，并重启监视器。
+- 它**会写入 GitHub**(临时钩子)，需要能管理 Webhook 的令牌(`admin:repo_hook`、`admin:org_hook`)。令牌无此权限时，目标的状态显示 `forbidden`，且每隔几分钟才重试一次。
+- 投递用每次启动时生成的密钥签名，该密钥只保存在内存中并通过命令行交给 `gh`，因此本机同一用户的其他进程可能读到它;它只允许该用户向本机上的接收端发送事件。共享密钥本身从不离开环境。GitHub 不会对 WebSocket 的每一帧单独签名:连接由令牌认证。
+- 结束的转发器会以越来越长的等待时间重新启动(5 秒到 5 分钟)。一个钩子只接受一个订阅者:不要为同一目标手动运行 `gh webhook forward`。此传输方式的投递在 GitHub 钩子页面中不显示为可重新发送，因此下面的恢复功能只适用于 `http` 传输。
+- `webhook.ws_cleanup`(关闭)会在启动时删除所列目标中指向 GitHub 转发器的钩子，以清理崩溃遗留的钩子;它会删除钩子，所以只有在确定没有其他会话使用它们时才开启。
+- 每个转发器的状态在 `GET /api/live-status` 的 `forwarders` 中。
+
+## 未送达的投递（默认关闭）
+
+家中的监视器并不总是开着:电脑夜里关机，隧道会断开。GitHub 会保留 Webhook 最近的投递，指出哪些失败，并允许重新发送失败的投递。开启 `webhook.redeliver.enabled` 后，监视器在启动一分钟后检查你在 `webhook.redeliver.hooks` 中列出的 Webhook(`repo:OWNER/REPO#ID` 或 `org:OWNER#ID`，其中 ID 是 GitHub 中该 Webhook 地址末尾的数字)，之后每隔 `webhook.redeliver.interval_minutes`(默认 60)检查一次，并请求 GitHub 重新发送所有尝试都没有收到 2xx 响应的投递。
+
+- **它会写入 GitHub**(重新发送请求)，需要能管理该 Webhook 的令牌。默认关闭;不涵盖 GitHub App 的投递。
+- 每次检查最多 `webhook.redeliver.max_per_run`(20)个投递，不处理比 `webhook.redeliver.max_age_hours`(24;GitHub 保留三天)更早的，从未请求过的优先。一次投递以逐渐增长的等待时间(5、10、20、40、80、160 和 300 秒)重新请求，第八次后放弃(`dead`)。已请求的内容保存在数据文件夹中的私有文件里(投递 ID 和次数，绝不包含载荷)，因此重启不会立刻再次请求。
+- 再次到达的投递会被接收端当作重复来响应，所以请求两次也无妨。
+- `POST /api/webhook/redeliver`(管理员，仅限本机，需一次性令牌)会立即检查，不论计划如何，并在操作日志中留下一行。计数器在 `GET /api/live-status` 的 `redelivery` 中。
+
 ## 实时视图检查清单
 
 1. 在 `webhook.secret_env` 所指的环境变量中放入至少 32 个字符的密钥，并开启 Webhook。
