@@ -115,6 +115,7 @@ jobs:
           python -m unittest discover -s monitor/tests -p "test_180_page_smoke.py" -v
           python -m unittest discover -s monitor/tests -p "test_180_motion.py" -v
           python -m unittest discover -s monitor/tests -p "test_183_now_panel.py" -v
+          python -m unittest discover -s monitor/tests -p "test_216_fold_memory_browser.py" -v
           python -m unittest discover -s monitor/tests -p "test_194_sort_now.py" -v
           python -m unittest discover -s monitor/tests -p "test_196_sort_alerts.py" -v
           python -m unittest discover -s monitor/tests -p "test_195_ports.py" -v

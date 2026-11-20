@@ -104,3 +104,5 @@
 菜单有五个带标题的分组（可折叠，监视器会记住）：“监控”（现在、警报、图表）、“哨兵”（概览、CI 哨兵、协作哨兵、安全哨兵）、“团队”（团队健康、舰队、仓库）、“报告与学习”（报告、定时报告、经验教训、历史）和“系统”（设置）。每个条目都有自己的地址：`#team-health`、`#fleet`、`#team-reports`、`#reports`、`#lessons`、`#sentinel`、`#sentinel-ci`、`#sentinel-collab` 和 `#sentinel-security`（也可用相同词语的 `?view=`）。旧地址（`#team`、`#sent`、`#alerts/reports`、`#team/fleet` 等）仍会打开正确的面板。
 
 三个哨兵可以开启或关闭（`sentinel.enabled`、`sentinels.collab.enabled`、`sentinels.security.enabled`）。哨兵的菜单项仅在其开启时出现，三个都关闭时“哨兵”分组也会消失；页面在下一次刷新时跟随状态。已关闭哨兵的地址仍会打开其面板，面板说明它已关闭，并带有一个打开其设置开关的按钮。A1 至 A13 面板属于 CI 哨兵；每个条目的徽标只统计它自己哨兵的警报。
+
+您在 A1 至 A13 各栏目中折叠或展开的内容会保持原样：页面在每次刷新时重新绘制，但会按名称记住每一个栏目（`ui.remember_folds` 默认开启，也会把选择保存在浏览器中）。

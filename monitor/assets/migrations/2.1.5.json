@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.5",
  "previous": "2.1.3",
- "digest": "0e16a2077ba8f20c902ae3b2b34ef1e56860d303d4fcb18f17f2b8339ddbd02c",
+ "digest": "4181de932d15668eb62a50d4c37b95b2b2dccc8943d9a535cc3be74c56938c9c",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -448,6 +448,11 @@
      168
     ],
     "default": 12
+   },
+   {
+    "key": "ui.remember_folds",
+    "kind": "bool",
+    "default": true
    },
    {
     "key": "updates.systemd_helper",

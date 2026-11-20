@@ -99,6 +99,6 @@ Alles Folgende ist lokal und nur lesend und standardmäßig aus, sofern nichts a
 - `logs.failed_step.enabled`, `github_app.share_reads` - docs/EXTRAS_deu.md
 - `reports.workflow_hygiene.enabled`, `reports.queue.enabled`, `reports.release_view.enabled`, `reports.supply_chain.enabled` - docs/EXTRAS_deu.md
 - `ai.skill` - docs/SKILLS_deu.md
-- `ui.orientation`, `ui.screen1_tabs`, `ui.now_sort`, `ui.alerts_sort` - docs/SCREENS_deu.md
+- `ui.orientation`, `ui.screen1_tabs`, `ui.now_sort`, `ui.alerts_sort`, `ui.remember_folds` - docs/SCREENS_deu.md
 - `ports.complete`, `ports.lite` - docs/DEPLOYMENT_deu.md
 - `notify.users.enabled` - docs/NOTIFICATIONS_deu.md

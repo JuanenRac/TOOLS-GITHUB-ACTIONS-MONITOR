@@ -31,12 +31,15 @@ Für einen Fernseher oder eine Wand mit größerer Schrift, hohem Kontrast oder 
 | `ui.screen3_orientation` | Ausrichtung von /screen/3. |
 | `ui.now_sort` | Reihenfolge von Läuft gerade für alle, die keine gewählt haben: ecosystem, severity, age, newest, repo, event oder state. |
 | `ui.alerts_sort` | Reihenfolge des Tabs Meldungen für alle, die keine gewählt haben: server, severity, streak, class, age, newest, repo, origin oder state. |
+| `ui.remember_folds` | Eingeklapptes merken: an (Standard), von Hand ein- oder ausgeklappte Bereiche bleiben nach einer Aktualisierung und beim erneuten Öffnen der Seite so; aus, nur solange die Seite geöffnet bleibt. |
 
 ## Reihenfolge der Listen
 
 Der Abschnitt **Läuft gerade** auf dem ersten Tab ist nach Ökosystem sortiert, mit einer Überschrift je Ökosystem. Die Liste über dem Abschnitt ändert das: Ökosystem, Schweregrad (zuerst hängende, dann Runs mit fehlgeschlagenem Job, dann laufende, dann wartende), Alter (längste Laufzeit zuerst), neueste zuerst, Repository, Auslöser (push, pull_request, schedule...) und Status (laufend vor wartend). Die Auswahl wird für jede Person gemerkt: im Teammodus speichert sie der Server beim Benutzer (`GET` und `POST /api/auth/me/view`, sie folgt dem Benutzer also in einen anderen Browser), sonst dieser Browser. Bis jemand wählt, gilt `ui.now_sort` der Konfigurationsdatei (Ökosystem, wenn der Wert fehlt oder falsch ist). Die Schaltflächen **Alle aufklappen** und **Alle zuklappen** neben der Liste klappen alle Repositories des Abschnitts auf einmal auf oder zu, in jeder Reihenfolge; die Wahl wird pro Person am selben Ort gemerkt und übersteht eine Aktualisierung (ein danach von Hand geöffnetes oder geschlossenes Repository behält Ihre Wahl).
 
 Die Liste des Tabs **Meldungen** behält die Reihenfolge des Monitors, bis jemand mit der Liste darüber eine andere wählt: Schweregrad (kritisch, Fehler, Warnung, Info), die längste Serie aufeinanderfolgender Fehler zuerst, Klasse (eine Fehler- oder kritische Meldung ist echt und steht vor den zu beobachtenden), die älteste zuerst, die neueste zuerst, Repository, Herkunft (der Wächter, der sie ausgelöst hat) und Status (offen vor stummgeschaltet). Sie wird auf dieselbe Weise gemerkt; bis jemand wählt, gilt `ui.alerts_sort` der Konfigurationsdatei (`server`, wenn der Wert fehlt oder falsch ist).
+
+**Ein- und ausgeklappte Bereiche** bleiben so, wie die Person sie verlassen hat. Die Bereiche des CI-Sentinels, die Karten der anderen Sentinels, die Listen der Hinweise im ersten Reiter und die Versionen des Updaters werden bei jeder Aktualisierung neu gezeichnet; eine Aktualisierung öffnet nie wieder, was eingeklappt war, und klappt nichts zu, was offen war: Jeder Block hat einen stabilen Namen, und die Seite behält die Wahl jedes einzelnen, im Speicher und, mit `ui.remember_folds` an (Standard), auch im Browser. Nur ein Klick der Person hält eine Wahl fest; was die Seite von selbst öffnet (die erste Karte mit Meldungen eines noch unberührten Sentinels), zählt nicht als Wahl.
 
 ## Getestete Größen
 
