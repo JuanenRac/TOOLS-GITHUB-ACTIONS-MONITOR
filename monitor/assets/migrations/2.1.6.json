@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.6",
  "previous": "2.1.5",
- "digest": "6f62293de010637183289203c8f095392c3adb963c6247438deaaced67e28c7d",
+ "digest": "c1476d5cf71d19b5e48a607a8a5e848ab0af3c5d8ce64fe50bc230e597d723ba",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -47,6 +47,11 @@
    },
    {
     "key": "report_export.txt",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "ui.remember_folds",
     "kind": "bool",
     "default": true
    }
