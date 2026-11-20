@@ -750,7 +750,9 @@
     "billing_api": false,
     "warn_percent": 75,
     "alert_percent": 90,
-    "default_runner": "linux"
+    "default_runner": "linux",
+    "failover": false,
+    "failover_max_age_minutes": 60
   },
   "session_guard": true,
   "discovery": {
