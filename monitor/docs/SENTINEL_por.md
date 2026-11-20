@@ -106,3 +106,7 @@ O menu tem cinco grupos, cada um com um título (dobram-se e o monitor lembra-se
 As três sentinelas podem ser ligadas ou desligadas (`sentinel.enabled`, `sentinels.collab.enabled`, `sentinels.security.enabled`). A entrada de uma sentinela só está no menu enquanto estiver ligada, e o grupo *Sentinelas* desaparece quando nenhuma está; a página acompanha o estado na atualização seguinte. O endereço de uma sentinela desligada continua a abrir o seu painel, que diz que está desligada e tem um botão que abre o seu interruptor nas Definições. Os painéis A1 a A13 são da sentinela de CI; o indicador de cada entrada conta só os alertas da sua sentinela.
 
 O que recolhe ou expande nas secções A1 a A13 fica assim: a página desenha-as de novo em cada atualização, mas lembra-se de cada uma pelo seu nome (`ui.remember_folds`, ativado por omissão, guarda a escolha também no navegador).
+
+## A fila de assinatura de A5
+
+Uma execução só entra na fila de assinatura se (a) não for um ensaio (dry run; o passo «Prepare the draft» correu), (b) houver um rascunho de release à espera ou o repositório não tiver nenhuma release publicada, e (c) a versão não estiver já publicada com a sua assinatura. O monitor olha para cada execução da fila uma vez de seis em seis horas (os jobs da execução e as releases do seu repositório: duas leituras, no máximo três execuções por ciclo, atrás da mesma porta da quota). O que sai da fila é listado por baixo como «verificado: já publicada vX» ou «ensaio»; uma linha que ninguém olhou ainda fica e é marcada como não verificada.

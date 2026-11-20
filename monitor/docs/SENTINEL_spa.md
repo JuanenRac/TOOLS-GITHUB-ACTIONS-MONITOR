@@ -108,3 +108,7 @@ El menú tiene cinco grupos con título (se pliegan y el monitor recuerda cuále
 Los tres centinelas se pueden activar o no (`sentinel.enabled`, `sentinels.collab.enabled`, `sentinels.security.enabled`). La entrada de un centinela está en el menú solo mientras está activado, y el grupo *Centinelas* desaparece cuando no hay ninguno; la página sigue el estado en su siguiente actualización. La dirección de un centinela apagado sigue abriendo su panel, que dice que está apagado y tiene un botón que abre su interruptor en Ajustes. Los paneles A1 a A13 son del centinela de CI; el contador de cada entrada cuenta solo las alertas de su centinela.
 
 Lo que pliegas o despliegas en las secciones A1 a A13 se queda así: la página las dibuja de nuevo en cada refresco pero recuerda cada una por su nombre (`ui.remember_folds`, activado por defecto, guarda la elección también en el navegador).
+
+## La cola de firma de A5
+
+Una ejecución entra en la cola de firma solo si (a) no es un simulacro (dry run; se ejecutó el paso «Prepare the draft»), (b) hay un borrador de release esperando o el repositorio no tiene ninguna release publicada, y (c) la versión no está ya publicada con su firma. El monitor mira cada ejecución de la cola una vez cada seis horas (los jobs de la ejecución y las releases de su repositorio: dos lecturas, como mucho tres ejecuciones por ciclo, dentro de la misma puerta de la cuota). Lo que sale de la cola se lista debajo como «comprobado: ya publicada vX» o «simulacro»; una fila que nadie ha mirado aún se queda y se marca como sin comprobar.

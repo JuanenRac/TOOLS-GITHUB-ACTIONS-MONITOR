@@ -107,7 +107,7 @@ class Settings(unittest.TestCase):
         self.assertEqual((cfg["refresh_seconds"], cfg["max_repos_per_tick"], cfg["max_calls_per_tick"], cfg["min_rate_remaining"]), (3600, 10, 60, 1000))
         self.assertEqual((cfg["unreleased_days"], cfg["unreleased_min_entries"], cfg["changelog_paths"], cfg["version_files"], cfg["expected_assets"]), (14, 1, ["CHANGELOG.md"], [], []))
         self.assertEqual({n: cfg["signals"][n]["level"] for n in rules.SIGNALS}, {"unreleased_pending": "info", "tag_without_release": "warning", "release_without_notes": "info",
-                                                                                  "version_mismatch": "warning", "ecosystem_drift": "warning", "assets_missing": "warning"})
+                                                                                  "version_mismatch": "warning", "ecosystem_drift": "info", "assets_missing": "warning"})
 
     def test_bad_values_keep_the_default_and_good_ones_are_taken(self):
         base = sd.settings({})

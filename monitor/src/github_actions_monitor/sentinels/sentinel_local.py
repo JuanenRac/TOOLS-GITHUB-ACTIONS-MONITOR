@@ -927,6 +927,9 @@ def compute_snapshot(inp):
             signed_wait.append(g)
     unsigned = [g for g in green if g not in signed_wait]
     queue = signstate.sign_queue(states, inp.get("finalize_fn"))
+    queue, sign_cleared = signstate.apply_probe(queue, inp.get("sign_probe") or {}, releases)      # dry runs and versions already published and signed are not offered for signing
+    cleared_runs = {c["run_id"] for c in sign_cleared}
+    unsigned = [g for g in unsigned if g.get("run_id") not in cleared_runs]
     reduced = bool(inp.get("reduced"))
     if reduced:   # no local workspace: there are no local signing records, so nothing can be said about what is waiting to be signed
         queue, unsigned, signed_wait = [], [], []
@@ -972,7 +975,7 @@ def compute_snapshot(inp):
                "stale_days": cfg["stale_pr_days"]},
         "tool_version": TOOL_VERSION,
         "a5": {"candidates": candidates, "green_unreleased": green, "pending_sign": [{**g, "pending_sign_hours": g["hours"]} for g in pending_sign(unsigned, now, cfg["pending_sign_hours"])],
-               "pending_sign_hours": cfg["pending_sign_hours"], "states": states, "sign_queue": queue, "signed_unpublished": signed_wait,
+               "pending_sign_hours": cfg["pending_sign_hours"], "states": states, "sign_queue": queue, "sign_cleared": sign_cleared, "signed_unpublished": signed_wait,
                "versions": sorted(({"repo": r, "tag": rel.get("tagName"), "published": rel.get("publishedAt")} for r, rel in releases.items()), key=lambda x: x["repo"]),
                "days": cfg["candidate_days"]},
         "a6": {"rows": hyg_rows, "pending": pending, "unknown": sum(1 for r in hyg_rows if r["unknown"]), "forks_idle": sorted(idle)},
@@ -1107,6 +1110,7 @@ class Sentinel:
         self.surface = surface.Collector(lambda *a, **k: self._gh(*a, **k), GITHUB_DIR, self.cfg["surface"])   # A10: cold calls and local scans, see surface.py
         self.last_snap = None
         self.surface_paused = None   # {"remaining", "needed"} while A10 waits for the allowance, else None
+        self.sign_probe = {}         # "repo|run id" -> what was found about a run of the signing queue (signstate.probe_of): dry run, draft releases, published tags
         self.failed_jobs = {}        # "repo|run id" -> the failed jobs of that red run, grouped (causes.summarize_jobs), see _failed_jobs_tick
         self.a2_resolved = {}        # "repo|workflow file" -> last run on the default branch (or none), see _a2_resolve_tick
         self.tick_began = None       # when the tick in progress began (None between ticks): the calls of the tick are counted from here
@@ -1550,6 +1554,7 @@ class Sentinel:
         did = self._workflow_marks_tick() or did
         did = self._upstream_tick() or did
         did = self._failed_jobs_tick() or did
+        did = self._sign_probe_tick() or did
         if did or self.dirty:
             self.dirty = False
             self._persist()
@@ -1573,6 +1578,34 @@ class Sentinel:
             self.error("surface", error)
             return False
         return bool(used)
+
+    def _sign_probe_tick(self):
+        """Looks at the runs of the signing queue (the jobs of the run and the releases of its repository: two reads each, at most three runs a tick, inside the same gate of the allowance) to know if the run
+        was a dry run and if a draft is waiting or the version is already published; `signstate.apply_probe` then keeps only what really has to be signed. Reads only; the answer is kept six hours."""
+        queue = [q for q in ((self.last_snap or {}).get("a5") or {}).get("sign_queue") or [] if q.get("run_id")]
+        now_ts = time.time()
+        wanted = {f"{q['repo']}|{q['run_id']}" for q in queue}
+        with self.lock:
+            self.sign_probe = {k: v for k, v in self.sign_probe.items() if k in wanted or now_ts - v.get("at", 0) < signstate.PROBE_TTL}
+        rate = (self.ctx["data_fn"]() or {}).get("rate")
+        if not queue or self._budget() <= 0 or (rate and rate["remaining"] < self.cfg["min_rate_remaining"]):
+            return False
+        did = False
+        todo = [q for q in queue if now_ts - (self.sign_probe.get(f"{q['repo']}|{q['run_id']}") or {}).get("at", 0) >= signstate.PROBE_TTL and not self._waiting_question("signprobe|" + q["repo"] + "|" + str(q["run_id"]))]
+        for q in todo[:3]:
+            key, owner = f"{q['repo']}|{q['run_id']}", toolconfig.github_owner()
+            try:
+                jobs = self._gh("api", f"repos/{owner}/{q['repo']}/actions/runs/{q['run_id']}/jobs?filter=latest&per_page=100", retries=1)
+                releases = self._gh("api", f"repos/{owner}/{q['repo']}/releases?per_page=10", retries=1)
+            except Exception as error:      # a failed question waits (5 minutes, 30, 6 hours) and the row stays as "not checked"
+                self._failed_question("signprobe|" + key.replace("|", "|"))
+                self.error("sign_probe", error)
+                continue
+            self._answered_question("signprobe|" + key)
+            with self.lock:
+                self.sign_probe[key] = signstate.probe_of(jobs, releases, now_ts)
+            did = True
+        return did
 
     def _failed_jobs_tick(self):
         """`ci.failed_jobs` (off): reads the jobs of a few red runs (one call each, at most `max_per_cycle` a tick, inside the same quota gate as A2) and keeps the failed ones grouped by platform. A
@@ -1867,7 +1900,7 @@ class Sentinel:
                 "repo_info": dict(self.repo_info), "alerts": dict(self.alerts), "perms": dict(self.perms), "runs": runs, "data": self.ctx["data_fn"](),
                 "history": self.history, "unreleased": dict(self.unreleased), "unreleased_notes": dict(self.unreleased_notes), "targets": self.targets,
                 "scans": dict(self.surface.scans), "surface_raw": dict(self.surface.raw), "surface_glob": dict(self.surface.glob), "audits": self._audits(), "roadmaps": self.roadmaps.get(),
-                "local": self._local(), "finalize_fn": self.finalize_fn, "reduced": not workspace.has_workspace(),
+                "local": self._local(), "sign_probe": dict(self.sign_probe), "finalize_fn": self.finalize_fn, "reduced": not workspace.has_workspace(),
                 "errors": dict(self.errors), "loading": self.loading, "ai": sentinel_ai.status(self.ai_cfg, self.ai_store) if self.ai_cfg["provider"] != "none" else
                 {"provider": "none", "enabled": False, "message": i18n.t("ai.off"), "label": i18n.t("ai.label")},
                 "cache_age": round(time.time() - self.saved_at) if (self.saved_at and not self.gql_at) else None,

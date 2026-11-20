@@ -50,3 +50,7 @@ GitHub がリポジトリに対して応答しない情報源（そこで機能�
 ## 設定
 
 設定ページの「センチネル」サブタブの「セキュリティ」ブロック：`sentinels.security.enabled`、`sentinels.security.refresh_seconds`、`sentinels.security.max_repos_per_tick`、`sentinels.security.min_rate_remaining`、`sentinels.security.repos`, `sentinels.security.plan_na`、`sentinels.security.signals.dependabot.enabled`、`sentinels.security.signals.dependabot.min_severity`、`sentinels.security.signals.code_scanning.enabled`、`sentinels.security.signals.code_scanning.min_severity`、`sentinels.security.signals.secret.enabled`、`sentinels.security.signals.branch.enabled`、`sentinels.security.signals.workflow.enabled`、`sentinels.security.signals.codeowners.enabled`, `sentinels.security.signals.runs_deleted.enabled`, `sentinels.security.signals.runs_deleted.check_window_days`, `sentinels.security.signals.runs_deleted.max_checks`。各指摘がスコアのセキュリティ要素から引く点数（`sentinels.security.penalty`）はファイルから読み込まれます。サンプルファイルを参照してください。
+
+## ルールセットによるブランチ保護
+
+デフォルトブランチは、クラシックなブランチ保護**または**有効なルールセットがあれば保護されているとみなします（ルールセットだけで保護されたリポジトリではクラシックのエンドポイントが 404 を返すため、センチネルはブランチの `protected` フラグと有効なルールも読みます）。`signals.branch.require` にはルールが備えるべき種類（例：`pull_request`、`required_status_checks`）を列挙でき、保護済みブランチに不足があれば不足分とともに通知されます。既定は空のリストで、どんな保護でも十分です。呼び出しがタイムアウトして読み取れなかったリポジトリは、原因（`timeout`、`rate`、`network`、`error`）とともに状態の `errors` と `error_kinds` に載り、検出事項にはなりません。

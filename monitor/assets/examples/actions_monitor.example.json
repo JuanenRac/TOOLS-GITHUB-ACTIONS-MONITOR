@@ -272,7 +272,8 @@
           "enabled": true
         },
         "branch": {
-          "enabled": true
+          "enabled": true,
+          "require": []
         },
         "workflow": {
           "enabled": true
@@ -332,7 +333,7 @@
         },
         "ecosystem_drift": {
           "enabled": true,
-          "level": "warning"
+          "level": "info"
         },
         "release_without_notes": {
           "enabled": true,

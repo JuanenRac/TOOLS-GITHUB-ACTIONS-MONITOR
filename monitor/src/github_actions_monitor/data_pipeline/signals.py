@@ -52,7 +52,74 @@ def _age(stamp, now):
         return None
 
 
-def inventory(data, panels=None, health=None, now=None, daily_trend=None):
+SENTINEL_WITH_SIGNAL = ("security", "delivery", "supply")      # the sentinels whose alerts have no panel: they travel as the signal `sentinel.<name>` (collab has its panel; the CI one has A1-A13)
+SENTINEL_NAMES = ("security", "delivery", "supply", "collab")
+_ALERT_LEVEL = {"critical": "act", "error": "act", "warning": "watch"}
+_RANK = {"act": 2, "watch": 1, "info": 0}
+_BENIGN_UNAVAILABLE = ("off", "plan", "not_found")      # a feature that is off, not in the plan, or a repository without the file: a setting of the account, not a gap of the reading
+
+
+def coverage_problems(status):
+    """{cause: number} of what keeps a sentinel from having read everything, from its status: reads that failed (by cause), repositories not checked yet, a pause, and sources GitHub would not answer for a
+    reason that is not a plain "off" or "not in the plan". Pure; {} when nothing is missing."""
+    status = status if isinstance(status, dict) else {}
+    out = {}
+    for e in status.get("errors") or []:
+        kind = str((e or {}).get("kind") or "error") if isinstance(e, dict) else "error"
+        out["read " + kind] = out.get("read " + kind, 0) + 1
+    if status.get("paused"):
+        out["paused"] = 1
+    if status.get("unchecked"):
+        out["not checked yet"] = len(status["unchecked"])
+    why = status.get("unavailable_why")
+    if isinstance(why, dict):      # the security sentinel: {reason: {signal: repositories}}
+        for reason, row in why.items():
+            if reason not in _BENIGN_UNAVAILABLE and isinstance(row, dict):
+                for signal, n in row.items():
+                    out[f"{reason} {signal}"] = out.get(f"{reason} {signal}", 0) + int(n or 0)
+    elif isinstance(status.get("unavailable"), dict):      # the others: {reason: repositories}
+        for reason, n in status["unavailable"].items():
+            if reason not in _BENIGN_UNAVAILABLE and isinstance(n, int):
+                out[f"unreadable {reason}"] = out.get(f"unreadable {reason}", 0) + n
+    return {k: v for k, v in out.items() if v}
+
+
+def sentinel_signals(reports):
+    """The signals of the sentinels that have no panel. `reports` = {name: {"status": dict, "alerts": [alerts]}} of the ones that are switched on. Per sentinel in `SENTINEL_WITH_SIGNAL`, one signal
+    `sentinel.<name>` with one row per (code, repository), the worst first, each row with its `code` and `level` (act / watch / info); and, for every sentinel (collab too), `sentinel.<name>.coverage`
+    (watch) ONLY when part of what it should read was not read, with the causes. A sentinel with nothing open says so at level info."""
+    out = []
+    for name in SENTINEL_NAMES:
+        rep = (reports or {}).get(name)
+        if not isinstance(rep, dict):
+            continue
+        alerts = [a for a in rep.get("alerts") or [] if isinstance(a, dict)]
+        if name in SENTINEL_WITH_SIGNAL:
+            rows = []
+            for a in sorted(alerts, key=lambda x: (-_RANK[_ALERT_LEVEL.get(x.get("level"), "info")], str(x.get("code")), str(x.get("repo")))):
+                level = _ALERT_LEVEL.get(a.get("level"), "info")
+                row = _row(a.get("repo"), a.get("title") or a.get("code"), "", None, ("open the " + name + " sentinel and deal with it") if level != "info" else "")
+                row["code"], row["level"] = str(a.get("code") or ""), level
+                rows.append(row)
+            level = max((r["level"] for r in rows), key=_RANK.get, default="info")
+            by_code = {}
+            for r in rows:
+                by_code[r["code"]] = by_code.get(r["code"], 0) + 1
+            repos = len({r["repo"] for r in rows})
+            summary = (f"{len(rows)} alert(s) in {repos} repositor(ies): " + ", ".join(f"{c} {n}" for c, n in sorted(by_code.items(), key=lambda kv: (-kv[1], kv[0]))[:6])) if rows else "no alerts"
+            sig = _signal("sentinel." + name, name, level, summary, rows)
+            sig["rows_total"] = len(rows)
+            out.append(sig)
+        problems = coverage_problems(rep.get("status"))
+        if problems:
+            transient = all(k.split(" ")[0] in ("read", "not", "paused") for k in problems)
+            ordered = sorted(problems.items(), key=lambda kv: (-kv[1], kv[0]))
+            out.append(_signal(f"sentinel.{name}.coverage", name, "watch", f"{name}: not everything was read - " + ", ".join(f"{k} {n}" for k, n in ordered[:8]),
+                               [_row("", f"{k}: {n}", "", None, "an empty list of alerts does not mean clean while this is open") for k, n in ordered[:8]], transient=transient))
+    return out
+
+
+def inventory(data, panels=None, health=None, now=None, daily_trend=None, sentinels=None):
     """The signals of one cycle. `data` is what the page reads (/api/data), `panels` the output of sentinel_panels.panels (complete edition), `health` a dict of the health of the monitor."""
     now = time.time() if now is None else now
     data = data or {}
@@ -116,6 +183,7 @@ def inventory(data, panels=None, health=None, now=None, daily_trend=None):
     for panel in panels or []:
         rows = [_row(r.get("repo"), r.get("text"), r.get("url"), None, "open the panel " + panel["id"].upper() + " of the Sentinel tab and deal with it") for r in panel.get("rows") or []]
         out.append(_signal("sentinel." + panel["id"], panel["id"], _level(panel.get("level")), panel.get("summary") or panel.get("title"), rows))
+    out.extend(sentinel_signals(sentinels))
     if isinstance(daily_trend, dict) and daily_trend:
         out.append(trend_signal(daily_trend))
     health = health or {}
@@ -178,10 +246,10 @@ def trend_signal(trend):
     return _signal("trend.daily", "a3", "info", summary, rows)
 
 
-def state(data, panels, edition, health=None, now=None, version="", trend=None):
+def state(data, panels, edition, health=None, now=None, version="", trend=None, sentinels=None):
     """The document of `GET /api/ai/state`: versioned, read only, with the counters the page and the brief show."""
     now = time.time() if now is None else now
-    signals = inventory(data, panels, health, now, trend)
+    signals = inventory(data, panels, health, now, trend, sentinels)
     missing = [p for p in SENTINEL_PANELS] if edition == "lite" else []
     return {"schema": SCHEMA, "edition": edition, "version": version, "generated_epoch": int(now), "signals": signals,
             "act": sum(max(1, len(s["rows"])) for s in signals if s["level"] == "act" and not s["transient"]),
@@ -189,6 +257,7 @@ def state(data, panels, edition, health=None, now=None, version="", trend=None):
             "note": "the lite edition has no sentinel: the panels listed are not missing data, they do not exist here" if missing else ""}
 
 
+STREAM_MAX_ROWS = 25      # events per sentinel; the rest is one more event that says how many
 EVENT_SIGNALS = ("quota", "quota.trend", "connection", "repos.errors", "health.refresh", "health.central", "health.doctor", "health.mode")
 
 
@@ -200,6 +269,21 @@ def extra_alert_rows(doc):
         if sig["id"] in EVENT_SIGNALS and sig["level"] in ("act", "watch"):
             out.append({"repo": "monitor", "workflow": sig["id"], "conclusion": "panel", "streak": 1, "since": None, "url": "", "panel": sig["panel"], "level": "bad" if sig["level"] == "act" else "warn",
                         "detail": sig["summary"], "title": sig["id"]})
+    for sig in doc["signals"]:      # the sentinels without a panel (security, delivery, supply) and their gaps of reading: one event per (code, repository), only for what asks for attention (watch / act)
+        parts = sig["id"].split(".")
+        if parts[0] != "sentinel" or len(parts) < 2 or parts[1] not in SENTINEL_NAMES:
+            continue
+        if sig["id"].endswith(".coverage"):
+            if sig["level"] in ("act", "watch"):
+                out.append({"repo": "monitor", "workflow": sig["id"], "conclusion": "panel", "streak": 1, "since": None, "url": "", "panel": sig["panel"], "level": "warn", "detail": sig["summary"], "title": sig["id"]})
+            continue
+        asking = [r for r in sig["rows"] if r.get("level") in ("act", "watch")]
+        for r in asking[:STREAM_MAX_ROWS]:
+            out.append({"repo": r["repo"] or sig["panel"], "workflow": r["code"], "conclusion": "panel", "streak": 1, "since": None, "url": "", "panel": sig["panel"],
+                        "level": "bad" if r["level"] == "act" else "warn", "detail": r["text"], "title": sig["id"]})
+        if len(asking) > STREAM_MAX_ROWS:
+            out.append({"repo": sig["panel"], "workflow": sig["id"] + ".more", "conclusion": "panel", "streak": 1, "since": None, "url": "", "panel": sig["panel"], "level": "warn",
+                        "detail": f"{len(asking) - STREAM_MAX_ROWS} more alert(s) not listed; see /api/sentinel/{sig['panel']}", "title": sig["id"]})
     return out
 
 

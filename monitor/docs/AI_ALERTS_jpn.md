@@ -66,3 +66,7 @@
 | vLLM | ローカル | `openai-compatible` | `http://127.0.0.1:8000/v1` | なし(ローカルサーバー) | `meta-llama/Llama-3.2-3B-Instruct`, `Qwen/Qwen2.5-7B-Instruct`, `mistralai/Mistral-7B-Instruct-v0.3` | このコンピューターから出ない | プロトコル互換で、このツールでは未検証 |
 | LocalAI | ローカル | `openai-compatible` | `http://127.0.0.1:8081/v1` | なし(ローカルサーバー) | `llama-3.2-3b-instruct`, `mixtral-8x7b-instruct`, `phi-4` | このコンピューターから出ない | プロトコル互換で、このツールでは未検証 |
 | Jan | ローカル | `openai-compatible` | `http://127.0.0.1:1337/v1` | なし(ローカルサーバー) | `llama3.2-3b-instruct`, `qwen2.5-7b-instruct`, `gemma-3-4b-it` | このコンピューターから出ない | プロトコル互換で、このツールでは未検証 |
+
+## センチネルが AI に伝えること
+
+セキュリティ、デリバリー、サプライチェーンの各センチネルにはパネルがないため、アラートは `GET /api/ai/state` のシグナル `sentinel.security`、`sentinel.delivery`、`sentinel.supply`（コードとリポジトリごとに 1 行、深刻なものから）として届き、注意が必要な場合（`watch` または `act`）は、ストリーム、フック、ブリーフにコードとリポジトリごとに 1 件のイベントとして届きます（センチネルごとに最大 25 件と、残りを数える 1 件。共有契約のピンが遅れているような `info` レベルのアラートは状態にのみ載ります）。センチネルがすべてを読み取れなかった場合（原因付きの失敗した読み取り、未確認のリポジトリ、一時停止、読めないソース）は、レベル `watch` の `sentinel.<名前>.coverage` を追加します。このシグナルが開いている間、空のアラート一覧は問題なしを意味しません。Collab センチネルはパネルを保ち、カバレッジのシグナルだけを追加します。

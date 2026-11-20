@@ -42,6 +42,13 @@ the repository, a link, how old it is and the next step. `GET /api/sentinel/pane
 | `sentinel.a8` | the panel `a8` of the Sentinel: A8 · Audits and rounds |
 | `sentinel.a9` | the panel `a9` of the Sentinel: A9 · GitHub roadmaps |
 | `sentinel.collab` | the panel `collab` of the Sentinel: Issues and pull requests |
+| `sentinel.collab.coverage` | present only when the Collab sentinel could not read everything, with the causes |
+| `sentinel.delivery` | the alerts of the Delivery sentinel (unreleased changes, tags without release, version mismatch, ecosystem drift, assets): one row per code and repository; the stream carries the rows that are watch or act |
+| `sentinel.delivery.coverage` | present only when the Delivery sentinel could not read everything, with the causes |
+| `sentinel.security` | the alerts of the Security sentinel (Dependabot, code scanning, secrets, branch protection by rule or ruleset, workflow permissions): one row per code and repository, worst first; the stream carries one event per row that is watch or act |
+| `sentinel.security.coverage` | present only when the Security sentinel could not read everything (reads that failed with their cause, repositories not checked yet, a pause, sources it may not read): an empty list is not a clean one while it is open |
+| `sentinel.supply` | the alerts of the Supply chain sentinel (unpinned actions, wide permissions, pull_request_target): one row per code and repository |
+| `sentinel.supply.coverage` | present only when the Supply chain sentinel could not read everything, with the causes |
 | `trend.daily` | the daily trend of the CI sentinel: a row per series with its last figure, the change against yesterday and 7 days ago and the days without a figure; always level info |
 
 ## Panels of the Sentinel

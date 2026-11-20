@@ -1961,6 +1961,20 @@ def whole(text, default=0):
     return int(text) if re.fullmatch(r"[0-9]{1,15}", text) else default
 
 
+def sentinel_reports():
+    """{name: {"status", "alerts"}} of the sentinels that are switched on, for the signals of the AI (security, delivery and supply have no panel; each one tells what it could not read). Never raises."""
+    out = {}
+    registry = None if LITE["on"] else SENTINEL.get("registry")
+    for name in (registry.names() if registry is not None else []):
+        try:
+            sentinel = registry.get(name)
+            if name != "ci" and getattr(sentinel, "enabled", False):
+                out[name] = {"status": sentinel.get_status(), "alerts": sentinel.get_alerts()}
+        except Exception as error:   # noqa: BLE001 - one sentinel that fails never stops the state
+            degraded.note("ai_alerts.panels", error)
+    return out
+
+
 def ai_state(lang=None, data=None, panels=None):
     """The document of `GET /api/ai/state`: every signal of the monitor (signals.py), the same in both editions; the lite one says which panels do not exist there."""
     from github_actions_monitor.data_pipeline import signals
@@ -2006,7 +2020,7 @@ def ai_state(lang=None, data=None, panels=None):
     except Exception as error:   # noqa: BLE001
         degraded.note("loop.extra", error)
     doc = signals.state(data, panels, "lite" if LITE["on"] else "complete", {"age_seconds": age, "stale": stale, "warnings": warnings, "working_mode": MODE.name, "auto_mode": bool(MODE.auto),
-                                                                           "central": central}, version=TOOL_VERSION, trend=trend)
+                                                                           "central": central}, version=TOOL_VERSION, trend=trend, sentinels=sentinel_reports())
     try:
         from github_actions_monitor.integrations import lessons
         doc["lessons"] = lessons.apply_now(config, limit=5) if lessons.settings(config)["enabled"] else []      # what the failures of this CI have already taught, for the AI that reads the state

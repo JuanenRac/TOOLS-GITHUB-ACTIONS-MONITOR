@@ -47,3 +47,7 @@ In the Settings page, Sentinel sub-tab, block Delivery: `sentinels.delivery.enab
 ## What it does not do
 
 It does not write to GitHub (no tag, release, label, pull request or issue), does not publish or sign anything, does not create proposals from its alerts and does not read the content of any file but the CHANGELOG and the version files you name.
+
+## Ecosystem drift is information by default
+
+`release.ecosystem_drift` compares the pin of each repository in the pin table of the provider (for example `registry/contract_pins.json` of the contract repository, the version each consumer was last checked against) with the latest published release of the provider. A repository that is behind is reported at level `info` by default, because the pins are brought up by the release train of the ecosystem and not by hand; `signals.ecosystem_drift.level` raises it. Reads that time out are listed under `unavailable` with the reason `timeout`.
