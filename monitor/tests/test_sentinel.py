@@ -106,7 +106,7 @@ class HistoryAndParte(_testenv.Spanish, unittest.TestCase):
         inp = {"now": NOW, "today": "2026-11-04", "cfg": sl.DEFAULTS, "repos": ["R"], "eco": {"R": "armor"}, "repo_info": info,
                "alerts": {"R": {"at": 1, "codeql": [{"number": 1, "rule": "py/x", "severity": "high", "path": "a.py", "line": 3, "url": "https://github.com/x", "description": "", "created": "", "message": ""}], "secret": 0}},
                "perms": {}, "runs": {"R": [run("R", "CI", "failure", "2026-11-04T09:00:00Z")]}, "data": {"active": [], "issues": [], "rate": {"remaining": 4000, "limit": 5000}},
-               "history": {"days": {}}, "unreleased": {"R": 2}, "targets": {}, "errors": {}, "loading": "", "audits": None}
+               "history": {"days": {}}, "unreleased": {"R": 5}, "targets": {}, "errors": {}, "loading": "", "audits": None}
         inp.update(over)
         return sl.compute_snapshot(inp)
 
