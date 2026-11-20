@@ -96,3 +96,7 @@ systemctl list-timers github-actions-monitor-backup.timer
 すべて設定タブ (フォルダとファイル) と [SETTINGS_jpn.md](SETTINGS_jpn.md) にあります: `ops.backup.*` (enabled、dir、interval_hours、keep、include_config、compress_level、encrypt、key_env)、`ops.purge.*` (enabled、require_backup_hours)、`ops.doctor.*` (strict_exit、backup_max_age_days、min_free_mb、sqlite_check、sqlite_timeout_s、webhook_min_length)。すべてのスイッチはオフまたは保守的な値で始まり、セキュリティに関わるもの (定期バックアップ、設定の同梱、暗号化、削除) にはその印が付いています。
 
 関連: [STORAGE_jpn.md](STORAGE_jpn.md) (バックエンドと保持期間)、[DEPLOYMENT_jpn.md](DEPLOYMENT_jpn.md) (サービス、コンテナ、TLS)、[CLI_jpn.md](CLI_jpn.md)。
+
+## モニターは自分のメモリとスレッドを監視します
+
+`selfwatch.interval_seconds`（60）ごとにモニターは自身の常駐メモリ、スレッド、プロセッサ使用量を読み取り、`/api/health` の `selfwatch`（`state`：`ok` または `high`）に表示します。メモリが `selfwatch.rss_warn_mb`（1024）を、スレッドが `selfwatch.threads_warn`（400）を超えると、握りつぶした失敗のカウンターに数値付きで一度だけ記録し（`selfwatch.high`）、解放できるものを解放し、通常に戻ったことも記録します。`selfwatch.enabled` でオフにできます。`selfwatch.rss_warn_mb` はコンテナーの上限より少し小さくしてください。CI は 1 プロセッサ・512 MB のコンテナーで 120 ワークフローのアカウントを使ってモニターを動かします（`tools/limits_check.py`）。

@@ -96,3 +96,7 @@ Para una copia cifrada pon la variable que indica `ops.backup.key_env` en `/etc/
 Todos están en la pestaña Ajustes (Carpetas y archivos) y en [SETTINGS_spa.md](SETTINGS_spa.md): `ops.backup.*` (enabled, dir, interval_hours, keep, include_config, compress_level, encrypt, key_env), `ops.purge.*` (enabled, require_backup_hours) y `ops.doctor.*` (strict_exit, backup_max_age_days, min_free_mb, sqlite_check, sqlite_timeout_s, webhook_min_length). Todo interruptor empieza apagado o conservador, y los de seguridad (la copia programada, incluir los ajustes, el cifrado, la purga) están marcados como tales.
 
 Mira también [STORAGE_spa.md](STORAGE_spa.md) (los backends y la retención), [DEPLOYMENT_spa.md](DEPLOYMENT_spa.md) (servicio, contenedor, TLS) y [CLI_spa.md](CLI_spa.md).
+
+## El monitor vigila su propia memoria e hilos
+
+Cada `selfwatch.interval_seconds` (60) el monitor lee su memoria residente, sus hilos y su uso de procesador y los muestra en `/api/health` como `selfwatch` (`state`: `ok` o `high`). Cuando la memoria supera `selfwatch.rss_warn_mb` (1024) o los hilos `selfwatch.threads_warn` (400) lo anota una vez en el contador de fallos tragados (`selfwatch.high`, con las cifras), libera lo que puede y anota la vuelta a la normalidad. Se apaga con `selfwatch.enabled`. Pon `selfwatch.rss_warn_mb` algo por debajo del límite de tu contenedor. El CI ejecuta el monitor en un contenedor de un procesador y 512 MB con una cuenta de 120 workflows (`tools/limits_check.py`).

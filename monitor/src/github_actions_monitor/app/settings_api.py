@@ -566,6 +566,10 @@ _f(_T_PATHS, "ops_doctor", "ops.doctor.backup_max_age_days", "int", (1, 365), re
 _f(_T_PATHS, "ops_doctor", "ops.doctor.min_free_mb", "int", (50, 10000000), restart=False, unit="MB")
 _f(_T_PATHS, "ops_doctor", "ops.doctor.sqlite_check", "enum", ("quick", "deep", "off"), restart=False)
 _f(_T_PATHS, "ops_doctor", "ops.doctor.sqlite_timeout_s", "int", (1, 600), restart=False, unit="s")
+_f(_T_PATHS, "selfwatch", "selfwatch.enabled", "bool", restart=False)
+_f(_T_PATHS, "selfwatch", "selfwatch.rss_warn_mb", "int", (64, 262144), restart=False, unit="MB")
+_f(_T_PATHS, "selfwatch", "selfwatch.threads_warn", "int", (20, 100000), restart=False)
+_f(_T_PATHS, "selfwatch", "selfwatch.interval_seconds", "int", (5, 3600), restart=False, unit="s")
 _f(_T_PATHS, "ops_doctor", "ops.doctor.webhook_min_length", "int", (8, 128), restart=False, unit="")
 # --- Outputs and exports
 _f(_T_OUT, "prometheus", "outputs.prometheus.enabled", "bool", restart=False, secure=True)
@@ -732,7 +736,7 @@ _f("lint", "lint_maintenance", "lint.maintenance.inactive", "bool", restart=Fals
 _f("lint", "lint_maintenance", "lint.maintenance.inactive_years", "int", (1, 10), restart=False)
 _f("lint", "lint_maintenance", "lint.maintenance.refresh_seconds", "int", (3600, 2592000), restart=False)
 _f("lint", "lint_maintenance", "lint.maintenance.max_calls_per_tick", "int", (1, 100), restart=False, unit="calls")
-for _rule in ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "own_action_main", "permissions_top", "archived_action"):
+for _rule in ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "own_action_main", "permissions_top", "archived_action", "container_input_name"):
     _f("lint", "rule_" + _rule, f"lint.rules.{_rule}.enabled", "bool", label=["cfg.p.rule_on"], help="cfg.h.rule_on")
     if _rule != "archived_action":      # that rule only informs: it has no severity to choose
         _f("lint", "rule_" + _rule, f"lint.rules.{_rule}.severity", "enum", ("info", "warn", "bad"), label=["cfg.p.severity"], help="cfg.h.p.severity")

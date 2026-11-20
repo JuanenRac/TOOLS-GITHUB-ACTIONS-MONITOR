@@ -25,3 +25,7 @@
 - 先执行 `pip install rich`,然后 `py -3 bin/tui.py [--port 8765] [--refresh 5] [--once] [--theme dark|light]`。它绘制一个实时表格,显示正在运行的内容、红色工作流、签名队列和报告,数据来自 `127.0.0.1` 上运行的监视器(不使用 GitHub 配额)。
 - 它是只读的:没有任何按键会重新运行、关闭或写入内容。没有 Rich 时它会说明如何安装并以代码 3 退出;监视器及其测试从不需要 Rich。
 - 交互式终端应用 `bin/tui_textual.py`(`pip install textual`;精简版加 `--lite`)可在“设置”标签页中编辑其所列分组的简单设置、**列表**(各项以逗号分隔输入:`a, b, c`)和数字**映射**(`name=3, other=5`);服务器会再次校验每个值,安全相关选项只能在页面中修改。
+
+## 规则 `container_input_name`：容器操作中带连字符的输入
+
+可选（`lint.rules.container_input_name.enabled`，默认关闭，严重程度 `warn`）。对于包含在容器中运行的操作（`action.yml` 中的 `runs.using: docker`）的仓库，它会查找带连字符输入的陷阱：GitHub 会把 `fail-on-findings` 以 `INPUT_FAIL-ON-FINDINGS`（保留连字符）传给程序，因此读取 `INPUT_FAIL_ON_FINDINGS` 的脚本永远看不到该值（只警告的模式会悄悄失效）。发现项会指出脚本、行号和输入名；也会指出 shell 形式 `$INPUT_FAIL-ON-FINDINGS`，因为 shell 会在连字符处截断名称。请用 `printenv` 或所用语言的环境变量读取该值。

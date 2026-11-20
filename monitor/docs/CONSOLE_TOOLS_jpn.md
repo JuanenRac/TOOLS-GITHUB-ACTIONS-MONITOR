@@ -25,3 +25,7 @@
 - `pip install rich` の後、`py -3 bin/tui.py [--port 8765] [--refresh 5] [--once] [--theme dark|light]`。実行中のもの、赤のワークフロー、署名キュー、レポートのライブ表を、`127.0.0.1` で動いているモニターから読み取って描画します(GitHub の割り当ては使いません)。
 - 読み取り専用で、再実行・クローズ・書き込みを行うキーはありません。Rich が無いときはインストール方法を表示してコード 3 で終了します。モニターとそのテストは Rich を必要としません。
 - 対話型ターミナルアプリ `bin/tui_textual.py`(`pip install textual`。lite 版には `--lite` を付けます)は、設定タブで、一覧表示されるグループの単純な設定、**リスト**(項目をカンマで区切って入力:`a, b, c`)、数値の**マップ**(`name=3, other=5`)を編集できます。サーバーが各値を再度検証し、セキュリティのオプションはページでのみ変更できます。
+
+## ルール `container_input_name`：コンテナーアクションのハイフン付き入力
+
+オプション（`lint.rules.container_input_name.enabled`、既定はオフ、重大度 `warn`）。コンテナーで動くアクション（`action.yml` の `runs.using: docker`）を持つリポジトリで、ハイフン付き入力の落とし穴を探します。GitHub は `fail-on-findings` をプログラムに `INPUT_FAIL-ON-FINDINGS`（ハイフンのまま）として渡すため、`INPUT_FAIL_ON_FINDINGS` を読むスクリプトは値を受け取れず、警告だけのモードが静かに機能しなくなります。検出結果にはスクリプト、行、入力名が示されます。シェルはハイフンで名前を切るため、シェル形式の `$INPUT_FAIL-ON-FINDINGS` も指摘します。値は `printenv` または使用言語の環境変数から読んでください。

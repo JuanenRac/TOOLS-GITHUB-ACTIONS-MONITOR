@@ -20,3 +20,11 @@
 `.github/workflows/dashboard-dispatch.yml` läuft, nachdem der Workflow `CI` auf `main` grün endet (nur Push-Ereignisse). Definiert die Betreuerin oder der Betreuer das optionale Repository-Secret `ECOSYSTEM_DASHBOARD_DISPATCH_TOKEN`, bittet er ein Dashboard-Repository, seine Versionstabelle zu aktualisieren; ohne das Secret endet er still, hat keine Berechtigungen und ändert oder verzögert die CI nie. Die Version in `electro-hobby-3d.project.json` muss bei jeder Version gleich `tool_version.py` sein; ein Test prüft das.
 
 - Hilfe-Checkliste: die Einstellungshilfe (`cfg.h.<Schlüssel>`) jeder neuen Einstellung, die Hilfe des geänderten Tabs, die Leitfäden in `monitor/docs/`, die acht Sprachen, der Hilfeindex (`python tools/make_help_index.py`) und das Änderungsprotokoll.
+
+## Prüfungen der CI, die den Ablauf schützen
+
+- **Tests ohne Netz**: `sh tools/run_offline_tests.sh discover -s monitor/tests` führt die ganze Suite in einem Netzwerk-Namensraum aus, der nur das Loopback hat. Ein Test, der das Internet braucht, scheitert dort.
+- **Prüfung der Abhängigkeiten**: `python tools/audit_dependencies.py` führt `pip-audit` für die von der CI installierten Pakete aus. Eine Unterdrückung in `.github/audit-suppressions.json` braucht `id`, `reason` und `expires` (höchstens 180 Tage entfernt); eine abgelaufene scheitert, ebenso eine tote (die Schwachstelle wird nicht mehr gefunden).
+- **Rauchtest externer Quellen**: der wöchentliche Workflow `sources-smoke.yml` führt `tools/smoke_sources.py` gegen die echte Statusseite, die Advisories, die Beschreibung der REST-API und das letzte Release aus und scheitert, wenn eine ihr Format geändert hat.
+- **Grenzen**: `tools/limits_check.py` betreibt den Monitor mit einem Konto von 120 Workflows in einem Container mit einem Prozessor und 512 MB.
+- **Reihenfolge des Releases**: das GitHub-Release als ENTWURF anlegen und den Tag `vX.Y.Z` pushen; `release-image.yml` baut und veröffentlicht das Image und veröffentlicht den Entwurf erst, wenn es für beide Plattformen unter seinem Tag antwortet.

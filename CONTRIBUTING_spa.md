@@ -20,3 +20,11 @@
 `.github/workflows/dashboard-dispatch.yml` se ejecuta cuando el workflow `CI` termina en verde en `main` (solo eventos push). Si el responsable define el secreto opcional del repositorio `ECOSYSTEM_DASHBOARD_DISPATCH_TOKEN`, pide a un repositorio de panel que actualice su tabla de versiones; sin el secreto termina en silencio, no tiene permisos y nunca cambia ni retrasa el CI. La versión de `electro-hobby-3d.project.json` debe ser igual a `tool_version.py` en cada versión; una prueba lo comprueba.
 
 - Lista de comprobación de la ayuda: la ayuda de Ajustes (`cfg.h.<clave>`) de cada ajuste nuevo, la ayuda de la pestaña que cambió, las guías de `monitor/docs/`, los ocho idiomas, el índice de ayuda (`python tools/make_help_index.py`) y el registro de cambios.
+
+## Comprobaciones del CI que cuidan el proceso
+
+- **Pruebas con la red cortada**: `sh tools/run_offline_tests.sh discover -s monitor/tests` ejecuta toda la suite en un espacio de red que solo tiene el bucle local. Una prueba que necesite internet falla ahí.
+- **Auditoría de dependencias**: `python tools/audit_dependencies.py` ejecuta `pip-audit` sobre los paquetes que instala el CI. Una supresión de `.github/audit-suppressions.json` necesita `id`, `reason` y `expires` (a 180 días como máximo); una caducada falla, y una muerta también (la vulnerabilidad ya no se encuentra).
+- **Humo de fuentes externas**: el workflow `sources-smoke.yml` (semanal) ejecuta `tools/smoke_sources.py` contra la página de estado real, los avisos de seguridad, la descripción de la API REST y la última release, y falla cuando una cambió de formato.
+- **Límites**: `tools/limits_check.py` ejecuta el monitor con una cuenta de 120 workflows en un contenedor de un procesador y 512 MB.
+- **Orden de la release**: crea la release de GitHub como BORRADOR y empuja la etiqueta `vX.Y.Z`; `release-image.yml` construye y publica la imagen y, solo cuando responde por su etiqueta en las dos plataformas, publica el borrador.

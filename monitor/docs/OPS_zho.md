@@ -96,3 +96,7 @@ systemctl list-timers github-actions-monitor-backup.timer
 全部位于“设置”标签页（文件夹和文件）以及 [SETTINGS_zho.md](SETTINGS_zho.md)：`ops.backup.*`（enabled、dir、interval_hours、keep、include_config、compress_level、encrypt、key_env）、`ops.purge.*`（enabled、require_backup_hours）和 `ops.doctor.*`（strict_exit、backup_max_age_days、min_free_mb、sqlite_check、sqlite_timeout_s、webhook_min_length）。每个开关默认关闭或取保守值，与安全相关的（计划备份、包含设置、加密、清理）都有相应标记。
 
 另见 [STORAGE_zho.md](STORAGE_zho.md)（后端和保留策略）、[DEPLOYMENT_zho.md](DEPLOYMENT_zho.md)（服务、容器、TLS）和 [CLI_zho.md](CLI_zho.md)。
+
+## 监视器监视自身的内存和线程
+
+每隔 `selfwatch.interval_seconds`（60）秒，监视器读取自身的常驻内存、线程和处理器使用情况，并在 `/api/health` 中以 `selfwatch`（`state`：`ok` 或 `high`）显示。当内存超过 `selfwatch.rss_warn_mb`（1024）或线程超过 `selfwatch.threads_warn`（400）时，它会在被吞掉失败的计数器中记录一次（`selfwatch.high`，附带数值），尽可能释放，并在恢复正常时记录。可用 `selfwatch.enabled` 关闭。请把 `selfwatch.rss_warn_mb` 设为略低于容器的限制。CI 会在一个处理器、512 MB 的容器中用 120 个工作流的账户运行监视器（`tools/limits_check.py`）。

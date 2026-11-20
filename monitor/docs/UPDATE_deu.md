@@ -107,3 +107,7 @@ Ohne Befehl öffnet sich die Seite. Die Befehle antworten einmal (mit `--json` a
 | 6 | fehlgeschlagen und der Rückweg ebenfalls: Kopie von Hand wiederherstellen |
 | 7 | keine Verbindung zu GitHub und kein Zip |
 | 8 | nicht bestätigt |
+
+## Wächter des Dienst-Helfers
+
+Mit `updates.systemd_helper` (oder `--systemd-unit`) prüft der Updater den Dienst jetzt, bevor er ihn anrührt: Eine Unit, deren Arbeitsverzeichnis und Befehl nicht auf DIESEN Ordner zeigen, gehört zu einer anderen Installation und wird weder gestoppt noch gestartet; eine Unit wird nicht gestartet, solange etwas anderes (ein Monitor im Vordergrund) ihren Port bedient; ein Neustart gilt nicht als erledigt, solange der Prozess der alte ist (die Unit muss eine neue PID zeigen); und `update status --systemd-unit UNIT` listet nur die Fehler des Dienstes seit seinem letzten Start. Das sind nur lesende Fragen an `systemctl --user show` und `journalctl --user`; eine unbeantwortbare Frage blockiert nichts.

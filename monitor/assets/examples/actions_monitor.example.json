@@ -648,6 +648,10 @@
         "enabled": false,
         "severity": "info"
       },
+      "container_input_name": {
+        "enabled": false,
+        "severity": "warn"
+      },
       "archived_action": {
         "enabled": false
       }
@@ -748,6 +752,12 @@
     "quiet_from_hour": 22,
     "quiet_to_hour": 7,
     "theme": "classic"
+  },
+  "selfwatch": {
+    "enabled": true,
+    "rss_warn_mb": 1024,
+    "threads_warn": 400,
+    "interval_seconds": 60
   },
   "updates": {
     "check": true,

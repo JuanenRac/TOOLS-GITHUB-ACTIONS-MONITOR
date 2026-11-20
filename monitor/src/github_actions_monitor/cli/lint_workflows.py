@@ -29,6 +29,10 @@ Optional rules (off until `lint.rules.<rule>.enabled` is true):
                      only informs (always `info`, it never makes the linter fail), asks GitHub once per action (`--check-actions` here; the monitor reads it through its own allowance, with a cache),
                      and says so, instead of judging, when GitHub cannot be reached
 
+  container_input_name  an action of your own that runs in a container (`runs.using: docker`) and declares an input with a hyphen (`fail-on-findings`): GitHub hands it to the program as
+                     `INPUT_FAIL-ON-FINDINGS`, hyphens kept, so a script that reads `INPUT_FAIL_ON_FINDINGS` never sees the value (a mode that "warns only" silently stops working). It reads the
+                     `action.yml` at the root of the folder and the entrypoint scripts next to it; it also names the shell form `$INPUT_FAIL-ON-FINDINGS`, which the shell cuts at the hyphen
+
 `unpinned_uses` tells an action of your own account (`lint.own_owners`, plus `github_owner`) from one of a third party in the `kind` of the finding; `lint.unpinned_own` can lower the own ones to
 information (`info`) or leave them out (`ignore`); the default (`same`) treats them like the rest.
 
@@ -53,9 +57,9 @@ SHA_RE = re.compile(r"^[0-9a-f]{40}\Z")
 USES_RE = re.compile(r"^\s*-?\s*uses:\s*['\"]?([^'\"\s#]+)")
 SEVERITIES = ("info", "warn", "bad")
 EXIT_NOT_READ = 2      # `--remote` could not read a repository (or its name is not OWNER/REPO): never "clean"
-RULES = ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "own_action_main", "permissions_top", "archived_action")
-DEFAULT_SEVERITY = {"unpinned_uses": "warn", "permissions": "warn", "secrets_in_clear": "bad", "injection": "warn", "pr_target": "bad", "no_timeout": "warn", "secrets_inherit": "warn", "own_action_main": "info", "permissions_top": "info", "archived_action": "info"}
-OPTIONAL = ("no_timeout", "secrets_inherit", "own_action_main", "permissions_top", "archived_action")      # off until the person switches them on: a new rule never adds findings by itself
+RULES = ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "own_action_main", "permissions_top", "archived_action", "container_input_name")
+DEFAULT_SEVERITY = {"unpinned_uses": "warn", "permissions": "warn", "secrets_in_clear": "bad", "injection": "warn", "pr_target": "bad", "no_timeout": "warn", "secrets_inherit": "warn", "own_action_main": "info", "permissions_top": "info", "archived_action": "info", "container_input_name": "warn"}
+OPTIONAL = ("no_timeout", "secrets_inherit", "own_action_main", "permissions_top", "archived_action", "container_input_name")      # off until the person switches them on: a new rule never adds findings by itself
 OWN_MODES = ("same", "info", "ignore")
 OWNER_RE = re.compile(r"^[A-Za-z0-9-]{1,39}\Z")
 MOVING_REFS = ("main", "master", "develop", "dev", "trunk", "head")
@@ -268,6 +272,77 @@ def jobs_without_timeout(lines):
     return out
 
 
+INPUT_DECL_RE = re.compile(r"^  ([A-Za-z0-9_-]+)\s*:\s*(?:#.*)?$")
+ENV_READ_RE = re.compile(r"INPUT_([A-Za-z0-9_-]+)")
+MAX_SCRIPTS = 8
+MAX_SCRIPT = 65536
+
+
+def declared_inputs(action_text):
+    """Names of the inputs an `action.yml` declares (the keys under the top-level `inputs:`), and whether it runs in a container."""
+    lines = bounded(action_text)
+    names, in_inputs, docker = [], False, False
+    for line in lines:
+        if re.match(r"^inputs\s*:", line):
+            in_inputs = True
+            continue
+        if in_inputs:
+            if line.strip() and not line.startswith(" "):
+                in_inputs = False
+            else:
+                match = INPUT_DECL_RE.match(line)
+                if match:
+                    names.append(match.group(1))
+        if re.match(r"^\s+using\s*:\s*['\"]?docker['\"]?\s*(?:#.*)?$", line):
+            docker = True
+    return names, docker
+
+
+def container_action_traps(action_text, scripts, name="action.yml"):
+    """[(file, line, detail)]: for an action that runs in a container, every place where an entrypoint script reads an input with a hyphen the way GitHub does NOT write it. `scripts` = {file: text}."""
+    names, docker = declared_inputs(action_text)
+    if not docker:
+        return []
+    hyphenated = {n.upper(): n for n in names if "-" in n}
+    found = []
+    for file, text in sorted(scripts.items()):
+        for number, line in enumerate(bounded(text), 1):
+            for match in ENV_READ_RE.finditer(line):
+                word = match.group(1).upper()
+                if word in hyphenated:      # the form GitHub really writes: fine when read through env/printenv, a trap in the shell where the hyphen ends the name
+                    if re.search(r"\$\{?INPUT_" + re.escape(match.group(1)), line):
+                        found.append((file, number, hyphenated[word]))
+                    continue
+                for upper, real in hyphenated.items():
+                    if word == upper.replace("-", "_"):      # the underscore form: GitHub never writes it
+                        found.append((file, number, real))
+    return found
+
+
+def action_files(path):
+    """(action.yml text, {script: text}) at the root of a folder, or None when there is no action there."""
+    base = Path(path)
+    if base.is_file():
+        return None
+    for name in ("action.yml", "action.yaml"):
+        try:
+            text = (base / name).read_text(encoding="utf-8", errors="replace")[:MAX_TEXT]
+        except OSError:
+            continue
+        scripts = {}
+        try:
+            candidates = sorted(p for p in base.iterdir() if p.is_file() and (p.suffix in (".sh", ".py", ".bash") or p.name.lower().startswith("entrypoint")))
+        except OSError:
+            candidates = []
+        for script in candidates[:MAX_SCRIPTS]:
+            try:
+                scripts[script.name] = script.read_text(encoding="utf-8", errors="replace")[:MAX_SCRIPT]
+            except OSError:
+                continue
+        return text, scripts
+    return None
+
+
 def workflow_files(path):
     path = Path(path)
     if path.is_file():
@@ -294,6 +369,12 @@ def lint_path_status(path, rules=None, root=None, maintenance=None):
             continue
         label = str(file.relative_to(root)).replace("\\", "/") if root and Path(root) in file.parents else file.name
         out += lint_text(text, label, rules, maintenance)
+    cfg = (rules or {}).get("container_input_name") or {}
+    if cfg.get("enabled", False):      # optional: the action and its scripts are read only when the rule is on
+        action = action_files(root or path)
+        if action:
+            for file, number, declared in container_action_traps(action[0], action[1]):
+                out.append({"file": file, "line": number, "rule": "container_input_name", "severity": cfg.get("severity", DEFAULT_SEVERITY["container_input_name"]), "detail": declared, "kind": ""})
     return out, problems
 
 

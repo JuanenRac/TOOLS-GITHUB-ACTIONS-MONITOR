@@ -89,3 +89,9 @@ monitor_cli.py team --json | jq -r '.data.ranking[] | .repo'
 
 - `completions` no tiene `--install`: nunca escribe en los ficheros de un usuario.
 - No hay comando `proposals`: el monitor aún no tiene ruta de propuestas sobre la que actuar.
+
+## `metrics`: las cifras para cron y para el correo
+
+`monitor_cli.py metrics` escribe las cifras del monitor como una línea `nombre=valor` cada una, en orden fijo y sin nada más en la salida estándar: `repos`, `active`, `queued`, `failures_24h`, `successes_24h`, `red_workflows`, `alerts`, `alerts_info`, `alerts_warning`, `alerts_error`, `alerts_critical`, `allowance_remaining`, `allowance_limit` y `offline`. Una cifra que no se conoce se omite, nunca se escribe como 0. Lee el monitor, nunca GitHub.
+
+Con `--if-problem` no escribe nada y sale con 0 cuando no hay ningún workflow en rojo ni alertas de `--fail-on` (error por defecto) o peores; si las hay, escribe las cifras y sale con 5. cron envía por correo cualquier salida, así que esta línea solo manda correo el día que algo va mal: `*/15 * * * * py -3 /opt/monitor/bin/monitor_cli.py metrics --if-problem`. Un monitor inalcanzable nunca es silencio: el error va a la salida de errores y el código de salida es 2.

@@ -297,6 +297,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `lint.own_owners` | `-` | lint | Accounts whose actions are your own |
 | `lint.refresh_seconds` | `-` | lint | Scan every |
 | `lint.rules.archived_action.enabled` | `-` | lint | lint.rules.archived_action.enabled |
+| `lint.rules.container_input_name.enabled` | `-` | lint | lint.rules.container_input_name.enabled |
+| `lint.rules.container_input_name.severity` | `-` | lint | lint.rules.container_input_name.severity |
 | `lint.rules.injection.enabled` | `-` | lint | lint.rules.injection.enabled |
 | `lint.rules.injection.severity` | `-` | lint | lint.rules.injection.severity |
 | `lint.rules.no_timeout.enabled` | `-` | lint | lint.rules.no_timeout.enabled |
@@ -541,6 +543,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `screens.theme_now` | `"inherit"` | general | Theme of the screen: Right now |
 | `screens.theme_overview` | `"inherit"` | general | Theme of the screen: Overview |
 | `screens.theme_sentinels` | `"inherit"` | general | Theme of the screen: Sentinels |
+| `selfwatch.enabled` | `true` | paths | The monitor watches itself |
+| `selfwatch.interval_seconds` | `60` | paths | Seconds between two readings |
+| `selfwatch.rss_warn_mb` | `1024` | paths | Warn when its memory is above |
+| `selfwatch.threads_warn` | `400` | paths | Warn when it runs more threads than |
 | `sentinel.a2_full_sample_unknown` | `-` | sentinel | Unknown when sample is full |
 | `sentinel.a2_resolve_batch_min` | `-` | sentinel | A2 lookups in one request from |
 | `sentinel.a2_resolve_batch_pages` | `-` | sentinel | A2 pages per repository |

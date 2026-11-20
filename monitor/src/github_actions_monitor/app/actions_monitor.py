@@ -21,6 +21,7 @@ cycle ("hot"); the others only every cold_refresh_seconds with fewer runs, so ~1
 do not use up the GitHub allowance shared with the agents.
 """
 from github_actions_monitor.app import api_spec, api_v1
+from github_actions_monitor.app import selfwatch  # noqa: E402
 from github_actions_monitor.app import degraded
 from github_actions_monitor.app import lastpicture
 from github_actions_monitor.app import cycle_watch
@@ -128,6 +129,7 @@ DEFAULTS = {
                 "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64, "group_map": True,
                 "menu": True, "menu_target": "new", "menu_max_windows": 4, "menu_rotate_seconds": 20, "menu_tv_scale": 1.5, "safe_margin_percent": 0},   # the wall screens /screen/overview, /screen/now and /screen/sentinels (docs/SCREENS.md, screens.py): read only, from what the monitor already holds
     "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "on_warning": True, "on_resolved": True, "on_report": True, "on_lesson": True, "on_sentinel": True, "on_stuck": True, "on_score_drop": True, "on_info": True, "on_live_recovered": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False, "theme": "classic", "quiet_enabled": False, "quiet_from_hour": 22, "quiet_to_hour": 7},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
+    "selfwatch": {"enabled": True, "rss_warn_mb": 1024, "threads_warn": 400, "interval_seconds": 60},      # the monitor watches its own memory and threads (app/selfwatch.py)
     "updates": {"check": True, "systemd_helper": False},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
     "airgapped": False,            # True: nothing is requested from the network except GitHub's data you asked for; the update check is off
     "open_browser": True,
@@ -2652,6 +2654,10 @@ class CountedReader:
         return getattr(self.stream, name)
 
 
+STORE_DOWN = [0]      # how many requests found the storage not answering since the monitor started
+STORE_RETRY_SECONDS = 5
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *args):
         pass
@@ -3008,7 +3014,11 @@ class Handler(BaseHTTPRequestHandler):
                 self.json_reply({"ok": False, "error": "audit_log_required", "code": "audit_unwritable"}, 503)
                 return
             with i18n.use_language(self.request_language()):
-                self.handle_post()
+                try:
+                    self.handle_post()
+                except Exception as error:      # noqa: BLE001 - see storage_failure
+                    if not self.storage_failure(error):
+                        raise
             self.audit_post(self.path.split("?")[0])
         finally:
             self.drain_body(counted)
@@ -3293,6 +3303,41 @@ class Handler(BaseHTTPRequestHandler):
             self.json_reply({"ok": False, "error": str(error)[:200]})
 
     def do_GET(self):
+        self.reply_status = 0
+        try:
+            self.serve_get()
+        except Exception as error:      # noqa: BLE001 - only a storage that does not answer is turned into an answer; anything else goes on as it always did
+            if not self.storage_failure(error):
+                raise
+
+    def storage_failure(self, error):
+        """A storage that does not answer (the database is locked, gone or full; the disk is unplugged) is a 503 with `Retry-After`, never a connection that drops with no answer. The monitor keeps running and
+        the next request that finds the storage back is served as usual. True when the error was that. A browser that closed the tab is not a storage failure."""
+        from github_actions_monitor.storage import base, state_io
+        import sqlite3
+        if isinstance(error, CLIENT_GONE):
+            return False
+        cause = error.__cause__
+        if not (isinstance(error, (base.StorageError, sqlite3.Error)) or (isinstance(error, OSError) and isinstance(cause, (sqlite3.Error, base.StorageError)) and state_io.bound()[0] is not None)):
+            return False      # a file that does not exist is not a storage that does not answer: only what state_io raised FROM a database error counts
+        STORE_DOWN[0] += 1
+        if getattr(self, "reply_status", 0):      # an answer is already on its way: the connection ends and the client asks again
+            self.close_connection = True
+            return True
+        body = json.dumps({"ok": False, "error": "storage_unavailable", "retry_after": STORE_RETRY_SECONDS}).encode("utf-8")
+        try:
+            self.send_response(503)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Retry-After", str(STORE_RETRY_SECONDS))
+            self.end_headers()
+            self.wfile.write(body)
+        except (ConnectionError, OSError):
+            pass
+        return True
+
+    def serve_get(self):
         self.v1 = False
         if not self.access_gate():      # the access token first: the 404 of a switch that is off does not tell a visitor without credentials whether the versioned API exists
             return
@@ -3983,7 +4028,8 @@ def health_payload(deep=False):
     answer also says whether the monitor is fit to serve: `ok` is false when the refresh loop is stuck or gone (see `health_reply`)."""
     with LOCK:
         loaded = bool(STATE.get("data"))
-    out = {"ok": True, "lite": LITE["on"], "version": TOOL_VERSION, "uptime_seconds": int(time.time() - STARTED), "loaded": loaded, "offline": LINK.state()["offline"], "degraded": degraded.snapshot()["total"]}
+    out = {"ok": True, "lite": LITE["on"], "version": TOOL_VERSION, "uptime_seconds": int(time.time() - STARTED), "loaded": loaded, "offline": LINK.state()["offline"], "degraded": degraded.snapshot()["total"],
+           "selfwatch": selfwatch.WATCH.snapshot()}
     if CHILD["account"]:
         out["account"] = CHILD["account"]
     if not LITE["on"]:
@@ -4923,6 +4969,7 @@ def main():
         signal.signal(signal.SIGHUP, reload_on_signal)      # kill -HUP: read the credential files again, no restart (where the system has the signal)
     threading.Thread(target=watchdog_loop, args=(config,), daemon=True, name="refresh-watchdog").start()
     threading.Thread(target=update_loop, daemon=True).start()
+    selfwatch.start(config, note=degraded.note)      # the memory and the threads of this process, noted before the system ends it
     if not LITE["on"]:
         start_sentinel(config)
     try:      # the token file of the second account is only accepted inside the accounts folder: a configuration that points elsewhere is told once, with the way out

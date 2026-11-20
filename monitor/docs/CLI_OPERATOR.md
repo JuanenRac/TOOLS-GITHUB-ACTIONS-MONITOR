@@ -89,3 +89,9 @@ monitor_cli.py team --json | jq -r '.data.ranking[] | .repo'
 
 - `completions` has no `--install`: it never writes in the files of a user.
 - There is no `proposals` command: the monitor has no route for proposals to act on yet.
+
+## `metrics`: the figures for cron and for mail
+
+`monitor_cli.py metrics` writes the figures of the monitor as one `name=value` line each, in a fixed order and with nothing else on the standard output: `repos`, `active`, `queued`, `failures_24h`, `successes_24h`, `red_workflows`, `alerts`, `alerts_info`, `alerts_warning`, `alerts_error`, `alerts_critical`, `allowance_remaining`, `allowance_limit` and `offline`. A figure that is not known is left out, never written as 0. It reads the monitor, never GitHub.
+
+With `--if-problem` it writes nothing and exits 0 when there is no red workflow and no alert at `--fail-on` (error by default) or worse; otherwise it writes the figures and exits 5. cron mails any output, so this line mails only the day something is wrong: `*/15 * * * * py -3 /opt/monitor/bin/monitor_cli.py metrics --if-problem`. An unreachable monitor is never silence: the error goes to the standard error output and the exit code is 2.

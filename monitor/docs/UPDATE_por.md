@@ -107,3 +107,7 @@ Sem comando abre-se a página. Os comandos respondem uma vez (acrescente `--json
 | 6 | falhou e o regresso também falhou: restaure a cópia à mão |
 | 7 | sem ligação ao GitHub e sem zip |
 | 8 | não confirmado |
+
+## Salvaguardas do ajudante de serviço
+
+Com `updates.systemd_helper` (ou `--systemd-unit`) o atualizador verifica agora o serviço antes de lhe tocar: uma unidade cujo diretório de trabalho e comando não apontam para ESTA pasta pertence a outra instalação e não é parada nem iniciada; uma unidade não é iniciada enquanto outra coisa (um monitor em primeiro plano) atende a sua porta; um reinício não é dado por feito enquanto o processo continuar a ser o antigo (a unidade tem de mostrar um PID novo); e `update status --systemd-unit UNIDADE` lista apenas os erros do serviço desde o último arranque. São perguntas só de leitura a `systemctl --user show` e `journalctl --user`; uma pergunta sem resposta não bloqueia nada.

@@ -107,3 +107,7 @@ Sans commande, la page s'ouvre. Les commandes répondent une fois (ajoutez `--js
 | 6 | échec et le retour a échoué aussi : restaurez la copie à la main |
 | 7 | pas de connexion à GitHub et pas de zip |
 | 8 | non confirmé |
+
+## Garde-fous de l'assistant de service
+
+Avec `updates.systemd_helper` (ou `--systemd-unit`) le programme de mise à jour vérifie maintenant le service avant d'y toucher : une unité dont le répertoire de travail et la commande ne pointent pas vers CE dossier appartient à une autre installation et n'est ni arrêtée ni démarrée ; une unité n'est pas démarrée tant qu'autre chose (un moniteur au premier plan) répond sur son port ; un redémarrage n'est pas tenu pour fait tant que le processus est l'ancien (l'unité doit montrer un nouveau PID) ; et `update status --systemd-unit UNITÉ` ne liste que les erreurs du service depuis son dernier démarrage. Ce sont des questions en lecture seule à `systemctl --user show` et `journalctl --user` ; une question sans réponse ne bloque rien.

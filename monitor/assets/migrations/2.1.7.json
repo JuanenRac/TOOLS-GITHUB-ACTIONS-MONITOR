@@ -1,0 +1,61 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.1.7",
+ "previous": "2.1.6",
+ "digest": "a7d39b02ec852ea7325b7a166ff1aa4919a851a56f3e305a552b612352e91e04",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "lint.rules.container_input_name.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "lint.rules.container_input_name.severity",
+    "kind": "enum",
+    "bounds": [
+     "info",
+     "warn",
+     "bad"
+    ]
+   },
+   {
+    "key": "selfwatch.enabled",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "selfwatch.interval_seconds",
+    "kind": "int",
+    "bounds": [
+     5,
+     3600
+    ],
+    "default": 60
+   },
+   {
+    "key": "selfwatch.rss_warn_mb",
+    "kind": "int",
+    "bounds": [
+     64,
+     262144
+    ],
+    "default": 1024
+   },
+   {
+    "key": "selfwatch.threads_warn",
+    "kind": "int",
+    "bounds": [
+     20,
+     100000
+    ],
+    "default": 400
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {}
+}

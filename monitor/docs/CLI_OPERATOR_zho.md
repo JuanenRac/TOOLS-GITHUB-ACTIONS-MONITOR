@@ -89,3 +89,9 @@ monitor_cli.py team --json | jq -r '.data.ranking[] | .repo'
 
 - `completions` 没有 `--install`：它从不写入用户的文件。
 - 没有 `proposals` 命令：监控器目前还没有可供操作的提案路由。
+
+## `metrics`：供 cron 和邮件使用的数值
+
+`monitor_cli.py metrics` 把监视器的数值写成每行一个 `名称=值`，顺序固定，标准输出中没有其他内容：`repos`、`active`、`queued`、`failures_24h`、`successes_24h`、`red_workflows`、`alerts`、`alerts_info`、`alerts_warning`、`alerts_error`、`alerts_critical`、`allowance_remaining`、`allowance_limit` 和 `offline`。未知的数值会省略，绝不写成 0。它只读取监视器，从不访问 GitHub。
+
+加上 `--if-problem` 后，如果没有红色工作流，也没有 `--fail-on`（默认 error）及更严重级别的警报，则不输出任何内容并以 0 退出；否则输出数值并以 5 退出。cron 会把任何输出都发成邮件，所以下面这行只在出问题的那天才发邮件：`*/15 * * * * py -3 /opt/monitor/bin/monitor_cli.py metrics --if-problem`。监视器无法连接时绝不会沉默：错误写入标准错误输出，退出码为 2。

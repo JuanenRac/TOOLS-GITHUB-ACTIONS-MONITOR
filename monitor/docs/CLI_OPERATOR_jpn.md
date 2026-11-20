@@ -89,3 +89,9 @@ monitor_cli.py team --json | jq -r '.data.ranking[] | .repo'
 
 - `completions` に `--install` はありません。ユーザーのファイルには決して書き込みません。
 - `proposals` コマンドはありません。モニターには、操作の対象となる提案用のルートがまだありません。
+
+## `metrics`：cron とメール向けの数値
+
+`monitor_cli.py metrics` はモニターの数値を 1 行に 1 つの `名前=値` として、決まった順序で、標準出力にほかの文字を混ぜずに書きます：`repos`、`active`、`queued`、`failures_24h`、`successes_24h`、`red_workflows`、`alerts`、`alerts_info`、`alerts_warning`、`alerts_error`、`alerts_critical`、`allowance_remaining`、`allowance_limit`、`offline`。わからない数値は 0 として書かず省きます。読むのはモニターだけで、GitHub には問い合わせません。
+
+`--if-problem` を付けると、赤いワークフローがなく `--fail-on`（既定は error）以上のアラートもないときは何も書かず 0 で終了し、あるときは数値を書いて 5 で終了します。cron は出力があればメールを送るので、次の 1 行は問題がある日だけメールを送ります：`*/15 * * * * py -3 /opt/monitor/bin/monitor_cli.py metrics --if-problem`。モニターに届かないときは沈黙せず、エラーは標準エラー出力に出て終了コードは 2 です。
