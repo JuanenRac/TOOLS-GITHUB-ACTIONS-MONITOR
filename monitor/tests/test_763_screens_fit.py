@@ -51,7 +51,7 @@ class TheSafeMargin(unittest.TestCase):
         html = HTML.read_text(encoding="utf-8")
         self.assertIn("P.safe", html)
         self.assertIn("--safe", html)
-        self.assertRegex(html, r"font-size:calc\(var\(--k\)\*var\(--d\)\*\(1 - var\(--safe\)/50\)")      # the type shrinks with the margin, so the design fits in what is left
+        self.assertRegex(html, r"font-size:max\(calc\(var\(--minpx\)\*1px/\.8\),calc\(var\(--k\)\*var\(--d\)\*\(1 - var\(--safe\)/50\)")      # the type shrinks with the margin, so the design fits in what is left
         self.assertRegex(html, r"padding:calc\(1rem \+ var\(--safe\)\*1vh\)")
         page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         self.assertIn("kiosk-safe", page)

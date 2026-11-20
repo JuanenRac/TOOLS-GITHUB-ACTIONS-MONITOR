@@ -192,7 +192,7 @@ header>.orglogo:first-child{margin-right:1rem}header>.orglogo:last-child{margin-
 .tiles .more{flex:0 0 100%}
 .fgroups>.more{grid-column:1/-1}
 /* the glance: what changed in the last look, for a few seconds, in the middle of the header */
-#glance{display:flex;gap:.4rem;min-width:0;overflow:hidden;justify-content:center;align-items:center}
+#glance{display:flex;flex-wrap:wrap;gap:.2rem .4rem;min-width:0;justify-content:center;align-items:center}
 #glance span{border:1px solid var(--line);border-radius:.4rem;padding:0 .45rem;font-size:.85rem;line-height:1.3;white-space:nowrap;color:var(--tx)}
 #glance span.up{border-color:var(--bad);color:var(--bad)}#glance span.down{border-color:var(--ok);color:var(--ok)}
 /* now */

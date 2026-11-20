@@ -40,7 +40,7 @@ import check_overflow  # noqa: E402
 
 LANGS = ("en", "es", "de", "fr", "it", "ja", "zh", "pt")
 KINDS = ("overview", "fleet", "now", "sentinels")
-SIZES = {"720p": (1280, 720), "1080p": (1920, 1080), "1440p": (2560, 1440), "4K": (3840, 2160), "ultrawide": (3440, 1440), "superwide": (5120, 1440), "portrait": (1080, 1920), "portrait4K": (2160, 3840)}
+SIZES = {"1080p": (1920, 1080), "1440p": (2560, 1440), "4K": (3840, 2160), "ultrawide": (3440, 1440), "superwide": (5120, 1440), "portrait": (1080, 1920), "portrait4K": (2160, 3840)}
 DATA = ("rich", "long", "many", "huge", "zero", "one", "old", "worst")
 #: a part of the short side of the window: the smallest type that is read from about three metres on a wall screen (12 px in a 1080 p window)
 MIN_FONT = 0.0105
