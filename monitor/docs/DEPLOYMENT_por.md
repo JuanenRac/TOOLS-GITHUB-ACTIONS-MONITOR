@@ -124,6 +124,15 @@ Só são lidos os nomes desta tabela. No serviço, um valor ilegível é ignorad
 | `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py`: em vez de repetir a suite ordinária, aceita o registo de uma execução verde completa desse mesmo commit (terminada, sem falhas nem erros, todos os testes executados); `--skip-clean-suite` também não repete a suite do zip extraído (as verificações rápidas continuam) e di-lo. |
 | `--progress` | `tools/make_release.py`: mostra o andamento das suites, uma linha a cada 250 testes, também na suite da instalação limpa. |
 
+## Um batimento externo (desativado por omissão)
+
+O monitor corre num computador que pode ser desligado, suspenso ou reiniciado, e então ninguém fica a saber que ninguém está a vigiar. Com `heartbeat.enabled` ativo, o monitor envia um aviso a um endereço a cada `heartbeat.interval_seconds` (300 por omissão) e um serviço como healthchecks.io, Cronitor ou Uptime Kuma diz-te quando os avisos deixam de chegar.
+
+- O endereço é um segredo: coloca-o na variável de ambiente que `heartbeat.url_env` indica (`MONITOR_HEARTBEAT_URL` por omissão). Nunca é escrito na configuração, mostrado nem registado, e as Definições só dizem se há um definido. Tem de ser `https` (`http` só com `notify.allow_private_targets`, para um serviço da tua própria rede), não pode ter utilizador nem palavra-passe e é aberto com a mesma proteção das notificações.
+- O aviso leva no máximo `msg=<versão> <ok|degraded>` (`heartbeat.send_state`): nunca um repositório, um alerta ou um nome.
+- Quando o monitor não está apto a servir (o seu ciclo de atualização está preso ou desapareceu) o aviso não é enviado e o silêncio é o alarme. A um serviço com endereço de falha (healthchecks.io: `/fail`) pode dar-se `heartbeat.fail_suffix` e então é avisado logo.
+- Na edição completa, `GET /api/health` mostra `heartbeat` (enviados, falhados, omitidos e o último resultado).
+
 ## Quando o GitHub revoga ou deixa caducar o acesso
 
 Cada conta é um processo próprio, pelo que um acesso que deixa de funcionar só afeta essa conta. Após duas recusas seguidas que dizem que o próprio acesso não serve (um 401, `Bad credentials`, um token caducado ou revogado, uma conta suspensa, nenhum acesso), a conta fica **cega**: a página, a verificação de saúde profunda, `GET /api/accounts` (`state: blind`) e o `bin/monitor_cli.py` dizem-no, abre-se um **alerta crítico de sistema** (`system.credential_blind`, sentinela `system`) no separador de alertas, e os tipos de notificação `credential_blind` (ativo por defeito) e `credential_back` avisam os canais uma vez. A recusa de uma só permissão (um 403 para um repositório) não torna uma conta cega. As outras contas continuam e a verificação de saúde profunda mantém-se verde. A conta continua a tentar e o primeiro ciclo bom fecha o alerta.

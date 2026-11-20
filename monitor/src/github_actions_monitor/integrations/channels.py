@@ -27,6 +27,7 @@ TIMEOUT = 8
 LOOPBACK = ("127.0.0.1", "localhost", "::1", "[::1]")
 LEVEL_PRIORITY = {"bad": "5", "critical": "5", "warn": "4", "info": "3", "ok": "2"}
 TEAMS_HOSTS = ("webhook.office.com", "outlook.office.com", "logic.azure.com", "powerplatform.com", "api.powerplatform.com")
+WORKFLOW_HOSTS = ("logic.azure.com", "powerplatform.com", "api.powerplatform.com")      # the Workflows app of Teams (the connectors of office.com are being retired)
 ADDRESS_RE = re.compile(r"^[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,200}\.[A-Za-z]{2,24}\Z")
 SENDER_RE = re.compile(r"^[A-Za-z0-9._%+-]{1,64}@(?:[A-Za-z0-9.-]{1,200}\.[A-Za-z]{2,24}|localhost)\Z")      # the sender may also be at `localhost`: it is the default and the relay is this computer
 TOPIC_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}\Z")
@@ -107,9 +108,21 @@ class Teams(Channel):
         ok = url.scheme == "https" and not url.username and any(host == h or host.endswith("." + h) for h in TEAMS_HOSTS)
         return None if ok else ("no_secret" if not secret else "bad_host")
 
+    @staticmethod
+    def payload(secret, message):
+        """What is posted. The Workflows of Microsoft (Power Automate: logic.azure.com, powerplatform.com) take a message with an Adaptive Card attached; the older connectors of a channel take `{"text": ...}`."""
+        host = (urlparse(str(secret)).hostname or "").lower()
+        if any(host == h or host.endswith("." + h) for h in WORKFLOW_HOSTS):
+            blocks = [{"type": "TextBlock", "text": _clean_line(message.get("title"), 120) or "Monitor", "weight": "Bolder", "wrap": True}, {"type": "TextBlock", "text": _clean_line(message.get("text"), 1500), "wrap": True}]
+            if message.get("url"):
+                blocks.append({"type": "TextBlock", "text": _clean_line(message["url"], 300), "wrap": True})
+            return {"type": "message", "attachments": [{"contentType": "application/vnd.microsoft.card.adaptive", "contentUrl": None,
+                                                         "content": {"$schema": "http://adaptivecards.io/schemas/adaptive-card.json", "type": "AdaptiveCard", "version": "1.4", "body": blocks}}]}
+        return {"text": _body(message)}
+
     def send(self, cfg, dest, secret, message, opener=None, allow_private=False, use_proxy=False, smtp=None):
-        payload = {"text": _body(message)}
-        request = urllib.request.Request(secret, data=json.dumps(payload).encode("utf-8"), headers={"Content-Type": "application/json"}, method="POST")
+        data = json.dumps(self.payload(secret, message)).encode("utf-8")
+        request = urllib.request.Request(secret, data=data, headers={"Content-Type": "application/json", "Content-Length": str(len(data))}, method="POST")      # the length is always written: a server that refuses a body sent in pieces (chunked) takes it
         with (opener or netguard.opener_for(allow_private, use_proxy=use_proxy))(request, timeout=TIMEOUT):
             pass
 

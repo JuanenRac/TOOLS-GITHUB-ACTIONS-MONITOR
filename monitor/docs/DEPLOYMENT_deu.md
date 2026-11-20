@@ -124,6 +124,15 @@ Gelesen werden nur die Namen dieser Tabelle. Im Dienst wird ein nicht lesbarer W
 | `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py`: statt die gewöhnliche Suite erneut auszuführen, wird die Aufzeichnung eines vollständigen grünen Laufs genau dieses Commits akzeptiert (beendet, ohne Fehlschlag und Fehler, alle Tests ausgeführt); `--skip-clean-suite` wiederholt auch die Suite des entpackten Zips nicht (die Schnellprüfungen laufen weiter) und sagt das. |
 | `--progress` | `tools/make_release.py`: zeigt den Fortschritt der Suiten, eine Zeile alle 250 Tests, auch in der Suite der sauberen Installation. |
 
+## Ein externer Herzschlag (standardmäßig aus)
+
+Der Monitor läuft auf einem Rechner, der ausgeschaltet, in den Ruhezustand versetzt oder neu gestartet werden kann, und dann erfährt niemand, dass niemand zuschaut. Mit eingeschaltetem `heartbeat.enabled` pingt der Monitor alle `heartbeat.interval_seconds` (standardmäßig 300) eine Adresse an, und ein Dienst wie healthchecks.io, Cronitor oder Uptime Kuma meldet, wenn die Pings ausbleiben.
+
+- Die Adresse ist ein Geheimnis: Lege sie in der Umgebungsvariable ab, die `heartbeat.url_env` nennt (standardmäßig `MONITOR_HEARTBEAT_URL`). Sie wird nie in die Konfiguration geschrieben, angezeigt oder protokolliert, und die Einstellungen sagen nur, ob eine definiert ist. Sie muss `https` sein (`http` nur mit `notify.allow_private_targets`, für einen Dienst im eigenen Netz), darf weder Benutzer noch Passwort enthalten und wird mit demselben Schutz geöffnet wie die Benachrichtigungen.
+- Der Ping enthält höchstens `msg=<Version> <ok|degraded>` (`heartbeat.send_state`): nie ein Repository, eine Warnung oder einen Namen.
+- Ist der Monitor nicht arbeitsfähig (seine Aktualisierungsschleife hängt oder fehlt), wird der Ping nicht gesendet, und die Stille ist der Alarm. Einem Dienst mit Fehleradresse (healthchecks.io: `/fail`) kann man `heartbeat.fail_suffix` geben, dann wird er sofort benachrichtigt.
+- In der kompletten Edition zeigt `GET /api/health` `heartbeat` (gesendet, fehlgeschlagen, übersprungen und das letzte Ergebnis).
+
 ## Wenn GitHub den Zugang widerruft oder er abläuft
 
 Jedes Konto ist ein eigener Prozess, ein ausfallender Zugang betrifft also nur dieses Konto. Nach zwei Ablehnungen in Folge, die sagen, dass der Zugang selbst unbrauchbar ist (ein 401, `Bad credentials`, ein abgelaufenes oder widerrufenes Token, ein gesperrtes Konto, gar kein Zugang), ist das Konto **blind**: Die Seite, die tiefe Gesundheitsprüfung, `GET /api/accounts` (`state: blind`) und `bin/monitor_cli.py` sagen es, ein **kritischer Systemalarm** (`system.credential_blind`, Wächter `system`) erscheint im Tab Alarme, und die Benachrichtigungsarten `credential_blind` (standardmäßig an) und `credential_back` informieren die Kanäle einmal. Die Ablehnung einer einzelnen Berechtigung (ein 403 für ein Repository) macht ein Konto nicht blind. Die anderen Konten laufen weiter, und die tiefe Gesundheitsprüfung bleibt grün. Das Konto versucht es weiter, und der erste gute Zyklus schließt den Alarm.

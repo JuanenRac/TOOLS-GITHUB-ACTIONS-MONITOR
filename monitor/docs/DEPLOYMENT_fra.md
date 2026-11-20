@@ -124,6 +124,15 @@ Seuls les noms de ce tableau sont lus. Dans le service, une valeur illisible est
 | `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py` : au lieu de relancer la suite ordinaire, accepte l'enregistrement d'une exécution verte complète de ce même commit (terminée, sans échec ni erreur, tous les tests exécutés) ; `--skip-clean-suite` ne relance pas non plus la suite du zip extrait (ses contrôles rapides restent faits) et le dit. |
 | `--progress` | `tools/make_release.py` : indique l'avancement des suites, une ligne tous les 250 tests, y compris dans la suite de l'installation propre. |
 
+## Un battement externe (désactivé par défaut)
+
+Le moniteur tourne sur un ordinateur qui peut être éteint, mis en veille ou redémarré, et alors personne n'apprend que personne ne surveille. Avec `heartbeat.enabled` activé, le moniteur envoie un ping à une adresse tous les `heartbeat.interval_seconds` (300 par défaut) et un service comme healthchecks.io, Cronitor ou Uptime Kuma vous dit quand les pings s'arrêtent.
+
+- L'adresse est un secret : mettez-la dans la variable d'environnement que nomme `heartbeat.url_env` (`MONITOR_HEARTBEAT_URL` par défaut). Elle n'est jamais écrite dans la configuration, affichée ni journalisée, et les Réglages disent seulement si une est définie. Elle doit être en `https` (`http` seulement avec `notify.allow_private_targets`, pour un service de votre propre réseau), ne porter ni nom d'utilisateur ni mot de passe, et s'ouvre avec la même protection que les notifications.
+- Le ping porte au plus `msg=<version> <ok|degraded>` (`heartbeat.send_state`) : jamais un dépôt, une alerte ou un nom.
+- Quand le moniteur n'est pas en état de servir (sa boucle d'actualisation est bloquée ou absente), le ping n'est pas envoyé et le silence est l'alarme. Un service avec une adresse d'échec (healthchecks.io : `/fail`) peut recevoir `heartbeat.fail_suffix` et est alors prévenu aussitôt.
+- Dans l'édition complète, `GET /api/health` montre `heartbeat` (envoyés, échoués, omis et le dernier résultat).
+
 ## Quand GitHub révoque l'accès ou qu'il expire
 
 Chaque compte est un processus à part : un accès qui cesse de fonctionner ne touche que ce compte. Après deux refus de suite qui disent que l'accès lui-même est inutilisable (un 401, `Bad credentials`, un jeton expiré ou révoqué, un compte suspendu, aucun accès), le compte est **aveugle** : la page, le contrôle de santé approfondi, `GET /api/accounts` (`state: blind`) et `bin/monitor_cli.py` le disent, une **alerte critique du système** (`system.credential_blind`, sentinelle `system`) s'ouvre dans l'onglet Alertes, et les types de notification `credential_blind` (activé par défaut) et `credential_back` préviennent les canaux une fois. Le refus d'une seule permission (un 403 pour un dépôt) ne rend pas un compte aveugle. Les autres comptes continuent et le contrôle de santé approfondi reste au vert. Le compte continue d'essayer, et le premier bon cycle ferme l'alerte.

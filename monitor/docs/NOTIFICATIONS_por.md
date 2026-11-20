@@ -26,12 +26,16 @@ Opcionais e **desligadas por predefinição**. Os eventos do feed (um vermelho n
 ## O contrato dos adaptadores
 
 - Para chegar a um serviço que não está na lista, execute um pequeno recetor neste computador e aponte `http_local` para ele. Recebe um POST com `Content-Type: application/json` e este corpo: `{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`.
-- `kind` é um de `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `ai_alert`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `score_dropped`, `security_new`, `security_fixed`, `delivery_new`, `delivery_fixed`, `alerts_digest`, `silence_review`. Os campos só se acrescentam. Responda com qualquer 2xx; o resto conta como falha.
+- `kind` é um de `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `ai_alert`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `github_incident`, `github_incident_over`, `score_dropped`, `security_new`, `security_fixed`, `delivery_new`, `delivery_fixed`, `alerts_digest`, `silence_review`. Os campos só se acrescentam. Responda com qualquer 2xx; o resto conta como falha.
 - `mqtt` publica o mesmo JSON como carga de uma mensagem QoS 0 em `notify.channels.mqtt.topic`.
 
 ## Apprise (opcional, desligado por predefinição)
 
 O canal `apprise` entrega a mensagem ao comando `apprise` (instale-o você, por exemplo `pip install apprise`) para chegar a qualquer um dos serviços que ele conhece. Os endereços contêm os segredos desses serviços, por isso estão numa variável de ambiente cujo NOME é `notify.channels.apprise.urls_env` (separados por espaços ou vírgulas, no máximo dez); são escritos num ficheiro temporário privado durante o instante da chamada, nunca nos argumentos do comando, e o comando recebe um ambiente sem as chaves do monitor. **O Apprise abre as suas próprias ligações: a proteção do monitor contra endereços privados não se aplica**, por isso o que alcança depende dos endereços que lhe der; é por isso que o canal tem o seu próprio interruptor, desligado por predefinição, e está marcado como definição de segurança. Se o comando faltar, o canal diz `not_installed`; uma falha conta-se como qualquer outra e nunca pára o monitor.
+
+## O estado do GitHub (desativado por omissão)
+
+Com `github_status.enabled` ativo, o monitor lê o resumo público de githubstatus.com a cada `github_status.interval_seconds` (300 por omissão): um JSON pequeno, sem conta, e nada sobre ti é enviado. A barra de baixo da página mostra o estado do GitHub. Quando o GitHub Actions tem um incidente o monitor avisa uma vez (os tipos `github_incident` e `github_incident_over`, que só são notificados se os adicionares a `notify.events`), e com `github_status.mark_reds` (ativo) um vermelho que aparece durante o incidente diz «causa possível: um incidente do GitHub» no texto e no campo `possible_cause`. O vermelho em si nunca é escondido.
 
 ## O limite por hora conta mensagens
 
@@ -42,7 +46,7 @@ O canal `apprise` entrega a mensagem ao comando `apprise` (instale-o você, por 
 Desativado por predefinição (`notify.users.enabled`). Com o modo de equipa ativo, cada utilizador escolhe em `GET/POST /api/auth/me/notify` os canais (`ntfy`, `teams`, `email`), as sentinelas (`ci`, `collab`), o nível mínimo (`info`, `warn`, `bad`), se quer os eventos do sistema e se as mensagens chegam logo ou reunidas num resumo (`hourly`, `daily`). A função decide o que um utilizador pode saber: um leitor, os eventos de CI das contas que pode ver; um mantenedor, além disso o que espera por uma pessoa (uma compilação à espera de assinatura, uma versão por publicar); um administrador, além disso os eventos do sistema. Um evento de uma conta nunca chega a quem não pode ver essa conta. `notify.users.max_per_hour` limita as mensagens que um utilizador recebe.
 
 - `ntfy`: o tópico de cada utilizador no servidor `notify.channels.ntfy.server` (https, ou um deste computador); um token de acesso é opcional.
-- `teams`: o endereço do webhook de entrada de um canal do Teams (apenas servidores da Microsoft).
+- `teams`: o endereço do webhook de entrada de um canal do Teams (apenas servidores da Microsoft). A mensagem segue sempre com o seu `Content-Length` (nunca em pedaços, que o Teams recusa) e, para um endereço de Workflows (`logic.azure.com`, `powerplatform.com`), como cartão adaptável.
 - `email`: o endereço do utilizador, enviado por um relé deste computador que não pede início de sessão (`notify.channels.email`).
 
 O endereço do webhook do Teams e o token do ntfy são guardados cifrados pelo sistema (DPAPI, Porta-chaves, Secret Service ou um ficheiro privado) e nunca voltam numa resposta, num registo nem na configuração; ao apagar um utilizador são apagados. `MONITOR_SECRET_BACKEND=file` força o ficheiro privado. Cada canal está desligado até o administrador o ativar. O resumo reúne os alertas que o utilizador não viu (até `notify.digest.max_items`); `POST /api/auth/me/notify/seen` marca-os como vistos e não são enviados; `POST /api/auth/me/notify/test` envia uma mensagem de teste aos canais do utilizador. Um administrador lê as preferências de todos (nunca um segredo) em `GET /api/auth/notify`.

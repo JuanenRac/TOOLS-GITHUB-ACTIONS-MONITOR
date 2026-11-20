@@ -519,7 +519,39 @@
     "max_verified_per_minute": 120,
     "persist_deliveries": true,
     "reject_stale": false,
-    "clock_skew_s": 300
+    "clock_skew_s": 300,
+    "max_body_kb": 1024,
+    "queue_max": 500,
+    "stale_after_h": 6,
+    "transport": "http",
+    "ws_targets": [],
+    "ws_max_targets": 10,
+    "ws_cleanup": false,
+    "redeliver": {
+      "enabled": false,
+      "hooks": [],
+      "max_per_run": 20,
+      "max_age_hours": 24,
+      "interval_minutes": 60
+    }
+  },
+  "events_feed": {
+    "enabled": false,
+    "interval_seconds": 60,
+    "owner_kind": "auto",
+    "max_per_tick": 20
+  },
+  "github_status": {
+    "enabled": false,
+    "interval_seconds": 300,
+    "mark_reds": true
+  },
+  "heartbeat": {
+    "enabled": false,
+    "url_env": "MONITOR_HEARTBEAT_URL",
+    "interval_seconds": 300,
+    "send_state": true,
+    "fail_suffix": ""
   },
   "kiosk": {
     "enabled": false,

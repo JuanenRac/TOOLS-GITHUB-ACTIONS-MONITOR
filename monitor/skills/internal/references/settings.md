@@ -244,6 +244,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `display.timezone` | `"local"` | general | Time zone of the texts |
 | `ecosystems` | `"all"` | general | Ecosystems watched |
 | `ecosystems_file` | `-` | paths | Ecosystems file |
+| `events_feed.enabled` | `false` | polling | Find changes with the events of the account |
+| `events_feed.interval_seconds` | `60` | polling | Seconds between reads of the events |
+| `events_feed.max_per_tick` | `20` | polling | Repositories read again per turn |
+| `events_feed.owner_kind` | `"auto"` | polling | Kind of account |
 | `exclude` | `[]` | general | Repositories to skip |
 | `extra_reader.any_folder` (secure) | `false` | quota | Accept the token file from any folder |
 | `extra_reader.enabled` (secure) | `false` | quota | Read also with a second account |
@@ -265,8 +269,16 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `github_app.openssl_path` (secure) | `-` | quota | Path of the program openssl |
 | `github_app.share_reads` (secure) | `false` | quota | Let tools take a read-only token of the App |
 | `github_owner` | `""` | general | GitHub account |
+| `github_status.enabled` (secure) | `false` | polling | Show the state of GitHub |
+| `github_status.interval_seconds` | `300` | polling | Seconds between reads of the state |
+| `github_status.mark_reds` | `true` | polling | Mark the reds of an incident |
 | `github_token.enabled` (secure) | `false` | advanced | Keep a GitHub token in the monitor |
 | `github_token.store` (secure) | `"auto"` | advanced | Where the token is kept |
+| `heartbeat.enabled` (secure) | `false` | outputs | Send the outside heartbeat |
+| `heartbeat.fail_suffix` | `""` | outputs | Address ending for a failure |
+| `heartbeat.interval_seconds` | `300` | outputs | Seconds between pings |
+| `heartbeat.send_state` | `true` | outputs | Send the version and the state in the ping |
+| `heartbeat.url_env` (secure) | `"MONITOR_HEARTBEAT_URL"` | outputs | Variable with the address to ping |
 | `hot_hours` | `3` | polling | A repository is hot for |
 | `issues_refresh_seconds` | `180` | polling | Refresh of issues |
 | `kiosk.enabled` | `false` | general | Kiosk profile |
@@ -779,12 +791,24 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `webhook.enabled` (secure) | `false` | webhook | Receiver on |
 | `webhook.live_events_keep` | `-` | webhook | Events kept |
 | `webhook.max_bad_per_minute` | `120` | webhook | Requests with a bad signature per address |
+| `webhook.max_body_kb` | `1024` | webhook | Largest body accepted |
 | `webhook.max_per_minute` | `30` | webhook | Events accepted per repository |
 | `webhook.max_verified_per_minute` | `120` | webhook | Requests with a good signature per address |
 | `webhook.persist_deliveries` | `true` | webhook | Remember deliveries after a restart |
+| `webhook.queue_max` | `500` | webhook | Events waiting to be applied |
 | `webhook.record_events` | `-` | webhook | Keep events |
+| `webhook.redeliver.enabled` (secure) | `false` | webhook | Ask GitHub to send again what never arrived |
+| `webhook.redeliver.hooks` (secure) | `[]` | webhook | Webhooks to look at |
+| `webhook.redeliver.interval_minutes` | `60` | webhook | Minutes between looks |
+| `webhook.redeliver.max_age_hours` | `24` | webhook | Oldest delivery to ask for (hours) |
+| `webhook.redeliver.max_per_run` | `20` | webhook | Most deliveries asked for per look |
 | `webhook.reject_stale` | `false` | webhook | Refuse old events |
 | `webhook.replay_seconds` | `3600` | webhook | Delivery ids remembered |
 | `webhook.secret_env` (secure) | `"MONITOR_WEBHOOK_SECRET"` | webhook | Environment variable with the shared secret |
 | `webhook.signing_state` | `-` | webhook | Shared secret |
+| `webhook.stale_after_h` | `6` | webhook | Hours before a run left open counts as lost |
+| `webhook.transport` (secure) | `"http"` | webhook | How GitHub reaches the receiver |
+| `webhook.ws_cleanup` (secure) | `false` | webhook | Delete the temporary hooks a crash left |
+| `webhook.ws_max_targets` | `10` | webhook | Most forwarders at once |
+| `webhook.ws_targets` (secure) | `[]` | webhook | Repositories or organizations to forward |
 | `workspace_root` | `""` | paths | Folder with your clones |

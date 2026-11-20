@@ -67,6 +67,7 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/chatops/slack` | POST | public | a slash command of Slack, read only (signed with the v0 HMAC of Slack, off by default) |
 | `/api/compare` | GET | viewer | this period against the one before, read only, from the ledger and the snapshots of the score (`?window=`, `?days=`, `?baseline=`, `?from=`/`?to=`, `?format=json|ndjson|csv`): every figure with its change, direction and state (`insufficient_data`, `baseline_unavailable` instead of a made-up number), and what changed (Complete only, off by default) |
 | `/api/credential` | POST | admin | replace the GitHub login without restarting (this computer only) |
+| `/api/credential/probe` | POST | admin | does the login (and the GitHub App) work: who it is, classic or fine-grained, scopes it lacks, repositories seen, allowance left, installations of the App (this computer only; at most one real check every 10 seconds) |
 | `/api/data` | GET | viewer | the main picture: repositories, runs, failing, active, rate |
 | `/api/discovery` | GET | viewer | repositories the monitor found and suggestions |
 | `/api/discovery/group` | POST | maintainer | put discovered repositories in a group |
@@ -146,4 +147,5 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/v1/me` | GET | viewer | who is asking: `mode` (individual or team), `authenticated`, `user`, `role` and `accounts` of the team session (null without one), `capabilities` (`read`, `write`, `admin`, `v1_write` always false), `limits`, the version of the monitor and `contract` (the version of the frozen shape); read only; 404 while the prefix is closed |
 | `/api/v1/repos` | GET | viewer | the watched repositories, one line each (`repo`, `ecosystem`, `state`, `risk`, `runs_24h`, `failures_24h`, `red_workflows`, `stuck_runs`, `alerts`, `last_run_at`) in pages: `?limit=`, `?cursor=` (the `next_cursor` of the previous page), `?state=`, `?ecosystem=`, `?q=`, `?fields=a,b`, `?profile=compact`; errors in one envelope with a stable `code`; read only; 404 while the prefix is closed |
 | `/api/webhook` | POST | public | the incoming webhook of GitHub (signed with HMAC) |
+| `/api/webhook/redeliver` | POST | admin | ask GitHub now to send again the webhook deliveries that never arrived, for the hooks named in `webhook.redeliver.hooks` (administrators, this computer only; it writes to GitHub) |
 | `/api/welcome` | GET,POST | viewer / maintainer | the first-run welcome flag (POST: this computer only) |

@@ -30,6 +30,26 @@
 - **“关于”面板显示监视器的标志,并可按需显示您组织的标志**(`ui.about_org_logo`,默认关闭,位于“常规”选项卡):监视器的图形始终在最上方,开启该设置后,为墙面屏幕上传的图片(“此浏览器”选项卡)会显示在旁边,并带有页面语言的替代文字。两者都随面板宽度变化且不变形;如果没有上传标志或其文件无法读取,会用一条简短提示取代图片,面板继续正常工作。
 - **工作流检查器现在可以提示已归档或不再维护的 Action**(规则 `archived_action`,因为要查询 GitHub,默认关闭;仅提供信息):它列出工作流所用的 GitHub Action 和可复用工作流中仓库已归档的;如果同时开启 `lint.maintenance.inactive`,还会列出已有 `lint.maintenance.inactive_years` 年(默认 2 年)没有推送的。它通过已为哨兵协调好的配额,每个 Action 只向 GitHub 查询一次(每次扫描最多 `lint.maintenance.max_calls_per_tick` 个,每个回答保留 `lint.maintenance.refresh_seconds` 秒),不会超过信息级别,绝不会使 `--fail-on` 失败,没有网络时不做任何判断并说明有多少个 Action 无法读取。命令行中使用 `--check-actions` 和 `--inactive-years N`。
 
+- **Webhook 请求体的上限成为设置，敌意投递语料库守护接收端**(`webhook.max_body_kb`，默认 1024，1 到 25600)：接收端曾拒绝所有超过 256 KB 的请求体，因此 GitHub 的大型投递(包含许多提交的 push、check suite)在它这一侧失败。现在上限由你设置(默认 1 MiB，最高到 GitHub 发送的 25 MiB)，超过它的请求体在读取前就以 `413` 拒绝，拒绝次数单独计入 `GET /api/live-status` 的 `stats.too_big`。测试向接收端发送空的、null 的、类型错误的、巨大的、未知的和重复的投递：它总是以状态码回应，从不崩溃也不会一直等待。
+
+- **迟到的投递不再让运行倒退**：GitHub 不保证投递的顺序，在 `completed` 之后到达的 `queued` 事件可能把已结束的运行显示为等待中。运行或作业现在只会向前推进(排队、进行中、已完成)：对它说得比已知更少的事件(上一个周期读到的也算)不会改变任何东西，并计入 `GET /api/live-status` 的 `stats.out_of_order`。运行的新尝试会重新开始。测试会喂入三种状态的每一种顺序。
+
+- **Webhook 事件在有界队列中等待，`/readyz` 说明监视器能否接收工作**(`webhook.queue_max`，默认 500，1 到 10000)：被接受的事件由工作线程应用，因此 GitHub 能很快得到响应。队列已满时，接收端返回带 `Retry-After` 的 `503` 并忘记该次投递，所以 GitHub 重新发送的那次会被接受，事件绝不会被悄悄丢弃。`GET /readyz`(仅限本机)返回 `200`，或带失败检查项的 `503`(`loaded`、`cycle`、`store`、`queue`);`GET /api/health` 仍然只表明进程还活着。队列深度和拒绝次数见 `GET /api/live-status`。
+
+- **对因投递丢失而保持开放的运行进行核对**(`webhook.stale_after_h`，默认 6，1 到 168)：事件让其保持排队或进行中的运行，如果在这段时间内没有收到最终事件，就会在运行列表中标记为 `stale`，其仓库在下一个周期被重新读取;`GET /api/live-status` 的 `stats.stale` 和 `open_runs` 统计它们。
+
+- **利用账户事件的免费变更检测**(`events_feed.enabled`，默认关闭;`events_feed.interval_seconds`、`events_feed.owner_kind`、`events_feed.max_per_tick`)：监视器用 ETag 读取组织或用户的事件。没有新内容的读取返回 `304`，不消耗配额;出现 push、拉取请求、标签或发布时，只有事件中提到的仓库会在下一个周期被重新读取，而不必等待冷仓库的慢速轮次。若 GitHub 的 `X-Poll-Interval` 更长则以它为准。不需要 Webhook 或隧道;计数器在 `GET /api/live-status` 的 `feed` 中。
+
+- **在栏中显示 GitHub 状态，并标记故障期间出现的红色**(`github_status.enabled`，默认关闭;`github_status.interval_seconds`、`github_status.mark_reds`)：监视器读取 githubstatus.com 的公开摘要(一个很小的 JSON，不使用账户，也不发送任何关于你的信息)，在页面底部的栏中显示 GitHub 的状态，并在 Actions 故障开始和结束时各通知一次(通知类型 `github_incident` 和 `github_incident_over`)。故障持续期间，出现的红色会在文本和字段 `possible_cause` 中注明“可能原因：GitHub 故障”;红色本身绝不会被隐藏。
+
+- **外部心跳，让别人在监视器停止时察觉**(`heartbeat.enabled`，默认关闭;`heartbeat.url_env`、`heartbeat.interval_seconds`、`heartbeat.send_state`、`heartbeat.fail_suffix`)：监视器每隔几分钟向你放在环境变量中的地址发送 ping(机密：绝不写入配置、显示或记录到日志)，healthchecks.io、Cronitor 或 Uptime Kuma 之类的服务会在 ping 停止时报警。ping 最多携带版本和状态;刷新循环卡住的监视器不会发送，因此沉默就是警报(或通过故障地址立即通知)。计数器显示在 `GET /api/health` 中。
+
+- **凭据助手：自动找到 GitHub App 的安装，并用按钮测试令牌**(`github_app.installation_id` 可以留空;`POST /api/credential/probe`，仅限本机;配额标签页的“测试令牌”按钮)：监视器现在会找到所监视账户的安装，或 App 仅有的那个，而不是取看到的第一个;当有多个账户且没有一个是监视器的账户时，会列出它们以便填写一个。测试会说明登录是谁、是经典令牌(以及缺少哪些权限范围)还是细粒度令牌或 App、能看到多少个仓库(以及单点登录是否截断了列表)、剩余多少配额，对于 App 还会给出名称、安装和缺少的权限。每 10 秒最多做一次真实检查;不会向 GitHub 写入任何内容，也不会显示任何令牌或密钥。
+
+- **没有公开地址的 Webhook，通过 GitHub 的 WebSocket**(`webhook.transport` = `websocket`;`webhook.ws_targets`、`webhook.ws_max_targets`、`webhook.ws_cleanup`;默认关闭)：监视器为你列出的每个仓库或组织运行并看护 `gh webhook forward`，它会创建一个临时 Webhook，并通过本机打开的连接把每次投递交给监视器的接收端，因此不会暴露任何东西，也不需要隧道。它会写入 GitHub(临时钩子)，需要能管理 Webhook 的令牌;结束的转发器会以更长的等待时间重新启动，令牌无权管理钩子的转发器会在 `GET /api/live-status` 的 `forwarders` 中显示 `forbidden`。投递用每次启动时生成的密钥签名，只有本进程的接收端在共享密钥之外接受它。
+
+- **恢复关机的电脑错过的 Webhook 投递**(`webhook.redeliver.enabled`，默认关闭;`webhook.redeliver.hooks`、`webhook.redeliver.max_per_run`、`webhook.redeliver.max_age_hours`、`webhook.redeliver.interval_minutes`;`POST /api/webhook/redeliver`)：启动一分钟后，之后每小时一次，监视器读取你指定的 Webhook 最近的投递，并请求 GitHub 重新发送所有尝试都没有收到 2xx 响应的投递，每次检查有数量上限、逐渐增长的等待时间(5 到 300 秒)，第八次请求后停止。已请求的内容记在私有文件里，因此重启不会立刻再次请求;运维人员可以立即发起请求，该请求会在操作日志中留下一行。它会写入 GitHub，所以默认关闭，且只触及你指定的钩子;计数器在 `GET /api/live-status` 的 `redelivery` 中。
+
 ### 修复
 
 - **发布面板（A5）、就绪表（A11）和发布候选工具统计的是 main 的 CHANGELOG 条目，而不是克隆当前所在分支的条目**：以前从克隆的工作树统计，所以停在某个旧代理分支上的克隆会显示 20 条，而 main 只有 3 条（13 条对 2 条），与最新发布比较的版本也是该分支的版本。现在它们从克隆所知的远程默认分支读取 `CHANGELOG.md`、清单和 `pyproject`（`git show origin/<分支>:<文件>`，从不 fetch，不改动克隆中的任何内容）；不知道该分支时读取工作树，并在该行注明（“克隆在分支 X，不在 main；按工作树统计”）；GitHub 上的 main 前进后克隆尚未获取时同样注明。整个监控器只用一个函数计数（`delivery/mainsource.py`）：`## [Unreleased]` 下的每个列表行算一条，包括嵌套行，CRLF 或 LF 均可，与以前一致。候选表的标题说明该数字是 main 的。
@@ -41,6 +61,8 @@
 - **墙屏为了让列表放得下而隐藏的行现在真的会消失**：页面用 hidden 属性隐藏行，但本身是 flex 盒子的行会忽略它，导致事件列表、队列、失败和热力图的行在卡片底部被切成两半并压在页脚上。现在隐藏优先于任何样式。
 - **墙屏的标题、标签和数字在八种语言下都不再以省略号结尾，也不再超出方框**：标题会换到第二行，比方框更宽的数字（七位、较长的单位）会使用更小的字号直到下限，标题旁的标签以及图例、严重程度或磁贴的标签会换行或缩短，而不是把时钟挤出去，热力图为每一行保留高度，墙屏上没有任何字号小于基准大小的 0.8。
 - **展台不再显示表格的列选择器**：在墙上没有人能点击它，而且它的方框展开时会盖住仓库表格。
+
+- **Teams 渠道始终发送 `Content-Length`，并为 Teams 的 Workflows 使用自适应卡片**：拒绝分块发送请求体的 Teams 目标不再失败，Workflows 流程的地址(`logic.azure.com`、`powerplatform.com`)会以卡片形式收到消息，这类流程读取的就是卡片;频道的旧连接器仍然收到纯文本。一个会拒绝分块请求体的假服务器测试对此进行检查。
 
 ## [2.1.5]
 

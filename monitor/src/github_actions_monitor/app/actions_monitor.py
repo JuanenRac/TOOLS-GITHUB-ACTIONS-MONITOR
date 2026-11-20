@@ -48,6 +48,9 @@ from github_actions_monitor.data_pipeline import activity
 from github_actions_monitor.data_pipeline import fork_ci
 from github_actions_monitor.data_pipeline import discovery
 from github_actions_monitor.data_pipeline import etagcache, knownstates
+from github_actions_monitor.data_pipeline import eventfeed, githubstatus, redeliver
+from github_actions_monitor.security import wsforward
+from github_actions_monitor.integrations import heartbeat
 from github_actions_monitor.data_pipeline import graphql_checks
 from github_actions_monitor import i18n
 from github_actions_monitor.security import auth_http
@@ -107,7 +110,11 @@ DEFAULTS = {
     "report_history_days": 30,   # (before 1.5.0: parte_history_days, still read)
     "sentinel": {"enabled": True},
     "ai": {"provider": "none"},
-    "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30, "max_bad_per_minute": 120, "max_verified_per_minute": 120, "reject_stale": False, "persist_deliveries": True, "clock_skew_s": 300},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
+    "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30, "max_bad_per_minute": 120, "max_verified_per_minute": 120, "reject_stale": False, "persist_deliveries": True, "clock_skew_s": 300, "max_body_kb": 1024, "queue_max": 500, "stale_after_h": 6,
+                "transport": "http", "ws_targets": [], "ws_max_targets": 10, "ws_cleanup": False, "redeliver": {"enabled": False, "hooks": [], "max_per_run": 20, "max_age_hours": 24, "interval_minutes": 60}},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
+    "events_feed": {"enabled": False, "interval_seconds": 60, "owner_kind": "auto", "max_per_tick": 20},      # optional: the events of the account read with an ETag, to read only the repository that changed (eventfeed.py)
+    "github_status": {"enabled": False, "interval_seconds": 300, "mark_reds": True},      # optional: the state of GitHub (githubstatus.com) in the bar, and the reds that appear during an incident of Actions (githubstatus.py)
+    "heartbeat": {"enabled": False, "url_env": "MONITOR_HEARTBEAT_URL", "interval_seconds": 300, "send_state": True, "fail_suffix": ""},      # optional: a ping to an outside service that raises the alarm when the monitor stops (heartbeat.py)
     "chatops": {"enabled": False, "slack": {"enabled": False, "signing_secret_env": "MONITOR_SLACK_SIGNING_SECRET"}, "discord": {"enabled": False, "public_key_env": "MONITOR_DISCORD_PUBLIC_KEY"}, "allowed_teams": [], "allowed_channels": [], "allowed_users": [],
                 "allowed_words": ["help", "status", "alerts", "red", "queue", "score"], "max_rows": 8, "show_repo_names": "all", "links": True, "max_age_seconds": 300, "rate_per_user_per_minute": 6, "rate_per_channel_per_minute": 20, "rate_per_minute": 60},   # read only commands from Slack and Discord, see chatops/inbound.py (off by default; the proofs are only in the environment)
     "config_check": {"strict": False},      # OFF: a key nobody reads, a wrong type or a number out of range is named at the start; ON: the monitor refuses to start (configcheck.py)
@@ -1366,7 +1373,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
     }
 
 
-WEBHOOK_STATS = {"accepted": 0, "bad_signature": 0, "ignored": 0, "duplicates": 0, "refused": 0, "last_at": None}      # deliveries seen since this process started (memory only; no payload, no secret)
+WEBHOOK_STATS = {"accepted": 0, "bad_signature": 0, "ignored": 0, "duplicates": 0, "refused": 0, "too_big": 0, "queue_full": 0, "out_of_order": 0, "stale": 0, "last_at": None}      # deliveries seen since this process started (memory only; no payload, no secret)
 
 
 def webhook_count(code, duplicate=False):
@@ -1376,6 +1383,8 @@ def webhook_count(code, duplicate=False):
         return
     key = "accepted" if code == 200 else "bad_signature" if code == 401 else ("duplicates" if duplicate else "ignored") if code == 202 else "refused"
     WEBHOOK_STATS[key] += 1
+    if code in (413, 503):      # also counted apart: a body over the limit, an event the full queue sent back (both are in `refused` too)
+        WEBHOOK_STATS["too_big" if code == 413 else "queue_full"] += 1
     if code == 200:
         WEBHOOK_STATS["last_at"] = resilience.stamp(time.time())
 
@@ -1383,12 +1392,191 @@ def webhook_count(code, duplicate=False):
 
 def webhook_status(config):
     """What the Live view says about the receiver: whether it is on, whether the secret is long enough (never the secret itself), the counters and the newest event. Read only."""
+    from github_actions_monitor.data_pipeline import eventfeed
     from github_actions_monitor.security import webhook
     cfg = webhook.settings(config)
     newest = LIVE_EVENTS[-1] if LIVE_EVENTS else None
     return {"enabled": cfg["enabled"], "active": webhook.active(config), "secret_ok": len(cfg["secret"]) >= webhook.MIN_SECRET, "text": webhook.status_text(config), "stats": dict(WEBHOOK_STATS),
-            "keep": webhook.live_settings(config)["live_events_keep"], "held": len(LIVE_EVENTS), "secret_source": webhook.secret_source(config), "coverage": webhook.coverage(config),
+            "keep": webhook.live_settings(config)["live_events_keep"], "held": len(LIVE_EVENTS), "queue": webhook.INBOX.snapshot(config), "open_runs": webhook.open_count(), "feed": eventfeed.FEED.snapshot(config), "forwarders": wsforward.FORWARDERS.snapshot(config), "redelivery": redeliver.RECOVERY.snapshot(config), "secret_source": webhook.secret_source(config), "coverage": webhook.coverage(config),
             "last": ({k: newest.get(k) for k in ("repo", "workflow", "event", "status", "conclusion", "at")} if newest else None)}
+
+
+def webhook_receive(config, body, headers, address=None, size=None):
+    """(HTTP code, answer) for one delivery. The signature, the replay and the rate are checked at once; what an accepted event does (the live list, the run list, the analytics, the notices) is put in the
+    bounded queue (`webhook.queue_max`) and applied by the worker, so GitHub is answered fast whatever the page or a notice is doing. A full queue answers 503 and forgets the delivery, so that its
+    resend is not taken for a duplicate: an event is never dropped in silence. Without a worker (tests, the lite edition) the event is applied here."""
+    from github_actions_monitor.security import webhook
+    code, answer, repo = webhook.handle(config, body, headers, STATE["data"]["repos"] if STATE.get("data") else [], address, size=size)      # bad signatures and good ones are counted apart, in every mode
+    if code == 200 and repo:
+        event = headers.get("X-GitHub-Event")
+
+        def job():
+            record = webhook.parse_event(event, body)
+            if record and webhook.live_settings(config)["record_events"]:
+                apply_live_event(record, config)
+            webhook.note_accepted()      # the coverage indicator counts it
+            __import__("github_actions_monitor.data_pipeline.savings", fromlist=["_"]).note_webhook(repo=repo)      # the webhook is alive: savings.webhook_first may stretch the slow turn of the cold repositories
+            webhook_settle(repo)
+        if webhook.INBOX.worker:
+            if not webhook.INBOX.put(job, webhook.guard_settings(config)["queue_max"]):
+                webhook.forget(headers.get("X-GitHub-Delivery"), body)
+                webhook_count(503)
+                return 503, {"ok": False, "error": "queue_full"}
+        else:
+            job()
+    webhook_count(code, bool(answer.get("duplicate")) if isinstance(answer, dict) else False)
+    return code, answer
+
+
+def webhook_sweep(config, now=None):
+    """The runs an event left open for more than `webhook.stale_after_h` hours with no final event (a lost delivery) are marked obsolete in the run list and their repository is read again in the next cycle,
+    which says what became of them. Returns how many."""
+    from github_actions_monitor.security import webhook
+    old = webhook.stale_open(config, now)
+    for repo, run_id in old:
+        entry = RUN_CACHE.get(repo)
+        if entry is not None:
+            for run in entry.get("runs", []):
+                if run.get("id") == run_id and run.get("status") != "completed":
+                    run["stale"] = True
+            entry["at"] = 0
+        HOT_FORCED.add(repo)
+    WEBHOOK_STATS["stale"] += len(old)
+    return len(old)
+
+
+def webhook_apply(job):
+    """Runs one queued job. A job that fails is counted and goes to the degraded list; it never stops the worker."""
+    from github_actions_monitor.security import webhook
+    try:
+        job()
+        webhook.INBOX.stats["done"] += 1
+        return True
+    except Exception as error:   # noqa: BLE001 - one bad event must not stop the others
+        webhook.INBOX.stats["failed"] += 1
+        degraded.note("webhook.apply", error)
+        return False
+
+
+def webhook_worker(config):
+    """The thread that applies the queued events and, once a minute, sweeps the runs that never ended. A job that fails is counted and goes to the degraded list; it never stops the thread."""
+    from github_actions_monitor.security import webhook
+    last = time.time()
+    while True:
+        job = webhook.INBOX.take(5)
+        if job is not None:
+            webhook_apply(job)
+        if time.time() - last >= 60:
+            last = time.time()
+            try:
+                webhook_sweep(LIVE_CONFIG or config)
+            except Exception as error:   # noqa: BLE001
+                degraded.note("webhook.sweep", error)
+
+
+def outside_tick(config, now=None):
+    """One turn of the cheap reads that keep the monitor in step with the world, each only when it is switched on: the events of the account (which repository changed), the state of GitHub and the outside
+    heartbeat. Nothing here runs in the demo. Returns what happened, for the tests: {"feed": [repositories read again], "status": "start" | "over" | "", "heartbeat": "sent" | ... | ""}."""
+    out = {"feed": [], "status": "", "heartbeat": "", "redelivered": 0}
+    if DEMO["on"]:
+        return out
+    from github_actions_monitor.integrations import notifiers
+    from github_actions_monitor.security import netguard
+    now = time.time() if now is None else now
+    data = STATE.get("data") or {}
+    if eventfeed.settings(config)["enabled"] and not (rate_block_state()["blocked"] or data.get("paused_quota")) and data.get("repos"):      # a read costs allowance only when something changed; a spent allowance is not asked
+        owner = toolconfig.github_owner(config)
+        names = [r.get("name") if isinstance(r, dict) else r for r in data["repos"]]
+        for repo in eventfeed.FEED.tick(run_gh, owner, config, [n for n in names if isinstance(n, str)], now):
+            webhook_settle(repo)      # the stored conditional reads of the repository are dropped and it is read again in the next cycle
+            HOT_FORCED.add(repo)
+            out["feed"].append(repo)
+    if redeliver.settings(config)["enabled"] and not (rate_block_state()["blocked"] or data.get("paused_quota")):
+        out["redelivered"] = redeliver.RECOVERY.run(config, run_gh, now)      # GitHub is asked to send again what never arrived (off by default: it writes to GitHub)
+    if githubstatus.settings(config)["enabled"]:
+        out["status"] = githubstatus.STATUS.tick(netguard.opener_for(False), config, now)
+        if out["status"]:
+            announce_github_status(out["status"], config)
+    if heartbeat.settings(config)["enabled"]:
+        healthy = LITE["on"] or health_payload(deep=True)["ok"]
+        out["heartbeat"] = heartbeat.HEARTBEAT.tick(config, healthy, TOOL_VERSION, notifiers.settings(config)["allow_private_targets"], now=now)
+    return out
+
+
+def webhook_redeliver_now(config):
+    """The operator asks now (POST /api/webhook/redeliver): the named webhooks are looked at at once, whatever the schedule, and GitHub is asked to send again what never arrived. {"asked", ...counters}."""
+    asked = redeliver.RECOVERY.run(config, run_gh, force=True)
+    return {"asked": asked, **redeliver.RECOVERY.snapshot(config)}
+
+
+def wsforward_start(config, port):
+    """Starts the forwarders of `gh webhook forward` when the receiver is on and the transport is `websocket` (once the server has its port). The temporary hooks of an earlier crash are deleted first only when
+    `webhook.ws_cleanup` is on. Never raises."""
+    from github_actions_monitor.security import webhook
+    try:
+        cfg = wsforward.settings(config)
+        if DEMO["on"] or cfg["transport"] != "websocket" or not cfg["targets"] or not webhook.active(config):
+            return []
+        if cfg["cleanup"]:
+            wsforward.cleanup(run_gh, cfg["targets"])
+        started = wsforward.FORWARDERS.start(config, port)
+        webhook.set_local_secret(wsforward.FORWARDERS.local_secret())
+        import atexit
+        atexit.register(wsforward.FORWARDERS.stop)
+        return started
+    except Exception as error:   # noqa: BLE001 - a forwarder that cannot start never stops the monitor
+        degraded.note("webhook.forward", error)
+        return []
+
+
+def announce_github_status(transition, config):
+    """The start and the end of an incident of GitHub Actions go to the console, the event feed and the notifications, once each. Never raises."""
+    from github_actions_monitor.integrations import notifiers
+    kind = "github_incident" if transition == "start" else "github_incident_over"
+    info = githubstatus.STATUS.snapshot(config)
+    name = (info["incidents"][0]["name"] if info["incidents"] else "") or info["description"] or "Actions"
+    event = {"kind": kind, "code": kind, "level": "warn" if transition == "start" else "ok", "repo": "", "owner": "main", "url": None, "args": {"name": name},
+             "text": i18n.t("evt." + kind, name=name)}
+    print(event["text"], flush=True)
+    sentinel = SENTINEL["obj"]
+    try:
+        if sentinel is not None:
+            sentinel.feed._append([event])
+        notifiers.notify(config, event)
+    except Exception as error:   # noqa: BLE001 - never stops the loop
+        degraded.note("outside.announce", error)
+
+
+def outside_loop(config):
+    """The thread of the cheap outside reads: it looks at the settings every 15 seconds, so a switch turned on in Settings works without a restart. A failure is noted and the loop goes on."""
+    while True:
+        try:
+            outside_tick(LIVE_CONFIG or config)
+        except Exception as error:   # noqa: BLE001 - one bad turn never ends the loop
+            degraded.note("outside.tick", error)
+        time.sleep(15)
+
+
+def outside_start(config):
+    """Starts the thread once."""
+    if OUTSIDE["on"]:
+        return False
+    OUTSIDE["on"] = True
+    threading.Thread(target=outside_loop, args=(config,), name="outside-reads", daemon=True).start()
+    return True
+
+
+OUTSIDE = {"on": False}
+
+
+def webhook_worker_start(config):
+    """Starts the worker when the receiver is on (once)."""
+    from github_actions_monitor.security import webhook
+    if webhook.INBOX.worker or not webhook.active(config):
+        return False
+    webhook.INBOX.worker = True
+    threading.Thread(target=webhook_worker, args=(config,), name="webhook-worker", daemon=True).start()
+    return True
 
 
 def apply_live_event(record, config):
@@ -1396,6 +1584,14 @@ def apply_live_event(record, config):
     ends red, the notifications. Nothing of the payload but the short validated fields is kept."""
     from github_actions_monitor.integrations import notifiers
     from github_actions_monitor.security import webhook
+    known = None
+    entry = RUN_CACHE.get(record["repo"])
+    if record["event"] == "workflow_run" and entry is not None:
+        known = next((r.get("status") for r in entry["runs"] if r.get("id") == record["run_id"] and r.get("attempt") in (None, record.get("attempt"))), None)      # a new attempt of a run starts again from queued
+    if webhook.is_late(record, known):      # it says less than what is already known about this run or job (a late delivery): never a step back
+        WEBHOOK_STATS["out_of_order"] += 1
+        return
+    webhook.note_open(record)
     keep = webhook.live_settings(config)["live_events_keep"]
     LIVE_EVENTS.append({k: v for k, v in record.items() if k in webhook.LIVE_FIELDS} | {"at": resilience.stamp(time.time())})
     del LIVE_EVENTS[:-keep]
@@ -1704,7 +1900,7 @@ AI_MODEL_POST = ("/api/ai/models/refresh", "/api/ai/models/test", "/api/ai/model
 THIS_COMPUTER_ACTIONS = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test") + AI_MODEL_POST
 THIS_COMPUTER_ADVANCED = ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures", "/api/ai/prompts/clear",
                           "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run", "/api/report-files/summary", "/api/ops/backup", "/api/ops/purge",
-                          "/api/updates/check", "/api/updates/plan", "/api/updates/apply", "/api/updates/rollback")
+                          "/api/updates/check", "/api/updates/plan", "/api/updates/apply", "/api/updates/rollback", "/api/webhook/redeliver", "/api/credential/probe")
 THIS_COMPUTER_POST = THIS_COMPUTER_ACTIONS + THIS_COMPUTER_ADVANCED
 
 
@@ -2374,6 +2570,7 @@ def run_cycle(config, generation):
         announce_link(transition, config)
     data["offline"] = LINK.state()
     data["etag"] = ETAG["cache"].stats() if ETAG["cache"] else None
+    data["github_status"] = githubstatus.STATUS.snapshot(config)      # the state of GitHub for the bar (nothing is read here: the loop of the outside reads keeps it)
     maintain(config, data)
     if not WATCH.current(generation):
         return None
@@ -2719,10 +2916,12 @@ class Handler(BaseHTTPRequestHandler):
         result = "ok" if 200 <= status < 300 and ok is not False else ("denied" if status in (401, 403) else "error")
         audit_action(self, action, target or path, {"status": status, **(details or {})}, result)
 
-    def json_reply(self, payload, code=200):
+    def json_reply(self, payload, code=200, headers=None):
         self.reply_ok = payload.get("ok") if isinstance(payload, dict) else None
         body = json.dumps(payload).encode("utf-8")
         self.send_response(code)
+        for name, value in (headers or {}).items():
+            self.send_header(name, value)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
@@ -3113,17 +3312,10 @@ class Handler(BaseHTTPRequestHandler):
             from github_actions_monitor.security import webhook
             try:
                 size = int(self.headers.get("Content-Length") or 0)
-                body = self.rfile.read(size) if 0 <= size <= webhook.MAX_BODY else b"x" * (webhook.MAX_BODY + 1)
-                code, answer, repo = webhook.handle(LIVE_CONFIG or DEFAULTS, body, self.headers, STATE["data"]["repos"] if STATE.get("data") else [], self.webhook_sender())      # bad signatures and good ones are counted apart, in every mode
-                webhook_count(code, bool(answer.get("duplicate")) if isinstance(answer, dict) else False)
-                record = webhook.parse_event(self.headers.get("X-GitHub-Event"), body) if (code == 200 and repo) else None
-                if record and webhook.live_settings(LIVE_CONFIG or DEFAULTS)["record_events"]:
-                    apply_live_event(record, LIVE_CONFIG or DEFAULTS)
-                if repo:
-                    webhook.note_accepted()      # the coverage indicator counts it
-                    __import__("github_actions_monitor.data_pipeline.savings", fromlist=["_"]).note_webhook(repo=repo)      # the webhook is alive: savings.webhook_first may stretch the slow turn of the cold repositories
-                    webhook_settle(repo)
-                self.json_reply(answer, code)
+                limit = webhook.guard_settings(LIVE_CONFIG or DEFAULTS)["max_body"]
+                body = self.rfile.read(size) if 0 <= size <= limit else b""      # a body over the limit is not read: the declared size is what answers 413
+                code, answer = webhook_receive(LIVE_CONFIG or DEFAULTS, body, self.headers, self.webhook_sender(), size if not 0 <= size <= limit else None)
+                self.json_reply(answer, code, **({"headers": {"Retry-After": "30"}} if code == 503 else {}))
             except Exception:
                 self.json_reply({"ok": False}, 400)
             return
@@ -3528,6 +3720,11 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 self.send_response(404)
                 self.end_headers()
+        elif path == "/readyz":   # ready to serve? (the loop, the data folder, the queue of the receiver): local only, no GitHub call; 200 or 503, with each check
+            if not self.guard():
+                return
+            payload, code = readiness()
+            self.json_reply(payload, code)
         elif path == "/api/health":   # for a service manager or a container check: local only, no GitHub call
             if not self.guard():
                 return
@@ -3991,6 +4188,7 @@ def health_payload(deep=False):
         snap = WATCH.snapshot(limit_seconds=watchdog_limit(LIVE_CONFIG or DEFAULTS))
         out["cycle"] = {"phase": snap["phase"], "running_seconds": snap["running_seconds"], "seconds_since_ok": snap["seconds_since_ok"], "stuck": verdict == "stuck", "dead": verdict == "dead", "blocked": verdict == "blocked", "abandoned_calls": cycle_watch.abandoned()}
         out["credential"] = credential.snapshot()
+        out["heartbeat"] = heartbeat.HEARTBEAT.snapshot(LIVE_CONFIG or DEFAULTS)
         if deep and verdict:
             out["ok"] = False
     return out
@@ -4000,6 +4198,25 @@ def health_reply(deep=False):
     """(payload, HTTP status): 200, or 503 when `deep` and the monitor is not fit to serve. The lite edition has no deep check and always answers 200."""
     payload = health_payload(deep and not LITE["on"])
     return payload, 200 if payload["ok"] else 503
+
+
+def readiness():
+    """(payload, HTTP status) of /readyz. /api/health says the process lives; this says whether it is fit to take work now: `loaded` (a first read is in), `cycle` (the refresh loop neither stuck nor gone,
+    complete edition), `store` (the data folder can be written) and `queue` (the events of the receiver wait in a queue that is not full). Each check is named, so an orchestrator or a person sees which one holds
+    it back. It never calls GitHub."""
+    from github_actions_monitor.security import webhook
+    health = health_payload(deep=not LITE["on"])
+    queue = webhook.INBOX.snapshot(LIVE_CONFIG or DEFAULTS)
+    try:
+        folder = paths.folder("data")
+        while not folder.exists() and folder != folder.parent:      # the folder is made when something is first written: the nearest one that exists must take a file
+            folder = folder.parent
+        store = os.access(str(folder), os.W_OK)
+    except OSError:
+        store = False
+    checks = {"loaded": bool(health["loaded"]), "cycle": bool(health["ok"]), "store": store, "queue": queue["depth"] < queue["max"]}
+    ready = all(checks.values())
+    return {"ready": ready, "checks": checks, "queue": {"depth": queue["depth"], "max": queue["max"]}, "version": TOOL_VERSION}, 200 if ready else 503
 
 
 CONFIRM_DELAY = 20      # seconds before the next cycle while a refusal of the login waits to be confirmed
@@ -4435,6 +4652,13 @@ def handle_advanced_post(path, request, who=""):
         return {"ok": entry is not None, "mute": entry}
     if path.startswith("/api/updates/"):      # the Updates menu (admin, from this computer, with the one-use token); Complete only
         return handle_updates_post(path, request, who, config)
+    if path == "/api/webhook/redeliver":      # ask GitHub now to send again the deliveries that never arrived (admin, from this computer); it WRITES to GitHub, so it only touches the hooks you named
+        answer = webhook_redeliver_now(config)
+        _audit_plain("webhook_redeliver", who, "", {"asked": answer["asked"]}, "ok")
+        return {"ok": True, **answer}
+    if path == "/api/credential/probe":      # does the login (and the GitHub App) work: a few small reads, nothing written; at most one real check every 10 seconds (a GET never starts gh, so this is a POST)
+        from github_actions_monitor.integrations import credential_probe
+        return credential_probe.probe(config, lambda args: run_gh(args[1:]), toolconfig.github_owner(config))
     if path == "/api/ops/backup":      # make a copy now (admin, from this computer); Complete only. The answer says whether it worked, never a path of the person or a secret
         if LITE["on"]:
             return {"ok": False, "status": "lite"}
@@ -4788,6 +5012,10 @@ def main():
     from github_actions_monitor.security import webhook as _webhook
     _webhook.load_memory(paths.folder("data") / "webhook_deliveries.json") if _webhook.guard_settings(config)["persist_deliveries"] else None      # the memory of deliveries survives a restart
     _webhook.freeze_secret_name(config)      # the shared secret of the webhook is read from the environment once, under the name this process started with, and no program the monitor starts inherits it
+    redeliver.RECOVERY.load(paths.folder("data") / "webhook_redelivered.json")      # what was already asked for again is not asked again after a restart
+    redeliver.RECOVERY.next_run = time.time() + 60      # the first look a minute after the start
+    outside_start(config)      # the cheap outside reads (events of the account, state of GitHub, heartbeat): each one only when switched on
+    webhook_worker_start(config)      # the events of the receiver are applied by a thread of their own (a bounded queue, see webhook_receive)
     from github_actions_monitor.chatops import inbound as _chat
     envguard.hold(*_chat.env_names(config))      # the proofs of the chat (the signing secret of Slack, the public key of Discord) leave the environment here too
     if LITE["on"]:
@@ -4961,6 +5189,7 @@ def main():
             print(i18n.t("mon.local_door_failed", port=listen["local_port"]), flush=True)
     server.tls_context = tls_ctx      # each connection is wrapped in its own thread (get_request), so a client that never finishes the handshake cannot stall the others
     url = f"{'https' if tls_ctx is not None else 'http'}://{localguard.display_host(server.server_address[0])}:{server.server_address[1]}/"      # from the address the server really listens on
+    wsforward_start(config, server.server_address[1])      # `gh webhook forward` hands the deliveries to the receiver of this very process (webhook.transport = websocket)
     try:      # the feed for AIs is off by default since 1.7.6: an installation that was already using it keeps it, and is told
         from github_actions_monitor.integrations import ai_alerts
         if ai_alerts.settings(config)["legacy"]:

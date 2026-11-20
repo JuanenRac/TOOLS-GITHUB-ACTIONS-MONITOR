@@ -26,12 +26,16 @@ Optional and **off by default**. The events of the feed (a new red, a stuck buil
 ## The adapter contract
 
 - To reach a service that is not in the list, run a small receiver on this computer and point `http_local` at it. It receives a POST with `Content-Type: application/json` and this body: `{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`.
-- `kind` is one of `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `ai_alert`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `score_dropped`, `security_new`, `security_fixed`, `delivery_new`, `delivery_fixed`, `alerts_digest`, `silence_review`. Fields are only ever added. Answer any 2xx; anything else is counted as a failure.
+- `kind` is one of `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `ai_alert`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `github_incident`, `github_incident_over`, `score_dropped`, `security_new`, `security_fixed`, `delivery_new`, `delivery_fixed`, `alerts_digest`, `silence_review`. Fields are only ever added. Answer any 2xx; anything else is counted as a failure.
 - `mqtt` publishes the same JSON as the payload of a QoS 0 message on `notify.channels.mqtt.topic`.
 
 ## Apprise (optional, off by default)
 
 The channel `apprise` hands the message to the `apprise` command (install it yourself, for example `pip install apprise`) so that any of the services it knows can be reached. The addresses hold the secrets of those services, so they are in an environment variable whose NAME is `notify.channels.apprise.urls_env` (separated by spaces or commas, at most ten); they are written to a private temporary file for the instant of the call, never to the arguments of the command, and the command gets an environment without the keys of the monitor. **Apprise opens its own connections: the guard of the monitor against private addresses does not apply to it**, so what it reaches is up to the addresses you give it; that is why the channel has its own switch, off by default, and is marked as a security setting. If the command is missing the channel says `not_installed`; a failure is counted like any other and never stops the monitor.
+
+## The state of GitHub (off by default)
+
+With `github_status.enabled` on, the monitor reads the public summary of githubstatus.com every `github_status.interval_seconds` (300 by default): one small JSON, no account, and nothing about you is sent. The bar at the bottom of the page shows the state of GitHub. When GitHub Actions has an incident the monitor tells it once (the kinds `github_incident` and `github_incident_over`, which are notified only when you add them to `notify.events`), and with `github_status.mark_reds` (on) a red that appears during the incident says "possible cause: an incident of GitHub" in its text and in the field `possible_cause`. The red itself is never hidden.
 
 ## The limit per hour counts messages
 
@@ -42,7 +46,7 @@ The channel `apprise` hands the message to the `apprise` command (install it you
 Off by default (`notify.users.enabled`). With the team mode on, every user chooses in `GET/POST /api/auth/me/notify` the channels (`ntfy`, `teams`, `email`), the sentinels (`ci`, `collab`), the lowest level (`info`, `warn`, `bad`), whether they want the events of the system, and whether the messages come at once or gathered in a digest (`hourly`, `daily`). The role decides what a user may be told: a viewer, the events of CI of the accounts they may see; a maintainer also what waits for a person to act (a build waiting for its signature, a release that is due); an administrator also the events of the system. An event of an account never reaches someone who may not see that account. `notify.users.max_per_hour` caps the messages one user gets.
 
 - `ntfy`: the topic of each user on the server `notify.channels.ntfy.server` (https, or one on this computer); an access token is optional.
-- `teams`: the address of the incoming webhook of a Teams channel (hosts of Microsoft only).
+- `teams`: the address of the incoming webhook of a Teams channel (hosts of Microsoft only). The message always goes with its `Content-Length` (never in pieces, which Teams refuses) and, for a Workflows address (`logic.azure.com`, `powerplatform.com`), as an Adaptive Card.
 - `email`: the address of the user, sent through a relay on this computer that needs no login (`notify.channels.email`).
 
 The address of the Teams webhook and the token of ntfy are kept encrypted by the system (DPAPI, Keychain, Secret Service, or a private file) and never come back in an answer, a log or the configuration; deleting a user deletes them. `MONITOR_SECRET_BACKEND=file` forces the private file. Every channel is off until the administrator turns it on. The digest gathers the alerts the user has not seen (up to `notify.digest.max_items`); `POST /api/auth/me/notify/seen` marks them as seen and they are not sent; `POST /api/auth/me/notify/test` sends a test message to the channels of the user. An administrator reads everybody's preferences (never a secret) in `GET /api/auth/notify`.
