@@ -38,6 +38,7 @@ EXEMPT = {
     "/api/settings": "recorded by its own line (settings_change) with the names of the settings",
     "/api/alerts/mute": "recorded by its own line (alert_mute) once the silence exists",
     "/api/alerts/unmute": "recorded by its own line (alert_unmute) once the silence is gone",
+    "/api/credential/probe": "tests the login and the GitHub App with a few small reads and says what they can do; changes nothing and writes nothing on GitHub",
     "/api/hot-only": "a display switch of this process; it changes no stored state",
     "/api/webhook": "a delivery from GitHub signed with the shared secret, not an action of a person",
     "/api/chatops/slack": "a signed command of the chat; every command that reaches the monitor leaves its own line (chatops_command) with the ids of the chat, and it only reads",
