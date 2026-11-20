@@ -132,6 +132,11 @@ def alert_id(repo, workflow, account=None):
     return hashlib.sha1((f"{account}|{repo}|{workflow}" if account else f"{repo}|{workflow}").encode()).hexdigest()[:12]
 
 
+def row_id(row):
+    """The id of the alert a row becomes. A row of a panel carries `ident_repo` and `ident_workflow`, built only from stable keys (panel id, section key, repository): the repo and the title shown to a person are translated, so an id made from them would change with the language and the alert would be closed and opened again at every change of language."""
+    return alert_id(row.get("ident_repo", row["repo"]), row.get("ident_workflow", row["workflow"]))
+
+
 def _clean_url(value):
     """An address (or a short word) of an alert, cleaned like any text; None stays None."""
     return None if value is None else redact(str(value), 400)
@@ -140,7 +145,7 @@ def _clean_url(value):
 def build_panel_alert(row):
     """An alert that comes from a panel of the Sentinel tab (A1..A13, the second sentinel): "real" when the panel says act ("bad"), "watch" when it says keep an eye on it ("warn")."""
     real = row.get("level") == "bad"
-    return {"id": alert_id(row["repo"], row["workflow"]), "account_id": account_id(), "severity": "high" if real else "warn", "class": "real" if real else "watch", "repo": redact(row["repo"], 200), "workflow": redact(row["workflow"], 200),
+    return {"id": row_id(row), "account_id": account_id(), "severity": "high" if real else "warn", "class": "real" if real else "watch", "repo": redact(row["repo"], 200), "workflow": redact(row["workflow"], 200),
             "conclusion": "panel", "since": None, "streak": 1, "url": _clean_url(row.get("url")), "cause": redact(str(row.get("detail") or ""), 240), "panel": redact(row.get("panel"), 40),
             "action": f"open the panel {str(row.get('panel')).upper()} of the Sentinel tab and deal with it"}
 
@@ -152,7 +157,7 @@ def build_alert(row, patterns, text=""):
     streak = int(row.get("streak") or 1)
     severity = "info" if kind == "transient" and streak < 3 else ("high" if streak >= 3 or kind == "real" and row.get("conclusion") == "failure" else "warn")
     action = "re-run once and look again" if kind == "transient" and streak < 3 else "open the log of the run, find the first failing step and fix it"
-    return {"id": alert_id(row["repo"], row["workflow"]), "account_id": account_id(), "severity": severity, "class": kind, "repo": redact(row["repo"], 200), "workflow": redact(row["workflow"], 200),
+    return {"id": row_id(row), "account_id": account_id(), "severity": severity, "class": kind, "repo": redact(row["repo"], 200), "workflow": redact(row["workflow"], 200),
             "conclusion": _clean_url(row.get("conclusion")), "since": row.get("since"), "streak": streak, "url": _clean_url(row.get("url")), "cause": redact(cause, 200), "action": action}
 
 
@@ -362,7 +367,7 @@ def update(config, red_rows, now=None, texts=None, opener=None, runner=None, own
     if budget:
         known = _read(folder / STATE, {})
         for row in red_rows:
-            ident = alert_id(row["repo"], row["workflow"])
+            ident = row_id(row)
             old = known.get(ident)
             diagnosis = old.get("diagnosis") if old and old.get("state") != "resolved" else None
             run = run_id_of(row.get("url"))
@@ -394,7 +399,7 @@ def _update_locked(cfg, folder, account, red_rows, now, texts, fresh, panels, se
     state = _read(folder / STATE, {})
     seen, opened, resolved = set(), [], []
     for row in red_rows:
-        ident = alert_id(row["repo"], row["workflow"])
+        ident = row_id(row)
         old = state.get(ident)
         diagnosis = fresh.get(ident) or (old.get("diagnosis") if old and old.get("state") != "resolved" else None)
         text = ((texts or {}).get(ident, "") + "\n" + "\n".join((diagnosis or {}).get("lines") or [])).strip()

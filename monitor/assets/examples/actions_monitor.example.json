@@ -1196,6 +1196,7 @@
     "alerts_sort": "server",
     "now_sort": "ecosystem",
     "orientation": "auto",
+    "remember_folds": true,
     "rotate_seconds": 0,
     "screen1_orientation": "auto",
     "screen1_tabs": "",

@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.5",
  "previous": "2.1.3",
- "digest": "ad1f9fe1fafae481d4e71b09f2672bf9dace402f5e99f08f210542726444d104",
+ "digest": "1cef3054fcd460abe8da07186ed268e68e6a454d9a657d5b39fa532665dd22be",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -485,6 +485,11 @@
     "key": "ui.about_org_logo",
     "kind": "bool",
     "default": false
+   },
+   {
+    "key": "ui.remember_folds",
+    "kind": "bool",
+    "default": true
    },
    {
     "key": "updates.systemd_helper",

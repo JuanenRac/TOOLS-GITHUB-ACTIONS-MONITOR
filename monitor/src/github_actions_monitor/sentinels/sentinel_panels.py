@@ -23,8 +23,9 @@ def _text(value, limit=200):
     return text[:limit]
 
 
-def _row(repo, text, url="", level="warn", key=""):
-    return {"repo": _text(repo, 120), "text": _text(text), "url": _text(url, 300), "level": level, "key": _text(key or text, 160)}
+def _row(repo, text, url="", level="warn", key="", ref=None):
+    """`ref` is the stable identity of the repo column when that column is a translated title (the A10 sections): the id of the alert is made from it and never from the words shown."""
+    return {"repo": _text(repo, 120), "text": _text(text), "url": _text(url, 300), "level": level, "key": _text(key or text, 160), "ref": _text(repo if ref is None else ref, 120)}
 
 
 def _gh(owner, repo, tail=""):
@@ -98,7 +99,7 @@ def _a10(s, owner, t):
     for sec in sections:
         if sec.get("level") in ("bad", "warn") and sec.get("count"):
             cells = [" ".join(str(c) for c in r if c not in (None, "")) if isinstance(r, (list, tuple)) else str(r) for r in (sec.get("rows") or [])[:5]]
-            rows.append(_row(sec.get("title") or sec.get("key"), f"{sec.get('count')}: " + " | ".join(cells), "", sec.get("level"), f"a10:{sec.get('key')}"))
+            rows.append(_row(sec.get("title") or sec.get("key"), f"{sec.get('count')}: " + " | ".join(cells), "", sec.get("level"), f"a10:{sec.get('key')}", ref=sec.get("key")))
     return rows, t("ui.sc_a10", n=len([x for x in sections if x.get("count") and x.get("level") in ("bad", "warn")]), m=len(sections))
 
 
@@ -174,7 +175,8 @@ def alert_rows(panel_list):
         for row in panel["rows"]:
             level = "bad" if (panel["level"] == "bad" and row["level"] == "bad") else "warn"
             out.append({"repo": row["repo"] or panel["id"].upper(), "workflow": f"{panel['title']} [{row['key']}]", "conclusion": "panel", "streak": 1, "since": None,
-                        "url": row["url"], "panel": panel["id"], "level": level, "detail": row["text"], "title": panel["title"]})
+                        "url": row["url"], "panel": panel["id"], "level": level, "detail": row["text"], "title": panel["title"],
+                        "ident_repo": row.get("ref") or row["repo"] or panel["id"].upper(), "ident_workflow": f"{panel['id']}[{row['key']}]"})      # the id never depends on the language of the title
     return out
 
 

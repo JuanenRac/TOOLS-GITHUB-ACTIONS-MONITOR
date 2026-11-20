@@ -648,6 +648,16 @@ const I18N=/*I18N_DATA*/null||{default:"en",langs:["en"],names:{en:"English"},ht
 /* several accounts (complete edition only): the supervisor embeds the list; one account or the lite edition leaves it null and nothing below changes */
 const ACC=/*ACCOUNTS_DATA*/null;
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+/* fold memory: what a person folds or unfolds stays so after every repaint (the lists are drawn again at each refresh) and, with ui.remember_folds on (the default), in this browser too. Every folding block carries a stable id in data-fold; only a click on a summary records a choice, so what the page opens by itself is never taken for one. */
+const FOLD=(()=>{const KEY="am-fold",mem=new Map();let loaded=false;
+  const on=()=>((typeof I18N==="object"&&I18N&&I18N.screens)||{}).remember_folds!==false;
+  const load=()=>{if(loaded)return;loaded=true;if(!on())return;try{const l=JSON.parse(store.get(KEY)||"[]");if(Array.isArray(l))l.forEach(r=>{if(Array.isArray(r)&&typeof r[0]==="string"&&!mem.has(r[0]))mem.set(r[0],r[1]===1)})}catch(e){}};
+  const save=()=>{if(on())store.set(KEY,JSON.stringify([...mem].slice(-400).map(([k,v])=>[k,v?1:0])))};
+  const o={get(id,def){load();id=String(id).slice(0,160);return mem.has(id)?mem.get(id):!!def},set(id,open){load();id=String(id).slice(0,160);mem.delete(id);mem.set(id,!!open);save()},
+    any(prefix){load();for(const k of mem.keys())if(k.startsWith(prefix))return true;return false},
+    attr(id,def){return ' data-fold="'+esc(String(id).slice(0,160))+'"'+(o.get(id,def)?" open":"")}};
+  document.addEventListener("click",e=>{const s=e.target&&e.target.closest&&e.target.closest("summary"),d=s&&s.parentElement;if(!d||d.tagName!=="DETAILS"||!d.dataset.fold)return;setTimeout(()=>o.set(d.dataset.fold,d.open),0)},true);
+  return o})();
 const QS=new URLSearchParams(location.search);   // deep link: ?tab=sent&repo=NAME&lang=de (the old #tab still works)
 var LANG=[QS.get("lang"),store.get("am-lang"),I18N.default,"en"].find(x=>x&&I18N.langs.includes(x));
 function T(k,v){const c=I18N.catalogues[LANG]||{},e=I18N.catalogues.en||{};let s=c[k]!==undefined?c[k]:e[k];if(s===undefined)return k;if(v)s=s.replace(/\{(\w+)\}/g,(m,n)=>v[n]!==undefined?v[n]:m);return s}
@@ -1003,11 +1013,11 @@ const redRepos=()=>LITE?(DATA?[...new Set(DATA.failing.map(r=>r.repo))]:[]):(SEN
 const signWait=()=>{const w={};((SENT&&SENT.a5&&SENT.a5.pending_sign)||[]).forEach(q=>{w[q.repo]=Math.max(w[q.repo]||0,q.hours||0)});return w};
 const signRepos=()=>{if(!SENT||!SENT.a5)return[];const w=signWait();return [...new Set([...(SENT.a5.sign_queue||[]).map(q=>q.repo),...(SENT.a5.pending_sign||[]).map(q=>q.repo)])].sort((a,b)=>(w[b]||0)-(w[a]||0)||(a<b?-1:1))};
 function focusSignQueue(){
-  OPEN.add("a5");store.set("am-s-open",[...OPEN].join(","));
+  FOLD.set("a5",true);
   showTab("sci");KPI_TAB="sci";renderSent();
   const q=$("sign-queue");if(q){q.scrollIntoView({block:"nearest"});q.focus&&q.focus({preventScroll:true})}
 }
-function onKpiRed(){setList(T("ui.l_red"),redRepos());if(redRepos().length){OPEN.add("a2");showTab("sci");KPI_TAB="sci";renderSent();const d=document.querySelector('details[data-k="a2"]');if(d)d.scrollIntoView({block:"nearest"})}}
+function onKpiRed(){setList(T("ui.l_red"),redRepos());if(redRepos().length){FOLD.set("a2",true);showTab("sci");KPI_TAB="sci";renderSent();const d=document.querySelector('details[data-k="a2"]');if(d)d.scrollIntoView({block:"nearest"})}}
 function onKpiSign(){const same=FILTER.list&&FILTER.listLabel===T("ui.l_unsigned");setList(T("ui.l_unsigned"),signRepos());if(!same&&signRepos().length)focusSignQueue()}
 [["kp-red",onKpiRed],["kp-sign",onKpiSign]].forEach(([id,fn])=>{$(id).addEventListener("click",fn);$(id).addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fn()}})});
 function readyChips(s){      // one chip per group of the readiness: a number, or the words "not enough data" with the reason in the tooltip
@@ -1050,7 +1060,7 @@ function runCounts(d){
 }
 const runFig=(shown,total)=>shown!==total?T("ui.k_of",{n:shown,total:total}):total;
 function runTitle(id,titleKey,shown,total){const el=$(id),t=el&&el.closest(".tile");if(t)t.title=T(titleKey)+(shown!==total?" - "+T("ui.k_filtered_title",{n:shown,total:total}):"")}
-function showingLine(c){const g=c.ghost?'<div class="mut" id="now-ghost" role="status">'+esc(T("ui.n_ghost",{n:c.ghost,days:c.ghostDays}))+"</div>":"";const lst=(id,key,n,days,rows)=>n?'<details class="mut" id="'+id+'"><summary>'+esc(T(key,{n:n,days:days}))+"</summary>"+rows.map(r=>'<div>'+esc(r.repo+" / "+r.workflow+" - "+String(r.since||"").slice(0,10))+"</div>").join("")+"</details>":"";const ag=lst("now-aged","ui.n_aged",c.aged,c.agedDays,c.agedRows)+lst("now-quiet","ui.n_quiet",c.quiet,c.quietDays,c.quietRows);const w=ag+(c.awaiting?'<div class="mut" id="now-awaiting" role="status">'+esc(T("ui.n_awaiting",{n:c.awaiting}))+"</div>":"")+g;const ia=!c.aged&&!c.quiet&&c.inactive?'<div class="mut" id="now-inactive" role="status">'+esc(T("ui.n_inactive",{n:c.inactive}))+"</div>":"";const dm=c.dormant||c.inactiveRepos?'<div class="mut" id="now-dormant" role="status">'+esc(T("ui.n_dormant",{n:c.dormant,m:c.inactiveRepos}))+"</div>":"";return w+ia+dm+(c.filters||c.differs?'<div class="mut" id="now-count" role="status">'+esc(T(c.filters?"ui.n_showing_filters":"ui.n_showing",{n:c.shown,total:c.total}))+"</div>":"")}
+function showingLine(c){const g=c.ghost?'<div class="mut" id="now-ghost" role="status">'+esc(T("ui.n_ghost",{n:c.ghost,days:c.ghostDays}))+"</div>":"";const lst=(id,key,n,days,rows)=>n?'<details class="mut" id="'+id+'"'+FOLD.attr(id,false)+'><summary>'+esc(T(key,{n:n,days:days}))+"</summary>"+rows.map(r=>'<div>'+esc(r.repo+" / "+r.workflow+" - "+String(r.since||"").slice(0,10))+"</div>").join("")+"</details>":"";const ag=lst("now-aged","ui.n_aged",c.aged,c.agedDays,c.agedRows)+lst("now-quiet","ui.n_quiet",c.quiet,c.quietDays,c.quietRows);const w=ag+(c.awaiting?'<div class="mut" id="now-awaiting" role="status">'+esc(T("ui.n_awaiting",{n:c.awaiting}))+"</div>":"")+g;const ia=!c.aged&&!c.quiet&&c.inactive?'<div class="mut" id="now-inactive" role="status">'+esc(T("ui.n_inactive",{n:c.inactive}))+"</div>":"";const dm=c.dormant||c.inactiveRepos?'<div class="mut" id="now-dormant" role="status">'+esc(T("ui.n_dormant",{n:c.dormant,m:c.inactiveRepos}))+"</div>":"";return w+ia+dm+(c.filters||c.differs?'<div class="mut" id="now-count" role="status">'+esc(T(c.filters?"ui.n_showing_filters":"ui.n_showing",{n:c.shown,total:c.total}))+"</div>":"")}
 function render(d){
   try{soundWatch(d)}catch(e){}
   DATA=d;const day=Date.now()-864e5;
@@ -1082,8 +1092,8 @@ function alerts(d){
     a.push(`<div class="alert warn" data-alert-repo="${esc(r.repo)}"><b>${esc(T("ui.a_unresolved"))}</b> · ${esc(text)} — <a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">${esc(T("ui.link_run"))}</a> <span class="mut">${esc(T("ui.a_no_issue"))}</span></div>`)});
   {const qb=d.quota_block;if(qb&&qb.blocked)a.push(`<div class="alert warn" id="quota-alert"><b>${esc(T("ui.a_quota_out",{time:qb.until?clock(qb.until,{hour:"2-digit",minute:"2-digit"}):"?",n:qb.unread||0}))}</b></div>`)}
   {const errs=Object.entries(d.errors||{});const by=new Map();errs.forEach(([k,v])=>{const m=String(v);if(!by.has(m))by.set(m,[]);by.get(m).push(k)});      // the same error in many repositories is ONE alert with the names behind a fold
-    const group=(m,ks)=>ks.length>1?`<details class="alert warn"><summary><b>${esc(T("ui.a_nodata_group",{n:ks.length}))}</b>: ${esc(m)}</summary><div class="mut">${esc(ks.join(", "))}</div></details>`:`<div class="alert warn"><b>${esc(T("ui.a_nodata",{key:ks[0]}))}</b>: ${esc(m)}</div>`;
-    if(by.size>3)a.push(`<details class="alert warn"><summary><b>${esc(T("ui.a_nodata_many",{n:errs.length}))}</b>: ${esc(errs[0][1])}</summary>${[...by.entries()].map(([m,ks])=>`<div class="mut">${esc(ks.length>1?T("ui.a_nodata_group",{n:ks.length}):ks[0])}: ${esc(m)}</div>`).join("")}</details>`);else by.forEach((ks,m)=>a.push(group(m,ks)))}
+    const group=(m,ks)=>ks.length>1?`<details class="alert warn"${FOLD.attr("al-grp:"+m,false)}><summary><b>${esc(T("ui.a_nodata_group",{n:ks.length}))}</b>: ${esc(m)}</summary><div class="mut">${esc(ks.join(", "))}</div></details>`:`<div class="alert warn"><b>${esc(T("ui.a_nodata",{key:ks[0]}))}</b>: ${esc(m)}</div>`;
+    if(by.size>3)a.push(`<details class="alert warn"${FOLD.attr("al-many",false)}><summary><b>${esc(T("ui.a_nodata_many",{n:errs.length}))}</b>: ${esc(errs[0][1])}</summary>${[...by.entries()].map(([m,ks])=>`<div class="mut">${esc(ks.length>1?T("ui.a_nodata_group",{n:ks.length}):ks[0])}: ${esc(m)}</div>`).join("")}</details>`);else by.forEach((ks,m)=>a.push(group(m,ks)))}
   OPENALERTS=a.length;try{renderBar()}catch(e){}      // the bar at the foot says the same as this list: it is never "no notices" while alerts are open
   $("alerts").innerHTML=a.length?a.join(""):`<span style="color:var(--ok)">${esc(T("ui.a_none"))}</span>`;
 }
@@ -1490,7 +1500,7 @@ function trCursor(svg,i){
   root.addEventListener("pointerleave",()=>{const tip=root.querySelector(".trtip"),cur=root.querySelector(".trcur");if(tip)tip.hidden=true;if(cur)cur.setAttribute("visibility","hidden")},true)
 })();
 function section(k,title,level,count,body){
-  return `<details data-k="${k}" ${OPEN.has(k)?"open":""}><summary><span class="sem ${level}" style="cursor:inherit"><i></i>${esc(LVN(level))}</span> ${esc(title)} <span class="mut" style="font-weight:400">${esc(count)}</span></summary><div class="dbody">${body}</div></details>`;
+  return `<details data-k="${k}"${FOLD.attr(k,OPEN.has(k))}><summary><span class="sem ${level}" style="cursor:inherit"><i></i>${esc(LVN(level))}</span> ${esc(title)} <span class="mut" style="font-weight:400">${esc(count)}</span></summary><div class="dbody">${body}</div></details>`;
 }
 function renderSent(){const keep=[$("s-details"),$("s-parte")].map(e=>e.scrollTop);try{renderSent0()}finally{[$("s-details"),$("s-parte")].forEach((e,i)=>e.scrollTop=keep[i])}}
 const ok_=t=>`<span style="color:var(--ok)">${esc(t)}</span>`,mut_=t=>`<span class="mut">${esc(t)}</span>`;
@@ -1622,7 +1632,7 @@ const SPDEF={scol:["collab.issue.critical","collab.issue.external","collab.issue
  sdel:["release.unreleased_pending","release.tag_without_release","release.release_without_notes","release.version_mismatch","release.ecosystem_drift","release.assets_missing"],
  ssup:["actions.supply.unpinned","actions.supply.mutable_ref","actions.supply.permissions_wide","actions.supply.permissions_missing","actions.supply.pr_target_checkout"]};
 const SPKEY={"security.secret":"secret","security.code_scanning":"code_scanning","security.dependabot":"dependabot","security.branch_unprotected":"branch","security.codeowners_missing":"codeowners","security.workflow_write":"workflow","security.runs_deleted":"runs_deleted"};
-const SPF={},SPR={},SPTOUCH=new Set();
+const SPF={},SPR={};
 function spf(scope){return SPF[scope]||(SPF[scope]={level:"",repo:""})}
 function spLevel(a){return a.level==="critical"||a.level==="error"?"bad":(a.level==="warning"?"warn":"ok")}
 function spWorst(list){return list.some(a=>spLevel(a)==="bad")?"bad":(list.some(a=>spLevel(a)==="warn")?"warn":"ok")}
@@ -1640,16 +1650,16 @@ function spPanel(scope,c,offKey,noneKey){
     h+=`<div class="spbar"><label>${esc(T("ui.sp_f_repo"))} <input type="search" data-spscope="${scope}" data-spk="repo" value="${esc(fl.repo)}" aria-label="${esc(T("ui.sp_f_repo"))}"></label> <label>${esc(T("ui.sp_f_level"))} <select data-spscope="${scope}" data-spk="level" aria-label="${esc(T("ui.sp_f_level"))}">${[["","ui.sp_all"],["bad","ui.sp_l_bad"],["warn","ui.sp_l_warn"],["ok","ui.sp_l_info"]].map(([v,k])=>`<option value="${v}"${fl.level===v?" selected":""}>${esc(T(k))}</option>`).join("")}</select></label></div>`
       +`<table class="sptable">${thk(["ui.sp_th_signal","ui.sp_th_level","ui.sp_th_n","ui.sp_th_repos"])}<tbody>${byCode}</tbody></table>`
   }
-  const anyOpen=codes.some(x=>OPEN.has(scope+":"+x)),firstAlert=codes.find(x=>all.some(a=>a.code===x));
+  const anyOpen=codes.some(x=>FOLD.get(scope+":"+x,OPEN.has(scope+":"+x))),firstAlert=codes.find(x=>all.some(a=>a.code===x));
   h+=codes.map(code=>{
     const k=SPKEY[code],un=k&&st.unavailable&&st.unavailable[k],rf=String(SPR[code]||"").toLowerCase();
     const mine=all.filter(a=>a.code===code),rows=mine.filter(a=>!rf||String(a.repo).toLowerCase().includes(rf));
     const level=un?"unknown":(mine.length?spWorst(mine):(healthy?"ok":"unknown"));
-    const dk=scope+":"+code,isOpen=OPEN.has(dk)||(!anyOpen&&!SPTOUCH.has(scope)&&code===firstAlert);
+    const dk=scope+":"+code,isOpen=FOLD.get(dk,OPEN.has(dk)||(!anyOpen&&!FOLD.any(scope+":")&&code===firstAlert));
     const body=`<div class="mut sphelp">${esc(T("ui.sph."+code))}</div>`
       +`<div class="spbar"><label>${esc(T("ui.sp_f_repo"))} <input type="search" data-sprepo="${esc(code)}" value="${esc(SPR[code]||"")}" aria-label="${esc(T("ui.sp_f_repo"))}: ${esc(T("ui.sp."+code))}"></label></div>`
       +(un?`<div class="mut">${esc(T("ui.sp_unavailable",{why:String(un)}))}</div>`:(rows.length?spRows(rows,scope==="scol"):(mine.length?mut_(T("ui.sp_nomatch")):ok_(T("ui.sp_none")))));
-    return `<details data-k="${esc(dk)}" data-sp="1" ${isOpen?"open":""}><summary><span class="sem ${level}" style="cursor:inherit"><i></i>${esc(LVN(level))}</span> ${esc(T("ui.sp."+code))} <span class="mut" style="font-weight:400">${esc(T("ui.sp_count",{n:mine.length}))}</span></summary><div class="dbody">${body}</div></details>`
+    return `<details data-k="${esc(dk)}" data-sp="1"${FOLD.attr(dk,isOpen)}><summary><span class="sem ${level}" style="cursor:inherit"><i></i>${esc(LVN(level))}</span> ${esc(T("ui.sp."+code))} <span class="mut" style="font-weight:400">${esc(T("ui.sp_count",{n:mine.length}))}</span></summary><div class="dbody">${body}</div></details>`
   }).join("");
   const unl=Object.keys(st.unavailable||{});
   const cut=scope==="scol"?(st.truncated_count?" \u00b7 "+esc(T("ui.collab_cut",{n:st.truncated_count,p:st.pages||1})):"")+(st.search_cut||[]).map(x=>" \u00b7 "+esc(T("ui.collab_cut_search",{seen:x.seen,total:x.total}))).join(""):"";
@@ -1661,7 +1671,6 @@ function spPanel(scope,c,offKey,noneKey){
 document.addEventListener("change",e=>{const t=e.target;if(!t||!t.dataset)return;
   if(t.dataset.sprepo!==undefined){SPR[t.dataset.sprepo]=String(t.value||"").trim();renderSentOthers();return}
   if(t.dataset.spscope!==undefined){spf(t.dataset.spscope)[t.dataset.spk]=t.dataset.spk==="repo"?String(t.value||"").trim().toLowerCase():t.value;renderSentOthers()}});
-["t-scol","t-ssec","t-sdel","t-ssup"].forEach(id=>{const el=$(id);if(el)el.addEventListener("toggle",e=>{const d=e.target;if(d.tagName==="DETAILS"&&d.dataset.sp){SPTOUCH.add(d.dataset.k.split(":")[0]);d.open?OPEN.add(d.dataset.k):OPEN.delete(d.dataset.k);store.set("am-s-open",[...OPEN].join(","))}},true)});
 const fmtS=x=>x==null?"–":(x>=3600?(x/3600).toFixed(1)+" h":(x>=120?Math.round(x/60)+" min":Math.round(x)+" s"));
 function analyticsBox(){
   const A=ANA;if(!A||A.enabled===false)return mut_(T("ui.a12_off"));
@@ -1694,14 +1703,13 @@ function lintBox(s){
   return lintCov(L)+(all.length?chips+(rows.length?`<table>${thk(["ui.th_repo","ui.th_file","ui.th_line","ui.th_rule","ui.th_severity"])}<tbody>${rows.slice(0,80).map(r=>`<tr><td>${esc(r.repo)}</td><td>${esc(r.file)}</td><td>${r.line}</td><td>${esc(T("lint.rule."+r.rule))}${r.detail&&r.detail!=="missing"?" · "+esc(r.detail):""}${r.rule==="archived_action"&&r.kind?" · "+esc(T("lint.kind."+r.kind)):""}</td><td><span class="chip ${r.severity==="bad"?"bad":(r.severity==="warn"?"warn":"")}">${esc(T("ui.lvl_"+r.severity))}</span></td></tr>`).join("")}</tbody></table>`:mut_(T("ui.help_none"))):ok_(T("ui.a13_none")));
 }
 async function copyText(btn){try{await navigator.clipboard.writeText(btn.dataset.copy);btn.textContent=T("ui.copied")}catch(err){btn.textContent=T("ui.copy_manual")}}
-$("t-sent").addEventListener("toggle",e=>{const d=e.target;if(d.tagName==="DETAILS"){d.open?OPEN.add(d.dataset.k):OPEN.delete(d.dataset.k);store.set("am-s-open",[...OPEN].join(","))}},true);
 $("t-sent").addEventListener("click",async e=>{
   const rl=e.target.closest("[data-repo-open]");if(rl){openPanel(rl.dataset.repoOpen);return}
   const cp=e.target.closest("[data-copy]");if(cp){await copyText(cp);return}
   const g=e.target.closest("[data-goto]");if(g){
     if(g.dataset.goto==="a2"&&SENT)setList(T("ui.l_red"),[...new Set(SENT.a2.red.map(r=>r.repo))]);
     else if(g.dataset.goto==="a5"&&SENT)setList(T("ui.l_pending"),[...new Set((SENT.a5.pending_sign||[]).map(r=>r.repo))]);
-    const gk=g.dataset.goto;showTab(gk==="collab"?"scol":(gk==="security"?"ssec":(gk==="delivery"?"sdel":(gk==="supply"?"ssup":"sci"))));const d=document.querySelector(`details[data-k="${gk}"]`);if(d){d.open=true;d.scrollIntoView({block:"nearest"})}return}
+    const gk=g.dataset.goto;showTab(gk==="collab"?"scol":(gk==="security"?"ssec":(gk==="delivery"?"sdel":(gk==="supply"?"ssup":"sci"))));const d=document.querySelector(`details[data-k="${gk}"]`);if(d){d.open=true;FOLD.set(gk,true);d.scrollIntoView({block:"nearest"})}return}
   const run=e.target.closest("button[data-ai-run]");if(run){
     if(!await askConfirm(T("ui.ai_prop_confirm",{cmd:run.dataset.cmd}),{danger:true}))return;
     try{const r=await fetch("/api/ai/actions/confirm",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:run.dataset.aiRun,command:run.dataset.cmd})});const j=await r.json();
@@ -2788,7 +2796,7 @@ function updVers(){
   const box=$("upd-vers");if(!box)return;const v=UPD.vers,s=UPD.st;if(!v){box.innerHTML="";return}
   box.innerHTML=v.map(r=>{
     const rel=r.relation==="current"?T("ui.upd_current"):(r.relation==="newer"?T("ui.upd_newer"):T("ui.upd_older")),can=s&&s.can_apply&&r.relation!=="current"&&r.has_zip&&!(s.progress&&s.progress.running);
-    return `<details data-k="upd-${esc(r.version)}"><summary><span class="chip ${r.relation==="newer"?"warn":(r.relation==="current"?"ok":"")}">${esc(rel)}</span> <b>${esc(r.version)}</b>${r.prerelease?` <span class="chip">${esc(T("ui.upd_prerelease"))}</span>`:""} <span class="mut" style="font-weight:400">${esc(String(r.published||"").slice(0,10))}</span>${can?` <button type="button" data-upd="${esc(r.version)}">${esc(T("ui.upd_to",{v:r.version}))}</button>`:""}</summary><div class="dbody"><div class="mut">${esc(T("ui.upd_notes"))}${r.has_sums&&r.has_zip?" · "+esc(T("ui.upd_zip_sums")):""}</div><pre style="white-space:pre-wrap;margin:6px 0">${esc(r.notes||"")}</pre></div></details>`}).join("")
+    return `<details data-k="upd-${esc(r.version)}"${FOLD.attr("upd-"+r.version,false)}><summary><span class="chip ${r.relation==="newer"?"warn":(r.relation==="current"?"ok":"")}">${esc(rel)}</span> <b>${esc(r.version)}</b>${r.prerelease?` <span class="chip">${esc(T("ui.upd_prerelease"))}</span>`:""} <span class="mut" style="font-weight:400">${esc(String(r.published||"").slice(0,10))}</span>${can?` <button type="button" data-upd="${esc(r.version)}">${esc(T("ui.upd_to",{v:r.version}))}</button>`:""}</summary><div class="dbody"><div class="mut">${esc(T("ui.upd_notes"))}${r.has_sums&&r.has_zip?" · "+esc(T("ui.upd_zip_sums")):""}</div><pre style="white-space:pre-wrap;margin:6px 0">${esc(r.notes||"")}</pre></div></details>`}).join("")
 }
 function updProg(){
   const box=$("upd-prog");if(!box)return;const p=(UPD.st&&UPD.st.progress&&UPD.st.progress.kind&&UPD.st.progress)||UPD.last;if(!p||!p.kind){box.innerHTML="";return}
