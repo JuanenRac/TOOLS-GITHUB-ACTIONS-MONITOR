@@ -21,7 +21,11 @@ What only shows with long real use: the migration from 1.8 and 1.9, the growth o
 
 The monitor's own workflows keep to what the hygiene sentinel will ask of others: actions pinned to a commit, the least permissions and a time limit on every job.
 
-## Done in 1.8.2 to 2.1.3
+## Done in 1.8.2 to 2.1.5
+
+### 2.1.5 - A complete configuration, records and caches that cannot be fooled, an assistant of fixed questions, a read API with a contract and a richer daily trend
+
+The example file carries every setting and the Settings tab shows a default for all of them; the configuration file is checked when the monitor starts. Every record the monitor keeps carries the version of its schema and, after a restart, the page shows the last picture at once. The sentinels have a time ceiling, the audit of accesses is written under the lock of the operating system, the cache of conditional reads belongs to the credential that read it and a listing that comes back empty is never believed. Optional switches look at the runs that are still going, judge the webhook repository by repository and let a monitor under a systemd user service be updated from the page. The update shows its progress as events and is tested end to end. The assistant gets a guide of its own, fixed read-only questions, an air-gapped mode that can be proved and the origin of the figures of a model; the read API has a complete OpenAPI document, a contract suite and a version header. The Daily trend has more figures, release marks, thresholds and a copy as an image, and each signal of the sentinel panels has its own card.
 
 ### 2.1.3 - Help on every setting, a tab for Yesterday vs today, a harder Updates menu and panels that no longer overlap
 

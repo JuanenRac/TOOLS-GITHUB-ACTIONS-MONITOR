@@ -10,6 +10,9 @@ and is shown as `tool_version` in the sentinel snapshot and by `read_report.py -
 when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
+
+## [2.1.5]
+
 - **The score, the reports, the mirror and the analytics can read every run, not only the newest 600** (`score.source`, `recent600` by default, `ledger` on request): on an account that reads thousands of runs in a cycle the page keeps the newest 600, and the score was made from them. With `ledger` they are made from every run the cycle read, counted once in the ledger, which now also keeps hourly totals (successes and failures per hour) that survive its ceiling of 20000 runs; a window the ceiling could not hold whole says so (`data_quality.truncated`) and gives the totals the hours hold (`data_quality.aggregate`). With the default the snapshot says when the cycle read more than the score saw (`data_quality.cut`, `data_quality.runs_read`, the reason `recent_cut` and a line on the page). The default becomes `ledger` in the next version. A ledger and the snapshots of earlier versions are read as they are. No call to GitHub is added; it is in the guide of the score, the settings help, the guides and the skills.
 - **Every command of the command line takes `--format text|table|plain|json|ndjson`**: `table` fits the columns to the width of the terminal and counts wide Japanese and Chinese characters as two cells, `plain` is one tab-separated line per record for `grep` and `awk`, and `ndjson` is one JSON object per line. `text` is what every command wrote before and stays the default (`cli.default_format` changes it); `--json` is unchanged.
 - **`watch status|alerts` repeats the read of the command** (`--interval`, `--once`, `--no-clear`): it reads the monitor on this computer, never GitHub, keeps a floor under the interval (`cli.watch.min_interval_seconds`, 2 by default), retries a monitor that cannot be reached with a longer pause each time and ends with exit code 0 on Ctrl-C.

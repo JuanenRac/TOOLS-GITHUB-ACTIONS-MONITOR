@@ -16,7 +16,11 @@ Was sich nur im langen echten Einsatz zeigt: die Migration von 1.8 und 1.9, das 
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 2.1.3
+## Erledigt in 1.8.2 bis 2.1.5
+
+### 2.1.5 - Eine vollständige Konfiguration, Aufzeichnungen und Caches, die sich nicht täuschen lassen, ein Assistent mit festen Fragen, eine Lese-API mit Vertrag und ein reichhaltigerer Tagestrend
+
+Die Beispieldatei enthält jede Einstellung und der Reiter Einstellungen zeigt für alle einen Standardwert; die Konfigurationsdatei wird beim Start des Monitors geprüft. Jede Aufzeichnung des Monitors trägt die Version ihres Schemas und nach einem Neustart zeigt die Seite sofort das letzte Bild. Die Wächter haben eine Zeitobergrenze, das Zugriffsprotokoll wird unter der Sperre des Betriebssystems geschrieben, der Cache der bedingten Abfragen gehört dem Zugang, der gelesen hat, und eine leer zurückkommende Liste wird nie geglaubt. Optionale Schalter betrachten die noch laufenden Läufe, beurteilen das Webhook-Repository Repository für Repository und erlauben es, einen Monitor unter einem systemd-Benutzerdienst von der Seite aus zu aktualisieren. Die Aktualisierung zeigt ihren Fortschritt als Ereignisse und wird von Anfang bis Ende getestet. Der Assistent bekommt eine eigene Anleitung, feste Fragen nur zum Lesen, einen nachweisbaren netzlosen Modus und die Herkunft der Zahlen eines Modells; die Lese-API hat ein vollständiges OpenAPI-Dokument, eine Vertragssuite und einen Versions-Header. Der Tagestrend hat mehr Zahlen, Versionsmarken, Schwellen und eine Kopie als Bild, und jedes Signal der Wächter-Felder hat seine eigene Karte.
 
 ### 2.1.3 - Hilfe an jeder Einstellung, ein Reiter für Gestern vs. heute, ein schwerer zu missbrauchendes Menü Aktualisierungen und Panels, die sich nicht mehr überdecken
 

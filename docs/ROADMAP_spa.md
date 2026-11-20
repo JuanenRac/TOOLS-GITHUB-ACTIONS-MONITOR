@@ -16,7 +16,11 @@ Lo que solo aparece con un uso real prolongado: la migración desde la 1.8 y la 
 
 Los workflows del propio monitor cumplen lo que el centinela de higiene pedirá a los demás: acciones fijadas a un commit, los permisos mínimos y un límite de tiempo en cada trabajo.
 
-## Hecho en la 1.8.2 a la 2.1.3
+## Hecho en la 1.8.2 a la 2.1.5
+
+### 2.1.5 - Una configuración completa, registros y cachés que no se dejan engañar, un asistente de preguntas fijas, una API de lectura con contrato y una tendencia diaria más rica
+
+El fichero de ejemplo lleva todos los ajustes y la pestaña Ajustes muestra un valor por defecto en todos; el fichero de configuración se comprueba al arrancar el monitor. Cada registro que guarda el monitor lleva la versión de su esquema y, tras un reinicio, la página muestra enseguida la última imagen. Los centinelas tienen un tope de tiempo, la auditoría de accesos se escribe bajo el candado del sistema operativo, la caché de lecturas condicionales pertenece a la credencial que leyó y un listado que vuelve vacío no se da por bueno. Interruptores opcionales miran las ejecuciones que siguen en marcha, juzgan el repositorio del webhook uno a uno y permiten actualizar desde la página un monitor bajo un servicio de usuario de systemd. La actualización muestra su avance como eventos y se prueba de punta a punta. El asistente tiene una guía propia, preguntas fijas de solo lectura, un modo aislado de la red que se puede demostrar y el origen de las cifras de un modelo; la API de lectura tiene un documento OpenAPI completo, una suite de contrato y una cabecera de versión. La tendencia diaria tiene más cifras, marcas de versión, umbrales y copia como imagen, y cada señal de los paneles de los centinelas tiene su propia tarjeta.
 
 ### 2.1.3 - Ayuda en cada ajuste, una pestaña para Ayer vs hoy, un menú de Actualizaciones más difícil de abusar y paneles que ya no se solapan
 
