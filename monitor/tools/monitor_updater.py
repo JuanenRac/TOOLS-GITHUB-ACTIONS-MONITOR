@@ -534,7 +534,7 @@ def _ask(argv, timeout=15):
     return (done.stdout or "") if getattr(done, "returncode", 1) == 0 else ""
 
 
-def unit_properties(unit, names=("MainPID", "ActiveState", "WorkingDirectory", "FragmentPath", "ExecStart", "ActiveEnterTimestamp")):
+def unit_properties(unit, names=("MainPID", "ActiveState", "LoadState", "WorkingDirectory", "FragmentPath", "ExecStart", "ActiveEnterTimestamp")):
     """{property: value} of a user unit, from `systemctl --user show` (empty when it cannot be read)."""
     if not UNIT_RE.match(str(unit or "")):
         return {}
@@ -554,6 +554,8 @@ def _norm(path):
 def unit_foreign(unit, root, props=None):
     """'' when the unit runs THIS installation (or when that cannot be told), else the folder it belongs to: a unit whose working directory and command do not mention this folder is another checkout's."""
     props = unit_properties(unit) if props is None else props
+    if props.get("LoadState") not in (None, "loaded"):      # a unit systemd does not know is nobody's: nothing to protect
+        return ""
     where = props.get("WorkingDirectory") or ""
     command = props.get("ExecStart") or ""
     here = _norm(root)
@@ -574,13 +576,11 @@ def unit_pid(unit):
 def wait_new_pid(unit, old, timeout=20):
     """Waits until the unit has a process that is not `old` (a restart that kept the old process is not a restart). Returns the new PID, or 0 when none came."""
     deadline = time.time() + timeout
-    while True:
-        pid = unit_pid(unit)
-        if pid and pid != old:
-            return pid
-        if time.time() >= deadline:
-            return 0
+    pid = unit_pid(unit)
+    while not (pid and pid != old) and time.time() < deadline:
         time.sleep(0.5)
+        pid = unit_pid(unit)
+    return pid if pid and pid != old else 0
 
 
 def unit_errors(unit, limit=20):
@@ -1797,7 +1797,8 @@ class Updater:
             foreign = unit_foreign(unit, self.root)
             if foreign:
                 raise RuntimeError(tr("c.systemd_foreign", unit=unit, where=foreign))
-            if unit_properties(unit, ("ActiveState",)).get("ActiveState") not in (None, "active", "activating") and self.detect()["running"].get("lite" if edition == "lite" else "complete", {}).get("open"):
+            state = unit_properties(unit, ("ActiveState", "LoadState"))
+            if state.get("LoadState") == "loaded" and state.get("ActiveState") not in (None, "active", "activating") and self.detect()["running"].get("lite" if edition == "lite" else "complete", {}).get("open"):
                 raise RuntimeError(tr("c.systemd_port", unit=unit, port=port))      # something else answers on the port the unit is about to use
             code, why = systemctl_user("start", unit)
             if code != 0:

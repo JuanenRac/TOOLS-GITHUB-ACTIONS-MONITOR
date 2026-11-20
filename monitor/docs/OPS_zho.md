@@ -99,4 +99,4 @@ systemctl list-timers github-actions-monitor-backup.timer
 
 ## 监视器监视自身的内存和线程
 
-每隔 `selfwatch.interval_seconds`（60）秒，监视器读取自身的常驻内存、线程和处理器使用情况，并在 `/api/health` 中以 `selfwatch`（`state`：`ok` 或 `high`）显示。当内存超过 `selfwatch.rss_warn_mb`（1024）或线程超过 `selfwatch.threads_warn`（400）时，它会在被吞掉失败的计数器中记录一次（`selfwatch.high`，附带数值），尽可能释放，并在恢复正常时记录。可用 `selfwatch.enabled` 关闭。请把 `selfwatch.rss_warn_mb` 设为略低于容器的限制。CI 会在一个处理器、512 MB 的容器中用 120 个工作流的账户运行监视器（`tools/limits_check.py`）。
+每隔 `selfwatch.interval_seconds`（60）秒，监视器读取自身的常驻内存、线程和处理器使用情况，并在 `/api/health` 中以 `selfwatch`（`state`：`ok` 或 `high`）显示。当内存超过 `selfwatch.rss_warn_mb`（1024）或线程超过 `selfwatch.threads_warn`（400）时，它会在被吞掉失败的计数器中记录一次（`high`，附带数值），尽可能释放，并在恢复正常时记录。可用 `selfwatch.enabled` 关闭。请把 `selfwatch.rss_warn_mb` 设为略低于容器的限制。CI 会在一个处理器、512 MB 的容器中用 120 个工作流的账户运行监视器（`tools/limits_check.py`）。

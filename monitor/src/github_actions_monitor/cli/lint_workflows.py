@@ -272,7 +272,7 @@ def jobs_without_timeout(lines):
     return out
 
 
-INPUT_DECL_RE = re.compile(r"^  ([A-Za-z0-9_-]+)\s*:\s*(?:#.*)?$")
+INPUT_DECL_RE = re.compile(r"^  ([A-Za-z0-9_-]+)\s*:\s*(?:#.*)?\Z")
 ENV_READ_RE = re.compile(r"INPUT_([A-Za-z0-9_-]+)")
 MAX_SCRIPTS = 8
 MAX_SCRIPT = 65536

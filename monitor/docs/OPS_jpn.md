@@ -99,4 +99,4 @@ systemctl list-timers github-actions-monitor-backup.timer
 
 ## モニターは自分のメモリとスレッドを監視します
 
-`selfwatch.interval_seconds`（60）ごとにモニターは自身の常駐メモリ、スレッド、プロセッサ使用量を読み取り、`/api/health` の `selfwatch`（`state`：`ok` または `high`）に表示します。メモリが `selfwatch.rss_warn_mb`（1024）を、スレッドが `selfwatch.threads_warn`（400）を超えると、握りつぶした失敗のカウンターに数値付きで一度だけ記録し（`selfwatch.high`）、解放できるものを解放し、通常に戻ったことも記録します。`selfwatch.enabled` でオフにできます。`selfwatch.rss_warn_mb` はコンテナーの上限より少し小さくしてください。CI は 1 プロセッサ・512 MB のコンテナーで 120 ワークフローのアカウントを使ってモニターを動かします（`tools/limits_check.py`）。
+`selfwatch.interval_seconds`（60）ごとにモニターは自身の常駐メモリ、スレッド、プロセッサ使用量を読み取り、`/api/health` の `selfwatch`（`state`：`ok` または `high`）に表示します。メモリが `selfwatch.rss_warn_mb`（1024）を、スレッドが `selfwatch.threads_warn`（400）を超えると、握りつぶした失敗のカウンターに数値付きで一度だけ記録し（`high`）、解放できるものを解放し、通常に戻ったことも記録します。`selfwatch.enabled` でオフにできます。`selfwatch.rss_warn_mb` はコンテナーの上限より少し小さくしてください。CI は 1 プロセッサ・512 MB のコンテナーで 120 ワークフローのアカウントを使ってモニターを動かします（`tools/limits_check.py`）。
