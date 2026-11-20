@@ -47,6 +47,15 @@ La finestra è il numero di giorni di esecuzioni che il punteggio guarda: `score
 
 Ogni account ha il proprio punteggio. Il dettaglio lo scompone per repository (solo le parti di CI, i peggiori per primi). Non esiste un numero unico per l'intera installazione. Solo a titolo informativo, `GET /api/score/global` del supervisore dà la media degli account valutati che chi chiede può vedere, ponderata per i loro repository con un numero e sempre con quanti account ne fanno parte; un account senza numero è elencato e lasciato fuori.
 
+## Quali esecuzioni legge
+
+La pagina elenca le 600 esecuzioni più recenti, ma un account con molti repository può leggerne migliaia in un ciclo. `score.source` sceglie da cosa derivano punteggio, rapporti, specchio e analitica:
+
+- `recent600` (predefinito in questa versione): le 600 esecuzioni più recenti della pagina, come prima. Quando il ciclo ne ha lette di più, l'istantanea lo dice: `data_quality.cut` è vero, `data_quality.runs_read` è il numero letto e `recent_cut` è tra i motivi, e la pagina mostra la riga «Il ciclo ha letto N esecuzioni ma il punteggio ha visto solo le 600 più recenti». Nulla viene nascosto: una cifra che vede solo una parte recente della finestra non è mai presentata come il tutto.
+- `ledger`: tutte le esecuzioni lette dal ciclo, contate una volta nel registro dell'account. Il registro conserva anche totali orari (successi e fallimenti per ora) che sopravvivono al suo tetto di 20000 esecuzioni: quando il tetto ha dovuto scartare esecuzioni della finestra, `data_quality.truncated` è vero e `data_quality.aggregate` indica le esecuzioni e il tasso di successo che quei totali contengono per la finestra.
+
+Il valore predefinito di `score.source` diventerà `ledger` nella versione successiva, con la sua voce nel registro delle migrazioni. Chi lo imposta a mano conserva il suo valore. Un registro scritto prima di questa versione costruisce i totali orari dalle esecuzioni che contiene; le istantanee delle versioni precedenti si leggono così come sono, senza i campi nuovi. Non si aggiunge alcuna chiamata a GitHub.
+
 ## Nella pagina
 
 Una pastiglia nell'intestazione, accanto alle pastiglie di preparazione, mostra il punteggio: il numero, la lettera, una freccia con la variazione rispetto alla finestra precedente e una piccola linea degli ultimi giorni. Il suo colore segue la lettera (A e B verde, C ambra, D ed E rosso). Finché non c'è un numero è neutra e dice perché (calibrazione, dati insufficienti). Una stella dopo la lettera significa che una parte non è ancora conteggiata (oggi, la sicurezza): un numero alto non significa allora che sia tutto a posto. Al passaggio del mouse mostra la copertura, le parti con i loro pesi e il repository più debole. La pastiglia non compare in Lite né con il punteggio spento (`score.enabled`). Durante la calibrazione la pastiglia dice quanto manca di `score.calibrating_hours` (`data_quality.calibrating_hours`), con una barra e il giorno e l'ora in cui comparirà il numero; con dati insufficienti dice quale condizione non è soddisfatta (esecuzioni o copertura), e il suggerimento spiega anche perché una parte non conta (una sentinella spenta, che non ha finito la prima scansione o che ha letto troppo pochi repository).
@@ -65,7 +74,7 @@ Quando il punteggio cala di `score.alert.drop_points` punti (10 per impostazione
 
 ## Le impostazioni
 
-Nella pagina Impostazioni, sotto-scheda Sentinella, blocchi Punteggio dell'account, Pesi del punteggio e Lettere del punteggio: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, da `score.grades.A` a `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` e `score.alert.notify_external` (spento per impostazione predefinita). I limiti buono e cattivo di ogni parte si leggono dal file, sotto `score.limits` (vedi il file di esempio); non si modificano nella pagina.
+Nella pagina Impostazioni, sotto-scheda Sentinella, blocchi Punteggio dell'account, Pesi del punteggio e Lettere del punteggio: `score.enabled`, `score.source`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, da `score.grades.A` a `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` e `score.alert.notify_external` (spento per impostazione predefinita). I limiti buono e cattivo di ogni parte si leggono dal file, sotto `score.limits` (vedi il file di esempio); non si modificano nella pagina.
 
 ## Rispetto al periodo precedente
 

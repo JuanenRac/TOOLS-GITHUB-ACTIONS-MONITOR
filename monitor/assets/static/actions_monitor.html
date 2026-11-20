@@ -1815,6 +1815,7 @@ function scoreWhy(a){
   }else if(a.state==="insufficient_data"){
     (q.reasons||[]).forEach(r=>{if(r==="few_runs")out.push(T("ui.score_why_few_runs",{runs:q.runs||0,min:q.min_runs}));else if(r==="low_coverage")out.push(T("ui.score_why_low_coverage",{coverage:Math.round((q.coverage||0)*100),min:Math.round((q.min_coverage||0)*100)}));else if(r==="no_data")out.push(T("ui.score_why_no_data"))});
   }
+  if(q.cut)out.push(T("ui.score_why_recent_cut",{runs:q.runs_read}));
   (a.missing_detail||[]).forEach(m=>{const part=T("ui.score_p_"+m.part),k="ui.score_miss_"+m.reason;
     out.push(T(k,{part:part,checked:m.checked,scope:m.scope,progress:m.scope?T("ui.score_miss_progress",{checked:m.checked,scope:m.scope}):""}))});
   return out

@@ -47,6 +47,15 @@ La ventana es el número de días de ejecuciones que mira la puntuación: `score
 
 Cada cuenta tiene su propia puntuación. Su detalle la desglosa por repositorio (solo las partes de CI, los peores primero). No hay un número único para toda la instalación. Solo como información, `GET /api/score/global` del supervisor da la media de las cuentas puntuadas que el solicitante puede ver, ponderada por sus repositorios con número y siempre con cuántas cuentas entran; una cuenta sin número se lista y se deja fuera.
 
+## Qué ejecuciones lee
+
+La página lista las 600 ejecuciones más recientes, pero una cuenta con muchos repositorios puede leer miles en un ciclo. `score.source` elige de qué salen la puntuación, los informes, el espejo y la analítica:
+
+- `recent600` (el valor por defecto en esta versión): las 600 ejecuciones más recientes de la página, como antes. Cuando el ciclo leyó más, la instantánea lo dice: `data_quality.cut` es verdadero, `data_quality.runs_read` es el número leído y `recent_cut` está entre los motivos, y la página muestra la línea "El ciclo leyó N ejecuciones pero la puntuación vio solo las 600 más recientes". No se oculta nada: una cifra que ve solo una parte reciente de la ventana nunca se presenta como el total.
+- `ledger`: todas las ejecuciones que leyó el ciclo, contadas una vez en el libro de la cuenta. El libro guarda además totales por hora (éxitos y fallos por hora) que sobreviven a su tope de 20000 ejecuciones: cuando el tope tuvo que descartar ejecuciones de la ventana, `data_quality.truncated` es verdadero y `data_quality.aggregate` da las ejecuciones y la tasa de éxito que esos totales guardan para la ventana.
+
+El valor por defecto de `score.source` pasará a `ledger` en la versión siguiente, con su entrada en el registro de migraciones. Quien lo fije a mano conserva su valor. Un libro escrito antes de esta versión construye sus totales por hora con las ejecuciones que tiene; las instantáneas de versiones anteriores se leen tal cual, sin los campos nuevos. No se añade ninguna llamada a GitHub.
+
 ## En la página
 
 Una ficha en la cabecera, junto a las fichas de preparación, muestra la puntuación: el número, la letra, una flecha con el cambio respecto a la ventana anterior y una pequeña línea con los últimos días. Su color sigue a la letra (A y B verde, C ámbar, D y E rojo). Mientras no hay número es neutra y dice por qué (calibrando, datos insuficientes). Una estrella tras la letra significa que una parte todavía no cuenta (hoy, la seguridad): un número alto no es entonces un todo en orden. Al pasar el ratón muestra la cobertura, las partes con sus pesos y el repositorio más débil. La ficha no se muestra en Lite ni con la puntuación apagada (`score.enabled`). Mientras calibra, la ficha dice cuánto falta de `score.calibrating_hours` (`data_quality.calibrating_hours`), con una barra y el día y la hora en que aparecerá el número; con datos insuficientes dice qué condición falla (ejecuciones o cobertura), y el texto emergente dice también por qué una parte no cuenta (un centinela apagado, que no ha terminado su primer barrido o que ha leído muy pocos repositorios).
@@ -65,7 +74,7 @@ Cuando la puntuación baja `score.alert.drop_points` puntos (10 por defecto) o m
 
 ## Los ajustes
 
-En la página de Ajustes, subpestaña Centinela, bloques Puntuación de la cuenta, Pesos de la puntuación y Letras de la puntuación: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, de `score.grades.A` a `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` y `score.alert.notify_external` (apagado por defecto). Los límites bueno y malo de cada parte se leen del fichero, en `score.limits` (véase el fichero de ejemplo); no se editan en la página.
+En la página de Ajustes, subpestaña Centinela, bloques Puntuación de la cuenta, Pesos de la puntuación y Letras de la puntuación: `score.enabled`, `score.source`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, de `score.grades.A` a `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` y `score.alert.notify_external` (apagado por defecto). Los límites bueno y malo de cada parte se leen del fichero, en `score.limits` (véase el fichero de ejemplo); no se editan en la página.
 
 ## Frente al periodo anterior
 

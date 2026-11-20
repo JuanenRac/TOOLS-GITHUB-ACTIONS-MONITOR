@@ -47,6 +47,15 @@ La fenêtre est le nombre de jours d'exécutions que regarde le score : `score.w
 
 Chaque compte a son propre score. Son détail le ventile par dépôt (les parties de CI seulement, les pires d'abord). Il n'y a pas de nombre unique pour toute l'installation. À titre d'information seulement, `GET /api/score/global` du superviseur donne la moyenne des comptes notés que le demandeur peut voir, pondérée par leurs dépôts ayant un nombre, toujours avec le nombre de comptes pris en compte ; un compte sans nombre est listé et écarté.
 
+## Quelles exécutions sont lues
+
+La page liste les 600 exécutions les plus récentes, mais un compte aux nombreux dépôts peut en lire des milliers en un cycle. `score.source` choisit d'où viennent le score, les rapports, le miroir et l'analytique :
+
+- `recent600` (défaut dans cette version) : les 600 exécutions les plus récentes de la page, comme avant. Quand le cycle en a lu davantage, l'instantané le dit : `data_quality.cut` est vrai, `data_quality.runs_read` est le nombre lu et `recent_cut` figure parmi les raisons, et la page affiche la ligne « Le cycle a lu N exécutions mais le score n'a vu que les 600 plus récentes ». Rien n'est caché : un chiffre qui ne voit qu'une partie récente de la fenêtre n'est jamais présenté comme le tout.
+- `ledger` : toutes les exécutions lues par le cycle, comptées une fois dans le registre du compte. Le registre garde aussi des totaux horaires (succès et échecs par heure) qui survivent à son plafond de 20000 exécutions : quand le plafond a dû écarter des exécutions de la fenêtre, `data_quality.truncated` est vrai et `data_quality.aggregate` donne les exécutions et le taux de réussite que ces totaux détiennent pour la fenêtre.
+
+Le défaut de `score.source` deviendra `ledger` dans la version suivante, avec son entrée dans le registre de migrations. Qui le fixe à la main garde sa valeur. Un registre écrit avant cette version construit ses totaux horaires à partir des exécutions qu'il détient ; les instantanés des versions antérieures sont lus tels quels, sans les nouveaux champs. Aucun appel à GitHub n'est ajouté.
+
 ## Sur la page
 
 Une pastille dans l'en-tête, à côté des pastilles de préparation, montre le score : le nombre, la lettre, une flèche avec l'évolution par rapport à la fenêtre précédente et une petite courbe des derniers jours. Sa couleur suit la lettre (A et B vert, C ambre, D et E rouge). Tant qu'il n'y a pas de nombre, elle est neutre et dit pourquoi (calibrage, données insuffisantes). Une étoile après la lettre signifie qu'une partie n'est pas encore comptée (aujourd'hui, la sécurité) : un nombre élevé ne veut alors pas dire que tout va bien. Au survol, elle montre la couverture, les parties avec leurs poids et le dépôt le plus faible. La pastille n'apparaît pas dans Lite ni quand le score est désactivé (`score.enabled`). Pendant le calibrage, la pastille indique ce qu'il reste de `score.calibrating_hours` (`data_quality.calibrating_hours`), avec une barre et le jour et l'heure où le chiffre apparaîtra ; avec trop peu de données, elle indique la condition qui échoue (exécutions ou couverture), et l'infobulle dit aussi pourquoi une partie n'est pas comptée (une sentinelle éteinte, qui n'a pas fini son premier balayage ou qui a lu trop peu de dépôts).
@@ -65,7 +74,7 @@ Quand le score baisse de `score.alert.drop_points` points (10 par défaut) ou pl
 
 ## Les réglages
 
-Dans la page des réglages, sous-onglet Sentinelle, blocs Score du compte, Poids du score et Lettres du score : `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, de `score.grades.A` à `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` et `score.alert.notify_external` (désactivé par défaut). Les limites bonne et mauvaise de chaque partie sont lues dans le fichier, sous `score.limits` (voir le fichier d'exemple) ; elles ne s'éditent pas dans la page.
+Dans la page des réglages, sous-onglet Sentinelle, blocs Score du compte, Poids du score et Lettres du score : `score.enabled`, `score.source`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, de `score.grades.A` à `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` et `score.alert.notify_external` (désactivé par défaut). Les limites bonne et mauvaise de chaque partie sont lues dans le fichier, sous `score.limits` (voir le fichier d'exemple) ; elles ne s'éditent pas dans la page.
 
 ## Par rapport à la période précédente
 

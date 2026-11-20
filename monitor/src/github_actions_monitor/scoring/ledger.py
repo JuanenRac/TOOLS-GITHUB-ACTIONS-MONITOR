@@ -4,7 +4,8 @@
 latest runs of each repository, and writes the snapshot of the account once an hour.
 
   ledger     the document `score_ledger` of the account: {"first_seen", "last_tick", "runs": {run id: [started, conclusion, seconds, repo, workflow]},
-             "collab": {alert id: [opened, closed or None]}}. Only the finished runs that count (a success or a failure) are kept, only as long as two windows need them, and never more than
+             "hours": {hour (epoch hours): [successes, failures]}, "collab": {alert id: [opened, closed or None]}}. The hourly counts are added once for every run the first time it is seen
+             and survive the ceiling of the runs, so a window the ledger could not hold whole still has its totals (`data_quality.aggregate`). Only the finished runs that count (a success or a failure) are kept, only as long as two windows need them, and never more than
              MAX_RUNS; the collaboration alerts are followed from the moment they appear until they are gone (that is when they count as resolved).
   snapshot   {"schema", "at", "window_days", the answer of the engine, "repos": [...]} saved under the hour it was made, one per account and hour.
 
@@ -24,10 +25,12 @@ MAX_RUNS = 20000
 MAX_COLLAB = 5000
 MAX_REPOS = 200
 SCHEMA = 1
+RECENT = 600                # the runs the page lists, and what the score saw before it could read the ledger of every run (score.source "recent600")
+SOURCES = ("recent600", "ledger")
 
 
 def empty_ledger(now):
-    return {"first_seen": now, "last_tick": 0, "runs": {}, "collab": {}, "drop_open": False}
+    return {"first_seen": now, "last_tick": 0, "runs": {}, "hours": {}, "collab": {}, "drop_open": False}
 
 
 def clean_ledger(data, now):
@@ -48,7 +51,34 @@ def clean_ledger(data, now):
     for key, row in (data.get("collab") or {}).items() if isinstance(data.get("collab"), dict) else []:
         if isinstance(row, list) and len(row) == 2 and isinstance(row[0], (int, float)):
             ledger["collab"][str(key)] = row
+    if isinstance(data.get("hours"), dict):
+        for key, row in data["hours"].items():
+            if str(key).isdigit() and isinstance(row, list) and len(row) == 2 and all(isinstance(n, int) and not isinstance(n, bool) and n >= 0 for n in row):
+                ledger["hours"][str(key)] = row
+    else:      # a ledger from before the hourly counts: they start from the runs it holds, the most that is known
+        for row in ledger["runs"].values():
+            count_hour(ledger, row[0], row[1])
     return ledger
+
+
+def hour_of(started):
+    return str(int(started // 3600))
+
+
+def count_hour(ledger, started, conclusion):
+    """One more finished run in the hourly counts: [successes, failures] of the hour it started in."""
+    row = ledger.setdefault("hours", {}).setdefault(hour_of(started), [0, 0])
+    row[0 if conclusion == "success" else 1] += 1
+
+
+def hours_between(ledger, start, end):
+    """(successes, failures) the hourly counts hold for the hours that start inside [start, end]."""
+    first, last = int(start // 3600) + 1, int(end // 3600)
+    ok = bad = 0
+    for key, row in (ledger.get("hours") or {}).items():
+        if first <= int(key) <= last:
+            ok, bad = ok + row[0], bad + row[1]
+    return ok, bad
 
 
 def run_key(run):
@@ -80,7 +110,11 @@ def update_ledger(ledger, runs, collab_alerts, now, keep_days, collab_known=True
         if started is None:
             continue
         seconds = run.get("seconds") if isinstance(run.get("seconds"), (int, float)) and not isinstance(run.get("seconds"), bool) else None
-        ledger["runs"].setdefault(run_key(run), [started, run["conclusion"], seconds, str(run.get("repo") or "")[:100], str(run.get("name") or "")[:100]])
+        key = run_key(run)
+        if key not in ledger["runs"]:
+            ledger["runs"][key] = [started, run["conclusion"], seconds, str(run.get("repo") or "")[:100], str(run.get("name") or "")[:100]]
+            if started >= now - keep_days * collector.DAY and started > (ledger.get("truncated_at") or 0.0):      # a run older than what the ledger keeps, or than what it dropped, was counted already or never will be
+                count_hour(ledger, started, run["conclusion"])
     open_now = set()
     for alert in (collab_alerts or []) if collab_known else []:
         if not isinstance(alert, dict) or not alert.get("id"):
@@ -98,6 +132,7 @@ def update_ledger(ledger, runs, collab_alerts, now, keep_days, collab_known=True
     pin_horizon = now - pin_days * collector.DAY
     ledger["runs"] = {k: v for k, v in ledger["runs"].items() if v[0] >= horizon or (k in pinned and v[0] >= pin_horizon)}      # the last failure of a workflow nobody fixed stays while it counts as red
     ledger["collab"] = {k: v for k, v in ledger["collab"].items() if v[1] is None or v[1] >= horizon}
+    ledger["hours"] = {k: v for k, v in (ledger.get("hours") or {}).items() if int(k) * 3600 + 3600 > horizon}
     if len(ledger["runs"]) > MAX_RUNS:
         newest = sorted(ledger["runs"].items(), key=lambda kv: kv[1][0], reverse=True)[:MAX_RUNS]
         ledger["runs"] = dict(newest)
@@ -140,7 +175,7 @@ def activity_counts(activity):
     return {key: int(counts.get(key) or 0) for key in ("active", "dormant", "inactive", "unknown")}
 
 
-def make_snapshot(ledger, cfg, now, account=None, security=None, activity=None):
+def make_snapshot(ledger, cfg, now, account=None, security=None, activity=None, source="recent600", seen=None):
     """The snapshot of the account for the window that ends at `now`. `security` is {"penalty", "repos"} from the Security sentinel, or None while it is off or has seen too little."""
     runs, collab = ledger_runs(ledger), ledger_collab(ledger)
     watched_hours = max(0.0, (now - ledger["first_seen"]) / 3600.0)
@@ -149,6 +184,15 @@ def make_snapshot(ledger, cfg, now, account=None, security=None, activity=None):
     if isinstance(cut, (int, float)) and cut > now - cfg["window_days"] * collector.DAY:      # the ledger dropped runs that belong to this window: the figures see only part of it, and it is said
         answer["data_quality"]["truncated"] = True
         answer["data_quality"]["reasons"] = [*answer["data_quality"]["reasons"], "truncated"]
+    quality = answer["data_quality"]
+    quality["source"] = source if source in SOURCES else "recent600"
+    if isinstance(seen, int) and not isinstance(seen, bool) and quality["source"] == "recent600" and seen > RECENT:      # the cycle read more runs than the page lists: this score saw only the newest ones
+        quality["cut"], quality["runs_read"] = True, seen
+        quality["reasons"] = [*quality["reasons"], "recent_cut"]
+    if "truncated" in quality:
+        ok, bad = hours_between(ledger, now - cfg["window_days"] * collector.DAY, now)
+        if ok + bad:
+            quality["aggregate"] = {"runs": ok + bad, "success_rate": round(ok / (ok + bad), 4)}
     snapshot = {"schema": SCHEMA, "at": now, "account": account, "window_days": cfg["window_days"], **answer, "repos": repo_rows(runs, now, cfg)}
     counts = activity_counts(activity)
     if counts is not None:
@@ -167,7 +211,7 @@ def hour_key(now):
     return datetime.fromtimestamp(now, timezone.utc).strftime("%Y-%m-%dT%H")
 
 
-def tick(storage, account_id, config, runs, collab_alerts, now=None, force=False, collab_known=True, security=None, activity=None, keep_days_min=0):
+def tick(storage, account_id, config, runs, collab_alerts, now=None, force=False, collab_known=True, security=None, activity=None, keep_days_min=0, seen=None):
     """One pass: updates the ledger, writes the snapshot of the hour and returns it; None when the score is off or the pass is not due. Needs the storage of the account."""
     now = time.time() if now is None else now
     cfg = engine.settings(config)
@@ -184,7 +228,7 @@ def tick(storage, account_id, config, runs, collab_alerts, now=None, force=False
     keep_days = min(180, max(2 * cfg["window_days"] + 1, keep_days_min))      # the comparison (compare/) asks to keep two of its windows when it is on
     update_ledger(ledger, runs, collab_alerts, now, keep_days, collab_known)
     ledger["last_tick"] = now
-    snapshot = make_snapshot(ledger, cfg, now, account_id, security, activity)
+    snapshot = make_snapshot(ledger, cfg, now, account_id, security, activity, cfg["source"], seen)
     snapshot["drop"] = drop.detect(snapshot, cfg)
     fresh = bool(snapshot["drop"]) and not ledger.get("drop_open")      # the moment the drop appears: the only time it goes out through the notification channels
     ledger["drop_open"] = bool(snapshot["drop"])

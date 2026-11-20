@@ -490,6 +490,7 @@ _f(_T_READY, "pins", "sentinel.readiness.pins.max_depth", "int", (1, 12))
 _f(_T_READY, "pins", "sentinel.readiness.pins.sources", "sources")
 # --- Score of the account (Complete only). The limits of every part (score.limits.*) are read from the file and shown in the guide, not edited here.
 _f(_T_SENT, "score", "score.enabled", "bool", restart=False)
+_f(_T_SENT, "score", "score.source", "enum", ("recent600", "ledger"), restart=False)
 _f(_T_SENT, "score", "score.window_days", "int", (1, 90), restart=False)
 _f(_T_SENT, "score", "score.calibrating_hours", "int", (0, 720), restart=False)
 _f(_T_SENT, "score", "score.min_runs", "int", (1, 100000), restart=False, unit="")

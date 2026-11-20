@@ -488,6 +488,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `score.grades.D` | `-` | sentinel | Least score for D |
 | `score.min_coverage` | `-` | sentinel | Least coverage for a score |
 | `score.min_runs` | `-` | sentinel | Least finished runs |
+| `score.source` | `-` | sentinel | Runs the score reads |
 | `score.trend_flat` | `-` | sentinel | Flat trend below |
 | `score.weights.collaboration` | `-` | sentinel | Weight: collaboration |
 | `score.weights.recovery` | `-` | sentinel | Weight: recovery |

@@ -973,6 +973,7 @@
   },
   "score": {
     "enabled": true,
+    "source": "recent600",
     "window_days": 7,
     "calibrating_hours": 24,
     "min_runs": 20,
