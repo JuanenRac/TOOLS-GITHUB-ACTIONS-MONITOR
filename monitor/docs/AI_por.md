@@ -20,7 +20,7 @@ Opcional e **desligado por predefinição**. Um modelo de linguagem pode resumir
 
 ## Os ícones de IA da barra
 
-A barra no canto superior direito mostra dois ícones: o chip é a IA integrada no monitor e as ondas são uma ferramenta de IA externa que lê o monitor. Um distintivo indica o estado sem depender da cor: uma marca de verificação significa ativa, uma barra oblíqua (com o desenho tracejado) inativa e um triângulo um erro (a IA integrada está configurada, mas não responde). Passe o rato para ver o estado exato; clique no ícone, ou prima Enter ou Espaço quando tem o foco, para abrir a secção de IA das definições.
+A barra no canto superior direito mostra dois ícones: o chip é a IA integrada no monitor e as ondas são uma ferramenta de IA externa que lê o monitor. Um distintivo indica o estado sem depender da cor: uma marca de verificação significa ativa, uma barra oblíqua (com o desenho tracejado) inativa e um triângulo um erro (a IA integrada está configurada, mas não responde). Passe o rato para ver o estado exato; clique no ícone, ou prima Enter ou Espaço quando tem o foco, para abrir o seu próprio grupo na secção de IA das definições (o chip leva ao fornecedor e ao modelo, as ondas ao feed lido pelas ferramentas de IA externas; o grupo desloca-se para a vista, pisca e o seu primeiro controlo recebe o foco).
 
 ## O que pode ver
 

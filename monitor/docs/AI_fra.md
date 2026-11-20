@@ -20,7 +20,7 @@ Optionnel et **désactivé par défaut**. Un modèle de langage peut résumer le
 
 ## Les icônes d'IA de la barre
 
-La barre en haut à droite affiche deux icônes : la puce est l'IA intégrée au moniteur et les ondes sont un outil d'IA externe qui lit le moniteur. Un badge dit l'état sans dépendre de la couleur : une coche signifie active, une barre oblique (avec un dessin en pointillés) inactive et un triangle une erreur (l'IA intégrée est configurée mais ne répond pas). Survolez pour voir l'état exact ; cliquez sur l'icône, ou appuyez sur Entrée ou Espace quand elle a le focus, pour ouvrir la section IA des réglages.
+La barre en haut à droite affiche deux icônes : la puce est l'IA intégrée au moniteur et les ondes sont un outil d'IA externe qui lit le moniteur. Un badge dit l'état sans dépendre de la couleur : une coche signifie active, une barre oblique (avec un dessin en pointillés) inactive et un triangle une erreur (l'IA intégrée est configurée mais ne répond pas). Survolez pour voir l'état exact ; cliquez sur l'icône, ou appuyez sur Entrée ou Espace quand elle a le focus, pour ouvrir son propre groupe dans la section IA des réglages (la puce mène au fournisseur et au modèle, les ondes au flux lu par les outils d'IA externes ; le groupe défile dans la vue, clignote et son premier contrôle reçoit le focus).
 
 ## Ce qu'elle peut voir
 

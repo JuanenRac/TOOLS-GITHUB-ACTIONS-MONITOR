@@ -20,7 +20,7 @@ Facoltativo e **spento per impostazione predefinita**. Un modello linguistico pu
 
 ## Le icone IA della barra
 
-La barra in alto a destra mostra due icone: il chip è l'IA integrata nel monitor e le onde sono uno strumento di IA esterno che legge il monitor. Un badge indica lo stato senza dipendere dal colore: una spunta significa attiva, una barra obliqua (con il disegno tratteggiato) inattiva e un triangolo un errore (l'IA integrata è configurata ma non risponde). Passa il puntatore per lo stato esatto; fai clic sull'icona, o premi Invio o Spazio quando ha il focus, per aprire la sezione IA delle impostazioni.
+La barra in alto a destra mostra due icone: il chip è l'IA integrata nel monitor e le onde sono uno strumento di IA esterno che legge il monitor. Un badge indica lo stato senza dipendere dal colore: una spunta significa attiva, una barra obliqua (con il disegno tratteggiato) inattiva e un triangolo un errore (l'IA integrata è configurata ma non risponde). Passa il puntatore per lo stato esatto; fai clic sull'icona, o premi Invio o Spazio quando ha il focus, per aprire il proprio gruppo nella sezione IA delle impostazioni (il chip porta a provider e modello, le onde al feed letto dagli strumenti di IA esterni; il gruppo viene portato in vista, evidenziato e il suo primo controllo riceve il focus).
 
 ## Cosa può vedere
 

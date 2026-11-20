@@ -318,6 +318,7 @@ th.sortable{cursor:pointer;user-select:none;white-space:nowrap}th.sortable:hover
 .sb-bar .sb-item{display:inline-flex;align-items:center;padding:2px 10px;border:1px dashed var(--line2);border-radius:999px;color:var(--mut);white-space:nowrap;line-height:1.5}.sb-bar .sb-item:empty{display:none}.sb-bar .sb-item.sb-on{color:var(--text);border-style:solid}
 .sb-bar .ai-ind{padding:0;display:inline-grid;place-items:center;color:var(--mut);flex:none}.sb-bar .ai-ind .ico{width:22px;height:22px;stroke-width:1.6}.sb-bar .ai-ind[data-state=on]{color:var(--text)}.sb-bar .ai-ind[data-state=err]{color:var(--bad)}
 .sb-bar .ai-ind:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.cfg-group.cfg-hit{outline:2px solid var(--acc);outline-offset:-2px}
 .about-logos{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px 24px;margin:0 0 14px}.about-logos figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;max-width:100%}
 .about-logos .logo{width:clamp(56px,14vw,96px);height:auto;aspect-ratio:1/1}.about-logos img{display:block;width:auto;height:auto;max-width:min(100%,clamp(96px,30vw,240px));max-height:clamp(48px,12vw,96px);object-fit:contain}
 .about-logos .mut{font-size:12px;text-align:center;overflow-wrap:anywhere}
@@ -2928,10 +2929,15 @@ function aiIcon(kind,state){
 function aiPaint(id,kind,name,state,detail){
   const e=$(id);if(!e)return;const st=T(state==="on"?"ui.bar_on":state==="err"?"ui.bar_ai_err":"ui.bar_off");
   if(e.dataset.drawn!==kind+state){e.innerHTML=aiIcon(kind,state);e.dataset.drawn=kind+state}
-  e.dataset.state=state;e.setAttribute("aria-label",name+": "+st);e.title=name+": "+st+". "+detail+" "+T("ui.bar_ai_go");e.classList.toggle("sb-on",state==="on");
+  e.dataset.state=state;e.setAttribute("aria-label",name+": "+st);e.title=name+": "+st+". "+detail+" "+T("ui.bar_ai_go_"+kind);e.classList.toggle("sb-on",state==="on");
 }
-function aiGo(kind){CFG.tab="ai";store.set("am-cfg-tab","ai");showTab("cfg");if(CFG.groups.length)cfgShowTab("ai");
-  setTimeout(()=>{const f=document.querySelector('#cfp-ai [data-key="'+(kind==="int"?"ai.provider":"ai_alerts.enabled")+'"]');if(f){f.scrollIntoView({block:"center"});const i=f.querySelector("input,select");if(i)i.focus()}},60)}
+/* each icon opens its own group of the AI tab: the built-in AI goes to the provider and model, the external AI tools go to the feed they read; the group is scrolled to the top of the view, flashed and its first control focused */
+function aiTarget(kind){return kind==="int"?"ai.provider":"ai_alerts.enabled"}
+function aiGo(kind){CFG.tab="ai";store.set("am-cfg-tab","ai");showTab("cfg");
+  const s=$("cfg-search");if(s&&s.value){s.value="";if(typeof cfgFilter==="function")cfgFilter()}
+  if(CFG.groups.length)cfgShowTab("ai");
+  setTimeout(()=>{const f=document.querySelector('#cfp-ai [data-key="'+aiTarget(kind)+'"]');if(!f)return;const box=f.closest(".cfg-group")||f;
+    box.scrollIntoView({block:"start"});box.classList.add("cfg-hit");setTimeout(()=>box.classList.remove("cfg-hit"),1800);const i=f.querySelector("input,select");if(i)i.focus({preventScroll:true})},60)}
 ["int","ext"].forEach(k=>{const b=$("bar-ai-"+k);if(b)b.addEventListener("click",()=>aiGo(k))});
 function agoText(s){s=Math.max(0,Math.round(s||0));return s>=3600?Math.floor(s/3600)+" h":s>=60?Math.floor(s/60)+" min":s+" s"}
 function renderClock(){const e=$("sb-clock");if(!e)return;const now=new Date(),part=(o)=>{try{return now.toLocaleString(LOC(),{timeZone:TZ,...o})}catch(x){return now.toLocaleString(LOC(),o)}};

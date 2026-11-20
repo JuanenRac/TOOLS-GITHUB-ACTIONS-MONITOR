@@ -20,7 +20,7 @@ import _testenv  # noqa: F401,E402
 
 PAGE = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
 LANGS = ("en", "es", "de", "fr", "it", "ja", "zh", "pt")
-KEYS = ("ui.bar_on", "ui.bar_off", "ui.bar_ai_err", "ui.bar_ai_go", "ui.bar_ai_int", "ui.bar_ai_ext", "ui.bar_ai_int_t", "ui.bar_ai_int_err_t", "ui.bar_ai_ext_t")
+KEYS = ("ui.bar_on", "ui.bar_off", "ui.bar_ai_err", "ui.bar_ai_go_int", "ui.bar_ai_go_ext", "ui.bar_ai_int", "ui.bar_ai_ext", "ui.bar_ai_int_t", "ui.bar_ai_int_err_t", "ui.bar_ai_ext_t")
 EDGES = (r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", r"C:\Program Files\Microsoft\Edge\Application\msedge.exe", r"C:\Program Files\Google\Chrome\Application\chrome.exe")
 
 
@@ -47,7 +47,7 @@ class Words(unittest.TestCase):
             for key in KEYS:
                 self.assertTrue(cats[lang].get(key), (lang, key))
         for lang in LANGS[1:]:
-            for key in ("ui.bar_ai_err", "ui.bar_ai_go", "ui.bar_ai_int_err_t"):
+            for key in ("ui.bar_ai_err", "ui.bar_ai_go_int", "ui.bar_ai_go_ext", "ui.bar_ai_int_err_t"):
                 self.assertNotEqual(cats[lang][key], cats["en"][key], (lang, key))
 
 
@@ -69,11 +69,16 @@ class Markup(unittest.TestCase):
         self.assertIn(".sb-bar .ai-ind:focus-visible{outline:2px solid var(--acc)", PAGE)
         self.assertIn(".sb-bar .ai-ind[data-state=err]{color:var(--bad)}", PAGE)
 
-    def test_the_click_goes_to_the_ai_section_of_the_settings(self):
+    def test_the_click_goes_to_the_ai_section_of_the_settings_and_each_icon_to_its_own_group(self):
         code = code_of_the_icons()
         self.assertIn('CFG.tab="ai"', code)
-        self.assertIn('"ai.provider"', code)
-        self.assertIn('"ai_alerts.enabled"', code)
+        self.assertIn('return kind==="int"?"ai.provider":"ai_alerts.enabled"', code)
+        self.assertIn('T("ui.bar_ai_go_"+kind)', code)
+
+    def test_the_two_targets_are_real_settings_of_different_groups(self):
+        text = (HERE / "src" / "github_actions_monitor" / "app" / "settings_api.py").read_text(encoding="utf-8")
+        self.assertRegex(text, r'_f\(_T_AI, "provider", "ai\.provider"')
+        self.assertRegex(text, r'_f\(_T_AI, "alerts", "ai_alerts\.enabled"')
 
 
 @unittest.skipUnless(browser(), "no Edge or Chrome on this computer")
@@ -93,9 +98,13 @@ class InTheBrowser(unittest.TestCase):
                   "    out.push({lang,id,st,label:e.getAttribute('aria-label'),title:e.title,state:e.dataset.state,svg:e.innerHTML.length,tag:e.tagName,tab:e.tabIndex,\n"
                   "      check:e.innerHTML.includes('M15.6 18l'),slash:e.innerHTML.includes('M14.5 21.5l'),tri:e.innerHTML.includes('M18 12.4l'),w:e.getBoundingClientRect().width,h:e.getBoundingClientRect().height})}}}\n"
                   "opened=[];$('bar-ai-int').click();const a=opened.slice();opened=[];$('bar-ai-ext').click();const b=opened.slice();\n"
-                  "document.getElementById('res').textContent=JSON.stringify({out,a,b,tab:CFG.tab});\n")
+                  "setTimeout(()=>{const r={};$('bar-ai-ext').click();\n"
+                  "  setTimeout(()=>{r.ext=document.activeElement.id;$('bar-ai-int').click();\n"
+                  "    setTimeout(()=>{r.int=document.activeElement.id;const h=document.querySelector('.cfg-hit');r.hit=h&&h.id;\n"
+                  "      document.getElementById('res').textContent=JSON.stringify({out,a,b,tab:CFG.tab,focus:r})},200)},200)},50);\n")
         html = ("<!doctype html><meta charset=utf-8><style>.ib{width:28px;height:28px;padding:0;display:inline-grid;place-items:center}.ico{width:22px;height:22px;fill:none;stroke:currentColor}</style>"
                 '<div class="sb-bar"><button type="button" class="ib ai-ind" id="bar-ai-int" data-kind="int" data-state="off"></button><button type="button" class="ib ai-ind" id="bar-ai-ext" data-kind="ext" data-state="off"></button></div>'
+                '<div id="cfp-ai"><div class="cfg-group" id="g-int"><div class="cfg-f" data-key="ai.provider"><select id="f-int"></select></div></div><div class="cfg-group" id="g-ext"><div class="cfg-f" data-key="ai_alerts.enabled"><input id="f-ext" type="checkbox"></div></div></div>'
                 "<pre id=res></pre><script>" + script.replace("</", "<\\/") + "</script>")
         cls.tmp = tempfile.TemporaryDirectory()
         page = Path(cls.tmp.name) / "icons.html"
@@ -120,7 +129,8 @@ class InTheBrowser(unittest.TestCase):
             name = cat["ui.bar_ai_int"] if row["id"].endswith("int") else cat["ui.bar_ai_ext"]
             self.assertEqual(row["label"], f"{name}: {word}", row)
             self.assertTrue(row["title"].startswith(f"{name}: {word}. "), row)
-            self.assertTrue(row["title"].endswith(cat["ui.bar_ai_go"]), row)
+            self.assertTrue(row["title"].endswith(cat["ui.bar_ai_go_int" if row["id"].endswith("int") else "ui.bar_ai_go_ext"]), row)
+            self.assertNotEqual(cat["ui.bar_ai_go_int"], cat["ui.bar_ai_go_ext"], row)
             self.assertEqual((row["check"], row["slash"], row["tri"]), (row["st"] == "on", row["st"] == "off", row["st"] == "err"), row)
             self.assertEqual(row["state"], row["st"])
 
@@ -134,6 +144,11 @@ class InTheBrowser(unittest.TestCase):
         self.assertEqual(self.result["a"], ["tab:cfg", "cfg:ai"])
         self.assertEqual(self.result["b"], ["tab:cfg", "cfg:ai"])
         self.assertEqual(self.result["tab"], "ai")
+
+    def test_each_icon_focuses_the_first_control_of_its_own_group_and_flashes_the_group(self):
+        self.assertEqual(self.result["focus"]["ext"], "f-ext")
+        self.assertEqual(self.result["focus"]["int"], "f-int")
+        self.assertEqual(self.result["focus"]["hit"], "g-int")
 
 
 if __name__ == "__main__":
