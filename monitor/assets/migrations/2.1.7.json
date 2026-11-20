@@ -4,10 +4,166 @@
  "format": 1,
  "version": "2.1.7",
  "previous": "2.1.6",
- "digest": "8350180026f7c65414d9dda845c41ab2ca2fd00c044fedfcb269b64a718675ef",
+ "digest": "fbafd7ae2cf9bab7da5bb2d89507ebd0d05e38f03d335693e1c8f4272b4cc5d4",
  "data_schema": 2,
  "settings": {
   "added": [
+   {
+    "key": "audit_feed.clone_alert.bot_patterns",
+    "kind": "names",
+    "default": [
+     "-bot",
+     "_bot",
+     "deploy",
+     "guardian"
+    ]
+   },
+   {
+    "key": "audit_feed.clone_alert.check_minutes",
+    "kind": "int",
+    "bounds": [
+     5,
+     1440
+    ],
+    "default": 30
+   },
+   {
+    "key": "audit_feed.clone_alert.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "audit_feed.clone_alert.threshold",
+    "kind": "int",
+    "bounds": [
+     1,
+     1000
+    ],
+    "default": 5
+   },
+   {
+    "key": "audit_feed.clone_alert.window_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     168
+    ],
+    "default": 24
+   },
+   {
+    "key": "auth.stream_revalidate_min",
+    "kind": "int",
+    "bounds": [
+     1,
+     1440
+    ],
+    "default": 10
+   },
+   {
+    "key": "backpressure.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "backpressure.max_reads_per_cycle",
+    "kind": "int",
+    "bounds": [
+     0,
+     5000
+    ],
+    "default": 0
+   },
+   {
+    "key": "backpressure.min_reads",
+    "kind": "int",
+    "bounds": [
+     1,
+     500
+    ],
+    "default": 20
+   },
+   {
+    "key": "backpressure.shed_percent",
+    "kind": "int",
+    "bounds": [
+     100,
+     1000
+    ],
+    "default": 150
+   },
+   {
+    "key": "cli.status_codes",
+    "kind": "enum",
+    "bounds": [
+     "classic",
+     "operator"
+    ],
+    "default": "classic"
+   },
+   {
+    "key": "cli.watch.branch_timeout_seconds",
+    "kind": "int",
+    "bounds": [
+     10,
+     86400
+    ],
+    "default": 900
+   },
+   {
+    "key": "compare.progressive",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "compare.progressive_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     29
+    ],
+    "default": 7
+   },
+   {
+    "key": "display.density",
+    "kind": "enum",
+    "bounds": [
+     "normal",
+     "dense"
+    ],
+    "default": "normal"
+   },
+   {
+    "key": "display.live_throttle_s",
+    "kind": "int",
+    "bounds": [
+     0,
+     300
+    ],
+    "default": 30
+   },
+   {
+    "key": "display.palette",
+    "kind": "enum",
+    "bounds": [
+     "default",
+     "colorblind"
+    ],
+    "default": "default"
+   },
+   {
+    "key": "display.reduce_motion",
+    "kind": "enum",
+    "bounds": [
+     "auto",
+     "on"
+    ],
+    "default": "auto"
+   },
+   {
+    "key": "display.whats_new",
+    "kind": "bool",
+    "default": true
+   },
    {
     "key": "events_feed.enabled",
     "kind": "bool",
@@ -40,6 +196,99 @@
      "user"
     ],
     "default": "auto"
+   },
+   {
+    "key": "expected_red.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "expected_red.max_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     365
+    ],
+    "default": 30
+   },
+   {
+    "key": "finops.by_change",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "finops.co2",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "finops.co2_grams_per_kwh",
+    "kind": "int",
+    "bounds": [
+     1,
+     2000
+    ],
+    "default": 400
+   },
+   {
+    "key": "finops.co2_watts",
+    "kind": "int",
+    "bounds": [
+     1,
+     2000
+    ],
+    "default": 40
+   },
+   {
+    "key": "fleet.meta_columns",
+    "kind": "metacols",
+    "default": []
+   },
+   {
+    "key": "fleet.meta_per_call",
+    "kind": "int",
+    "bounds": [
+     1,
+     200
+    ],
+    "default": 20
+   },
+   {
+    "key": "fleet.meta_ttl_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     168
+    ],
+    "default": 6
+   },
+   {
+    "key": "github_actions.comment_on_target",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "github_actions.operator",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9 ._@-]{0,60}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "github_actions.preflight",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "github_actions.require_reason",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "github_actions.writer_lock",
+    "kind": "bool",
+    "default": true
    },
    {
     "key": "github_status.enabled",
@@ -94,6 +343,378 @@
      "re": "^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|PATHEXT|COMSPEC|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|SSH_AUTH_SOCK|MONITOR_SUPERVISOR_KEY|MONITOR_ACCESS_TOKEN|MONITOR_WEBHOOK_SECRET|MONITOR_SLACK_SIGNING_SECRET|MONITOR_DISCORD_PUBLIC_KEY)\\Z)([A-Z_][A-Z0-9_]{0,63})?\\Z"
     },
     "default": "MONITOR_HEARTBEAT_URL"
+   },
+   {
+    "key": "limits.memory_mb",
+    "kind": "int",
+    "bounds": [
+     64,
+     65536
+    ],
+    "default": 512
+   },
+   {
+    "key": "limits.warn_percent",
+    "kind": "int",
+    "bounds": [
+     50,
+     99
+    ],
+    "default": 80
+   },
+   {
+    "key": "lint.rules.container_input_name.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "lint.rules.container_input_name.severity",
+    "kind": "enum",
+    "bounds": [
+     "info",
+     "warn",
+     "bad"
+    ]
+   },
+   {
+    "key": "listen.noindex",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "mcp.prompts",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "mcp.write_tools",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "modes.idle_minutes",
+    "kind": "int",
+    "bounds": [
+     0,
+     1440
+    ],
+    "default": 0
+   },
+   {
+    "key": "notify.dedupe_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     720
+    ]
+   },
+   {
+    "key": "notify.dedupe_ledger",
+    "kind": "bool"
+   },
+   {
+    "key": "notify.max_event_age_hours",
+    "kind": "int",
+    "bounds": [
+     0,
+     8760
+    ]
+   },
+   {
+    "key": "otlp.cicd_conventions",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "otlp.job_spans",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "outputs.prometheus.histogram_max_series",
+    "kind": "int",
+    "bounds": [
+     10,
+     2000
+    ]
+   },
+   {
+    "key": "outputs.prometheus.histograms",
+    "kind": "bool"
+   },
+   {
+    "key": "outputs.prometheus.per_runner",
+    "kind": "bool"
+   },
+   {
+    "key": "pairing.code_minutes",
+    "kind": "int",
+    "bounds": [
+     1,
+     30
+    ],
+    "default": 5
+   },
+   {
+    "key": "pairing.device_days",
+    "kind": "int",
+    "bounds": [
+     0,
+     365
+    ],
+    "default": 90
+   },
+   {
+    "key": "pairing.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "pairing.max_devices",
+    "kind": "int",
+    "bounds": [
+     1,
+     50
+    ],
+    "default": 10
+   },
+   {
+    "key": "pwa.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "pwa.refresh_on_return",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "quota.chip",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "refresh.share_by_workflow",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "refresh.share_seconds",
+    "kind": "int",
+    "bounds": [
+     1,
+     600
+    ],
+    "default": 20
+   },
+   {
+    "key": "report_export.limits",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "screens.glance_seconds",
+    "kind": "int",
+    "bounds": [
+     0,
+     30
+    ],
+    "default": 3
+   },
+   {
+    "key": "screens.hide_healthy",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "screens.idle_dim_minutes",
+    "kind": "int",
+    "bounds": [
+     0,
+     1440
+    ],
+    "default": 0
+   },
+   {
+    "key": "screens.life",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "screens.logo_fleet",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "screens.min_font_px",
+    "kind": "int",
+    "bounds": [
+     8,
+     32
+    ],
+    "default": 12
+   },
+   {
+    "key": "screens.sound_voices",
+    "kind": "text",
+    "bounds": {
+     "re": "^(?:(?:new_red|sentinel|stuck|score_drop|connection_lost|warning|resolved|report|lesson|info|live_recovered)=(?:red|sentinel|stuck|score|conn|warning|resolved|report|lesson|info|live|bell|chime|ding_dong|doorbell|ding|ping_high|ping_low|tick_soft|tock_soft|double_tick|tick_tock|knock|knock_three|blip|bloop|bubble|drop|droplet|arpeggio_up|arpeggio_down|minor_up|minor_down|fanfare|level_up|coin|harp_up|harp_down|marimba|xylophone|pluck|cascade|sparkle|ascend|descend|notify_a|notify_b|notify_c|sweep_up|sweep_down|whistle_up|whistle_down|zap|laser|radar|sonar|beacon|heartbeat|alarm_fast|siren|klaxon|buzzer|gong|phone|cuckoo)(?:,(?!\\Z)|\\Z)){0,11}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "screens.sound_volume",
+    "kind": "int",
+    "bounds": [
+     0,
+     100
+    ],
+    "default": 0
+   },
+   {
+    "key": "screens.theme_fleet",
+    "kind": "enum",
+    "bounds": [
+     "inherit",
+     "auto",
+     "light",
+     "dark",
+     "Armor",
+     "Aqua",
+     "Midnight",
+     "Ember",
+     "Forest",
+     "Violet",
+     "Solar",
+     "Ice",
+     "Crimson",
+     "Mono",
+     "High contrast",
+     "Metallic",
+     "Professional",
+     "Videogame",
+     "Terminal",
+     "Blueprint",
+     "contrast"
+    ],
+    "default": "inherit"
+   },
+   {
+    "key": "screens.transition",
+    "kind": "enum",
+    "bounds": [
+     "none",
+     "fade",
+     "slide"
+    ],
+    "default": "fade"
+   },
+   {
+    "key": "selfwatch.enabled",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "selfwatch.interval_seconds",
+    "kind": "int",
+    "bounds": [
+     5,
+     3600
+    ],
+    "default": 60
+   },
+   {
+    "key": "selfwatch.rss_warn_mb",
+    "kind": "int",
+    "bounds": [
+     64,
+     262144
+    ],
+    "default": 1024
+   },
+   {
+    "key": "selfwatch.threads_warn",
+    "kind": "int",
+    "bounds": [
+     20,
+     100000
+    ],
+    "default": 400
+   },
+   {
+    "key": "sentinels.collab.rules.external_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     90
+    ]
+   },
+   {
+    "key": "sentinels.collab.rules.team_members",
+    "kind": "names"
+   },
+   {
+    "key": "siem.queue_max",
+    "kind": "int",
+    "bounds": [
+     10,
+     10000
+    ],
+    "default": 500
+   },
+   {
+    "key": "siem.sinks",
+    "default": []
+   },
+   {
+    "key": "sound.ambient",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "sound.ambient_volume",
+    "kind": "int",
+    "bounds": [
+     1,
+     50
+    ],
+    "default": 10
+   },
+   {
+    "key": "sound.tick",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "sound.tick_seconds",
+    "kind": "int",
+    "bounds": [
+     1,
+     60
+    ],
+    "default": 1
+   },
+   {
+    "key": "sound.voices",
+    "kind": "text",
+    "bounds": {
+     "re": "^(?:(?:new_red|sentinel|stuck|score_drop|connection_lost|warning|resolved|report|lesson|info|live_recovered)=(?:red|sentinel|stuck|score|conn|warning|resolved|report|lesson|info|live|bell|chime|ding_dong|doorbell|ding|ping_high|ping_low|tick_soft|tock_soft|double_tick|tick_tock|knock|knock_three|blip|bloop|bubble|drop|droplet|arpeggio_up|arpeggio_down|minor_up|minor_down|fanfare|level_up|coin|harp_up|harp_down|marimba|xylophone|pluck|cascade|sparkle|ascend|descend|notify_a|notify_b|notify_c|sweep_up|sweep_down|whistle_up|whistle_down|zap|laser|radar|sonar|beacon|heartbeat|alarm_fast|siren|klaxon|buzzer|gong|phone|cuckoo)(?:,(?!\\Z)|\\Z)){0,11}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "ui.compact",
+    "kind": "enum",
+    "bounds": [
+     "auto",
+     "on",
+     "off"
+    ],
+    "default": "auto"
+   },
+   {
+    "key": "ui.palette",
+    "kind": "bool",
+    "default": true
    },
    {
     "key": "webhook.max_body_kb",
@@ -184,6 +805,19 @@
    },
    {
     "key": "webhook.ws_targets",
+    "kind": "names",
+    "default": []
+   },
+   {
+    "key": "workspaces.active",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9._-]{0,40}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "workspaces.list",
     "kind": "names",
     "default": []
    }
