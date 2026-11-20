@@ -51,6 +51,7 @@ PAIR_KEYS = ("ci.stuck.workflow_minutes", "ci.stuck.runner_minutes")
 LABEL_KEYS = ("sentinels.collab.rules.issue_critical_labels", "sentinels.collab.rules.ignore_labels")
 PATH_RE = re.compile(r"^(?!/)(?!.*\.\.)[A-Za-z0-9._/-]{1,120}\Z")      # sentinels.delivery.changelog_paths / version_files: a path inside the repository (no leading slash, no ..)
 PATH_KEYS = ("sentinels.delivery.changelog_paths", "sentinels.delivery.version_files")
+USES_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}/[A-Za-z0-9._*?-]{1,100}\Z")      # owner/repo of an action that cannot be judged (sentinels.supply.ignore_uses)
 GLOB_RE = re.compile(r"^[A-Za-z0-9._*? -]{1,100}\Z")      # a name or a pattern of names (a ruleset may be called "Protect main" or "main-*")
 HYGIENE_SKIP = ("ruleset", "label", "file", "sha", "allowed", "schedule")
 TZ_RE = re.compile(r"^(?:local|utc|UTC|[A-Za-z][A-Za-z0-9_+./-]{1,63})\Z")      # display.timezone: local, utc or an IANA name
@@ -386,6 +387,7 @@ _f(_T_SENT, "security", "sentinels.security.max_repos_per_tick", "int", (1, 100)
 _f(_T_SENT, "security", "sentinels.security.deadline_s", "int", (0, 600), unit="s")
 _f(_T_SENT, "security", "sentinels.security.min_rate_remaining", "int", (100, 5000), unit="calls")
 _f(_T_SENT, "security", "sentinels.security.repos", "repos")
+_f(_T_SENT, "security", "sentinels.security.plan_na", "bool")
 _f(_T_SENT, "security", "sentinels.security.signals.dependabot.enabled", "bool")
 _f(_T_SENT, "security", "sentinels.security.signals.dependabot.min_severity", "enum", ("low", "medium", "high", "critical"))
 _f(_T_SENT, "security", "sentinels.security.signals.code_scanning.enabled", "bool")
@@ -408,6 +410,7 @@ _f(_T_SENT, "supply", "sentinels.supply.max_files_per_repo", "int", (1, 100))
 _f(_T_SENT, "supply", "sentinels.supply.min_rate_remaining", "int", (100, 5000), unit="calls")
 _f(_T_SENT, "supply", "sentinels.supply.repos", "repos")
 _f(_T_SENT, "supply", "sentinels.supply.ignore", "patterns")
+_f(_T_SENT, "supply", "sentinels.supply.ignore_uses", "names")
 _f(_T_SENT, "supply", "sentinels.supply.signals.unpinned.enabled", "bool")
 _f(_T_SENT, "supply", "sentinels.supply.signals.unpinned.level", "enum", ("info", "warning", "error", "critical"))
 _f(_T_SENT, "supply", "sentinels.supply.signals.mutable_ref.enabled", "bool")
@@ -933,7 +936,7 @@ def check_value(path, value):
             return False, "path"      # the folder of the copies: never empty and a relative one never climbs out of the data folder
         return True, text
     if kind == "names":
-        pattern = WORKDAY_RE if path == "compare.workdays" else FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else RUNNER_LABEL_RE if path in RUNNER_LABEL_KEYS else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path in ("sentinel.hygiene.ruleset_names", "sentinels.delivery.expected_assets") else (PATH_RE if path in PATH_KEYS else (alertflow.SILENCE_RE if path == "alerts.silences" else (alertflow.PATTERN_RE if path == "alerts.service.workflows" else (PAIR_RE if path in PAIR_KEYS else NAME_RE)))))))
+        pattern = USES_RE if path == "sentinels.supply.ignore_uses" else WORKDAY_RE if path == "compare.workdays" else FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else RUNNER_LABEL_RE if path in RUNNER_LABEL_KEYS else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path in ("sentinel.hygiene.ruleset_names", "sentinels.delivery.expected_assets") else (PATH_RE if path in PATH_KEYS else (alertflow.SILENCE_RE if path == "alerts.silences" else (alertflow.PATTERN_RE if path == "alerts.service.workflows" else (PAIR_RE if path in PAIR_KEYS else NAME_RE)))))))
         if not isinstance(value, list) or len(value) > 200 or not all(isinstance(v, str) and pattern.match(v) for v in value):
             return False, "names"
         if path == "sentinel.hygiene.ruleset_names" and not value:

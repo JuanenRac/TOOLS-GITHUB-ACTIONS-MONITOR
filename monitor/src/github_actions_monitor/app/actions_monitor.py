@@ -1998,7 +1998,7 @@ def score_security(registry, config):
     if not scope or not checked or checked / scope < minimum:
         return None
     readable, total = status.get("sources_readable") or 0, status.get("sources_total") or 0
-    if total and readable / total < minimum:      # "could not be read" is not "clean": the part is absent, not a 100
+    if (total and readable / total < minimum) or (status.get("sources_na_plan") and not total):      # "could not be read" (or "not in the plan") is not "clean": the part is absent, not a 100
         return None
     return {"penalty": sentinel.get_metrics().get("security_penalty", 0), "repos": checked}
 
@@ -2024,7 +2024,7 @@ def score_missing_detail(registry, config, answer):
                 row["reason"] = "first_sweep"
             elif checked / scope < minimum:
                 row["reason"] = "partial"
-            elif total and readable / total < minimum:
+            elif (total and readable / total < minimum) or (status.get("sources_na_plan") and not total):
                 row["reason"] = "unreadable"
             else:
                 row["reason"] = "next_pass"

@@ -672,6 +672,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinels.security.enabled` | `-` | sentinel | Security sentinel on |
 | `sentinels.security.max_repos_per_tick` | `-` | sentinel | Repositories per round |
 | `sentinels.security.min_rate_remaining` | `-` | sentinel | Allowance kept free |
+| `sentinels.security.plan_na` | `-` | sentinel | Count what the plan lacks as N/A |
 | `sentinels.security.refresh_seconds` | `-` | sentinel | Security cycle |
 | `sentinels.security.repos` | `-` | sentinel | Repositories watched for security |
 | `sentinels.security.signals.branch.enabled` | `-` | sentinel | Branch protection |
@@ -688,6 +689,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinels.supply.deadline_s` | `-` | sentinel | Time ceiling per round |
 | `sentinels.supply.enabled` | `-` | sentinel | Supply chain sentinel on |
 | `sentinels.supply.ignore` | `-` | sentinel | Workflow findings to ignore |
+| `sentinels.supply.ignore_uses` | `-` | sentinel | Actions that cannot be judged |
 | `sentinels.supply.incremental` | `-` | sentinel | Lint only what changed |
 | `sentinels.supply.max_calls_per_tick` | `-` | sentinel | Calls per round |
 | `sentinels.supply.max_files_per_repo` | `-` | sentinel | Workflow files per repository |

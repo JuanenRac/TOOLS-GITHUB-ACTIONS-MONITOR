@@ -15,6 +15,9 @@ its own: the findings come from `cli/lint_workflows.lint_text` (one source of tr
 Frontier with the Security sentinel: `security.workflow_write` is the default permission of the REPOSITORY (a setting of GitHub); the signals here are about the CONTENT of each workflow file, so the
 same repository never raises the same finding from both. A `uses:` that points to a workflow of the same repository (`OWNER/REPO/.github/workflows/x.yml@ref`) is not a third party and is left out.
 """
+import fnmatch
+import re
+
 from github_actions_monitor.cli import lint_workflows
 
 SIGNALS = ("unpinned", "mutable_ref", "permissions_wide", "permissions_missing", "pr_target_checkout")
@@ -23,6 +26,7 @@ SIGNAL_OF = {code: name for name, code in CODES.items()}
 USED_RULES = ("unpinned_uses", "permissions", "pr_target")      # the only rules of the linter this module switches on
 LEVELS = ("info", "warning", "error", "critical")
 DEFAULT_LEVEL = {"unpinned": "warning", "mutable_ref": "warning", "permissions_wide": "warning", "permissions_missing": "warning", "pr_target_checkout": "error"}
+USES_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}/[A-Za-z0-9._*?-]{1,100}\Z")      # `owner/repo` of an action or reusable workflow, with * and ? for any
 MAX_FILES, MAX_EXAMPLES = 5, 3      # what an alert lists of where it was found (the numbers carry the rest)
 
 
@@ -53,9 +57,18 @@ def signal_of(finding, repo="", owner=""):
     return ""
 
 
-def findings(repo, texts, config=None, owner="", ignore=()):
-    """[{"signal", "file", "line", "detail", "severity"}] of every workflow file of `repo` (`texts` = {file name: text}), already filtered by `ignore` (patterns `repo:file:rule`) and by the comment
-    `# monitor-lint: ignore RULE` of the file. Order: by file and line, so the answer is the same for the same texts."""
+def left_out(detail, patterns):
+    """True when the `uses:` text (`owner/repo[/path]@ref`) belongs to an `owner/repo` of `patterns` (`sentinels.supply.ignore_uses`): an action or reusable workflow of another organisation that the token
+    cannot see, whose ref the monitor cannot judge, so it is left out of the findings instead of being reported on a guess. The name is compared in lower case."""
+    spec = str(detail or "").split("@", 1)[0].lower().split("/")
+    name = "/".join(spec[:2])
+    return len(spec) >= 2 and any(fnmatch.fnmatchcase(name, str(p).lower()) for p in patterns or ())
+
+
+def findings(repo, texts, config=None, owner="", ignore=(), ignore_uses=(), skipped=None):
+    """[{"signal", "file", "line", "detail", "severity"}] of every workflow file of `repo` (`texts` = {file name: text}), already filtered by `ignore` (patterns `repo:file:rule`), by the comment
+    `# monitor-lint: ignore RULE` of the file and by `ignore_uses` (`owner/repo` of the actions that cannot be judged: the ones left out are appended to the list `skipped`, when given, so they are counted and
+    never silent). Order: by file and line, so the answer is the same for the same texts."""
     rules, out = lint_rules(config), []
     for name in sorted(texts):
         label = ".github/workflows/" + name
@@ -63,6 +76,10 @@ def findings(repo, texts, config=None, owner="", ignore=()):
             if lint_workflows.ignored(repo, item, ignore):
                 continue
             signal = signal_of(item, repo, owner)
+            if signal in ("unpinned", "mutable_ref") and left_out(item["detail"], ignore_uses):
+                if skipped is not None:
+                    skipped.append({"file": name, "line": item["line"], "detail": item["detail"]})
+                continue
             if signal:
                 out.append({"signal": signal, "file": name, "line": item["line"], "detail": item["detail"] if signal in ("unpinned", "mutable_ref") else "", "severity": item["severity"]})
     return out
