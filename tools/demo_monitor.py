@@ -6,7 +6,7 @@
 # =============================================================================
 """A demo monitor with invented data (the demo-* repositories of the demo-owner account) for the screenshots of the documentation.
 
-    python tools/demo_monitor.py [PORT] [--lite] [--network]   # default 18765; runs until it is stopped
+    python tools/demo_monitor.py [PORT] [--lite] [--network] [--rich] [--kiosk]   # default 18765; runs until it is stopped
 
 It starts the real web server of the monitor on 127.0.0.1 with a temporary configuration and made-up runs, alerts, a signing queue, analytics and linter findings, so the page can be
 photographed without touching your own configuration or GitHub. Nothing is read from GitHub and nothing is written outside a temporary folder.
@@ -52,6 +52,8 @@ def setup(now):
     tmp = Path(tempfile.mkdtemp(prefix="ghamon_demo_"))
     cfg = json.loads((ROOT / "assets" / "examples" / "actions_monitor.example.json").read_text(encoding="utf-8"))
     cfg.update({"github_owner": OWNER, "workspace_root": "", "signed_dir": "", "audit_dir": "", "screens": {**cfg.get("screens", {}), "enabled": True}})      # the wall screens are off by default; the demo shows them
+    if "--kiosk" in sys.argv:      # the kiosk profile is off by default too: the measuring tool of the screens asks for it
+        cfg["kiosk"] = {**cfg.get("kiosk", {}), "enabled": True}
     (tmp / "actions_monitor.json").write_text(json.dumps(cfg), encoding="utf-8")
     am.CONFIG_FILE = settings_api.CONFIG_FILE = toolconfig.CONFIG_FILE = tmp / "actions_monitor.json"
     settings_api.BACKUP_DIR = tmp / "backups"

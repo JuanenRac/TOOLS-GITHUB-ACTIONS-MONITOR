@@ -75,9 +75,11 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 .livebar{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin:0 0 8px}.livebox{border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--panel);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 #live-check{flex-direction:column;align-items:flex-start;margin:0 0 8px}#live-check ol{margin:4px 0 0;padding-left:20px}#live-check li{margin:2px 0}.livebox.ok{border-color:var(--ok)}.livebox.warn{border-color:var(--warn)}.livebox.off{border-color:var(--line2);color:var(--mut)}.livebox b{font-weight:700}
 /* chrome=0: a screen of its own for a wall or a second monitor: no header, no tabs, no filters; the figures stay */
-.kiosk .sidebar,.kiosk .tools,.kiosk .filters,.kiosk footer{display:none!important}.kiosk .hcorner{position:static}
+.kiosk .sidebar,.kiosk .tools,.kiosk .filters,.kiosk footer,.kiosk .tbl-tools{display:none!important}.kiosk .hcorner{position:static}
 .kiosk header{padding:6px 14px}.kiosk main{padding-top:8px}
 /* kiosk=1 (kiosk.enabled in Settings): larger type through the zoom of the body, and an optional high contrast */
+/* the safe margin (kiosk.safe_margin_percent, ?safe=): a television that cuts the border (overscan) must not cut the page; the zoom of the kiosk is divided out so the margin is a part of the window, not of the zoomed page */
+body.kiosk-safe{box-sizing:border-box;padding:calc(var(--safe,0)*1vh/var(--z,1)) calc(var(--safe,0)*1vw/var(--z,1))}
 body.kiosk-hc{--bg:#000;--page:#000;--panel:#000;--panel2:#0b0b0b;--line:#fff;--line2:#fff;--text:#fff;--mut:#e5e7eb;--ok:#4ade80;--bad:#ff6b6b;--warn:#fbbf24;--run:#7dd3fc}
 .lite-note{margin:0 0 10px;color:var(--mut)}
 #hidden{display:none;background:var(--warn);color:var(--on-warn);padding:6px 18px;font-weight:600}
@@ -944,7 +946,11 @@ const VIEWS={now:"now",sentinel:"sent","sentinel-ci":"sci","sentinel-collab":"sc
 const VIEW=QS.get("view")&&VIEWS[QS.get("view")]?QS.get("view"):"";
 if(QS.get("chrome")==="0")document.body.classList.add("kiosk");
 (function(){const k=I18N.kiosk||{};if(k.enabled!==true||QS.get("kiosk")!=="1")return;      // the kiosk profile: only when it is on in Settings and the address asks for it
-  const n=parseInt(QS.get("scale")||k.font_scale_percent,10),s=Math.max(100,Math.min(400,isNaN(n)?100:n));document.body.style.zoom=String(s/100);document.body.classList.add("kiosk");
+  const n=parseInt(QS.get("scale")||k.font_scale_percent,10),s=Math.max(100,Math.min(400,isNaN(n)?100:n));const sf=Math.max(0,Math.min(10,parseFloat(QS.get("safe")||k.safe_margin_percent||0)||0)),fitOn=QS.get("fit")==="1"||(k.scale_with_window===true&&QS.get("fit")!=="0");
+  /* the type size is a percent of a window of 1080 px on its short side; with kiosk.scale_with_window (?fit=1) it grows with the window, so a 4K television looks like a Full HD one */
+  const zoom=()=>{const f=fitOn?Math.max(.5,Math.min(window.innerWidth,window.innerHeight)/1080):1,hz=fitOn?(parseFloat(getComputedStyle(document.documentElement).zoom)||1):1,z=fitOn?Math.max(.5,Math.min(8,s/100*f/hz)):s/100;document.body.style.zoom=String(z);document.body.style.setProperty("--z",String(z))};      /* with fit the page already doubles its type on a big window (html zoom 1.25 or 1.6): that part is divided out so the total is what the setting asks for */
+  zoom();document.body.classList.add("kiosk");if(fitOn)window.addEventListener("resize",zoom);
+  if(sf>0){document.documentElement.style.setProperty("--safe",String(sf));document.body.classList.add("kiosk-safe")}
   if(QS.get("contrast")==="1"||(k.high_contrast===true&&QS.get("contrast")!=="0"))document.body.classList.add("kiosk-hc")})();
 function accUrl(id){const u=new URL(location.href);if(id)u.searchParams.set("account",id);else u.searchParams.delete("account");return u.pathname+u.search}
 function accApi(path){if(!ACC||!ACC.current)return path;return path+(path.includes("?")?"&":"?")+"account="+encodeURIComponent(ACC.current)}
