@@ -2765,7 +2765,7 @@ async function advancedExtras(){
   if(tk.enabled)h+=`<input id="adv-token" type="password" autocomplete="off" spellcheck="false" placeholder="${esc(T("ui.adv_token_ph"))}"> <button type="button" id="adv-token-save">${esc(T("ui.adv_token_save"))}</button>`;
   h+=`<button type="button" id="adv-token-del"${tk.stored?"":" disabled"}>${esc(T("ui.adv_token_delete"))}</button></div>`;
   h+=`<h4>${esc(T("ui.adv_gh_h"))}</h4>`;
-  if(gh.enabled)h+=`<div class="inl"><select id="adv-gh-action">${(gh.allowed||[]).map(a=>`<option>${esc(a)}</option>`).join("")}</select><input id="adv-gh-repo" placeholder="${esc(T("ui.adv_gh_repo"))}" size="22"><input id="adv-gh-num" placeholder="${esc(T("ui.adv_gh_number"))}" size="14"><button type="button" id="adv-gh-go">${esc(T("ui.adv_prepare"))}</button></div>`;
+  if(gh.enabled)h+=`<div class="inl"><select id="adv-gh-action">${(gh.allowed||[]).map(a=>`<option>${esc(a)}</option>`).join("")}</select><input id="adv-gh-repo" placeholder="${esc(T("ui.adv_gh_repo"))}" size="22"><input id="adv-gh-num" placeholder="${esc(T("ui.adv_gh_number"))}" size="14"><input id="adv-gh-reason" placeholder="${esc(T("ui.adv_gh_reason"))}" size="30" maxlength="200"><button type="button" id="adv-gh-go">${esc(T("ui.adv_prepare"))}</button></div>`;
   else h+=`<div class="mut">${esc(T("ui.adv_off"))}</div>`;
   h+=`<h4>${esc(T("ui.adv_act_h"))}</h4>`;
   if(ac.enabled)h+=`<div class="inl"><select id="adv-act-sel">${(ac.allowed||[]).map(a=>`<option>${esc(a)}</option>`).join("")}</select><button type="button" id="adv-act-go">${esc(T("ui.adv_prepare"))}</button><button type="button" id="adv-act-stop">${esc(T("ui.adv_act_stop"))}</button></div><pre id="adv-act-out" aria-live="polite"></pre>`;
@@ -2788,7 +2788,7 @@ async function advancedExtras(){
   const on=(id,fn)=>{const e=box.querySelector("#"+id);if(e)e.addEventListener("click",fn)};
   on("adv-token-save",async()=>{const i=box.querySelector("#adv-token"),j=await advPost("/api/github-token",{token:i.value});i.value="";cfgMsg(j.ok?"ok":"bad",j.ok?T("ui.adv_token_saved"):T("ui.adv_token_bad",{why:advWhy(j)}));advancedExtras()});
   on("adv-token-del",async()=>{await advPost("/api/github-token",{action:"delete"});advancedExtras()});
-  on("adv-gh-go",async()=>{const p=await advPost("/api/gh-action/plan",{action:box.querySelector("#adv-gh-action").value,repo:box.querySelector("#adv-gh-repo").value.trim(),number:box.querySelector("#adv-gh-num").value.trim()});
+  on("adv-gh-go",async()=>{const p=await advPost("/api/gh-action/plan",{action:box.querySelector("#adv-gh-action").value,repo:box.querySelector("#adv-gh-repo").value.trim(),number:box.querySelector("#adv-gh-num").value.trim(),reason:box.querySelector("#adv-gh-reason").value.trim()});
     if(!p.ok){cfgMsg("bad",T("ui.adv_refused",{why:advWhy(p)}));return}
     if(!await askConfirm(T("ui.adv_gh_confirm",{method:p.plan.method,endpoint:p.plan.endpoint}),{danger:true}))return;
     const j=await advPost("/api/gh-action/confirm",{plan:p.plan.id});cfgMsg(j.ok?"ok":"bad",j.ok?T("ui.adv_done"):T("ui.adv_refused",{why:advWhy(j)}))});

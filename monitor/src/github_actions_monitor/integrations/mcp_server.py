@@ -21,6 +21,7 @@ from pathlib import Path
 
 from github_actions_monitor.integrations import ai_alerts  # noqa: E402
 from github_actions_monitor.integrations import lessons  # noqa: E402
+from github_actions_monitor.integrations import mcp_extras  # noqa: E402
 from github_actions_monitor.app import toolconfig  # noqa: E402
 from github_actions_monitor.tool_version import TOOL_VERSION  # noqa: E402
 from github_actions_monitor.security import netguard
@@ -106,7 +107,7 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
         rows = [a for a in ai_alerts.alerts(config, states=("open", "acknowledged")) if not arguments.get("only_real") or a["class"] == "real"]
         rows.sort(key=lambda a: (a["state"] == "acknowledged", a["class"] != "real", a["repo"], a["workflow"]))
         info = ai_alerts.brief_info(config)
-        return ai_alerts.redact_json({"updated": info["updated"], "updated_local": info["updated_local"], "age_seconds": info["age_seconds"], "alerts": rows}, indent=1)
+        return mcp_extras.with_link(ai_alerts.redact_json({"updated": info["updated"], "updated_local": info["updated_local"], "age_seconds": info["age_seconds"], "alerts": rows}, indent=1), "al")
     if name in ("alert_diagnose", "diagnose"):
         wanted = str(arguments.get("id", ""))
         found = [a for a in ai_alerts.alerts(config, states=("open", "acknowledged")) if a["id"] == wanted]
@@ -119,7 +120,7 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
             diagnosis = ai_alerts.diagnose(toolconfig.github_owner(config), item["repo"], item.get("url"), runner, cfg["log_lines"], cfg["max_bytes"])
             if not diagnosis:
                 raise ValueError("this alert has no run to read")
-        return ai_alerts.redact_json({"id": wanted, "repo": item["repo"], "workflow": item["workflow"], "diagnosis": diagnosis, "origin": item.get("origin")}, indent=1)
+        return mcp_extras.with_link(ai_alerts.redact_json({"id": wanted, "repo": item["repo"], "workflow": item["workflow"], "diagnosis": diagnosis, "origin": item.get("origin")}, indent=1), "al")
     if name == "get_red_repos":
         rows = [a for a in ai_alerts.alerts(config, states=("open", "acknowledged")) if a.get("conclusion") != "panel"]
         return ai_alerts.redact_json(sorted({a["repo"] for a in rows}))
@@ -146,7 +147,7 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
         fragment = "\n".join((log or "").splitlines()[-40:]) if code == 0 else ""
         return ai_alerts.redact("Failed steps:\n" + ("\n".join(steps) or "(none listed)") + "\n\nEnd of the failed log:\n" + fragment, 4000)
     if name == "get_quota":
-        return ai_alerts.redact_json(getter("/api/quota"), 3000)
+        return mcp_extras.with_link(ai_alerts.redact_json(getter("/api/quota"), 3000), "quota")
     if name == "get_score":
         return ai_alerts.redact_json(getter("/api/score"), 6000)
     if name in ("lessons_apply", "lessons_recurring", "lessons_brief", "lesson_propose"):
@@ -189,7 +190,23 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
         if not allow_ack:
             raise ValueError("acknowledging is off: start the server with --allow-ack")
         return "acknowledged" if ai_alerts.ack(config, arguments.get("id")) else "no such open alert"
+    if name == "describe_capabilities":
+        return json.dumps(mcp_extras.describe(config, allow_ack, allow_lessons, listed_tools(config, allow_ack)), indent=1)
+    if name == "ping":
+        return "pong"
+    if name == "whoami":
+        return json.dumps(mcp_extras.whoami(config), indent=1)
+    if name == "gh_action":
+        return ai_alerts.redact(mcp_extras.governed_write(config, arguments, runner), 4000)
     raise ValueError("unknown tool")
+
+
+def listed_tools(config, allow_ack):
+    """The tools `tools/list` shows: the read ones, the self-description, and - only with mcp.write_tools on - the governed write tool."""
+    tools = [t for t in TOOLS if allow_ack or t["name"] not in ("ack_alert", "alert_ack")] + mcp_extras.EXTRA_TOOLS
+    if mcp_extras.settings(config)["write_tools"]:
+        tools.append(mcp_extras.WRITE_TOOL)
+    return tools
 
 
 def _closed_api(getter, path):
@@ -239,14 +256,22 @@ def handle(message, config, allow_ack=False, **kwargs):
     method, ident = message.get("method"), message.get("id")
     if method == "initialize":
         version = (message.get("params") or {}).get("protocolVersion", "2024-11-05")
-        result = {"protocolVersion": version if isinstance(version, str) and len(version) <= 20 else "2024-11-05", "capabilities": {"tools": {}, "logging": {}},
+        result = {"protocolVersion": version if isinstance(version, str) and len(version) <= 20 else "2024-11-05", "capabilities": {"tools": {}, "logging": {}, **({"prompts": {}} if mcp_extras.settings(config)["prompts"] else {})},
                   "serverInfo": {"name": "github-actions-monitor", "version": TOOL_VERSION}}
         note = open_summary(config)
         if note:
             result["instructions"] = note
         ai_alerts.touch(config, "mcp", str(((message.get("params") or {}).get("clientInfo") or {}).get("name") or "mcp") if isinstance((message.get("params") or {}).get("clientInfo"), dict) else "mcp")
     elif method == "tools/list":
-        result = {"tools": [t for t in TOOLS if allow_ack or t["name"] not in ("ack_alert", "alert_ack")]}
+        result = {"tools": listed_tools(config, allow_ack)}
+    elif method == "prompts/list":
+        result = mcp_extras.prompt_list(config)
+    elif method == "prompts/get":
+        params = message.get("params") or {}
+        try:
+            result = mcp_extras.prompt_get(config, params.get("name"), params.get("arguments"))
+        except ValueError as error:
+            return error_reply(ident, {"code": -32602, "message": str(error)[:200]})
     elif method == "tools/call":
         params = message.get("params") or {}
         ai_alerts.touch(config, "mcp", "mcp")

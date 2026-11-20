@@ -1,11 +1,13 @@
 name: Release image
 
-# Builds the official image for linux/amd64 and linux/arm64 and, ONLY when a release is published (or when started by hand with `push` on), publishes it to ghcr.io with an attestation of its
+# Builds the official image for linux/amd64 and linux/arm64 and, ONLY when a version tag is pushed (or when started by hand with `push` on), publishes it to ghcr.io with an attestation of its
 # provenance. Started by hand with `push` off (the default) it builds both platforms and pushes nothing: that is how the workflow is tried before a release.
+# The release of GitHub waits for the package: it is created as a DRAFT with the tag, and the last job publishes it only after the image of that version is in the registry and answers by tag.
+# A release that is not a draft (published by hand) is left as it is.
 # Only actions of GitHub itself are used (the settings of this repository allow no others): the build is the docker and buildx that the runner already has.
 on:
-  release:
-    types: [published]
+  push:
+    tags: ["v*"]
   workflow_dispatch:
     inputs:
       push:
@@ -30,9 +32,9 @@ jobs:
       id-token: write       # the attestation of the provenance
       attestations: write
     env:
-      PUBLISH: ${{ github.event_name == 'release' || inputs.push }}
+      PUBLISH: ${{ github.event_name == 'push' || inputs.push }}
       EVENT: ${{ github.event_name }}
-      TAG: ${{ github.event.release.tag_name }}
+      TAG: ${{ github.ref_name }}
       REPOSITORY: ${{ github.repository }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -43,8 +45,8 @@ jobs:
         id: names
         run: |
           version="$(python3 -c "import re; print(re.search(r'TOOL_VERSION = \"([0-9.]+)\"', open('monitor/src/github_actions_monitor/tool_version.py', encoding='utf-8').read()).group(1))")"
-          if [ "$EVENT" = "release" ] && [ "$TAG" != "v${version}" ]; then
-            echo "the release ${TAG} is not the version of the code (v${version})"; exit 1
+          if [ "$EVENT" = "push" ] && [ "$TAG" != "v${version}" ]; then
+            echo "the tag ${TAG} is not the version of the code (v${version})"; exit 1
           fi
           image="ghcr.io/${REPOSITORY,,}"
           {
@@ -70,7 +72,7 @@ jobs:
           ACTOR: ${{ github.actor }}
         run: printf '%s' "$REGISTRY_TOKEN" | docker login ghcr.io --username "$ACTOR" --password-stdin
 
-      - name: Build for both platforms${{ (github.event_name == 'release' || inputs.push) && ' and push' || ' (nothing is pushed)' }}
+      - name: Build for both platforms${{ (github.event_name == 'push' || inputs.push) && ' and push' || ' (nothing is pushed)' }}
         id: build
         env:
           VERSION: ${{ steps.names.outputs.version }}
@@ -92,3 +94,44 @@ jobs:
           subject-name: ${{ steps.names.outputs.image }}
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
+    outputs:
+      version: ${{ steps.names.outputs.version }}
+      image: ${{ steps.names.outputs.image }}
+
+  release:
+    name: Publish the release once the image is in the registry
+    needs: image
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write       # edit the release: a draft becomes public
+      packages: read        # ask the registry for the image
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      TAG: ${{ github.ref_name }}
+      VERSION: ${{ needs.image.outputs.version }}
+      IMAGE: ${{ needs.image.outputs.image }}
+    steps:
+      - name: The image of this version answers by its tag
+        env:
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          printf '%s' "$REGISTRY_TOKEN" | docker login ghcr.io --username "$ACTOR" --password-stdin
+          for attempt in 1 2 3 4 5 6; do
+            if docker buildx imagetools inspect "${IMAGE}:${VERSION}" > inspect.txt 2>&1; then break; fi
+            if [ "$attempt" = 6 ]; then cat inspect.txt; echo "the image ${IMAGE}:${VERSION} is not in the registry: the release stays a draft"; exit 1; fi
+            sleep 20
+          done
+          grep -q "linux/amd64" inspect.txt && grep -q "linux/arm64" inspect.txt || { cat inspect.txt; echo "the image lacks a platform: the release stays a draft"; exit 1; }
+
+      - name: Publish the draft release (a release that is not a draft is left as it is)
+        run: |
+          draft="$(gh release view "$TAG" --json isDraft --jq .isDraft 2>/dev/null || echo missing)"
+          case "$draft" in
+            true) gh release edit "$TAG" --draft=false --latest; echo "published ${TAG} after the image" ;;
+            false) echo "${TAG} was already public: nothing to do" ;;
+            *) echo "there is no release ${TAG} yet: create it as a draft and the next run of this workflow publishes it" ;;
+          esac

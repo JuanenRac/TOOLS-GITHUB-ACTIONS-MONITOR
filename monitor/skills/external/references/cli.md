@@ -63,6 +63,7 @@ Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `
 | `--status-codes` | status: exit codes, classic (0 to 5, the usual ones) or operator (0 healthy, 1 nothing serving, 2 up but needs attention) |
 | `--if-problem` | metrics: write nothing and exit 0 when there is no red workflow and no alert at --fail-on (error by default) or worse; otherwise write the figures and exit 5 (for cron, which mails any output) |
 | `--color` | Colour of the answer: auto (only on a terminal, never with NO_COLOR), always or never (no escape sequence at all) |
+| `--egress` | doctor: list every host this configuration can call, why, and what fails if it is blocked (nothing is called) |
 | `--version` | print the version |
 
 Other entry points: `bin/mcp_server.py` (MCP over standard input and output; `--allow-ack`, `--allow-lessons`), `bin/ai_hook.py` (gate script of an AI tool), `bin/read_report.py`, `bin/actions_monitor.py --doctor`.

@@ -76,7 +76,7 @@
     "hot_hours": 3,
     "min_rate_remaining": 800,
     "candidate_days": 2,
-    "candidate_min_entries": 1,
+    "candidate_min_entries": 5,
     "skip_candidate_prefixes": [],
     "stale_pr_days": 7,
     "trend_green_pct": 90,
@@ -686,6 +686,10 @@
         "enabled": false,
         "severity": "info"
       },
+      "container_input_name": {
+        "enabled": false,
+        "severity": "warn"
+      },
       "archived_action": {
         "enabled": false
       }
@@ -795,6 +799,20 @@
     "tick": false,
     "tick_seconds": 1
   },
+  "mcp": {
+    "prompts": true,
+    "write_tools": false
+  },
+  "siem": {
+    "queue_max": 500,
+    "sinks": []
+  },
+  "selfwatch": {
+    "enabled": true,
+    "rss_warn_mb": 1024,
+    "threads_warn": 400,
+    "interval_seconds": 60
+  },
   "updates": {
     "check": true,
     "systemd_helper": false
@@ -864,9 +882,11 @@
     "lockout_minutes": 15,
     "min_length": 10,
     "allow_bearer": false,
-    "audit": true
+    "audit": true,
+    "stream_revalidate_min": 10
   },
   "listen": {
+    "noindex": true,
     "network": false,
     "host": "127.0.0.1",
     "token_env": "MONITOR_ACCESS_TOKEN",
@@ -888,7 +908,12 @@
   "github_actions": {
     "enabled": false,
     "allowed": ["rerun_failed", "cancel"],
-    "merge_method": "squash"
+    "merge_method": "squash",
+    "require_reason": true,
+    "operator": "",
+    "comment_on_target": false,
+    "preflight": true,
+    "writer_lock": true
   },
   "act": {
     "enabled": false,

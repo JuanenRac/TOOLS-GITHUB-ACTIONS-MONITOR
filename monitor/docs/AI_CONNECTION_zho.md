@@ -129,3 +129,9 @@ GitHub 配额由监视器、AI 工具和账户下的所有其他工具共享。�
 | vLLM | 本地 | `openai-compatible` | `http://127.0.0.1:8000/v1` | 无(本地服务器) | `meta-llama/Llama-3.2-3B-Instruct`, `Qwen/Qwen2.5-7B-Instruct`, `mistralai/Mistral-7B-Instruct-v0.3` | 保留在本机 | 协议兼容,尚未用本工具测试 |
 | LocalAI | 本地 | `openai-compatible` | `http://127.0.0.1:8081/v1` | 无(本地服务器) | `llama-3.2-3b-instruct`, `mixtral-8x7b-instruct`, `phi-4` | 保留在本机 | 协议兼容,尚未用本工具测试 |
 | Jan | 本地 | `openai-compatible` | `http://127.0.0.1:1337/v1` | 无(本地服务器) | `llama3.2-3b-instruct`, `qwen2.5-7b-instruct`, `gemma-3-4b-it` | 保留在本机 | 协议兼容,尚未用本工具测试 |
+
+## MCP 服务器：提示、自我描述、链接与受管控的写入
+
+- **提示**（`mcp.prompts`，开启）：`prompts/list` 和 `prompts/get` 给 AI 一个带编号的计划来遵循，而不是即兴发挥：`am_i_affected`（某个包、操作或事件是否出现在我的仓库中？）、`investigate_red`（某个仓库为何变红？）和 `weekly_review`（本周什么需要人工处理？）。提示只是文本。
+- **自我描述**：工具 `describe_capabilities`（服务器能做什么、哪些开关已开启）、`ping` 和 `whoami`。关于警报、诊断和配额的应答带有 `dashboard_url`，即显示相同内容的页面地址。
+- **写入**（`mcp.write_tools`，关闭）：工具 `gh_action` 规划 GitHub 上的操作并返回预览（方法、端点、仓库、编号、理由、涉及的数量）和 `plan_id`；在同一调用带着 `confirm: true` 和该 `plan_id` 回来之前不会发送任何内容。它与页面使用同一模块，因此还需要 `github_actions.enabled`、理由、凭据权限和唯一写入者，并以操作人 `mcp` 记入操作日志。设置关闭时该工具并不存在。

@@ -96,3 +96,7 @@ Per un backup cifrato metti la variabile indicata da `ops.backup.key_env` in `/e
 Sono tutte nella scheda Impostazioni (Cartelle e file) e in [SETTINGS_ita.md](SETTINGS_ita.md): `ops.backup.*` (enabled, dir, interval_hours, keep, include_config, compress_level, encrypt, key_env), `ops.purge.*` (enabled, require_backup_hours) e `ops.doctor.*` (strict_exit, backup_max_age_days, min_free_mb, sqlite_check, sqlite_timeout_s, webhook_min_length). Ogni interruttore parte spento o prudente, e quelli di sicurezza (il backup pianificato, l'inclusione delle impostazioni, la cifratura, la pulizia) sono contrassegnati come tali.
 
 Vedi anche [STORAGE_ita.md](STORAGE_ita.md) (i backend e la conservazione), [DEPLOYMENT_ita.md](DEPLOYMENT_ita.md) (servizio, contenitore, TLS) e [CLI_ita.md](CLI_ita.md).
+
+## Il monitor sorveglia la propria memoria e i propri thread
+
+Ogni `selfwatch.interval_seconds` (60) il monitor legge la propria memoria residente, i propri thread e l'uso del processore e li mostra in `/api/health` come `selfwatch` (`state`: `ok` o `high`). Quando la memoria supera `selfwatch.rss_warn_mb` (1024) o i thread `selfwatch.threads_warn` (400), lo annota una volta nel contatore degli errori inghiottiti (`high`, con le cifre), libera ciò che può e annota il ritorno alla normalità. Si disattiva con `selfwatch.enabled`. Imposta `selfwatch.rss_warn_mb` poco sotto il limite del tuo container. La CI esegue il monitor in un container con un processore e 512 MB con un account di 120 workflow (`tools/limits_check.py`).

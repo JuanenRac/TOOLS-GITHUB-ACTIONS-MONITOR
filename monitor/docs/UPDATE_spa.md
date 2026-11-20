@@ -111,3 +111,6 @@ Sin comando se abre la página. Los comandos responden una vez (añade `--json` 
 ## El aviso nombra la orden de tu forma de instalar
 
 El aviso de una versión más nueva (consola, Acerca de, `/api/about`) dice ahora la orden exacta de la forma en que se instaló este monitor, en el campo `command` junto a `channel`: el producto descomprimido (`py -3 monitor/bin/monitor_cli.py update`), un gestor de servicios (`... update apply --systemd-unit <unidad>`), un contenedor (`docker pull ghcr.io/juanenrac/tools-github-actions-monitor:<versión>`), pipx, uv o una extensión de la orden `gh`. El aviso no ejecuta nada.
+## Guardas del ayudante de servicio
+
+Con `updates.systemd_helper` (o `--systemd-unit`) el actualizador comprueba ahora el servicio antes de tocarlo: una unidad cuyo directorio de trabajo y orden no apuntan a ESTA carpeta pertenece a otra instalación y no se detiene ni se arranca; una unidad no se arranca mientras otra cosa (un monitor en primer plano) atienda su puerto; un reinicio no se da por hecho mientras el proceso siga siendo el viejo (la unidad debe mostrar un PID nuevo); y `update status --systemd-unit UNIDAD` lista solo los errores del servicio desde su último arranque. Son preguntas de solo lectura a `systemctl --user show` y `journalctl --user`; una pregunta sin respuesta no bloquea nada.

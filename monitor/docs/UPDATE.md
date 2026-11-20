@@ -111,3 +111,6 @@ Without a command the page opens. The commands answer once (add `--json` for a d
 ## The notice names the command of your way of installing
 
 The notice of a newer version (console, About, `/api/about`) now says the exact command for the way this monitor was installed, in the field `command` next to `channel`: the unpacked product (`py -3 monitor/bin/monitor_cli.py update`), a service manager (`... update apply --systemd-unit <unit>`), a container (`docker pull ghcr.io/juanenrac/tools-github-actions-monitor:<version>`), pipx, uv or an extension of the `gh` command. Nothing is run by the notice.
+## Guards of the service helper
+
+With `updates.systemd_helper` (or `--systemd-unit`) the updater now checks the service before it touches it: a unit whose working directory and command do not point to THIS folder belongs to another installation and is neither stopped nor started; a unit is not started while something else (a monitor in the foreground) answers on its port; a restart is not taken for done while the process is still the old one (the unit must show a new PID); and `update status --systemd-unit UNIT` lists only the errors of the service since its last start. These are read-only questions to `systemctl --user show` and `journalctl --user`; a question that cannot be answered blocks nothing.

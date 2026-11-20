@@ -20,3 +20,11 @@
 `.github/workflows/dashboard-dispatch.yml` s'exécute quand le workflow `CI` se termine au vert sur `main` (événements push seulement). Si le mainteneur définit le secret optionnel du dépôt `ECOSYSTEM_DASHBOARD_DISPATCH_TOKEN`, il demande à un dépôt de tableau de bord de rafraîchir sa table de versions ; sans le secret il se termine en silence, n'a aucune permission et ne modifie ni ne retarde jamais la CI. La version de `electro-hobby-3d.project.json` doit être égale à `tool_version.py` à chaque version ; un test le vérifie.
 
 - Liste de contrôle de l'aide : l'aide des Réglages (`cfg.h.<clé>`) de chaque nouveau réglage, l'aide de l'onglet modifié, les guides de `monitor/docs/`, les huit langues, l'index d'aide (`python tools/make_help_index.py`) et le journal des modifications.
+
+## Contrôles de la CI qui protègent le processus
+
+- **Tests sans réseau** : `sh tools/run_offline_tests.sh discover -s monitor/tests` exécute toute la suite dans un espace de noms réseau qui n'a que la boucle locale. Un test qui a besoin d'internet y échoue.
+- **Audit des dépendances** : `python tools/audit_dependencies.py` lance `pip-audit` sur les paquets que la CI installe. Une suppression de `.github/audit-suppressions.json` demande `id`, `reason` et `expires` (180 jours au plus) ; une suppression expirée échoue, et une morte aussi (la vulnérabilité n'est plus trouvée).
+- **Test de fumée des sources externes** : le workflow `sources-smoke.yml` (hebdomadaire) lance `tools/smoke_sources.py` contre la vraie page d'état, les avis de sécurité, la description de l'API REST et la dernière release, et échoue quand l'une a changé de format.
+- **Limites** : `tools/limits_check.py` fait tourner le moniteur avec un compte de 120 workflows dans un conteneur d'un processeur et 512 Mo.
+- **Ordre de la release** : créez la release GitHub en BROUILLON et poussez l'étiquette `vX.Y.Z` ; `release-image.yml` construit et publie l'image et ne publie le brouillon que lorsqu'elle répond sous son étiquette pour les deux plateformes.

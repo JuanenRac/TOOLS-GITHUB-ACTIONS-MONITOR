@@ -20,3 +20,11 @@
 `.github/workflows/dashboard-dispatch.yml` 在 `CI` 工作流于 `main` 上变绿后运行(仅 push 事件)。如果维护者定义了可选的仓库密钥 `ECOSYSTEM_DASHBOARD_DISPATCH_TOKEN`,它会请求一个看板仓库刷新其版本表;没有该密钥时静默退出,没有任何权限,也从不更改或拖慢 CI。每次发布时 `electro-hobby-3d.project.json` 中的版本必须等于 `tool_version.py`;有测试检查。
 
 - 帮助检查清单:每个新设置的设置帮助(`cfg.h.<键>`)、所改标签页的帮助、`monitor/docs/` 中的指南、八种语言、帮助索引(`python tools/make_help_index.py`)和更新日志。
+
+## 守护流程的 CI 检查
+
+- **断网测试**：`sh tools/run_offline_tests.sh discover -s monitor/tests` 在只有回环接口的网络命名空间中运行整个测试套件。需要互联网的测试会在这里失败。
+- **依赖审计**：`python tools/audit_dependencies.py` 对 CI 安装的包运行 `pip-audit`。`.github/audit-suppressions.json` 中的抑制项需要 `id`、`reason` 和 `expires`（最长 180 天后）；过期的会失败，已无用的（漏洞不再出现）也会失败。
+- **外部来源冒烟测试**：每周运行的工作流 `sources-smoke.yml` 用 `tools/smoke_sources.py` 访问真实的状态页、安全公告、REST API 描述和最新发布，任何一个改变格式都会失败。
+- **限制**：`tools/limits_check.py` 在一个处理器、512 MB 的容器中用 120 个工作流的账户运行监视器。
+- **发布顺序**：先把 GitHub 发布创建为草稿并推送标签 `vX.Y.Z`；`release-image.yml` 构建并发布镜像，只有当两个平台都能按标签响应时才发布草稿。

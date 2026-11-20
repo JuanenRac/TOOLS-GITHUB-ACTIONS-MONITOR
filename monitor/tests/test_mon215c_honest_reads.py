@@ -18,7 +18,7 @@ from github_actions_monitor.security import auth  # noqa: E402
 from github_actions_monitor import i18n  # noqa: E402
 
 PAGE = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
-CONFIG = {"github_actions": {"enabled": True, "allowed": ["rerun_failed", "cancel"]}}
+CONFIG = {"github_actions": {"enabled": True, "allowed": ["rerun_failed", "cancel"], "require_reason": False, "preflight": False, "writer_lock": False}}
 
 
 class ContextualErrors(unittest.TestCase):

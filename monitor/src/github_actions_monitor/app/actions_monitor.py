@@ -22,6 +22,7 @@ do not use up the GitHub allowance shared with the agents.
 """
 from github_actions_monitor.app import api_spec, api_v1
 from github_actions_monitor.app import codestale
+from github_actions_monitor.app import selfwatch  # noqa: E402
 from github_actions_monitor.app import degraded
 from github_actions_monitor.app import viewers
 from github_actions_monitor.app import lastpicture
@@ -140,7 +141,9 @@ DEFAULTS = {
                 "menu": True, "menu_target": "new", "menu_max_windows": 4, "menu_rotate_seconds": 20, "menu_tv_scale": 1.5, "safe_margin_percent": 0,
                 "life": True, "glance_seconds": 3, "transition": "fade", "hide_healthy": False, "idle_dim_minutes": 0, "min_font_px": 12},   # the wall screens /screen/overview, /screen/now and /screen/sentinels (docs/SCREENS.md, screens.py): read only, from what the monitor already holds
     "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "on_warning": True, "on_resolved": True, "on_report": True, "on_lesson": True, "on_sentinel": True, "on_stuck": True, "on_score_drop": True, "on_info": True, "on_live_recovered": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False, "theme": "classic", "quiet_enabled": False, "quiet_from_hour": 22, "quiet_to_hour": 7, "voices": "", "ambient": False, "ambient_volume": 10, "tick": False, "tick_seconds": 1},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
-
+    "mcp": {"prompts": True, "write_tools": False},      # the MCP server (bin/mcp_server.py): guided prompts on, the governed write tool OFF (integrations/mcp_extras.py)
+    "siem": {"queue_max": 500, "sinks": []},      # OFF: events towards Elasticsearch, Splunk, Loki, Sentinel, BigQuery or an HTTP receiver; each sink is enabled by hand in the file (integrations/siem.py)
+    "selfwatch": {"enabled": True, "rss_warn_mb": 1024, "threads_warn": 400, "interval_seconds": 60},      # the monitor watches its own memory and threads (app/selfwatch.py)
     "updates": {"check": True, "systemd_helper": False},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
     "airgapped": False,            # True: nothing is requested from the network except GitHub's data you asked for; the update check is off
     "open_browser": True,
@@ -149,10 +152,10 @@ DEFAULTS = {
     "quota": {"billing_api": False, "chip": True, "warn_percent": 75, "alert_percent": 90, "default_runner": "linux", "failover": False, "failover_max_age_minutes": 60},
     "session_guard": True,         # the page asks for a one-use token before it changes a setting or confirms an action
     "discovery": {"events": True, "suggest_groups": True, "auto_frequency": False, "hide": [], "skip_archived": True, "fork_policy": "show", "fork_ci_days": 90, "fork_checks_per_pass": 30},
-    "auth": {"enabled": False, "session_hours": 12, "max_failed_logins": 5, "lockout_minutes": 15, "min_length": 10, "allow_bearer": False, "audit": True},     # OFF: one person, no login. On: users with roles once the first administrator exists (security/auth.py)
-    "listen": {"network": False, "trusted_proxy": False, "trusted_proxies": [], "local_port": 0, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "tls_cert_file": "", "tls_key_file": "", "secure_cookie": False, "proxy_public_host": "", "max_failed_attempts": 10, "query_access": False},     # OFF: only this computer. On: a private address, with an access token for every request
+    "auth": {"enabled": False, "session_hours": 12, "max_failed_logins": 5, "lockout_minutes": 15, "min_length": 10, "allow_bearer": False, "audit": True, "stream_revalidate_min": 10},     # OFF: one person, no login. On: users with roles once the first administrator exists (security/auth.py)
+    "listen": {"network": False, "noindex": True, "trusted_proxy": False, "trusted_proxies": [], "local_port": 0, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "tls_cert_file": "", "tls_key_file": "", "secure_cookie": False, "proxy_public_host": "", "max_failed_attempts": 10, "query_access": False},     # OFF: only this computer. On: a private address, with an access token for every request
     "github_token": {"enabled": False, "store": "auto"},       # OFF: the monitor uses your own `gh login`. On: a token kept in the store of the system (secretstore.py)
-    "github_actions": {"enabled": False, "allowed": ["rerun_failed", "cancel"], "merge_method": "squash"},      # OFF: actions on GitHub, each one confirmed on its own (ghactions.py)
+    "github_actions": {"enabled": False, "allowed": ["rerun_failed", "cancel"], "merge_method": "squash", "require_reason": True, "operator": "", "comment_on_target": False, "preflight": True, "writer_lock": True},      # OFF: actions on GitHub, each one confirmed on its own (ghactions.py)
     "act": {"enabled": False, "allowed": [], "timeout_seconds": 900, "allow_symlinks": False},
     "dispatch": {"required_ci": ["ci.yml"]},                                 # the workflow files that must have passed on a commit before a batch is fired (gha_dispatch_all.py)         # OFF: run a workflow here with `act`, each run confirmed on its own (actlocal.py)
     "mirror": {"enabled": False, "folder": "", "max_mb": 500, "keep_days": 14, "max_per_cycle": 3},     # OFF: a local copy of the artifacts of the runs (mirror.py)
@@ -2927,6 +2930,16 @@ class CountedReader:
         return getattr(self.stream, name)
 
 
+def noindex_on(config):
+    """`listen.noindex` (on unless it is a real false): the X-Robots-Tag header of every answer and the file /robots.txt."""
+    listen = config.get("listen") if isinstance(config, dict) else None
+    return not (isinstance(listen, dict) and listen.get("noindex") is False)
+
+
+STORE_DOWN = [0]      # how many requests found the storage not answering since the monitor started
+STORE_RETRY_SECONDS = 5
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *args):
         pass
@@ -2950,6 +2963,8 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header(name, value)
         if getattr(self, "deprecated_access", False):
             self.send_header("Deprecation", "true")      # the ?access= address is deprecated: POST /api/access keeps the token out of the address bar
+        if noindex_on(LIVE_CONFIG or DEFAULTS):      # no search engine indexes a monitor, whatever it is behind (`listen.noindex`, on by default)
+            self.send_header("X-Robots-Tag", "noindex, nofollow")
         if getattr(self, "v1", False):      # every answer under /api/v1/ says which version of the API it is, whichever handler wrote it
             self.send_header(api_v1.VERSION_HEADER, api_v1.API_VERSION)
         super().end_headers()
@@ -3009,6 +3024,20 @@ class Handler(BaseHTTPRequestHandler):
         except (ConnectionError, OSError):
             pass   # the browser or a reader closed the tab mid-answer: nothing to report
 
+    def stream_guard(self):
+        """A function for the loop of a stream: True when the stream must end because the session that opened it was revoked or has expired, or because the role no longer allows it. It looks every
+        `auth.stream_revalidate_min` minutes (10), so no connection keeps permissions that are gone."""
+        last = [time.time()]
+
+        def stop():
+            config = toolconfig.raw_config()
+            every = auth.settings(config)["stream_revalidate_min"] * 60
+            if time.time() - last[0] < every:
+                return False
+            last[0] = time.time()
+            return not auth_http.revalidate(self, config, self.path.split("?")[0])
+        return stop
+
     def live_stream(self):
         """GET /api/live-events/stream: `text/event-stream` with a `hello` frame, then one `live` frame per webhook event accepted from now on (or after `Last-Event-ID` / `?since=` while still held)
         and a keep-alive comment. Read only, off by default (`live.sse.enabled`); the network mode asks for the access token as for every other request; limited listeners, each for a limited time."""
@@ -3031,7 +3060,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Connection", "close")
             self.end_headers()
             self.close_connection = True
-            for frame in webhook.sse_frames(config, lambda: (LIVE_TOTAL[0], list(LIVE_EVENTS)), since=whole(resume, None)):
+            for frame in webhook.sse_frames(config, lambda: (LIVE_TOTAL[0], list(LIVE_EVENTS)), since=whole(resume, None), stop=self.stream_guard()):
                 self.wfile.write(frame.encode("utf-8"))
                 self.wfile.flush()
         except (ConnectionError, OSError):
@@ -3064,7 +3093,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Connection", "close")
             self.end_headers()
             self.close_connection = True
-            for frame in ai_alerts.stream_frames(config, offset=whole(resume, None),
+            for frame in ai_alerts.stream_frames(config, offset=whole(resume, None), stop=self.stream_guard(),
                                                  only_real=(ask.get("only") or [""])[0] == "real"):
                 self.wfile.write(frame.encode("utf-8"))
                 self.wfile.flush()
@@ -3285,7 +3314,11 @@ class Handler(BaseHTTPRequestHandler):
                 self.json_reply({"ok": False, "error": "audit_log_required", "code": "audit_unwritable"}, 503)
                 return
             with i18n.use_language(self.request_language()):
-                self.handle_post()
+                try:
+                    self.handle_post()
+                except Exception as error:      # noqa: BLE001 - see storage_failure
+                    if not self.storage_failure(error):
+                        raise
             self.audit_post(self.path.split("?")[0])
         finally:
             self.drain_body(counted)
@@ -3563,7 +3596,45 @@ class Handler(BaseHTTPRequestHandler):
             self.json_reply({"ok": False, "error": str(error)[:200]})
 
     def do_GET(self):
+        self.reply_status = 0
+        try:
+            self.serve_get()
+        except Exception as error:      # noqa: BLE001 - only a storage that does not answer is turned into an answer; anything else goes on as it always did
+            if not self.storage_failure(error):
+                raise
+
+    def storage_failure(self, error):
+        """A storage that does not answer (the database is locked, gone or full; the disk is unplugged) is a 503 with `Retry-After`, never a connection that drops with no answer. The monitor keeps running and
+        the next request that finds the storage back is served as usual. True when the error was that. A browser that closed the tab is not a storage failure."""
+        from github_actions_monitor.storage import base, state_io
+        import sqlite3
+        if isinstance(error, CLIENT_GONE):
+            return False
+        cause = error.__cause__
+        if not (isinstance(error, (base.StorageError, sqlite3.Error)) or (isinstance(error, OSError) and isinstance(cause, (sqlite3.Error, base.StorageError)) and state_io.bound()[0] is not None)):
+            return False      # a file that does not exist is not a storage that does not answer: only what state_io raised FROM a database error counts
+        STORE_DOWN[0] += 1
+        if getattr(self, "reply_status", 0):      # an answer is already on its way: the connection ends and the client asks again
+            self.close_connection = True
+            return True
+        body = json.dumps({"ok": False, "error": "storage_unavailable", "retry_after": STORE_RETRY_SECONDS}).encode("utf-8")
+        try:
+            self.send_response(503)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Retry-After", str(STORE_RETRY_SECONDS))
+            self.end_headers()
+            self.wfile.write(body)
+        except (ConnectionError, OSError):
+            pass
+        return True
+
+    def serve_get(self):
         self.v1 = False
+        if self.path.split("?")[0] == "/robots.txt" and noindex_on(toolconfig.raw_config()):      # nothing here is for a search engine; the file is public and says so
+            self.reply("User-agent: *\nDisallow: /\n", "text/plain; charset=utf-8")
+            return
         if not self.access_gate():      # the access token first: the 404 of a switch that is off does not tell a visitor without credentials whether the versioned API exists
             return
         if not self.v1_enter() or not auth_http.gate(self, LIVE_CONFIG or DEFAULTS, LITE["on"]):
@@ -4259,7 +4330,7 @@ def health_payload(deep=False):
     answer also says whether the monitor is fit to serve: `ok` is false when the refresh loop is stuck or gone (see `health_reply`)."""
     with LOCK:
         loaded = bool(STATE.get("data"))
-    out = {"ok": True, "lite": LITE["on"], "version": TOOL_VERSION, "uptime_seconds": int(time.time() - STARTED), "loaded": loaded, "offline": LINK.state()["offline"], "degraded": degraded.snapshot()["total"], "code_stale": codestale.stale(TOOL_VERSION)}      # code_stale: the files on the disk are of another version than this process (it must be restarted)
+    out = {"ok": True, "lite": LITE["on"], "version": TOOL_VERSION, "uptime_seconds": int(time.time() - STARTED), "loaded": loaded, "offline": LINK.state()["offline"], "degraded": degraded.snapshot()["total"], "code_stale": codestale.stale(TOOL_VERSION), "selfwatch": selfwatch.WATCH.snapshot()}      # code_stale: the files on the disk are of another version than this process (it must be restarted)
     if CHILD["account"]:
         out["account"] = CHILD["account"]
     out["viewers"] = viewers.public(LIVE_CONFIG or DEFAULTS)      # whether the polling is aware of who is looking (modes.idle_minutes), for how long nobody has, and whether it is cold
@@ -4867,7 +4938,8 @@ def handle_advanced_post(path, request, who=""):
     if path.startswith("/api/gh-action"):
         from github_actions_monitor.integrations import ghactions
         if path.endswith("plan"):
-            item, why = ghactions.plan(config, toolconfig.github_owner(config), request.get("action"), request.get("repo"), request.get("number"))
+            item, why = ghactions.plan(config, toolconfig.github_owner(config), request.get("action"), request.get("repo"), request.get("number"), reason=request.get("reason"),
+                                       operator=request.get("operator") or who, run_gh=run_gh_checked)
             return {"ok": item is not None, "status": why, "plan": item}
         return ghactions.execute(config, request.get("plan"), run_gh_checked)
     from github_actions_monitor.integrations import actlocal
@@ -4919,6 +4991,11 @@ def start_sentinel(config):
         SENTINEL["obj"] = SENTINEL["registry"].get("ci")                                   # the CI sentinel answers everything the monitor always asked of it
         from github_actions_monitor.integrations import notifiers
         SENTINEL["obj"].feed.listeners.append(notifiers.make_listener(toolconfig.raw_config))
+        from github_actions_monitor.integrations import siem      # OFF: events towards a SIEM, only for the sinks that are enabled (siem.sinks)
+        for _name in ("ci", "collab", "security", "supply", "delivery"):
+            _sentinel = SENTINEL["registry"].get(_name)
+            if _sentinel is not None:
+                _sentinel.feed.listeners.append(siem.make_listener(toolconfig.raw_config))
         collab = SENTINEL["registry"].get("collab")
         if collab is not None:
             collab.feed.listeners.append(notifiers.make_listener(toolconfig.raw_config))
@@ -5287,6 +5364,7 @@ def main():
         signal.signal(signal.SIGHUP, reload_on_signal)      # kill -HUP: read the credential files again, no restart (where the system has the signal)
     threading.Thread(target=watchdog_loop, args=(config,), daemon=True, name="refresh-watchdog").start()
     threading.Thread(target=update_loop, daemon=True).start()
+    selfwatch.start(config, note=degraded.note)      # the memory and the threads of this process, noted before the system ends it
     if not LITE["on"]:
         start_sentinel(config)
     try:      # the token file of the second account is only accepted inside the accounts folder: a configuration that points elsewhere is told once, with the way out

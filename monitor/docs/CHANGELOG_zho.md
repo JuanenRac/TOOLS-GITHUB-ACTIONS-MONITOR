@@ -100,6 +100,35 @@
 - **`monitor_cli.py metrics` 输出供 cron 和邮件使用的数值**：每个数值一行 `名称=值`，顺序固定，标准输出中没有其他内容；加上 `--if-problem` 时，如果没有红色工作流且没有 `--fail-on` 及更严重级别的警报，则完全不输出（退出码 0），因此 cron 只在出问题的那天才发邮件（附带数值，退出码 5）。
 
 - **新版本提示会给出与你的安装方式相符的命令**：解压后的产品、服务管理器、容器、pipx、uv 或 `gh` 的扩展（`/api/about` 应答中的 `channel` 和 `command`，以及控制台和“关于”面板）。提示本身不会运行任何东西。
+- **更新程序服务助手的防护**：使用 `updates.systemd_helper`（或 `--systemd-unit`）时，它拒绝停止或启动属于另一个安装的服务，在其他程序占用其端口时拒绝启动，进程仍是旧进程时不把重启视为完成；`update status --systemd-unit 单元` 只列出该服务自上次启动以来的错误。
+
+- **GitHub 发布会等待软件包**：镜像工作流现在由版本标签触发，把镜像发布到镜像仓库，只有当镜像在两个平台上都能按标签响应时，才发布（先创建为草稿的）发布版本。
+
+- **CI 在断网状态下运行测试套件并审计依赖**：一个作业在只有回环接口的网络命名空间中运行全部测试，另一个作业通过 `tools/audit_dependencies.py` 运行 `pip-audit`；抑制项必须带有理由和到期日期，过期或已无用的抑制项会使作业失败。
+
+- **每周对外部来源做冒烟测试**：工作流 `sources-smoke.yml` 读取 GitHub 真实的状态页、安全公告、REST API 描述和项目的最新发布，当某个来源改变了监视器所读取的格式时即失败（`tools/smoke_sources.py`；有测试保证其端点列表与代码实际调用的一致）。
+
+- **工作流检查器能发现容器操作中带连字符输入的陷阱**（规则 `container_input_name`，默认关闭，`warn`）：GitHub 把 `fail-on-findings` 以 `INPUT_FAIL-ON-FINDINGS` 传入，因此读取 `INPUT_FAIL_ON_FINDINGS` 的脚本永远看不到该值；发现项会指出脚本、行号和输入名。
+
+- **停止响应的存储会得到干净的 503**：需要数据库的路由会返回带有 `Retry-After` 和 `storage_unavailable` 的 `503`，而不是断开连接；监视器继续运行，存储恢复后的下一个请求会正常处理；实时流会告诉浏览器重连前要等待多久（`retry:`），并用 `Last-Event-ID` 续传。端到端测试会切断真实服务器的数据库来验证这一点。
+
+- **监视器监视自身的内存和线程**（`selfwatch.enabled`、`selfwatch.rss_warn_mb` 1024、`selfwatch.threads_warn` 400、`selfwatch.interval_seconds` 60）：`/api/health` 带有 `selfwatch`，超过限制时会带着数值在被吞掉失败的计数器中记录一次并尽可能释放；CI 在一个处理器、512 MB 的容器中用 120 个工作流的账户运行监视器（`tools/limits_check.py`）。
+
+- **GitHub 上的操作需要理由和操作人，并由服务器把关**（`github_actions.require_reason`、`github_actions.operator`、`github_actions.comment_on_target`、`github_actions.preflight`、`github_actions.writer_lock`）：没有理由（3 到 200 个字符）和操作人的计划会被服务器拒绝，无论页面发送什么，两者都会写入日志；操作前会再次查看目标（变化则返回 `stale`），以无副作用的方式询问凭据能否执行（权限诊断还会读取可推送名单），本机只有一个监视器可以写入，用 `--profile qa` 启动的监视器是观察者。开启 `github_actions.comment_on_target` 后，被关闭的议题或拉取请求还会收到带有这些信息的评论。
+
+- **实时流随其会话结束**（`auth.stream_revalidate_min`，10）：实时流每隔几分钟重新检查开启它的会话，会话被撤销或过期、用户被删除或角色不再允许时即关闭，因此没有连接会保留已失效的权限。
+
+- **监视器请求搜索引擎不要收录，并说明暴露到网络意味着什么**（`listen.noindex`，开启）：每个响应都带有 `X-Robots-Tag: noindex, nofollow`，`/robots.txt` 禁止一切；doctor 的暴露检查会给出地址、是否有 TLS 以及是否需要登录，并提醒对任何人开放的页面可能被标记为钓鱼。使用 Caddy 和 Cloudflare Tunnel 请求头的测试保证代理之后对 Host 和 Origin 的检查可靠。
+
+- **监视器网络目标表，以及被阻止时会失败的内容**（`monitor_cli.py doctor --egress`）：当前配置可能访问的每个主机、用途、使其成为目标的设置以及阻止它的后果，供出站策略严格的计算机使用；有测试保证该表与代码中出现的主机一致。
+
+- **发送到 SIEM 的事件**（可选，关闭；`siem.sinks`、`siem.queue_max`）：Elasticsearch（bulk）、Splunk HEC、Loki、Microsoft Sentinel（用共享密钥签名）、BigQuery 或简单的 HTTP 接收端，每个目标有自己的过滤器（`from_minutes`、`levels`、`repos_filter`）、固定的字段列表，令牌从环境变量读取而绝不从文件读取，遵守监视器的网络规则（除非目标允许，否则不使用私有地址），接收端宕机时使用有界队列，离线模式下完全不发送。
+
+- **MCP 服务器新增引导式提示和自我描述，应答带有页面链接，并能在受控条件下写入**（`mcp.prompts` 开启，`mcp.write_tools` 关闭）：提示 `am_i_affected`、`investigate_red` 和 `weekly_review` 给 AI 一个带编号的计划；工具 `describe_capabilities`、`ping` 和 `whoami` 说明服务器能做什么；关于警报、诊断和配额的应答带有 `dashboard_url`；仅在设置开启时才存在的工具 `gh_action` 会规划操作并显示预览，在同一调用带着 `confirm: true` 和该计划回来之前不发送任何内容，并经过与页面相同的防护。
+
+- **CI 哨兵的工作流检查器读取远程默认分支，而不是克隆的工作区**：本地克隆的工作流文件与 CHANGELOG 和版本一样，通过 `git show origin/<默认分支>` 读取（不 fetch、不联网），因此停留在旧分支的克隆不会再让检查器评判 main 上并不存在的工作流；没有远程分支时读取工作区并予以说明。
+
+- **只有在 [Unreleased] 下有五条以上条目时才会建议发布**：`sentinel.candidate_min_entries` 的默认值现在是 5（原为 1），因此 CI 哨兵的发布候选和发布就绪度不再因为一两个小改动而出现。你自己选择的值会保留；该数字可在设置中设为 1 到 100。
 
 ### 修复
 

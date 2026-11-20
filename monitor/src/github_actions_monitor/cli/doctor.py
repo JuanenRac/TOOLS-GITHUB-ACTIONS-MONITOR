@@ -31,6 +31,19 @@ ORDER_OPS = ("volumes", "supervisor", "limits", "capacity", "sqlite_hot", "backu
 EXIT_OK, EXIT_FAIL, EXIT_WARN, EXIT_DOCTOR_ERROR = 0, 1, 3, 4
 
 
+def exposure_detail(config, listen):
+    """What the monitor says about being reachable from the network: the address, whether the traffic is encrypted (a certificate of its own or a proxy that declares it) and whether people have to sign in
+    (the team mode); and the reminder that a page without a login that anyone can reach may be marked as phishing by the browsers, so it must not be indexed or published (`listen.noindex` keeps it out of the search engines)."""
+    tls = bool(listen.get("tls_cert_file")) or bool(listen.get("secure_cookie")) or bool(listen.get("proxy_public_host"))
+    team = isinstance(config.get("auth"), dict) and config["auth"].get("enabled") is True
+    parts = ["network " + str(listen.get("host", "")), "tls" if tls else "no tls", "team login" if team else "token only"]
+    if listen.get("noindex") is False:
+        parts.append("indexable")
+    elif not team:
+        parts.append("do not publish: a page open to anyone may be flagged as phishing")
+    return " · ".join(parts)
+
+
 def default_runner(args, timeout=20):
     try:
         from github_actions_monitor.security import secretstore
@@ -137,7 +150,7 @@ def run(runner=default_runner, folder=HERE, ports=None, python=None, config=None
     out["token"] = ("ok" if guard else "warn", "one-use, 10 min" if guard else "off")
     listen = config.get("listen") if isinstance(config.get("listen"), dict) else {}
     network = listen.get("network") is True
-    out["exposure"] = ("warn" if network else "ok", ("network " + str(listen.get("host", ""))) if network else "127.0.0.1")
+    out["exposure"] = ("warn" if network else "ok", exposure_detail(config, listen) if network else "127.0.0.1")
     out["risks"] = risks(config)
     out["conflicts"] = conflicts(config)
     out["backend"] = token_backend(config)

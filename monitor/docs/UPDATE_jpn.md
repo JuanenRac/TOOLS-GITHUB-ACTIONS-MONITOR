@@ -111,3 +111,6 @@
 ## 通知はインストール方法に合ったコマンドを示します
 
 新しいバージョンの通知（コンソール、このツールについて、`/api/about`）は、このモニターのインストール方法に合った正確なコマンドを `channel` の隣の `command` フィールドで示します：展開した製品（`py -3 monitor/bin/monitor_cli.py update`）、サービスマネージャー（`... update apply --systemd-unit <ユニット>`）、コンテナー（`docker pull ghcr.io/juanenrac/tools-github-actions-monitor:<バージョン>`）、pipx、uv、`gh` コマンドの拡張。通知自体は何も実行しません。
+## サービスヘルパーの安全確認
+
+`updates.systemd_helper`（または `--systemd-unit`）を使うと、アップデーターはサービスに触れる前に確認します。作業ディレクトリとコマンドが「このフォルダー」を指さないユニットは別のインストールのものとして停止も起動もしません。ポートでほかのもの（フォアグラウンドのモニター）が応答している間はユニットを起動しません。プロセスが古いままの間は再起動を完了とみなしません（ユニットは新しい PID を示す必要があります）。`update status --systemd-unit ユニット` はサービスの前回の起動以降のエラーだけを一覧します。これらは `systemctl --user show` と `journalctl --user` への読み取り専用の問い合わせで、答えが得られなくても何もブロックしません。

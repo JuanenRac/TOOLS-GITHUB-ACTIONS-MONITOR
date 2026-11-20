@@ -725,6 +725,10 @@ def cmd_doctor(ctx):
     from github_actions_monitor.app import toolconfig
     edition = "lite" if ctx.get("lite") else "complete"
     config = toolconfig.raw_config()
+    if ctx.get("egress"):      # `doctor --egress`: the hosts this configuration can call and what fails if they are blocked (no check is run, nothing is called)
+        from github_actions_monitor.ops import egress
+        rows = egress.table(config)
+        return {"egress": rows, "airgapped": config.get("airgapped") is True}, egress.lines(config, i18n.t), EXIT_OK
     try:
         checks = doctor.run(config=config, edition=edition)
     except Exception:      # noqa: BLE001 - the doctor itself could not run: its own exit code, not a traceback
@@ -1133,6 +1137,7 @@ def build_parser():
     ap.add_argument("--status-codes", choices=STATUS_CODES, default="", dest="status_codes", help=i18n.t("cli.help_status_codes"))
     ap.add_argument("--if-problem", action="store_true", dest="if_problem", help=i18n.t("cli.help_if_problem"))
     ap.add_argument("--color", choices=terminal.MODES, default="auto", help=i18n.t("cli.help_color"))
+    ap.add_argument("--egress", action="store_true", help=i18n.t("cli.help_egress"))
     ap.add_argument("--version", action="store_true", help=i18n.t("cli.help_version"))
     return ap
 
@@ -1168,6 +1173,7 @@ def main(argv=None):
         ctx.update({"raw": raw, "format": "csv" if args.format == "csv" else formats.choose(args.format, args.json, formats.configured_format(raw)), "interval": args.interval, "once": args.once or args.single_pass, "exit_on_change": args.exit_on_change, "clear": not args.no_clear,
                     "branch": args.branch, "repo_asked": args.repo, "wait": args.wait, "status_codes": args.status_codes, "if_problem": args.if_problem, "color": terminal.use_color(args.color)})
         scheme["operator"] = args.command == "status" and status_scheme(ctx) == "operator"
+        ctx["egress"] = args.egress
         CLIENT.update({"session": "", "ca": (args.ca_file or os.environ.get("MONITOR_CA_FILE") or "").strip()})
         if CLIENT["ca"] and not os.path.isfile(CLIENT["ca"]):
             raise CliError(EXIT_USAGE, i18n.t("cli.ca_file_bad", file=CLIENT["ca"]))

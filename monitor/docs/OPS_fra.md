@@ -96,3 +96,7 @@ Pour une sauvegarde chiffrée, mettez la variable que désigne `ops.backup.key_e
 Tous sont dans l'onglet Réglages (Dossiers et fichiers) et dans [SETTINGS_fra.md](SETTINGS_fra.md) : `ops.backup.*` (enabled, dir, interval_hours, keep, include_config, compress_level, encrypt, key_env), `ops.purge.*` (enabled, require_backup_hours) et `ops.doctor.*` (strict_exit, backup_max_age_days, min_free_mb, sqlite_check, sqlite_timeout_s, webhook_min_length). Chaque interrupteur commence désactivé ou prudent, et ceux de sécurité (la sauvegarde planifiée, l'inclusion des réglages, le chiffrement, la purge) sont marqués comme tels.
 
 Voir aussi [STORAGE_fra.md](STORAGE_fra.md) (les backends et la rétention), [DEPLOYMENT_fra.md](DEPLOYMENT_fra.md) (service, conteneur, TLS) et [CLI_fra.md](CLI_fra.md).
+
+## Le moniteur surveille sa propre mémoire et ses threads
+
+Toutes les `selfwatch.interval_seconds` (60) le moniteur lit sa mémoire résidente, ses threads et son usage du processeur et les montre dans `/api/health` sous `selfwatch` (`state` : `ok` ou `high`). Quand la mémoire dépasse `selfwatch.rss_warn_mb` (1024) ou les threads `selfwatch.threads_warn` (400), il le note une fois dans le compteur des échecs avalés (`high`, avec les chiffres), libère ce qu'il peut et note le retour à la normale. Désactivable avec `selfwatch.enabled`. Réglez `selfwatch.rss_warn_mb` un peu sous la limite de votre conteneur. La CI exécute le moniteur dans un conteneur d'un processeur et 512 Mo avec un compte de 120 workflows (`tools/limits_check.py`).

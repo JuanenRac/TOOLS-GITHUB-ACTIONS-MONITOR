@@ -595,8 +595,11 @@ def sse_release():
         SSE_STREAMS[0] = max(0, SSE_STREAMS[0] - 1)
 
 
-def _sse_frame(name, data, ident=None):
-    return (f"id: {ident}\n" if ident is not None else "") + f"event: {name}\ndata: {json.dumps(data, ensure_ascii=True)}\n\n"
+SSE_RETRY_MS = 3000      # how long a browser waits before it reconnects when the stream breaks (the `retry:` field of the hello frame)
+
+
+def _sse_frame(name, data, ident=None, retry=None):
+    return (f"id: {ident}\n" if ident is not None else "") + f"event: {name}\n" + (f"retry: {int(retry)}\n" if retry else "") + f"data: {json.dumps(data, ensure_ascii=True)}\n\n"
 
 
 def sse_frames(config, snapshot, stop=lambda: False, sleep=time.sleep, clock=time.time, since=None, keepalive=15, poll=1.0):
@@ -607,7 +610,7 @@ def sse_frames(config, snapshot, stop=lambda: False, sleep=time.sleep, clock=tim
     started = clock()
     total, events = snapshot()
     seen = total if since is None else max(0, min(int(since), total))
-    yield _sse_frame("hello", {"held": len(events), "total": total})
+    yield _sse_frame("hello", {"held": len(events), "total": total}, retry=SSE_RETRY_MS)
     last_beat = started
     while not stop() and clock() - started < cfg["max_seconds"]:
         total, events = snapshot()

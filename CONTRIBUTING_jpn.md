@@ -20,3 +20,11 @@
 `.github/workflows/dashboard-dispatch.yml` は、`CI` ワークフローが `main` で成功した後(push イベントのみ)に実行されます。管理者が任意のリポジトリシークレット `ECOSYSTEM_DASHBOARD_DISPATCH_TOKEN` を定義すると、ダッシュボードリポジトリにバージョン表の更新を依頼します。シークレットが無ければ何もせず終了し、権限もなく、CIを変更・遅延させません。`electro-hobby-3d.project.json` のバージョンは各リリースで `tool_version.py` と等しくなければならず、テストが確認します。
 
 - ヘルプのチェックリスト:新しい設定ごとの設定ヘルプ(`cfg.h.<キー>`)、変更したタブのヘルプ、`monitor/docs/` のガイド、8 言語、ヘルプのインデックス(`python tools/make_help_index.py`)、変更履歴。
+
+## 手順を守る CI のチェック
+
+- **ネットワークを遮断したテスト**：`sh tools/run_offline_tests.sh discover -s monitor/tests` は、ループバックだけを持つネットワーク名前空間でスイート全体を実行します。インターネットが必要なテストはここで失敗します。
+- **依存関係の監査**：`python tools/audit_dependencies.py` は CI がインストールするパッケージに `pip-audit` を実行します。`.github/audit-suppressions.json` の抑制には `id`、`reason`、`expires`（最長 180 日先）が必要で、期限切れの抑制も、不要になった抑制（脆弱性がもう見つからない）も失敗になります。
+- **外部ソースのスモークテスト**：週次のワークフロー `sources-smoke.yml` が `tools/smoke_sources.py` で本物のステータスページ、アドバイザリ、REST API の記述、最新リリースを読み、形式が変わると失敗します。
+- **制限**：`tools/limits_check.py` は 1 プロセッサ・512 MB のコンテナーで 120 ワークフローのアカウントを使ってモニターを動かします。
+- **リリースの順序**：GitHub のリリースを下書きとして作り、タグ `vX.Y.Z` をプッシュします。`release-image.yml` がイメージをビルドして公開し、両方のプラットフォームでタグ指定で応答したときだけ下書きを公開します。

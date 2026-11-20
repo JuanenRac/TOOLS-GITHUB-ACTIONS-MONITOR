@@ -122,3 +122,7 @@ GitHub Actions 向けの他のツールの仕組みを調べて、いくつか�
 - `alertmanager.example.yml`：重大度別に 3 つの受信先（既定の Webhook、Grafana OnCall、n8n）へ振り分けるルート。すべてのアドレスは `https://example.invalid/...` で、自分のものを書くまで何も送信されません。ファイルに秘密情報を書かないでください。
 - `n8n_ghamon_alerts.json`：Alertmanager の Webhook を受け取りアラートごとに 1 件のメッセージを作る n8n のワークフロー。最後のノードは、チャット、メール、チケットのノードに置き換えるまで何もしません。
 - `prometheus.example.yml` と `docker-compose.observability.yml` は、パックを試すためにモニターのコンピューター上で Prometheus、Alertmanager、Grafana を起動します（コンテナーはホストのネットワークを共有し、ポートは `127.0.0.1` にあり、Grafana のパスワードはファイルではなくシェルから渡します）。
+## モニターが接続する先と、SIEM へのイベント
+
+- **ネットワーク接続先の一覧**：`monitor_cli.py doctor --egress`（`--json` も可）は、現在の設定が接続しうるホストごとに、用途、接続先になる設定、ブロックされたときに失敗することを一覧します：`api.github.com`、`github.com` と `objects.githubusercontent.com`（更新）、`raw.githubusercontent.com`（`lint.anonymous_public`）、ntfy、Telegram、チャットの Webhook、選んだ AI プロバイダー、OTLP コレクター、SIEM の送信先。`airgapped` では何も使われません。テストが、この一覧をコードに現れるホストと一致させます。
+- **SIEM**（オフ）：ファイルの `siem.sinks` に送信先を並べ、使うものには `enabled: true` を付けます：`elasticsearch`（bulk）、`splunk_hec`、`loki`、`sentinel`（Log Analytics、共有キーで署名）、`bigquery`（`insertAll`）、`http`（JSON 行）。トークンやキーは `token_env` が示す環境変数から読み、ファイルからは読みません。各送信先は `from_minutes`（5）、`levels`、`repos_filter` で絞り込みます。イベントのフィールドは固定（トークンやログ本文は含みません）。プライベートアドレスの受信先は `allow_private` がない限り拒否されます。受信先が停止している間、イベントは `siem.queue_max`（500）のキューで待ち、古いものから破棄されます。オフラインモードでは何も送られません。
