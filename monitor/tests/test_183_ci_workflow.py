@@ -1,6 +1,6 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
-"""The CI of the repository is cheap and does not pile up: Ubuntu and Windows on every pull request, the pip cache everywhere, runs superseded by a
+"""The CI of the repository is cheap and does not pile up: Ubuntu and Windows on every pull request, no cache of packages (the workflow also runs on tags, and a cache written there could be poisoned), runs superseded by a
 new push cancelled, and the image workflow written so that GitHub accepts it. The workflows are not part of the zip of the product: without them the tests skip."""
 import re
 import sys
@@ -54,12 +54,15 @@ class TheCiDoesNotPileUp(unittest.TestCase):
     def test_no_image_that_moves(self):
         self.assertNotIn("macos-latest", text(CI))
 
-    def test_every_python_job_uses_the_pip_cache_of_the_same_file(self):
+    def test_no_python_job_keeps_a_cache_and_no_checkout_keeps_the_token(self):
         source = text(CI)
         setups = source.count("uses: actions/setup-python@")
         self.assertGreaterEqual(setups, 4)
-        self.assertEqual(source.count("cache: pip\n"), setups)
-        self.assertEqual(source.count("cache-dependency-path: .github/ci-requirements.txt"), setups)
+        self.assertNotIn("cache:", source)       # the workflow also runs on tags: a cache written by it could be read by another run
+        self.assertNotIn("cache-dependency-path", source)
+        checkouts = source.count("uses: actions/checkout@")
+        self.assertGreaterEqual(checkouts, setups)
+        self.assertEqual(source.count("persist-credentials: false"), checkouts)
         requirements = (ROOT / ".github" / "ci-requirements.txt").read_text(encoding="utf-8")
         self.assertTrue({"rich", "textual"} <= {line.strip() for line in requirements.splitlines() if line.strip() and not line.startswith("#")})
 
