@@ -113,6 +113,10 @@
      10000
     ],
     "default": 500
+   },
+   {
+    "key": "siem.sinks",
+    "default": []
    }
   ],
   "removed": [],
