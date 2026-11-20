@@ -19,6 +19,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Añadido
 
+- **Todas las ejecuciones en curso se cuentan, flujo por flujo** (`fleet.show_all_active`, activada por defecto): la salud de un repositorio lleva `ci.active` (se ve como *En curso ahora* en la ventana del repositorio) con cuántas ejecuciones de cada flujo corren y esperan y la ejecución más reciente de cada rama, de modo que dos ejecuciones del mismo flujo que van a la vez (publicaciones en paralelo, una ejecución por rama) no se muestran como una; las filas de la flota llevan `running` y `queued`. Desactivada: un flujo muestra solo su ejecución más reciente.
 <<<<<<< HEAD
 - **Cuando se acaba una cuota, la lectura se hace con otra fuente y, si todas están gastadas, se muestra la última copia buena con su edad** (`quota.failover`, desactivada por defecto, con `quota.failover_max_age_minutes`): una lectura que responde 429 o «rate limit exceeded» se repite una vez con otra fuente que pueda leer (tu sesión, la GitHub App, la segunda cuenta) y la que se agotó cuenta como gastada hasta su próxima comprobación gratuita; cuando todas las fuentes están gastadas se muestra la última copia buena de esa lectura con su edad en vez de un error, nunca más antigua que el límite pedido. Un límite nunca se toma por una negativa de permiso, una escritura nunca cambia de fuente y el estado de la cuota dice cuántas veces actuó.
 =======

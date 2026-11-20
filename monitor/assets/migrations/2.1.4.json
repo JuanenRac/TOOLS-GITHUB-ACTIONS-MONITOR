@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "7b81661e5028301b14d88daa287bb85f9adfc471301ec70abc877da6d6295e86",
+ "digest": "0e460fac8bcdeaef39636e54fa0b1081a30c552cc0e429bc44678eac40e38b04",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -126,6 +126,11 @@
      0,
      100
     ]
+   },
+   {
+    "key": "fleet.show_all_active",
+    "kind": "bool",
+    "default": true
    },
    {
     "key": "lint.anonymous_public",

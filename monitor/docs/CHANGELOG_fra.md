@@ -19,6 +19,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Toutes les exécutions en cours sont comptées, workflow par workflow** (`fleet.show_all_active`, activée par défaut) : la santé d'un dépôt porte `ci.active` (affiché *En cours maintenant* dans la fenêtre du dépôt) avec combien d'exécutions de chaque workflow tournent et attendent et l'exécution la plus récente de chaque branche, si bien que deux exécutions du même workflow en même temps (publications en parallèle, une exécution par branche) ne sont pas montrées comme une seule ; les lignes de la flotte portent `running` et `queued`. Désactivée : un workflow n'affiche que son exécution la plus récente.
 <<<<<<< HEAD
 - **Quand un quota est épuisé, la lecture se fait avec une autre source et, si toutes sont dépensées, la dernière bonne copie est montrée avec son âge** (`quota.failover`, désactivé par défaut, avec `quota.failover_max_age_minutes`) : une lecture qui répond 429 ou « rate limit exceeded » est refaite une fois avec une autre source capable de lire (votre session, la GitHub App, le second compte) et celle qui s'est épuisée compte comme dépensée jusqu'à sa prochaine vérification gratuite ; quand toutes les sources sont dépensées, la dernière bonne copie de cette lecture est montrée avec son âge au lieu d'une erreur, jamais plus vieille que la limite demandée. Une limite n'est jamais prise pour un refus de permission, une écriture ne change jamais de source, et l'état du quota dit combien de fois il est intervenu.
 =======

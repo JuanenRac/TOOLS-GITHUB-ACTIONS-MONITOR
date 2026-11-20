@@ -151,7 +151,7 @@ DEFAULTS = {
     "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
     "organizations": {"discover": False},                                    # OFF: list the organisations of the login (orgs.py)
     "finops": {"jobs_per_cycle": 0},
-    "fleet": {"page_size": 50, "group_by": "ecosystem", "sort": "risk", "labels": [], "saved_filters": []},      # the fleet view of the Team tab (health/fleet.py)
+    "fleet": {"page_size": 50, "group_by": "ecosystem", "sort": "risk", "show_all_active": True, "labels": [], "saved_filters": []},      # the fleet view of the Team tab (health/fleet.py)
     "network": {"use_proxy": False, "etag": True, "graphql_checks": False, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
     "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
     "pagination": {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3, "cursor_pages": 3},      # pages of 100 followed when a list is full, and said when something is cut (paging.py)
@@ -2119,11 +2119,13 @@ def health_views(now=None, only=None):
     if only is not None:
         names = [n for n in names if n == only]
     runs_by, failing_by, active_by, alerts_by = (repo_view.group_by_repo(x) for x in (runs, failing, active, alerts))
+    from github_actions_monitor.health import fleet as fleet_view_module
+    all_active = fleet_view_module.settings(toolconfig.raw_config())["show_all_active"]      # fleet.show_all_active: every run that is going, or only the newest of each workflow
     summary_by = RUN_SUMMARY["by_repo"] if (data.get("runs_total") or 0) > len(runs) else {}      # the cut was made: count over everything the cycle read
     views = []
     for repo in names:
         eco = toolconfig.ecosystem_of(repo)
-        view = repo_view.repo_view(repo, runs_by.get(repo, []), failing_by.get(repo, []), active_by.get(repo, []), alerts_by.get(repo, []), ready.get(repo), sources, eco, now, summary_by.get(repo) if summary_by else None)
+        view = repo_view.repo_view(repo, runs_by.get(repo, []), failing_by.get(repo, []), active_by.get(repo, []), alerts_by.get(repo, []), ready.get(repo), sources, eco, now, summary_by.get(repo) if summary_by else None, all_active)
         view["ecosystem_label"] = toolconfig.label_of(eco)
         views.append(view)
     return views

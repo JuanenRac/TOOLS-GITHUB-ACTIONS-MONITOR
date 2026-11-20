@@ -135,7 +135,7 @@ class Load(unittest.TestCase):
 
 class Settings(unittest.TestCase):
     def test_the_defaults_are_conservative_and_a_bad_value_falls_back(self):
-        self.assertEqual(fleet.settings({}), {"page_size": 50, "group_by": "ecosystem", "sort": "risk", "labels": [], "saved_filters": []})
+        self.assertEqual(fleet.settings({}), {"page_size": 50, "group_by": "ecosystem", "sort": "risk", "show_all_active": True, "labels": [], "saved_filters": []})
         self.assertEqual(actions_monitor.DEFAULTS["fleet"]["page_size"], 50)
         bad = fleet.settings({"fleet": {"page_size": 3, "group_by": "x", "sort": 7, "labels": ["no equals", 5], "saved_filters": ["bad"]}})
         self.assertEqual((bad["page_size"], bad["group_by"], bad["sort"], bad["labels"], bad["saved_filters"]), (50, "ecosystem", "risk", [], []))

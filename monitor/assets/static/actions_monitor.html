@@ -1955,6 +1955,7 @@ function repoHealthHtml(v){
   const rows=[[T("ui.team_c_state"),stateChip(v.state)+" · "+esc(T("ui.team_c_risk")+" "+v.risk),true],
     [T("ui.rh_ci"),esc(ci.runs_24h?T("ui.rh_ci_line",{ok:ci.successes_24h,bad:ci.failures_24h,n:ci.runs_24h}):T("ui.rh_none")),true],
     [T("ui.rh_red"),(ci.red_workflows||[]).length?esc(ci.red_workflows.join(", ")):mut_("-"),true],[T("ui.rh_stuck"),String(ci.stuck_runs||0)],
+    [T("ui.rh_going"),(ci.active&&ci.active.runs)?ci.active.workflows.map(w=>`<div>${esc(w.workflow||"-")}: ${esc(T("ui.rh_going_line",{running:w.running,queued:w.queued,branches:(w.branches||[]).length}))}</div>`).join(""):mut_("-"),true],
     [T("ui.rh_alerts"),(al.items||[]).length?al.items.map(a=>`<div><span class="chip ${a.level==="critical"||a.level==="error"?"bad":a.level==="info"?"":"warn"}">${esc(T("ui.al_o_"+a.sentinel)===("ui.al_o_"+a.sentinel)?a.sentinel:T("ui.al_o_"+a.sentinel))}</span> ${esc(a.title)}</div>`).join(""):esc(T("ui.rh_no_alerts")),true],
     [T("ui.rh_ready"),v.readiness?esc((v.readiness.entries||0)+" · "+(v.readiness.next||"")):esc(T("ui.rh_no_ready")),true],
     [T("ui.rh_activity"),act.last_run_at?esc(T("ui.rh_act_line",{when:ago(act.last_run_at),n:act.runs_7d||0})):mut_("-"),true],

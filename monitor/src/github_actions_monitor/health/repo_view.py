@@ -64,7 +64,35 @@ def summarize_runs(runs, now):
     return out
 
 
-def ci_part(repo, runs, failing, active, now, summary=None):
+ACTIVE_WORKFLOWS, ACTIVE_BRANCHES = 30, 10      # what the health of one repository lists of its runs that are still going (the numbers carry the rest)
+
+
+def active_part(repo, active, all_runs=True):
+    """The runs of the repository that are still going, BY WORKFLOW: {"runs", "running", "queued", "all", "workflows": [{"workflow", "running", "queued", "branches": [{"branch", "status", "id", "url"}]}]}.
+    Two runs of the same workflow that go at once (a release in parallel, a matrix by branch) are both counted and listed, with the newest run of each branch; with `all_runs` off (`fleet.show_all_active`) a
+    workflow shows only its newest run, as a list that keeps one run per workflow would. `running` is `in_progress`; everything else that waits (queued, waiting, pending) is `queued`."""
+    by_workflow = {}
+    for run in active or []:
+        if isinstance(run, dict) and run.get("repo") == repo:
+            by_workflow.setdefault(str(run.get("name") or run.get("workflow") or ""), []).append(run)
+    rows = []
+    for name, runs in by_workflow.items():
+        runs = sorted(runs, key=lambda r: str(r.get("started") or ""), reverse=True)
+        runs = runs if all_runs else runs[:1]
+        newest, seen = [], set()
+        for run in runs:      # the newest run of each branch (the list is already newest first)
+            key = str(run.get("branch") or "")
+            if key not in seen:
+                seen.add(key)
+                newest.append({"branch": key, "status": run.get("status"), "id": run.get("id"), "url": run.get("url")})
+        running = sum(1 for r in runs if r.get("status") == "in_progress")
+        rows.append({"workflow": name, "running": running, "queued": len(runs) - running, "branches": newest[:ACTIVE_BRANCHES]})
+    rows.sort(key=lambda r: (-(r["running"] + r["queued"]), r["workflow"].lower()))
+    running, queued = sum(r["running"] for r in rows), sum(r["queued"] for r in rows)
+    return {"runs": running + queued, "running": running, "queued": queued, "all": bool(all_runs), "workflows": rows[:ACTIVE_WORKFLOWS]}
+
+
+def ci_part(repo, runs, failing, active, now, summary=None, all_active=True):
     """The CI of the repository: runs of the last 24 hours and the red and stuck ones. `failing` are the red workflows ({"repo", "workflow"...}), `active` the runs in progress or waiting."""
     if summary is not None:      # counted over every run of the account, not over the cut the page receives
         recent_n, ok, bad = summary["runs_24h"], summary["successes_24h"], summary["failures_24h"]
@@ -77,7 +105,8 @@ def ci_part(repo, runs, failing, active, now, summary=None):
     red = sorted({str(f.get("workflow") or f.get("name") or "") for f in failing if isinstance(f, dict) and f.get("repo") == repo})
     stuck = sum(1 for a in active if isinstance(a, dict) and a.get("repo") == repo and a.get("stuck"))
     judged = ok + bad
-    return {"runs_24h": recent_n, "successes_24h": ok, "failures_24h": bad, "success_rate_24h": round(ok / judged, 3) if judged else None, "red_workflows": red, "stuck_runs": stuck}
+    return {"runs_24h": recent_n, "successes_24h": ok, "failures_24h": bad, "success_rate_24h": round(ok / judged, 3) if judged else None, "red_workflows": red, "stuck_runs": stuck,
+            "active": active_part(repo, active, all_active)}
 
 
 def alerts_part(repo, alerts):
@@ -120,9 +149,9 @@ def risk_of(ci, alerts):
     return points
 
 
-def repo_view(repo, runs, failing, active, alerts, readiness, sources, ecosystem="", now=0.0, summary=None):
+def repo_view(repo, runs, failing, active, alerts, readiness, sources, ecosystem="", now=0.0, summary=None, all_active=True):
     """The whole health of one repository. `readiness` is the row of the readiness of the releases for this repository ({"entries", "next"...}) or None; `sources` {sentinel: lifecycle}."""
-    ci = ci_part(repo, runs, failing, active, now, summary)
+    ci = ci_part(repo, runs, failing, active, now, summary, all_active)
     al = alerts_part(repo, alerts)
     act = activity_part(repo, runs, now, summary)
     blind = sorted(name for name, life in (sources or {}).items() if life not in ("healthy", "off"))

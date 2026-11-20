@@ -19,6 +19,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Hinzugefügt
 
+- **Jeder laufende Run wird gezählt, Workflow für Workflow** (`fleet.show_all_active`, standardmäßig an): Die Gesundheit eines Repositorys trägt `ci.active` (im Repository-Dialog als *Läuft gerade*) mit der Zahl der laufenden und wartenden Runs jedes Workflows und dem neuesten Run jedes Branches, sodass zwei gleichzeitig laufende Runs desselben Workflows (parallele Releases, ein Run pro Branch) nicht als einer erscheinen; die Zeilen der Flotte tragen `running` und `queued`. Aus: Ein Workflow zeigt nur seinen neuesten Run.
 <<<<<<< HEAD
 - **Wird ein Kontingent erschöpft, wird mit einer anderen Quelle gelesen und, sind alle verbraucht, die letzte gute Kopie mit ihrem Alter gezeigt** (`quota.failover`, standardmäßig aus, mit `quota.failover_max_age_minutes`): Ein Lesevorgang, der mit 429 oder „rate limit exceeded“ antwortet, wird einmal mit einer anderen lesefähigen Quelle wiederholt (Ihr Login, die GitHub App, das zweite Konto); die erschöpfte Quelle gilt bis zu ihrer nächsten kostenlosen Prüfung als verbraucht. Sind alle Quellen verbraucht, wird statt eines Fehlers die letzte gute Kopie dieses Lesevorgangs mit ihrem Alter gezeigt, nie älter als das verlangte Limit. Ein Limit wird nie für eine Rechteverweigerung gehalten, ein Schreibvorgang wechselt nie die Quelle, und der Status des Kontingents nennt, wie oft es eingegriffen hat.
 =======

@@ -248,6 +248,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `fleet.labels` | `[]` | general | Labels by repository name |
 | `fleet.page_size` | `50` | general | Repositories per page |
 | `fleet.saved_filters` | `[]` | general | Saved filters |
+| `fleet.show_all_active` | `true` | general | Every run that is going |
 | `fleet.sort` | `"risk"` | general | Order inside a group |
 | `github_actions.allowed` (secure) | `["rerun_failed", "cancel"]` | advanced | Actions that can be planned |
 | `github_actions.enabled` (secure) | `false` | advanced | Allow actions on GitHub |

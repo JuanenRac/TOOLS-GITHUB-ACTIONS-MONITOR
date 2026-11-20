@@ -20,6 +20,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- **Every run that is going is counted, workflow by workflow** (`fleet.show_all_active`, on by default): the health of a repository has `ci.active` (shown as *Going now* in the repository dialog) with how many runs of each workflow run and wait and the newest run of each branch, so two runs of the same workflow that go at once (releases in parallel, one run per branch) are not shown as one; the rows of the fleet carry `running` and `queued`. Off: a workflow shows only its newest run.
 <<<<<<< HEAD
 - **When an allowance runs out, the read is made with another source and, if all are spent, the last good copy is shown with its age** (`quota.failover`, off by default, with `quota.failover_max_age_minutes`): a read that answers 429 or "rate limit exceeded" is made once more with another source that can read (your login, the GitHub App, the second account) and the one that ran dry counts as spent until its next free check; when every source is spent the last good copy of that read is shown with its age instead of an error, never older than the limit asked for. A limit is never taken for a refusal of permission, a write never fails over, and the status of the quota says how many times it acted.
 =======

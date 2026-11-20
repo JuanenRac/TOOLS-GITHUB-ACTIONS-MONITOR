@@ -13,7 +13,7 @@ from github_actions_monitor.health import repo_view
 
 GROUPS = ("ecosystem", "label", "state", "none")
 SORTS = ("risk", "name", "last_run", "state")
-DEFAULTS = {"page_size": 50, "group_by": "ecosystem", "sort": "risk"}
+DEFAULTS = {"page_size": 50, "group_by": "ecosystem", "sort": "risk", "show_all_active": True}
 LIMIT = 5000
 LABEL_RE = re.compile(r"^([A-Za-z0-9._*?-]{1,100})=([A-Za-z0-9._-]{1,40})\Z")      # pattern=label
 FILTER_RE = re.compile(r"^([A-Za-z0-9._-]{1,30})=(|warn|bad|unknown|ok)\|([A-Za-z0-9._-]{0,40})\|([A-Za-z0-9._-]{0,40})\|([A-Za-z0-9._ -]{0,40})\Z")      # name=severity|ecosystem|label|text
@@ -26,7 +26,7 @@ def settings(config):
     saved = [x for x in cfg.get("saved_filters") or [] if isinstance(x, str) and FILTER_RE.match(x)]
     return {"page_size": size if isinstance(size, int) and not isinstance(size, bool) and 10 <= size <= 500 else DEFAULTS["page_size"],
             "group_by": cfg.get("group_by") if cfg.get("group_by") in GROUPS else DEFAULTS["group_by"],
-            "sort": cfg.get("sort") if cfg.get("sort") in SORTS else DEFAULTS["sort"], "labels": labels[:200], "saved_filters": saved[:50]}
+            "sort": cfg.get("sort") if cfg.get("sort") in SORTS else DEFAULTS["sort"], "show_all_active": cfg.get("show_all_active") is not False, "labels": labels[:200], "saved_filters": saved[:50]}
 
 
 def label_of(repo, labels):
@@ -93,7 +93,7 @@ def fleet_view(views, config, ecosystem="", severity="", text="", label="", grou
         for v in sorted(buckets[g["key"]], key=lambda x: _order(x, order)):
             rows.append({"repo": v["repo"], "group": g["key"], "label": label_of(v["repo"], cfg["labels"]), "ecosystem": v["ecosystem"], "state": v["state"], "risk": v["risk"],
                          "red_workflows": len(v["ci"]["red_workflows"]), "alerts": v["alerts"]["total"], "failures_24h": v["ci"]["failures_24h"], "last_run_at": v["activity"]["last_run_at"],
-                         "not_fully_seen": v["not_fully_seen"]})
+                         "not_fully_seen": v["not_fully_seen"], "running": v["ci"]["active"]["running"], "queued": v["ci"]["active"]["queued"]})
     totals = {s: sum(g[s] for g in groups) for s in repo_view.STATES}
     return {"schema": 1, "all": len(views), "shown": len(chosen), "truncated": len(rows) > limit, "page_size": cfg["page_size"], "group_by": by, "sort": order, "totals": totals,
             "groups": groups, "rows": rows[:limit], "saved_filters": [f["name"] for f in saved_filters(cfg)],
