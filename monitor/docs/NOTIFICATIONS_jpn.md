@@ -42,7 +42,7 @@
 既定ではオフです（`notify.users.enabled`）。チームモードが有効なとき、各ユーザーは `GET/POST /api/auth/me/notify` で、チャンネル（`ntfy`、`teams`、`email`）、センチネル（`ci`、`collab`）、最低レベル（`info`、`warn`、`bad`）、システムのイベントを受け取るか、メッセージをすぐ受け取るかダイジェスト（`hourly`、`daily`）にまとめるかを選びます。ロールが通知される内容を決めます。閲覧者は見られるアカウントのCIイベント、メンテナーは加えて人の対応を待つもの（署名待ちのビルド、公開期限のリリース）、管理者は加えてシステムのイベントです。アカウントのイベントは、そのアカウントを見られない人には届きません。`notify.users.max_per_hour` が1人あたりのメッセージ数を制限します。
 
 - `ntfy`: `notify.channels.ntfy.server`（https、またはこのコンピューター上のサーバー）上の各ユーザーのトピック。アクセストークンは任意です。
-- `teams`: Teamsチャンネルの受信Webhookのアドレス（Microsoftのホストのみ）。
+- `teams`: Teamsチャンネルの受信Webhookのアドレス（Microsoftのホストのみ）。メッセージは常に `Content-Length` 付きで送られ（Teams が拒否する分割送信は行いません）、Workflows のアドレス（`logic.azure.com`、`powerplatform.com`）にはアダプティブカードとして送られます。
 - `email`: ユーザーのアドレス。ログイン不要のこのコンピューター上のリレー経由で送信します（`notify.channels.email`）。
 
 TeamsのWebhookアドレスとntfyのトークンはシステムが暗号化して保管し（DPAPI、キーチェーン、Secret Service、または非公開ファイル）、応答、ログ、設定には決して現れません。ユーザーを削除すると一緒に削除されます。`MONITOR_SECRET_BACKEND=file` で非公開ファイルを強制できます。各チャンネルは管理者が有効にするまでオフです。ダイジェストはユーザーがまだ見ていないアラートを集め（最大 `notify.digest.max_items`）、`POST /api/auth/me/notify/seen` で既読にすると送信されません。`POST /api/auth/me/notify/test` はユーザーのチャンネルにテストメッセージを送ります。管理者は `GET /api/auth/notify` で全員の設定（秘密は含まない）を読めます。
