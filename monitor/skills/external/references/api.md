@@ -80,6 +80,7 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/gh-action/plan` | POST | admin | plan an action on GitHub; nothing is sent until it is confirmed (this computer only) |
 | `/api/github-app/status` | GET | admin | state of the optional GitHub App for reads (this computer only) |
 | `/api/github-token` | GET,POST | admin / admin | state or change of the token the monitor keeps (administrators, this computer only) |
+| `/api/glossary` | GET | viewer | what each figure means exactly (written with the real parameters of the calculation and of the settings), the attacks the rules of the linter look for, the limits of the analysis and a few places to learn more (read only) |
 | `/api/health` | GET | public | is it alive; `?deep=1` fails when the refresh cycle is stuck |
 | `/api/help/search` | GET | viewer | search the documentation |
 | `/api/help/topic` | GET | viewer | one documentation topic |
@@ -156,3 +157,4 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/v1/repos` | GET | viewer | the watched repositories, one line each (`repo`, `ecosystem`, `state`, `risk`, `runs_24h`, `failures_24h`, `red_workflows`, `stuck_runs`, `alerts`, `last_run_at`) in pages: `?limit=`, `?cursor=` (the `next_cursor` of the previous page), `?state=`, `?ecosystem=`, `?q=`, `?fields=a,b`, `?profile=compact`; errors in one envelope with a stable `code`; read only; 404 while the prefix is closed |
 | `/api/webhook` | POST | public | the incoming webhook of GitHub (signed with HMAC) |
 | `/api/welcome` | GET,POST | viewer / maintainer | the first-run welcome flag (POST: this computer only) |
+| `/api/whats-new` | GET | viewer | the entries of the changelog of the versions after `?since=VERSION` up to the installed one, in the language of the page; `display.whats_new` turns it off (read only) |

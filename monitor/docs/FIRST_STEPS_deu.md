@@ -20,3 +20,13 @@
 **6. Einen Bericht speichern oder drucken.** Die zwei Schaltflächen am oberen Rand der Seite speichern den Bericht des geöffneten Tabs (TXT, PDF und, wenn Sie möchten, JSON, jeweils über das Fenster **Speichern unter** Ihres Browsers) oder drucken ihn als saubere Seite ([Ausgaben für andere Werkzeuge](OUTPUTS.md)).
 
 **Gut zu wissen.** Bei einem Tarif mit privaten Repositorys wählen Sie ihn unter Einstellungen > Grundlagen, um Ihre Kontingente zu sehen ([Kontingente und Tarife](QUOTAS_deu.md)). Der Wächter steht in [Der Wächter](SENTINEL_deu.md). Das Werkzeug liest GitHub nur; es schreibt erst nach Ihrer Bestätigung.
+
+## Bequem lesen
+
+- **Dichte** (`display.density`, oder `?density=dense` für ein Fenster): `dense` verkleinert Abstände und Schrift jedes Tabs.
+- **Weniger Bewegung** (`display.reduce_motion`): `auto` folgt der Einstellung Ihres Systems, `on` stoppt jede Animation und jeden Übergang. Der Zustand eines Workflows steht immer in Worten und wird auch mit einer Form gezeichnet, nie nur in Farbe.
+- **Farben bei Farbenblindheit** (`display.palette`, oder `?palette=colorblind`): Blau, Zinnober, Gelb und ein helleres Blau, ein Satz für den dunklen Modus und ein anderer für den hellen. Das Kontrast-Tor (`python tools/check_contrast.py`) prüft jedes Theme und simuliert die drei Formen der Farbenblindheit.
+- **Keine Sprünge beim Lesen** (`display.live_throttle_s`): Solange Zeiger oder Fokus im gelesenen Tab sind, wartet die periodische Aktualisierung; eine von Ihnen angeforderte wird sofort angewandt.
+- **Neuigkeiten** (`display.whats_new`): Nach einem Update bietet ein Hinweis die Einträge des Änderungsverlaufs der übersprungenen Versionen; öffnen Sie ihn erneut über die Palette. `GET /api/whats-new?since=2.1.5` antwortet mit den Einträgen (nur lesend).
+- **Glossar und Grenzen**: Öffnen Sie es über die Palette. `GET /api/glossary` antwortet mit den Zahlen, geschrieben mit Ihren echten Parametern, den Angriffen, nach denen die Regeln suchen, den Grenzen der Analyse und einigen Orten zum Weiterlernen. Ist `report_export.limits` an, enden gespeicherte und gedruckte Berichte mit den Grenzen.
+- **Der Kopffilter** deckt die Tabs Jetzt, Alarme, Diagramme, die des Wächters (Wächter, CI, Zusammenarbeit, Sicherheit, Auslieferung, Lieferkette), Repositories und Verlauf ab; die übrigen (Trend des Wächters, Team, Flotte, Berichte, Lektionen, Updates und Einstellungen) sind immer global. Ein Hinweis unter dem Filter sagt das.

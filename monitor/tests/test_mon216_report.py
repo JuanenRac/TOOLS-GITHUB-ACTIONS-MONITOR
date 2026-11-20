@@ -160,7 +160,7 @@ class TheBuilder(unittest.TestCase):
             self.assertIn(alert["text"], text)
 
     def test_the_settings_fall_back_to_the_safe_default(self):
-        self.assertEqual(tab_report.settings({}), {"txt": True, "pdf": True, "json": False, "name": "monitor-{tab}-{date}", "paper": "a4", "pdf_path": "auto"})
+        self.assertEqual(tab_report.settings({}), {"txt": True, "pdf": True, "json": False, "name": "monitor-{tab}-{date}", "paper": "a4", "pdf_path": "auto", "limits": True})
         bad = {"report_export": {"txt": "yes", "pdf": 1, "json": None, "name": "../x y", "paper": "a3", "pdf_path": "cloud"}}
         self.assertEqual(tab_report.settings(bad), tab_report.settings({}))
         good = {"report_export": {"txt": False, "json": True, "name": "informe_{tab}", "paper": "letter", "pdf_path": "browser"}}

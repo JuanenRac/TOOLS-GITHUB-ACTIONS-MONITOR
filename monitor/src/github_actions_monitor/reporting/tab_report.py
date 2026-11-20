@@ -22,7 +22,7 @@ PRODUCT = "GitHub Actions Monitor"
 PAPER = ("a4", "letter")
 PDF_PATH = ("auto", "own", "browser")
 BROWSER_ONLY = ("ja", "zh")      # the standard fonts of a PDF do not hold these scripts: the print of the browser (which has the fonts) makes their PDF
-DEFAULTS = {"txt": True, "pdf": True, "json": False, "name": "monitor-{tab}-{date}", "paper": "a4", "pdf_path": "auto"}
+DEFAULTS = {"txt": True, "pdf": True, "json": False, "name": "monitor-{tab}-{date}", "paper": "a4", "pdf_path": "auto", "limits": True}
 NAME_RE = re.compile(r"^[A-Za-z0-9._{}-]{1,80}\Z")
 MAX_ALERTS = 30
 MAX_ROWS = 60
@@ -32,7 +32,7 @@ def settings(config):
     """The `report_export` block read with its defaults: a value that is not valid falls back to the default (never an error)."""
     block = (config or {}).get("report_export") if isinstance((config or {}).get("report_export"), dict) else {}
     out = dict(DEFAULTS)
-    for key in ("txt", "pdf", "json"):
+    for key in ("txt", "pdf", "json", "limits"):
         if isinstance(block.get(key), bool):
             out[key] = block[key]
     if isinstance(block.get("name"), str) and NAME_RE.match(block["name"]):
@@ -130,7 +130,12 @@ def _lessons_tab(library, word):
     return [{"label": word("lessons"), "value": len(library or []), "level": "info"}], [{"title": word("lessons"), "columns": [word("col_category"), word("col_lesson"), word("col_do")], "rows": rows, "empty": word("none")}]
 
 
-def build(tab, state, lang="en", translate=None, data=None, library=None, now=None):
+def limits_section(word):
+    """The section "Limits of the analysis" at the end of a report: what the analysis does not do, in the language of the report (the same five lines as the glossary of the page)."""
+    return {"title": word("limits_title"), "columns": [word("limits_col")], "rows": [[word("limits_%d" % n)] for n in range(1, 6)], "empty": ""}
+
+
+def build(tab, state, lang="en", translate=None, data=None, library=None, now=None, limits=False):
     """The report of a tab as a structure, or None when there is no such tab. `state` is the document of ai_state, `data` what the page reads, `library` the lessons of the book."""
     document = briefs.brief(tab, state, lang, translate)
     if document is None:
@@ -151,6 +156,8 @@ def build(tab, state, lang="en", translate=None, data=None, library=None, now=No
         sections = []
         figures = []
         alerts = []
+    elif limits:
+        sections = list(sections) + [limits_section(word)]
     date = time.strftime("%Y-%m-%d", stamp)
     meta = [{"label": word("generated"), "value": time.strftime("%Y-%m-%d %H:%M", stamp)}, {"label": word("version"), "value": str(document.get("version", ""))},
             {"label": word("tab"), "value": document.get("title", tab)}]

@@ -12,6 +12,18 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- **Density, less movement and a palette for colour blindness for the whole page** (`display.density`, `display.reduce_motion`, `display.palette`; `?density=`, `?palette=` for one window): `dense` tightens the spacing and the type of every tab, not only of Now; `reduce_motion: on` stops every animation and transition whatever the system says; the `colorblind` palette (blue, vermilion, yellow and a lighter blue, one set for each mode) keeps the four states apart for the three common kinds of colour blindness, and the state is always written in words and shape too.
+
+- **A contrast gate** (`tools/check_contrast.py`, run by the CI): every text on every surface of the dark and light modes and of the sixteen themes reaches 4.5:1, the colour of a state reaches 3:1, the colour-blind palette is checked with a simulation of the three kinds of colour blindness, and a new dimming of text with `opacity` fails the build.
+
+- **The page does not jump while you read** (`display.live_throttle_s`, 30 by default, 0 turns it off): while the pointer or the keyboard focus is inside the tab you are reading, the periodic refresh of the data waits and is applied when you leave, never more often than that many seconds; a refresh you ask for is applied at once.
+
+- **What is new after an update** (`display.whats_new`, on): a notice that never interrupts offers the entries of the changelog of the versions you skipped, in your language, read from the installed version (`GET /api/whats-new`); what you have seen is kept in the browser before anything is shown, and the palette opens it at any time.
+
+- **A glossary and the limits of the analysis** (`GET /api/glossary`; `report_export.limits`, on): the palette opens a window with what each figure means exactly (red on main, success rate, streak, duration, wait in the queue, recent failure rate), written with the real parameters of the calculation and of your settings, the attacks the rules of the linter look for, six places to learn more and the limits of the analysis, which the saved and printed reports now end with.
+
+- **The header filter says what it covers, the selector of repositories says what is happening, and an empty or failed page says what to do**: a note lists the tabs that follow the filter and the ones that are always global; the selector of repositories shows loading, failed with a button to try again, or nothing yet; the error bar has a button to try again, and a page with no repositories or with no open alerts shows a box with the next step.
+
 - **Every red says what started it** (pull request, push to main, scheduled, manual, merge queue, chained workflow): the class travels with the red rows, with the failing runs of `/api/data` (`cls`) and with the `ci.red` alerts, which show it as a small tag and can be filtered by it in the Alerts tab ("Started by").
 
 - **Expected red, with a reason, an owner and an end** (`expected_red.enabled`, off by default; `expected_red.max_days`, 30): a workflow that is red on purpose for a while (a pipeline under construction) is marked from the Alerts tab or the palette; while the mark lasts its red is listed apart, is not counted and does not alert, and when it runs out the red comes back and one alert says so. It is not a silence by pattern: it names one workflow (or `*` for a whole repository), it needs a reason and an owner and it can never last longer than the maximum. `GET` and `POST /api/expected-red`; a note of this monitor, never a change on GitHub.

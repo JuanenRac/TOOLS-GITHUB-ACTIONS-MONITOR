@@ -11,6 +11,18 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Aggiunto
 
+- **Densità, meno movimento e una tavolozza per il daltonismo su tutta la pagina** (`display.density`, `display.reduce_motion`, `display.palette`; `?density=`, `?palette=` per una finestra): `dense` riduce spazi e carattere di ogni scheda, non solo di Ora; `reduce_motion: on` ferma ogni animazione e transizione qualunque cosa dica il sistema; la tavolozza `colorblind` (blu, vermiglio, giallo e un blu più chiaro, un set per ogni modo) tiene distinti i quattro stati per le tre forme comuni di daltonismo, e lo stato è sempre scritto anche a parole e con una forma.
+
+- **Una barriera di contrasto** (`tools/check_contrast.py`, eseguita dalla CI): ogni testo su ogni superficie dei modi scuro e chiaro e dei sedici temi raggiunge 4,5:1, il colore di uno stato raggiunge 3:1, la tavolozza per il daltonismo si verifica con una simulazione delle tre forme, e un nuovo attenuamento del testo con `opacity` fa fallire la build.
+
+- **La pagina non salta mentre leggi** (`display.live_throttle_s`, 30 per impostazione predefinita, 0 lo spegne): finché il puntatore o il focus della tastiera sono dentro la scheda che leggi, l'aggiornamento periodico dei dati attende e si applica quando esci, mai più spesso di quei secondi; un aggiornamento che chiedi tu si applica subito.
+
+- **Le novità dopo un aggiornamento** (`display.whats_new`, acceso): un avviso che non interrompe mai offre le voci del registro delle modifiche delle versioni saltate, nella tua lingua, lette dalla versione installata (`GET /api/whats-new`); ciò che hai visto viene conservato nel browser prima di mostrare qualsiasi cosa, e la tavolozza lo apre in qualsiasi momento.
+
+- **Un glossario e i limiti dell'analisi** (`GET /api/glossary`; `report_export.limits`, acceso): la tavolozza apre una finestra con ciò che significa esattamente ogni cifra (rosso su main, tasso di successo, serie, durata, attesa in coda, tasso di errore recente), scritta con i parametri reali del calcolo e delle tue impostazioni, gli attacchi che cercano le regole del linter, sei posti dove saperne di più e i limiti dell'analisi, con cui ora terminano anche i rapporti salvati e stampati.
+
+- **Il filtro dell'intestazione dice cosa copre, il selettore dei repository dice cosa succede, e una pagina vuota o in errore dice cosa fare**: una nota elenca le schede che seguono il filtro e quelle sempre globali; il selettore dei repository mostra caricamento, errore con un pulsante per riprovare, o ancora nulla; la barra degli errori ha un pulsante per riprovare, e una pagina senza repository o senza avvisi aperti mostra un riquadro con il passo successivo.
+
 - **Ogni rosso dice cosa lo ha avviato** (pull request, push su main, pianificato, manuale, coda di merge, workflow concatenato): la classe viaggia con le righe rosse, con le esecuzioni fallite di `/api/data` (`cls`) e con gli avvisi `ci.red`, che la mostrano come una piccola etichetta e si possono filtrare per essa nella scheda Avvisi ("Avviato da").
 
 - **Rosso atteso, con motivo, responsabile e fine** (`expected_red.enabled`, spento per impostazione predefinita; `expected_red.max_days`, 30): un workflow rosso di proposito per un po' (una pipeline in lavorazione) si segna dalla scheda Avvisi o dalla tavolozza; finché il segno dura il suo rosso è elencato a parte, non viene contato e non avvisa, e alla scadenza il rosso torna e un avviso lo dice. Non è un silenzio per schema: nomina un workflow (o `*` per un intero repository), richiede un motivo e un responsabile e non può mai durare più del massimo. `GET` e `POST /api/expected-red`; una nota di questo monitor, mai una modifica su GitHub.

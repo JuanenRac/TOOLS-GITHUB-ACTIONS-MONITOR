@@ -97,6 +97,8 @@
     act("shortcuts",shortcutsOpen);
     if(PR.enabled)act("pair",pairOpen);
     if(document.getElementById("er-open")&&window.expectedRedOpen)act("expected",window.expectedRedOpen);
+    if(window.whatsNewOpen)act("whatsnew",window.whatsNewOpen);
+    if(window.glossaryOpen)act("glossary",window.glossaryOpen);
     return out;
   }
   function palScore(label,words){
@@ -199,4 +201,120 @@
   }
   setTimeout(metaLoad,1500);
   document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("#n-repos");if(t){tries=0;setTimeout(metaLoad,300)}});
+})();
+
+/* ---- how the page looks and behaves while you read: density, less movement, colour-blind palette, updates that wait while you read, what is new, the glossary,
+        the scope of the filter, the states of the selectors and the actions for an empty page or a failure ---- */
+(function(){
+  const D=I18N.display||{},q=new URLSearchParams(location.search),root=document.documentElement;
+  const h=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const tx=(k,v)=>T(k,v),jget=async u=>{try{const r=await fetch(u,{cache:"no-store"});return r.ok?await r.json():null}catch(e){return null}};
+  const mem={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+
+  /* density of every tab, less movement and the palette for colour blindness (a window can ask for its own with ?density= and ?palette=) */
+  root.classList.toggle("dense",(q.get("density")||D.density)==="dense");
+  root.classList.toggle("reduce-motion",D.reduce_motion==="on");
+  if((q.get("palette")||D.palette)==="colorblind")root.setAttribute("data-palette","colorblind");
+
+  /* an update of the data does not jump under your hand: while the pointer or the focus is inside the tab you read, the new picture waits (display.live_throttle_s) */
+  const wait=D.live_throttle_s==null?30:D.live_throttle_s;
+  if(wait>0&&typeof render==="function"){
+    const drawNow=render;let pending=null,last=Date.now(),pointerAt=0;
+    const tab=()=>document.querySelector(".tab.on");
+    document.addEventListener("pointermove",e=>{const t=tab();if(t&&t.contains(e.target))pointerAt=Date.now()},{passive:true});
+    const reading=()=>{const t=tab();if(!t)return false;const a=document.activeElement;return (!!a&&a!==document.body&&t.contains(a)&&/^(INPUT|TEXTAREA|SELECT|SUMMARY)$/.test(a.tagName))||Date.now()-pointerAt<4000};
+    render=function(d){
+      const periodic=/\btick\b/.test(String(new Error().stack||""));      /* a refresh asked for by a click or a key is applied at once; the periodic one waits */
+      if(periodic&&reading()){pending=d;return}
+      pending=null;last=Date.now();return drawNow(d);
+    };
+    setInterval(()=>{if(pending&&!reading()&&Date.now()-last>=wait*1000){const d=pending;pending=null;last=Date.now();drawNow(d)}},1000);
+  }
+
+  /* a small dialog with a close button (the same look as the others) */
+  function modal(id,title,body){
+    document.querySelectorAll("#"+id).forEach(x=>x.remove());
+    const d=document.createElement("div");d.id=id;d.className="dlg";d.setAttribute("role","dialog");d.setAttribute("aria-modal","true");d.setAttribute("aria-labelledby",id+"-h");
+    d.innerHTML='<div class="dlg-box"><div class="dlg-top"><h2 id="'+id+'-h">'+h(title)+'</h2><span class="sp"></span><button type="button" class="ib" data-x aria-label="'+h(tx("ui.close"))+'">&times;</button></div><div class="dlg-body">'+body+'</div></div>';
+    document.body.appendChild(d);const back=document.activeElement,close=()=>{d.remove();if(back&&back.focus)try{back.focus()}catch(e){}};
+    d.querySelector("[data-x]").onclick=close;d.onclick=e=>{if(e.target===d)close()};d.onkeydown=e=>{if(e.key==="Escape"){e.stopPropagation();close()}};d.querySelector("[data-x]").focus();
+  }
+
+  /* what is new after an update: a notice that never interrupts; what was seen is kept in this browser before anything else happens */
+  function wnShow(j){
+    const body=j.versions.length?j.versions.map(v=>'<h3>'+h(v.version)+'</h3><ul class="wn-list">'+v.items.map(x=>'<li>'+h(x)+'</li>').join("")+'</ul>'+(v.more?'<p class="mut">'+h(tx("ui.wn_more",{n:v.more}))+'</p>':'')).join(""):'<p class="mut">'+h(tx("ui.wn_none"))+'</p>';
+    modal("wn-dlg",tx("ui.wn_title"),body);
+  }
+  window.whatsNewOpen=async()=>{const j=await jget("/api/whats-new?"+qlang());if(j)wnShow(j)};
+  async function wnInit(){
+    const cur=I18N.version;if(D.whats_new===false||!cur)return;
+    const seen=mem.get("am-seen-version");
+    if(!seen){mem.set("am-seen-version",cur);return}
+    if(seen===cur)return;
+    const j=await jget("/api/whats-new?since="+encodeURIComponent(seen)+"&"+qlang());
+    mem.set("am-seen-version",cur);      /* saved before anything is shown, so a reload does not show the notice again */
+    if(!j||!j.enabled||!j.versions.length)return;
+    const bar=document.createElement("div");bar.className="wn-bar";bar.setAttribute("role","status");
+    bar.innerHTML='<span>'+h(tx("ui.wn_banner",{version:cur}))+'</span><button type="button" data-open>'+h(tx("ui.wn_open"))+'</button><span class="sp"></span><button type="button" class="ib" data-x aria-label="'+h(tx("ui.close"))+'">&times;</button>';
+    const shell=document.querySelector(".shell");if(shell&&shell.parentNode)shell.parentNode.insertBefore(bar,shell);
+    bar.querySelector("[data-open]").onclick=()=>{wnShow(j);bar.remove()};bar.querySelector("[data-x]").onclick=()=>bar.remove();
+  }
+  setTimeout(wnInit,800);
+
+  /* the glossary: the figures with their real parameters, the attacks, the limits and where to learn more */
+  window.glossaryOpen=async()=>{
+    const j=await jget("/api/glossary?"+qlang());if(!j)return;
+    const term=x=>'<div class="gl-term"><b>'+h(x.name)+'</b>'+h(x.definition)+'</div>';
+    modal("gl-dlg",tx("ui.gl_title"),'<h3>'+h(tx("ui.gl_metrics"))+'</h3>'+j.metrics.map(term).join("")+'<h3>'+h(tx("ui.gl_attacks"))+'</h3>'+j.attacks.map(term).join("")
+      +'<h3>'+h(j.limits_title)+'</h3><ul class="wn-list">'+j.limits.map(x=>'<li>'+h(x)+'</li>').join("")+'</ul><h3>'+h(tx("ui.gl_resources"))+'</h3><ul class="wn-list">'+j.resources.map(r=>'<li><a href="'+h(r.url)+'" target="_blank" rel="noopener noreferrer">'+h(r.name)+'</a></li>').join("")+'</ul>');
+  };
+
+  /* what the filter of the header covers: which tabs follow it and which are always global */
+  const OBEYS=["now","al","charts","sent","sci","scol","ssec","sdel","ssup","repos","hist"],GLOBAL=["syvt","strend","team","fleet","rep","trep","les","upd","cfg"];
+  window.FILTER_SCOPE={obeys:OBEYS,global:GLOBAL};
+  (function scope(){
+    const input=document.getElementById("g-q");if(!input)return;
+    const row=input.closest("label")&&input.closest("label").parentElement;if(!row||document.getElementById("scope-note"))return;
+    const names=l=>l.filter(t=>TABS.includes(t)).map(t=>tx("ui.tab_"+t)).join(", ");
+    const note=document.createElement("div");note.id="scope-note";note.className="scope-note";note.setAttribute("role","note");
+    note.textContent=tx("ui.scope_obeys",{tabs:names(OBEYS)})+" "+tx("ui.scope_global",{tabs:names(GLOBAL)});note.title=tx("ui.scope_title");
+    row.insertAdjacentElement("afterend",note);
+  })();
+
+  /* states of the selector of repositories: loading, failed with a way to try again, nothing yet */
+  setInterval(()=>{
+    const sel=document.getElementById("f-repo");if(!sel)return;
+    let st=document.getElementById("f-repo-state");
+    if(!st){st=document.createElement("span");st.id="f-repo-state";st.className="mut";st.setAttribute("role","status");sel.parentElement.appendChild(st)}
+    const err=document.getElementById("err"),failed=!!err&&err.style.display==="block";
+    let msg="",retry=false;
+    if(typeof DATA==="undefined"||!DATA){msg=failed?tx("ui.sel_error"):tx("ui.sel_loading");retry=failed}
+    else if(!DATA.repos||!DATA.repos.length)msg=tx("ui.sel_empty");
+    if(st.dataset.m!==msg){st.dataset.m=msg;st.textContent=msg?msg+" ":"";if(retry){const b=document.createElement("button");b.type="button";b.textContent=tx("ui.sel_retry");b.onclick=()=>{try{tick(true)}catch(e){}};st.appendChild(b)}}
+  },1500);
+
+  /* empty and failed pages that say what to do: a button on the error bar, and a box with the next step when nothing is watched yet or nothing is open */
+  const err=document.getElementById("err");
+  if(err){
+    const addRetry=()=>{if(err.style.display!=="block"||!err.textContent||(err.lastElementChild&&err.lastElementChild.dataset.retry))return;
+      const b=document.createElement("button");b.type="button";b.dataset.retry="1";b.textContent=tx("ui.es_retry");b.style.marginLeft="10px";b.onclick=()=>{try{tick(true)}catch(e){}};err.appendChild(b)};
+    new MutationObserver(addRetry).observe(err,{childList:true,characterData:true,attributes:true,attributeFilter:["style"]});
+  }
+  function box(host,id,html,wire){
+    let b=document.getElementById(id);
+    if(!html){if(b)b.remove();return}
+    if(!b){b=document.createElement("div");b.id=id;b.className="es-box";b.setAttribute("role","status");host.insertAdjacentElement("afterbegin",b)}
+    if(b.dataset.h!==html){b.dataset.h=html;b.innerHTML=html;wire(b)}
+  }
+  setInterval(()=>{
+    if(typeof DATA==="undefined"||!DATA)return;
+    const noRepos=!DATA.repos||!DATA.repos.length;
+    ["now","repos"].forEach(t=>{const host=document.getElementById("t-"+t);if(!host)return;
+      box(host,"es-"+t,noRepos?'<p>'+h(tx("ui.es_repos_empty"))+'</p><p class="mut">'+h(tx("ui.es_repos_hint"))+'</p><button type="button" data-s>'+h(tx("ui.es_open_settings"))+'</button> <button type="button" data-r>'+h(tx("ui.es_refresh"))+'</button>':"",
+        b=>{b.querySelector("[data-s]").onclick=()=>showTab("cfg");b.querySelector("[data-r]").onclick=()=>{try{tick(true)}catch(e){}}})});
+    const list=document.getElementById("al-list");
+    if(list&&typeof ALERTS!=="undefined"&&ALERTS&&!list.querySelector(".alrow")&&!list.querySelector(".es-box"))
+      box(list,"es-al",'<p>'+h(tx("ui.es_alerts_clear"))+'</p><button type="button" data-r>'+h(tx("ui.es_refresh"))+'</button>',b=>{b.querySelector("[data-r]").onclick=()=>{try{tick(true)}catch(e){}}});
+    else if(list&&list.querySelector(".alrow")){const old=document.getElementById("es-al");if(old)old.remove()}
+  },2000);
 })();

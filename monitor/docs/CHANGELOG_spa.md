@@ -11,6 +11,18 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Añadido
 
+- **Densidad, menos movimiento y una paleta para daltonismo en toda la página** (`display.density`, `display.reduce_motion`, `display.palette`; `?density=`, `?palette=` para una ventana): `dense` reduce los espacios y la letra de todas las pestañas, no solo la de Ahora; `reduce_motion: on` detiene toda animación y transición diga lo que diga el sistema; la paleta `colorblind` (azul, bermellón, amarillo y un azul más claro, un juego para cada modo) mantiene separados los cuatro estados para los tres tipos habituales de daltonismo, y el estado se escribe siempre también con palabras y forma.
+
+- **Una puerta de contraste** (`tools/check_contrast.py`, ejecutada por la CI): todo texto sobre toda superficie de los modos oscuro y claro y de los dieciséis temas llega a 4,5:1, el color de un estado llega a 3:1, la paleta para daltonismo se comprueba con una simulación de los tres tipos de daltonismo, y un nuevo atenuado de texto con `opacity` rompe la compilación.
+
+- **La página no salta mientras lees** (`display.live_throttle_s`, 30 por defecto, 0 lo apaga): mientras el puntero o el foco del teclado están dentro de la pestaña que lees, la actualización periódica de los datos espera y se aplica al salir, nunca con más frecuencia que esos segundos; una actualización que pides tú se aplica al instante.
+
+- **Novedades tras actualizar** (`display.whats_new`, encendido): un aviso que nunca interrumpe ofrece las entradas del historial de cambios de las versiones que te saltaste, en tu idioma, leídas de la versión instalada (`GET /api/whats-new`); lo que ya viste se guarda en el navegador antes de mostrar nada, y la paleta lo abre en cualquier momento.
+
+- **Un glosario y los límites del análisis** (`GET /api/glossary`; `report_export.limits`, encendido): la paleta abre una ventana con lo que significa exactamente cada cifra (rojo en main, tasa de éxito, racha, duración, espera en la cola, tasa de fallos reciente), escrita con los parámetros reales del cálculo y de tus ajustes, los ataques que buscan las reglas del linter, seis sitios donde aprender más y los límites del análisis, con los que ahora terminan los informes guardados e impresos.
+
+- **El filtro de la cabecera dice qué cubre, el selector de repositorios dice qué pasa, y una página vacía o con fallo dice qué hacer**: una nota lista las pestañas que siguen el filtro y las que son siempre globales; el selector de repositorios muestra cargando, fallo con un botón para reintentar, o nada todavía; la barra de error tiene un botón para reintentar, y una página sin repositorios o sin alertas abiertas muestra un cuadro con el siguiente paso.
+
 - **Cada rojo dice qué lo inició** (pull request, push a main, programado, manual, cola de fusión, workflow encadenado): la clase viaja con las filas rojas, con las ejecuciones fallidas de `/api/data` (`cls`) y con las alertas `ci.red`, que la muestran como una etiqueta pequeña y se pueden filtrar por ella en la pestaña Alertas ("Iniciado por").
 
 - **Rojo esperado, con motivo, responsable y fin** (`expected_red.enabled`, apagado por defecto; `expected_red.max_days`, 30): un workflow que está en rojo a propósito durante un tiempo (una tubería en obras) se marca desde la pestaña Alertas o la paleta; mientras dura la marca su rojo se lista aparte, no se cuenta y no avisa, y al acabarse vuelve el rojo y una alerta lo dice. No es un silencio por patrón: nombra un workflow (o `*` para todo un repositorio), exige un motivo y un responsable y nunca puede durar más que el máximo. `GET` y `POST /api/expected-red`; una nota de este monitor, nunca un cambio en GitHub.

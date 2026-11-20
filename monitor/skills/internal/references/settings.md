@@ -246,7 +246,12 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `discovery.suggest_groups` | `true` | basic | Suggest groups for unclassified repositories |
 | `dispatch.required_ci` | `["ci.yml"]` | advanced | Workflows that must pass before a build is fired |
 | `display.blink_red_tiles` | `true` | general | Blink red tiles |
+| `display.density` | `"normal"` | general | Density of the page |
+| `display.live_throttle_s` | `30` | general | Seconds between updates while you read |
+| `display.palette` | `"default"` | general | Colours for colour blindness |
+| `display.reduce_motion` | `"auto"` | general | Less movement |
 | `display.timezone` | `"local"` | general | Time zone of the texts |
+| `display.whats_new` | `true` | general | Show what's new after an update |
 | `ecosystems` | `"all"` | general | Ecosystems watched |
 | `ecosystems_file` | `-` | paths | Ecosystems file |
 | `exclude` | `[]` | general | Repositories to skip |
@@ -456,6 +461,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `readpool.reserve.user` | `-` | quota | readpool.reserve.user |
 | `refresh_seconds` | `45` | polling | Refresh of hot repositories |
 | `report_export.json` | `false` | outputs | JSON marked |
+| `report_export.limits` | `true` | outputs | Limits of the analysis in the reports |
 | `report_export.name` | `"monitor-{tab}-{date}"` | outputs | Suggested file name |
 | `report_export.paper` | `"a4"` | outputs | Paper of the PDF |
 | `report_export.pdf` | `true` | outputs | PDF marked |

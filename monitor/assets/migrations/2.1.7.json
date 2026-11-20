@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.7",
  "previous": "2.1.6",
- "digest": "4ab76db46381c12d2f2f71f98e75ce8519070aa43613550fa46c676a511b7fc0",
+ "digest": "41eb6e655c672dd0c25dd87a56b9fcdc0d73c73601141f682d83a3ce6a40f9e9",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -49,6 +49,47 @@
      168
     ],
     "default": 24
+   },
+   {
+    "key": "display.density",
+    "kind": "enum",
+    "bounds": [
+     "normal",
+     "dense"
+    ],
+    "default": "normal"
+   },
+   {
+    "key": "display.live_throttle_s",
+    "kind": "int",
+    "bounds": [
+     0,
+     300
+    ],
+    "default": 30
+   },
+   {
+    "key": "display.palette",
+    "kind": "enum",
+    "bounds": [
+     "default",
+     "colorblind"
+    ],
+    "default": "default"
+   },
+   {
+    "key": "display.reduce_motion",
+    "kind": "enum",
+    "bounds": [
+     "auto",
+     "on"
+    ],
+    "default": "auto"
+   },
+   {
+    "key": "display.whats_new",
+    "kind": "bool",
+    "default": true
    },
    {
     "key": "expected_red.enabled",
@@ -126,6 +167,11 @@
    },
    {
     "key": "pwa.refresh_on_return",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "report_export.limits",
     "kind": "bool",
     "default": true
    },

@@ -462,6 +462,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 @media (min-width:3200px) and (min-height:1800px){html{zoom:1.6}}
 /* compact profile, touch targets, palette and pairing (ui_extras.js) */
 @media (pointer:coarse){button,select,summary,.nav-group-title,nav[role=tab] button{min-height:44px}.ib{min-width:44px}input:not([type=checkbox]):not([type=radio]):not([type=range]){min-height:44px}}
+:root.compact button,:root.compact select,:root.compact summary,:root.compact .nav-group-title,:root.compact [role=tab]{min-height:44px}:root.compact .ib{min-width:44px}:root.compact input:not([type=checkbox]):not([type=radio]):not([type=range]){min-height:44px}
 :root.compact .shell{flex-direction:column;overflow:auto}:root.compact .sidebar{width:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:6px 8px;border-right:0;border-bottom:1px solid var(--line)}
 :root.compact .side-toggle,:root.compact .side-foot .nl,:root.compact .nav-group-title{display:none}:root.compact .sidebar nav{flex:1 1 100%;order:3;flex-direction:row;overflow-x:auto;overflow-y:hidden;gap:6px}
 :root.compact .nav-group,:root.compact .nav-items,:root.compact .nav-group.folded .nav-items{display:flex;gap:4px;align-items:center}:root.compact .sidebar nav button[role=tab]{width:auto;padding:6px 10px;white-space:nowrap}
@@ -475,6 +476,17 @@ header .tile.wide{min-width:0;grid-column:span 2}
 #pal-list .pal-g{cursor:default;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);padding:8px 10px 2px}.pal-hint{margin:8px 0 0;font-size:12px}
 #pair-dlg .dlg-body,#sc-dlg .dlg-body{padding:12px 16px;overflow:auto}.pair-qr{display:inline-block;max-width:100%;border-radius:8px;overflow:hidden;background:#fff}.pair-qr svg{display:block;width:min(280px,70vw);height:auto}
 .er-form{display:grid;gap:8px;margin-top:12px}.er-form label{display:grid;gap:2px}.er-form input{padding:6px 8px;font:inherit}.pair-url{overflow-wrap:anywhere}.pair-list{list-style:none;margin:0;padding:0}.pair-list li{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line)}
+/* density of every tab, less movement, colour-blind palette, notices and states (ui_extras.js) */
+:root.dense body{font-size:13px}:root.dense main{padding:6px 10px}:root.dense header{padding:6px 12px}:root.dense .tile{padding:4px 8px}:root.dense .card{padding:3px 8px;margin-bottom:3px;font-size:12px}
+:root.dense .alrow{padding:2px 6px;margin-bottom:2px}:root.dense h3{margin:4px 0 2px}:root.dense td,:root.dense th{padding-top:2px;padding-bottom:2px}:root.dense .bar{height:4px}
+:root.reduce-motion *,:root.reduce-motion *::before,:root.reduce-motion *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+:root.reduce-motion[data-blink="1"] .tile.bad:not(.skel),:root.reduce-motion[data-blink="1"] #statusbar .sb-item.bad{box-shadow:inset 0 0 0 3px var(--bad)}
+:root[data-palette=colorblind]{--ok:#56b4e9;--bad:#e8702a;--warn:#f0e442;--run:#cc79a7}
+:root[data-palette=colorblind][data-theme=light]{--ok:#00487a;--bad:#8f2d00;--warn:#a08400;--run:#2e8fd0}
+@media (prefers-color-scheme:light){:root[data-palette=colorblind]:not([data-theme]){--ok:#00487a;--bad:#8f2d00;--warn:#a08400;--run:#2e8fd0}}
+.wn-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:6px 18px;background:var(--panel2);border-bottom:1px solid var(--line)}.wn-bar .sp{flex:1}
+.wn-list{margin:0 0 12px;padding-left:18px}.wn-list li{margin:4px 0;overflow-wrap:anywhere}#wn-dlg .dlg-body,#gl-dlg .dlg-body{padding:12px 16px;overflow:auto}
+.gl-term{margin:0 0 10px}.gl-term b{display:block}.es-box{padding:14px;text-align:center;color:var(--mut)}.es-box p{margin:0 0 8px}.scope-note{font-size:12px;color:var(--mut);margin:4px 0}
 </style>
 </head>
 <body>

@@ -119,8 +119,8 @@ DEFAULTS = {
     "pwa": {"enabled": False, "refresh_on_return": True},      # the monitor as an installable app (surfaces/pwa.py): manifest, service worker (only the offline page and the icons) and a refresh when the app returns to the front
     "pairing": {"enabled": False, "code_minutes": 5, "max_devices": 10, "device_days": 90},      # phones and tablets that join the network mode with a one-use code shown as a QR code (security/devices.py)
     "startup": {"resume_max_age_hours": 12},   # the last picture is shown at once after a restart, with its age (lastpicture.py); 0 = off
-    "display": {"timezone": "local", "blink_red_tiles": True},   # blink_red_tiles: the red tiles and red items of the bar blink softly until the cause is solved; zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
-    "report_export": {"txt": True, "pdf": True, "json": False, "name": "monitor-{tab}-{date}", "paper": "a4", "pdf_path": "auto"},      # save and print the report of a tab (reporting/tab_report.py): boxes marked at the start, suggested file name, paper of the PDF, way the PDF is made
+    "display": {"timezone": "local", "blink_red_tiles": True, "live_throttle_s": 30, "whats_new": True, "density": "normal", "reduce_motion": "auto", "palette": "default"},   # blink_red_tiles: the red tiles and red items of the bar blink softly until the cause is solved; zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
+    "report_export": {"txt": True, "pdf": True, "json": False, "name": "monitor-{tab}-{date}", "paper": "a4", "pdf_path": "auto", "limits": True},      # save and print the report of a tab (reporting/tab_report.py): boxes marked at the start, suggested file name, paper of the PDF, way the PDF is made
     "modes": {"auto_low": True, "auto_low_enter": 1000, "auto_low_exit": 2500, "low": {"refresh_seconds": 240, "cold_refresh_seconds": 1800, "runs_per_repo": 10, "hot_hours": 2}},      # see modes.py: only what is shown in the Quota tab
     "extra_reader": {"enabled": False, "file": "", "any_folder": False},      # a second read-only account: only the PATH of the file with its token (readpool.py)
     "github_app": {"enabled": False, "app_id": "", "key_path": "", "installation_id": "", "share_reads": False},      # an optional GitHub App for the READS (its own allowance); only the PATH of the key is kept here (github_app.py)
@@ -1888,7 +1888,7 @@ def report_get(path, query):
             library = sorted(lessons.load_library().values(), key=lambda x: x["category"]) if lessons.settings(config)["enabled"] else []
         except Exception as error:   # noqa: BLE001 - the lessons never stop a report
             degraded.note("report.lessons", error)
-    document = tab_report.build(tab, ai_state(lang), lang, i18n.tl, data=STATE.get("data") or {}, library=library)
+    document = tab_report.build(tab, ai_state(lang), lang, i18n.tl, data=STATE.get("data") or {}, library=library, limits=options["limits"])
     if document is None:
         return "json", {"ok": False, "error": "tab", "tabs": list(__import__("github_actions_monitor.data_pipeline.briefs", fromlist=["_"]).tabs())}, 404
     document = redactor.redact_data(document)
@@ -2616,6 +2616,9 @@ def render_page():
     from github_actions_monitor.security import devices
     pwa_cfg = pwa.settings(toolconfig.raw_config())
     data["pwa"] = pwa_cfg
+    shown = toolconfig.raw_config().get("display") if isinstance(toolconfig.raw_config().get("display"), dict) else {}
+    data["display"] = {"live_throttle_s": shown.get("live_throttle_s") if isinstance(shown.get("live_throttle_s"), int) and 0 <= shown.get("live_throttle_s") <= 300 else 30, "whats_new": shown.get("whats_new") is not False,
+                       "density": "dense" if shown.get("density") == "dense" else "normal", "reduce_motion": "on" if shown.get("reduce_motion") == "on" else "auto", "palette": "colorblind" if shown.get("palette") == "colorblind" else "default"}
     data["pairing"] = {"enabled": devices.settings(toolconfig.raw_config())["enabled"] and bool(localguard.STATE["network"]) and not LITE["on"]}
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     page = page.replace("</head>", pwa.head(pwa_cfg) + "</head>", 1) if pwa_cfg["enabled"] else page
@@ -3607,6 +3610,19 @@ class Handler(BaseHTTPRequestHandler):
         if path in ("/pair", "/api/devices", "/api/pair/status", "/manifest.webmanifest", "/sw.js", "/pwa/offline", "/pwa/icon-192.png", "/pwa/icon-512.png"):      # the app, the pairing page and the devices
             if self.pwa_get(path):
                 return
+        if path in ("/api/whats-new", "/api/glossary"):      # the notes of the page: read only, from the files of the installed version
+            if not self.guard():
+                return
+            if path == "/api/glossary":
+                from github_actions_monitor.ui import glossary
+                self.json_reply(glossary.payload(toolconfig.raw_config()))
+            else:
+                from urllib.parse import parse_qs
+                from github_actions_monitor.ui import whats_new
+                ask = {k: v[0] for k, v in parse_qs(self.path.partition("?")[2]).items() if v}
+                raw = toolconfig.raw_config()
+                self.json_reply(whats_new.payload(i18n.language(), ask.get("since", ""), TOOL_VERSION, (raw.get("display") or {}).get("whats_new") is not False))
+            return
         if path in ("/api/expected-red", "/api/clone-anomalies", "/api/meta-columns"):      # the notes of this monitor: read only (the marks are written by POST /api/expected-red)
             if not self.guard():
                 return

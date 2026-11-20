@@ -756,7 +756,12 @@
   },
   "display": {
     "timezone": "local",
-    "blink_red_tiles": true
+    "blink_red_tiles": true,
+    "live_throttle_s": 30,
+    "whats_new": true,
+    "density": "normal",
+    "reduce_motion": "auto",
+    "palette": "default"
   },
   "sound": {
     "enabled": true,
@@ -1021,7 +1026,8 @@
     "json": false,
     "name": "monitor-{tab}-{date}",
     "paper": "a4",
-    "pdf_path": "auto"
+    "pdf_path": "auto",
+    "limits": true
   },
   "score": {
     "enabled": true,
