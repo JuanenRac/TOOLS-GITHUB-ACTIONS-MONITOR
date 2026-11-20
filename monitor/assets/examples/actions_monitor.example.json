@@ -747,7 +747,12 @@
     "quiet_enabled": false,
     "quiet_from_hour": 22,
     "quiet_to_hour": 7,
-    "theme": "classic"
+    "theme": "classic",
+    "voices": "",
+    "ambient": false,
+    "ambient_volume": 10,
+    "tick": false,
+    "tick_seconds": 1
   },
   "updates": {
     "check": true,
@@ -1199,6 +1204,8 @@
     "rotate_seconds": 0,
     "show_repo_names": "public",
     "sound": false,
+    "sound_voices": "",
+    "sound_volume": 0,
     "theme_now": "inherit",
     "theme_overview": "inherit",
     "theme_sentinels": "inherit"

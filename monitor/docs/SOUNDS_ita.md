@@ -36,6 +36,14 @@ La pagina produce i propri suoni con l'API Web Audio, uno per ogni tipo di event
 - Più tipi nella stessa lettura fanno una sola raffica: al massimo tre schemi, il più grave per primo; il resto aspetta la raffica successiva. Due raffiche non si sovrappongono mai.
 - Un avviso silenziato (scheda Avvisi) non suona mai.
 
+## La libreria dei suoni
+
+Oltre agli undici suoni che ogni tipo di evento ha sempre avuto, il monitor porta una libreria di 54 suoni (65 in tutto) che puoi assegnare a qualsiasi tipo di evento. Sono generati nel browser (e, per il bip di questo computer, con le stesse note): nessun file audio da scaricare. I suoni dei tipi sono i primi undici; gli altri si assegnano liberamente: `bell`, `chime`, `ding_dong`, `doorbell`, `ding`, `ping_high`, `ping_low`, `tick_soft`, `tock_soft`, `double_tick`, `tick_tock`, `knock`, `knock_three`, `blip`, `bloop`, `bubble`, `drop`, `droplet`, `arpeggio_up`, `arpeggio_down`, `minor_up`, `minor_down`, `fanfare`, `level_up`, `coin`, `harp_up`, `harp_down`, `marimba`, `xylophone`, `pluck`, `cascade`, `sparkle`, `ascend`, `descend`, `notify_a`, `notify_b`, `notify_c`, `sweep_up`, `sweep_down`, `whistle_up`, `whistle_down`, `zap`, `laser`, `radar`, `sonar`, `beacon`, `heartbeat`, `alarm_fast`, `siren`, `klaxon`, `buzzer`, `gong`, `phone`, `cuckoo`.
+
+Per dare a un tipo un altro suono scrivi coppie `tipo=suono` separate da virgole in `sound.voices`, per esempio `new_red=coin,warning=drop`. I tipi sono `new_red`, `sentinel`, `stuck`, `score_drop`, `connection_lost`, `warning`, `resolved`, `report`, `lesson`, `info`, `live_recovered`. Un nome che non è nella libreria viene ignorato e il tipo mantiene il proprio suono. Le schermate a muro possono aggiungere un proprio elenco in `screens.sound_voices` e un proprio volume in `screens.sound_volume`. Nessun suono dura più di un secondo e tutti sono diversi tra loro.
+
+Due sottofondi opzionali, entrambi disattivati per impostazione predefinita: `sound.ambient` (due note gravi molto dolci, calme finché nulla è rosso e più ruvide quando qualcosa lo è) e `sound.tick` (un clic secco brevissimo ogni `sound.tick_seconds`, così si sente uno schermo bloccato). Entrambi seguono il chip di silenzio, l'interruttore principale e le ore di silenzio.
+
 ## Impostazioni (Impostazioni, Suono)
 
 Sono tutte nel file di configurazione e nella scheda Impostazioni; volume, tema e interruttori hanno effetto subito.
@@ -49,6 +57,10 @@ Sono tutte nel file di configurazione e nella scheda Impostazioni; volume, tema 
 | `sound.cooldown_seconds` | Pausa tra due suoni dello stesso tipo. |
 | `sound.quiet_enabled`, `sound.quiet_from_hour`, `sound.quiet_to_hour` | Ore di silenzio (disattivate per impostazione predefinita): tra le due ore di questo computer non suona nulla; possono attraversare la mezzanotte. |
 | `sound.server_beep` | Disattivato per impostazione predefinita. Il monitor stesso suona su questo computer quando nessuna pagina è aperta o il browser blocca l’audio: un motivo per ogni tipo di evento della tabella qui sopra (toni di Windows, suoni di sistema di macOS, eventi canberra su Linux), con gli stessi interruttori e le stesse ore di silenzio della pagina, in una raffica di al massimo tre tipi alla volta; solo locale. |
+| `sound.voices` | Dà a un tipo di evento un altro suono della libreria (coppie `tipo=suono` separate da virgole). Vuoto per impostazione predefinita. |
+| `sound.ambient`, `sound.ambient_volume` | Suono d'ambiente (disattivato per impostazione predefinita) e il suo volume, da 1 a 50. |
+| `sound.tick`, `sound.tick_seconds` | Tic di orologio (disattivato per impostazione predefinita) e secondi tra i tic, da 1 a 60. |
+| `screens.sound_voices`, `screens.sound_volume` | Come `sound.voices`, solo per le schermate a muro, e il loro volume (0 = quello di `sound.volume`). |
 
 ## Prova ogni suono
 

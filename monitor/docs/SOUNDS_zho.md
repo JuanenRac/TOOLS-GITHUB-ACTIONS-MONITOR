@@ -36,6 +36,14 @@
 - 一次读取中出现多种类型只响一轮:最多三种模式,最严重的先响;其余的等下一轮。两轮不会重叠。
 - 已静音的警报(“警报”标签页)不会响。
 
+## 声音库
+
+除了每种事件一直拥有的 11 种声音外，监视器还带有一个包含 54 种声音的声音库（共 65 种），可分配给任何事件。声音在浏览器中合成（本机蜂鸣也用同样的音符），无需下载音频文件。事件的声音是前 11 个，其余可自由分配：`bell`, `chime`, `ding_dong`, `doorbell`, `ding`, `ping_high`, `ping_low`, `tick_soft`, `tock_soft`, `double_tick`, `tick_tock`, `knock`, `knock_three`, `blip`, `bloop`, `bubble`, `drop`, `droplet`, `arpeggio_up`, `arpeggio_down`, `minor_up`, `minor_down`, `fanfare`, `level_up`, `coin`, `harp_up`, `harp_down`, `marimba`, `xylophone`, `pluck`, `cascade`, `sparkle`, `ascend`, `descend`, `notify_a`, `notify_b`, `notify_c`, `sweep_up`, `sweep_down`, `whistle_up`, `whistle_down`, `zap`, `laser`, `radar`, `sonar`, `beacon`, `heartbeat`, `alarm_fast`, `siren`, `klaxon`, `buzzer`, `gong`, `phone`, `cuckoo`。
+
+要给某种事件换一种声音，在 `sound.voices` 中写入用逗号分隔的 `事件=声音` 对，例如 `new_red=coin,warning=drop`。事件有 `new_red`, `sentinel`, `stuck`, `score_drop`, `connection_lost`, `warning`, `resolved`, `report`, `lesson`, `info`, `live_recovered`。不在声音库中的名称会被忽略，该事件保持自己的声音。墙面屏幕可以在 `screens.sound_voices` 中使用自己的列表，在 `screens.sound_volume` 中使用自己的音量。没有声音超过一秒，且每种声音互不相同。
+
+两个可选背景音，默认都关闭：`sound.ambient`（两个很轻的低音，没有红色时平和，有红色时变粗糙）和 `sound.tick`（每隔 `sound.tick_seconds` 一声极短的干脆咔哒声，让卡住的屏幕能被听出来）。两者都遵循静音标签、总开关和安静时段。
+
 ## 设置(设置,声音)
 
 全部位于配置文件和“设置”标签页;音量、主题和开关立即生效。
@@ -49,6 +57,10 @@
 | `sound.cooldown_seconds` | 同一类型两次声音之间的间隔。 |
 | `sound.quiet_enabled`, `sound.quiet_from_hour`, `sound.quiet_to_hour` | 静音时段(默认关闭):在本机的两个时刻之间不发声;可以跨过午夜。 |
 | `sound.server_beep` | 默认关闭。没有打开页面或浏览器阻止声音时,监视器本身会在本机发声:上表中每种事件类型各有一种模式(Windows 音调、macOS 系统声音、Linux 的 canberra 事件),使用与页面相同的开关和静音时段,每次最多合并三种类型为一串;仅限本地。 |
+| `sound.voices` | 给某种事件指定声音库中的另一种声音（用逗号分隔的 `事件=声音` 对）。默认为空。 |
+| `sound.ambient`, `sound.ambient_volume` | 背景环境音（默认关闭）及其音量，1 到 50。 |
+| `sound.tick`, `sound.tick_seconds` | 时钟滴答声（默认关闭）及滴答间隔秒数，1 到 60。 |
+| `screens.sound_voices`, `screens.sound_volume` | 与 `sound.voices` 相同，但只用于墙面屏幕，并有自己的音量（0 = 使用 `sound.volume`）。 |
 
 ## 试听每种声音
 

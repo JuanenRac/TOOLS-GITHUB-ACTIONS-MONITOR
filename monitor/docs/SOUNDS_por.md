@@ -36,6 +36,14 @@ A página faz os seus próprios sons com a API Web Audio, um por cada tipo de ev
 - Vários tipos na mesma leitura fazem uma única rajada: no máximo três padrões, o mais grave primeiro; o resto espera pela rajada seguinte. Duas rajadas nunca se sobrepõem.
 - Um alerta silenciado (separador Alertas) nunca toca.
 
+## A biblioteca de sons
+
+Além dos onze sons que cada tipo de evento sempre teve, o monitor traz uma biblioteca de 54 sons (65 no total) que pode atribuir a qualquer tipo de evento. São feitos no navegador (e, para o sinal sonoro deste computador, com as mesmas notas), por isso não há ficheiros de áudio para descarregar. Os sons dos tipos são os primeiros onze; os restantes são de atribuição livre: `bell`, `chime`, `ding_dong`, `doorbell`, `ding`, `ping_high`, `ping_low`, `tick_soft`, `tock_soft`, `double_tick`, `tick_tock`, `knock`, `knock_three`, `blip`, `bloop`, `bubble`, `drop`, `droplet`, `arpeggio_up`, `arpeggio_down`, `minor_up`, `minor_down`, `fanfare`, `level_up`, `coin`, `harp_up`, `harp_down`, `marimba`, `xylophone`, `pluck`, `cascade`, `sparkle`, `ascend`, `descend`, `notify_a`, `notify_b`, `notify_c`, `sweep_up`, `sweep_down`, `whistle_up`, `whistle_down`, `zap`, `laser`, `radar`, `sonar`, `beacon`, `heartbeat`, `alarm_fast`, `siren`, `klaxon`, `buzzer`, `gong`, `phone`, `cuckoo`.
+
+Para dar a um tipo outro som escreva pares `tipo=som` separados por vírgulas em `sound.voices`, por exemplo `new_red=coin,warning=drop`. Os tipos são `new_red`, `sentinel`, `stuck`, `score_drop`, `connection_lost`, `warning`, `resolved`, `report`, `lesson`, `info`, `live_recovered`. Um nome que não esteja na biblioteca é ignorado e o tipo mantém o seu próprio som. Os ecrãs de parede podem acrescentar a sua própria lista em `screens.sound_voices` e o seu próprio volume em `screens.sound_volume`. Nenhum som dura mais de um segundo e todos são diferentes entre si.
+
+Dois fundos opcionais, ambos desligados por predefinição: `sound.ambient` (duas notas graves muito suaves, calmas enquanto nada está vermelho e mais ásperas enquanto algo está) e `sound.tick` (um clique seco muito curto a cada `sound.tick_seconds`, para se ouvir um ecrã congelado). Ambos seguem o chip de silêncio, o interruptor principal e o horário silencioso.
+
 ## Definições (Definições, Som)
 
 Todas estão no ficheiro de configuração e no separador Definições; o volume, o tema e os interruptores aplicam-se logo.
@@ -49,6 +57,10 @@ Todas estão no ficheiro de configuração e no separador Definições; o volume
 | `sound.cooldown_seconds` | Pausa entre dois sons do mesmo tipo. |
 | `sound.quiet_enabled`, `sound.quiet_from_hour`, `sound.quiet_to_hour` | Horário silencioso (desligado por predefinição): entre as duas horas deste computador não toca nada; pode atravessar a meia-noite. |
 | `sound.server_beep` | Desativado por predefinição. O próprio monitor soa neste computador quando não há nenhuma página aberta ou o navegador bloqueia o som: um padrão para cada tipo de evento da tabela acima (tons do Windows, sons de sistema do macOS, eventos canberra no Linux), com os mesmos interruptores e horário silencioso da página, numa rajada de no máximo três tipos de cada vez; apenas local. |
+| `sound.voices` | Dá a um tipo de evento outro som da biblioteca (pares `tipo=som` separados por vírgulas). Vazio por predefinição. |
+| `sound.ambient`, `sound.ambient_volume` | Som ambiente (desligado por predefinição) e o seu volume, de 1 a 50. |
+| `sound.tick`, `sound.tick_seconds` | Tique de relógio (desligado por predefinição) e segundos entre tiques, de 1 a 60. |
+| `screens.sound_voices`, `screens.sound_volume` | O mesmo que `sound.voices`, só para os ecrãs de parede, e o seu próprio volume (0 = o de `sound.volume`). |
 
 ## Testar cada som
 

@@ -30,6 +30,10 @@
 - **“关于”面板显示监视器的标志,并可按需显示您组织的标志**(`ui.about_org_logo`,默认关闭,位于“常规”选项卡):监视器的图形始终在最上方,开启该设置后,为墙面屏幕上传的图片(“此浏览器”选项卡)会显示在旁边,并带有页面语言的替代文字。两者都随面板宽度变化且不变形;如果没有上传标志或其文件无法读取,会用一条简短提示取代图片,面板继续正常工作。
 - **工作流检查器现在可以提示已归档或不再维护的 Action**(规则 `archived_action`,因为要查询 GitHub,默认关闭;仅提供信息):它列出工作流所用的 GitHub Action 和可复用工作流中仓库已归档的;如果同时开启 `lint.maintenance.inactive`,还会列出已有 `lint.maintenance.inactive_years` 年(默认 2 年)没有推送的。它通过已为哨兵协调好的配额,每个 Action 只向 GitHub 查询一次(每次扫描最多 `lint.maintenance.max_calls_per_tick` 个,每个回答保留 `lint.maintenance.refresh_seconds` 秒),不会超过信息级别,绝不会使 `--fail-on` 失败,没有网络时不做任何判断并说明有多少个 Action 无法读取。命令行中使用 `--check-actions` 和 `--inactive-years N`。
 
+- **超过六十种声音的声音库**（`sound.voices`、`screens.sound_voices`、`screens.sound_volume`）：每种事件保持原有声音，也可以指定声音库中的任意其他声音，适用于页面、本机蜂鸣，以及拥有自己列表和音量的墙面屏幕。声音在浏览器中合成（无需下载），没有任何一个超过一秒，且各不相同；单一来源（`soundlib.py`）由 `tools/make_sound_library.py` 复制到页面和墙面屏幕，测试会检查副本是否最新。八种语言的声音指南列出了每一种声音。
+
+- **可选的背景环境音和时钟滴答声**（`sound.ambient`、`sound.ambient_volume`、`sound.tick`、`sound.tick_seconds`；默认都关闭）：环境音是两个很轻的低音，有红色时会变粗糙；滴答声是每隔几秒一声极短的干脆咔哒声，让卡住的屏幕能被听出来。两者在页面和墙面屏幕中都遵循静音标签、总开关和安静时段。
+
 ### 修复
 
 - **墙屏为了让列表放得下而隐藏的行现在真的会消失**：页面用 hidden 属性隐藏行，但本身是 flex 盒子的行会忽略它，导致事件列表、队列、失败和热力图的行在卡片底部被切成两半并压在页脚上。现在隐藏优先于任何样式。

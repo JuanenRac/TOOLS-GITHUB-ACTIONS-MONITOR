@@ -1,0 +1,69 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.1.7",
+ "previous": "2.1.6",
+ "digest": "06ba8be5d9df7b805394237e811b4fe46e95465efe15532bbfd06890ba7cecc6",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "screens.sound_voices",
+    "kind": "text",
+    "bounds": {
+     "re": "^(?:(?:new_red|sentinel|stuck|score_drop|connection_lost|warning|resolved|report|lesson|info|live_recovered)=(?:red|sentinel|stuck|score|conn|warning|resolved|report|lesson|info|live|bell|chime|ding_dong|doorbell|ding|ping_high|ping_low|tick_soft|tock_soft|double_tick|tick_tock|knock|knock_three|blip|bloop|bubble|drop|droplet|arpeggio_up|arpeggio_down|minor_up|minor_down|fanfare|level_up|coin|harp_up|harp_down|marimba|xylophone|pluck|cascade|sparkle|ascend|descend|notify_a|notify_b|notify_c|sweep_up|sweep_down|whistle_up|whistle_down|zap|laser|radar|sonar|beacon|heartbeat|alarm_fast|siren|klaxon|buzzer|gong|phone|cuckoo)(?:,(?!\\Z)|\\Z)){0,11}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "screens.sound_volume",
+    "kind": "int",
+    "bounds": [
+     0,
+     100
+    ],
+    "default": 0
+   },
+   {
+    "key": "sound.ambient",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "sound.ambient_volume",
+    "kind": "int",
+    "bounds": [
+     1,
+     50
+    ],
+    "default": 10
+   },
+   {
+    "key": "sound.tick",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "sound.tick_seconds",
+    "kind": "int",
+    "bounds": [
+     1,
+     60
+    ],
+    "default": 1
+   },
+   {
+    "key": "sound.voices",
+    "kind": "text",
+    "bounds": {
+     "re": "^(?:(?:new_red|sentinel|stuck|score_drop|connection_lost|warning|resolved|report|lesson|info|live_recovered)=(?:red|sentinel|stuck|score|conn|warning|resolved|report|lesson|info|live|bell|chime|ding_dong|doorbell|ding|ping_high|ping_low|tick_soft|tock_soft|double_tick|tick_tock|knock|knock_three|blip|bloop|bubble|drop|droplet|arpeggio_up|arpeggio_down|minor_up|minor_down|fanfare|level_up|coin|harp_up|harp_down|marimba|xylophone|pluck|cascade|sparkle|ascend|descend|notify_a|notify_b|notify_c|sweep_up|sweep_down|whistle_up|whistle_down|zap|laser|radar|sonar|beacon|heartbeat|alarm_fast|siren|klaxon|buzzer|gong|phone|cuckoo)(?:,(?!\\Z)|\\Z)){0,11}\\Z"
+    },
+    "default": ""
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {}
+}

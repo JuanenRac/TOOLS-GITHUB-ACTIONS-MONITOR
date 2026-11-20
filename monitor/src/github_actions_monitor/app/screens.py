@@ -40,7 +40,7 @@ DENSITIES = ("compact", "normal", "large")
 MAX_SAFE = 10      # the most a television may cut from each edge that the screens keep clear (screens.safe_margin_percent, ?safe=), in percent of the window
 NAMES = ("all", "public", "none")
 DEFAULTS = {"enabled": False, "blink": True, "blink_calm_minutes": 30, "rotate_seconds": 0, "default_theme": "inherit", "default_density": "normal", "refresh_seconds": 10, "burn_in_protection": True,
-            "night_dim": False, "night_dim_from_hour": 22, "night_dim_to_hour": 7, "show_repo_names": "public", "sound": False,
+            "night_dim": False, "night_dim_from_hour": 22, "night_dim_to_hour": 7, "show_repo_names": "public", "sound": False, "sound_voices": "", "sound_volume": 0,
             "theme_overview": "inherit", "theme_now": "inherit", "theme_sentinels": "inherit", "mode": "three", "rotate_every_seconds": 20, "alert_hold_seconds": 30,
             "logo_overview": True, "logo_now": False, "logo_sentinels": False, "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64, "group_map": True,
             "menu": True, "menu_target": "new", "menu_max_windows": 4, "menu_rotate_seconds": 20, "menu_tv_scale": 1.5, "safe_margin_percent": 0}   # the five before the last belong to the Screens menu (screenmenu.py)
@@ -125,6 +125,13 @@ def _theme(value, allowed, default):
     return default
 
 
+def _voices_text(value):
+    """screens.sound_voices: the pairs `kind=sound` that name a kind of event and a sound of the library, as text (an invalid pair is left out)."""
+    from github_actions_monitor.integrations import soundlib
+    pairs = soundlib.parse_voices(value)
+    return ",".join(f"{k}={v}" for k, v in pairs.items())
+
+
 def settings(config):
     """The settings of the wall screens from the configuration, each one inside its range (a value that is not valid is the default)."""
     block = (config or {}).get("screens")
@@ -136,6 +143,7 @@ def settings(config):
             "burn_in_protection": _flag(block.get("burn_in_protection"), d["burn_in_protection"]), "night_dim": _flag(block.get("night_dim"), d["night_dim"]),
             "night_dim_from_hour": _int(block.get("night_dim_from_hour"), 0, 23, d["night_dim_from_hour"]), "night_dim_to_hour": _int(block.get("night_dim_to_hour"), 0, 23, d["night_dim_to_hour"]),
             "show_repo_names": _choice(block.get("show_repo_names"), NAMES, d["show_repo_names"]), "sound": _flag(block.get("sound"), d["sound"]),
+            "sound_voices": _voices_text(block.get("sound_voices")), "sound_volume": _int(block.get("sound_volume"), 0, 100, d["sound_volume"]),
             "theme_overview": _theme(block.get("theme_overview"), THEME_CHOICES, d["theme_overview"]), "theme_now": _theme(block.get("theme_now"), THEME_CHOICES, d["theme_now"]),
             "theme_sentinels": _theme(block.get("theme_sentinels"), THEME_CHOICES, d["theme_sentinels"]), "mode": _choice(block.get("mode"), MODES, d["mode"]),
             "rotate_every_seconds": _int(block.get("rotate_every_seconds"), 5, 300, d["rotate_every_seconds"]), "alert_hold_seconds": _int(block.get("alert_hold_seconds"), 5, 600, d["alert_hold_seconds"]),

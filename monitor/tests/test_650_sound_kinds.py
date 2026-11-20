@@ -64,17 +64,15 @@ def run_js(body):
 
 class Static(unittest.TestCase):
     def test_every_kind_has_a_pattern_and_the_patterns_are_all_different(self):
-        shared = block(PAGE, "SOUNDS")
-        names = re.findall(r"^\s{2}(\w+):\{w:", shared, re.M)
-        self.assertEqual(sorted(names), sorted(KINDS))
-        notes = {}
-        for name in names:
-            body = re.search(r"^\s{2}" + name + r":\{w:\"\w+\",n:(\[\[.*?\]\])\}", shared, re.M).group(1)
-            notes[name] = json.loads(re.sub(r"(?<![\d])\.(\d)", r"0.\1", body))
+        library = block(PAGE, "SND-LIBRARY")
+        data = json.loads(library[library.index("{"):library.rindex("}") + 1])
+        notes = {name: item["n"] for name, item in data.items()}
+        self.assertTrue(set(KINDS) <= set(notes))
         signatures = {json.dumps([[n[0], n[1], n[2], n[3] if len(n) > 3 else 0] for n in v]) for v in notes.values()}
-        self.assertEqual(len(signatures), len(KINDS), "two kinds sound the same")
-        # the ear tells them apart by the number of notes, the pitch and the rhythm: no two kinds share both the count and the first pitch
-        self.assertEqual(len({(len(v), v[0][0]) for v in notes.values()}), len(KINDS))
+        self.assertEqual(len(signatures), len(notes), "two sounds are the same")
+        # the ear tells the eleven kinds apart by the number of notes, the pitch and the rhythm: no two kinds share both the count and the first pitch
+        kinds = {k: notes[k] for k in KINDS}
+        self.assertEqual(len({(len(v), v[0][0]) for v in kinds.values()}), len(KINDS))
         for name, v in notes.items():
             self.assertLess(max(n[1] + n[2] for n in v), 1.0, name)      # short: nothing sounds for a second or more
 
@@ -143,7 +141,7 @@ console.log(JSON.stringify(res));""")
             self.assertEqual([round(f * 0.75, 3) for f in r["classic"]], [round(f, 3) for f in r["soft"]], kind)
             self.assertEqual(set(r["softTypes"]), {"sine"}, kind)
             sigs.add(tuple(r["classic"]))
-        self.assertEqual(len(sigs), len(KINDS))
+        self.assertEqual(len(sigs), len(out))
 
     def test_what_the_browser_blocks_is_kept_and_plays_after_the_click_and_a_stale_one_is_dropped(self):
         out = run_js("""

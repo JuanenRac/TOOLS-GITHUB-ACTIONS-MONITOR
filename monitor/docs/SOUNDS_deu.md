@@ -36,6 +36,14 @@ Die Seite macht ihre Töne selbst mit der Web-Audio-API, einen für jede Ereigni
 - Mehrere Arten in einem Blick ergeben einen einzigen Schub: höchstens drei Muster, das ernsteste zuerst; der Rest wartet auf den nächsten Schub. Zwei Schübe überlagern sich nie.
 - Ein stummgeschalteter Alarm (Tab Alarme) ertönt nie.
 
+## Die Klangbibliothek
+
+Neben den elf Klängen, die jede Ereignisart schon immer hatte, bringt der Monitor eine Bibliothek mit 54 Klängen (insgesamt 65) mit, die du jeder Ereignisart zuweisen kannst. Sie werden im Browser erzeugt (und für den Piepton dieses Rechners aus denselben Noten), es gibt also keine Audiodateien zum Herunterladen. Die Klänge der Arten sind die ersten elf; die übrigen sind frei zuweisbar: `bell`, `chime`, `ding_dong`, `doorbell`, `ding`, `ping_high`, `ping_low`, `tick_soft`, `tock_soft`, `double_tick`, `tick_tock`, `knock`, `knock_three`, `blip`, `bloop`, `bubble`, `drop`, `droplet`, `arpeggio_up`, `arpeggio_down`, `minor_up`, `minor_down`, `fanfare`, `level_up`, `coin`, `harp_up`, `harp_down`, `marimba`, `xylophone`, `pluck`, `cascade`, `sparkle`, `ascend`, `descend`, `notify_a`, `notify_b`, `notify_c`, `sweep_up`, `sweep_down`, `whistle_up`, `whistle_down`, `zap`, `laser`, `radar`, `sonar`, `beacon`, `heartbeat`, `alarm_fast`, `siren`, `klaxon`, `buzzer`, `gong`, `phone`, `cuckoo`.
+
+Um einer Art einen anderen Klang zu geben, schreibe `art=klang`-Paare durch Kommas getrennt in `sound.voices`, zum Beispiel `new_red=coin,warning=drop`. Die Arten sind `new_red`, `sentinel`, `stuck`, `score_drop`, `connection_lost`, `warning`, `resolved`, `report`, `lesson`, `info`, `live_recovered`. Ein Name, der nicht in der Bibliothek steht, wird ignoriert und die Art behält ihren eigenen Klang. Die Wandanzeigen können in `screens.sound_voices` eine eigene Liste und in `screens.sound_volume` eine eigene Lautstärke haben. Kein Klang dauert länger als eine Sekunde, und alle unterscheiden sich voneinander.
+
+Zwei optionale Hintergründe, beide standardmäßig aus: `sound.ambient` (zwei sehr leise tiefe Töne, ruhig, solange nichts rot ist, rauer, solange etwas rot ist) und `sound.tick` (ein sehr kurzes trockenes Klicken alle `sound.tick_seconds`, damit ein eingefrorener Bildschirm zu hören ist). Beide folgen dem Stummschalter, dem Hauptschalter und den Ruhezeiten.
+
 ## Einstellungen (Einstellungen, Ton)
 
 Alle stehen in der Konfigurationsdatei und im Tab Einstellungen; Lautstärke, Thema und Schalter wirken sofort.
@@ -49,6 +57,10 @@ Alle stehen in der Konfigurationsdatei und im Tab Einstellungen; Lautstärke, Th
 | `sound.cooldown_seconds` | Pause zwischen zwei Tönen derselben Art. |
 | `sound.quiet_enabled`, `sound.quiet_from_hour`, `sound.quiet_to_hour` | Ruhezeiten (standardmäßig aus): zwischen den beiden Uhrzeiten dieses Rechners ertönt nichts; sie dürfen über Mitternacht gehen. |
 | `sound.server_beep` | Standardmäßig aus. Der Monitor selbst ertönt auf diesem Rechner, wenn keine Seite geöffnet ist oder der Browser den Ton sperrt: ein Muster für jede Ereignisart der Tabelle oben (Windows-Töne, macOS-Systemklänge, canberra-Ereignisse unter Linux), mit denselben Schaltern und Ruhezeiten wie die Seite, in einem Schub von höchstens drei Arten; nur lokal. |
+| `sound.voices` | Gibt einer Ereignisart einen anderen Klang der Bibliothek (`art=klang`-Paare, durch Kommas getrennt). Standardmäßig leer. |
+| `sound.ambient`, `sound.ambient_volume` | Hintergrundklang (standardmäßig aus) und seine Lautstärke, 1 bis 50. |
+| `sound.tick`, `sound.tick_seconds` | Uhrticken (standardmäßig aus) und die Sekunden zwischen den Ticks, 1 bis 60. |
+| `screens.sound_voices`, `screens.sound_volume` | Dasselbe wie `sound.voices`, nur für die Wandanzeigen, und ihre eigene Lautstärke (0 = die von `sound.volume`). |
 
 ## Jeden Ton testen
 
