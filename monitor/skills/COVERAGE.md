@@ -18,6 +18,7 @@ A test fails when something in the code is not named in these skills, so this ta
 | settings | 804 | references/settings.md (the ai, lessons and alert ones matter) | references/settings.md |
 | settings | 786 | references/settings.md (the ai, lessons and alert ones matter) | references/settings.md |
 | settings | 781 | references/settings.md (the ai, lessons and alert ones matter) | references/settings.md |
+| settings | 788 | references/settings.md (the ai, lessons and alert ones matter) | references/settings.md |
 | files | 14 | references/files.md | references/files.md |
 | roles | 3 | references/roles.md | references/roles.md |
 | tabs | 21 | references/tabs.md | references/tabs.md |

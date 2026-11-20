@@ -70,6 +70,7 @@ Three pages for a monitor or a TV that nobody touches. They have no side menu an
 | Address | What it shows |
 |---|---|
 | `/screen/overview` | Score ring and letter; the fleet (green, red, stuck, waiting); the last 24 hours and 7 days as area charts; a heat map of repositories by hour; what has been red the longest; runners and minutes; the latest events; the GitHub allowance as a gauge. The fleet card also shows the map by groups: one bar for each group of the Fleet view (the same grouping, `fleet.group_by`) with its repositories that are red, need attention, are in order or have no data; only the name of the group and numbers. |
+| `/screen/fleet` | Every repository of the fleet by group (the grouping and the order of the Fleet tab, the riskiest group first): a small square for each healthy repository and a chip with the name for each one that needs a look, with the totals of the fleet on top. What does not fit is counted ("+3 more"). |
 | `/screen/now` | What is happening this minute: running runs with progress and duration, the queue, runs waiting for approval, recent failures, merges and releases, releases due and a live line of the last two hours. |
 | `/screen/sentinels` | One card for each sentinel (A1 to A12) with its level, open findings, whether its sources can be read, the last sweep and a ring that follows the sweep; an animated radar that marks what is wrong and the alerts by severity. |
 
@@ -111,14 +112,20 @@ The language of a screen is decided in this order: `?lang=xx` in the address; th
 | `screens.safe_margin_percent` | Keeps the content this many percent away from each edge of the window, for a television that cuts the border (overscan): everything is drawn a little smaller. 0 (default) uses the whole window; 0 to 10. |
 | `screens.night_dim` | Dims the screens between `screens.night_dim_from_hour` (22) and `screens.night_dim_to_hour` (7); off by default. |
 | `screens.show_repo_names` | all, public (default: private repositories appear as private-1, private-2...) or none (every name is hidden). Use public or none for a screen that other people can see. With a list of repositories written by hand in `repos`, the visibility is read with one listing of the account every `discover_refresh_seconds`; a repository whose visibility could not be read counts as private. The numbers (private-1...) go only to the hidden repositories, in the order of an HMAC of the name with a key of the installation kept in a private file of the data folder, so they say nothing about where a repository falls among the others. |
-| `screens.theme_overview`, `screens.theme_now`, `screens.theme_sentinels` | The theme of one screen: inherit (default: the one of `screens.default_theme`) or any of the themes above. |
+| `screens.theme_overview`, `screens.theme_fleet`, `screens.theme_now`, `screens.theme_sentinels` | The theme of one screen: inherit (default: the one of `screens.default_theme`) or any of the themes above. |
 | `screens.mode` | three (default: the three pages apart, one for each window) or rotate (one single page that turns through the three and jumps to a new red). |
 | `screens.rotate_every_seconds` | In rotate mode, seconds on each screen (20 by default; 5 to 300). |
 | `screens.alert_hold_seconds` | In rotate mode, seconds that a new red keeps the window on its screen (30 by default; 5 to 600), or until the red is gone. |
-| `screens.logo_overview`, `screens.logo_now`, `screens.logo_sentinels` | On which screens the logo shows (only the overview by default). |
+| `screens.logo_overview`, `screens.logo_fleet`, `screens.logo_now`, `screens.logo_sentinels` | On which screens the logo shows (only the overview by default). |
 | `screens.logo_corner` | top-right (default), top-left, bottom-right or bottom-left. |
 | `screens.logo_max_width`, `screens.logo_max_height` | Largest size of the logo in pixels at 1920 x 1080 (160 x 64 by default; it grows with the screen). |
 | `screens.group_map` | On by default. Shows the map of the fleet by groups on the overview screen (the grouping of the Fleet view). Off: only the four tiles. |
+| `screens.life` | On by default. A figure that changes flashes where it changed, a new failure sends a wave over its box and a change of state leaves a short trail. Nothing moves with the system setting for less motion. |
+| `screens.glance_seconds` | Seconds that the header shows what changed in the last update, in up to three chips ("Red +1"); 3 by default, 0 = off (0 to 30). |
+| `screens.transition` | How a window that turns changes from one screen to the next: fade (default), slide or none. |
+| `screens.hide_healthy` | Off by default. The Fleet screen leaves out the squares of the healthy repositories; the overview leaves out the groups without red or yellow and the rows of the heat map without a failure. The totals stay. |
+| `screens.idle_dim_minutes` | 0 = off (default). When nothing has changed for this many minutes and nothing is red, the screen dims to save the panel; the next change wakes it (1 to 1440). |
+| `screens.min_font_px` | The smallest letter of the screens in pixels, whatever the size of the window (12 by default; 8 to 32). |
 | `screens.menu` | On by default. The Screens button in the top bar. Off: the button disappears; the screens keep working at their own addresses. |
 | `screens.menu_target` | new (default): a screen opens in a new window or tab; same: in the tab you are in. |
 | `screens.menu_max_windows` | Most windows that a multi-monitor set opens at once (4 by default; 1 to 9). |
@@ -166,12 +173,15 @@ The three pages are drawn in units that follow the short side of the window, so 
 - A name of a repository or a workflow that does not fit ends in dots and carries its full text in the `title`; a heading, a label or a figure never ends in dots: a heading takes a second line and a figure wider than its box gets a smaller type, down to a floor.
 - When a list has more rows than its box holds, the most important come first (red before green, the newest first) and the last line says how many were left out ("+3 more"); nothing is hidden without that line.
 - Safe margin (overscan): many televisions cut a few percent of every edge unless their picture mode is "just scan" or "pixel for pixel". `screens.safe_margin_percent` (0 by default, 0 to 10; `?safe=4` for one window) keeps the content that far from each edge by drawing everything smaller, and `kiosk.safe_margin_percent` does the same for the kiosk. Try 3 to 5 if the first letters of the clock or the border of the cards are cut.
+- The smallest letter is `screens.min_font_px` (12 pixels by default): in a window so small that the layout would need a smaller type, the screens keep the letter and show fewer rows, saying how many they left out, instead of shrinking the text.
 
 ### How they behave
 
 - Failures blink less than twice a second (never a strobe); a new failure makes a single flash; a failure nobody attended to for `screens.blink_calm_minutes` keeps a fixed glow. With the system setting for less motion, or `?blink=off`, nothing blinks and nothing moves. A failure is never shown by colour alone: it carries a symbol and a word.
 - When the monitor does not answer, the page says so, dims and tries again after 5, 10, 20... seconds (up to 60).
 - A screen that is always on is protected from burn-in: everything moves a few pixels every minute and the page can dim at night.
+- What changes between two updates is seen: the figure flashes where it changed (`screens.life`), a new failure sends a wave over its box, and for `screens.glance_seconds` seconds a few chips in the header say what changed ("Red +1", "Running +2"). The first look of a screen only remembers; with the system setting for less motion nothing moves, but the chips still appear.
+- A window that turns changes screen with a fade, a slide or a cut (`screens.transition`). A screen with nothing new for `screens.idle_dim_minutes` minutes rests (dimmed) as long as nothing is red.
 
 ### Setting up several monitors
 
@@ -202,7 +212,7 @@ Every tab of the page has a decision, written in the code (`TAB_DECISIONS` of `s
 | `strend` | Daily trend | - | `reading` |
 | `syvt` | Yesterday vs today | - | `reading` |
 | `team` | Team health | - | `people` |
-| `fleet` | Fleet | `/screen/overview` | - |
+| `fleet` | Fleet | `/screen/fleet` | - |
 | `repos` | Repositories | - | `controls` |
 | `rep` | Reports | - | `reading` |
 | `trep` | Scheduled reports | - | `reading` |

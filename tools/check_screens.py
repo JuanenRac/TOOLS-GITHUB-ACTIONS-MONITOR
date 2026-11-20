@@ -4,7 +4,7 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D)
 # GPL-3.0-or-later - see LICENSE
 # =============================================================================
-"""Measures the wall screens (/screen/overview, /screen/now, /screen/sentinels) in every language, window size and kind of data, and reports what does not fit.
+"""Measures the wall screens (/screen/overview, /screen/fleet, /screen/now, /screen/sentinels) in every language, window size and kind of data, and reports what does not fit.
 
     python tools/check_screens.py [--lang en de ...] [--size 1080p 4K ...] [--data rich long ...] [--kind overview ...] [--safe PERCENT] [--inset PERCENT] [--report FILE] [--list]
 
@@ -39,7 +39,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import check_overflow  # noqa: E402
 
 LANGS = ("en", "es", "de", "fr", "it", "ja", "zh", "pt")
-KINDS = ("overview", "now", "sentinels")
+KINDS = ("overview", "fleet", "now", "sentinels")
 SIZES = {"1080p": (1920, 1080), "1440p": (2560, 1440), "4K": (3840, 2160), "ultrawide": (3440, 1440), "superwide": (5120, 1440), "portrait": (1080, 1920), "portrait4K": (2160, 3840)}
 DATA = ("rich", "long", "many", "huge", "zero", "one", "old", "worst")
 #: a part of the short side of the window: the smallest type that is read from about three metres on a wall screen (12 px in a 1080 p window)
@@ -58,13 +58,13 @@ const __ce=console.error;console.error=function(){window.__errs.push("console.er
 
 LIB = r"""
   const found=[],seen=new Set(),Q=new URLSearchParams(location.search),wait=ms=>new Promise(r=>setTimeout(r,ms));
-  const inset=parseFloat(Q.get("inset")||Q.get("safe")||"0")||0,MINF=parseFloat(Q.get("minfont")||"0.0105");
+  const inset=parseFloat(Q.get("inset")||Q.get("safe")||"0")||0,MINF=parseFloat(Q.get("minfont")||"0.0105"),MINPX=parseFloat(Q.get("minpx")||"12");
   const css=e=>getComputedStyle(e);
   const where=e=>{const p=[];for(let n=e;n&&n!==document.body&&p.length<3;n=n.parentElement){p.push(n.tagName.toLowerCase()+(n.id?"#"+n.id:"")+(n.classList.length&&!n.id?"."+[...n.classList].slice(0,2).join("."):""))}return p.join("<")};
   const shown=e=>{if(e.closest(".vh,.sr-only"))return false;for(let n=e;n&&n!==document.documentElement;n=n.parentElement){const s=css(n);if(s.display==="none"||s.visibility==="hidden")return false}const r=e.getBoundingClientRect();return r.width>0&&r.height>0};
   /* ---- the measure ---- */
   function add(ctx,kind,e,detail){const key=ctx.screen+"|"+ctx.data+"|"+kind+"|"+where(e)+"|"+detail.slice(0,24);if(seen.has(key))return;seen.add(key);found.push({kind,at:where(e),text:(e.textContent||"").trim().slice(0,60),detail,screen:ctx.screen,data:ctx.data})}
-  const NAMES=".nm,.hn,.gn";
+  const NAMES=".nm,.hn,.gn,.tn";
   function clipRect(r,el){      /* the part of the rectangle that is not cut by a box that clips (overflow other than visible), up to the frame of the window itself (#wrap, the body) */
     let x1=r.left,x2=r.right,y1=r.top,y2=r.bottom;
     for(let a=el;a&&a!==document.documentElement;a=a.parentElement){
@@ -78,7 +78,7 @@ LIB = r"""
   }
 
   function measure(ctx,ROOT){ROOT=ROOT||(()=>document.getElementById("stage"));
-    const vw=innerWidth,vh=innerHeight,ix=vw*inset/100,iy=vh*inset/100,de=document.documentElement,minFont=MINF*Math.min(vw,vh);
+    const vw=innerWidth,vh=innerHeight,ix=vw*inset/100,iy=vh*inset/100,de=document.documentElement,minFont=Math.max(MINF*Math.min(vw,vh),MINPX);
     if(de.scrollWidth>vw+1||de.scrollHeight>vh+1)found.push({kind:"page",at:"html",text:"",detail:de.scrollWidth+"x"+de.scrollHeight+" > "+vw+"x"+vh,screen:ctx.screen,data:ctx.data});
     const stage=ROOT();const zoom=(parseFloat(document.body.style.zoom)||1)*(parseFloat(css(document.documentElement).zoom)||1);      /* the zoom of the kiosk and the one the page gives to a big window */
     const all=[...stage.querySelectorAll("*")].filter(e=>!e.closest("svg")&&!["SCRIPT","STYLE"].includes(e.tagName)&&shown(e));
@@ -121,7 +121,7 @@ LIB = r"""
 
 WALL_BODY = r"""
   const out=document.getElementById("screens-measure")||document.body.appendChild(Object.assign(document.createElement("pre"),{id:"screens-measure"}));
-  const KINDS=(Q.get("kinds")||"overview,now,sentinels").split(","),DS=(Q.get("data")||"rich").split(",");
+  const KINDS=(Q.get("kinds")||"overview,fleet,now,sentinels").split(","),DS=(Q.get("data")||"rich").split(",");
   const clone=o=>JSON.parse(JSON.stringify(o));
   /* ---- the kinds of data: the answer of the demo, changed ---- */
   const L1="demo-organization-with-an-extremely-long-repository-name-that-keeps-going-on-and-on-and-on",L2="Donaudampfschifffahrtsgesellschaftskapitaensmuetzenabzeichenverwaltungsrepositorium-Kontinuierliche",
@@ -138,7 +138,7 @@ WALL_BODY = r"""
       const keep=name==="one"?1:0;
       const cut=a=>Array.isArray(a)?a.slice(0,keep):a;
       for(const k of ["trend24","trend7d","heat","top_red","events","running","queued","approval","failures","merges","next_releases","pending_sign","timeline"])if(k in d)d[k]=cut(d[k]);
-      if(d.groups)d.groups.groups=cut(d.groups.groups);
+      if(d.groups){if(Array.isArray(d.groups))d.groups=cut(d.groups);else d.groups.groups=cut(d.groups.groups)}
       if(name==="zero"){
         if(d.fleet)d.fleet={total:0,red:0,stuck:0,waiting:0,green:0,idle:0};if(d.queue)d.queue={running:0,queued:0,approval:0,minutes24:0,minutes7d:0};
         if(d.score)d.score={state:"off",value:null,letter:null,trend:null};if(d.alerts)d.alerts={total:0,by_level:{critical:0,error:0,warning:0,info:0},by_sentinel:{}};
@@ -166,6 +166,13 @@ WALL_BODY = r"""
         d.score={state:"scored",value:100,letter:"A+",trend:-123};
         d.events.forEach(e=>{e.ago=86400*400});d.top_red.forEach(e=>{e.seconds=86400*400});
       }
+    }else if(kind==="fleet"){
+      if(many||long||huge){
+        const mk=(i,n)=>Array.from({length:n},(_,j)=>({name:long?lr(j+i):"repo-"+i+"-"+j,state:["ok","ok","warn","bad","unknown"][(i+j)%5],running:0,red:0}));
+        d.groups=Array.from({length:many?8:3},(_,i)=>({key:"g"+i,label:long?lr(i).slice(0,40):"Group "+i,repos:huge?bigN:60+i,bad:huge?bigN:i,warn:huge?bigN:i,ok:50,unknown:1,tiles:mk(i,many?60:12),hidden:many?7:0}));
+        d.more_groups=many?5:0;
+      }
+      if(huge)d.fleet={total:bigN,red:bigN,stuck:bigN,waiting:bigN,green:bigN,idle:0};
     }else if(kind==="now"){
       const rn=(list,n,f)=>rows(list,n,f);
       if(many){
@@ -201,7 +208,7 @@ WALL_BODY = r"""
     await wait(1200);
     const S=window.__screens;clearTimeout(S.state.timer);S.state.moving=true;
     const base={};
-    for(const k of ["overview","now","sentinels"])base[k]=await (await window.__ofetch("/api/screens/data?screen="+k+"&lang="+encodeURIComponent(document.documentElement.getAttribute("data-l")||Q.get("lang")||"en"))).json();
+    for(const k of ["overview","fleet","now","sentinels"])base[k]=await (await window.__ofetch("/api/screens/data?screen="+k+"&lang="+encodeURIComponent(document.documentElement.getAttribute("data-l")||Q.get("lang")||"en"))).json();
     const rowsDone=[];
     for(const ds of DS)for(const kind of KINDS){
       S.state.moving=false;S.show(kind);S.state.moving=true;S.paint(mutate(ds,kind,base[kind]));await wait(450);

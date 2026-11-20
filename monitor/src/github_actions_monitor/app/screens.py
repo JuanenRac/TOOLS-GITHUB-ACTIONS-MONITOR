@@ -26,8 +26,10 @@ from github_actions_monitor.tool_version import TOOL_VERSION
 from github_actions_monitor.util import paths
 
 SCHEMA = 1
-KINDS = ("overview", "now", "sentinels")
-PATH_RE = re.compile(r"^/screen/(overview|now|sentinels)/?\Z")
+KINDS = ("overview", "fleet", "now", "sentinels")      # the four screens of the wall in the order they turn: Overview, Fleet, Right now, Sentinels (?monitor=1 to 4 only names the window)
+PATH_RE = re.compile(r"^/screen/(overview|fleet|now|sentinels)/?\Z")
+TRANSITIONS = ("none", "fade", "slide")
+MIN_FONT_LOW, MIN_FONT_HIGH = 8, 32      # the smallest letter (screens.min_font_px) a screen may be asked to keep, in pixels
 THEMES = ("dark", "light", "contrast")
 #: the themes of the main page (the same names, in the same order as its list): `auto` follows the computer, the rest are fixed. A wall screen may also use `contrast`, white on black for a screen seen from far away.
 STUDIO_THEMES = ("Armor", "Aqua", "Midnight", "Ember", "Forest", "Violet", "Solar", "Ice", "Crimson", "Mono", "High contrast", "Metallic", "Professional", "Videogame", "Terminal", "Blueprint")
@@ -41,9 +43,10 @@ MAX_SAFE = 10      # the most a television may cut from each edge that the scree
 NAMES = ("all", "public", "none")
 DEFAULTS = {"enabled": False, "blink": True, "blink_calm_minutes": 30, "rotate_seconds": 0, "default_theme": "inherit", "default_density": "normal", "refresh_seconds": 10, "burn_in_protection": True,
             "night_dim": False, "night_dim_from_hour": 22, "night_dim_to_hour": 7, "show_repo_names": "public", "sound": False, "sound_voices": "", "sound_volume": 0,
-            "theme_overview": "inherit", "theme_now": "inherit", "theme_sentinels": "inherit", "mode": "three", "rotate_every_seconds": 20, "alert_hold_seconds": 30,
-            "logo_overview": True, "logo_now": False, "logo_sentinels": False, "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64, "group_map": True,
-            "menu": True, "menu_target": "new", "menu_max_windows": 4, "menu_rotate_seconds": 20, "menu_tv_scale": 1.5, "safe_margin_percent": 0}   # the five before the last belong to the Screens menu (screenmenu.py)
+            "theme_overview": "inherit", "theme_fleet": "inherit", "theme_now": "inherit", "theme_sentinels": "inherit", "mode": "three", "rotate_every_seconds": 20, "alert_hold_seconds": 30,
+            "logo_overview": True, "logo_fleet": False, "logo_now": False, "logo_sentinels": False, "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64, "group_map": True,
+            "menu": True, "menu_target": "new", "menu_max_windows": 4, "menu_rotate_seconds": 20, "menu_tv_scale": 1.5, "safe_margin_percent": 0,
+            "life": True, "glance_seconds": 3, "transition": "fade", "hide_healthy": False, "idle_dim_minutes": 0, "min_font_px": 12}   # the five before the last belong to the Screens menu (screenmenu.py)
 SENTINEL_KEY = re.compile(r"^ui\.a(1[0-2]|[1-9])\Z")
 SENTINELS = tuple("a%d" % n for n in range(1, 13))
 LEVELS = ("ok", "warn", "bad", "info", "unknown")
@@ -69,7 +72,7 @@ TAB_DECISIONS = {
     "strend": {"screen": None, "reason": "reading"},
     "syvt": {"screen": None, "reason": "reading"},
     "team": {"screen": None, "reason": "people"},
-    "fleet": {"screen": "overview", "field": "groups"},
+    "fleet": {"screen": "fleet", "field": "groups"},
     "repos": {"screen": None, "reason": "controls"},
     "rep": {"screen": None, "reason": "reading"},
     "trep": {"screen": None, "reason": "reading"},
@@ -144,15 +147,18 @@ def settings(config):
             "night_dim_from_hour": _int(block.get("night_dim_from_hour"), 0, 23, d["night_dim_from_hour"]), "night_dim_to_hour": _int(block.get("night_dim_to_hour"), 0, 23, d["night_dim_to_hour"]),
             "show_repo_names": _choice(block.get("show_repo_names"), NAMES, d["show_repo_names"]), "sound": _flag(block.get("sound"), d["sound"]),
             "sound_voices": _voices_text(block.get("sound_voices")), "sound_volume": _int(block.get("sound_volume"), 0, 100, d["sound_volume"]),
-            "theme_overview": _theme(block.get("theme_overview"), THEME_CHOICES, d["theme_overview"]), "theme_now": _theme(block.get("theme_now"), THEME_CHOICES, d["theme_now"]),
+            "theme_overview": _theme(block.get("theme_overview"), THEME_CHOICES, d["theme_overview"]), "theme_fleet": _theme(block.get("theme_fleet"), THEME_CHOICES, d["theme_fleet"]), "theme_now": _theme(block.get("theme_now"), THEME_CHOICES, d["theme_now"]),
             "theme_sentinels": _theme(block.get("theme_sentinels"), THEME_CHOICES, d["theme_sentinels"]), "mode": _choice(block.get("mode"), MODES, d["mode"]),
             "rotate_every_seconds": _int(block.get("rotate_every_seconds"), 5, 300, d["rotate_every_seconds"]), "alert_hold_seconds": _int(block.get("alert_hold_seconds"), 5, 600, d["alert_hold_seconds"]),
-            "logo_overview": _flag(block.get("logo_overview"), d["logo_overview"]), "logo_now": _flag(block.get("logo_now"), d["logo_now"]), "logo_sentinels": _flag(block.get("logo_sentinels"), d["logo_sentinels"]),
+            "logo_overview": _flag(block.get("logo_overview"), d["logo_overview"]), "logo_fleet": _flag(block.get("logo_fleet"), d["logo_fleet"]), "logo_now": _flag(block.get("logo_now"), d["logo_now"]), "logo_sentinels": _flag(block.get("logo_sentinels"), d["logo_sentinels"]),
             "logo_corner": _choice(block.get("logo_corner"), CORNERS, d["logo_corner"]), "logo_max_width": _int(block.get("logo_max_width"), 16, 640, d["logo_max_width"]),
             "logo_max_height": _int(block.get("logo_max_height"), 16, 320, d["logo_max_height"]), "group_map": _flag(block.get("group_map"), d["group_map"]),
             "menu": _flag(block.get("menu"), d["menu"]), "menu_target": _choice(block.get("menu_target"), ("new", "same"), d["menu_target"]), "menu_max_windows": _int(block.get("menu_max_windows"), 1, 9, d["menu_max_windows"]),
             "menu_rotate_seconds": _int(block.get("menu_rotate_seconds"), 5, 300, d["menu_rotate_seconds"]), "menu_tv_scale": _scale(block.get("menu_tv_scale"), d["menu_tv_scale"]),
-            "safe_margin_percent": _int(block.get("safe_margin_percent"), 0, MAX_SAFE, d["safe_margin_percent"])}
+            "safe_margin_percent": _int(block.get("safe_margin_percent"), 0, MAX_SAFE, d["safe_margin_percent"]),
+            "life": _flag(block.get("life"), d["life"]), "glance_seconds": _int(block.get("glance_seconds"), 0, 30, d["glance_seconds"]), "transition": _choice(block.get("transition"), TRANSITIONS, d["transition"]),
+            "hide_healthy": _flag(block.get("hide_healthy"), d["hide_healthy"]), "idle_dim_minutes": _int(block.get("idle_dim_minutes"), 0, 1440, d["idle_dim_minutes"]),
+            "min_font_px": _int(block.get("min_font_px"), MIN_FONT_LOW, MIN_FONT_HIGH, d["min_font_px"])}
 
 
 def global_theme(config):
@@ -254,7 +260,7 @@ def page_data(kind, cfg, prm, lang=None, logo=None, global_name="auto"):
     """The object embedded in the page: language, texts of this language, the settings that matter to the page, the parameters of the window, the theme of each screen and the logo."""
     return {"screen": kind, "kinds": list(KINDS), "lang": lang or i18n.language(), "html_lang": i18n.HTML_LANG.get(lang or i18n.language(), "en"), "locale": i18n.BROWSER_LOCALE.get(lang or i18n.language(), "en-GB"),
             "texts": {k: i18n.t(k) for k in page_keys()}, "version": TOOL_VERSION,
-            "settings": {k: cfg[k] for k in ("blink", "blink_calm_minutes", "burn_in_protection", "night_dim", "night_dim_from_hour", "night_dim_to_hour")}, "params": prm,
+            "settings": {k: cfg[k] for k in ("blink", "blink_calm_minutes", "burn_in_protection", "night_dim", "night_dim_from_hour", "night_dim_to_hour", "life", "glance_seconds", "transition", "hide_healthy", "idle_dim_minutes", "min_font_px")}, "params": prm,
             "themes": {k: resolve_theme(cfg, k, global_name) for k in KINDS}, "logo": logo_block(cfg, logo)}
 
 
@@ -547,6 +553,38 @@ def group_map(view, labels=None):
     return {"by": by, "groups": rows[:GROUPS_SHOWN], "more": max(0, len(rows) - GROUPS_SHOWN)}
 
 
+FLEET_GROUPS, FLEET_TILES = 8, 60
+STATE_ORDER = {"bad": 0, "warn": 1, "unknown": 2, "ok": 3}
+
+
+def build_fleet(state, snapshot, alerts, score, names, now, view=None, labels=None):
+    """The Fleet screen: the repositories of the fleet by group, each one a tile with its state (the grouping and the order of the Fleet tab: the riskiest group first). A group keeps its first `FLEET_TILES`
+    tiles, worst first, and says how many it left out; the screen keeps the first `FLEET_GROUPS` groups and says how many more there are. A repository is named as the rest of the screens name it
+    (`screens.show_repo_names`): a hidden one is private-N and nothing more. None for `groups` when the fleet view is not there."""
+    out = {"fleet": _fleet(state, snapshot), "groups": None, "totals": {k: 0 for k in STATE_ORDER}, "alerts": _alert_summary(alerts), "by": "ecosystem", "more_groups": 0, "tiles_shown": FLEET_TILES}
+    if not isinstance(view, dict) or not isinstance(view.get("groups"), list):
+        return out
+    labels = labels if isinstance(labels, dict) else {}
+    by = view.get("group_by") if view.get("group_by") in GROUP_BY else "ecosystem"
+    rows = {}
+    for row in view.get("rows") or []:
+        if isinstance(row, dict) and isinstance(row.get("repo"), str):
+            rows.setdefault(str(row.get("group") or ""), []).append(row)
+    groups = []
+    for group in view["groups"]:
+        if not isinstance(group, dict):
+            continue
+        key = str(group.get("key") or "")[:40]
+        members = sorted(rows.get(key, []), key=lambda r: (STATE_ORDER.get(r.get("state"), 2), -_int(r.get("risk"), 0, 10 ** 9, 0)))
+        tiles = [{"name": names.name(r["repo"])[:60], "state": r.get("state") if r.get("state") in STATE_ORDER else "unknown", "running": _int(r.get("running"), 0, 10 ** 4, 0), "red": _int(r.get("red_workflows"), 0, 10 ** 4, 0)}
+                 for r in members[:FLEET_TILES]]
+        groups.append({"key": key, "label": str(labels.get(key, key) if by == "ecosystem" else key)[:40], "repos": _int(group.get("repos"), 0, 10 ** 6, 0), "bad": _int(group.get("bad"), 0, 10 ** 6, 0),
+                       "warn": _int(group.get("warn"), 0, 10 ** 6, 0), "ok": _int(group.get("ok"), 0, 10 ** 6, 0), "unknown": _int(group.get("unknown"), 0, 10 ** 6, 0), "tiles": tiles,
+                       "hidden": max(0, len(members) - FLEET_TILES)})
+    out.update(groups=groups[:FLEET_GROUPS], by=by, more_groups=max(0, len(groups) - FLEET_GROUPS), totals={k: sum(g[k] for g in groups) for k in STATE_ORDER})
+    return out
+
+
 def build_overview(state, snapshot, alerts, score, names, now, groups=None):
     runs = [r for r in (state.get("runs") or []) if isinstance(r, dict)]
     red = _red_repos(state, snapshot)
@@ -704,6 +742,8 @@ def build(kind, state, snapshot, alerts, score, cfg, edition="complete", now=Non
         out["meta"]["repos"] = len(data.get("repos") or [])
     if kind == "overview":
         out.update(build_overview(data, snapshot, alerts, score, names, now, group_map(fleet_view, labels) if cfg.get("group_map", True) else None))
+    elif kind == "fleet":
+        out.update(build_fleet(data, snapshot, alerts, score, names, now, fleet_view, labels))
     elif kind == "now":
         out.update(build_now(data, snapshot, alerts, score, names, now))
     else:

@@ -70,6 +70,7 @@ Trois pages pour un moniteur ou un téléviseur que personne ne touche. Elles n'
 | Adresse | Ce qu'elle montre |
 |---|---|
 | `/screen/overview` | Anneau et lettre du score ; le parc (verts, rouges, bloqués, en attente) ; les dernières 24 heures et 7 jours en graphiques en aires ; une carte thermique des dépôts par heure ; ce qui est rouge depuis le plus longtemps ; runners et minutes ; les derniers événements ; le quota GitHub sous forme de jauge. La carte de la flotte affiche aussi la carte par groupes : une barre par groupe de la vue de flotte (le même regroupement, `fleet.group_by`) avec ses dépôts rouges, à surveiller, en ordre ou sans données ; seulement le nom du groupe et des chiffres. |
+| `/screen/fleet` | Chaque dépôt du parc par groupe (le regroupement et l'ordre de l'onglet Parc, le groupe le plus risqué d'abord) : un petit carré pour chaque dépôt sain et une pastille avec le nom pour chacun qui demande un coup d'œil, avec les totaux du parc en haut. Ce qui ne tient pas est compté (« +3 de plus »). |
 | `/screen/now` | Ce qui se passe cette minute : exécutions en cours avec progression et durée, la file, les exécutions en attente d'approbation, les échecs récents, les fusions et versions publiées, les versions à venir et une ligne en direct des deux dernières heures. |
 | `/screen/sentinels` | Une carte par sentinelle (A1 à A12) avec son niveau, les constats ouverts, si ses sources sont lisibles, le dernier balayage et un anneau qui suit le balayage ; un radar animé qui marque ce qui ne va pas et les alertes par gravité. |
 
@@ -111,14 +112,20 @@ La langue d'un écran se décide dans cet ordre : `?lang=xx` dans l'adresse ; pu
 | `screens.safe_margin_percent` | Garde le contenu à ce pourcentage de chaque bord de la fenêtre, pour un téléviseur qui coupe la bordure (overscan) : tout est dessiné un peu plus petit. 0 (défaut) utilise toute la fenêtre ; de 0 à 10. |
 | `screens.night_dim` | Atténue les écrans entre `screens.night_dim_from_hour` (22) et `screens.night_dim_to_hour` (7) ; désactivé par défaut. |
 | `screens.show_repo_names` | all, public (par défaut : les dépôts privés apparaissent comme private-1, private-2...) ou none (tous les noms sont masqués). Utilisez public ou none pour un écran que d'autres personnes peuvent voir. Avec une liste de dépôts écrite à la main dans `repos`, la visibilité est lue par une liste du compte toutes les `discover_refresh_seconds` ; un dépôt dont la visibilité n'a pas pu être lue compte comme privé. Les numéros (private-1...) ne vont qu'aux dépôts masqués, dans l'ordre d'un HMAC du nom avec une clé de l'installation gardée dans un fichier privé du dossier de données : ils ne disent rien de la place d'un dépôt parmi les autres. |
-| `screens.theme_overview`, `screens.theme_now`, `screens.theme_sentinels` | Le thème d'un écran : inherit (par défaut : celui de `screens.default_theme`) ou l'un des thèmes ci-dessus. |
+| `screens.theme_overview`, `screens.theme_fleet`, `screens.theme_now`, `screens.theme_sentinels` | Le thème d'un écran : inherit (par défaut : celui de `screens.default_theme`) ou l'un des thèmes ci-dessus. |
 | `screens.mode` | three (par défaut : les trois pages séparées, une par fenêtre) ou rotate (une seule page qui passe par les trois et saute vers un nouveau rouge). |
 | `screens.rotate_every_seconds` | En mode rotate, secondes sur chaque écran (20 par défaut ; de 5 à 300). |
 | `screens.alert_hold_seconds` | En mode rotate, secondes pendant lesquelles un nouveau rouge garde la fenêtre sur son écran (30 par défaut ; de 5 à 600), ou jusqu'à ce que le rouge disparaisse. |
-| `screens.logo_overview`, `screens.logo_now`, `screens.logo_sentinels` | Sur quels écrans le logo apparaît (seulement la vue d'ensemble par défaut). |
+| `screens.logo_overview`, `screens.logo_fleet`, `screens.logo_now`, `screens.logo_sentinels` | Sur quels écrans le logo apparaît (seulement la vue d'ensemble par défaut). |
 | `screens.logo_corner` | top-right (par défaut), top-left, bottom-right ou bottom-left. |
 | `screens.logo_max_width`, `screens.logo_max_height` | Taille maximale du logo en pixels à 1920 x 1080 (160 x 64 par défaut ; il grandit avec l'écran). |
 | `screens.group_map` | Activé par défaut. Affiche la carte de la flotte par groupes sur l’écran général (le regroupement de la vue de flotte). Désactivé : seulement les quatre tuiles. |
+| `screens.life` | Activé par défaut. Un chiffre qui change clignote là où il a changé, un nouvel échec envoie une onde sur sa case et un changement d'état laisse une courte traînée. Rien ne bouge avec le réglage du système pour moins de mouvement. |
+| `screens.glance_seconds` | Secondes pendant lesquelles l'en-tête montre ce qui a changé à la dernière mise à jour, en trois pastilles au plus (« Rouge +1 ») ; 3 par défaut, 0 = désactivé (0 à 30). |
+| `screens.transition` | Comment une fenêtre qui tourne passe d'un écran au suivant : fade (par défaut), slide ou none. |
+| `screens.hide_healthy` | Désactivé par défaut. L'écran Parc omet les carrés des dépôts sains ; la vue d'ensemble omet les groupes sans rouge ni jaune et les lignes de la carte de chaleur sans échec. Les totaux restent. |
+| `screens.idle_dim_minutes` | 0 = désactivé (par défaut). Quand rien n'a changé pendant ce nombre de minutes et que rien n'est rouge, l'écran s'assombrit pour ménager la dalle ; le prochain changement le réveille (1 à 1440). |
+| `screens.min_font_px` | La plus petite lettre des écrans en pixels, quelle que soit la taille de la fenêtre (12 par défaut ; 8 à 32). |
 | `screens.menu` | Activé par défaut. Le bouton Écrans de la barre du haut. Désactivé : le bouton disparaît ; les écrans continuent de fonctionner à leurs propres adresses. |
 | `screens.menu_target` | new (par défaut) : un écran s'ouvre dans une nouvelle fenêtre ou un nouvel onglet ; same : dans l'onglet actuel. |
 | `screens.menu_max_windows` | Nombre maximal de fenêtres qu'un ensemble multi-écrans ouvre d'un coup (4 par défaut ; de 1 à 9). |
@@ -166,12 +173,15 @@ Les trois pages sont dessinées avec des unités qui suivent le petit côté de 
 - Le nom d'un dépôt ou d'un workflow qui ne tient pas se termine par des points de suspension et porte son texte complet dans le `title` ; un titre, une étiquette ou un chiffre ne se termine jamais par des points de suspension : le titre passe sur une deuxième ligne et un chiffre plus large que sa boîte reçoit une police plus petite, jusqu'à un plancher.
 - Quand une liste a plus de lignes que sa boîte n'en contient, les plus importantes passent en premier (le rouge avant le vert, le plus récent d'abord) et la dernière ligne dit combien ont été laissées de côté (« +3 de plus ») ; rien n'est masqué sans cette ligne.
 - Marge de sécurité (overscan) : beaucoup de téléviseurs coupent quelques pour cent de chaque bord, sauf si leur mode d'image est « just scan » ou « pixel par pixel ». `screens.safe_margin_percent` (0 par défaut, de 0 à 10 ; `?safe=4` pour une fenêtre) garde le contenu à cette distance de chaque bord en dessinant tout plus petit, et `kiosk.safe_margin_percent` fait de même pour le kiosque. Essayez 3 à 5 si les premières lettres de l'horloge ou la bordure des cartes sont coupées.
+- La plus petite lettre est `screens.min_font_px` (12 pixels par défaut) : dans une fenêtre si petite que la mise en page demanderait une police plus petite, les écrans gardent la lettre et montrent moins de lignes, en disant combien ils en ont laissé de côté, au lieu de réduire le texte.
 
 ### Leur comportement
 
 - Les échecs clignotent moins de deux fois par seconde (jamais de stroboscope) ; un nouvel échec provoque un seul éclair ; un échec dont personne ne s'est occupé pendant `screens.blink_calm_minutes` minutes garde un halo fixe. Avec le réglage du système pour réduire les animations, ou avec `?blink=off`, rien ne clignote ni ne bouge. Un échec n'est jamais signalé par la seule couleur : il porte un symbole et un mot.
 - Quand le moniteur ne répond pas, la page le dit, s'atténue et réessaie après 5, 10, 20... secondes (jusqu'à 60).
 - Un écran toujours allumé est protégé contre la rémanence : tout se déplace de quelques pixels chaque minute et la page peut s'atténuer la nuit.
+- Ce qui change entre deux mises à jour se voit : le chiffre clignote là où il a changé (`screens.life`), un nouvel échec envoie une onde sur sa case et, pendant `screens.glance_seconds` secondes, quelques pastilles de l'en-tête disent ce qui a changé (« Rouge +1 », « En cours +2 »). Le premier regard d'un écran ne fait que mémoriser ; avec le réglage du système pour moins de mouvement rien ne bouge, mais les pastilles apparaissent quand même.
+- Une fenêtre qui tourne change d'écran par un fondu, un glissement ou une coupure (`screens.transition`). Un écran sans nouveauté depuis `screens.idle_dim_minutes` minutes se repose (assombri) tant que rien n'est rouge.
 
 ### Installer plusieurs moniteurs
 
@@ -202,7 +212,7 @@ Chaque onglet de la page a une décision, écrite dans le code (`TAB_DECISIONS` 
 | `strend` | Tendance quotidienne | - | `reading` |
 | `syvt` | Hier vs aujourd'hui | - | `reading` |
 | `team` | Santé de l'équipe | - | `people` |
-| `fleet` | Flotte | `/screen/overview` | - |
+| `fleet` | Flotte | `/screen/fleet` | - |
 | `repos` | Dépôts | - | `controls` |
 | `rep` | Rapports | - | `reading` |
 | `trep` | Rapports planifiés | - | `reading` |

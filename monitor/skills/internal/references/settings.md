@@ -376,6 +376,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `modes.auto_low` | `-` | quota | Low mode by itself |
 | `modes.auto_low_enter` | `-` | quota | Calls left to enter Low |
 | `modes.auto_low_exit` | `-` | quota | Calls left to leave Low |
+| `modes.idle_minutes` | `-` | quota | Minutes without viewers before going cold |
 | `modes.low.cold_refresh_seconds` | `-` | quota | Low: seconds between readings of the rest |
 | `modes.low.hot_hours` | `-` | quota | Low: hours a repository stays hot |
 | `modes.low.refresh_seconds` | `-` | quota | Low: seconds between readings of hot repositories |
@@ -553,8 +554,13 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `screens.default_density` | `"normal"` | general | Density of the wall screens |
 | `screens.default_theme` | `"inherit"` | general | Theme of the wall screens |
 | `screens.enabled` | `false` | general | Wall screens |
+| `screens.glance_seconds` | `3` | general | Seconds of the glance |
 | `screens.group_map` | `true` | general | Group map on the overview screen |
+| `screens.hide_healthy` | `false` | general | Hide what is healthy |
+| `screens.idle_dim_minutes` | `0` | general | Minutes until a quiet screen rests |
+| `screens.life` | `true` | general | Life on the wall screens |
 | `screens.logo_corner` | `"top-right"` | general | Corner of the logo |
+| `screens.logo_fleet` | `false` | general | Logo on the screen: Fleet |
 | `screens.logo_max_height` | `64` | general | Largest height of the logo |
 | `screens.logo_max_width` | `160` | general | Largest width of the logo |
 | `screens.logo_now` | `false` | general | Logo on the screen: Right now |
@@ -565,6 +571,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `screens.menu_rotate_seconds` | `20` | general | Seconds per screen in the turning presets |
 | `screens.menu_target` | `"new"` | general | Where the Screens menu opens a screen |
 | `screens.menu_tv_scale` | `1.5` | general | Size of the TV preset |
+| `screens.min_font_px` | `12` | general | Smallest letter of the screens |
 | `screens.mode` | `"three"` | general | Wall screens mode |
 | `screens.night_dim` | `false` | general | Dim at night |
 | `screens.night_dim_from_hour` | `22` | general | Dim from (hour) |
@@ -577,9 +584,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `screens.sound` | `false` | general | Sound on wall screens |
 | `screens.sound_voices` | `""` | general | Sounds of the wall screens |
 | `screens.sound_volume` | `0` | general | Volume of the wall screens |
+| `screens.theme_fleet` | `"inherit"` | general | Theme of the screen: Fleet |
 | `screens.theme_now` | `"inherit"` | general | Theme of the screen: Right now |
 | `screens.theme_overview` | `"inherit"` | general | Theme of the screen: Overview |
 | `screens.theme_sentinels` | `"inherit"` | general | Theme of the screen: Sentinels |
+| `screens.transition` | `"fade"` | general | Change between screens |
 | `sentinel.a2_full_sample_unknown` | `-` | sentinel | Unknown when sample is full |
 | `sentinel.a2_resolve_batch_min` | `-` | sentinel | A2 lookups in one request from |
 | `sentinel.a2_resolve_batch_pages` | `-` | sentinel | A2 pages per repository |

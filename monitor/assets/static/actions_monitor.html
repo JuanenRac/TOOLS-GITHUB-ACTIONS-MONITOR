@@ -1462,7 +1462,8 @@ function freshPaint(){
   const key=note?note.level+"|"+note.text:"";
   if(key!==(FRESHNOTE?FRESHNOTE.level+"|"+FRESHNOTE.text:"")){FRESHNOTE=note;try{renderBar()}catch(e){}}
 }
-function freshDog(){if(freshWatch(nowMs()))tick(true)}
+/* with modes.idle_minutes on, a hidden tab does not ask (it asks at once when it comes back, see below): a forgotten tab does not keep the monitor awake */
+function freshDog(){if(I18N.viewer_aware&&document.hidden)return;if(freshWatch(nowMs()))tick(true)}
 setInterval(freshDog,5000);setInterval(freshPaint,1000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)tick(true)});
 /* ---------- Sentinel ---------- */
