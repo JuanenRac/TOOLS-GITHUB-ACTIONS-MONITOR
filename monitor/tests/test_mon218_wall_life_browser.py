@@ -61,6 +61,7 @@ PROBE_LIFE = r"""
     CFG.hide_healthy=true;S.paint(fleet(4));await wait(150);
     log.hiddenSquares=document.querySelectorAll("#f-groups .ft").length;
     log.hiddenChips=document.querySelectorAll("#f-groups .tn").length;
+    await wait(1700);      /* the wave of the last red is gone */
     CFG.hide_healthy=false;CFG.life=false;CFG.glance_seconds=3;
     document.getElementById("ff-green").classList.remove("changed");
     S.paint(fleet(2));await wait(150);

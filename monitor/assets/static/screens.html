@@ -180,9 +180,9 @@ header>.orglogo:first-child{margin-right:1rem}header>.orglogo:last-child{margin-
 #f-fleet .tile{padding:.2rem .6rem}#f-fleet .tile .big{font-size:2.2rem;line-height:1.1}
 .fgroups{display:grid;grid-template-columns:repeat(auto-fit,minmax(17rem,1fr));grid-auto-rows:minmax(0,1fr);gap:.7rem;height:100%;min-height:0}
 .fg{border:1px solid var(--line);border-radius:.6rem;padding:.4rem .6rem;display:flex;flex-direction:column;gap:.3rem;min-height:0;min-width:0;overflow:hidden;position:relative}
-.fg .gh{display:flex;justify-content:space-between;align-items:baseline;gap:.5rem;font-size:.9rem;line-height:1.15;flex:0 0 auto}
+.fg .gh{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:0 .5rem;font-size:.9rem;line-height:1.15;flex:0 0 auto;min-width:0}
 .fg .gh b{min-width:0;overflow-wrap:anywhere}
-.fg .gh span{white-space:nowrap;color:var(--mut);font-size:.85rem}
+.fg .gh span{color:var(--mut);font-size:.85rem;min-width:0;overflow-wrap:anywhere}
 .fg .tiles{flex:1 1 0;min-height:0;display:flex;flex-wrap:wrap;align-content:flex-start;gap:.25rem;overflow:hidden}
 .tiles .ft{width:.85rem;height:.85rem;border-radius:.2rem;background:var(--ok);opacity:.8}
 .tiles .tn{font-size:.8rem;line-height:1.25;padding:0 .4rem;border-radius:.3rem;border:1px solid var(--line);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

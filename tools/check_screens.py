@@ -64,7 +64,7 @@ LIB = r"""
   const shown=e=>{if(e.closest(".vh,.sr-only"))return false;for(let n=e;n&&n!==document.documentElement;n=n.parentElement){const s=css(n);if(s.display==="none"||s.visibility==="hidden")return false}const r=e.getBoundingClientRect();return r.width>0&&r.height>0};
   /* ---- the measure ---- */
   function add(ctx,kind,e,detail){const key=ctx.screen+"|"+ctx.data+"|"+kind+"|"+where(e)+"|"+detail.slice(0,24);if(seen.has(key))return;seen.add(key);found.push({kind,at:where(e),text:(e.textContent||"").trim().slice(0,60),detail,screen:ctx.screen,data:ctx.data})}
-  const NAMES=".nm,.hn,.gn";
+  const NAMES=".nm,.hn,.gn,.tn";
   function clipRect(r,el){      /* the part of the rectangle that is not cut by a box that clips (overflow other than visible), up to the frame of the window itself (#wrap, the body) */
     let x1=r.left,x2=r.right,y1=r.top,y2=r.bottom;
     for(let a=el;a&&a!==document.documentElement;a=a.parentElement){
