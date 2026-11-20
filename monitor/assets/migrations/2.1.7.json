@@ -113,20 +113,14 @@
      10000
     ],
     "default": 500
+   },
+   {
+    "key": "siem.sinks",
+    "default": []
    }
   ],
   "removed": [],
-  "changed": [
-   {
-    "key": "sentinel.candidate_min_entries",
-    "old": {
-     "default": 1
-    },
-    "new": {
-     "default": 5
-    }
-   }
-  ]
+  "changed": []
  },
  "manual": {}
 }
