@@ -39,6 +39,8 @@
 
 每轮最多读取 `sentinels.supply.max_repos_per_tick` 个仓库（默认 10），最多进行 `sentinels.supply.max_calls_per_tick` 次调用（60）：列出一个仓库的工作流一次，每个新增或更改的文件再一次，因为 SHA 未变的文件不会再次读取。最久未读的优先，有未关闭警报的稍早一些；周期为每 `sentinels.supply.refresh_seconds`（默认一小时）。当剩余额度低于 `sentinels.supply.min_rate_remaining` 时哨兵暂停。其状态（`supply_state.json`）保存未关闭的警报，因此重启不会重复通知，对仓库的首次查看也不会写入事件。`sentinels.supply.max_files_per_repo` 限制在一个仓库中读取的文件数；超出的仓库只会被部分读取并计为部分。 一轮在 `sentinels.supply.deadline_s` 秒后(默认 30;0 = 无上限)也不再开始新的仓库:没轮到的等待下一轮,状态会把它们按名称列为 `unchecked`(并带有 `round_cut`),而不是算作零告警。
 
+开启 `sentinels.supply.incremental`(默认关闭)后,工作流文件(其 blob SHA)和规则与上次成功检查相同的仓库不会重新检查,其提醒保持原样:不查看绝不会关闭提醒,而任何规则、忽略列表或程序版本的变化都会让所有仓库重新检查。状态会显示有多少仓库保持不变(`unchanged`)。这是针对你熟悉的仓库所做的选择,而不是继承的默认值。
+
 ## 忽略一条发现
 
 `sentinels.supply.ignore` 接受 `仓库:文件:规则` 模式（`*` 表示任意），其中规则指检查器的规则，例如 `myrepo:release.yml:unpinned_uses`；注意 `unpinned_uses` 是 `unpinned` 和 `mutable_ref` 背后的规则，`permissions` 是两个权限信号背后的规则。`lint.ignore` 的模式在这里不适用。
@@ -49,7 +51,7 @@
 
 ## 设置项
 
-在“设置”页面的“哨兵”子标签、“供应链”块中：`sentinels.supply.enabled`, `sentinels.supply.refresh_seconds`, `sentinels.supply.max_repos_per_tick`, `sentinels.supply.max_calls_per_tick`, `sentinels.supply.max_files_per_repo`, `sentinels.supply.min_rate_remaining`, `sentinels.supply.repos`, `sentinels.supply.ignore`, `sentinels.supply.signals.unpinned.enabled`, `sentinels.supply.signals.unpinned.level`, `sentinels.supply.signals.mutable_ref.enabled`, `sentinels.supply.signals.mutable_ref.level`, `sentinels.supply.signals.permissions_wide.enabled`, `sentinels.supply.signals.permissions_wide.level`, `sentinels.supply.signals.permissions_missing.enabled`, `sentinels.supply.signals.permissions_missing.level`, `sentinels.supply.signals.pr_target_checkout.enabled`, `sentinels.supply.signals.pr_target_checkout.level`.
+在“设置”页面的“哨兵”子标签、“供应链”块中：`sentinels.supply.enabled`, `sentinels.supply.incremental`, `sentinels.supply.refresh_seconds`, `sentinels.supply.max_repos_per_tick`, `sentinels.supply.max_calls_per_tick`, `sentinels.supply.max_files_per_repo`, `sentinels.supply.min_rate_remaining`, `sentinels.supply.repos`, `sentinels.supply.ignore`, `sentinels.supply.signals.unpinned.enabled`, `sentinels.supply.signals.unpinned.level`, `sentinels.supply.signals.mutable_ref.enabled`, `sentinels.supply.signals.mutable_ref.level`, `sentinels.supply.signals.permissions_wide.enabled`, `sentinels.supply.signals.permissions_wide.level`, `sentinels.supply.signals.permissions_missing.enabled`, `sentinels.supply.signals.permissions_missing.level`, `sentinels.supply.signals.pr_target_checkout.enabled`, `sentinels.supply.signals.pr_target_checkout.level`.
 
 ## 它不做什么
 

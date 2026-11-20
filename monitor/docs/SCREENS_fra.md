@@ -9,6 +9,8 @@
 
 La page s'adapte à la taille de sa fenêtre, du téléphone à la 4K, à la verticale ou à l'horizontale, et un même moniteur peut servir plusieurs écrans, chacun avec les onglets que vous choisissez. Rien n'est interrogé deux fois : tous les écrans lisent le même état.
 
+
+Pour une télévision ou un mur avec un texte plus grand, un contraste élevé ou une rotation parmi quelques onglets, voir [KIOSK_fra.md](KIOSK_fra.md).
 ## Adresses
 
 - `/` - la page entière.
@@ -82,6 +84,7 @@ Une adresse par moniteur. Un paramètre peut rendre une fenêtre plus calme ou p
 | `?rotate=30` | La fenêtre passe toute seule par vue d'ensemble, en ce moment et sentinelles toutes les 30 secondes (au moins 5 ; 0 = elle reste sur un écran). Avec `screens.mode` = rotate elle tourne déjà ; ceci change le rythme d'une fenêtre. |
 | `?jump=off` | Seulement avec `screens.mode` = rotate : la fenêtre tourne mais ne saute jamais vers un nouveau rouge. |
 | `?blink=off` | Les échecs gardent un halo fixe au lieu de clignoter. Il ne peut pas activer ce que `screens.blink` laisse désactivé. |
+| `?repo=WORD,WORD` | Seulement les dépôts dont le nom contient l'un des mots (lettres, chiffres et `. _ - /`, jusqu'à huit mots). `/screen/overview` et `/screen/now` ne gardent que les dépôts dont l'écran montre le nom (un nom masqué ne correspond jamais), les chiffres suivent les lignes gardées, et la note et la carte des groupes, qui concernent toute la flotte, ne sont pas affichées ; `/screen/sentinels` n'est pas filtré. |
 | `?sound=on` | Un bip court pour un nouvel échec, seulement si `screens.sound` l'autorise. Désactivé par défaut. |
 
 ### Langue des écrans

@@ -8,11 +8,13 @@ By default one limit (`stuck_minutes`) decides, as always. Three settings of the
     so a build that lasts six hours is not "stuck" at hour two while a build of two minutes that runs for an hour is.
   * `workflow_minutes` / `runner_minutes` (empty): a fixed limit for a workflow file (`build.yml=420`) or for a runner label (`self-hosted=720`); the workflow wins over the label.
   * `queue_minutes` (0 = same limit as a running build): a longer limit for a run that has not even started because it waits for a runner.
+  * `no_runner_check` (off): a run that waits for a label that is neither a GitHub-hosted one nor carried by any runner the monitor can list is named `no_runner` (the cause) instead of just `queue`. Needs `runners.enabled`;
+    a runner that is not in that list (a larger runner, a runner of another organisation) would be reported wrongly, so it is up to you to switch it on.
   * `ghost_enabled` / `ghost_days` (on, 7): a run that has been in the queue for more than `ghost_days` days is not waiting for a runner any more: GitHub never starts it (its pull request was closed, its job
     asked for a runner that does not exist). It is a "ghost": it is not stuck, not queued and not a reason for any alarm; it is counted and shown apart so that somebody can cancel it.
 
 Every run that waits also says WHY: `queue` (it waits for a runner), `awaiting_approval` (it waits for a person), `runner_down` (it waits and every self-hosted runner with its label is offline),
-`ghost` (it has waited for days) or `build` (it is running). Pure functions: no network; the clock is given by the caller.
+`ghost` (it has waited for days), `no_runner` (it waits for a label that no runner of the account carries and no GitHub-hosted runner has: nothing can ever pick it up; only with `no_runner_check` on and the list of runners read) or `build` (it is running). Pure functions: no network; the clock is given by the caller.
 """
 import fnmatch
 import math
@@ -20,8 +22,10 @@ import time
 from datetime import datetime
 
 DEFAULTS = {"learned": False, "percentile": 95, "margin": 2.0, "min_samples": 3, "min_minutes": 30, "max_minutes": 720, "queue_minutes": 0,
-            "workflow_minutes": [], "runner_minutes": [], "awaiting_stuck": True, "ghost_enabled": True, "ghost_days": 7}
-REASONS = ("queue", "awaiting_approval", "runner_down", "ghost", "build")
+            "workflow_minutes": [], "runner_minutes": [], "awaiting_stuck": True, "ghost_enabled": True, "ghost_days": 7, "no_runner_check": False}
+REASONS = ("queue", "awaiting_approval", "runner_down", "no_runner", "ghost", "build")
+GENERIC_LABELS = ("self-hosted", "linux", "windows", "macos", "x64", "x86", "arm", "arm64")      # the labels every runner of a system carries: they never say which runner is wanted
+HOSTED_PATTERNS = ("ubuntu-*", "windows-*", "macos-*")      # the labels of the runners GitHub itself hosts (ubuntu-latest, ubuntu-24.04, windows-2022, macos-14-xlarge...)
 QUEUE_STATES = ("queued", "pending", "requested")
 
 
@@ -51,7 +55,8 @@ def settings(config):
             "min_samples": _int(block.get("min_samples"), 2, 100, DEFAULTS["min_samples"]), "min_minutes": min(low, high), "max_minutes": max(low, high),
             "queue_minutes": _int(block.get("queue_minutes"), 0, 100000, 0), "workflow_minutes": _pairs(block.get("workflow_minutes")),
             "runner_minutes": _pairs(block.get("runner_minutes")), "awaiting_stuck": block.get("awaiting_stuck") is not False,
-            "ghost_enabled": block.get("ghost_enabled") is not False, "ghost_days": _int(block.get("ghost_days"), 1, 3650, DEFAULTS["ghost_days"])}
+            "ghost_enabled": block.get("ghost_enabled") is not False, "ghost_days": _int(block.get("ghost_days"), 1, 3650, DEFAULTS["ghost_days"]),
+            "no_runner_check": block.get("no_runner_check") is True}
 
 
 def workflow_key(run):
@@ -84,11 +89,22 @@ def _match(pattern, text):
     return fnmatch.fnmatchcase(str(text or "").lower(), pattern.lower())
 
 
-def reason_of(run, labels=(), offline_labels=()):
+def missing_labels(labels, known_labels):
+    """The labels a job asks for that nobody can give: not generic, not GitHub-hosted and not carried by any runner of `known_labels` (every label of the listed runners, online or not).
+    `known_labels` None (the runners were not read) means nothing can be said, so nothing is missing."""
+    wanted = {str(x).lower() for x in labels or ()}
+    if known_labels is None or not wanted or any(_match(pattern, label) for pattern in HOSTED_PATTERNS for label in wanted):
+        return []
+    return sorted(wanted - {str(x).lower() for x in known_labels} - set(GENERIC_LABELS))
+
+
+def reason_of(run, labels=(), offline_labels=(), known_labels=None):
     status = run.get("status")
     if run.get("conclusion") == "action_required" or status == "waiting":
         return "awaiting_approval"
     if status in QUEUE_STATES:
+        if missing_labels(labels, known_labels):
+            return "no_runner"
         wanted = {str(x).lower() for x in labels}
         if wanted and wanted & {str(x).lower() for x in offline_labels}:
             return "runner_down"
@@ -115,10 +131,10 @@ def is_ghost(run, cfg, now=None):
     return age is not None and age > cfg["ghost_days"]
 
 
-def evaluate(run, base_minutes, cfg, learned=None, labels=(), offline_labels=(), now=None):
+def evaluate(run, base_minutes, cfg, learned=None, labels=(), offline_labels=(), now=None, known_labels=None):
     """(stuck, reason, limit_minutes) of one unfinished run. `base_minutes` is the classic `stuck_minutes`; `learned` is the result of learn(); `labels` the runner labels of its jobs (when known)."""
-    reason = reason_of(run, labels, offline_labels)
-    if reason == "queue" and is_ghost(run, cfg, now):      # a run that waits for a runner of its own that is OFF is a breakdown of the owner, not a run that GitHub abandoned
+    reason = reason_of(run, labels, offline_labels, known_labels if cfg.get("no_runner_check") else None)
+    if reason in ("queue", "no_runner") and is_ghost(run, cfg, now):      # a run that waits for a runner of its own that is OFF is a breakdown of the owner, not a run that GitHub abandoned
         return False, "ghost", base_minutes
     limit = base_minutes
     key = (run.get("repo"), workflow_key(run))
@@ -132,11 +148,18 @@ def evaluate(run, base_minutes, cfg, learned=None, labels=(), offline_labels=(),
         if _match(pattern, workflow_key(run)) or _match(pattern, run.get("name")):
             limit = minutes
             break
-    if reason in ("queue", "runner_down") and cfg["queue_minutes"]:
+    if reason in ("queue", "runner_down", "no_runner") and cfg["queue_minutes"]:
         limit = max(limit, cfg["queue_minutes"])
     if reason == "awaiting_approval" and not cfg["awaiting_stuck"]:
         return False, reason, limit
     return (run.get("seconds") or 0) > limit * 60, reason, limit
+
+
+def known_labels(runner_payload):
+    """Every label that some listed self-hosted runner carries, online or not; None when the list of runners was not read (so no label can be called missing)."""
+    if not isinstance(runner_payload, dict) or not isinstance(runner_payload.get("runners"), list):
+        return None
+    return {str(x).lower() for item in runner_payload["runners"] for x in (item.get("labels") or [])}
 
 
 def offline_labels(runner_payload):

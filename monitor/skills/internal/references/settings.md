@@ -52,6 +52,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.provider` (secure) | `"none"` | ai | AI service |
 | `ai.redact.extra_patterns` (secure) | `-` | ai | Patterns to always hide |
 | `ai.redact.extra_terms` (secure) | `-` | ai | Words to always hide |
+| `ai.report_summary.enabled` | `-` | ai | AI draft for the summary of a report |
 | `ai.similar.enabled` | `-` | ai | Similar alerts |
 | `ai.similar.max` | `-` | ai | Most similar alerts |
 | `ai.skill` | `-` | ai | Give the AI its guide |
@@ -203,11 +204,15 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ci.stuck.max_minutes` | `720` | sentinel | Largest learned limit |
 | `ci.stuck.min_minutes` | `30` | sentinel | Smallest learned limit |
 | `ci.stuck.min_samples` | `3` | sentinel | Finished runs needed to learn |
+| `ci.stuck.no_runner_check` | `false` | sentinel | Name a label nobody has |
 | `ci.stuck.percentile` | `95` | sentinel | Percentile of the durations |
 | `ci.stuck.queue_minutes` | `0` | sentinel | Limit for a run waiting for a runner |
 | `ci.stuck.runner_minutes` | `[]` | sentinel | Fixed limits per runner label |
 | `ci.stuck.workflow_minutes` | `[]` | sentinel | Fixed limits per workflow |
+| `cli.default_format` | `"text"` | general | Default format of the command line |
 | `cli.prefer_v1` | `true` | advanced | The command line asks /api/v1/ first |
+| `cli.watch.default_interval_seconds` | `5` | general | Usual interval of watch |
+| `cli.watch.min_interval_seconds` | `2` | general | Fastest refresh of watch |
 | `cold_refresh_seconds` | `600` | polling | Refresh of cold repositories |
 | `cold_runs_per_repo` | `5` | polling | Runs read per cold repository |
 | `compare.cache_seconds` | `60` | sentinel | Keep the answer (seconds) |
@@ -263,6 +268,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `github_token.store` (secure) | `"auto"` | advanced | Where the token is kept |
 | `hot_hours` | `3` | polling | A repository is hot for |
 | `issues_refresh_seconds` | `180` | polling | Refresh of issues |
+| `kiosk.enabled` | `false` | general | Kiosk profile |
+| `kiosk.font_scale_percent` | `150` | general | Type size of the kiosk |
+| `kiosk.high_contrast` | `false` | general | High contrast in the kiosk |
+| `kiosk.rotate_seconds` | `30` | general | Seconds between tabs in the kiosk |
+| `kiosk.rotate_views` | `false` | general | Turn through the tabs of a preset |
 | `language` | `""` | general | Language of the tools |
 | `lessons.allow_write` (secure) | `false` | ai | Allow writing lessons |
 | `lessons.brief_max_bytes` | `3000` | ai | Size of ai/LESSONS.md |
@@ -446,6 +456,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `runners.model.enabled` | `false` | advanced | Model the runners |
 | `runners.model.jobs_per_cycle` | `10` | advanced | Runs whose jobs are read per cycle |
 | `runners.model.large_labels` | `[]` | advanced | Labels of your larger runners |
+| `runners.model.observed_reads_per_cycle` | `0` | advanced | Workflow files read to see what the self-hosted runners really run |
 | `runners.model.queue_warn_minutes` | `20` | advanced | Minutes a job may wait for a self-hosted runner |
 | `runners.model.runaway_ignore_events` | `["pull_request", "pull_request_target"]` | advanced | Events that do not count as runaway |
 | `runners.model.runaway_runs_per_hour` | `20` | advanced | Runs per hour of a workflow that fires itself |
@@ -569,6 +580,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinel.surface.checks.attestation.enabled` | `-` | surface | sentinel.surface.checks.attestation.enabled |
 | `sentinel.surface.checks.attestation.max_per_tick` | `-` | surface | sentinel.surface.checks.attestation.max_per_tick |
 | `sentinel.surface.checks.broad_permissions.enabled` | `-` | surface | sentinel.surface.checks.broad_permissions.enabled |
+| `sentinel.surface.checks.commit_state.enabled` | `-` | surface | sentinel.surface.checks.commit_state.enabled |
+| `sentinel.surface.checks.commit_state.include_other_apps` | `-` | surface | Count the checks of other apps |
+| `sentinel.surface.checks.commit_state.include_statuses` | `-` | surface | Count the commit statuses |
 | `sentinel.surface.checks.coverage.enabled` | `-` | surface | sentinel.surface.checks.coverage.enabled |
 | `sentinel.surface.checks.dead_schedule.days` | `-` | surface | sentinel.surface.checks.dead_schedule.days |
 | `sentinel.surface.checks.dead_schedule.enabled` | `-` | surface | sentinel.surface.checks.dead_schedule.enabled |
@@ -666,11 +680,15 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinels.security.signals.codeowners.enabled` | `-` | sentinel | CODEOWNERS file |
 | `sentinels.security.signals.dependabot.enabled` | `-` | sentinel | Dependabot alerts |
 | `sentinels.security.signals.dependabot.min_severity` | `-` | sentinel | Dependabot: least severity |
+| `sentinels.security.signals.runs_deleted.check_window_days` | `-` | sentinel | Days a run is watched |
+| `sentinels.security.signals.runs_deleted.enabled` | `-` | sentinel | Runs deleted after being seen |
+| `sentinels.security.signals.runs_deleted.max_checks` | `-` | sentinel | Requests per repository |
 | `sentinels.security.signals.secret.enabled` | `-` | sentinel | Secret scanning alerts |
 | `sentinels.security.signals.workflow.enabled` | `-` | sentinel | Workflow permissions |
 | `sentinels.supply.deadline_s` | `-` | sentinel | Time ceiling per round |
 | `sentinels.supply.enabled` | `-` | sentinel | Supply chain sentinel on |
 | `sentinels.supply.ignore` | `-` | sentinel | Workflow findings to ignore |
+| `sentinels.supply.incremental` | `-` | sentinel | Lint only what changed |
 | `sentinels.supply.max_calls_per_tick` | `-` | sentinel | Calls per round |
 | `sentinels.supply.max_files_per_repo` | `-` | sentinel | Workflow files per repository |
 | `sentinels.supply.max_repos_per_tick` | `-` | sentinel | Repositories per round |

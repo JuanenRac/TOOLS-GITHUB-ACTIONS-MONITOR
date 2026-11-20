@@ -31,8 +31,13 @@
 | `credential` | 在一切运行时为某个账户更换 GitHub 登录:`credential replace\|reload [--account ID] [--new-token-file FILE\|-]`;从不打印令牌 | 不支持 |
 | `install-skill` | 把监视器的一个技能(`internal` 或 `external`)复制到 AI 工具读取技能的文件夹:`install-skill external --dest FOLDER`;无需监视器正在运行 | 不支持 |
 | `gh-token` | 打印 GitHub App 的一小时安装令牌,使工具的读取消耗 App 的配额(仅在 `github_app.share_reads` 开启时);请不带 `--json` 运行 | 不支持 |
+| `watch` | 反复进行同一次读取（`watch status\|alerts`、`--interval`、`--once`、`--exit-on-change`）；参见 [CLI_OPERATOR_zho.md](CLI_OPERATOR_zho.md) | 不支持 |
+| `completions` | `bash`、`zsh`、`fish` 或 `powershell` 的补全脚本，由真实解析器生成（只打印） | 不支持 |
+| `kiosk` | 电视或墙面所用的监控器地址（`ops`、`team`、`release`、`quiet`）；参见 [KIOSK_zho.md](KIOSK_zho.md) | 不支持 |
 
 所有命令的选项：`--json`（以单个 JSON 文档输出：`{"ok", "exit", "data"}`）、`--account ID`、`--url URL`、`--lite`（端口 8766）、`--timeout 秒数`（1 到 60）、`--lang 代码`。在网络模式下,请把访问令牌放在监视器自己读取的环境变量 `MONITOR_ACCESS_TOKEN` 中(`MONITOR_TOKEN` 作为别名也可用;`--token TOKEN` 是最后手段,因为命令行选项会出现在进程列表中)。优先顺序:`MONITOR_ACCESS_TOKEN`、`MONITOR_TOKEN`、`--token`。令牌通过请求头 `X-Monitor-Access` 传送,绝不出现在地址或屏幕上。对其他计算机使用未加密 `http` 的 `--url` 时,会在 stderr 打印警告(令牌和响应将以明文传输):在不受你控制的网络中请使用 `https`。
+
+每个命令还接受 `--format text|table|plain|json|ndjson`（`--json` 即 `--format json`）；参见 [CLI_OPERATOR_zho.md](CLI_OPERATOR_zho.md)。
 
 命令行是面向客户端的只读 API 的客户端:契约冻结的路由(`docs/schemas/api_contract.json`)先在 `/api/v1/` 下请求;若监视器在那里返回 404(API 已关闭,`api.v1_enabled`),则改请求旧路由,且不再尝试该前缀。两条路径的文档相同,因此任何命令的输出都不会改变。`cli.prefer_v1`(默认开启)可将其关闭,环境变量 `MONITOR_CLI_PREFER_V1`(`0` 或 `1`)优先。契约未冻结的路由始终按旧方式请求。
 
@@ -48,6 +53,7 @@
 | 3 | 监视器拒绝此客户端，或该账户的 GitHub 登录失败或已过期（凭据问题，而非配额耗尽） |
 | 4 | 监视器有响应但处于降级状态：离线、配额耗尽、尚无数据、没有该端点，或响应不是 JSON |
 | 5 | `alerts --fail-on 级别` 发现了该级别或更严重的未处理警报（已静音的不计） |
+| 6 | `watch --exit-on-change` 发现了变化（仅在给出该选项时）；参见 [CLI_OPERATOR_zho.md](CLI_OPERATOR_zho.md) |
 
 ## 示例
 
