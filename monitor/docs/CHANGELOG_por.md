@@ -94,6 +94,11 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 - **Uma letra mínima para os ecrãs de parede** (`screens.min_font_px`, 12 píxeis por predefinição, 8 a 32): numa janela pequena os ecrãs mantêm a letra e mostram menos linhas, dizendo quantas deixaram de fora («+3 mais»), em vez de encolher o texto. O `tools/check_screens.py` mede agora também o ecrã Frota e a letra mínima em píxeis.
 
 - **Uma sondagem que sabe se alguém está a ver** (`modes.idle_minutes`, 0 = desligado por predefinição; 10 é um bom começo): quando nenhuma página, ecrã de parede ou fluxo em direto pediu dados ao monitor durante esses minutos, o ciclo de atualização estica até ao intervalo frio do modo em vigor até alguém voltar a olhar, e um separador oculto deixa de pedir enquanto estiver oculto. Nunca arrefece enquanto um alerta puder sair do computador (um canal de avisos, o recetor do webhook, a saída para uma IA, o chat ou o sinal sonoro deste computador), e as sentinelas mantêm os seus próprios relógios. O `/api/health` diz se está frio e o que o mantém ao seu ritmo.
+- **A linha de comandos escreve uma saída limpa sem terminal** (`--color auto|always|never`, `NO_COLOR`): com a saída redirecionada, enviada para `tee` ou executada pelo cron não escreve nenhuma sequência de escape, toma a largura de `COLUMNS` ou 80, limpa as sequências de escape que um título ou um nome do GitHub possa trazer, e um leitor que fecha mais cedo (`| head`) termina o comando em silêncio em vez de com um traceback. Só o cabeçalho de `--format table` é colorido.
+
+- **`monitor_cli.py metrics` escreve os números para o cron e para o correio**: uma linha `nome=valor` por número, por ordem fixa e nada mais na saída padrão, e com `--if-problem` nada de todo (saída 0) quando não há workflows vermelhos nem alertas de `--fail-on` ou piores, para que o cron só envie correio no dia em que algo corre mal (saída 5 com os números).
+
+- **O aviso de uma versão mais recente nomeia o comando da sua forma de instalar**: o produto descompactado, um gestor de serviços, um contentor, pipx, uv ou uma extensão de `gh` (`channel` e `command` na resposta de `/api/about`, na consola e no painel Acerca de). O aviso não executa nada.
 
 ### Corrigido
 

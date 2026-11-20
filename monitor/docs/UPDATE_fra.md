@@ -107,3 +107,7 @@ Sans commande, la page s'ouvre. Les commandes répondent une fois (ajoutez `--js
 | 6 | échec et le retour a échoué aussi : restaurez la copie à la main |
 | 7 | pas de connexion à GitHub et pas de zip |
 | 8 | non confirmé |
+
+## L'avis nomme la commande de votre mode d'installation
+
+L'avis d'une version plus récente (console, À propos, `/api/about`) donne maintenant la commande exacte du mode d'installation de ce moniteur, dans le champ `command` à côté de `channel` : le produit décompressé (`py -3 monitor/bin/monitor_cli.py update`), un gestionnaire de services (`... update apply --systemd-unit <unité>`), un conteneur (`docker pull ghcr.io/juanenrac/tools-github-actions-monitor:<version>`), pipx, uv ou une extension de la commande `gh`. L'avis n'exécute rien.

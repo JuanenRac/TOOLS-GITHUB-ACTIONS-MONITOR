@@ -41,6 +41,37 @@ def is_newer(latest, current):
     return a + (0,) * (width - len(a)) > b + (0,) * (width - len(b))
 
 
+CHANNELS = ("docker", "service", "pipx", "uv", "gh-extension", "zip")
+IMAGE = "ghcr.io/" + REPO.lower()
+COMMANDS = {"zip": "py -3 monitor/bin/monitor_cli.py update", "service": "py -3 monitor/bin/monitor_cli.py update apply --systemd-unit <unit>", "pipx": "pipx upgrade github-actions-monitor",
+            "uv": "uv tool upgrade github-actions-monitor", "gh-extension": "gh extension upgrade actions-monitor", "docker": "docker pull {image}:{tag}"}
+
+
+def install_channel(env=None, prefix=None, exists=None):
+    """How this monitor was installed, from what the process can see: docker (a container), service (a service manager or MONITOR_SERVICE=1), pipx, uv (a tool of uv), gh-extension (an extension of the gh
+    command) or zip (the unpacked product: the default). `env`, `prefix` and `exists` are given by the tests."""
+    env = os.environ if env is None else env
+    exists = exists or os.path.exists
+    where = str(prefix if prefix is not None else __file__).replace("\\", "/").lower()
+    if exists("/.dockerenv") or str(env.get("MONITOR_IN_CONTAINER", "")).strip() == "1":
+        return "docker"
+    if "/pipx/venvs/" in where:
+        return "pipx"
+    if "/uv/tools/" in where or "/uv/archive" in where or "/.cache/uv/" in where:
+        return "uv"
+    if "/gh/extensions/" in where:
+        return "gh-extension"
+    if str(env.get("MONITOR_SERVICE", "")).strip() == "1" or env.get("INVOCATION_ID"):
+        return "service"
+    return "zip"
+
+
+def update_command(channel, tag=""):
+    """The exact command to update for that channel (the tag is the one of the newer release)."""
+    template = COMMANDS.get(channel) or COMMANDS["zip"]
+    return template.format(image=IMAGE, tag=str(tag or "latest").lstrip("v"))
+
+
 def settings(config):
     """{"check": bool, "airgapped": bool}: the check is on by default and always off in an air-gapped installation (setting or MONITOR_AIRGAPPED)."""
     cfg = config if isinstance(config, dict) else {}
@@ -92,7 +123,9 @@ def view(config, current, state, offline=False):
     release = state.get("release") if isinstance(state.get("release"), dict) else None
     latest = release.get("tag", "").lstrip("v") if release else ""
     newer = bool(cfg["check"] and release and is_newer(latest, current))
+    channel = install_channel()
     return {"enabled": cfg["check"], "airgapped": cfg["airgapped"], "current": current, "latest": latest if release else "", "newer": newer,
+            "channel": channel, "command": update_command(channel, latest) if newer else "",
             "url": release.get("url", "") if newer else "", "changelog": f"https://github.com/{REPO}/blob/{release['tag']}/monitor/CHANGELOG.md" if newer else "",
             "checked_at": state.get("checked_at") or 0, "offline": bool(offline)}
 
@@ -144,5 +177,7 @@ def check(config, current, reader, now=None, state_file=None, offline=False, for
 def notice(info, translate):
     """The one line shown in the console and in `doctor` ('' when there is nothing to say)."""
     if info.get("newer"):
+        if info.get("command"):
+            return translate("upd.available_cmd", version=info["latest"], current=info["current"], url=info["url"], command=info["command"])
         return translate("upd.available", version=info["latest"], current=info["current"], url=info["url"])
     return ""

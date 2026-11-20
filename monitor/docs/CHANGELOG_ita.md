@@ -93,6 +93,11 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 - **Una lettera minima per gli schermi da parete** (`screens.min_font_px`, 12 pixel per impostazione predefinita, da 8 a 32): in una finestra piccola gli schermi mantengono la lettera e mostrano meno righe, dicendo quante ne hanno lasciate fuori («+3 altre»), invece di rimpicciolire il testo. `tools/check_screens.py` ora misura anche lo schermo Flotta e la lettera minima in pixel.
 
 - **Un sondaggio che sa se qualcuno sta guardando** (`modes.idle_minutes`, 0 = spento per impostazione predefinita; 10 è un buon inizio): quando nessuna pagina, schermata a muro o flusso in diretta ha chiesto dati al monitor per questi minuti, il ciclo di aggiornamento si allunga fino all'intervallo freddo della modalità in vigore finché qualcuno non guarda di nuovo, e una scheda nascosta smette di chiedere finché è nascosta. Non si raffredda mai finché un avviso può uscire dal computer (un canale di avvisi, il ricevitore del webhook, il flusso per un'IA, la chat o il bip di questo computer), e le sentinelle mantengono i propri orologi. `/api/health` dice se è freddo e cosa lo tiene al suo ritmo.
+- **La riga di comando scrive un output pulito senza terminale** (`--color auto|always|never`, `NO_COLOR`): con l'output reindirizzato, inviato a `tee` o eseguito da cron non scrive alcuna sequenza di escape, prende la larghezza da `COLUMNS` o 80, ripulisce le sequenze di escape che un titolo o un nome di GitHub può contenere, e un lettore che si chiude prima (`| head`) termina il comando in silenzio invece che con un traceback. Solo l'intestazione di `--format table` è colorata.
+
+- **`monitor_cli.py metrics` scrive le cifre per cron e per la posta**: una riga `nome=valore` per cifra, in ordine fisso e nient'altro sullo standard output, e con `--if-problem` nulla (codice 0) quando non c'è alcun workflow rosso né alert di livello `--fail-on` o peggiore, così cron manda posta solo il giorno in cui qualcosa non va (codice 5 con le cifre).
+
+- **L'avviso di una versione più recente nomina il comando del tuo modo di installare**: prodotto decompresso, gestore di servizi, container, pipx, uv o un'estensione di `gh` (`channel` e `command` nella risposta di `/api/about`, nella console e nel pannello Informazioni). L'avviso non esegue nulla.
 
 ### Corretto
 

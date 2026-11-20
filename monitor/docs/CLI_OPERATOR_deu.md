@@ -110,3 +110,15 @@ monitor_cli.py team --json | jq -r '.data.ranking[] | .repo'
 
 - `completions` hat kein `--install`: Es schreibt nie in die Dateien eines Benutzers.
 - Es gibt keinen Befehl `proposals`: Der Monitor hat noch keine Route für Vorschläge, auf die er wirken könnte.
+
+## Umgeleitete Ausgabe, Farbe und Breite
+
+- Ohne Terminal (Umleitung, `tee`, Pipe, cron) schreibt der Befehl keine Escape-Sequenz, nimmt die Breite aus `COLUMNS`, wenn es eine Zahl ist, sonst 80, und Text von GitHub (ein Titel, ein Name) wird von den Escape-Sequenzen befreit, die er tragen könnte.
+- `--color auto|always|never` (Standard `auto`): `auto` schreibt Farbe nur im Terminal und nie, wenn `NO_COLOR` gesetzt (und nicht leer) oder `TERM=dumb` ist; `always` schreibt sie immer; `never` nie. Nur die Kopfzeile von `--format table` wird gefärbt (fett); `json` und `ndjson` bleiben unberührt.
+- Ein Leser, der früher schließt (`monitor_cli.py alerts --format plain | head -1`), beendet den Befehl still: keine Traceback- und keine Fehlerausgabe.
+
+## `metrics`: die Zahlen für cron und für Mail
+
+`monitor_cli.py metrics` schreibt die Zahlen des Monitors als je eine Zeile `name=wert`, in fester Reihenfolge und ohne etwas anderes auf der Standardausgabe: `repos`, `active`, `queued`, `failures_24h`, `successes_24h`, `red_workflows`, `alerts`, `alerts_info`, `alerts_warning`, `alerts_error`, `alerts_critical`, `allowance_remaining`, `allowance_limit` und `offline`. Eine unbekannte Zahl wird weggelassen, nie als 0 geschrieben. Es liest den Monitor, nie GitHub.
+
+Mit `--if-problem` schreibt es nichts und endet mit 0, wenn kein Workflow rot ist und keine Warnung der Stufe `--fail-on` (Standard error) oder schlimmer vorliegt; sonst schreibt es die Zahlen und endet mit 5. cron schickt jede Ausgabe per Mail, so kommt diese Zeile nur an dem Tag, an dem etwas nicht stimmt: `*/15 * * * * py -3 /opt/monitor/bin/monitor_cli.py metrics --if-problem`. Ein nicht erreichbarer Monitor ist nie Stille: Der Fehler geht auf die Fehlerausgabe und der Code ist 2.

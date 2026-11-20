@@ -96,6 +96,11 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 - **A library of more than sixty sounds** (`sound.voices`, `screens.sound_voices`, `screens.sound_volume`): every kind of event keeps the sound it always had and can be given any other sound of the library, for the page, for the beep of this computer and, with its own list and volume, for the wall screens. The sounds are made in the browser (nothing to download), none lasts more than a second and every one is different; one source (`soundlib.py`) is copied into the page and the wall screens by `tools/make_sound_library.py`, and a test checks that the copies are current. The eight guides of the sounds name every one.
 
 - **An optional background ambience and a clock tick** (`sound.ambient`, `sound.ambient_volume`, `sound.tick`, `sound.tick_seconds`; both off by default): the ambience is two very soft low notes that turn rougher while something is red, and the tick is a very short dry click every few seconds so a frozen screen is heard. Both follow the mute chip, the main switch and the quiet hours, in the page and in the wall screens.
+- **The command line writes a clean output without a terminal** (`--color auto|always|never`, `NO_COLOR`): with the output redirected, piped to `tee` or run by cron it writes no escape sequence, takes the width from `COLUMNS` or 80, cleans the escape sequences that a title or a name from GitHub may carry, and a reader that closes early (`| head`) ends the command quietly instead of with a traceback. Only the header of `--format table` is ever coloured.
+
+- **`monitor_cli.py metrics` writes the figures for cron and for mail**: one `name=value` line per figure, in a fixed order and nothing else on the standard output, and with `--if-problem` nothing at all (exit 0) when there is no red workflow and no alert at `--fail-on` or worse, so cron sends mail only the day something is wrong (exit 5 with the figures).
+
+- **The notice of a newer version names the command of your way of installing**: the unpacked product, a service manager, a container, pipx, uv or an extension of `gh` (`channel` and `command` in the answer of `/api/about`, and in the console and the About panel). Nothing is run by the notice.
 
 ### Fixed
 

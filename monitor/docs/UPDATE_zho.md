@@ -107,3 +107,7 @@
 | 6 | 失败且回滚也失败：请手动恢复备份 |
 | 7 | 无法连接 GitHub 且未提供 zip |
 | 8 | 未确认 |
+
+## 提示会给出与你的安装方式相符的命令
+
+新版本提示（控制台、关于、`/api/about`）现在会在 `channel` 旁边的 `command` 字段中给出与本监视器安装方式相符的确切命令：解压后的产品（`py -3 monitor/bin/monitor_cli.py update`）、服务管理器（`... update apply --systemd-unit <单元>`）、容器（`docker pull ghcr.io/juanenrac/tools-github-actions-monitor:<版本>`）、pipx、uv 或 `gh` 命令的扩展。提示本身不会运行任何东西。

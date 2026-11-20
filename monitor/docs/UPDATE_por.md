@@ -107,3 +107,7 @@ Sem comando abre-se a página. Os comandos respondem uma vez (acrescente `--json
 | 6 | falhou e o regresso também falhou: restaure a cópia à mão |
 | 7 | sem ligação ao GitHub e sem zip |
 | 8 | não confirmado |
+
+## O aviso nomeia o comando da sua forma de instalar
+
+O aviso de uma versão mais recente (consola, Acerca de, `/api/about`) diz agora o comando exato da forma como este monitor foi instalado, no campo `command` ao lado de `channel`: o produto descompactado (`py -3 monitor/bin/monitor_cli.py update`), um gestor de serviços (`... update apply --systemd-unit <unidade>`), um contentor (`docker pull ghcr.io/juanenrac/tools-github-actions-monitor:<versão>`), pipx, uv ou uma extensão do comando `gh`. O aviso não executa nada.

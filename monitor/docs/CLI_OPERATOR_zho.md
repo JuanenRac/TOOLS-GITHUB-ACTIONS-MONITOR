@@ -110,3 +110,15 @@ monitor_cli.py team --json | jq -r '.data.ranking[] | .repo'
 
 - `completions` 没有 `--install`：它从不写入用户的文件。
 - 没有 `proposals` 命令：监控器目前还没有可供操作的提案路由。
+
+## 重定向的输出、颜色与宽度
+
+- 没有终端时（重定向、`tee`、管道、cron），命令不写任何转义序列；宽度取自 `COLUMNS`（为数字时），否则为 80；来自 GitHub 的文本（标题、名称）会被清除其中可能带有的转义序列。
+- `--color auto|always|never`（默认 `auto`）：`auto` 仅在终端中输出颜色，设置了 `NO_COLOR`（且非空）或 `TERM=dumb` 时从不输出；`always` 不论目的地都输出；`never` 一律不输出。只有 `--format table` 的表头会着色（加粗）；`json` 和 `ndjson` 从不改动。
+- 读取端提前关闭时（`monitor_cli.py alerts --format plain | head -1`），命令安静结束：没有回溯，也没有错误文本。
+
+## `metrics`：供 cron 和邮件使用的数值
+
+`monitor_cli.py metrics` 把监视器的数值写成每行一个 `名称=值`，顺序固定，标准输出中没有其他内容：`repos`、`active`、`queued`、`failures_24h`、`successes_24h`、`red_workflows`、`alerts`、`alerts_info`、`alerts_warning`、`alerts_error`、`alerts_critical`、`allowance_remaining`、`allowance_limit` 和 `offline`。未知的数值会省略，绝不写成 0。它只读取监视器，从不访问 GitHub。
+
+加上 `--if-problem` 后，如果没有红色工作流，也没有 `--fail-on`（默认 error）及更严重级别的警报，则不输出任何内容并以 0 退出；否则输出数值并以 5 退出。cron 会把任何输出都发成邮件，所以下面这行只在出问题的那天才发邮件：`*/15 * * * * py -3 /opt/monitor/bin/monitor_cli.py metrics --if-problem`。监视器无法连接时绝不会沉默：错误写入标准错误输出，退出码为 2。

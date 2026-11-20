@@ -94,6 +94,11 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 - **Eine kleinste Schrift für die Wandanzeigen** (`screens.min_font_px`, standardmäßig 12 Pixel, 8 bis 32): In einem kleinen Fenster behalten die Anzeigen die Schrift und zeigen weniger Zeilen, wobei sie sagen, wie viele sie weggelassen haben („+3 weitere“), statt den Text zu verkleinern. `tools/check_screens.py` misst jetzt auch die Flottenanzeige und die kleinste Schrift in Pixeln.
 
 - **Eine Abfrage, die weiß, ob jemand hinsieht** (`modes.idle_minutes`, 0 = standardmäßig aus; 10 ist ein guter Anfang): Hat so viele Minuten keine Seite, Wandanzeige oder Live-Stream Daten vom Monitor abgefragt, dehnt sich der Aktualisierungszyklus auf das kalte Intervall des geltenden Modus, bis wieder jemand hinsieht, und ein verborgener Tab fragt nicht, solange er verborgen ist. Es wird nie kühl, solange ein Alarm den Rechner verlassen kann (ein Benachrichtigungskanal, der Webhook-Empfänger, der Feed für eine KI, der Chat oder der Piepton dieses Rechners), und die Wächter behalten ihre eigenen Uhren. `/api/health` sagt, ob er kühl ist und was ihn im Takt hält.
+- **Die Befehlszeile schreibt ohne Terminal eine saubere Ausgabe** (`--color auto|always|never`, `NO_COLOR`): bei umgeleiteter Ausgabe, über `tee` oder per cron schreibt sie keine Escape-Sequenz, nimmt die Breite aus `COLUMNS` oder 80, entfernt Escape-Sequenzen, die ein Titel oder Name von GitHub tragen kann, und ein Leser, der früher schließt (`| head`), beendet den Befehl still statt mit einem Traceback. Nur die Kopfzeile von `--format table` wird gefärbt.
+
+- **`monitor_cli.py metrics` schreibt die Zahlen für cron und Mail**: eine Zeile `name=wert` je Zahl, in fester Reihenfolge und nichts sonst auf der Standardausgabe; mit `--if-problem` gar nichts (Code 0), wenn kein Workflow rot ist und keine Warnung der Stufe `--fail-on` oder schlimmer vorliegt, sodass cron nur an dem Tag Mail schickt, an dem etwas nicht stimmt (Code 5 mit den Zahlen).
+
+- **Der Hinweis auf eine neuere Version nennt den Befehl Ihrer Installationsart**: entpacktes Produkt, Dienstmanager, Container, pipx, uv oder eine Erweiterung von `gh` (`channel` und `command` in der Antwort von `/api/about` sowie in Konsole und Info-Panel). Der Hinweis führt nichts aus.
 
 ### Behoben
 
