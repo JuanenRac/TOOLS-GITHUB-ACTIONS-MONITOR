@@ -9,6 +9,8 @@
 
 The page adapts to the size of its window, from a phone to 4K, upright or turned, and one monitor can serve several screens, each one showing the tabs you choose. Nothing is polled twice: every screen reads the same state.
 
+
+For a TV or a wall with larger type, a high contrast or a rotation through a few tabs, see [KIOSK.md](KIOSK.md).
 ## Addresses
 
 - `/` - the whole page.
@@ -82,6 +84,7 @@ One address for each monitor. A parameter can make a window quieter or smaller t
 | `?rotate=30` | The window turns by itself through overview, right now and sentinels every 30 seconds (at least 5; 0 = it stays on one screen). With `screens.mode` = rotate it already turns; this changes the pace of one window. |
 | `?jump=off` | Only with `screens.mode` = rotate: the window turns but never jumps to a new red. |
 | `?blink=off` | Failures keep a fixed glow instead of blinking. It cannot turn on what `screens.blink` keeps off. |
+| `?repo=WORD,WORD` | Only the repositories whose name holds one of the words (letters, digits and `. _ - /`, up to eight words). `/screen/overview` and `/screen/now` keep only the repositories whose name the screen shows (a hidden name is never matched), the figures follow the rows that are kept, and the score and the map of groups, which belong to the whole fleet, are not shown; `/screen/sentinels` is not filtered. |
 | `?sound=on` | A short beep for a new failure, only if `screens.sound` allows it. Off by default. |
 
 ### Language of the screens

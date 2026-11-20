@@ -9,6 +9,8 @@
 
 La página se adapta al tamaño de su ventana, de un móvil a 4K, en vertical o en horizontal, y un mismo monitor puede servir varias pantallas, cada una con las pestañas que elijas. Nada se consulta dos veces: todas las pantallas leen el mismo estado.
 
+
+Para una TV o una pared con letra más grande, un contraste alto o una rotación por unas pocas pestañas, véase [KIOSK_spa.md](KIOSK_spa.md).
 ## Direcciones
 
 - `/` - la página entera.
@@ -82,6 +84,7 @@ Una dirección para cada monitor. Un parámetro puede hacer una ventana más tra
 | `?rotate=30` | La ventana pasa sola por general, ahora y centinelas cada 30 segundos (mínimo 5; 0 = se queda en una pantalla). Con `screens.mode` = rotate ya rota; esto cambia el ritmo de una ventana. |
 | `?jump=off` | Solo con `screens.mode` = rotate: la ventana rota pero nunca salta a un rojo nuevo. |
 | `?blink=off` | Los fallos conservan un halo fijo en lugar de parpadear. No puede activar lo que `screens.blink` mantiene apagado. |
+| `?repo=WORD,WORD` | Solo los repositorios cuyo nombre contiene una de las palabras (letras, cifras y `. _ - /`, hasta ocho palabras). `/screen/overview` y `/screen/now` conservan solo los repositorios cuyo nombre muestra la pantalla (un nombre oculto nunca coincide), las cifras siguen las filas conservadas y la puntuación y el mapa de grupos, que son de toda la flota, no se muestran; `/screen/sentinels` no se filtra. |
 | `?sound=on` | Un pitido corto con cada fallo nuevo, solo si `screens.sound` lo permite. Desactivado por defecto. |
 
 ### Idioma de las pantallas

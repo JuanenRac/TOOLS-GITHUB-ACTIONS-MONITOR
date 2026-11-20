@@ -79,6 +79,8 @@ The Alerts tab can show a panel of fixed questions that the AI you already confi
 
 With `ai.similar.enabled` on (off by default), "explain this alert" also lists up to `ai.similar.max` alerts that look like it, so the answer can say "this already happened in another repository". They are found by a plain comparison of words (the code of the alert, the workflow, the words of the title and the cause) among the open alerts and the resolved ones the feed remembers: no model, no embeddings, only the data of this account, the same order for the same data, and each one is cited by its id.
 
+With `ai.report_summary.enabled` on (off by default), Reports offers **Draft with the AI** for the summary of the next report: the figures of the report, cleaned of secrets, go to this AI through the same cleaner, budget, cache and chain as every other question, a person edits the draft and approves it, and the approved text opens the next report once. Nothing is written or sent without that approval.
+
 The assistant has five fixed questions, all of them read-only: "explain this alert" (`explain_alert`), "summarise the situation" (`summarize_week`), "why is it slow here" (`why_slow`), "the situation of a repository" (`explain_repo`: its runs and its open alerts) and "what to do first" (`prioritize`: the open alerts, the status and the score, put in order with the ids). They use the same four tools, the same limits and the same daily budget; there is still no free chat.
 
 ## Air-gapped mode of the AI (optional, off by default)

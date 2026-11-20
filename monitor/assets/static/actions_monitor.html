@@ -77,12 +77,15 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 /* chrome=0: a screen of its own for a wall or a second monitor: no header, no tabs, no filters; the figures stay */
 .kiosk .sidebar,.kiosk .tools,.kiosk .filters,.kiosk footer{display:none!important}.kiosk .hcorner{position:static}
 .kiosk header{padding:6px 14px}.kiosk main{padding-top:8px}
+/* kiosk=1 (kiosk.enabled in Settings): larger type through the zoom of the body, and an optional high contrast */
+body.kiosk-hc{--bg:#000;--page:#000;--panel:#000;--panel2:#0b0b0b;--line:#fff;--line2:#fff;--text:#fff;--mut:#e5e7eb;--ok:#4ade80;--bad:#ff6b6b;--warn:#fbbf24;--run:#7dd3fc}
 .lite-note{margin:0 0 10px;color:var(--mut)}
 #hidden{display:none;background:var(--warn);color:var(--on-warn);padding:6px 18px;font-weight:600}
 @media (max-width:640px){header{padding:8px 10px}.tile{min-width:calc(50% - 4px);flex:1 1 calc(50% - 4px);padding:6px 9px}.tile.wide{min-width:100%}.tile b{font-size:18px}h1{width:100%}}
 @media (prefers-reduced-motion:no-preference){@keyframes tilepulse{0%,100%{box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo),0 0 0 0 rgba(96,165,250,.5)}50%{box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo),0 0 0 5px rgba(96,165,250,0)}}
 .tile.run:not(.skel){animation:tilepulse 2.4s ease-out infinite}@keyframes shimmer2{from{background-position:200% 0}to{background-position:-200% 0}}.tile.skel b{animation:shimmer2 1.4s linear infinite}}
 .sp{flex:1}
+#rs-sum-text{width:100%;box-sizing:border-box;margin:6px 0}
 select,input,textarea{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font:inherit;box-shadow:inset 0 1px 2px rgba(0,0,0,.25)}
 button{background:linear-gradient(var(--panel2),var(--panel));color:var(--text);border:1px solid var(--line2);border-radius:9px;padding:5px 12px;font:inherit;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo),0 3px 7px rgba(0,0,0,.22);transition:filter .14s,box-shadow .14s,transform .08s,border-color .14s}
 button:hover{filter:brightness(1.14);border-color:var(--run);box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo),0 0 0 1px var(--run),0 0 14px var(--glow)}
@@ -570,7 +573,9 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <section id="fleet-sec"><h2 data-i18n="ui.fleet_title"></h2><div class="body"><div class="tbl-tools" id="fleet-tools"></div><div class="mut" id="fleet-sum"></div><table><thead><tr id="fleet-head"></tr></thead><tbody id="fleet-rows"></tbody></table><div class="tbl-tools" id="fleet-pager"></div></div></section>
 </div>
 <div class="tab" id="t-trep" role="tabpanel" aria-labelledby="n-trep">
-<section id="rs-sec"><h2 data-i18n="ui.rs_title"></h2><div class="body"><div class="mut" id="rs-state"></div><ul id="rs-list"></ul><button id="rs-run" type="button" data-i18n="ui.rs_run"></button> <span class="mut" id="rs-msg" role="status"></span></div></section>
+<section id="rs-sec"><h2 data-i18n="ui.rs_title"></h2><div class="body"><div class="mut" id="rs-state"></div><ul id="rs-list"></ul><button id="rs-run" type="button" data-i18n="ui.rs_run"></button> <span class="mut" id="rs-msg" role="status"></span>
+<div id="rs-sum"><h3 data-i18n="ui.rs_sum_title"></h3><label class="mut" for="rs-sum-text" data-i18n="ui.rs_sum_help"></label><div class="mut" id="rs-sum-next"></div><textarea id="rs-sum-text" rows="4" maxlength="1200"></textarea>
+<div><button id="rs-sum-tpl" type="button" data-i18n="ui.rs_sum_tpl"></button> <button id="rs-sum-ai" type="button" data-i18n="ui.rs_sum_ai" hidden></button> <button id="rs-sum-save" type="button" data-i18n="ui.rs_sum_save"></button> <button id="rs-sum-clear" type="button" data-i18n="ui.rs_sum_clear"></button> <span class="mut" id="rs-sum-msg" role="status"></span></div></div></div></section>
 </div>
 <div class="tab" id="t-hist" role="tabpanel" aria-labelledby="n-hist">
 <section><h2 data-i18n="ui.h_title"></h2>
@@ -913,6 +918,9 @@ window.addEventListener("hashchange",()=>{const t=tabOf(location.hash);if(t&&TAB
 const VIEWS={now:"now",sentinel:"sent","sentinel-ci":"sci","sentinel-collab":"scol","sentinel-security":"ssec","sentinel-delivery":"sdel","sentinel-supply":"ssup","sentinel-trend":"strend","sentinel-yesterday":"syvt",alerts:"al",reports:"rep",lessons:"les",charts:"charts",repos:"repos",team:"team","team-health":"team",fleet:"fleet","team-reports":"trep",repo:"team",settings:"cfg",updates:"upd",live:"live"};
 const VIEW=QS.get("view")&&VIEWS[QS.get("view")]?QS.get("view"):"";
 if(QS.get("chrome")==="0")document.body.classList.add("kiosk");
+(function(){const k=I18N.kiosk||{};if(k.enabled!==true||QS.get("kiosk")!=="1")return;      // the kiosk profile: only when it is on in Settings and the address asks for it
+  const n=parseInt(QS.get("scale")||k.font_scale_percent,10),s=Math.max(100,Math.min(400,isNaN(n)?100:n));document.body.style.zoom=String(s/100);document.body.classList.add("kiosk");
+  if(QS.get("contrast")==="1"||(k.high_contrast===true&&QS.get("contrast")!=="0"))document.body.classList.add("kiosk-hc")})();
 function accUrl(id){const u=new URL(location.href);if(id)u.searchParams.set("account",id);else u.searchParams.delete("account");return u.pathname+u.search}
 function accApi(path){if(!ACC||!ACC.current)return path;return path+(path.includes("?")?"&":"?")+"account="+encodeURIComponent(ACC.current)}
 if(ACC&&!LITE){
@@ -1605,10 +1613,10 @@ function secLevel(){const c=SECUR;return !c||c.enabled===false?"unknown":(c.leve
 function collabLevel(){const c=COLLAB;return !c||c.enabled===false?"unknown":(c.level||"unknown")}
 /* one card per signal in the panels of Collaboration, Security, Delivery and Supply chain: the same container as the cards of the CI sentinel (counter, list, filter by repository, help); Delivery and Supply chain add a table by code and filters of their own */
 const SPDEF={scol:["collab.issue.critical","collab.issue.external","collab.issue.stale","collab.pr.conflict","collab.pr.draft_old","collab.pr.review_pending"],
- ssec:["security.secret","security.code_scanning","security.dependabot","security.branch_unprotected","security.codeowners_missing","security.workflow_write"],
+ ssec:["security.secret","security.code_scanning","security.dependabot","security.branch_unprotected","security.codeowners_missing","security.workflow_write","security.runs_deleted"],
  sdel:["release.unreleased_pending","release.tag_without_release","release.release_without_notes","release.version_mismatch","release.ecosystem_drift","release.assets_missing"],
  ssup:["actions.supply.unpinned","actions.supply.mutable_ref","actions.supply.permissions_wide","actions.supply.permissions_missing","actions.supply.pr_target_checkout"]};
-const SPKEY={"security.secret":"secret","security.code_scanning":"code_scanning","security.dependabot":"dependabot","security.branch_unprotected":"branch","security.codeowners_missing":"codeowners","security.workflow_write":"workflow"};
+const SPKEY={"security.secret":"secret","security.code_scanning":"code_scanning","security.dependabot":"dependabot","security.branch_unprotected":"branch","security.codeowners_missing":"codeowners","security.workflow_write":"workflow","security.runs_deleted":"runs_deleted"};
 const SPF={},SPR={},SPTOUCH=new Set();
 function spf(scope){return SPF[scope]||(SPF[scope]={level:"",repo:""})}
 function spLevel(a){return a.level==="critical"||a.level==="error"?"bad":(a.level==="warning"?"warn":"ok")}
@@ -1881,7 +1889,25 @@ function rsPaint(){
   const st=$("rs-state"),ul=$("rs-list");
   if(!RS){st.textContent="";ul.innerHTML="";return}
   st.textContent=RS.enabled?T("ui.rs_on",{cron:RS.cron}):T("ui.rs_off");
+  const sm=RS.summary||{},nx=sm.next;$("rs-sum-next").textContent=nx?T("ui.rs_sum_next")+" "+nx.text:"";$("rs-sum-ai").hidden=!sm.ai;
   ul.innerHTML=(RS.reports||[]).length?RS.reports.slice(0,20).map(r=>`<li><a href="/api/report-files/file?name=${encodeURIComponent(r.name)}" target="_blank" rel="noopener">${esc(r.name)}</a> <span class="mut">${esc(T("ui.rs_kind_"+r.kind))} · ${esc(String(Math.max(1,Math.round(r.bytes/1024))))} KB</span></li>`).join(""):`<li class="mut">${esc(T("ui.rs_none"))}</li>`}
+let RS_ORIGIN="edited";
+async function rsSum(action,extra){
+  try{const r=await fetch("/api/report-files/summary",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.assign({action},extra||{}))});return await r.json()}catch(e){return null}}
+$("rs-sum-tpl").addEventListener("click",async()=>{
+  const m=$("rs-sum-msg");m.textContent="";const d=await rsSum("draft");
+  if(d&&d.ok){$("rs-sum-text").value=d.template||"";RS_ORIGIN="template"}else m.textContent=T("ui.rs_sum_failed")});
+$("rs-sum-ai").addEventListener("click",async()=>{
+  const m=$("rs-sum-msg");m.textContent="";const d=await rsSum("draft_ai");
+  if(d&&d.ok){const a=d.ai||{};if(a.status==="ok"&&a.text){$("rs-sum-text").value=a.text;RS_ORIGIN="ai"}else{$("rs-sum-text").value=d.template||"";RS_ORIGIN="template";m.textContent=T("ui.rs_sum_ai_off")}}
+  else m.textContent=T("ui.rs_sum_failed")});
+$("rs-sum-save").addEventListener("click",async()=>{
+  const m=$("rs-sum-msg"),text=$("rs-sum-text").value.trim();m.textContent="";
+  if(!text){m.textContent=T("ui.rs_sum_empty");return}
+  const d=await rsSum("save",{text,origin:RS_ORIGIN});m.textContent=d&&d.ok?T("ui.rs_sum_saved"):T("ui.rs_sum_failed");rsLoad()});
+$("rs-sum-clear").addEventListener("click",async()=>{
+  const m=$("rs-sum-msg");m.textContent="";const d=await rsSum("clear");
+  if(d&&d.ok){$("rs-sum-text").value="";RS_ORIGIN="edited";m.textContent=T("ui.rs_sum_cleared")}else m.textContent=T("ui.rs_sum_failed");rsLoad()});
 $("rs-run").addEventListener("click",async()=>{
   const msg=$("rs-msg");msg.textContent="";
   try{const r=await fetch("/api/report-files/run",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});const d=await r.json();msg.textContent=d&&d.ok?T("ui.rs_done"):T("ui.rs_failed")}catch(e){msg.textContent=T("ui.rs_failed")}
@@ -2604,12 +2630,13 @@ async function advancedExtras(){
   h+=`<h4>${esc(T("ui.adv_runners_h"))}</h4>`+(rn&&rn.enabled?`<div>${esc(T("ui.adv_runners_counts",rn.counts))}</div>`+(rn.runners||[]).map(x=>`<div class="mut">${esc(x.name)} · ${esc(x.state)}${x.load1!=null?" · load "+x.load1:""}${x.disk_free_percent!=null?" · disk free "+x.disk_free_percent+" %":""}</div>`).join(""):`<div class="mut">${esc(T("ui.adv_off"))}</div>`);
   h+=`<h4>${esc(T("ui.adv_model_h"))}</h4>`;
   if(rm&&rm.enabled){
-    const kn=k=>T("ui.runner_kind_"+k),q=Object.entries(rm.queue||{}),u=Object.entries(rm.usage||{}),rw=(rm.runaway||{}).rows||[],dn=rm.selfhosted||[];
+    const kn=k=>T("ui.runner_kind_"+k),q=Object.entries(rm.queue||{}),u=Object.entries(rm.usage||{}),rw=(rm.runaway||{}).rows||[],dn=rm.selfhosted||[],ob=(rm.observed||{}).rows||[];
     h+=q.map(([k,v])=>`<div>${esc(T("ui.adv_model_queue",{kind:kn(k),jobs:v.jobs,minutes:Math.floor(v.oldest_wait_seconds/60)}))}</div>`).join("")+
       u.map(([k,v])=>`<div class="mut">${esc(T("ui.adv_model_usage",{kind:kn(k),minutes:v.minutes,usd:v.usd==null?T("ui.adv_model_usd_unknown"):"$"+v.usd.toFixed(2)}))}</div>`).join("")+
       rw.map(r=>`<div>${esc(T("ui.adv_model_runaway",{repo:r.repo,workflow:r.workflow,runs:r.runs_last_hour}))}</div>`).join("")+
       dn.map(r=>`<div>${esc(T("ui.adv_model_down",{repo:r.repo,labels:(r.labels||[]).join(", "),jobs:r.jobs,minutes:r.oldest_wait_minutes,reason:T("ui.runner_reason_"+r.reason)}))}</div>`).join("")+
-      ((rm.runaway||{}).limited?`<div class="mut">${esc(T("ui.adv_model_limited"))}</div>`:"")+(q.length||u.length||rw.length||dn.length?"":`<div class="mut">${esc(T("ui.adv_model_none"))}</div>`);
+      ob.map(r=>`<div>${esc(T("ui.adv_model_observed",{repo:r.repo,jobs:r.jobs,runners:(r.runners||[]).join(", ")||"–",reason:(r.reasons||[]).length?r.reasons.map(x=>T("ui.runner_observed_"+x)).join("; "):T(r.files==="unread"?"ui.runner_observed_unread":"ui.runner_observed_ok")}))}</div>`).join("")+
+      ((rm.runaway||{}).limited?`<div class="mut">${esc(T("ui.adv_model_limited"))}</div>`:"")+(q.length||u.length||rw.length||dn.length||ob.length?"":`<div class="mut">${esc(T("ui.adv_model_none"))}</div>`);
   }else h+=`<div class="mut">${esc(T("ui.adv_off"))}</div>`;
   h+=`<h4>${esc(T("ui.adv_mirror_h"))}</h4><div class="mut">${esc(mi&&mi.enabled?T("ui.adv_mirror_text",{count:mi.count,mb:mi.mb}):T("ui.adv_off"))}</div>`;
   h+=`<h4>${esc(T("ui.adv_otlp_h"))}</h4><div class="mut">${esc(ot&&ot.enabled?T("ui.adv_otlp_text",{host:ot.endpoint_host,spans:ot.spans_sent})+(ot.last_error?" · "+ot.last_error:""):T("ui.adv_off"))}</div>`;

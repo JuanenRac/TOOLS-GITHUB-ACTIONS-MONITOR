@@ -12,7 +12,7 @@ Each panel shows one card per signal with a state lamp, a counter, the list, a f
 An alert carries the code of its signal, so reading the cards means reading the alerts and grouping them by `code`:
 
 - `scol` (6): `collab.issue.critical`, `collab.issue.external`, `collab.issue.stale`, `collab.pr.conflict`, `collab.pr.draft_old`, `collab.pr.review_pending`.
-- `ssec` (6): `security.secret`, `security.code_scanning`, `security.dependabot`, `security.branch_unprotected`, `security.codeowners_missing`, `security.workflow_write`.
+- `ssec` (7): `security.secret`, `security.code_scanning`, `security.dependabot`, `security.branch_unprotected`, `security.codeowners_missing`, `security.workflow_write`, `security.runs_deleted`.
 - `sdel` (6): `release.unreleased_pending`, `release.tag_without_release`, `release.release_without_notes`, `release.version_mismatch`, `release.ecosystem_drift`, `release.assets_missing`.
 - `ssup` (5): `actions.supply.unpinned`, `actions.supply.mutable_ref`, `actions.supply.permissions_wide`, `actions.supply.permissions_missing`, `actions.supply.pr_target_checkout`.
 

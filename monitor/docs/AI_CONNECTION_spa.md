@@ -79,6 +79,8 @@ La pestaña Alertas puede mostrar un panel de preguntas fijas que la IA que ya c
 
 Con `ai.similar.enabled` encendido (apagado por defecto), «explica esta alerta» también lista hasta `ai.similar.max` alertas que se le parecen, para que la respuesta pueda decir «esto ya pasó en otro repositorio». Se hallan con una comparación simple de palabras (el código de la alerta, el flujo de trabajo, las palabras del título y de la causa) entre las alertas abiertas y las resueltas que recuerda el feed: sin modelo, sin embeddings, solo con los datos de esta cuenta, con el mismo orden para los mismos datos, y cada una se cita por su id.
 
+Con `ai.report_summary.enabled` encendido (apagado por defecto), Informes ofrece **Borrador con la IA** para el resumen del siguiente informe: las cifras del informe, limpias de secretos, van a esta IA por el mismo limpiador, presupuesto, caché y cadena que cualquier otra pregunta, una persona edita el borrador y lo aprueba, y el texto aprobado abre el siguiente informe una vez. No se escribe ni se envía nada sin esa aprobación.
+
 El asistente tiene cinco preguntas fijas, todas de solo lectura: «explica esta alerta» (`explain_alert`), «resume la situación» (`summarize_week`), «por qué va lento aquí» (`why_slow`), «la situación de un repositorio» (`explain_repo`: sus ejecuciones y sus alertas abiertas) y «qué hacer primero» (`prioritize`: las alertas abiertas, el estado y la puntuación, puestos en orden con los ids). Usan las mismas cuatro herramientas, los mismos límites y el mismo presupuesto diario; sigue sin haber chat libre.
 
 ## Modo aislado de la IA (opcional, apagado por defecto)

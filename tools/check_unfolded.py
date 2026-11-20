@@ -90,7 +90,7 @@ PROBE = r"""
        const v=r.querySelector("svg");if(v){const w=v.getBoundingClientRect().width;if(w<40)found.push({kind:"trend_curve_squeezed",at:"strend",detail:Math.round(w)+"px wide"})}}
      if(document.querySelector("#t-sent #s-trend"))found.push({kind:"trend_still_in_summary",at:"sent",detail:"the summary still holds the daily trend"})}
     /* one card per signal in the panels of Collaboration, Security, Delivery and Supply chain; Delivery and Supply chain also have a table by code and filters */
-    for(const [tab,box,n,tbl] of [["scol","s-details-collab",6,false],["ssec","s-details-sec",6,false],["sdel","s-details-del",6,true],["ssup","s-details-sup",5,true]]){
+    for(const [tab,box,n,tbl] of [["scol","s-details-collab",6,false],["ssec","s-details-sec",7,false],["sdel","s-details-del",6,true],["ssup","s-details-sup",5,true]]){
       try{showTab(tab)}catch(e){}await wait(200);
       const holder=document.getElementById(box),cards=holder?holder.querySelectorAll(":scope>details[data-sp]"):[];
       if(cards.length!==n)found.push({kind:"sub_cards",at:tab,detail:cards.length+" cards instead of "+n});

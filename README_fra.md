@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4803_passing-brightgreen.svg" alt="4803 tests">
+  <img src="https://img.shields.io/badge/Tests-4937_passing-brightgreen.svg" alt="4937 tests">
 </p>
 
 > Surveille les workflows de tous vos dépôts et vous dit, sur une page locale, ce qui est rouge, ce qui est bloqué et ce qui vous attend.
@@ -96,8 +96,8 @@ Méthode, hypothèses et comment le mesurer dans votre propre usage: [`monitor/d
 | | |
 |---|---|
 | **Maturité** | functional |
-| **Tests** | 4803 méthodes de test (`python -m unittest discover -s monitor/tests`) |
-| **Réglages** | 741 réglages, tous avec aide |
+| **Tests** | 4937 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Réglages** | 759 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -342,6 +342,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/HEALTH_fra.md`](monitor/docs/HEALTH_fra.md): La santé d'un dépôt et de l'équipe : de quoi elle est faite, l'onglet Équipe, les liens directs et l'API
 - [`monitor/docs/REPORT_SCHEDULE_fra.md`](monitor/docs/REPORT_SCHEDULE_fra.md): Rapports planifiés : le score, ce qui a changé, les dépôts qui demandent une personne et les alertes ouvertes en HTML et Markdown, l'horaire et les fichiers
 - [`monitor/docs/CLI_fra.md`](monitor/docs/CLI_fra.md) : la ligne de commande comme client du moniteur
+- [`monitor/docs/CLI_OPERATOR_fra.md`](monitor/docs/CLI_OPERATOR_fra.md) : la ligne de commande pour l'opérateur : formats, watch, completions et codes de sortie
+- [`monitor/docs/KIOSK_fra.md`](monitor/docs/KIOSK_fra.md) : le moniteur sur une télévision ou un mur
 - [`monitor/docs/ACCOUNTS_fra.md`](monitor/docs/ACCOUNTS_fra.md) : plusieurs comptes, un processus chacun
 - [`monitor/docs/QUOTAS_fra.md`](monitor/docs/QUOTAS_fra.md) : quotas et offres de GitHub
 - [`monitor/docs/MODES_fra.md`](monitor/docs/MODES_fra.md) : modes de travail : normal, rapide et turbo

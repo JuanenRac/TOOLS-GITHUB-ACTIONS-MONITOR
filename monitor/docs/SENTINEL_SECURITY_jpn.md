@@ -19,6 +19,9 @@ CI センチネル、コラボレーションセンチネルに続く 3 つ目�
 | デフォルトブランチに保護がない | `security.branch_unprotected` | 警告 | はい |
 | ワークフローに既定で書き込み権限が与えられている | `security.workflow_write` | 警告 | はい |
 | CODEOWNERS ファイルがない | `security.codeowners_missing` | 情報 | いいえ |
+| 監視ツールが確認した重要な run(既定ブランチへの push、手動実行、`pull_request_target` の run)が削除された | `security.runs_deleted` | error | いいえ |
+
+**削除された run**(`security.runs_deleted`、既定はオフ): シークレットが漏えいした後、それを出力した run を削除するのが痕跡を消す典型的な方法で、GitHub には目に見える記録が残りません。`sentinels.security.signals.runs_deleted.enabled` をオンにすると、センチネルは確認した重要な run の短い非公開リストを保持し、run の一覧から消えたものがあれば、その 1 件だけを問い合わせます。明示的な 404 は削除とみなし、拒否(403)、ネットワークエラー、5xx は数えません。`sentinels.security.signals.runs_deleted.check_window_days`(14)より古い run は問い合わせず(アカウントの保持期間で消えた可能性があるため)、検出した削除は同じ日数だけ通知として残ります。リポジトリ・ラウンドごとに問い合わせる単独の run は最大 `sentinels.security.signals.runs_deleted.max_checks`(50)件です。通知にはワークフロー名、実行者、ブランチが入り、run の内容は入りません。
 
 リポジトリとシグナルごとに 1 件のアラートがあり、詳細に重大度別の件数が入ります。各シグナルはオフにでき（`sentinels.security.signals.<シグナル>.enabled`）、Dependabot とコードスキャンには別の最小重大度も設定できます。アーカイブされたリポジトリには、それ以上の問い合わせをしません。
 
@@ -44,4 +47,4 @@ GitHub がリポジトリに対して応答しない情報源（そこで機能�
 
 ## 設定
 
-設定ページの「センチネル」サブタブの「セキュリティ」ブロック：`sentinels.security.enabled`、`sentinels.security.refresh_seconds`、`sentinels.security.max_repos_per_tick`、`sentinels.security.min_rate_remaining`、`sentinels.security.repos`、`sentinels.security.signals.dependabot.enabled`、`sentinels.security.signals.dependabot.min_severity`、`sentinels.security.signals.code_scanning.enabled`、`sentinels.security.signals.code_scanning.min_severity`、`sentinels.security.signals.secret.enabled`、`sentinels.security.signals.branch.enabled`、`sentinels.security.signals.workflow.enabled`、`sentinels.security.signals.codeowners.enabled`。各指摘がスコアのセキュリティ要素から引く点数（`sentinels.security.penalty`）はファイルから読み込まれます。サンプルファイルを参照してください。
+設定ページの「センチネル」サブタブの「セキュリティ」ブロック：`sentinels.security.enabled`、`sentinels.security.refresh_seconds`、`sentinels.security.max_repos_per_tick`、`sentinels.security.min_rate_remaining`、`sentinels.security.repos`、`sentinels.security.signals.dependabot.enabled`、`sentinels.security.signals.dependabot.min_severity`、`sentinels.security.signals.code_scanning.enabled`、`sentinels.security.signals.code_scanning.min_severity`、`sentinels.security.signals.secret.enabled`、`sentinels.security.signals.branch.enabled`、`sentinels.security.signals.workflow.enabled`、`sentinels.security.signals.codeowners.enabled`, `sentinels.security.signals.runs_deleted.enabled`, `sentinels.security.signals.runs_deleted.check_window_days`, `sentinels.security.signals.runs_deleted.max_checks`。各指摘がスコアのセキュリティ要素から引く点数（`sentinels.security.penalty`）はファイルから読み込まれます。サンプルファイルを参照してください。

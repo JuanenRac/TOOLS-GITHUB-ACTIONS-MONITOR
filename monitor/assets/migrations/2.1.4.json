@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "0e460fac8bcdeaef39636e54fa0b1081a30c552cc0e429bc44678eac40e38b04",
+ "digest": "60aa608ce2a8d11c069164400596dd521b732153b94601f145cb1fb21df0e73a",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -61,6 +61,10 @@
     "kind": "names"
    },
    {
+    "key": "ai.report_summary.enabled",
+    "kind": "bool"
+   },
+   {
     "key": "ai.similar.enabled",
     "kind": "bool"
    },
@@ -110,9 +114,44 @@
     "default": 300
    },
    {
+    "key": "ci.stuck.no_runner_check",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "cli.default_format",
+    "kind": "enum",
+    "bounds": [
+     "text",
+     "table",
+     "plain",
+     "json",
+     "ndjson"
+    ],
+    "default": "text"
+   },
+   {
     "key": "cli.prefer_v1",
     "kind": "bool",
     "default": true
+   },
+   {
+    "key": "cli.watch.default_interval_seconds",
+    "kind": "int",
+    "bounds": [
+     1,
+     3600
+    ],
+    "default": 5
+   },
+   {
+    "key": "cli.watch.min_interval_seconds",
+    "kind": "int",
+    "bounds": [
+     1,
+     3600
+    ],
+    "default": 2
    },
    {
     "key": "config_check.strict",
@@ -131,6 +170,39 @@
     "key": "fleet.show_all_active",
     "kind": "bool",
     "default": true
+   },
+   {
+    "key": "kiosk.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "kiosk.font_scale_percent",
+    "kind": "int",
+    "bounds": [
+     100,
+     400
+    ],
+    "default": 150
+   },
+   {
+    "key": "kiosk.high_contrast",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "kiosk.rotate_seconds",
+    "kind": "int",
+    "bounds": [
+     5,
+     600
+    ],
+    "default": 30
+   },
+   {
+    "key": "kiosk.rotate_views",
+    "kind": "bool",
+    "default": false
    },
    {
     "key": "lint.anonymous_public",
@@ -171,6 +243,15 @@
      1440
     ],
     "default": 60
+   },
+   {
+    "key": "runners.model.observed_reads_per_cycle",
+    "kind": "int",
+    "bounds": [
+     0,
+     20
+    ],
+    "default": 0
    },
    {
     "key": "sampling.active_probe",
@@ -222,6 +303,18 @@
      3.0
     ],
     "default": 1.5
+   },
+   {
+    "key": "sentinel.surface.checks.commit_state.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinel.surface.checks.commit_state.include_other_apps",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinel.surface.checks.commit_state.include_statuses",
+    "kind": "bool"
    },
    {
     "key": "sentinel.trend_green_pct",
@@ -300,12 +393,36 @@
     ]
    },
    {
+    "key": "sentinels.security.signals.runs_deleted.check_window_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     90
+    ]
+   },
+   {
+    "key": "sentinels.security.signals.runs_deleted.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.security.signals.runs_deleted.max_checks",
+    "kind": "int",
+    "bounds": [
+     1,
+     500
+    ]
+   },
+   {
     "key": "sentinels.supply.deadline_s",
     "kind": "int",
     "bounds": [
      0,
      600
     ]
+   },
+   {
+    "key": "sentinels.supply.incremental",
+    "kind": "bool"
    },
    {
     "key": "startup.resume_max_age_hours",
