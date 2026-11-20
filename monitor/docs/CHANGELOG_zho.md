@@ -50,6 +50,12 @@
 
 - **监视器请求搜索引擎不要收录，并说明暴露到网络意味着什么**（`listen.noindex`，开启）：每个响应都带有 `X-Robots-Tag: noindex, nofollow`，`/robots.txt` 禁止一切；doctor 的暴露检查会给出地址、是否有 TLS 以及是否需要登录，并提醒对任何人开放的页面可能被标记为钓鱼。使用 Caddy 和 Cloudflare Tunnel 请求头的测试保证代理之后对 Host 和 Origin 的检查可靠。
 
+- **监视器网络目标表，以及被阻止时会失败的内容**（`monitor_cli.py doctor --egress`）：当前配置可能访问的每个主机、用途、使其成为目标的设置以及阻止它的后果，供出站策略严格的计算机使用；有测试保证该表与代码中出现的主机一致。
+
+- **发送到 SIEM 的事件**（可选，关闭；`siem.sinks`、`siem.queue_max`）：Elasticsearch（bulk）、Splunk HEC、Loki、Microsoft Sentinel（用共享密钥签名）、BigQuery 或简单的 HTTP 接收端，每个目标有自己的过滤器（`from_minutes`、`levels`、`repos_filter`）、固定的字段列表，令牌从环境变量读取而绝不从文件读取，遵守监视器的网络规则（除非目标允许，否则不使用私有地址），接收端宕机时使用有界队列，离线模式下完全不发送。
+
+- **MCP 服务器新增引导式提示和自我描述，应答带有页面链接，并能在受控条件下写入**（`mcp.prompts` 开启，`mcp.write_tools` 关闭）：提示 `am_i_affected`、`investigate_red` 和 `weekly_review` 给 AI 一个带编号的计划；工具 `describe_capabilities`、`ping` 和 `whoami` 说明服务器能做什么；关于警报、诊断和配额的应答带有 `dashboard_url`；仅在设置开启时才存在的工具 `gh_action` 会规划操作并显示预览，在同一调用带着 `confirm: true` 和该计划回来之前不发送任何内容，并经过与页面相同的防护。
+
 ### 修复
 
 - **发布面板（A5）、就绪表（A11）和发布候选工具统计的是 main 的 CHANGELOG 条目，而不是克隆当前所在分支的条目**：以前从克隆的工作树统计，所以停在某个旧代理分支上的克隆会显示 20 条，而 main 只有 3 条（13 条对 2 条），与最新发布比较的版本也是该分支的版本。现在它们从克隆所知的远程默认分支读取 `CHANGELOG.md`、清单和 `pyproject`（`git show origin/<分支>:<文件>`，从不 fetch，不改动克隆中的任何内容）；不知道该分支时读取工作树，并在该行注明（“克隆在分支 X，不在 main；按工作树统计”）；GitHub 上的 main 前进后克隆尚未获取时同样注明。整个监控器只用一个函数计数（`delivery/mainsource.py`）：`## [Unreleased]` 下的每个列表行算一条，包括嵌套行，CRLF 或 LF 均可，与以前一致。候选表的标题说明该数字是 main 的。

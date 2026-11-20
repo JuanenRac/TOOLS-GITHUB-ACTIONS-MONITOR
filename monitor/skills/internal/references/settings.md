@@ -349,6 +349,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `logs.failed_step.max_bytes` | `2000` | ai | Size of the failed step text |
 | `logs.failed_step.max_per_minute` | `10` | ai | Lookups of a failed step per minute |
 | `max_workers` | `20` | polling | Parallel requests |
+| `mcp.prompts` | `true` | ai | MCP server: guided prompts |
+| `mcp.write_tools` (secure) | `false` | ai | MCP server: allow actions on GitHub |
 | `min_rate_remaining` | `800` | polling | Pause below this allowance |
 | `mirror.enabled` (secure) | `false` | advanced | Keep a local copy of artifacts |
 | `mirror.folder` | `""` | advanced | Folder of the copies |
@@ -738,6 +740,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinels.supply.signals.unpinned.level` | `-` | sentinel | Actions not pinned to a commit: level |
 | `session_guard` (secure) | `true` | basic | One-use token for changes |
 | `show_unclassified` | `true` | general | Show unclassified repositories |
+| `siem.queue_max` | `500` | outputs | Events waiting for a SIEM |
 | `signed_dir` | `""` | paths | Folder of signature records |
 | `sound.cooldown_seconds` | `30` | general | Seconds between two sounds |
 | `sound.enabled` | `true` | general | Sound alerts |

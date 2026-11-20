@@ -129,6 +129,8 @@ DEFAULTS = {
                 "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64, "group_map": True,
                 "menu": True, "menu_target": "new", "menu_max_windows": 4, "menu_rotate_seconds": 20, "menu_tv_scale": 1.5, "safe_margin_percent": 0},   # the wall screens /screen/overview, /screen/now and /screen/sentinels (docs/SCREENS.md, screens.py): read only, from what the monitor already holds
     "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "on_warning": True, "on_resolved": True, "on_report": True, "on_lesson": True, "on_sentinel": True, "on_stuck": True, "on_score_drop": True, "on_info": True, "on_live_recovered": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False, "theme": "classic", "quiet_enabled": False, "quiet_from_hour": 22, "quiet_to_hour": 7},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
+    "mcp": {"prompts": True, "write_tools": False},      # the MCP server (bin/mcp_server.py): guided prompts on, the governed write tool OFF (integrations/mcp_extras.py)
+    "siem": {"queue_max": 500, "sinks": []},      # OFF: events towards Elasticsearch, Splunk, Loki, Sentinel, BigQuery or an HTTP receiver; each sink is enabled by hand in the file (integrations/siem.py)
     "selfwatch": {"enabled": True, "rss_warn_mb": 1024, "threads_warn": 400, "interval_seconds": 60},      # the monitor watches its own memory and threads (app/selfwatch.py)
     "updates": {"check": True, "systemd_helper": False},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
     "airgapped": False,            # True: nothing is requested from the network except GitHub's data you asked for; the update check is off
@@ -4631,6 +4633,11 @@ def start_sentinel(config):
         SENTINEL["obj"] = SENTINEL["registry"].get("ci")                                   # the CI sentinel answers everything the monitor always asked of it
         from github_actions_monitor.integrations import notifiers
         SENTINEL["obj"].feed.listeners.append(notifiers.make_listener(toolconfig.raw_config))
+        from github_actions_monitor.integrations import siem      # OFF: events towards a SIEM, only for the sinks that are enabled (siem.sinks)
+        for _name in ("ci", "collab", "security", "supply", "delivery"):
+            _sentinel = SENTINEL["registry"].get(_name)
+            if _sentinel is not None:
+                _sentinel.feed.listeners.append(siem.make_listener(toolconfig.raw_config))
         collab = SENTINEL["registry"].get("collab")
         if collab is not None:
             collab.feed.listeners.append(notifiers.make_listener(toolconfig.raw_config))

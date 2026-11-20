@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.7",
  "previous": "2.1.6",
- "digest": "4649af9c930407afcd7ff8b9f719541d758e95f31bf5e2323486931897138c5b",
+ "digest": "05dde510a1cd979714ee45ceccf3d633f0ffa3991c099802d99284efeb0b99fd",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -64,6 +64,16 @@
     "default": true
    },
    {
+    "key": "mcp.prompts",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "mcp.write_tools",
+    "kind": "bool",
+    "default": false
+   },
+   {
     "key": "selfwatch.enabled",
     "kind": "bool",
     "default": true
@@ -94,6 +104,15 @@
      100000
     ],
     "default": 400
+   },
+   {
+    "key": "siem.queue_max",
+    "kind": "int",
+    "bounds": [
+     10,
+     10000
+    ],
+    "default": 500
    }
   ],
   "removed": [],

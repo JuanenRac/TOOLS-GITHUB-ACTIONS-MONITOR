@@ -753,6 +753,14 @@
     "quiet_to_hour": 7,
     "theme": "classic"
   },
+  "mcp": {
+    "prompts": true,
+    "write_tools": false
+  },
+  "siem": {
+    "queue_max": 500,
+    "sinks": []
+  },
   "selfwatch": {
     "enabled": true,
     "rss_warn_mb": 1024,

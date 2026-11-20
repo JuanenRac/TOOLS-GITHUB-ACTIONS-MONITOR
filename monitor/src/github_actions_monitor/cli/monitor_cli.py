@@ -639,6 +639,10 @@ def cmd_doctor(ctx):
     from github_actions_monitor.app import toolconfig
     edition = "lite" if ctx.get("lite") else "complete"
     config = toolconfig.raw_config()
+    if ctx.get("egress"):      # `doctor --egress`: the hosts this configuration can call and what fails if they are blocked (no check is run, nothing is called)
+        from github_actions_monitor.ops import egress
+        rows = egress.table(config)
+        return {"egress": rows, "airgapped": config.get("airgapped") is True}, egress.lines(config, i18n.t), EXIT_OK
     try:
         checks = doctor.run(config=config, edition=edition)
     except Exception:      # noqa: BLE001 - the doctor itself could not run: its own exit code, not a traceback
@@ -979,6 +983,7 @@ def build_parser():
     ap.add_argument("--once", action="store_true", help=i18n.t("cli.help_once"))
     ap.add_argument("--exit-on-change", action="store_true", dest="exit_on_change", help=i18n.t("cli.help_exit_on_change"))
     ap.add_argument("--no-clear", action="store_true", dest="no_clear", help=i18n.t("cli.help_no_clear"))
+    ap.add_argument("--egress", action="store_true", help=i18n.t("cli.help_egress"))
     ap.add_argument("--version", action="store_true", help=i18n.t("cli.help_version"))
     return ap
 
@@ -1011,6 +1016,7 @@ def main(argv=None):
                "provider": args.provider if re.fullmatch(r"[A-Za-z0-9-]{0,40}", args.provider) else "", "model": args.model if re.fullmatch(r"[A-Za-z0-9._:/@+-]{0,100}", args.model) else "", "refresh": args.refresh}
         raw = _config() if args.command in ("watch", "kiosk") or not (args.format or args.json) else {}
         ctx.update({"raw": raw, "format": "csv" if args.format == "csv" else formats.choose(args.format, args.json, formats.configured_format(raw)), "interval": args.interval, "once": args.once, "exit_on_change": args.exit_on_change, "clear": not args.no_clear})
+        ctx["egress"] = args.egress
         CLIENT.update({"session": "", "ca": (args.ca_file or os.environ.get("MONITOR_CA_FILE") or "").strip()})
         if CLIENT["ca"] and not os.path.isfile(CLIENT["ca"]):
             raise CliError(EXIT_USAGE, i18n.t("cli.ca_file_bad", file=CLIENT["ca"]))
