@@ -107,3 +107,7 @@ Sin comando se abre la página. Los comandos responden una vez (añade `--json` 
 | 6 | falló y también falló la vuelta: restaura la copia a mano |
 | 7 | sin conexión con GitHub y sin zip |
 | 8 | no confirmado |
+
+## El aviso nombra la orden de tu forma de instalar
+
+El aviso de una versión más nueva (consola, Acerca de, `/api/about`) dice ahora la orden exacta de la forma en que se instaló este monitor, en el campo `command` junto a `channel`: el producto descomprimido (`py -3 monitor/bin/monitor_cli.py update`), un gestor de servicios (`... update apply --systemd-unit <unidad>`), un contenedor (`docker pull ghcr.io/juanenrac/tools-github-actions-monitor:<versión>`), pipx, uv o una extensión de la orden `gh`. El aviso no ejecuta nada.

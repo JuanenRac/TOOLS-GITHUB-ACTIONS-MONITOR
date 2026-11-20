@@ -107,3 +107,7 @@ Ohne Befehl öffnet sich die Seite. Die Befehle antworten einmal (mit `--json` a
 | 6 | fehlgeschlagen und der Rückweg ebenfalls: Kopie von Hand wiederherstellen |
 | 7 | keine Verbindung zu GitHub und kein Zip |
 | 8 | nicht bestätigt |
+
+## Der Hinweis nennt den Befehl Ihrer Installationsart
+
+Der Hinweis auf eine neuere Version (Konsole, Info, `/api/about`) nennt jetzt den genauen Befehl für die Art, wie dieser Monitor installiert wurde, im Feld `command` neben `channel`: das entpackte Produkt (`py -3 monitor/bin/monitor_cli.py update`), ein Dienstmanager (`... update apply --systemd-unit <Einheit>`), ein Container (`docker pull ghcr.io/juanenrac/tools-github-actions-monitor:<Version>`), pipx, uv oder eine Erweiterung des Befehls `gh`. Der Hinweis führt nichts aus.

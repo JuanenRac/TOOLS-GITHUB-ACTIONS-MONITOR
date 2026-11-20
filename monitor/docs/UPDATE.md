@@ -107,3 +107,7 @@ Without a command the page opens. The commands answer once (add `--json` for a d
 | 6 | failed and the return failed too: restore the copy by hand |
 | 7 | no connection to GitHub and no zip given |
 | 8 | not confirmed |
+
+## The notice names the command of your way of installing
+
+The notice of a newer version (console, About, `/api/about`) now says the exact command for the way this monitor was installed, in the field `command` next to `channel`: the unpacked product (`py -3 monitor/bin/monitor_cli.py update`), a service manager (`... update apply --systemd-unit <unit>`), a container (`docker pull ghcr.io/juanenrac/tools-github-actions-monitor:<version>`), pipx, uv or an extension of the `gh` command. Nothing is run by the notice.

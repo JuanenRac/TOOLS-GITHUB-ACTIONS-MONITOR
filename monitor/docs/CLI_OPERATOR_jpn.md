@@ -89,3 +89,15 @@ monitor_cli.py team --json | jq -r '.data.ranking[] | .repo'
 
 - `completions` に `--install` はありません。ユーザーのファイルには決して書き込みません。
 - `proposals` コマンドはありません。モニターには、操作の対象となる提案用のルートがまだありません。
+
+## リダイレクトした出力、色、幅
+
+- 端末がない場合（リダイレクト、`tee`、パイプ、cron）、コマンドはエスケープシーケンスを書かず、`COLUMNS` が数値ならその幅、そうでなければ 80 を使い、GitHub から来たテキスト（タイトルや名前）に含まれるエスケープシーケンスは取り除かれます。
+- `--color auto|always|never`（既定は `auto`）：`auto` は端末でのみ色を出し、`NO_COLOR` が設定されている（空でない）か `TERM=dumb` のときは出しません。`always` は出力先に関係なく出し、`never` は出しません。色（太字）が付くのは `--format table` の見出しだけで、`json` と `ndjson` には手を加えません。
+- 読み手が先に閉じた場合（`monitor_cli.py alerts --format plain | head -1`）、コマンドは静かに終了します。トレースバックもエラー文も出ません。
+
+## `metrics`：cron とメール向けの数値
+
+`monitor_cli.py metrics` はモニターの数値を 1 行に 1 つの `名前=値` として、決まった順序で、標準出力にほかの文字を混ぜずに書きます：`repos`、`active`、`queued`、`failures_24h`、`successes_24h`、`red_workflows`、`alerts`、`alerts_info`、`alerts_warning`、`alerts_error`、`alerts_critical`、`allowance_remaining`、`allowance_limit`、`offline`。わからない数値は 0 として書かず省きます。読むのはモニターだけで、GitHub には問い合わせません。
+
+`--if-problem` を付けると、赤いワークフローがなく `--fail-on`（既定は error）以上のアラートもないときは何も書かず 0 で終了し、あるときは数値を書いて 5 で終了します。cron は出力があればメールを送るので、次の 1 行は問題がある日だけメールを送ります：`*/15 * * * * py -3 /opt/monitor/bin/monitor_cli.py metrics --if-problem`。モニターに届かないときは沈黙せず、エラーは標準エラー出力に出て終了コードは 2 です。

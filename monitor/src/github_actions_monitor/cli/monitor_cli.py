@@ -7,6 +7,8 @@
   accounts  the accounts the supervisor watches (the complete edition with an `accounts/` folder)
   alerts    the alerts of every sentinel in one list (--sentinel ci|collab, --level, --muted)
   live      the last events that arrived through the webhook and the state of the receiver
+  metrics   the figures of the monitor as one `name=value` line each (nothing else on the standard output), made for cron and for mail; with --if-problem it writes nothing at all
+            when all is well, so cron sends no mail
   doctor    the checks of --doctor for this installation (no monitor needed); --strict makes a warning exit 3
   backup    create | verify | restore | status | list: the complete backup package of this installation (no monitor needed); --key-env NAME with --encrypt seals it (optional library), --deep on
             verify restores it into a temporary folder, restore takes --account ID, --to-dir DIR and --force
@@ -61,10 +63,10 @@ AI_HOOK_ACTIONS = ("install", "status", "uninstall")
 CREDENTIAL_ACTIONS = ("replace", "reload")
 LITE_COMMANDS = ("status", "doctor", "health", "check", "briefs")
 LEVELS = ("info", "warning", "error", "critical")
-from github_actions_monitor.cli import completions, formats, monitor_admin      # noqa: E402
+from github_actions_monitor.cli import completions, formats, monitor_admin, terminal      # noqa: E402
 from github_actions_monitor.cli import watch as watch_loop      # noqa: E402
 from github_actions_monitor.surfaces import kiosk      # noqa: E402
-COMMANDS = COMMANDS + ("watch", "completions", "kiosk")      # the operator commands (docs/CLI_OPERATOR.md)
+COMMANDS = COMMANDS + ("watch", "completions", "kiosk", "metrics")      # the operator commands (docs/CLI_OPERATOR.md)
 EXIT_CHANGED = watch_loop.EXIT_CHANGED      # 6: `watch --exit-on-change` saw something change (only when the flag is given)
 OPERATOR_WORDS = {"watch": watch_loop.WATCHABLE, "completions": completions.SHELLS, "kiosk": tuple(kiosk.PRESETS)}
 WORDS_BY_COMMAND = {"ai-hook": AI_HOOK_ACTIONS, "credential": CREDENTIAL_ACTIONS, "lessons": LESSONS_ACTIONS, "install-skill": SKILL_ACTIONS, "ai": AI_ACTIONS, **OPERATOR_WORDS}
@@ -888,6 +890,33 @@ def cmd_kiosk(ctx):
     return {"preset": preset, "tabs": list(kiosk.PRESETS[preset]), "url": link, "enabled": config["enabled"]}, lines, EXIT_OK
 
 
+METRIC_LEVELS = ("info", "warning", "error", "critical")
+
+
+def cmd_metrics(ctx):
+    """metrics [--if-problem] [--fail-on LEVEL]: the figures of the monitor, one `name=value` per line, in a fixed order and with no text around them, so that `cron` mails exactly that and a script
+    can read it with `cut -d= -f2`. A figure that is not known is left out, never written as 0. With --if-problem nothing is written and the exit code is 0 when there are no red workflows and no
+    alert at --fail-on (error by default) or worse; otherwise the figures are written and the exit code is 5. Read only: it asks the monitor, never GitHub."""
+    status, _, code = cmd_status(dict(ctx, format="json"))
+    alerts = fetch(ctx["base"], "/api/alerts", {"account": ctx["account"], "muted": "hide"}, ctx["timeout"], ctx["token"]).get("alerts") or []
+    per_level = {level: sum(1 for a in alerts if isinstance(a, dict) and a.get("level") == level) for level in METRIC_LEVELS}
+    allowance = status.get("allowance") or {}
+    figures = {"repos": status.get("repos"), "active": status.get("active"), "queued": status.get("queued"), "failures_24h": status.get("failures_24h"), "successes_24h": status.get("successes_24h"),
+               "red_workflows": status.get("red_workflows"), "alerts": len(alerts), **{"alerts_" + level: n for level, n in per_level.items()},
+               "allowance_remaining": allowance.get("remaining"), "allowance_limit": allowance.get("limit"), "offline": 1 if status.get("offline") else 0}
+    figures = {k: v for k, v in figures.items() if isinstance(v, (int, float)) and not isinstance(v, bool)}
+    wanted = ctx.get("fail_on") or "error"
+    rank = {"info": 0, "warning": 1, "error": 2, "critical": 3}
+    worse = sum(n for level, n in per_level.items() if rank[level] >= rank[wanted])
+    problem = bool(figures.get("red_workflows")) or worse > 0
+    if ctx.get("if_problem") and not problem and code == EXIT_OK:
+        return figures, [], EXIT_OK
+    lines = [f"{name}={value}" for name, value in figures.items()]
+    if problem:
+        code = EXIT_ALERTS if code == EXIT_OK else code
+    return figures, lines, code
+
+
 def cmd_watch(ctx):
     """watch status|alerts [--interval S] [--once] [--exit-on-change] [--no-clear]: the same read again and again, from the API of the monitor (never GitHub). Ctrl-C ends it with 0; with
     --exit-on-change it ends with 6 when something changed; a monitor that cannot be reached is retried with a longer pause each time."""
@@ -904,7 +933,9 @@ def cmd_watch(ctx):
             raise CliError(EXIT_DEGRADED, i18n.t("cli.bad_shape")) from None
 
     def show(payload, lines, code):
-        print(formats.render(ctx["format"], command, payload, lines, code), flush=True)
+        out = formats.render(ctx["format"], command, payload, lines, code, width=terminal.width(), color=ctx.get("color", False))
+        if not terminal.emit(out if ctx["format"] in ("json", "ndjson", "table") else terminal.clean(out)):
+            raise KeyboardInterrupt      # the reader of the pipe is gone: end like Ctrl-C does
 
     def clear():
         if ctx.get("clear") and ctx["format"] in ("text", "table") and sys.stdout.isatty():
@@ -913,7 +944,7 @@ def cmd_watch(ctx):
     return None, None, code
 
 
-HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "compare": cmd_compare, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "briefs": cmd_briefs, "screens": cmd_screens, "api": cmd_api, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai, "watch": cmd_watch, "completions": cmd_completions, "kiosk": cmd_kiosk}
+HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "compare": cmd_compare, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "briefs": cmd_briefs, "screens": cmd_screens, "api": cmd_api, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai, "watch": cmd_watch, "completions": cmd_completions, "kiosk": cmd_kiosk, "metrics": cmd_metrics}
 
 
 def cmd_update(rest):
@@ -979,6 +1010,8 @@ def build_parser():
     ap.add_argument("--once", action="store_true", help=i18n.t("cli.help_once"))
     ap.add_argument("--exit-on-change", action="store_true", dest="exit_on_change", help=i18n.t("cli.help_exit_on_change"))
     ap.add_argument("--no-clear", action="store_true", dest="no_clear", help=i18n.t("cli.help_no_clear"))
+    ap.add_argument("--if-problem", action="store_true", dest="if_problem", help=i18n.t("cli.help_if_problem"))
+    ap.add_argument("--color", choices=terminal.MODES, default="auto", help=i18n.t("cli.help_color"))
     ap.add_argument("--version", action="store_true", help=i18n.t("cli.help_version"))
     return ap
 
@@ -1010,7 +1043,7 @@ def main(argv=None):
                "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run, "deep": args.deep, "file": args.file, "strict": args.strict, "force": args.force, "encrypt": args.encrypt, "key_env": args.key_env if re.fullmatch(r"[A-Z_][A-Z0-9_]{0,63}", args.key_env) else "", "to_dir": args.to_dir, "new_token_file": args.new_token_file, "dest": args.dest, "read_only": args.read_only, "repo": args.repo if re.fullmatch(r"[A-Za-z0-9._/-]{0,201}", args.repo) else "",
                "provider": args.provider if re.fullmatch(r"[A-Za-z0-9-]{0,40}", args.provider) else "", "model": args.model if re.fullmatch(r"[A-Za-z0-9._:/@+-]{0,100}", args.model) else "", "refresh": args.refresh}
         raw = _config() if args.command in ("watch", "kiosk") or not (args.format or args.json) else {}
-        ctx.update({"raw": raw, "format": "csv" if args.format == "csv" else formats.choose(args.format, args.json, formats.configured_format(raw)), "interval": args.interval, "once": args.once, "exit_on_change": args.exit_on_change, "clear": not args.no_clear})
+        ctx.update({"raw": raw, "format": "csv" if args.format == "csv" else formats.choose(args.format, args.json, formats.configured_format(raw)), "interval": args.interval, "once": args.once, "exit_on_change": args.exit_on_change, "clear": not args.no_clear, "if_problem": args.if_problem, "color": terminal.use_color(args.color)})
         CLIENT.update({"session": "", "ca": (args.ca_file or os.environ.get("MONITOR_CA_FILE") or "").strip()})
         if CLIENT["ca"] and not os.path.isfile(CLIENT["ca"]):
             raise CliError(EXIT_USAGE, i18n.t("cli.ca_file_bad", file=CLIENT["ca"]))
@@ -1037,9 +1070,12 @@ def main(argv=None):
     if lines is None:      # `watch` wrote its own results while it ran
         return code
     if args.command == "compare" and ctx["format"] != "json":      # `compare` writes its own table, ndjson and csv
-        print("\n".join(lines))
+        terminal.emit(terminal.clean("\n".join(lines)))
         return code
-    print(formats.render(ctx["format"], args.command, payload, lines, code, ascii_only=args.command == "ai-hook"))      # ai-hook: plain ASCII, whatever the console
+    if args.command == "metrics" and not lines and ctx["format"] in ("text", "table", "plain"):      # `metrics --if-problem` with nothing to report writes nothing at all
+        return code
+    out = formats.render(ctx["format"], args.command, payload, lines, code, ascii_only=args.command == "ai-hook", width=terminal.width(), color=ctx["color"])      # ai-hook: plain ASCII, whatever the console
+    terminal.emit(out if ctx["format"] in ("json", "ndjson", "table") else terminal.clean(out))
     return code
 
 

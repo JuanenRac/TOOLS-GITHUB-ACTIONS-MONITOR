@@ -89,3 +89,15 @@ monitor_cli.py team --json | jq -r '.data.ranking[] | .repo'
 
 - `completions` n'a pas de `--install` : il n'écrit jamais dans les fichiers d'un utilisateur.
 - Il n'y a pas de commande `proposals` : le moniteur n'a pas encore de route de propositions sur laquelle agir.
+
+## Sortie redirigée, couleur et largeur
+
+- Sans terminal (une redirection, `tee`, un tube, cron) la commande n'écrit aucune séquence d'échappement, prend la largeur de `COLUMNS` quand c'est un nombre et 80 sinon, et le texte venu de GitHub (un titre, un nom) est débarrassé des séquences d'échappement qu'il pourrait porter.
+- `--color auto|always|never` (par défaut `auto`) : `auto` n'écrit la couleur que dans un terminal et jamais quand `NO_COLOR` est définie (et non vide) ou `TERM=dumb` ; `always` l'écrit quelle que soit la destination ; `never` n'en écrit aucune. Seul l'en-tête de `--format table` est coloré (en gras) ; `json` et `ndjson` ne sont jamais touchés.
+- Un lecteur qui se ferme plus tôt (`monitor_cli.py alerts --format plain | head -1`) termine la commande en silence : ni trace d'erreur ni texte d'erreur.
+
+## `metrics` : les chiffres pour cron et pour le courrier
+
+`monitor_cli.py metrics` écrit les chiffres du moniteur à raison d'une ligne `nom=valeur` chacun, dans un ordre fixe et sans rien d'autre sur la sortie standard : `repos`, `active`, `queued`, `failures_24h`, `successes_24h`, `red_workflows`, `alerts`, `alerts_info`, `alerts_warning`, `alerts_error`, `alerts_critical`, `allowance_remaining`, `allowance_limit` et `offline`. Un chiffre inconnu est omis, jamais écrit comme 0. Elle lit le moniteur, jamais GitHub.
+
+Avec `--if-problem` elle n'écrit rien et sort avec 0 quand aucun workflow n'est rouge et qu'aucune alerte de niveau `--fail-on` (error par défaut) ou pire n'existe ; sinon elle écrit les chiffres et sort avec 5. cron envoie par courrier toute sortie : cette ligne n'envoie donc un message que le jour où quelque chose ne va pas : `*/15 * * * * py -3 /opt/monitor/bin/monitor_cli.py metrics --if-problem`. Un moniteur injoignable n'est jamais un silence : l'erreur va sur la sortie d'erreur et le code est 2.

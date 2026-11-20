@@ -89,3 +89,15 @@ monitor_cli.py team --json | jq -r '.data.ranking[] | .repo'
 
 - `completions` non ha `--install`: non scrive mai nei file di un utente.
 - Non esiste un comando `proposals`: il monitor non ha ancora una rotta di proposte su cui agire.
+
+## Output reindirizzato, colore e larghezza
+
+- Senza terminale (un reindirizzamento, `tee`, una pipe, cron) il comando non scrive alcuna sequenza di escape, prende la larghezza da `COLUMNS` quando è un numero e usa 80 altrimenti, e il testo che arriva da GitHub (un titolo, un nome) viene ripulito dalle sequenze di escape che potrebbe contenere.
+- `--color auto|always|never` (predefinito `auto`): `auto` scrive il colore solo in un terminale e mai quando `NO_COLOR` è impostata (e non vuota) o `TERM=dumb`; `always` lo scrive qualunque sia la destinazione; `never` non ne scrive. Solo l'intestazione di `--format table` è colorata (in grassetto); `json` e `ndjson` non vengono mai toccati.
+- Un lettore che si chiude prima (`monitor_cli.py alerts --format plain | head -1`) termina il comando in silenzio: nessuna traccia di errore né testo di errore.
+
+## `metrics`: le cifre per cron e per la posta
+
+`monitor_cli.py metrics` scrive le cifre del monitor come una riga `nome=valore` ciascuna, in ordine fisso e senza altro sullo standard output: `repos`, `active`, `queued`, `failures_24h`, `successes_24h`, `red_workflows`, `alerts`, `alerts_info`, `alerts_warning`, `alerts_error`, `alerts_critical`, `allowance_remaining`, `allowance_limit` e `offline`. Una cifra non nota viene omessa, mai scritta come 0. Legge il monitor, mai GitHub.
+
+Con `--if-problem` non scrive nulla ed esce con 0 quando non c'è alcun workflow rosso né alert di livello `--fail-on` (error per impostazione predefinita) o peggiore; altrimenti scrive le cifre ed esce con 5. cron invia per posta qualsiasi output, quindi questa riga manda un messaggio solo il giorno in cui qualcosa non va: `*/15 * * * * py -3 /opt/monitor/bin/monitor_cli.py metrics --if-problem`. Un monitor irraggiungibile non è mai silenzio: l'errore va sullo standard error e il codice è 2.

@@ -7,7 +7,7 @@
 
 Generated from the code. It reads what the running monitor says (and never writes to GitHub). `--json` prints one JSON document; the exit codes are stable.
 
-Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `briefs`, `api`, `install-skill`, `gh-token`, `ai`, `backup`, `update`, `compare`, `screens`, `watch`, `completions`, `kiosk`.
+Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `briefs`, `api`, `install-skill`, `gh-token`, `ai`, `backup`, `update`, `compare`, `screens`, `watch`, `completions`, `kiosk`, `metrics`.
 
 | flag | what |
 | --- | --- |
@@ -56,6 +56,8 @@ Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `
 | `--once` | watch: read once and finish |
 | `--exit-on-change` | watch: finish with exit code 6 when what is watched changes |
 | `--no-clear` | watch: do not clear the screen between two reads |
+| `--if-problem` | metrics: write nothing and exit 0 when there is no red workflow and no alert at --fail-on (error by default) or worse; otherwise write the figures and exit 5 (for cron, which mails any output) |
+| `--color` | Colour of the answer: auto (only on a terminal, never with NO_COLOR), always or never (no escape sequence at all) |
 | `--version` | print the version |
 
 Other entry points: `bin/mcp_server.py` (MCP over standard input and output; `--allow-ack`, `--allow-lessons`), `bin/ai_hook.py` (gate script of an AI tool), `bin/read_report.py`, `bin/actions_monitor.py --doctor`.
