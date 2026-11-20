@@ -11,7 +11,8 @@ from urllib.parse import urlencode
 PRESETS = {"ops": ("now", "al", "charts"), "team": ("al", "team"), "release": ("now", "repos", "rep"), "quiet": ("al",)}
 SCALE_RANGE = (100, 400)
 ROTATE_RANGE = (5, 600)
-DEFAULTS = {"enabled": False, "font_scale_percent": 150, "high_contrast": False, "rotate_views": False, "rotate_seconds": 30}
+SAFE_RANGE = (0, 10)      # percent of each edge that a television may cut (overscan) and the page keeps clear
+DEFAULTS = {"enabled": False, "font_scale_percent": 150, "high_contrast": False, "rotate_views": False, "rotate_seconds": 30, "safe_margin_percent": 0, "scale_with_window": False}
 
 
 def _int(value, low, high, fallback):
@@ -24,7 +25,8 @@ def settings(raw):
     block = block if isinstance(block, dict) else {}
     return {"enabled": block.get("enabled") is True, "font_scale_percent": _int(block.get("font_scale_percent"), *SCALE_RANGE, DEFAULTS["font_scale_percent"]),
             "high_contrast": block.get("high_contrast") is True, "rotate_views": block.get("rotate_views") is True,
-            "rotate_seconds": _int(block.get("rotate_seconds"), *ROTATE_RANGE, DEFAULTS["rotate_seconds"])}
+            "rotate_seconds": _int(block.get("rotate_seconds"), *ROTATE_RANGE, DEFAULTS["rotate_seconds"]),
+            "safe_margin_percent": _int(block.get("safe_margin_percent"), *SAFE_RANGE, DEFAULTS["safe_margin_percent"]), "scale_with_window": block.get("scale_with_window") is True}
 
 
 def public(raw):

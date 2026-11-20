@@ -24,6 +24,8 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk=1` | active le profil (seulement quand `kiosk.enabled` est activé) |
 | `scale=%` | la taille du texte, de 100 à 400 (une valeur hors de la plage y est ramenée) |
 | `contrast=1` / `contrast=0` | contraste élevé activé ou désactivé pour cette fenêtre (le réglage `kiosk.high_contrast` est la valeur par défaut) |
+| `safe=POURCENT` | la marge de sécurité de cette fenêtre, de 0 à 10 (le réglage `kiosk.safe_margin_percent` est la valeur par défaut) |
+| `fit=1` / `fit=0` | le texte grandit avec la fenêtre pour cette fenêtre, ou non (le réglage `kiosk.scale_with_window` est la valeur par défaut) |
 | `rotate=SECONDS` | parcourir les onglets de `tabs=` (le paramètre existant ; la commande ne l'ajoute que lorsque la rotation est activée) |
 | `chrome=0`, `screen=`, `tabs=`, `account=` | les paramètres existants |
 
@@ -45,5 +47,7 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk.high_contrast` | désactivé | fond noir et lignes blanches |
 | `kiosk.rotate_views` | désactivé | un préréglage à plusieurs onglets change d'onglet tout seul ; désactivé, l'écran montre le premier onglet du préréglage |
 | `kiosk.rotate_seconds` | 30 | la durée d'affichage de chaque onglet (de 5 à 600) |
+| `kiosk.safe_margin_percent` | 0 | la part de chaque bord, en pourcentage, que la page laisse libre pour un téléviseur qui coupe la bordure (overscan) ; de 0 à 10 |
+| `kiosk.scale_with_window` | désactivé | la taille du texte ci-dessus est celle d'une fenêtre de 1080 px sur son petit côté ; activé, elle grandit avec la fenêtre, si bien qu'un téléviseur 4K ressemble à un Full HD |
 
 La taille est appliquée avec le zoom de la page : chaque chiffre et chaque tableau grandissent ensemble. Une valeur hors de sa plage n'est pas une erreur : elle est remplacée par la valeur par défaut.

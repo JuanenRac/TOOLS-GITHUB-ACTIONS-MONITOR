@@ -37,12 +37,13 @@ THEME_CHOICES = ("inherit",) + SCREEN_THEMES
 MODES = ("three", "rotate")
 CORNERS = ("top-right", "top-left", "bottom-right", "bottom-left")
 DENSITIES = ("compact", "normal", "large")
+MAX_SAFE = 10      # the most a television may cut from each edge that the screens keep clear (screens.safe_margin_percent, ?safe=), in percent of the window
 NAMES = ("all", "public", "none")
 DEFAULTS = {"enabled": False, "blink": True, "blink_calm_minutes": 30, "rotate_seconds": 0, "default_theme": "inherit", "default_density": "normal", "refresh_seconds": 10, "burn_in_protection": True,
             "night_dim": False, "night_dim_from_hour": 22, "night_dim_to_hour": 7, "show_repo_names": "public", "sound": False,
             "theme_overview": "inherit", "theme_now": "inherit", "theme_sentinels": "inherit", "mode": "three", "rotate_every_seconds": 20, "alert_hold_seconds": 30,
             "logo_overview": True, "logo_now": False, "logo_sentinels": False, "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64, "group_map": True,
-            "menu": True, "menu_target": "new", "menu_max_windows": 4, "menu_rotate_seconds": 20, "menu_tv_scale": 1.5}   # the last five belong to the Screens menu (screenmenu.py)
+            "menu": True, "menu_target": "new", "menu_max_windows": 4, "menu_rotate_seconds": 20, "menu_tv_scale": 1.5, "safe_margin_percent": 0}   # the five before the last belong to the Screens menu (screenmenu.py)
 SENTINEL_KEY = re.compile(r"^ui\.a(1[0-2]|[1-9])\Z")
 SENTINELS = tuple("a%d" % n for n in range(1, 13))
 LEVELS = ("ok", "warn", "bad", "info", "unknown")
@@ -142,7 +143,8 @@ def settings(config):
             "logo_corner": _choice(block.get("logo_corner"), CORNERS, d["logo_corner"]), "logo_max_width": _int(block.get("logo_max_width"), 16, 640, d["logo_max_width"]),
             "logo_max_height": _int(block.get("logo_max_height"), 16, 320, d["logo_max_height"]), "group_map": _flag(block.get("group_map"), d["group_map"]),
             "menu": _flag(block.get("menu"), d["menu"]), "menu_target": _choice(block.get("menu_target"), ("new", "same"), d["menu_target"]), "menu_max_windows": _int(block.get("menu_max_windows"), 1, 9, d["menu_max_windows"]),
-            "menu_rotate_seconds": _int(block.get("menu_rotate_seconds"), 5, 300, d["menu_rotate_seconds"]), "menu_tv_scale": _scale(block.get("menu_tv_scale"), d["menu_tv_scale"])}
+            "menu_rotate_seconds": _int(block.get("menu_rotate_seconds"), 5, 300, d["menu_rotate_seconds"]), "menu_tv_scale": _scale(block.get("menu_tv_scale"), d["menu_tv_scale"]),
+            "safe_margin_percent": _int(block.get("safe_margin_percent"), 0, MAX_SAFE, d["safe_margin_percent"])}
 
 
 def global_theme(config):
@@ -201,7 +203,7 @@ def params(query, cfg, kind=None, global_name="auto"):
         pass
     asked = _theme(query.get("theme"), SCREEN_THEMES, None)
     return {"monitor": monitor, "theme": asked or resolve_theme(cfg, kind, global_name), "theme_locked": asked is not None, "density": _choice(query.get("density"), DENSITIES, cfg["default_density"]),
-            "refresh": _int(query.get("refresh"), 5, 120, cfg["refresh_seconds"]), "scale": scale, "rotate": rotate, "mode": cfg.get("mode", "three"),
+            "refresh": _int(query.get("refresh"), 5, 120, cfg["refresh_seconds"]), "scale": scale, "safe": _int(query.get("safe"), 0, MAX_SAFE, cfg["safe_margin_percent"]), "rotate": rotate, "mode": cfg.get("mode", "three"),
             "jump": turning and rotate > 0 and _flag(query.get("jump"), True), "hold": cfg["alert_hold_seconds"],
             "blink": cfg["blink"] and _flag(query.get("blink"), True), "sound": cfg["sound"] and _flag(query.get("sound"), False), "repo": clean_repo_filter(query.get("repo"))}
 

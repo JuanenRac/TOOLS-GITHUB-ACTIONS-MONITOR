@@ -89,6 +89,7 @@ Eine Adresse je Monitor. Ein Parameter kann ein Fenster ruhiger oder kleiner mac
 | `?blink=off` | Fehler behalten einen festen Schein statt zu blinken. Es kann nicht einschalten, was `screens.blink` ausgeschaltet lässt. |
 | `?repo=WORD,WORD` | Nur die Repositories, deren Name eines der Wörter enthält (Buchstaben, Ziffern und `. _ - /`, bis zu acht Wörter). `/screen/overview` und `/screen/now` behalten nur Repositories, deren Name der Bildschirm zeigt (ein verborgener Name passt nie), die Zahlen folgen den behaltenen Zeilen, und die Bewertung und die Gruppenkarte, die zur ganzen Flotte gehören, werden nicht gezeigt; `/screen/sentinels` wird nicht gefiltert. |
 | `?sound=on` | Ein kurzer Signalton bei einem neuen Fehler, nur wenn `screens.sound` es erlaubt. Standardmäßig aus. |
+| `?safe=4` | Hält den Inhalt um diesen Prozentsatz (0 bis 10) vom Rand des Fensters entfernt, für einen Fernseher, der den Rand abschneidet (Overscan). Ersetzt `screens.safe_margin_percent` für dieses Fenster. |
 
 ### Sprache der Anzeigen
 
@@ -107,6 +108,7 @@ Die Sprache einer Anzeige wird in dieser Reihenfolge bestimmt: `?lang=xx` in der
 | `screens.blink_calm_minutes` | Minuten, nach denen ein Fehler, um den sich niemand gekümmert hat, einen festen Schein behält statt zu blinken (standardmäßig 30; 0 = blinkt bis zur Lösung). |
 | `screens.sound` | Ein Signalton bei einem neuen Fehler (standardmäßig aus). |
 | `screens.burn_in_protection` | Verschiebt alles jede Minute um einige Pixel (standardmäßig an). |
+| `screens.safe_margin_percent` | Hält den Inhalt um diesen Prozentsatz vom Rand des Fensters entfernt, für einen Fernseher, der den Rand abschneidet (Overscan): alles wird etwas kleiner gezeichnet. 0 (Standard) nutzt das ganze Fenster; 0 bis 10. |
 | `screens.night_dim` | Dunkelt die Anzeigen zwischen `screens.night_dim_from_hour` (22) und `screens.night_dim_to_hour` (7) ab; standardmäßig aus. |
 | `screens.show_repo_names` | all, public (Standard: private Repositories erscheinen als private-1, private-2...) oder none (jeder Name wird ausgeblendet). Für einen Bildschirm, den andere sehen können, public oder none verwenden. Bei einer von Hand geschriebenen Liste in `repos` wird die Sichtbarkeit alle `discover_refresh_seconds` mit einer Auflistung des Kontos gelesen; ein Repository, dessen Sichtbarkeit nicht gelesen werden konnte, gilt als privat. Die Nummern (private-1...) erhalten nur die verborgenen Repositorys, in der Reihenfolge eines HMAC des Namens mit einem Schlüssel der Installation, der in einer privaten Datei im Datenordner liegt; sie sagen also nichts darüber, wo ein Repository unter den anderen liegt. |
 | `screens.theme_overview`, `screens.theme_now`, `screens.theme_sentinels` | Das Design einer Anzeige: inherit (Standard: das von `screens.default_theme`) oder eines der obigen Designs. |
@@ -146,6 +148,24 @@ Das Fenster „Über“ zeigt immer das Logo des Monitors. Ist `ui.about_org_log
 ### Was sie zeigen und was sie verbergen
 
 Die Daten kommen von `/api/screens/data?screen=overview` (oder `now`, `sentinels`): eine geschlossene Liste von Feldern, gebildet aus dem letzten Zyklus, dem Schnappschuss der Wächter, den Warnungen und der Bewertung. Sie enthält nie einen Link, einen Commit-Titel, einen Job-Namen, einen Benutzernamen oder einen Pfad dieses Rechners, und die Workflow-Namen ausgeblendeter Repositories werden ebenfalls ausgeblendet. Im Netzwerkmodus brauchen die Seiten dasselbe Zugriffstoken wie der Rest des Monitors, und die Antwort ist schreibgeschützt.
+
+### Was hineinpasst und was geschieht, wenn es nicht passt
+
+Die drei Seiten werden in Einheiten gezeichnet, die der kurzen Seite des Fensters folgen; dasselbe Layout füllt also die unten genannten Größen, nichts wird gedehnt und nichts scrollt. Ein Werkzeug misst sie mit dem DOM in den acht Sprachen und mit Daten, die eine Anzeige hart fordern (Repository-Namen mit 90 Zeichen, deutsche Zusammensetzungen und japanische Namen ohne Leerzeichen, die größte Zeilenzahl, die der Monitor senden kann, siebenstellige Zahlen, gar keine Daten, ein einziger Wert, eine alte Messung): `python tools/check_screens.py` (`--list` zeigt jeden Befund, `--report DATEI` schreibt sie als JSON, `--size` und `--lang` wählen, was gemessen wird, `--surface kiosk` misst den Kiosk). Es schlägt fehl bei einer Seite, die scrollt, einem Text oder Kasten jenseits des Rands, einem Kasten, dessen Inhalt nicht passt, einer Überschrift, die mit Auslassungspunkten endet, zwei Texten, die sich überdecken, einer Schrift unter einem Hundertstel der kurzen Fensterseite (12 px bei einem Fenster von 1080 px) und Zeilen, die ohne Hinweis verborgen sind.
+
+| Größe | Art |
+|---|---|
+| 1920x1080 | Full HD |
+| 2560x1440 | QHD |
+| 3840x2160 | 4K |
+| 3440x1440 | Ultrabreit 21:9 |
+| 5120x1440 | Super-Ultrabreit 32:9 |
+| 1080x1920 | Full HD hochkant |
+| 2160x3840 | 4K hochkant |
+
+- Ein Name eines Repositorys oder Workflows, der nicht passt, endet mit Auslassungspunkten und trägt seinen vollen Text im `title`; eine Überschrift, eine Beschriftung oder eine Zahl endet nie mit Auslassungspunkten: die Überschrift bekommt eine zweite Zeile, und eine Zahl, die breiter ist als ihr Kasten, bekommt eine kleinere Schrift bis zu einer Untergrenze.
+- Hat eine Liste mehr Zeilen, als in ihren Kasten passen, stehen die wichtigsten zuerst (Rot vor Grün, das Neueste zuerst), und die letzte Zeile sagt, wie viele weggelassen wurden ("+3 weitere"); ohne diese Zeile wird nichts verborgen.
+- Sicherer Rand (Overscan): Viele Fernseher schneiden einige Prozent jedes Rands ab, sofern ihr Bildmodus nicht "Just Scan" oder "Pixel für Pixel" ist. `screens.safe_margin_percent` (standardmäßig 0, 0 bis 10; `?safe=4` für ein Fenster) hält den Inhalt so weit von jedem Rand entfernt, indem alles kleiner gezeichnet wird, und `kiosk.safe_margin_percent` tut dasselbe für den Kiosk. 3 bis 5 versuchen, wenn die ersten Buchstaben der Uhr oder der Rand der Karten abgeschnitten werden.
 
 ### Wie sie sich verhalten
 

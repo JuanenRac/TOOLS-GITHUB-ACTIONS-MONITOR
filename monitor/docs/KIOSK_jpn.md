@@ -24,6 +24,8 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk=1` | プロファイルをオンにします（`kiosk.enabled` がオンのときだけ） |
 | `scale=%` | 文字サイズ（100〜400）。範囲外の値は範囲内に収められます |
 | `contrast=1` / `contrast=0` | このウィンドウのハイコントラストのオン／オフ（既定は設定 `kiosk.high_contrast`） |
+| `safe=PERCENT` | このウィンドウの安全マージン、0〜10（設定 `kiosk.safe_margin_percent` が既定値） |
+| `fit=1` / `fit=0` | このウィンドウで文字をウィンドウに合わせて拡大するかどうか（設定 `kiosk.scale_with_window` が既定値） |
 | `rotate=SECONDS` | `tabs=` のタブを順に切り替えます（既存のパラメーター。コマンドは切り替えがオンのときだけ追加します） |
 | `chrome=0`, `screen=`, `tabs=`, `account=` | 既存のもの |
 
@@ -45,5 +47,7 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk.high_contrast` | オフ | 黒い背景と白い線 |
 | `kiosk.rotate_views` | オフ | 複数のタブを持つプリセットは自動でタブを切り替える。オフの場合、画面にはプリセットの最初のタブが表示される |
 | `kiosk.rotate_seconds` | 30 | 各タブを表示する時間（5〜600） |
+| `kiosk.safe_margin_percent` | 0 | 端を切り取るテレビ（オーバースキャン）のために、ページが各端で空けておく割合（%）。0〜10 |
+| `kiosk.scale_with_window` | オフ | 上の文字サイズは、短い辺が 1080 px のウィンドウでの大きさです。オンにするとウィンドウに合わせて大きくなり、4K テレビでもフルHDと同じ見た目になります |
 
 サイズはページのズームで適用されるため、すべての数値と表が一緒に大きくなります。範囲外の値はエラーではなく、既定値に置き換えられます。

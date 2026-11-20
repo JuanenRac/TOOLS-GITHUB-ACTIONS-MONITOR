@@ -89,6 +89,7 @@ Una dirección para cada monitor. Un parámetro puede hacer una ventana más tra
 | `?blink=off` | Los fallos conservan un halo fijo en lugar de parpadear. No puede activar lo que `screens.blink` mantiene apagado. |
 | `?repo=WORD,WORD` | Solo los repositorios cuyo nombre contiene una de las palabras (letras, cifras y `. _ - /`, hasta ocho palabras). `/screen/overview` y `/screen/now` conservan solo los repositorios cuyo nombre muestra la pantalla (un nombre oculto nunca coincide), las cifras siguen las filas conservadas y la puntuación y el mapa de grupos, que son de toda la flota, no se muestran; `/screen/sentinels` no se filtra. |
 | `?sound=on` | Un pitido corto con cada fallo nuevo, solo si `screens.sound` lo permite. Desactivado por defecto. |
+| `?safe=4` | Mantiene el contenido a este porcentaje (0 a 10) de distancia de cada borde de la ventana, para un televisor que recorta el borde (overscan). Sustituye a `screens.safe_margin_percent` en esta ventana. |
 
 ### Idioma de las pantallas
 
@@ -107,6 +108,7 @@ El idioma de una pantalla se decide en este orden: `?lang=xx` en la dirección; 
 | `screens.blink_calm_minutes` | Minutos tras los cuales un fallo que nadie atiende conserva un halo fijo en lugar de parpadear (30 por defecto; 0 = parpadea hasta que se resuelve). |
 | `screens.sound` | Un pitido con cada fallo nuevo (desactivado por defecto). |
 | `screens.burn_in_protection` | Desplaza todo unos píxeles cada minuto (activado por defecto). |
+| `screens.safe_margin_percent` | Mantiene el contenido a este porcentaje de distancia de cada borde de la ventana, para un televisor que recorta el borde (overscan): todo se dibuja algo más pequeño. 0 (por defecto) usa toda la ventana; de 0 a 10. |
 | `screens.night_dim` | Atenúa las pantallas entre `screens.night_dim_from_hour` (22) y `screens.night_dim_to_hour` (7); desactivado por defecto. |
 | `screens.show_repo_names` | all, public (por defecto: los repositorios privados aparecen como private-1, private-2...) o none (se ocultan todos los nombres). Usa public o none en una pantalla que otras personas puedan ver. Con una lista de repositorios escrita a mano en `repos`, la visibilidad se lee con un listado de la cuenta cada `discover_refresh_seconds`; un repositorio cuya visibilidad no se pudo leer cuenta como privado. Los números (private-1...) se dan solo a los repositorios ocultos, en el orden de un HMAC del nombre con una clave de la instalación guardada en un fichero privado de la carpeta de datos, así que no dicen nada de dónde cae un repositorio entre los demás. |
 | `screens.theme_overview`, `screens.theme_now`, `screens.theme_sentinels` | El tema de una pantalla: inherit (por defecto: el de `screens.default_theme`) o cualquiera de los temas anteriores. |
@@ -146,6 +148,24 @@ El panel Acerca de muestra siempre el logotipo del monitor. Con `ui.about_org_lo
 ### Qué muestran y qué ocultan
 
 Los datos salen de `/api/screens/data?screen=overview` (o `now`, `sentinels`): una lista cerrada de campos construida con el último ciclo, la instantánea de los centinelas, las alertas y la puntuación. Nunca contiene un enlace, un título de commit, el nombre de un job, el nombre de una persona ni una ruta de este equipo, y los nombres de workflow de los repositorios ocultos también se ocultan. En el modo red las páginas necesitan el mismo token de acceso que el resto del monitor y la respuesta es de solo lectura.
+
+### Qué cabe y qué pasa cuando no cabe
+
+Las tres páginas se dibujan con unidades que siguen el lado corto de la ventana, así que el mismo diseño llena los tamaños de abajo; nada se estira y nada tiene scroll. Una herramienta las mide con el DOM en los ocho idiomas y con datos que ponen a prueba una pantalla (nombres de repositorios de 90 caracteres, palabras compuestas alemanas y nombres japoneses sin espacios, el máximo de filas que el monitor puede enviar, cifras de siete dígitos, ningún dato, un solo dato, una lectura vieja): `python tools/check_screens.py` (`--list` muestra cada hallazgo, `--report FICHERO` los escribe en JSON, `--size` y `--lang` eligen qué medir, `--surface kiosk` mide el kiosco). Falla ante una página con scroll, un texto o una caja más allá del borde, una caja cuyo contenido no cabe, un título que acaba en puntos suspensivos, dos textos que se tapan, una letra menor que la centésima parte del lado corto de la ventana (12 px en una ventana de 1080 px) y filas ocultas sin aviso.
+
+| Tamaño | Tipo |
+|---|---|
+| 1920x1080 | Full HD |
+| 2560x1440 | QHD |
+| 3840x2160 | 4K |
+| 3440x1440 | ultraancho 21:9 |
+| 5120x1440 | superultraancho 32:9 |
+| 1080x1920 | Full HD girado |
+| 2160x3840 | 4K girado |
+
+- El nombre de un repositorio o de un flujo que no cabe acaba en puntos suspensivos y lleva su texto completo en el `title`; un título, una etiqueta o una cifra nunca acaba en puntos suspensivos: el título pasa a una segunda línea y una cifra más ancha que su caja usa una letra menor, hasta un mínimo.
+- Cuando una lista tiene más filas de las que caben en su caja, van primero las más importantes (rojo antes que verde, lo más reciente primero) y la última línea dice cuántas se quedaron fuera ("+3 más"); nada se oculta sin esa línea.
+- Margen de seguridad (overscan): muchos televisores recortan unos puntos porcentuales de cada borde salvo que su modo de imagen sea "just scan" o "pixel a pixel". `screens.safe_margin_percent` (0 por defecto, de 0 a 10; `?safe=4` para una ventana) mantiene el contenido a esa distancia de cada borde dibujando todo más pequeño, y `kiosk.safe_margin_percent` hace lo mismo con el kiosco. Prueba de 3 a 5 si se cortan las primeras letras del reloj o el borde de las tarjetas.
 
 ### Cómo se comportan
 
