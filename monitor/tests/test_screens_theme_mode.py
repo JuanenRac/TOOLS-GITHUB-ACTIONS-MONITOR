@@ -86,10 +86,10 @@ class TheThemeOfEachScreen(unittest.TestCase):
     def test_every_colour_the_page_draws_with_is_defined_by_each_palette_family(self):
         used = set(re.findall(r"var\((--[a-z0-9]+)", re.sub(r":root\[data-studio\]\{[^}]*\}", "", SCREENS)))
         plain = ":root{" + SCREENS.split(":root{", 1)[1].split("}", 1)[0]
-        for name in used - {"--k", "--d", "--i", "--sx", "--sy", "--len", "--lw", "--lh", "--page", "--a"}:
+        for name in used - {"--k", "--d", "--i", "--sx", "--sy", "--len", "--lw", "--lh", "--page", "--a", "--safe"}:
             self.assertIn(name + ":", plain, f"{name} has no value in the default palette")
         alias = re.search(r":root\[data-studio\]\{([^}]*)\}", SCREENS).group(1)
-        for name in used - {"--k", "--d", "--i", "--sx", "--sy", "--len", "--lw", "--lh", "--page", "--a", "--ok", "--warn", "--bad", "--line", "--mut", "--bg"}:
+        for name in used - {"--k", "--d", "--i", "--sx", "--sy", "--len", "--lw", "--lh", "--page", "--a", "--safe", "--ok", "--warn", "--bad", "--line", "--mut", "--bg"}:
             self.assertIn(name + ":", alias, f"{name} is not given to the sixteen themes")
 
     def test_the_page_wears_the_theme_and_changes_it_with_the_screen(self):
