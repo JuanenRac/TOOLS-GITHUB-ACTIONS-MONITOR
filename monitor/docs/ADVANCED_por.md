@@ -102,3 +102,12 @@ Tudo o que se segue é local e só de leitura, e está desligado a não ser que 
 - `ui.orientation`, `ui.screen1_tabs`, `ui.now_sort`, `ui.alerts_sort`, `ui.remember_folds` - docs/SCREENS_por.md
 - `ports.complete`, `ports.lite` - docs/DEPLOYMENT_por.md
 - `notify.users.enabled` - docs/NOTIFICATIONS_por.md
+
+## Ações governadas no GitHub, fluxos e exposição
+
+- **Motivo e operador** (`github_actions.require_reason`, ativado): o servidor recusa planear qualquer ação sem um motivo (3 a 200 caracteres) e o nome do operador (`github_actions.operator`, ou a pessoa com sessão iniciada no modo de equipa); ambos ficam em `github_actions_log.jsonl` e no registo de ações. Com `github_actions.comment_on_target` (desligado) um issue ou pull request fechado recebe também um comentário com eles, porque o GitHub mostra o token ou a App como ator.
+- **O alvo é visto outra vez** mesmo antes de agir: um issue já fechado, uma execução já terminada ou um pull request já fundido respondem `stale` e nada é enviado.
+- **Doctor de permissões** (`github_actions.preflight`, ativado): antes de planear pergunta-se à credencial, sem efeitos, se pode (acesso de escrita, não excluída da lista de quem pode fazer push para o ramo); se não, a ação é recusada com o motivo.
+- **Um só escritor** (`github_actions.writer_lock`, ativado): o primeiro monitor do computador que atua toma um bloqueio; os outros, e todo o monitor iniciado com `--profile qa`, são observadores que recusam toda a ação.
+- **Os fluxos terminam com a sessão**: os fluxos em direto voltam a verificar a sua sessão a cada `auth.stream_revalidate_min` minutos (10) e terminam se foi revogada ou expirou, se o utilizador foi removido ou se o papel já não os permite.
+- **Sem indexação** (`listen.noindex`, ativado): cada resposta leva `X-Robots-Tag: noindex, nofollow` e `/robots.txt` proíbe tudo. A verificação de exposição do doctor diz se o modo de rede tem TLS e login, e lembra que uma página aberta a qualquer pessoa pode ser marcada como phishing: não a publique. Atrás do Caddy ou de um Cloudflare Tunnel defina `listen.proxy_public_host`: esse nome, sem porta e sob HTTPS, é o único anfitrião adicional aceite.

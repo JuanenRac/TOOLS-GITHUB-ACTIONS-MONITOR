@@ -102,3 +102,12 @@
 - `ui.orientation`, `ui.screen1_tabs`, `ui.now_sort`, `ui.alerts_sort`, `ui.remember_folds` - docs/SCREENS_zho.md
 - `ports.complete`, `ports.lite` - docs/DEPLOYMENT_zho.md
 - `notify.users.enabled` - docs/NOTIFICATIONS_zho.md
+
+## GitHub 上受管控的操作、流与暴露范围
+
+- **理由和操作人**（`github_actions.require_reason`，开启）：服务器拒绝规划没有理由（3 到 200 个字符）和操作人姓名（`github_actions.operator`，团队模式下为已登录的人）的任何操作；两者都会写入 `github_actions_log.jsonl` 和操作日志。开启 `github_actions.comment_on_target`（默认关闭）后，被关闭的议题或拉取请求还会收到带有这些信息的评论，因为 GitHub 显示的执行者是令牌或应用。
+- **操作前再次查看目标**：已关闭的议题、已结束的运行或已合并的拉取请求会返回 `stale`，不会发送任何内容。
+- **权限诊断**（`github_actions.preflight`，开启）：规划前以无副作用的方式询问凭据能否执行（有写权限，且未被排除在可推送到该分支的名单之外）；不能则带着原因拒绝。
+- **只有一个写入者**（`github_actions.writer_lock`，开启）：本机上第一个执行操作的监视器获得锁；其余监视器以及用 `--profile qa` 启动的监视器都是拒绝一切操作的观察者。
+- **流随会话结束**：实时流每隔 `auth.stream_revalidate_min` 分钟（10）重新检查其会话，会话被撤销或过期、用户被删除或角色不再允许时即结束。
+- **不被收录**（`listen.noindex`，开启）：每个响应都带有 `X-Robots-Tag: noindex, nofollow`，且 `/robots.txt` 禁止一切。doctor 的暴露检查会说明网络模式是否有 TLS 和登录，并提醒对任何人开放的页面可能被标记为钓鱼：请勿公开。在 Caddy 或 Cloudflare Tunnel 之后请设置 `listen.proxy_public_host`：在 HTTPS 下该不带端口的名称是唯一额外接受的主机。

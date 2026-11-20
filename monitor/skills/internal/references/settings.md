@@ -152,6 +152,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `auth.max_failed_logins` (secure) | `5` | advanced | Wrong passwords before a lock |
 | `auth.min_length` (secure) | `10` | advanced | Shortest password |
 | `auth.session_hours` (secure) | `12` | advanced | Session length |
+| `auth.stream_revalidate_min` (secure) | `10` | advanced | Look at a live stream's session every |
 | `cache.etag.enabled` | `true` | cache | Conditional reads on |
 | `cache.etag.revalidate_active` | `true` | cache | Read lists with running work in full |
 | `cache.etag.skip_stateful` | `true` | cache | Always read live state in full |
@@ -256,8 +257,13 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `fleet.show_all_active` | `true` | general | Every run that is going |
 | `fleet.sort` | `"risk"` | general | Order inside a group |
 | `github_actions.allowed` (secure) | `["rerun_failed", "cancel"]` | advanced | Actions that can be planned |
+| `github_actions.comment_on_target` (secure) | `false` | advanced | Comment on the issue or pull request |
 | `github_actions.enabled` (secure) | `false` | advanced | Allow actions on GitHub |
 | `github_actions.merge_method` (secure) | `"squash"` | advanced | Merge method |
+| `github_actions.operator` | `""` | advanced | Name of the operator |
+| `github_actions.preflight` (secure) | `true` | advanced | Check the permission before planning |
+| `github_actions.require_reason` (secure) | `true` | advanced | A reason and an operator for every action |
+| `github_actions.writer_lock` (secure) | `true` | advanced | Only one monitor writes |
 | `github_app.app_id` (secure) | `""` | quota | App number (app_id) |
 | `github_app.enabled` (secure) | `false` | quota | Read with a GitHub App |
 | `github_app.installation_id` (secure) | `""` | quota | Installation number (optional) |
@@ -326,6 +332,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `listen.local_port` (secure) | `0` | advanced | Local-only port for this computer |
 | `listen.max_failed_attempts` (secure) | `10` | advanced | Wrong access tokens allowed |
 | `listen.network` (secure) | `false` | advanced | Listen beyond this computer |
+| `listen.noindex` (secure) | `true` | advanced | Keep search engines out |
 | `listen.proxy_public_host` (secure) | `""` | advanced | Public name of the HTTPS proxy (without a port) |
 | `listen.query_access` (secure) | `false` | advanced | Accept the access token in the address (deprecated) |
 | `listen.secure_cookie` (secure) | `false` | advanced | Mark the access cookie as Secure |

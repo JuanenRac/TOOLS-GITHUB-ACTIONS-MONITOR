@@ -156,6 +156,27 @@ def read_context(key, value, account, now=None):
     return {"user": who, "role": role, "accounts": accounts_of, "csrf": ""}
 
 
+def revalidate(handler, config, path="/"):
+    """True while the session that opened a long connection (a live stream) is still valid and its role still allows the route: the token is looked up again, so a session that was revoked, expired or
+    whose user was removed or deactivated ends the stream at the next look. In the individual mode, or when nobody has been created yet, there is nothing to revoke (True)."""
+    cfg = auth.settings(config)
+    if os.environ.get(CHILD_ENV) or not cfg["enabled"]:
+        return True
+    storage = auth.get_storage(config)
+    if not _users_exist(storage):
+        return True
+    token, _kind = presented_token(handler.headers, cfg)
+    context = auth.find_session(storage, token) if token else None
+    if context is None:
+        auth.audit(cfg, "stream_closed", address=_address(handler), path=path, result="denied", code="session_gone")
+        return False
+    needed = auth.required_role("GET", path)
+    if needed is not None and not auth.allows(context["role"], needed):
+        auth.audit(cfg, "stream_closed", context["user"], context["role"], _address(handler), path, "denied", "forbidden_role")
+        return False
+    return True
+
+
 def acting_user(handler):
     """The name of the person behind a request ('' in the individual mode): the session of the gate, or the header the supervisor adds for an account child."""
     context = getattr(handler, "auth_user", None)

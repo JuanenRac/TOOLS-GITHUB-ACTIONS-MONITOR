@@ -44,6 +44,12 @@
 
 - **监视器监视自身的内存和线程**（`selfwatch.enabled`、`selfwatch.rss_warn_mb` 1024、`selfwatch.threads_warn` 400、`selfwatch.interval_seconds` 60）：`/api/health` 带有 `selfwatch`，超过限制时会带着数值在被吞掉失败的计数器中记录一次并尽可能释放；CI 在一个处理器、512 MB 的容器中用 120 个工作流的账户运行监视器（`tools/limits_check.py`）。
 
+- **GitHub 上的操作需要理由和操作人，并由服务器把关**（`github_actions.require_reason`、`github_actions.operator`、`github_actions.comment_on_target`、`github_actions.preflight`、`github_actions.writer_lock`）：没有理由（3 到 200 个字符）和操作人的计划会被服务器拒绝，无论页面发送什么，两者都会写入日志；操作前会再次查看目标（变化则返回 `stale`），以无副作用的方式询问凭据能否执行（权限诊断还会读取可推送名单），本机只有一个监视器可以写入，用 `--profile qa` 启动的监视器是观察者。开启 `github_actions.comment_on_target` 后，被关闭的议题或拉取请求还会收到带有这些信息的评论。
+
+- **实时流随其会话结束**（`auth.stream_revalidate_min`，10）：实时流每隔几分钟重新检查开启它的会话，会话被撤销或过期、用户被删除或角色不再允许时即关闭，因此没有连接会保留已失效的权限。
+
+- **监视器请求搜索引擎不要收录，并说明暴露到网络意味着什么**（`listen.noindex`，开启）：每个响应都带有 `X-Robots-Tag: noindex, nofollow`，`/robots.txt` 禁止一切；doctor 的暴露检查会给出地址、是否有 TLS 以及是否需要登录，并提醒对任何人开放的页面可能被标记为钓鱼。使用 Caddy 和 Cloudflare Tunnel 请求头的测试保证代理之后对 Host 和 Origin 的检查可靠。
+
 ### 修复
 
 - **发布面板（A5）、就绪表（A11）和发布候选工具统计的是 main 的 CHANGELOG 条目，而不是克隆当前所在分支的条目**：以前从克隆的工作树统计，所以停在某个旧代理分支上的克隆会显示 20 条，而 main 只有 3 条（13 条对 2 条），与最新发布比较的版本也是该分支的版本。现在它们从克隆所知的远程默认分支读取 `CHANGELOG.md`、清单和 `pyproject`（`git show origin/<分支>:<文件>`，从不 fetch，不改动克隆中的任何内容）；不知道该分支时读取工作树，并在该行注明（“克隆在分支 X，不在 main；按工作树统计”）；GitHub 上的 main 前进后克隆尚未获取时同样注明。整个监控器只用一个函数计数（`delivery/mainsource.py`）：`## [Unreleased]` 下的每个列表行算一条，包括嵌套行，CRLF 或 LF 均可，与以前一致。候选表的标题说明该数字是 main 的。

@@ -102,3 +102,12 @@
 - `ui.orientation`, `ui.screen1_tabs`, `ui.now_sort`, `ui.alerts_sort`, `ui.remember_folds` - docs/SCREENS_jpn.md
 - `ports.complete`, `ports.lite` - docs/DEPLOYMENT_jpn.md
 - `notify.users.enabled` - docs/NOTIFICATIONS_jpn.md
+
+## GitHub 上の管理された操作、ストリーム、公開範囲
+
+- **理由と実行者**（`github_actions.require_reason`、オン）：理由（3～200 文字）と実行者名（`github_actions.operator`、チームモードではサインイン中の人）がない操作の計画をサーバーは拒否します。両方が `github_actions_log.jsonl` と操作ログに記録されます。`github_actions.comment_on_target`（オフ）をオンにすると、閉じた issue やプルリクエストにもそれらを書いたコメントが付きます（GitHub が表示する実行者はトークンまたは App のため）。
+- **対象を直前に再確認**：すでに閉じた issue、終了した実行、マージ済みのプルリクエストは `stale` と答え、何も送られません。
+- **権限の診断**（`github_actions.preflight`、オン）：計画の前に、認証情報にそれができるか（書き込み権限があり、ブランチへ push できる人の一覧から外れていない）を副作用なしで確認し、できなければ理由付きで拒否します。
+- **書き込めるのは 1 つだけ**（`github_actions.writer_lock`、オン）：このコンピューターで最初に操作したモニターがロックを取り、ほかのモニターと `--profile qa` で起動したモニターは、すべての操作を拒否する観察者になります。
+- **ストリームはセッションとともに終わります**：ライブストリームは `auth.stream_revalidate_min` 分（10）ごとにセッションを確認し、取り消し・期限切れ・ユーザー削除・ロールの変更で許可されなくなると終了します。
+- **インデックスされません**（`listen.noindex`、オン）：すべての応答に `X-Robots-Tag: noindex, nofollow` が付き、`/robots.txt` はすべてを禁止します。doctor の公開範囲チェックは、ネットワークモードに TLS とログインがあるかを示し、誰でも開けるページはフィッシングと判定されることがあるので公開しないよう注意します。Caddy や Cloudflare Tunnel の背後では `listen.proxy_public_host` を設定します。HTTPS のもとでポートなしのその名前だけが追加で受け入れられるホストです。

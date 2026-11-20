@@ -4,10 +4,47 @@
  "format": 1,
  "version": "2.1.7",
  "previous": "2.1.6",
- "digest": "a7d39b02ec852ea7325b7a166ff1aa4919a851a56f3e305a552b612352e91e04",
+ "digest": "4649af9c930407afcd7ff8b9f719541d758e95f31bf5e2323486931897138c5b",
  "data_schema": 2,
  "settings": {
   "added": [
+   {
+    "key": "auth.stream_revalidate_min",
+    "kind": "int",
+    "bounds": [
+     1,
+     1440
+    ],
+    "default": 10
+   },
+   {
+    "key": "github_actions.comment_on_target",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "github_actions.operator",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9 ._@-]{0,60}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "github_actions.preflight",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "github_actions.require_reason",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "github_actions.writer_lock",
+    "kind": "bool",
+    "default": true
+   },
    {
     "key": "lint.rules.container_input_name.enabled",
     "kind": "bool"
@@ -20,6 +57,11 @@
      "warn",
      "bad"
     ]
+   },
+   {
+    "key": "listen.noindex",
+    "kind": "bool",
+    "default": true
    },
    {
     "key": "selfwatch.enabled",

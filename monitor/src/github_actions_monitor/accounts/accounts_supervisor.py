@@ -416,6 +416,15 @@ class Handler(BaseHTTPRequestHandler):
         for name, value in localguard.SECURITY_HEADERS:
             if name.lower() not in sent:
                 self.send_header(name, value)
+        if "x-robots-tag" not in sent:
+            try:      # `listen.noindex` (on unless it is a real false): no search engine indexes the monitor
+                from github_actions_monitor.app import toolconfig
+                listen = toolconfig.raw_config().get("listen")
+                indexable = isinstance(listen, dict) and listen.get("noindex") is False
+            except Exception:   # noqa: BLE001 - a header never stops an answer
+                indexable = False
+            if not indexable:
+                self.send_header("X-Robots-Tag", "noindex, nofollow")
         super().end_headers()
 
     def reply(self, code, body, kind="application/json; charset=utf-8", extra=None):

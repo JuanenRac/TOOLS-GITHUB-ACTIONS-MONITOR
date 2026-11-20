@@ -138,10 +138,10 @@ DEFAULTS = {
     "quota": {"billing_api": False, "warn_percent": 75, "alert_percent": 90, "default_runner": "linux", "failover": False, "failover_max_age_minutes": 60},
     "session_guard": True,         # the page asks for a one-use token before it changes a setting or confirms an action
     "discovery": {"events": True, "suggest_groups": True, "auto_frequency": False, "hide": [], "skip_archived": True, "fork_policy": "show", "fork_ci_days": 90, "fork_checks_per_pass": 30},
-    "auth": {"enabled": False, "session_hours": 12, "max_failed_logins": 5, "lockout_minutes": 15, "min_length": 10, "allow_bearer": False, "audit": True},     # OFF: one person, no login. On: users with roles once the first administrator exists (security/auth.py)
-    "listen": {"network": False, "trusted_proxy": False, "trusted_proxies": [], "local_port": 0, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "tls_cert_file": "", "tls_key_file": "", "secure_cookie": False, "proxy_public_host": "", "max_failed_attempts": 10, "query_access": False},     # OFF: only this computer. On: a private address, with an access token for every request
+    "auth": {"enabled": False, "session_hours": 12, "max_failed_logins": 5, "lockout_minutes": 15, "min_length": 10, "allow_bearer": False, "audit": True, "stream_revalidate_min": 10},     # OFF: one person, no login. On: users with roles once the first administrator exists (security/auth.py)
+    "listen": {"network": False, "noindex": True, "trusted_proxy": False, "trusted_proxies": [], "local_port": 0, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "tls_cert_file": "", "tls_key_file": "", "secure_cookie": False, "proxy_public_host": "", "max_failed_attempts": 10, "query_access": False},     # OFF: only this computer. On: a private address, with an access token for every request
     "github_token": {"enabled": False, "store": "auto"},       # OFF: the monitor uses your own `gh login`. On: a token kept in the store of the system (secretstore.py)
-    "github_actions": {"enabled": False, "allowed": ["rerun_failed", "cancel"], "merge_method": "squash"},      # OFF: actions on GitHub, each one confirmed on its own (ghactions.py)
+    "github_actions": {"enabled": False, "allowed": ["rerun_failed", "cancel"], "merge_method": "squash", "require_reason": True, "operator": "", "comment_on_target": False, "preflight": True, "writer_lock": True},      # OFF: actions on GitHub, each one confirmed on its own (ghactions.py)
     "act": {"enabled": False, "allowed": [], "timeout_seconds": 900, "allow_symlinks": False},
     "dispatch": {"required_ci": ["ci.yml"]},                                 # the workflow files that must have passed on a commit before a batch is fired (gha_dispatch_all.py)         # OFF: run a workflow here with `act`, each run confirmed on its own (actlocal.py)
     "mirror": {"enabled": False, "folder": "", "max_mb": 500, "keep_days": 14, "max_per_cycle": 3},     # OFF: a local copy of the artifacts of the runs (mirror.py)
@@ -2654,6 +2654,12 @@ class CountedReader:
         return getattr(self.stream, name)
 
 
+def noindex_on(config):
+    """`listen.noindex` (on unless it is a real false): the X-Robots-Tag header of every answer and the file /robots.txt."""
+    listen = config.get("listen") if isinstance(config, dict) else None
+    return not (isinstance(listen, dict) and listen.get("noindex") is False)
+
+
 STORE_DOWN = [0]      # how many requests found the storage not answering since the monitor started
 STORE_RETRY_SECONDS = 5
 
@@ -2681,6 +2687,8 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header(name, value)
         if getattr(self, "deprecated_access", False):
             self.send_header("Deprecation", "true")      # the ?access= address is deprecated: POST /api/access keeps the token out of the address bar
+        if noindex_on(LIVE_CONFIG or DEFAULTS):      # no search engine indexes a monitor, whatever it is behind (`listen.noindex`, on by default)
+            self.send_header("X-Robots-Tag", "noindex, nofollow")
         if getattr(self, "v1", False):      # every answer under /api/v1/ says which version of the API it is, whichever handler wrote it
             self.send_header(api_v1.VERSION_HEADER, api_v1.API_VERSION)
         super().end_headers()
@@ -2738,6 +2746,20 @@ class Handler(BaseHTTPRequestHandler):
         except (ConnectionError, OSError):
             pass   # the browser or a reader closed the tab mid-answer: nothing to report
 
+    def stream_guard(self):
+        """A function for the loop of a stream: True when the stream must end because the session that opened it was revoked or has expired, or because the role no longer allows it. It looks every
+        `auth.stream_revalidate_min` minutes (10), so no connection keeps permissions that are gone."""
+        last = [time.time()]
+
+        def stop():
+            config = toolconfig.raw_config()
+            every = auth.settings(config)["stream_revalidate_min"] * 60
+            if time.time() - last[0] < every:
+                return False
+            last[0] = time.time()
+            return not auth_http.revalidate(self, config, self.path.split("?")[0])
+        return stop
+
     def live_stream(self):
         """GET /api/live-events/stream: `text/event-stream` with a `hello` frame, then one `live` frame per webhook event accepted from now on (or after `Last-Event-ID` / `?since=` while still held)
         and a keep-alive comment. Read only, off by default (`live.sse.enabled`); the network mode asks for the access token as for every other request; limited listeners, each for a limited time."""
@@ -2760,7 +2782,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Connection", "close")
             self.end_headers()
             self.close_connection = True
-            for frame in webhook.sse_frames(config, lambda: (LIVE_TOTAL[0], list(LIVE_EVENTS)), since=whole(resume, None)):
+            for frame in webhook.sse_frames(config, lambda: (LIVE_TOTAL[0], list(LIVE_EVENTS)), since=whole(resume, None), stop=self.stream_guard()):
                 self.wfile.write(frame.encode("utf-8"))
                 self.wfile.flush()
         except (ConnectionError, OSError):
@@ -2793,7 +2815,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Connection", "close")
             self.end_headers()
             self.close_connection = True
-            for frame in ai_alerts.stream_frames(config, offset=whole(resume, None),
+            for frame in ai_alerts.stream_frames(config, offset=whole(resume, None), stop=self.stream_guard(),
                                                  only_real=(ask.get("only") or [""])[0] == "real"):
                 self.wfile.write(frame.encode("utf-8"))
                 self.wfile.flush()
@@ -3339,6 +3361,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def serve_get(self):
         self.v1 = False
+        if self.path.split("?")[0] == "/robots.txt" and noindex_on(toolconfig.raw_config()):      # nothing here is for a search engine; the file is public and says so
+            self.reply("User-agent: *\nDisallow: /\n", "text/plain; charset=utf-8")
+            return
         if not self.access_gate():      # the access token first: the 404 of a switch that is off does not tell a visitor without credentials whether the versioned API exists
             return
         if not self.v1_enter() or not auth_http.gate(self, LIVE_CONFIG or DEFAULTS, LITE["on"]):
@@ -4553,7 +4578,8 @@ def handle_advanced_post(path, request, who=""):
     if path.startswith("/api/gh-action"):
         from github_actions_monitor.integrations import ghactions
         if path.endswith("plan"):
-            item, why = ghactions.plan(config, toolconfig.github_owner(config), request.get("action"), request.get("repo"), request.get("number"))
+            item, why = ghactions.plan(config, toolconfig.github_owner(config), request.get("action"), request.get("repo"), request.get("number"), reason=request.get("reason"),
+                                       operator=request.get("operator") or who, run_gh=run_gh_checked)
             return {"ok": item is not None, "status": why, "plan": item}
         return ghactions.execute(config, request.get("plan"), run_gh_checked)
     from github_actions_monitor.integrations import actlocal

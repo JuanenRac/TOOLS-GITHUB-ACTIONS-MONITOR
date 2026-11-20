@@ -102,3 +102,12 @@ Everything below is local and read only, and off unless it says it is on. Each h
 - `ui.orientation`, `ui.screen1_tabs`, `ui.now_sort`, `ui.alerts_sort`, `ui.remember_folds` - docs/SCREENS.md
 - `ports.complete`, `ports.lite` - docs/DEPLOYMENT.md
 - `notify.users.enabled` - docs/NOTIFICATIONS.md
+
+## Governed actions on GitHub, streams and exposure
+
+- **Reason and operator** (`github_actions.require_reason`, on): the server refuses to plan any action without a reason (3 to 200 characters) and the name of the operator (`github_actions.operator`, or the signed-in person in the team mode); both are written in `github_actions_log.jsonl` and in the log of actions. With `github_actions.comment_on_target` (off) a closed issue or pull request also gets a comment with them, because GitHub shows the token or the App as the actor.
+- **The target is looked at again** right before acting: an issue already closed, a run already finished or a pull request already merged answers `stale` and nothing is sent.
+- **Doctor of permissions** (`github_actions.preflight`, on): before planning, the credential is asked without side effects whether it can (write access, not left out of the list of who may push to the branch); if not, the action is refused with the reason.
+- **One writer** (`github_actions.writer_lock`, on): the first monitor of the computer that acts takes a lock; the others, and every monitor started with `--profile qa`, are observers that refuse every action.
+- **Streams end with the session**: the live streams look at their session again every `auth.stream_revalidate_min` minutes (10) and end when it was revoked or has expired, the user was removed or the role no longer allows them.
+- **Not indexed** (`listen.noindex`, on): every answer carries `X-Robots-Tag: noindex, nofollow` and `/robots.txt` disallows everything. The doctor's exposure check says whether the network mode has TLS and a login, and reminds that a page open to anyone may be marked as phishing: do not publish it. Behind Caddy or a Cloudflare Tunnel set `listen.proxy_public_host`: that name, without a port and under HTTPS, is the only extra host accepted.
