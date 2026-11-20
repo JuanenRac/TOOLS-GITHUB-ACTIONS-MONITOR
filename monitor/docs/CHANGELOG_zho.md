@@ -74,6 +74,9 @@
 - **大型账户上比较的长窗口**（`compare.progressive` 和 `compare.progressive_days`，默认关闭）：比设定天数更长的窗口会先立即用最近几天作答并标记为 `partial`，整个窗口在后台计算后提供给下一次请求。
 
 - **`monitor_cli.py toolbox`**：无需运行监视器、在本机上工作的运维小工具：`limits`（配置与其上限的对比）、`workspaces`、`ledger`（已发送的通知，`--force` 将其清除）、`summary`（按类型、仓库和日期统计事件）以及 `export-events FILE`（按文件名结尾写成 jsonl、csv、parquet 或 duckdb；parquet 和 duckdb 需要各自的包，文件必须是新的，不会覆盖任何文件，也不接受任何查询语言）。
+- **超过六十种声音的声音库**（`sound.voices`、`screens.sound_voices`、`screens.sound_volume`）：每种事件保持原有声音，也可以指定声音库中的任意其他声音，适用于页面、本机蜂鸣，以及拥有自己列表和音量的墙面屏幕。声音在浏览器中合成（无需下载），没有任何一个超过一秒，且各不相同；单一来源（`soundlib.py`）由 `tools/make_sound_library.py` 复制到页面和墙面屏幕，测试会检查副本是否最新。八种语言的声音指南列出了每一种声音。
+
+- **可选的背景环境音和时钟滴答声**（`sound.ambient`、`sound.ambient_volume`、`sound.tick`、`sound.tick_seconds`；默认都关闭）：环境音是两个很轻的低音，有红色时会变粗糙；滴答声是每隔几秒一声极短的干脆咔哒声，让卡住的屏幕能被听出来。两者在页面和墙面屏幕中都遵循静音标签、总开关和安静时段。
 
 ### 修复
 

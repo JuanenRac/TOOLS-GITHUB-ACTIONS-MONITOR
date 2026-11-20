@@ -76,6 +76,9 @@ when this file and `tool_version.py` disagree.
 - **Long windows of the comparison on a big account** (`compare.progressive` and `compare.progressive_days`, off by default): a window longer than the days set is answered at once with its last days, marked `partial`, while the whole one is computed in the background and given to the next request.
 
 - **`monitor_cli.py toolbox`**: the small tools of the operator that work on this computer with no monitor running: `limits` (the setup against its ceilings), `workspaces`, `ledger` (the notifications already sent, `--force` forgets them), `summary` (the events by kind, repository and day) and `export-events FILE` (jsonl, csv, parquet or duckdb by the end of the name; parquet and duckdb need their package, the file must be new, nothing is overwritten and no query language is accepted).
+- **A library of more than sixty sounds** (`sound.voices`, `screens.sound_voices`, `screens.sound_volume`): every kind of event keeps the sound it always had and can be given any other sound of the library, for the page, for the beep of this computer and, with its own list and volume, for the wall screens. The sounds are made in the browser (nothing to download), none lasts more than a second and every one is different; one source (`soundlib.py`) is copied into the page and the wall screens by `tools/make_sound_library.py`, and a test checks that the copies are current. The eight guides of the sounds name every one.
+
+- **An optional background ambience and a clock tick** (`sound.ambient`, `sound.ambient_volume`, `sound.tick`, `sound.tick_seconds`; both off by default): the ambience is two very soft low notes that turn rougher while something is red, and the tick is a very short dry click every few seconds so a frozen screen is heard. Both follow the mute chip, the main switch and the quiet hours, in the page and in the wall screens.
 
 ### Fixed
 

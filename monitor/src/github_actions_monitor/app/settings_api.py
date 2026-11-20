@@ -30,6 +30,7 @@ from pathlib import Path
 
 from github_actions_monitor import i18n
 from github_actions_monitor.data_pipeline import alertflow
+from github_actions_monitor.integrations import soundlib
 from github_actions_monitor.app import screens, surface
 from github_actions_monitor.app import toolconfig
 from github_actions_monitor.security import envguard
@@ -194,6 +195,8 @@ _f(_T_GENERAL, "wall", "screens.rotate_seconds", "int", (0, 3600), unit="s", res
 _f(_T_GENERAL, "wall", "screens.blink", "bool", restart=False)
 _f(_T_GENERAL, "wall", "screens.blink_calm_minutes", "int", (0, 1440), unit="min", restart=False)
 _f(_T_GENERAL, "wall", "screens.sound", "bool", restart=False)
+_f(_T_GENERAL, "wall", "screens.sound_voices", "text", re.compile(r"^(?:(?:" + "|".join(soundlib.PAGE_KEY) + r")=(?:" + "|".join(soundlib.LIBRARY) + r")(?:,(?!\Z)|\Z)){0,11}\Z"), restart=False)
+_f(_T_GENERAL, "wall", "screens.sound_volume", "int", (0, 100), unit="%", restart=False)
 _f(_T_GENERAL, "wall", "screens.safe_margin_percent", "int", (0, 10), unit="%", restart=False)
 _f(_T_GENERAL, "wall", "screens.burn_in_protection", "bool", restart=False)
 _f(_T_GENERAL, "wall", "screens.night_dim", "bool", restart=False)
@@ -278,6 +281,11 @@ _f(_T_GENERAL, "sound", "sound.quiet_to_hour", "int", (0, 23), unit="h", restart
 _f(_T_GENERAL, "sound", "sound.cooldown_seconds", "int", (0, 3600), unit="s", restart=False)
 _f(_T_GENERAL, "sound", "sound.volume", "int", (1, 100), unit="%", restart=False)
 _f(_T_GENERAL, "sound", "sound.server_beep", "bool", restart=False, secure=True)
+_f(_T_GENERAL, "sound", "sound.voices", "text", re.compile(r"^(?:(?:" + "|".join(soundlib.PAGE_KEY) + r")=(?:" + "|".join(soundlib.LIBRARY) + r")(?:,(?!\Z)|\Z)){0,11}\Z"), restart=False)
+_f(_T_GENERAL, "sound", "sound.ambient", "bool", restart=False)
+_f(_T_GENERAL, "sound", "sound.ambient_volume", "int", (1, 50), unit="%", restart=False)
+_f(_T_GENERAL, "sound", "sound.tick", "bool", restart=False)
+_f(_T_GENERAL, "sound", "sound.tick_seconds", "int", (1, 60), unit="s", restart=False)
 _f(_T_GENERAL, "scope", "mode", "enum", ("full", "lite"))
 _f(_T_GENERAL, "scope", "repos", "repos")
 _f(_T_GENERAL, "scope", "ecosystems", "eco")

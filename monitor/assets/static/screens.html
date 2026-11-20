@@ -418,33 +418,109 @@ function banner(kind,text){
 /*SOUNDS-BEGIN*/
 /* the sounds of the monitor, one per kind of event, made with the Web Audio API (no audio file): the page and the wall screens carry this same block (a test keeps the two copies equal).
    A note is [Hz, start (s), length (s), Hz at the end (a slide)]. The themes change the colour (wave, attack, release, pitch), never the rhythm, so a kind is the same pattern in every theme. */
-const SND_PATTERNS={
-  red:{w:"sine",n:[[880,0,.15],[1175,.22,.15]]},
-  sentinel:{w:"triangle",n:[[330,0,.14],[330,.2,.14],[330,.4,.14]]},
-  stuck:{w:"sine",n:[[740,0,.7,370]]},
-  score:{w:"triangle",n:[[784,0,.16],[622,.2,.16],[466,.4,.28]]},
-  conn:{w:"sine",n:[[392,0,.3],[262,.38,.4]]},
-  warning:{w:"triangle",n:[[660,0,.16],[660,.26,.16]]},
-  resolved:{w:"sine",n:[[523,0,.12],[659,.14,.12],[784,.28,.25]]},
-  report:{w:"triangle",n:[[1047,0,.12],[784,.16,.3]]},
-  lesson:{w:"sine",n:[[1319,0,.08],[1568,.1,.08],[1976,.2,.16]]},
-  info:{w:"sine",n:[[988,0,.22]]},
-  live:{w:"sine",n:[[392,0,.12],[523,.14,.12],[659,.28,.12],[880,.42,.22]]}
+/*SND-LIBRARY-BEGIN*/
+const SND_LIBRARY={
+ "red":{"w":"sine","n":[[880,0,0.15],[1175,0.22,0.15]]},
+ "sentinel":{"w":"triangle","n":[[330,0,0.14],[330,0.2,0.14],[330,0.4,0.14]]},
+ "stuck":{"w":"sine","n":[[740,0,0.7,370]]},
+ "score":{"w":"triangle","n":[[784,0,0.16],[622,0.2,0.16],[466,0.4,0.28]]},
+ "conn":{"w":"sine","n":[[392,0,0.3],[262,0.38,0.4]]},
+ "warning":{"w":"triangle","n":[[660,0,0.16],[660,0.26,0.16]]},
+ "resolved":{"w":"sine","n":[[523,0,0.12],[659,0.14,0.12],[784,0.28,0.25]]},
+ "report":{"w":"triangle","n":[[1047,0,0.12],[784,0.16,0.3]]},
+ "lesson":{"w":"sine","n":[[1319,0,0.08],[1568,0.1,0.08],[1976,0.2,0.16]]},
+ "info":{"w":"sine","n":[[988,0,0.22]]},
+ "live":{"w":"sine","n":[[392,0,0.12],[523,0.14,0.12],[659,0.28,0.12],[880,0.42,0.22]]},
+ "bell":{"w":"sine","n":[[1319,0,0.5]]},
+ "chime":{"w":"sine","n":[[1047,0,0.12],[1319,0.15,0.3]]},
+ "ding_dong":{"w":"sine","n":[[880,0,0.3],[659,0.38,0.45]]},
+ "doorbell":{"w":"sine","n":[[659,0,0.25],[523,0.3,0.4]]},
+ "ding":{"w":"triangle","n":[[1568,0,0.3]]},
+ "ping_high":{"w":"sine","n":[[2093,0,0.1]]},
+ "ping_low":{"w":"sine","n":[[440,0,0.25]]},
+ "tick_soft":{"w":"triangle","n":[[1760,0,0.03]]},
+ "tock_soft":{"w":"triangle","n":[[1175,0,0.04]]},
+ "double_tick":{"w":"triangle","n":[[1760,0,0.03],[1760,0.12,0.03]]},
+ "tick_tock":{"w":"triangle","n":[[1760,0,0.04],[1175,0.3,0.06]]},
+ "knock":{"w":"triangle","n":[[196,0,0.06],[196,0.14,0.06]]},
+ "knock_three":{"w":"triangle","n":[[196,0,0.06],[196,0.14,0.06],[196,0.28,0.06]]},
+ "blip":{"w":"square","n":[[1500,0,0.06]]},
+ "bloop":{"w":"sine","n":[[320,0,0.1,700]]},
+ "bubble":{"w":"sine","n":[[500,0,0.12,900],[700,0.16,0.1,1100]]},
+ "drop":{"w":"sine","n":[[1200,0,0.18,500]]},
+ "droplet":{"w":"sine","n":[[1500,0,0.07,900],[1100,0.14,0.1,600]]},
+ "arpeggio_up":{"w":"sine","n":[[523,0.0,0.12],[659,0.1,0.12],[784,0.2,0.12],[1047,0.3,0.12]]},
+ "arpeggio_down":{"w":"sine","n":[[1047,0.0,0.12],[784,0.1,0.12],[659,0.2,0.12],[523,0.3,0.12]]},
+ "minor_up":{"w":"triangle","n":[[440,0.0,0.14],[523,0.12,0.14],[659,0.24,0.14]]},
+ "minor_down":{"w":"triangle","n":[[659,0.0,0.14],[523,0.12,0.14],[440,0.24,0.14]]},
+ "fanfare":{"w":"square","n":[[523,0,0.1],[523,0.12,0.1],[523,0.24,0.1],[784,0.38,0.4]]},
+ "level_up":{"w":"square","n":[[392,0.0,0.08],[523,0.08,0.08],[659,0.16,0.08],[784,0.24,0.08],[1047,0.32,0.08]]},
+ "coin":{"w":"square","n":[[988,0,0.07],[1319,0.08,0.35]]},
+ "harp_up":{"w":"sine","n":[[392,0.0,0.2],[494,0.07,0.2],[587,0.14,0.2],[784,0.21,0.2],[988,0.28,0.2],[1175,0.35,0.2]]},
+ "harp_down":{"w":"sine","n":[[1175,0.0,0.2],[988,0.07,0.2],[784,0.14,0.2],[587,0.21,0.2],[494,0.28,0.2],[392,0.35,0.2]]},
+ "marimba":{"w":"triangle","n":[[523,0.0,0.1],[659,0.13,0.1],[523,0.26,0.1],[784,0.39,0.1]]},
+ "xylophone":{"w":"sine","n":[[1047,0.0,0.07],[1319,0.09,0.07],[1568,0.18,0.07],[2093,0.27,0.07]]},
+ "pluck":{"w":"triangle","n":[[330,0,0.1],[247,0.12,0.2]]},
+ "cascade":{"w":"sine","n":[[1568,0.0,0.08],[1319,0.06,0.08],[1047,0.12,0.08],[880,0.18,0.08],[659,0.24,0.08],[523,0.3,0.08]]},
+ "sparkle":{"w":"sine","n":[[1568,0.0,0.05],[2093,0.05,0.05],[1760,0.1,0.05],[2349,0.15,0.05],[2093,0.2,0.05]]},
+ "ascend":{"w":"triangle","n":[[330,0.0,0.1],[392,0.1,0.1],[440,0.2,0.1],[494,0.3,0.1],[587,0.4,0.1]]},
+ "descend":{"w":"triangle","n":[[587,0.0,0.1],[494,0.1,0.1],[440,0.2,0.1],[392,0.3,0.1],[330,0.4,0.1]]},
+ "notify_a":{"w":"sine","n":[[880,0,0.1],[1175,0.12,0.1],[1568,0.24,0.18]]},
+ "notify_b":{"w":"triangle","n":[[1568,0,0.1],[1175,0.12,0.1],[880,0.24,0.18]]},
+ "notify_c":{"w":"sine","n":[[784,0,0.08],[988,0.1,0.08],[784,0.2,0.08],[988,0.3,0.16]]},
+ "sweep_up":{"w":"sine","n":[[300,0,0.45,1400]]},
+ "sweep_down":{"w":"sine","n":[[1400,0,0.45,300]]},
+ "whistle_up":{"w":"sine","n":[[800,0,0.3,1800]]},
+ "whistle_down":{"w":"sine","n":[[1750,0,0.3,800]]},
+ "zap":{"w":"sawtooth","n":[[1800,0,0.18,200]]},
+ "laser":{"w":"square","n":[[2200,0,0.22,300]]},
+ "radar":{"w":"sine","n":[[1000,0,0.08],[1000,0.33,0.08],[1000,0.66,0.08]]},
+ "sonar":{"w":"sine","n":[[700,0,0.9,650]]},
+ "beacon":{"w":"sine","n":[[880,0,0.06],[880,0.25,0.06],[880,0.5,0.06],[880,0.75,0.06]]},
+ "heartbeat":{"w":"sine","n":[[110,0,0.12],[90,0.18,0.16]]},
+ "alarm_fast":{"w":"square","n":[[880,0,0.1],[660,0.14,0.1],[880,0.28,0.1],[660,0.42,0.1]]},
+ "siren":{"w":"sawtooth","n":[[600,0,0.45,1000],[1000,0.45,0.45,600]]},
+ "klaxon":{"w":"sawtooth","n":[[220,0,0.4],[220,0.5,0.4]]},
+ "buzzer":{"w":"square","n":[[150,0,0.4]]},
+ "gong":{"w":"sine","n":[[196,0,0.9]]},
+ "phone":{"w":"square","n":[[1000,0,0.08],[800,0.1,0.08],[1000,0.2,0.08],[800,0.3,0.08]]},
+ "cuckoo":{"w":"sine","n":[[784,0,0.2],[622,0.28,0.3]]}
 };
+/*SND-LIBRARY-END*/
+const SND_PATTERNS=SND_LIBRARY;
+/* a kind of event may sound as another sound of the library (sound.voices, screens.sound_voices): {kind of the settings: name of the library}; the page names four kinds differently (red, score, conn, live) */
+const SND_PAGEKEY={new_red:"red",connection_lost:"conn",score_drop:"score",live_recovered:"live"};
+let SND_VOICES={};
+function setVoices(map){const o={};if(map&&typeof map==="object")Object.keys(map).forEach(k=>{const pk=SND_PAGEKEY[k]||k,n=map[k];if(Object.prototype.hasOwnProperty.call(SND_PATTERNS,pk)&&typeof n==="string"&&Object.prototype.hasOwnProperty.call(SND_PATTERNS,n))o[pk]=n});SND_VOICES=o;return o}
 const SND_THEMES={classic:{w:"",atk:.02,rel:.15,mul:1,gain:1},soft:{w:"sine",atk:.06,rel:.35,mul:.75,gain:.8}};
 let AUDIO=null;
 function audioCtx(){try{if(!AUDIO){const C=window.AudioContext||window.webkitAudioContext;if(C)AUDIO=new C()}if(AUDIO&&AUDIO.state!=="running"&&AUDIO.state!=="closed")AUDIO.resume();return AUDIO}catch(e){return null}}
 /* plays the patterns of the kinds one after the other (a string or a list); false when the browser does not let the page sound yet, so the caller can keep them and try again */
 function playTones(vol,kinds,theme){const c=audioCtx();if(!c||c.state!=="running")return false;
   const list=Array.isArray(kinds)?kinds:[kinds||"red"],th=SND_THEMES[theme]||SND_THEMES.classic,v=Math.max(0.01,Math.min(1,vol||0.4))*0.5*th.gain;let t=c.currentTime+0.02;
-  list.forEach(k=>{const p=SND_PATTERNS[k]||SND_PATTERNS.red;let end=0;
+  list.forEach(k=>{const p=SND_PATTERNS[SND_VOICES[k]||k]||SND_PATTERNS[k]||SND_PATTERNS.red;let end=0;
     p.n.forEach(([f,d,len,to])=>{const o=c.createOscillator(),g=c.createGain();o.type=th.w||p.w;o.frequency.setValueAtTime(f*th.mul,t+d);if(to)o.frequency.linearRampToValueAtTime(to*th.mul,t+d+len);o.connect(g);g.connect(c.destination);
       g.gain.setValueAtTime(0.0001,t+d);g.gain.exponentialRampToValueAtTime(v,t+d+th.atk);g.gain.exponentialRampToValueAtTime(0.0001,t+d+len+th.rel);o.start(t+d);o.stop(t+d+len+th.rel+0.02);end=Math.max(end,d+len+th.rel)});
     t+=end+0.25});
   return true}
+/* the ambience (sound.ambient, off by default): two soft low notes that never stop while it is on; a fifth when the fleet is calm, a rougher interval while something is red. It follows the volume of the sound settings
+   at a fraction of it and has no rhythm of its own, so it never hides a pattern. false (and silence) when the browser does not let the page sound yet */
+let AMB=null;
+function ambientStop(){if(!AMB)return;try{AMB.g.gain.exponentialRampToValueAtTime(0.0001,AMB.ctx.currentTime+0.5);AMB.a.stop(AMB.ctx.currentTime+0.6);AMB.b.stop(AMB.ctx.currentTime+0.6)}catch(e){}AMB=null}
+function ambientSet(on,vol,tense){const c=audioCtx();if(!on||!c||c.state!=="running"){ambientStop();return false}
+  const v=Math.max(0.002,Math.min(1,vol||0.1))*0.4,t=c.currentTime;
+  if(!AMB){const g=c.createGain(),a=c.createOscillator(),b=c.createOscillator();a.type="sine";b.type="sine";g.gain.setValueAtTime(0.0001,t);a.connect(g);b.connect(g);g.connect(c.destination);a.start(t);b.start(t);AMB={g:g,a:a,b:b,ctx:c,tense:null}}
+  if(AMB.tense!==!!tense){AMB.tense=!!tense;AMB.a.frequency.setValueAtTime(tense?104:110,t);AMB.b.frequency.setValueAtTime(tense?147:165,t)}
+  AMB.g.gain.exponentialRampToValueAtTime(v,t+1.5);return true}
+/* the tick (sound.tick, off by default): one very short, dry click every `tick_seconds`; sndTickDue says when the next one is due so the page and the wall screens keep the same pace */
+let SND_TICKAT=0;
+function sndTickDue(secs,now){if(!(secs>=1))return false;if(now-SND_TICKAT>=secs*1000-100){SND_TICKAT=now;return true}return false}
+function playTick(vol){const c=audioCtx();if(!c||c.state!=="running")return false;const t=c.currentTime+0.01,o=c.createOscillator(),g=c.createGain(),v=Math.max(0.01,Math.min(1,vol||0.4))*0.18;
+  o.type="square";o.frequency.setValueAtTime(1900,t);o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+0.002);g.gain.exponentialRampToValueAtTime(0.0001,t+0.025);o.start(t);o.stop(t+0.04);return true}
 /*SOUNDS-END*/
 /* the sounds of the wall are the ones of the page (the block above is the same text): one per kind of event, with the volume, the theme, the switches and the quiet hours of the settings, and only in a window that asks for them (?sound=on) in a monitor that allows them (screens.sound) */
-const SC=Object.assign({enabled:true,theme:"classic",volume:40,cooldown_seconds:30,quiet_enabled:false,quiet_from_hour:22,quiet_to_hour:7},D.sound||{});
+const SC=Object.assign({enabled:true,theme:"classic",volume:40,cooldown_seconds:30,quiet_enabled:false,quiet_from_hour:22,quiet_to_hour:7,ambient:false,ambient_volume:10,tick:false,tick_seconds:1},D.sound||{});
+setVoices(SC.voices);
 const SND_SW={red:"new_red",conn:"connection_lost",score:"score_drop",live:"live_recovered"};
 function sndQuiet(){if(!SC.quiet_enabled||SC.quiet_from_hour===SC.quiet_to_hour)return false;const h=new Date().getHours(),a=SC.quiet_from_hour,b=SC.quiet_to_hour;return a<b?(h>=a&&h<b):(h>=a||h<b)}
 function beep(kinds){
@@ -460,6 +536,10 @@ function sndDrain(){
 }
 ["pointerup","click","touchend","keydown"].forEach(ev=>document.addEventListener(ev,()=>{if(P.sound){audioCtx();sndDrain()}},{capture:true}));
 setInterval(()=>{if(P.sound&&STATE.sq.length)sndDrain()},3000);
+/* the ambience and the tick of the wall (sound.ambient, sound.tick; off by default) only in a window that asks for sound, outside the quiet hours */
+function sndAmbience(){const on=P.sound&&SC.enabled!==false&&SC.ambient===true&&!sndQuiet();try{return ambientSet(on,(SC.ambient_volume==null?10:SC.ambient_volume)/100,STATE.prevRed.size>0)}catch(e){return false}}
+function sndTicks(){if(!(P.sound&&SC.enabled!==false&&SC.tick===true&&!sndQuiet()))return false;if(!sndTickDue(SC.tick_seconds,Date.now()))return false;return playTick(SC.volume/100)}
+setInterval(()=>{sndAmbience()},2000);setInterval(()=>{try{sndTicks()}catch(e){}},1000);
 /* alerts of the sentinels that rise between two looks sound as their level (a serious one, a warning); the first look only remembers */
 function alertSound(al){
   if(!al||typeof al.by_level!=="object")return;const bl=al.by_level,sv=num(bl.critical)+num(bl.error),wn=num(bl.warning);

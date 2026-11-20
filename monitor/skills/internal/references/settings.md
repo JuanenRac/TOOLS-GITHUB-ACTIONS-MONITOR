@@ -573,6 +573,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `screens.safe_margin_percent` | `0` | general | Safe margin of the screens |
 | `screens.show_repo_names` (secure) | `"public"` | general | Repository names on wall screens |
 | `screens.sound` | `false` | general | Sound on wall screens |
+| `screens.sound_voices` | `""` | general | Sounds of the wall screens |
+| `screens.sound_volume` | `0` | general | Volume of the wall screens |
 | `screens.theme_now` | `"inherit"` | general | Theme of the screen: Right now |
 | `screens.theme_overview` | `"inherit"` | general | Theme of the screen: Overview |
 | `screens.theme_sentinels` | `"inherit"` | general | Theme of the screen: Sentinels |
@@ -761,6 +763,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `session_guard` (secure) | `true` | basic | One-use token for changes |
 | `show_unclassified` | `true` | general | Show unclassified repositories |
 | `signed_dir` | `""` | paths | Folder of signature records |
+| `sound.ambient` | `false` | general | Background ambience |
+| `sound.ambient_volume` | `10` | general | Ambience volume |
 | `sound.cooldown_seconds` | `30` | general | Seconds between two sounds |
 | `sound.enabled` | `true` | general | Sound alerts |
 | `sound.on_connection_lost` | `true` | general | Sound when the connection drops |
@@ -779,6 +783,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sound.quiet_to_hour` | `7` | general | Quiet until |
 | `sound.server_beep` (secure) | `false` | general | Beep of this computer (page closed) |
 | `sound.theme` | `"classic"` | general | Theme of the sounds |
+| `sound.tick` | `false` | general | Clock tick |
+| `sound.tick_seconds` | `1` | general | Seconds between ticks |
+| `sound.voices` | `""` | general | Sound of each kind of event |
 | `sound.volume` | `40` | general | Volume of the page |
 | `startup.resume_max_age_hours` | `12` | basic | Show the last picture after a restart (hours) |
 | `stuck_minutes` | `120` | polling | A build is stuck after |

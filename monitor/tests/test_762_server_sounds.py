@@ -196,7 +196,7 @@ class TheCycle(unittest.TestCase):
 class ThePages(unittest.TestCase):
     def test_the_page_and_the_wall_have_the_sound_of_the_live_view_back(self):
         for text in (PAGE, WALL):
-            self.assertIn("live:{w:\"sine\"", text)
+            self.assertIn('"live":{"w":"sine"', text)
         self.assertEqual(page_sounds.block(PAGE, "SOUNDS").replace("\r\n", "\n"), page_sounds.block(WALL, "SOUNDS").replace("\r\n", "\n"))
         self.assertIn('beep(["live"])', WALL)
         self.assertIn('live:on("live_recovered")', PAGE)

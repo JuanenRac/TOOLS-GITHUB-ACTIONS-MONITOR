@@ -36,6 +36,14 @@ La page fait ses propres sons avec l'API Web Audio, un pour chaque type d'évén
 - Plusieurs types dans un même regard font une seule salve : trois motifs au plus, le plus grave d'abord ; le reste attend la salve suivante. Deux salves ne se chevauchent jamais.
 - Une alerte mise en sourdine (onglet Alertes) ne retentit jamais.
 
+## La bibliothèque de sons
+
+En plus des onze sons que chaque type d'événement a toujours eus, le moniteur embarque une bibliothèque de 54 sons (65 au total) que vous pouvez attribuer à n'importe quel type d'événement. Ils sont fabriqués dans le navigateur (et, pour le bip de cet ordinateur, avec les mêmes notes) : aucun fichier audio à télécharger. Les sons des types sont les onze premiers ; les autres s'attribuent librement : `bell`, `chime`, `ding_dong`, `doorbell`, `ding`, `ping_high`, `ping_low`, `tick_soft`, `tock_soft`, `double_tick`, `tick_tock`, `knock`, `knock_three`, `blip`, `bloop`, `bubble`, `drop`, `droplet`, `arpeggio_up`, `arpeggio_down`, `minor_up`, `minor_down`, `fanfare`, `level_up`, `coin`, `harp_up`, `harp_down`, `marimba`, `xylophone`, `pluck`, `cascade`, `sparkle`, `ascend`, `descend`, `notify_a`, `notify_b`, `notify_c`, `sweep_up`, `sweep_down`, `whistle_up`, `whistle_down`, `zap`, `laser`, `radar`, `sonar`, `beacon`, `heartbeat`, `alarm_fast`, `siren`, `klaxon`, `buzzer`, `gong`, `phone`, `cuckoo`.
+
+Pour donner à un type un autre son, écrivez des paires `type=son` séparées par des virgules dans `sound.voices`, par exemple `new_red=coin,warning=drop`. Les types sont `new_red`, `sentinel`, `stuck`, `score_drop`, `connection_lost`, `warning`, `resolved`, `report`, `lesson`, `info`, `live_recovered`. Un nom absent de la bibliothèque est ignoré et le type garde son propre son. Les écrans muraux peuvent ajouter leur propre liste dans `screens.sound_voices` et leur propre volume dans `screens.sound_volume`. Aucun son ne dure plus d'une seconde et tous sont différents.
+
+Deux fonds optionnels, tous deux désactivés par défaut : `sound.ambient` (deux notes graves très douces, calmes tant que rien n'est rouge, plus rugueuses dès que quelque chose l'est) et `sound.tick` (un clic sec très bref toutes les `sound.tick_seconds`, pour qu'un écran figé s'entende). Les deux suivent la pastille de sourdine, l'interrupteur principal et les heures de silence.
+
 ## Réglages (Réglages, Son)
 
 Tous sont dans le fichier de configuration et dans l'onglet Réglages ; le volume, le thème et les interrupteurs agissent aussitôt.
@@ -49,6 +57,10 @@ Tous sont dans le fichier de configuration et dans l'onglet Réglages ; le volum
 | `sound.cooldown_seconds` | Pause entre deux sons du même type. |
 | `sound.quiet_enabled`, `sound.quiet_from_hour`, `sound.quiet_to_hour` | Heures de silence (désactivées par défaut) : entre les deux heures de cet ordinateur rien ne sonne ; elles peuvent passer minuit. |
 | `sound.server_beep` | Désactivé par défaut. Le moniteur lui-même émet un son sur cet ordinateur quand aucune page n’est ouverte ou que le navigateur bloque le son : un motif pour chaque type d’événement du tableau ci-dessus (tons de Windows, sons système de macOS, événements canberra sous Linux), avec les mêmes interrupteurs et heures calmes que la page, en une rafale d’au plus trois types à la fois ; local uniquement. |
+| `sound.voices` | Donne à un type d'événement un autre son de la bibliothèque (paires `type=son` séparées par des virgules). Vide par défaut. |
+| `sound.ambient`, `sound.ambient_volume` | Ambiance sonore (désactivée par défaut) et son volume, de 1 à 50. |
+| `sound.tick`, `sound.tick_seconds` | Tic-tac d'horloge (désactivé par défaut) et secondes entre les tics, de 1 à 60. |
+| `screens.sound_voices`, `screens.sound_volume` | Comme `sound.voices`, seulement pour les écrans muraux, et leur propre volume (0 = celui de `sound.volume`). |
 
 ## Tester chaque son
 
