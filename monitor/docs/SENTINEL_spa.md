@@ -112,3 +112,19 @@ Lo que pliegas o despliegas en las secciones A1 a A13 se queda así: la página 
 ## La cola de firma de A5
 
 Una ejecución entra en la cola de firma solo si (a) no es un simulacro (dry run; se ejecutó el paso «Prepare the draft»), (b) hay un borrador de release esperando o el repositorio no tiene ninguna release publicada, y (c) la versión no está ya publicada con su firma. El monitor mira cada ejecución de la cola una vez cada seis horas (los jobs de la ejecución y las releases de su repositorio: dos lecturas, como mucho tres ejecuciones por ciclo, dentro de la misma puerta de la cuota). Lo que sale de la cola se lista debajo como «comprobado: ya publicada vX» o «simulacro»; una fila que nadie ha mirado aún se queda y se marca como sin comprobar.
+## Notas sobre los repositorios
+
+Todo esto son notas del monitor: leen, nunca escriben en GitHub, y están apagadas o vacías por defecto.
+
+- **Qué inició un rojo.** Cada rojo lleva una clase: `pr` (un pull request), `main` (un push), `nightly` (un programado), `manual` (una persona o una llamada de fuera), `queue` (la cola de fusión), `chained` (otro workflow) u `other`. La pestaña Alertas la muestra como una etiqueta y filtra por ella ("Iniciado por"). Qué eventos cuentan como rojo sigue siendo `ci.red_events`, y `ci.extra_branches` sigue añadiendo las ramas de mantenimiento vigiladas.
+- **Rojo esperado** (`expected_red.enabled`). Desde la pestaña Alertas o la paleta, marca un workflow (o `*` para un repositorio) como rojo a propósito con un motivo, un responsable y unos días (nunca más de `expected_red.max_days`). Mientras dura la marca, su rojo se lista aparte, no se cuenta y no avisa; al acabarse vuelve el rojo y una alerta dice que la marca se acabó, hasta que la quites o la marques de nuevo.
+- **Clonados anómalos por usuario** (`audit_feed.clone_alert.enabled`). Lee el registro de auditoría de la organización para `git.clone` (solo algunos planes lo ofrecen; cuando el tuyo no, la respuesta dice `available: false`). Un usuario que clona más repositorios distintos que `threshold` dentro de `window_hours` se nombra en una alerta; los robots se dejan fuera por los patrones de nombre y por el final `[bot]`.
+- **Columnas de metadatos** (`fleet.meta_columns`). Una lista JSON de `{"name", "path", "regex"}`, como mucho cinco. El primer grupo de la expresión (o la coincidencia entera) en su primera línea coincidente es el valor de la columna; solo se mira el primer 8 KB del fichero.
+- **Personas de fuera del equipo** (`sentinels.collab.rules.watch_external_comments`, `external_days`, `team_members`). Una incidencia o un pull request de alguien ajeno al equipo que nadie respondió ni tocó pasados `external_days` días es una alerta del código `collab.issue.external`.
+
+| Ruta | Qué hace |
+|---|---|
+| `GET /api/expected-red` | las marcas con su estado (`active` o `expired`) |
+| `POST /api/expected-red` | `{"action": "add", "repo", "workflow", "reason", "owner", "days"}` o `{"action": "remove", "id"}` (un mantenedor, con el token de un solo uso de la página; queda en el registro de acciones) |
+| `GET /api/clone-anomalies` | los usuarios por encima del umbral, según el registro de auditoría (un mantenedor) |
+| `GET /api/meta-columns` | las columnas y el valor hallado hasta ahora para cada repositorio |

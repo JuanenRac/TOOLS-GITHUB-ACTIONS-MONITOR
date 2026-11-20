@@ -110,3 +110,19 @@
 ## A5 的签名队列
 
 一次运行只有同时满足以下条件才会进入签名队列：(a) 不是试运行（dry run；“Prepare the draft”步骤已执行），(b) 有等待中的发布草稿，或仓库没有任何已发布的发布版本，(c) 该版本尚未带签名发布。监视器每六小时检查队列中的每次运行一次（该运行的作业和其仓库的发布：两次读取，每个周期最多三次运行，受同一额度闸门限制）。离开队列的条目会列在下方，显示为“已检查：vX 已发布”或“试运行”；尚未被查看的行会保留并标记为未检查。
+## 关于仓库的备注
+
+这些都是监视器的备注:它们只读取,绝不写入 GitHub,默认关闭或为空。
+
+- **是什么触发了红色。** 每个红色都带有一个类别:`pr`(拉取请求)、`main`(推送)、`nightly`(定时)、`manual`(人或外部调用)、`queue`(合并队列)、`chained`(另一个工作流)或 `other`。警报标签页以标签显示它并可按它筛选(「触发方式」)。哪些事件算作红色仍由 `ci.red_events` 决定,被关注的维护分支仍由 `ci.extra_branches` 添加。
+- **预期红色**(`expected_red.enabled`)。在警报标签页或命令面板中,把某个工作流(或用 `*` 代表一个仓库)标记为有意的红色,并写明原因、负责人和天数(不超过 `expected_red.max_days`)。标记有效期间,它的红色单独列出、不计数、不报警;到期后红色恢复,并产生一条警报说明标记已到期,直到你移除或重新标记。
+- **按用户统计的异常克隆**(`audit_feed.clone_alert.enabled`)。从组织的审计日志读取 `git.clone`(只有部分套餐提供;你的套餐没有时,响应会给出 `available: false`)。在 `window_hours` 内克隆的不同仓库数超过 `threshold` 的用户会在警报中被点名;机器人按名称模式和以 `[bot]` 结尾被排除。
+- **元数据列**(`fleet.meta_columns`)。`{"name", "path", "regex"}` 的 JSON 列表,最多五个。表达式在第一条匹配行上的第一个分组(或整个匹配)就是该列的值;只查看文件的前 8 KB。
+- **团队外部人员**(`sentinels.collab.rules.watch_external_comments`、`external_days`、`team_members`)。团队外部人员的议题或拉取请求在 `external_days` 天后仍无人回复或处理,就会产生代码为 `collab.issue.external` 的警报。
+
+| 路由 | 作用 |
+|---|---|
+| `GET /api/expected-red` | 各标记及其状态(`active` 或 `expired`) |
+| `POST /api/expected-red` | `{"action": "add", "repo", "workflow", "reason", "owner", "days"}` 或 `{"action": "remove", "id"}`(维护者,需页面的一次性令牌;记入操作日志) |
+| `GET /api/clone-anomalies` | 根据审计日志,超过阈值的用户(维护者) |
+| `GET /api/meta-columns` | 各列以及每个仓库目前找到的值 |

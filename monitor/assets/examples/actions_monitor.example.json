@@ -312,6 +312,8 @@
         "pr_draft_max_days": 30,
         "pr_conflict_days": 7,
         "watch_external_comments": false,
+        "external_days": 1,
+        "team_members": [],
         "ignore_labels": ["monitor:ignore"]
       },
       "search_api": false
@@ -563,6 +565,34 @@
     "safe_margin_percent": 0,
     "scale_with_window": false
   },
+  "expected_red": {
+    "enabled": false,
+    "max_days": 30
+  },
+  "audit_feed": {
+    "clone_alert": {
+      "enabled": false,
+      "threshold": 5,
+      "window_hours": 24,
+      "bot_patterns": [
+        "-bot",
+        "_bot",
+        "deploy",
+        "guardian"
+      ],
+      "check_minutes": 30
+    }
+  },
+  "pwa": {
+    "enabled": false,
+    "refresh_on_return": true
+  },
+  "pairing": {
+    "enabled": false,
+    "code_minutes": 5,
+    "max_devices": 10,
+    "device_days": 90
+  },
   "cli": {
     "prefer_v1": true,
     "default_format": "text",
@@ -771,7 +801,12 @@
   },
   "display": {
     "timezone": "local",
-    "blink_red_tiles": true
+    "blink_red_tiles": true,
+    "live_throttle_s": 30,
+    "whats_new": true,
+    "density": "normal",
+    "reduce_motion": "auto",
+    "palette": "default"
   },
   "sound": {
     "enabled": true,
@@ -997,7 +1032,10 @@
     "sort": "risk",
     "show_all_active": true,
     "labels": [],
-    "saved_filters": []
+    "saved_filters": [],
+    "meta_columns": [],
+    "meta_per_call": 20,
+    "meta_ttl_hours": 6
   },
   "lessons": {
     "enabled": true,
@@ -1075,7 +1113,8 @@
     "json": false,
     "name": "monitor-{tab}-{date}",
     "paper": "a4",
-    "pdf_path": "auto"
+    "pdf_path": "auto",
+    "limits": true
   },
   "score": {
     "enabled": true,
@@ -1325,7 +1364,9 @@
     "screen3_orientation": "auto",
     "screen3_tabs": "",
     "theme": "auto",
-    "about_org_logo": false
+    "about_org_logo": false,
+    "compact": "auto",
+    "palette": true
   },
   "audit_dir": "",
   "readpool": {

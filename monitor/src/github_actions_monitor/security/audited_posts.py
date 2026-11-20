@@ -30,6 +30,10 @@ AUDITED = {
     "/api/screens/logo": "screens_logo_upload",                # the logo of the organization is uploaded (its kind and size go in, never its content)
     "/api/webhook/redeliver": "webhook_redeliver",      # GitHub is asked to send again the deliveries that never arrived (how many, never a payload)
     "/api/screens/logo/remove": "screens_logo_remove",         # the logo of the organization is removed
+    "/api/pair/start": "device_pair_start",                    # a one-use code for a phone is opened (never the code itself)
+    "/api/pair/redeem": "device_pair",                         # a phone spends the code and becomes a paired device (its id, never its token)
+    "/api/expected-red": "expected_red_change",                # a workflow is marked or unmarked as expected red (the repository and the workflow, never the reason)
+    "/api/devices/revoke": "device_revoke",                    # a paired device is taken away
 }
 
 #: route -> why it is not in this table

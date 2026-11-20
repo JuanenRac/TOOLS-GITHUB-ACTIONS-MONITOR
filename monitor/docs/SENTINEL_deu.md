@@ -110,3 +110,19 @@ Was Sie in den Bereichen A1 bis A13 ein- oder ausklappen, bleibt so: Die Seite z
 ## Die Signaturwarteschlange von A5
 
 Ein Lauf kommt nur dann in die Signaturwarteschlange, wenn (a) er kein Probelauf (dry run) ist (der Schritt „Prepare the draft“ lief), (b) ein Release-Entwurf wartet oder das Repository kein veröffentlichtes Release hat und (c) die Version nicht schon mit Signatur veröffentlicht ist. Der Monitor sieht sich jeden Lauf der Warteschlange einmal alle sechs Stunden an (die Jobs des Laufs und die Releases seines Repositorys: zwei Lesevorgänge, höchstens drei Läufe je Zyklus, innerhalb derselben Kontingentschranke). Was die Warteschlange verlässt, steht darunter als „geprüft: bereits veröffentlicht vX“ oder „Probelauf“; eine noch nicht angesehene Zeile bleibt und ist als ungeprüft markiert.
+## Notizen zu den Repositories
+
+All das sind Notizen des Monitors: Sie lesen, schreiben nie auf GitHub und sind standardmäßig aus oder leer.
+
+- **Was ein Rot ausgelöst hat.** Jedes Rot trägt eine Klasse: `pr` (ein Pull Request), `main` (ein Push), `nightly` (ein Zeitplan), `manual` (eine Person oder ein Aufruf von außen), `queue` (die Merge-Warteschlange), `chained` (ein anderer Workflow) oder `other`. Der Tab Alarme zeigt sie als Etikett und filtert danach („Gestartet durch“). Welche Ereignisse überhaupt als Rot zählen, bleibt `ci.red_events`, und `ci.extra_branches` fügt weiterhin die beobachteten Wartungszweige hinzu.
+- **Erwartetes Rot** (`expected_red.enabled`). Markieren Sie im Tab Alarme oder in der Palette einen Workflow (oder `*` für ein Repository) als absichtlich rot, mit Grund, Verantwortlichem und einer Zahl von Tagen (nie mehr als `expected_red.max_days`). Solange die Markierung gilt, wird sein Rot gesondert aufgeführt, nicht gezählt und alarmiert nicht; läuft sie ab, kehrt das Rot zurück und ein Alarm meldet, dass die Markierung abgelaufen ist, bis Sie sie entfernen oder neu setzen.
+- **Auffällige Klone pro Benutzer** (`audit_feed.clone_alert.enabled`). Liest das Audit-Log der Organisation nach `git.clone` (nur manche Tarife bieten es; bei Ihrem Tarif ohne sagt die Antwort `available: false`). Ein Benutzer, der innerhalb von `window_hours` mehr verschiedene Repositories als `threshold` klont, wird in einem Alarm genannt; Roboter werden über die Namensmuster und die Endung `[bot]` ausgelassen.
+- **Metadatenspalten** (`fleet.meta_columns`). Eine JSON-Liste aus `{"name", "path", "regex"}`, höchstens fünf. Die erste Gruppe des Ausdrucks (oder der ganze Treffer) in der ersten passenden Zeile ist der Wert der Spalte; nur die ersten 8 KB der Datei werden angesehen.
+- **Personen außerhalb des Teams** (`sentinels.collab.rules.watch_external_comments`, `external_days`, `team_members`). Ein Issue oder Pull Request einer Person außerhalb des Teams, den niemand nach `external_days` Tagen beantwortet oder angefasst hat, ist ein Alarm mit dem Code `collab.issue.external`.
+
+| Route | Was sie tut |
+|---|---|
+| `GET /api/expected-red` | die Markierungen mit ihrem Zustand (`active` oder `expired`) |
+| `POST /api/expected-red` | `{"action": "add", "repo", "workflow", "reason", "owner", "days"}` oder `{"action": "remove", "id"}` (ein Maintainer, mit dem Einmal-Token der Seite; im Aktionsprotokoll vermerkt) |
+| `GET /api/clone-anomalies` | die Benutzer über dem Schwellenwert, aus dem Audit-Log (ein Maintainer) |
+| `GET /api/meta-columns` | die Spalten und der bisher gefundene Wert je Repository |

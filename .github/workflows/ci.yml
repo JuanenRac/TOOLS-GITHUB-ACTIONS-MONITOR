@@ -105,6 +105,7 @@ jobs:
           python tools/sync_changelog.py --check
           python tools/make_help_index.py --check
           python tools/make_glance.py --check
+          python tools/check_contrast.py      # every text on every surface of every theme reaches 4.5:1, the states 3:1, the colour-blind palette keeps them apart
       - name: The demo holds the frozen contract of the read API, complete and lite
         run: |
           python tools/demo_monitor.py 18871 &

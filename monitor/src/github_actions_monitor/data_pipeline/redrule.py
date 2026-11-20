@@ -22,6 +22,7 @@ import time
 from datetime import datetime
 
 from github_actions_monitor import i18n
+from github_actions_monitor.data_pipeline import expected_red
 
 BAD = ("failure", "timed_out", "startup_failure")      # `action_required` is not a failure: it is a run that waits for a person to approve it (see is_awaiting)
 IGNORED = ("cancelled", "skipped", "neutral", "stale")
@@ -54,10 +55,25 @@ def configure(config):
     POLICY["copilot_alerts"] = block.get("copilot_alerts") is True      # the activity of Copilot that failed is a notice (information) only when asked for
     extra = block.get("extra_branches")
     POLICY["branches"] = tuple(b for b in extra if isinstance(b, str) and b) if isinstance(extra, (list, tuple)) else ()
+    expected_red.configure(config)      # the workflows marked "expected red" (expected_red.py) are listed apart while their mark lasts
 
 
 def workflow_key(run):
     return run.get("path") or run.get("name") or ""
+
+
+TRIGGER_CLASSES = ("pr", "main", "nightly", "manual", "queue", "chained", "other")
+
+
+def trigger_class(event, lane_name=None):
+    """What started the run that is red, in one word that does not depend on the language: pr (a pull request), main (a push), nightly (a schedule), manual (a person or a call from outside:
+    workflow_dispatch, repository_dispatch), queue (the merge queue), chained (another workflow), other. A red of a pull request is not the same news as one on main."""
+    event = str(event or "")
+    if lane_name == "queue" or event == "merge_group":
+        return "queue"
+    if event.startswith("pull_request"):
+        return "pr"
+    return {"push": "main", "schedule": "nightly", "workflow_dispatch": "manual", "repository_dispatch": "manual", "workflow_run": "chained"}.get(event, "other")
 
 
 def is_dynamic(run):
@@ -212,7 +228,7 @@ def classify(runs, branch, now=None, policy=None):
         if is_awaiting(run) or run.get("status") != "completed" or not run.get("conclusion") or run.get("conclusion") in IGNORED:
             continue
         series.setdefault((where, workflow_key(run)), []).append(run)
-    out = {"red": [], "inactive": []}
+    out = {"red": [], "inactive": [], "expected": []}
     for (where, key), items in series.items():
         last = items[-1]
         if last.get("conclusion") not in BAD:
@@ -227,7 +243,7 @@ def classify(runs, branch, now=None, policy=None):
             else:
                 break
         recent = [r.get("conclusion") in BAD for r in items[-10:]]
-        item = {"run": last, "streak": streak, "lane": where, "kind": kind, "recent": (sum(recent), len(recent))}
+        item = {"run": last, "streak": streak, "lane": where, "kind": kind, "recent": (sum(recent), len(recent)), "class": trigger_class(last.get("event"), where)}
         quiet_since = newest_of.get(key) or 0
         failed_at = _epoch(last.get("started")) or 0
         if policy.get("red_age_days") and failed_at and now - failed_at > _age_limit(policy["red_age_days"], items) * 86400 and not any(t > failed_at for t in alive.get((where, key), ())):
@@ -235,7 +251,11 @@ def classify(runs, branch, now=None, policy=None):
         elif policy["inactive_days"] and quiet_since and now - quiet_since > policy["inactive_days"] * 86400:
             out["inactive"].append(item)
         else:
-            out["red"].append(item)
+            mark = expected_red.lookup(last.get("repo"), key) or expected_red.lookup(last.get("repo"), last.get("name"))
+            if mark:      # a workflow that is known to be red for a while, with a reason, an owner and an end: listed apart, neither red nor alerted until the mark runs out
+                out["expected"].append({**item, "mark": mark})
+            else:
+                out["red"].append(item)
     return out
 
 
@@ -270,7 +290,7 @@ def split_disabled(red, perms):
 
 def red_runs(runs, branch, now=None):
     """The last run of every workflow that is red now (the runs themselves, for the callers that need the whole record)."""
-    return [item["run"] for item in classify(runs, branch, now)["red"]]
+    return [{**item["run"], "cls": item["class"]} for item in classify(runs, branch, now)["red"]]
 
 
 def lane_label(where):
@@ -285,7 +305,7 @@ def row_of(repo, item):
     where = item["lane"]
     return {"repo": repo, "workflow": (last.get("name") or workflow_key(last)) + lane_label(where), "conclusion": last.get("conclusion"), "since": last.get("started"), "url": last.get("url"), "streak": item["streak"],
             "sha": last.get("sha", ""), "origin": "merge_queue" if where == "queue" else ("maintenance" if where else "branch"), "branch": last.get("branch"), "kind": item["kind"],
-            "run_id": last.get("id"), "reusable": list(last.get("reusable") or []), "aged": bool(item.get("aged")),
+            "run_id": last.get("id"), "reusable": list(last.get("reusable") or []), "aged": bool(item.get("aged")), "event": last.get("event") or "", "class": item.get("class") or "other",
             "file": workflow_key(last), "recent_runs": item["recent"][1], "fail_rate": round(100 * item["recent"][0] / item["recent"][1]) if item["recent"][1] else 0}
 
 
@@ -313,10 +333,12 @@ def red_workflows(runs_by_repo, default_branches=None, guess=False, sample=None,
 def states(runs_by_repo, default_branches=None, guess=False, now=None):
     """{"inactive": [rows], "awaiting": [rows], "services": [rows]} for all repositories: the workflows not red because they were abandoned, the runs that wait for an approval and the
     services of GitHub (dynamic workflows) whose last run failed."""
-    out = {"inactive": [], "awaiting": [], "services": []}
+    out = {"inactive": [], "awaiting": [], "services": [], "expected": []}
     for repo, runs in runs_by_repo.items():
         branch, _guessed = branch_of(repo, runs, default_branches, guess)
-        out["inactive"].extend(row_of(repo, item) for item in classify(runs, branch, now)["inactive"])
+        sorted_out = classify(runs, branch, now)
+        out["inactive"].extend(row_of(repo, item) for item in sorted_out["inactive"])
+        out["expected"].extend({**row_of(repo, item), "reason": item["mark"]["reason"], "owner": item["mark"]["owner"], "until": item["mark"]["until"]} for item in sorted_out["expected"])
         out["awaiting"].extend(awaiting_runs(runs, now))
         out["services"].extend(service_rows(runs, now))
     return out

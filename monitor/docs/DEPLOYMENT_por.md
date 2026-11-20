@@ -232,3 +232,20 @@ gh workflow run docker-audit.yml -f ref=<tag>
 ```
 
 Os mesmos scripts correm numa máquina Linux com Docker (`tools/docker_audit/run_all.sh`); `tools/docker_audit/LEEME.txt` explica como ler cada resultado.
+
+## O monitor no telemóvel
+
+Tudo nesta secção está desligado ou é inofensivo por defeito.
+
+- **Aplicação instalável** (`pwa.enabled`): a página oferece um manifesto, dois ícones e um pequeno service worker, para que um navegador possa instalar o monitor como aplicação. Os ficheiros são `/manifest.webmanifest`, `/sw.js`, `/pwa/offline`, `/pwa/icon-192.png` e `/pwa/icon-512.png`; no modo de rede são servidos atrás do token de acesso como qualquer página. O worker guarda apenas a página offline e os ícones: nunca a página, nunca uma resposta da API. Quando a aplicação volta ao primeiro plano, ou a rede regressa, a página pede logo dados novos (`pwa.refresh_on_return`).
+- **Vista compacta** (`ui.compact`): `auto` usa-a numa janela estreita, `on` sempre, `off` nunca; `?compact=1` ou `?compact=0` altera-a numa janela. O menu passa para cima como uma fila de separadores, as tabelas deslizam para o lado, um ecrã tátil recebe alvos de pelo menos 44 pixéis e as caixas de diálogo seguem a altura que o teclado no ecrã deixa.
+- **Emparelhamento com um código QR** (`pairing.enabled`, só no modo de rede): abra a paleta (Ctrl+K) e escolha "Emparelhar um telemóvel", depois "Novo código QR". O código funciona uma vez e durante `pairing.code_minutes` minutos; um código novo anula o anterior. O telemóvel lê-o, carrega no botão da página que se abre e recebe um token próprio (um cookie), nunca o token de acesso. A mesma janela lista os dispositivos emparelhados e retira um: o seu token deixa de funcionar de imediato. No máximo `pairing.max_devices` dispositivos; um dispositivo tem de ser emparelhado de novo passados `pairing.device_days` dias (0 = nunca). O monitor guarda apenas o hash de cada token em `devices.json` da pasta de dados, um código errado conta contra o endereço como um token de acesso errado, e cada emparelhamento e cada revogação deixam uma linha no registo de ações.
+
+| Rota | O que faz |
+|---|---|
+| `GET /api/devices` | os dispositivos emparelhados e se o emparelhamento está ativo (só este computador) |
+| `POST /api/pair/start` | abre um código de uso único e responde com o seu endereço e o seu código QR (só este computador, com o token de uso único da página) |
+| `POST /api/pair/redeem` | o telemóvel gasta o código (`{"code": "..."}`) e recebe o seu cookie |
+| `POST /api/devices/revoke` | retira um dispositivo (`{"id": "..."}`; só este computador) |
+
+- **Paleta e atalhos** (`ui.palette`): Ctrl+K abre uma caixa de pesquisa de separadores, repositórios e ações; `?` lista os atalhos, `/` vai à pesquisa do separador, `r` atualiza e `[` `]` mudam de separador.

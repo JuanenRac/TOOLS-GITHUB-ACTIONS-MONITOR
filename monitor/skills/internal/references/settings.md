@@ -140,6 +140,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `api.max_limit` | `200` | advanced | Most items per page |
 | `api.v1_enabled` | `"auto"` | advanced | Read API under /api/v1/ |
 | `audit_dir` | `""` | paths | Folder of audit files |
+| `audit_feed.clone_alert.bot_patterns` | `["-bot", "_bot", "deploy", "guardian"]` | sentinel | Names that are robots |
+| `audit_feed.clone_alert.check_minutes` | `30` | sentinel | Minutes between two reads of the audit log |
+| `audit_feed.clone_alert.enabled` | `false` | sentinel | Warn about abnormal clones |
+| `audit_feed.clone_alert.threshold` | `5` | sentinel | Repositories cloned before warning |
+| `audit_feed.clone_alert.window_hours` | `24` | sentinel | Window of the clones (hours) |
 | `audit_log.enabled` (secure) | `-` | sentinel | Log of actions on |
 | `audit_log.keep_generations` (secure) | `-` | sentinel | Rotated files kept |
 | `audit_log.maintainers_can_read` (secure) | `-` | sentinel | Maintainers may read it |
@@ -250,7 +255,12 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `discovery.suggest_groups` | `true` | basic | Suggest groups for unclassified repositories |
 | `dispatch.required_ci` | `["ci.yml"]` | advanced | Workflows that must pass before a build is fired |
 | `display.blink_red_tiles` | `true` | general | Blink red tiles |
+| `display.density` | `"normal"` | general | Density of the page |
+| `display.live_throttle_s` | `30` | general | Seconds between updates while you read |
+| `display.palette` | `"default"` | general | Colours for colour blindness |
+| `display.reduce_motion` | `"auto"` | general | Less movement |
 | `display.timezone` | `"local"` | general | Time zone of the texts |
+| `display.whats_new` | `true` | general | Show what's new after an update |
 | `ecosystems` | `"all"` | general | Ecosystems watched |
 | `ecosystems_file` | `-` | paths | Ecosystems file |
 | `events_feed.enabled` | `false` | polling | Find changes with the events of the account |
@@ -258,6 +268,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `events_feed.max_per_tick` | `20` | polling | Repositories read again per turn |
 | `events_feed.owner_kind` | `"auto"` | polling | Kind of account |
 | `exclude` | `[]` | general | Repositories to skip |
+| `expected_red.enabled` | `false` | sentinel | Expected red |
+| `expected_red.max_days` | `30` | sentinel | Most days of an expected red |
 | `extra_reader.any_folder` (secure) | `false` | quota | Accept the token file from any folder |
 | `extra_reader.enabled` (secure) | `false` | quota | Read also with a second account |
 | `extra_reader.file` (secure) | `""` | quota | File with the token of the second account |
@@ -268,6 +280,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `finops.jobs_per_cycle` | `0` | advanced | Jobs read per cycle for their system |
 | `fleet.group_by` | `"ecosystem"` | general | Group the fleet by |
 | `fleet.labels` | `[]` | general | Labels by repository name |
+| `fleet.meta_columns` | `[]` | general | Metadata columns of the repositories |
+| `fleet.meta_per_call` | `20` | general | Files read per round for the metadata columns |
+| `fleet.meta_ttl_hours` | `6` | general | Hours before a metadata value is read again |
 | `fleet.page_size` | `50` | general | Repositories per page |
 | `fleet.saved_filters` | `[]` | general | Saved filters |
 | `fleet.show_all_active` | `true` | general | Every run that is going |
@@ -466,9 +481,15 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `pagination.cursor_pages` | `3` | polling | Pages followed by cursor (alerts) |
 | `pagination.job_pages` | `2` | polling | Pages of jobs per run |
 | `pagination.workflow_pages` | `3` | polling | Pages of workflows per repository |
+| `pairing.code_minutes` | `5` | general | Minutes a pairing code lasts |
+| `pairing.device_days` | `90` | general | Days a paired device keeps its access |
+| `pairing.enabled` (secure) | `false` | general | Pair phones with a QR code |
+| `pairing.max_devices` | `10` | general | Most paired devices |
 | `ports.complete` | `8765` | general | Port of the complete edition |
 | `ports.lite` | `8766` | general | Port of the lite edition |
 | `profiles_file` | `-` | paths | Batch profiles file |
+| `pwa.enabled` | `false` | general | Installable app (PWA) |
+| `pwa.refresh_on_return` | `true` | general | Refresh when the app returns |
 | `quota.alert_percent` | `90` | basic | Alert at this share of the included minutes |
 | `quota.billing_api` (secure) | `false` | basic | Read the real usage from the billing report of GitHub |
 | `quota.chip` | `true` | basic | Header chip shows the tightest bucket |
@@ -489,6 +510,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `refresh.share_seconds` | `20` | polling | Seconds a shared read stays valid |
 | `refresh_seconds` | `45` | polling | Refresh of hot repositories |
 | `report_export.json` | `false` | outputs | JSON marked |
+| `report_export.limits` | `true` | outputs | Limits of the analysis in the reports |
 | `report_export.name` | `"monitor-{tab}-{date}"` | outputs | Suggested file name |
 | `report_export.paper` | `"a4"` | outputs | Paper of the PDF |
 | `report_export.pdf` | `true` | outputs | PDF marked |
@@ -715,12 +737,14 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinels.collab.min_rate_remaining` | `-` | sentinel | Collab allowance floor |
 | `sentinels.collab.refresh_seconds` | `-` | sentinel | Collab cycle |
 | `sentinels.collab.repos` | `-` | sentinel | Collab repositories |
+| `sentinels.collab.rules.external_days` | `-` | sentinel | Days before a person from outside is chased |
 | `sentinels.collab.rules.ignore_labels` | `-` | sentinel | Ignored labels |
 | `sentinels.collab.rules.issue_critical_labels` | `-` | sentinel | Critical labels |
 | `sentinels.collab.rules.issue_stale_days` | `-` | sentinel | Days without activity (issue) |
 | `sentinels.collab.rules.pr_conflict_days` | `-` | sentinel | Days with conflicts |
 | `sentinels.collab.rules.pr_draft_max_days` | `-` | sentinel | Days of a draft |
 | `sentinels.collab.rules.pr_review_pending_days` | `-` | sentinel | Days waiting for review |
+| `sentinels.collab.rules.team_members` | `-` | sentinel | People who are part of the team |
 | `sentinels.collab.rules.watch_external_comments` | `-` | sentinel | Watch outsiders |
 | `sentinels.collab.search_api` | `-` | sentinel | Read issues and pull requests with the Search API |
 | `sentinels.delivery.changelog_paths` | `-` | sentinel | CHANGELOG files |
@@ -822,8 +846,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `tui.theme` | `-` | console | Colours |
 | `ui.about_org_logo` | `false` | general | Organization logo in About |
 | `ui.alerts_sort` | `"server"` | general | Order of the alerts |
+| `ui.compact` | `"auto"` | general | Compact view |
 | `ui.now_sort` | `"ecosystem"` | general | Order of the runs happening now |
 | `ui.orientation` | `"auto"` | general | Orientation of the page |
+| `ui.palette` | `true` | general | Palette and shortcuts |
 | `ui.remember_folds` | `true` | general | Remember folded sections |
 | `ui.rotate_seconds` | `0` | general | Seconds between tabs of a screen |
 | `ui.screen1_orientation` | `"auto"` | general | Orientation of screen 1 |

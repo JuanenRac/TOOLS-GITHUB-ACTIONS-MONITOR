@@ -232,3 +232,20 @@ gh workflow run docker-audit.yml -f ref=<tag>
 ```
 
 同样的脚本也可以在装有 Docker 的 Linux 机器上运行（`tools/docker_audit/run_all.sh`）；`tools/docker_audit/LEEME.txt` 说明如何阅读每个结果。
+
+## 在手机上使用监视器
+
+本节的内容默认都是关闭的或无害的。
+
+- **可安装的应用**(`pwa.enabled`):页面提供清单、两个图标和一个小型 service worker,浏览器因此可以把监视器安装为应用。文件为 `/manifest.webmanifest`、`/sw.js`、`/pwa/offline`、`/pwa/icon-192.png` 和 `/pwa/icon-512.png`;在网络模式下,它们像其他页面一样在访问令牌之后提供。worker 只保存离线页面和图标:绝不保存页面,也绝不保存 API 的任何响应。应用回到前台或网络恢复时,页面会立即请求最新数据(`pwa.refresh_on_return`)。
+- **紧凑视图**(`ui.compact`):`auto` 在窄窗口中使用,`on` 始终使用,`off` 从不使用;`?compact=1` 或 `?compact=0` 只改变一个窗口。菜单移到顶部成为一排标签页,表格可横向滚动,触屏的点击目标至少 44 像素,对话框会跟随屏幕键盘留下的高度。
+- **用二维码配对**(`pairing.enabled`,仅限网络模式):打开命令面板(Ctrl+K),选择「配对手机」,再选「新二维码」。该码只能使用一次,有效 `pairing.code_minutes` 分钟;新码会使旧码失效。手机扫描后点击打开页面上的按钮,即可获得自己的令牌(一个 cookie),绝不是访问令牌。同一窗口列出已配对的设备并可收回其中一台:它的令牌立即失效。最多 `pairing.max_devices` 台设备;设备在 `pairing.device_days` 天后需重新配对(0 = 永不)。监视器只在数据文件夹的 `devices.json` 中保存每个令牌的哈希,错误的码像错误的访问令牌一样计入该地址,每次配对和每次收回都会在操作日志中留下一行。
+
+| 路由 | 作用 |
+|---|---|
+| `GET /api/devices` | 已配对的设备以及配对是否开启(仅限此电脑) |
+| `POST /api/pair/start` | 打开一个一次性码并返回其地址和二维码(仅限此电脑,需要页面的一次性令牌) |
+| `POST /api/pair/redeem` | 手机使用该码(`{"code": "..."}`)并获得其 cookie |
+| `POST /api/devices/revoke` | 收回一台设备(`{"id": "..."}`;仅限此电脑) |
+
+- **命令面板和快捷键**(`ui.palette`):Ctrl+K 打开标签页、仓库和操作的搜索框;`?` 列出快捷键,`/` 转到标签页的搜索框,`r` 刷新,`[` `]` 切换标签页。

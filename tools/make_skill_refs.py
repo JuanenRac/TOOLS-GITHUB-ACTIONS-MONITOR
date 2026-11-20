@@ -26,6 +26,17 @@ ENDPOINT_RE = re.compile(r'"(/api/[a-z0-9/_-]*[a-z0-9_-])"')
 
 #: endpoint -> (methods, what it is, for the AIs). Every endpoint named in the code must be here.
 NOTES = {
+    "/api/clone-anomalies": ("GET", "the users who cloned more different repositories than the threshold in the window, read from the audit log of the organization (maintainer; `audit_feed.clone_alert.enabled`; `available` is false when the plan has no git events)"),
+    "/api/expected-red": ("GET,POST", "the workflows marked as red on purpose with a reason, an owner and an end (GET: the list with each state; POST {action: add|remove, repo, workflow, reason, owner, days}: a maintainer, `expected_red.enabled`, a note of this monitor)"),
+    "/api/meta-columns": ("GET", "the metadata columns of the Repositories table (`fleet.meta_columns`) and the value of each repository found so far; a thread reads a few files per call"),
+    "/api/glossary": ("GET", "what each figure means exactly (written with the real parameters of the calculation and of the settings), the attacks the rules of the linter look for, the limits of the analysis and a few places to learn more (read only)"),
+    "/api/whats-new": ("GET", "the entries of the changelog of the versions after `?since=VERSION` up to the installed one, in the language of the page; `display.whats_new` turns it off (read only)"),
+    "/api/devices": ("GET", "the devices paired with a QR code and whether pairing is on (this computer only; empty while `pairing.enabled` is off)"),
+    "/api/devices/revoke": ("POST", "take one paired device away ({id}); its token stops working at once (this computer only)"),
+    "/api/pair": ("GET,POST", "prefix of the pairing of a phone (see the routes below)"),
+    "/api/pair/redeem": ("POST", "a phone spends the one-use pairing code ({code}) and gets its own access cookie (the code is its proof; needs `pairing.enabled` and the network mode)"),
+    "/api/pair/start": ("POST", "open a one-use pairing code and answer its address and QR code (this computer only; needs `pairing.enabled` and the network mode)"),
+    "/api/pair/status": ("GET", "the same answer as /api/devices (this computer only)"),
     "/api/about": ("GET", "version, edition, folders, health and a text to paste in a support request"),
     "/api/access": ("GET,POST", "the access token of the network mode (this computer only)"),
     "/api/accounts": ("GET", "the accounts of an installation with several, with their state (running, blind)"),

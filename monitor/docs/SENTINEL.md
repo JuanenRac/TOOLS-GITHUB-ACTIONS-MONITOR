@@ -112,3 +112,19 @@ What you fold or unfold in the sections A1 to A13 stays so: the page draws them 
 ## The signing queue of A5
 
 A run enters the signing queue only when (a) it is not a dry run (the step "Prepare the draft" ran), (b) a draft release is waiting or the repository has no published release, and (c) the version is not already published with its signature. The monitor looks at each run of the queue once every six hours (the jobs of the run and the releases of its repository: two reads, at most three runs a cycle, inside the same gate of the allowance). What leaves the queue is listed under it as "checked: already published vX" or "dry run"; a row nobody looked at yet stays and is marked as not checked.
+## Notes about the repositories
+
+All of these are notes of the monitor: they read, they never write to GitHub, and they are off or empty by default.
+
+- **What started a red.** Every red carries a class: `pr` (a pull request), `main` (a push), `nightly` (a schedule), `manual` (a person or a call from outside), `queue` (the merge queue), `chained` (another workflow) or `other`. The Alerts tab shows it as a tag and filters by it ("Started by"). Which events count as red at all is still `ci.red_events`, and `ci.extra_branches` still adds the maintenance branches that are watched.
+- **Expected red** (`expected_red.enabled`). From the Alerts tab or the palette, mark a workflow (or `*` for a repository) as red on purpose with a reason, an owner and a number of days (never more than `expected_red.max_days`). While the mark lasts, its red is listed apart, is not counted and does not alert; when it runs out the red comes back and one alert says that the mark ran out, until you remove it or mark it again.
+- **Abnormal clones by user** (`audit_feed.clone_alert.enabled`). Reads the audit log of the organization for `git.clone` (only some plans offer it; when yours does not, the answer says `available: false`). A user who clones more different repositories than `threshold` inside `window_hours` is named in an alert; robots are left out by the name patterns and by the `[bot]` ending.
+- **Metadata columns** (`fleet.meta_columns`). A JSON list of `{"name", "path", "regex"}`, at most five. The first group of the expression (or the whole match) on its first matching line is the value of the column; only the first 8 KB of the file are looked at.
+- **People from outside the team** (`sentinels.collab.rules.watch_external_comments`, `external_days`, `team_members`). An issue or a pull request of someone outside the team that nobody answered or touched after `external_days` days is an alert of the code `collab.issue.external`.
+
+| Route | What it does |
+|---|---|
+| `GET /api/expected-red` | the marks with their state (`active` or `expired`) |
+| `POST /api/expected-red` | `{"action": "add", "repo", "workflow", "reason", "owner", "days"}` or `{"action": "remove", "id"}` (a maintainer, with the one-use token of the page; recorded in the log of actions) |
+| `GET /api/clone-anomalies` | the users above the threshold, from the audit log (a maintainer) |
+| `GET /api/meta-columns` | the columns and the value found so far for each repository |

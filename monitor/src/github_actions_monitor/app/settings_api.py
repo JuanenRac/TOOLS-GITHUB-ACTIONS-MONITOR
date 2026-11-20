@@ -160,6 +160,8 @@ _f(_T_GENERAL, "identity", "github_owner", "text", OWNER_RE)
 _f(_T_GENERAL, "identity", "language", "enum", ("",) + tuple(i18n.LANGS), False)
 _f(_T_GENERAL, "identity", "display.timezone", "text", TZ_RE, False)
 _f(_T_GENERAL, "identity", "display.blink_red_tiles", "bool", restart=False)
+_f(_T_GENERAL, "identity", "display.live_throttle_s", "int", (0, 300), unit="s", restart=False)
+_f(_T_GENERAL, "identity", "display.whats_new", "bool", restart=False)
 _f(_T_GENERAL, "screens", "ui.orientation", "enum", ("auto", "portrait", "landscape"), restart=False)
 _f(_T_GENERAL, "screens", "ui.rotate_seconds", "int", (0, 3600), unit="s", restart=False)
 _f(_T_GENERAL, "screens", "ui.screen1_tabs", "text", re.compile(r"^[a-z,]{0,60}\Z"), restart=False)
@@ -175,6 +177,12 @@ _f(_T_GENERAL, "kiosk", "kiosk.scale_with_window", "bool", restart=False)
 _f(_T_GENERAL, "kiosk", "kiosk.high_contrast", "bool", restart=False)
 _f(_T_GENERAL, "kiosk", "kiosk.rotate_views", "bool", restart=False)
 _f(_T_GENERAL, "kiosk", "kiosk.rotate_seconds", "int", (5, 600), unit="s", restart=False)
+_f(_T_GENERAL, "pwa", "pwa.enabled", "bool", restart=False)
+_f(_T_GENERAL, "pwa", "pwa.refresh_on_return", "bool", restart=False)
+_f(_T_GENERAL, "pairing", "pairing.enabled", "bool", restart=False, secure=True)
+_f(_T_GENERAL, "pairing", "pairing.code_minutes", "int", (1, 30), restart=False)
+_f(_T_GENERAL, "pairing", "pairing.max_devices", "int", (1, 50), unit="", restart=False)
+_f(_T_GENERAL, "pairing", "pairing.device_days", "int", (0, 365), restart=False)
 _f(_T_GENERAL, "cli", "cli.default_format", "enum", ("text", "table", "plain", "json", "ndjson"), restart=False)
 _f(_T_GENERAL, "cli", "cli.watch.min_interval_seconds", "int", (1, 3600), unit="s", restart=False)
 _f(_T_GENERAL, "cli", "cli.watch.default_interval_seconds", "int", (1, 3600), unit="s", restart=False)
@@ -184,6 +192,11 @@ _f(_T_GENERAL, "wall", "screens.enabled", "bool", restart=False)
 _f(_T_GENERAL, "look", "ui.theme", "enum", screens.GLOBAL_THEMES, restart=False)
 _f(_T_GENERAL, "look", "ui.remember_folds", "bool", restart=False)
 _f(_T_GENERAL, "look", "ui.about_org_logo", "bool", restart=False)
+_f(_T_GENERAL, "look", "ui.compact", "enum", ("auto", "on", "off"), restart=False)
+_f(_T_GENERAL, "look", "ui.palette", "bool", restart=False)
+_f(_T_GENERAL, "look", "display.density", "enum", ("normal", "dense"), restart=False)
+_f(_T_GENERAL, "look", "display.reduce_motion", "enum", ("auto", "on"), restart=False)
+_f(_T_GENERAL, "look", "display.palette", "enum", ("default", "colorblind"), restart=False)
 _f(_T_GENERAL, "wall", "screens.default_theme", "enum", screens.THEME_CHOICES, restart=False)
 _f(_T_GENERAL, "wall", "screens.theme_overview", "enum", screens.THEME_CHOICES, restart=False)
 _f(_T_GENERAL, "wall", "screens.theme_fleet", "enum", screens.THEME_CHOICES, restart=False)
@@ -236,6 +249,9 @@ _f(_T_GENERAL, "fleet", "fleet.sort", "enum", ("risk", "name", "last_run", "stat
 _f(_T_GENERAL, "fleet", "fleet.show_all_active", "bool", restart=False)
 _f(_T_GENERAL, "fleet", "fleet.labels", "names", restart=False)
 _f(_T_GENERAL, "fleet", "fleet.saved_filters", "names", restart=False)
+_f(_T_GENERAL, "fleet", "fleet.meta_columns", "metacols", restart=False)
+_f(_T_GENERAL, "fleet", "fleet.meta_per_call", "int", (1, 200), unit="calls", restart=False)
+_f(_T_GENERAL, "fleet", "fleet.meta_ttl_hours", "int", (1, 168), restart=False)
 _f("quota", "modes", "modes.auto_low", "bool", restart=False)
 _f("quota", "modes", "modes.auto_low_enter", "int", (50, 4000), restart=False, unit="calls")
 _f("quota", "modes", "modes.auto_low_exit", "int", (100, 5000), restart=False, unit="calls")
@@ -420,6 +436,15 @@ _f(_T_SENT, "collab", "sentinels.collab.rules.pr_review_pending_days", "int", (1
 _f(_T_SENT, "collab", "sentinels.collab.rules.pr_draft_max_days", "int", (1, 365))
 _f(_T_SENT, "collab", "sentinels.collab.rules.pr_conflict_days", "int", (1, 90))
 _f(_T_SENT, "collab", "sentinels.collab.rules.watch_external_comments", "bool")
+_f(_T_SENT, "collab", "sentinels.collab.rules.external_days", "int", (1, 90))
+_f(_T_SENT, "collab", "sentinels.collab.rules.team_members", "names")
+_f(_T_SENT, "expected_red", "expected_red.enabled", "bool", restart=False)
+_f(_T_SENT, "expected_red", "expected_red.max_days", "int", (1, 365), restart=False)
+_f(_T_SENT, "clones", "audit_feed.clone_alert.enabled", "bool", restart=False)
+_f(_T_SENT, "clones", "audit_feed.clone_alert.threshold", "int", (1, 1000), unit="repos", restart=False)
+_f(_T_SENT, "clones", "audit_feed.clone_alert.window_hours", "int", (1, 168), restart=False)
+_f(_T_SENT, "clones", "audit_feed.clone_alert.check_minutes", "int", (5, 1440), restart=False)
+_f(_T_SENT, "clones", "audit_feed.clone_alert.bot_patterns", "names", restart=False)
 _f(_T_SENT, "collab", "sentinels.collab.rules.ignore_labels", "names")
 # --- Security sentinel (1.9.1; the weights of the penalty it puts on the score, sentinels.security.penalty.*, are read from the file)
 _f(_T_SENT, "security", "sentinels.security.enabled", "bool")
@@ -627,6 +652,7 @@ _f(_T_OUT, "report_export", "report_export.json", "bool", restart=False)
 _f(_T_OUT, "report_export", "report_export.name", "text", REPORT_NAME_RE, restart=False)
 _f(_T_OUT, "report_export", "report_export.paper", "enum", ("a4", "letter"), restart=False)
 _f(_T_OUT, "report_export", "report_export.pdf_path", "enum", ("auto", "own", "browser"), restart=False)
+_f(_T_OUT, "report_export", "report_export.limits", "bool", restart=False)
 # --- Integrations: external AI, incoming webhook
 _f(_T_AI, "provider", "ai.provider", "enum", ("none", "ollama", "openai-compatible", "anthropic", "copilot"), secure=True)
 _f(_T_AI, "provider", "ai.model", "text", MODEL_RE)
@@ -1089,6 +1115,17 @@ def check_value(path, value):
             if not isinstance(group, list) or not group or len(group) > 8 or not all(isinstance(n, str) and FILE_NAME_RE.match(n) and ".." not in n for n in group):
                 return False, "list"
         return True, [list(g) for g in value]
+    if kind == "metacols":      # fleet.meta_columns: [{"name", "path", "regex"}], at most 5, each one checked by data_pipeline/meta_columns.py (a risky expression is refused)
+        from github_actions_monitor.data_pipeline import meta_columns
+        if not isinstance(value, list) or len(value) > meta_columns.MAX_COLUMNS:
+            return False, "list"
+        clean = []
+        for item in value:
+            column, _why = meta_columns.valid_column(item)
+            if column is None or set(item) - {"name", "path", "regex"}:
+                return False, "list"
+            clean.append({"name": column["name"], "path": column["path"], "regex": column["regex"]})
+        return True, clean
     if kind == "sources":
         if not isinstance(value, list) or len(value) > 20:
             return False, "list"

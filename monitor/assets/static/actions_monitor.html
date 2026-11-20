@@ -460,6 +460,33 @@ header .tile.wide{min-width:0;grid-column:span 2}
 :root[data-orient="portrait"] #t-sent{grid-template-columns:minmax(0,1fr);overflow:auto}:root[data-orient="portrait"] #t-now{grid-template-columns:minmax(0,1fr);grid-auto-rows:minmax(0,1fr)}:root[data-orient="portrait"] #t-charts{grid-template-columns:minmax(0,1fr);grid-template-rows:none;overflow:auto}:root[data-orient="portrait"] #t-charts section{min-height:260px}:root[data-orient="portrait"] body{overflow:auto}:root[data-orient="portrait"] .hgrid{grid-template-columns:minmax(0,1fr)}:root[data-orient="portrait"] .hcorner{position:static;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;order:-1}
 @media (min-width:2400px) and (min-height:1000px){html{zoom:1.25}}
 @media (min-width:3200px) and (min-height:1800px){html{zoom:1.6}}
+/* compact profile, touch targets, palette and pairing (ui_extras.js) */
+@media (pointer:coarse){button,select,summary,.nav-group-title,nav[role=tab] button{min-height:44px}.ib{min-width:44px}input:not([type=checkbox]):not([type=radio]):not([type=range]){min-height:44px}}
+:root.compact button,:root.compact select,:root.compact summary,:root.compact .nav-group-title,:root.compact [role=tab]{min-height:44px}:root.compact .ib{min-width:44px}:root.compact input:not([type=checkbox]):not([type=radio]):not([type=range]){min-height:44px}
+:root.compact .shell{flex-direction:column;overflow:auto}:root.compact .sidebar{width:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:6px 8px;border-right:0;border-bottom:1px solid var(--line)}
+:root.compact .side-toggle,:root.compact .side-foot .nl,:root.compact .nav-group-title{display:none}:root.compact .sidebar nav{flex:1 1 100%;order:3;flex-direction:row;overflow-x:auto;overflow-y:hidden;gap:6px}
+:root.compact .nav-group,:root.compact .nav-items,:root.compact .nav-group.folded .nav-items{display:flex;gap:4px;align-items:center}:root.compact .sidebar nav button[role=tab]{width:auto;padding:6px 10px;white-space:nowrap}
+:root.compact .side-foot{order:2;margin-left:auto}:root.compact .side-foot button{width:auto}:root.compact #accbar{order:4;flex:1 1 100%}:root.compact .stage{min-height:70vh}
+:root.compact main{padding:6px 8px}:root.compact header{padding:6px 8px}:root.compact .tile{min-width:calc(50% - 4px);flex:1 1 calc(50% - 4px);padding:4px 8px}:root.compact .tile b{font-size:17px}
+:root.compact .tab{overflow-x:auto}:root.compact table{display:block;max-width:100%;overflow-x:auto}:root.compact #statusbar .sb-opt{display:none}:root.compact .card{min-width:0}
+.dlg-box{max-height:calc(var(--vvh,100vh) - 28px)}
+#pal-dlg{align-items:flex-start;padding-top:12vh}#pal-dlg .dlg-box{width:min(560px,96vw)}#pal-dlg .dlg-top{display:none}#pal-dlg .dlg-body{padding:12px}
+#pal-q{width:100%;box-sizing:border-box;padding:10px 12px;font:inherit}#pal-list{list-style:none;margin:8px 0 0;padding:0;max-height:50vh;overflow:auto}
+#pal-list li{padding:8px 10px;border-radius:8px;cursor:pointer;overflow-wrap:anywhere}#pal-list li[aria-selected=true]{background:var(--panel2);outline:2px solid var(--run)}
+#pal-list .pal-g{cursor:default;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);padding:8px 10px 2px}.pal-hint{margin:8px 0 0;font-size:12px}
+#pair-dlg .dlg-body,#sc-dlg .dlg-body{padding:12px 16px;overflow:auto}.pair-qr{display:inline-block;max-width:100%;border-radius:8px;overflow:hidden;background:#fff}.pair-qr svg{display:block;width:min(280px,70vw);height:auto}
+.er-form{display:grid;gap:8px;margin-top:12px}.er-form label{display:grid;gap:2px}.er-form input{padding:6px 8px;font:inherit}.pair-url{overflow-wrap:anywhere}.pair-list{list-style:none;margin:0;padding:0}.pair-list li{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line)}
+/* density of every tab, less movement, colour-blind palette, notices and states (ui_extras.js) */
+:root.dense body{font-size:13px}:root.dense main{padding:6px 10px}:root.dense header{padding:6px 12px}:root.dense .tile{padding:4px 8px}:root.dense .card{padding:3px 8px;margin-bottom:3px;font-size:12px}
+:root.dense .alrow{padding:2px 6px;margin-bottom:2px}:root.dense h3{margin:4px 0 2px}:root.dense td,:root.dense th{padding-top:2px;padding-bottom:2px}:root.dense .bar{height:4px}
+:root.reduce-motion *,:root.reduce-motion *::before,:root.reduce-motion *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+:root.reduce-motion[data-blink="1"] .tile.bad:not(.skel),:root.reduce-motion[data-blink="1"] #statusbar .sb-item.bad{box-shadow:inset 0 0 0 3px var(--bad)}
+:root[data-palette=colorblind]{--ok:#56b4e9;--bad:#e8702a;--warn:#f0e442;--run:#cc79a7}
+:root[data-palette=colorblind][data-theme=light]{--ok:#00487a;--bad:#8f2d00;--warn:#a08400;--run:#2e8fd0}
+@media (prefers-color-scheme:light){:root[data-palette=colorblind]:not([data-theme]){--ok:#00487a;--bad:#8f2d00;--warn:#a08400;--run:#2e8fd0}}
+.wn-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:6px 18px;background:var(--panel2);border-bottom:1px solid var(--line)}.wn-bar .sp{flex:1}
+.wn-list{margin:0 0 12px;padding-left:18px}.wn-list li{margin:4px 0;overflow-wrap:anywhere}#wn-dlg .dlg-body,#gl-dlg .dlg-body{padding:12px 16px;overflow:auto}
+.gl-term{margin:0 0 10px}.gl-term b{display:block}.es-box{padding:14px;text-align:center;color:var(--mut)}.es-box p{margin:0 0 8px}.scope-note{font-size:12px;color:var(--mut);margin:4px 0}
 </style>
 </head>
 <body>
@@ -543,7 +570,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <button type="button" id="asst-go" data-i18n="ui.asst_ask"></button></div>
 <div id="asst-out" role="status" aria-live="polite"></div></div></section>
 <section><h2><span data-i18n="ui.al_title"></span> <span class="mut" id="al-count" style="font-weight:400"></span></h2><div class="body">
-<div class="row" id="al-filters" role="group" data-i18n-aria="ui.al_filters"><span id="al-chips"></span><label><span data-i18n="ui.al_level"></span> <select id="al-level"><option value="" data-i18n="ui.f_all"></option><option value="error" data-i18n="ui.lv_bad"></option><option value="warning" data-i18n="ui.lv_warn"></option><option value="info" data-i18n="ui.lv_info"></option></select></label><label><span data-i18n="ui.sort_by"></span> <select id="al-sort" data-i18n-title="ui.sort_al_title"><option value="server" data-i18n="ui.sort_al_server"></option><option value="severity" data-i18n="ui.sort_al_severity"></option><option value="streak" data-i18n="ui.sort_al_streak"></option><option value="class" data-i18n="ui.sort_al_class"></option><option value="age" data-i18n="ui.sort_al_age"></option><option value="newest" data-i18n="ui.sort_al_newest"></option><option value="repo" data-i18n="ui.sort_al_repo"></option><option value="origin" data-i18n="ui.sort_al_origin"></option><option value="state" data-i18n="ui.sort_al_state"></option></select></label><label class="inl"><input type="checkbox" id="al-muted"> <span data-i18n="ui.al_show_muted"></span></label></div>
+<div class="row" id="al-filters" role="group" data-i18n-aria="ui.al_filters"><span id="al-chips"></span><label><span data-i18n="ui.al_level"></span> <select id="al-level"><option value="" data-i18n="ui.f_all"></option><option value="error" data-i18n="ui.lv_bad"></option><option value="warning" data-i18n="ui.lv_warn"></option><option value="info" data-i18n="ui.lv_info"></option></select></label><label><span data-i18n="ui.al_class"></span> <select id="al-class"><option value="" data-i18n="ui.f_all"></option><option value="pr" data-i18n="ui.cls_pr"></option><option value="main" data-i18n="ui.cls_main"></option><option value="nightly" data-i18n="ui.cls_nightly"></option><option value="manual" data-i18n="ui.cls_manual"></option><option value="queue" data-i18n="ui.cls_queue"></option><option value="chained" data-i18n="ui.cls_chained"></option><option value="other" data-i18n="ui.cls_other"></option></select></label><label><span data-i18n="ui.sort_by"></span> <select id="al-sort" data-i18n-title="ui.sort_al_title"><option value="server" data-i18n="ui.sort_al_server"></option><option value="severity" data-i18n="ui.sort_al_severity"></option><option value="streak" data-i18n="ui.sort_al_streak"></option><option value="class" data-i18n="ui.sort_al_class"></option><option value="age" data-i18n="ui.sort_al_age"></option><option value="newest" data-i18n="ui.sort_al_newest"></option><option value="repo" data-i18n="ui.sort_al_repo"></option><option value="origin" data-i18n="ui.sort_al_origin"></option><option value="state" data-i18n="ui.sort_al_state"></option></select></label><label class="inl"><input type="checkbox" id="al-muted"> <span data-i18n="ui.al_show_muted"></span></label></div>
 <div id="al-list"><span class="mut">–</span></div>
 <h3 style="font-size:13px;margin:14px 0 4px" data-i18n="ui.al_hist_title"></h3><div id="al-hist" class="mut">–</div>
 </div></section>
@@ -645,7 +672,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <div class="authpanel" id="auth-panel" role="dialog" aria-modal="true" hidden></div>
 <script>
 "use strict";
-(function(){const raw=window.fetch.bind(window),need=/^\/api\/(alerts\/(mute|unmute)|settings|screens\/logo|ai\/actions\/confirm|ai\/actions\/unlock|ai\/test|notify\/test|discovery\/group|mode|gh-action\/confirm|act\/confirm|act\/stop|github-token|ops\/(backup|purge))/;
+(function(){const raw=window.fetch.bind(window),need=/^\/api\/(alerts\/(mute|unmute)|settings|screens\/logo|pair\/start|devices\/revoke|expected-red|ai\/actions\/confirm|ai\/actions\/unlock|ai\/test|notify\/test|discovery\/group|mode|gh-action\/confirm|act\/confirm|act\/stop|github-token|ops\/(backup|purge))/;
   /* team mode (security/auth_http.py): who is signed in is asked once and kept for 30 s; in the individual mode and in the lite edition the answer is "individual" and nothing below adds a header or a request */
   const A={me:null,at:0};
   const me=async(fresh)=>{if(!fresh&&A.me&&Date.now()-A.at<30000)return A.me;let j=null;try{const r=await raw("/api/auth/me",{cache:"no-store"});if(r.ok)j=await r.json()}catch(e){}A.me=j&&typeof j==="object"?j:{enabled:false,mode:"individual",authenticated:false};A.at=Date.now();return A.me};
@@ -1826,7 +1853,7 @@ $("t-sent").addEventListener("click",async e=>{
   renderSent();
 });
 /* the Alerts tab: the alerts of every sentinel in one list, a filter by origin and level, and local silences with an end (the monitor never writes to GitHub) */
-var ALERTS=null;const ALF={s:QS.get("sentinel")||store.get("am-al-s")||"",l:"",m:store.get("am-al-m")==="1"};
+var ALERTS=null;const ALF={s:QS.get("sentinel")||store.get("am-al-s")||"",l:"",c:"",m:store.get("am-al-m")==="1"};
 async function alertsTick(){if(LITE)return;try{const r=await fetch("/api/alerts",{cache:"no-store"});if(r.ok)ALERTS=await r.json()}catch(e){}try{renderAlerts()}catch(e){}try{soundAlerts(ALERTS)}catch(e){}try{assistantTick()}catch(e){}lessonsTick()}
 /* the assistant (assistant.py): a panel of fixed questions, drawn only when ai.assistant.enabled answers; it reads, never acts, and always shows its sources and what it sent */
 var ASST=null;
@@ -1901,14 +1928,14 @@ function renderAlerts(){
   const sm=A.summary||{by_sentinel:{},by_level:{}},names=A.sentinels||[];
   $("al-chips").innerHTML=[["",T("ui.f_all"),sm.total||0],...names.map(n=>[n,T("ui.al_o_"+n)===("ui.al_o_"+n)?n:T("ui.al_o_"+n),(sm.by_sentinel||{})[n]||0])].map(c=>`<button type="button" data-s="${esc(c[0])}" aria-pressed="${ALF.s===c[0]}">${esc(c[1])} (${c[2]})</button>`).join("");
   $("al-chips").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{ALF.s=b.dataset.s;store.set("am-al-s",ALF.s);renderAlerts()}));
-  $("al-level").value=ALF.l;$("al-muted").checked=ALF.m;
+  $("al-level").value=ALF.l;$("al-class").value=ALF.c;$("al-muted").checked=ALF.m;
   $("al-sort").value=sortGet("alerts");
-  const rows=alertsSorted((A.alerts||[]).filter(a=>(!ALF.s||a.sentinel===ALF.s)&&(!ALF.l||a.level===ALF.l)&&(ALF.m||!a.muted_until)&&(!SENT||!a.repo||sVis(a.repo))),sortGet("alerts"));
+  const rows=alertsSorted((A.alerts||[]).filter(a=>(!ALF.s||a.sentinel===ALF.s)&&(!ALF.l||a.level===ALF.l)&&(!ALF.c||(a.details||{}).class===ALF.c)&&(ALF.m||!a.muted_until)&&(!SENT||!a.repo||sVis(a.repo))),sortGet("alerts"));
   const open=(A.alerts||[]).filter(a=>!a.muted_until).length;
   $("al-count").textContent=T("ui.al_count",{n:open,m:sm.muted||0});
   const dot=$("d-al");if(dot){const bad=(A.alerts||[]).filter(a=>!a.muted_until&&a.level==="error").length;dot.hidden=!bad;dot.textContent=bad}
   const url=a=>safeUrl((a.details||{}).url);
-  box.innerHTML=rows.length?rows.map(a=>`<div class="alrow ${a.muted_until?"muted":""}"><span class="origin ${esc(a.sentinel)}">${esc(T("ui.al_o_"+a.sentinel)===("ui.al_o_"+a.sentinel)?a.sentinel:T("ui.al_o_"+a.sentinel))}</span><span class="chip ${a.level==="error"?"bad":a.level==="info"?"":"warn"}" title="${esc(a.code)}">${esc(LVN(a.level==="error"?"bad":a.level==="warning"?"warn":"info"))}</span><span class="tt"><b class="rl" data-repo-open="${esc(a.repo||"")}">${esc(a.repo||"")}</b> ${esc(a.title)}${+((a.details||{}).streak)>1?` <span class="chip" title="${esc(T("ui.th_streak"))}">×${+a.details.streak}</span>`:""} <span class="mut">${esc(a.created_at?ago(a.created_at):"")}</span>${url(a)!=="#"?` <a href="${esc(url(a))}" target="_blank" rel="noopener">${esc(T("ui.a_open"))}</a>`:""}${a.muted_until?` <span class="chip">${esc(T(onChange(a)?"ui.al_muted_change":"ui.al_muted_until",{time:dtime(a.muted_until)}))}</span>`:""}</span><span class="acts">${fsRun(a)?`<button type="button" data-fs="${esc(fsRun(a))}" data-repo="${esc(a.repo||"")}">${esc(T("ui.fs_button"))}</button>`:""}${a.muted_until?`<button type="button" data-un="alert" data-v="${esc(a.id)}">${esc(T("ui.al_unmute"))}</button>`:`<button type="button" data-m="alert" data-v="${esc(a.id)}" title="${esc(T("ui.al_mute_alert_t",{h:A.mute_hours}))}">${esc(T("ui.al_mute_alert",{h:A.mute_hours}))}</button>${(a.details||{}).updated?`<button type="button" data-mc="alert" data-v="${esc(a.id)}" title="${esc(T("ui.al_mute_change_t",{h:A.mute_hours}))}">${esc(T("ui.al_mute_change"))}</button>`:""}<button type="button" data-m="code" data-v="${esc(a.code)}" title="${esc(T("ui.al_mute_code_t",{h:A.mute_hours}))}">${esc(T("ui.al_mute_code"))}</button><button type="button" data-m="sentinel" data-v="${esc(a.sentinel)}" title="${esc(T("ui.al_mute_sent_t",{h:A.mute_hours}))}">${esc(T("ui.al_mute_sent"))}</button>`}</span></div>`).join(""):`<span style="color:var(--ok)">${esc(T("ui.al_none"))}</span>`;
+  box.innerHTML=rows.length?rows.map(a=>`<div class="alrow ${a.muted_until?"muted":""}"><span class="origin ${esc(a.sentinel)}">${esc(T("ui.al_o_"+a.sentinel)===("ui.al_o_"+a.sentinel)?a.sentinel:T("ui.al_o_"+a.sentinel))}</span><span class="chip ${a.level==="error"?"bad":a.level==="info"?"":"warn"}" title="${esc(a.code)}">${esc(LVN(a.level==="error"?"bad":a.level==="warning"?"warn":"info"))}</span><span class="tt"><b class="rl" data-repo-open="${esc(a.repo||"")}">${esc(a.repo||"")}</b> ${esc(a.title)}${+((a.details||{}).streak)>1?` <span class="chip" title="${esc(T("ui.th_streak"))}">×${+a.details.streak}</span>`:""}${(a.details||{}).class?` <span class="chip" title="${esc(T("ui.al_class"))}">${esc(T("ui.cls_"+a.details.class))}</span>`:""} <span class="mut">${esc(a.created_at?ago(a.created_at):"")}</span>${url(a)!=="#"?` <a href="${esc(url(a))}" target="_blank" rel="noopener">${esc(T("ui.a_open"))}</a>`:""}${a.muted_until?` <span class="chip">${esc(T(onChange(a)?"ui.al_muted_change":"ui.al_muted_until",{time:dtime(a.muted_until)}))}</span>`:""}</span><span class="acts">${fsRun(a)?`<button type="button" data-fs="${esc(fsRun(a))}" data-repo="${esc(a.repo||"")}">${esc(T("ui.fs_button"))}</button>`:""}${a.muted_until?`<button type="button" data-un="alert" data-v="${esc(a.id)}">${esc(T("ui.al_unmute"))}</button>`:`<button type="button" data-m="alert" data-v="${esc(a.id)}" title="${esc(T("ui.al_mute_alert_t",{h:A.mute_hours}))}">${esc(T("ui.al_mute_alert",{h:A.mute_hours}))}</button>${(a.details||{}).updated?`<button type="button" data-mc="alert" data-v="${esc(a.id)}" title="${esc(T("ui.al_mute_change_t",{h:A.mute_hours}))}">${esc(T("ui.al_mute_change"))}</button>`:""}<button type="button" data-m="code" data-v="${esc(a.code)}" title="${esc(T("ui.al_mute_code_t",{h:A.mute_hours}))}">${esc(T("ui.al_mute_code"))}</button><button type="button" data-m="sentinel" data-v="${esc(a.sentinel)}" title="${esc(T("ui.al_mute_sent_t",{h:A.mute_hours}))}">${esc(T("ui.al_mute_sent"))}</button>`}</span></div>`).join(""):`<span style="color:var(--ok)">${esc(T("ui.al_none"))}</span>`;
   box.querySelectorAll("button[data-fs]").forEach(b=>b.addEventListener("click",()=>fsOpen(b)));
   box.querySelectorAll("button[data-m]").forEach(b=>b.addEventListener("click",()=>alertMute(b.dataset.m,b.dataset.v,true)));
   box.querySelectorAll("button[data-mc]").forEach(b=>b.addEventListener("click",()=>alertMute(b.dataset.mc,b.dataset.v,true,true)));
@@ -1918,6 +1945,7 @@ function renderAlerts(){
   $("al-hist").querySelectorAll("button[data-un]").forEach(b=>b.addEventListener("click",()=>alertMute(b.dataset.un,b.dataset.v,false)));
 }
 $("al-level").addEventListener("change",()=>{ALF.l=$("al-level").value;renderAlerts()});
+$("al-class").addEventListener("change",()=>{ALF.c=$("al-class").value;renderAlerts()});
 $("al-sort").addEventListener("change",()=>{sortSet("alerts",$("al-sort").value);renderAlerts()});
 $("al-muted").addEventListener("change",()=>{ALF.m=$("al-muted").checked;store.set("am-al-m",ALF.m?"1":"0");renderAlerts()});
 /* a group that has no number says why: how many of its repositories have data against the minimum, which ones lack it and which have no workflow at all (those are not counted) */
@@ -2204,7 +2232,7 @@ function cfgField(f){
       input.addEventListener("input",()=>onchange(input.value.split(/\n/).map(l=>l.split(";").map(x=>x.trim()).filter(Boolean)).filter(g=>g.length)));inl.appendChild(input)}
     else if(f.type==="intmap"){input=document.createElement("textarea");input.id=id;input.value=Object.entries(f.value||{}).map(([k,v])=>k+" = "+v).join("\n");sub.push(T("ui.cfg_map_hint"));
       input.addEventListener("input",()=>{const o={};input.value.split(/\n/).forEach(l=>{const m=l.match(/^\s*([A-Za-z0-9._-]+)\s*=\s*(-?\d+)\s*$/);if(m)o[m[1]]=Number(m[2])});onchange(o)});inl.appendChild(input)}
-    else if(f.type==="sources"){input=document.createElement("textarea");input.id=id;input.value=JSON.stringify(f.value||[],null,1);sub.push(T("ui.cfg_sources_hint"));
+    else if(f.type==="sources"||f.type==="metacols"){input=document.createElement("textarea");input.id=id;input.value=JSON.stringify(f.value||[],null,1);sub.push(T("ui.cfg_sources_hint"));
       input.addEventListener("input",()=>{try{const v=JSON.parse(input.value||"[]");wrap.classList.remove("bad");onchange(v)}catch(e){wrap.classList.add("bad");cfgMsg("err",T("ui.cfg_json_invalid"))}});inl.appendChild(input)}
     else if(f.type==="eco"){input=document.createElement("div");input.className="eco-list";input.id=id;
       const all=f.value==="all"||f.value==null,chosen=new Set(Array.isArray(f.value)?f.value:[]);
@@ -3119,6 +3147,7 @@ async function logoLoad(){try{const r=await fetch("/api/screens/logo/info",{cach
 function fsSync(){const b=$("fs");if(!b)return;const on=!!document.fullscreenElement,k=on?"ui.fs_exit":"ui.fs_enter";b.setAttribute("aria-pressed",on);b.title=T(k);b.setAttribute("aria-label",T(k));const u=$("fs-ico");if(u)u.setAttribute("href",on?"#i-fullx":"#i-full")}
 {const b=$("fs");if(b){if(!document.fullscreenEnabled)b.hidden=true;else{b.addEventListener("click",()=>{const r=document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();if(r&&r.catch)r.catch(()=>{})});document.addEventListener("fullscreenchange",fsSync);fsSync()}}}
 {if(QS.get("dlg")==="notes")setTimeout(openNotes,800)}      /* deep link: ?dlg=notes opens the window of the notices (the pictures use it) */
+try{/*EXTRAS_JS*/}catch(e){}
 </script>
 </body>
 </html>
