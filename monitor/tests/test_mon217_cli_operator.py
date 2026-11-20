@@ -61,7 +61,9 @@ class Server(unittest.TestCase):
 
 class TheExitCodesOfStatus(Server):
     def test_the_classic_codes_are_the_default_and_do_not_change(self):
-        self.assertEqual(self.status()[0], 0)
+        code, out, _ = self.status("--json")
+        self.assertEqual(code, 0)
+        self.assertNotIn("attention", json.loads(out)["data"], "the document of the classic scheme is the one it always was")
         base.ANSWERS["/api/data"] = data(offline={"offline": True})
         self.assertEqual(self.status()[0], 4)      # degraded, as it always was
         base.ANSWERS["/api/data"] = data()

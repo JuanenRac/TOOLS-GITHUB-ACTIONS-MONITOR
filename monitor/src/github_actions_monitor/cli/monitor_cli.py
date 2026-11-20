@@ -302,8 +302,8 @@ def cmd_status(ctx):
         attention.append("error")
         lines.append(i18n.t("cli.status_error", error=str(payload["error"])[:160]))
         code = EXIT_AUTH if answer.get("hint") == "auth" else EXIT_DEGRADED
-    payload["attention"] = attention
-    if status_scheme(ctx) == "operator":
+    if status_scheme(ctx) == "operator":      # the document of the classic scheme is frozen (a golden test): the reasons only appear with the operator scheme
+        payload["attention"] = attention
         code = EXIT_OPERATOR_ATTENTION if attention else EXIT_OK
     return payload, lines, code
 
