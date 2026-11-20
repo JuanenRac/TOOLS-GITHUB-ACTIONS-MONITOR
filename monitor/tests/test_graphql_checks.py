@@ -1,6 +1,6 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
-"""Reading the workflows of cold repositories through GraphQL (network.graphql_checks, OFF by default): the query, the reading of the answer, the batches, the fall back to REST and the
+"""Reading the workflows of cold repositories through GraphQL (network.graphql_checks, ON by default after its measure): the query, the reading of the answer, the batches, the fall back to REST and the
 accounting. GitHub is simulated: no network, no `gh`."""
 import json
 import sys
@@ -35,13 +35,14 @@ class Reading(unittest.TestCase):
         for key in gc.STATS:
             gc.STATS[key] = 0
 
-    def test_it_is_off_unless_the_switch_is_true(self):
-        self.assertEqual(gc.settings({}), {"enabled": False, "batch": 20})
+    def test_it_is_on_unless_the_switch_is_set_to_something_else_than_true(self):
+        self.assertEqual(gc.settings({}), {"enabled": True, "batch": 20})
+        self.assertEqual(gc.settings({"network": {"graphql_checks": False}})["enabled"], False)
         self.assertEqual(gc.settings({"network": {"graphql_checks": "yes"}})["enabled"], False)
         self.assertEqual(gc.settings({"network": {"graphql_checks": True, "graphql_batch": 5}}), {"enabled": True, "batch": 5})
         self.assertEqual(gc.settings({"network": {"graphql_checks": True, "graphql_batch": 99}})["batch"], 20)
         self.assertEqual(gc.settings({"network": {"graphql_checks": True, "graphql_batch": True}})["batch"], 20)
-        self.assertEqual(am.DEFAULTS["network"]["graphql_checks"], False)
+        self.assertEqual(am.DEFAULTS["network"]["graphql_checks"], True)
 
     def test_the_query_has_an_alias_per_repository_and_never_a_strange_name(self):
         text = gc.query("owner-1", ["alpha", "beta"])
@@ -82,7 +83,7 @@ class Reading(unittest.TestCase):
         self.assertEqual(gc.stats(), {"calls": 1, "repos": 1, "fallbacks": 2, "cost": 2, "errors": 1})
 
     def test_the_stats_are_hidden_while_the_feature_is_off_and_unused(self):
-        self.assertIsNone(gc.stats({}))
+        self.assertIsNone(gc.stats({"network": {"graphql_checks": False}}))
         self.assertEqual(gc.stats({"network": {"graphql_checks": True}})["calls"], 0)
 
 

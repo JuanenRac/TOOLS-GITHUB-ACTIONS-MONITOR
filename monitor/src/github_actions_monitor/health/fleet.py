@@ -93,7 +93,7 @@ def fleet_view(views, config, ecosystem="", severity="", text="", label="", grou
         for v in sorted(buckets[g["key"]], key=lambda x: _order(x, order)):
             rows.append({"repo": v["repo"], "group": g["key"], "label": label_of(v["repo"], cfg["labels"]), "ecosystem": v["ecosystem"], "state": v["state"], "risk": v["risk"],
                          "red_workflows": len(v["ci"]["red_workflows"]), "alerts": v["alerts"]["total"], "failures_24h": v["ci"]["failures_24h"], "last_run_at": v["activity"]["last_run_at"],
-                         "not_fully_seen": v["not_fully_seen"], "running": v["ci"]["active"]["running"], "queued": v["ci"]["active"]["queued"]})
+                         "not_fully_seen": v["not_fully_seen"], "running": (v["ci"].get("active") or {}).get("running", 0), "queued": (v["ci"].get("active") or {}).get("queued", 0)})
     totals = {s: sum(g[s] for g in groups) for s in repo_view.STATES}
     return {"schema": 1, "all": len(views), "shown": len(chosen), "truncated": len(rows) > limit, "page_size": cfg["page_size"], "group_by": by, "sort": order, "totals": totals,
             "groups": groups, "rows": rows[:limit], "saved_filters": [f["name"] for f in saved_filters(cfg)],

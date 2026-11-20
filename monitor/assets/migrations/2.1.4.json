@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "60aa608ce2a8d11c069164400596dd521b732153b94601f145cb1fb21df0e73a",
+ "digest": "48599864d35eddde56d9778a2594e70bd8efd0cd9dac6eccea052532914c3852",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -437,6 +437,15 @@
     "key": "updates.systemd_helper",
     "kind": "bool",
     "default": false
+   },
+   {
+    "key": "webhook.clock_skew_s",
+    "kind": "int",
+    "bounds": [
+     0,
+     3600
+    ],
+    "default": 300
    }
   ],
   "removed": [],
@@ -482,6 +491,15 @@
      "bounds": {
       "re": "^[0-9]{0,12}\\Z"
      }
+    }
+   },
+   {
+    "key": "network.graphql_checks",
+    "old": {
+     "default": false
+    },
+    "new": {
+     "default": true
     }
    },
    {
