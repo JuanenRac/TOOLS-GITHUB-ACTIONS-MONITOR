@@ -22,6 +22,7 @@ do not use up the GitHub allowance shared with the agents.
 """
 from github_actions_monitor.app import api_spec, api_v1
 from github_actions_monitor.app import degraded
+from github_actions_monitor.app import viewers
 from github_actions_monitor.app import lastpicture
 from github_actions_monitor.app import cycle_watch
 import argparse
@@ -124,14 +125,15 @@ DEFAULTS = {
     "ports": {"complete": 8765, "lite": 8766},      # the port of each edition (util/ports.py); --port wins, then MONITOR_PORT for the complete one
     "ui": {"orientation": "auto", "rotate_seconds": 0, "screen1_tabs": "", "screen1_orientation": "auto", "screen2_tabs": "", "screen2_orientation": "auto", "screen3_tabs": "", "screen3_orientation": "auto", "now_sort": "ecosystem", "alerts_sort": "server", "theme": "auto", "remember_folds": True, "about_org_logo": False},   # the screens (docs/SCREENS.md): the orientation of the page, and which tabs each /screen/N shows
     "screens": {"enabled": False, "blink": True, "blink_calm_minutes": 30, "rotate_seconds": 0, "default_theme": "inherit", "default_density": "normal", "refresh_seconds": 10, "burn_in_protection": True, "night_dim": False, "night_dim_from_hour": 22, "night_dim_to_hour": 7, "show_repo_names": "public", "sound": False,
-                "theme_overview": "inherit", "theme_now": "inherit", "theme_sentinels": "inherit", "mode": "three", "rotate_every_seconds": 20, "alert_hold_seconds": 30, "logo_overview": True, "logo_now": False, "logo_sentinels": False,
+                "theme_overview": "inherit", "theme_fleet": "inherit", "theme_now": "inherit", "theme_sentinels": "inherit", "mode": "three", "rotate_every_seconds": 20, "alert_hold_seconds": 30, "logo_overview": True, "logo_fleet": False, "logo_now": False, "logo_sentinels": False,
                 "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64, "group_map": True,
-                "menu": True, "menu_target": "new", "menu_max_windows": 4, "menu_rotate_seconds": 20, "menu_tv_scale": 1.5, "safe_margin_percent": 0},   # the wall screens /screen/overview, /screen/now and /screen/sentinels (docs/SCREENS.md, screens.py): read only, from what the monitor already holds
+                "menu": True, "menu_target": "new", "menu_max_windows": 4, "menu_rotate_seconds": 20, "menu_tv_scale": 1.5, "safe_margin_percent": 0,
+                "life": True, "glance_seconds": 3, "transition": "fade", "hide_healthy": False, "idle_dim_minutes": 0, "min_font_px": 12},   # the wall screens /screen/overview, /screen/now and /screen/sentinels (docs/SCREENS.md, screens.py): read only, from what the monitor already holds
     "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "on_warning": True, "on_resolved": True, "on_report": True, "on_lesson": True, "on_sentinel": True, "on_stuck": True, "on_score_drop": True, "on_info": True, "on_live_recovered": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False, "theme": "classic", "quiet_enabled": False, "quiet_from_hour": 22, "quiet_to_hour": 7},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
     "updates": {"check": True, "systemd_helper": False},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
     "airgapped": False,            # True: nothing is requested from the network except GitHub's data you asked for; the update check is off
     "open_browser": True,
-    "modes": {"start": "normal", "default_minutes": 60},     # normal | fast | turbo: see modes.py; the presets can be edited under modes.fast / modes.turbo
+    "modes": {"start": "normal", "default_minutes": 60, "idle_minutes": 0},     # normal | fast | turbo: see modes.py; the presets can be edited under modes.fast / modes.turbo
     "account": {"plan": "unknown"},     # free | pro | team | enterprise: the quotas of the plan come from quotas.json (quota.py)
     "quota": {"billing_api": False, "warn_percent": 75, "alert_percent": 90, "default_runner": "linux", "failover": False, "failover_max_age_minutes": 60},
     "session_guard": True,         # the page asks for a one-use token before it changes a setting or confirms an action
@@ -2389,7 +2391,7 @@ def run_cycle(config, generation):
     WATCH.phase("log")
     write_cycle_log(data)
     WATCH.phase("extras")
-    delay = tuned(config, "refresh_seconds", data)
+    delay = viewers.stretch(config, tuned(config, "refresh_seconds", data), tuned(config, "cold_refresh_seconds"))      # nobody looking for modes.idle_minutes and nothing that must not wait: the cold pace
     try:   # the report of the day goes to the audit folder (never stops the loop)
         if SENTINEL["obj"] is not None and AUTOSAVE is not None and not data.get("loading"):
             from github_actions_monitor.sentinels import sentinel_local
@@ -2539,6 +2541,7 @@ def render_page():
     page = (paths.STATIC / "actions_monitor.html").read_text(encoding="utf-8")
     data = {"default": i18n.language(), "langs": list(i18n.LANGS), "names": i18n.NATIVE_NAMES, "html": i18n.HTML_LANG, "locale": i18n.BROWSER_LOCALE, "catalogues": i18n.ui_catalogues(),
             "ecosystems": {**{"other": i18n.t("ui.eco_other")}, **{key: item["label"] for key, item in toolconfig.ecosystems().items()}}, "owner": toolconfig.github_owner(), "tz": tzdisplay.setting(), "screens": {k: v for k, v in (toolconfig.raw_config().get("ui") or {}).items() if k in DEFAULTS["ui"] and k != "theme"}, "kiosk": ({} if LITE["on"] else __import__("github_actions_monitor.surfaces.kiosk", fromlist=["_"]).public(toolconfig.raw_config())), "theme": screens.global_theme(toolconfig.raw_config()), "screen_menu": {k: v for k, v in screenmenu.menu_settings(toolconfig.raw_config()).items() if k in ("menu", "menu_target", "menu_max_windows")}, "blink": (toolconfig.raw_config().get("display") or {}).get("blink_red_tiles", True) is not False, "sound": {k: v for k, v in __import__("github_actions_monitor.integrations.soundalert", fromlist=["_"]).settings(toolconfig.raw_config()).items() if k != "server_beep"}, "host": github_host(), "lite": LITE["on"], "network": localguard.public_state(), "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
+    data["viewer_aware"] = bool(viewers.settings(toolconfig.raw_config())["idle_minutes"])      # modes.idle_minutes: a hidden tab stops asking
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     return page.replace("/*I18N_DATA*/null", blob, 1)
 
@@ -2550,6 +2553,7 @@ def render_screen(kind, query):
     chosen = screens.global_theme(config)
     page = (paths.STATIC / "screens.html").read_text(encoding="utf-8").replace("/*THEME_CSS*/", screens.theme_css(), 1)
     data = screens.page_data(kind, cfg, screens.params(query, cfg, kind, chosen), logo=orglogo.info(), global_name=chosen)
+    data["viewer_aware"] = bool(viewers.settings(config)["idle_minutes"])      # modes.idle_minutes: a hidden window stops asking
     from github_actions_monitor.integrations import soundalert
     data["sound"] = {key: value for key, value in soundalert.settings(toolconfig.raw_config()).items() if key != "server_beep"}      # the same sounds as the page, per kind (the window still needs ?sound=on and screens.sound)
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
@@ -2585,7 +2589,7 @@ def screens_payload(kind, cfg, repo=""):
         except Exception as error:   # noqa: BLE001
             degraded.note("screens.score", error)
     view = labels = None
-    if not LITE["on"] and kind == "overview" and cfg.get("group_map", True):
+    if not LITE["on"] and ((kind == "overview" and cfg.get("group_map", True)) or kind == "fleet"):
         view, labels = screens_groups()
     return screens.build(kind, state, snapshot, alerts, score, cfg, "lite" if LITE["on"] else "complete", fleet_view=view, labels=labels, repo=repo)
 
@@ -3298,6 +3302,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         if not self.v1_enter() or not auth_http.gate(self, LIVE_CONFIG or DEFAULTS, LITE["on"]):
             return
+        viewers.touch(self.path)      # a page, a wall screen or a live stream asking for data is somebody looking (modes.idle_minutes)
         with i18n.use_language(self.request_language()):
             if self.v1 and self.path.split("?")[0] in api_v1.OWN_ROUTES:
                 self.handle_v1()
@@ -3986,6 +3991,7 @@ def health_payload(deep=False):
     out = {"ok": True, "lite": LITE["on"], "version": TOOL_VERSION, "uptime_seconds": int(time.time() - STARTED), "loaded": loaded, "offline": LINK.state()["offline"], "degraded": degraded.snapshot()["total"]}
     if CHILD["account"]:
         out["account"] = CHILD["account"]
+    out["viewers"] = viewers.public(LIVE_CONFIG or DEFAULTS)      # whether the polling is aware of who is looking (modes.idle_minutes), for how long nobody has, and whether it is cold
     if not LITE["on"]:
         verdict = "" if DEMO["on"] else cycle_verdict()
         snap = WATCH.snapshot(limit_seconds=watchdog_limit(LIVE_CONFIG or DEFAULTS))

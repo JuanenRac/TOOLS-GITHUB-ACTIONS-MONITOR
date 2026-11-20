@@ -28,7 +28,7 @@ class TheThemeOfEachScreen(unittest.TestCase):
         cfg = screens.settings({})
         self.assertEqual((cfg["default_theme"], cfg["theme_overview"], cfg["theme_now"], cfg["theme_sentinels"]), ("inherit",) * 4)
         for name in screens.GLOBAL_THEMES:
-            self.assertEqual([screens.resolve_theme(cfg, k, name) for k in screens.KINDS], [name] * 3, name)
+            self.assertEqual([screens.resolve_theme(cfg, k, name) for k in screens.KINDS], [name] * 4, name)
         self.assertEqual(screens.global_theme({}), "auto")
         self.assertEqual(screens.global_theme({"ui": {"theme": "Armor"}}), "Armor")
         self.assertEqual(screens.global_theme({"ui": {"theme": "high contrast"}}), "High contrast", "the case does not matter")
@@ -37,9 +37,9 @@ class TheThemeOfEachScreen(unittest.TestCase):
 
     def test_all_the_screens_can_fix_one_and_one_screen_can_fix_another(self):
         cfg = screens.settings({"screens": {"default_theme": "contrast", "theme_now": "Terminal"}})
-        self.assertEqual([screens.resolve_theme(cfg, k, "dark") for k in screens.KINDS], ["contrast", "Terminal", "contrast"])
+        self.assertEqual([screens.resolve_theme(cfg, k, "dark") for k in screens.KINDS], ["contrast", "contrast", "Terminal", "contrast"])
         cfg = screens.settings({"screens": {"theme_sentinels": "light"}})
-        self.assertEqual([screens.resolve_theme(cfg, k, "Armor") for k in screens.KINDS], ["Armor", "Armor", "light"])
+        self.assertEqual([screens.resolve_theme(cfg, k, "Armor") for k in screens.KINDS], ["Armor", "Armor", "Armor", "light"])
         self.assertEqual(screens.resolve_theme(cfg, None, "Ice"), "Ice")
 
     def test_a_value_that_is_not_a_theme_is_the_inherited_one(self):
@@ -60,7 +60,7 @@ class TheThemeOfEachScreen(unittest.TestCase):
     def test_the_page_data_has_the_theme_of_each_screen(self):
         cfg = screens.settings({"screens": {"theme_now": "Mono"}})
         data = screens.page_data("now", cfg, screens.params({}, cfg, "now", "Ice"), global_name="Ice")
-        self.assertEqual(data["themes"], {"overview": "Ice", "now": "Mono", "sentinels": "Ice"})
+        self.assertEqual(data["themes"], {"overview": "Ice", "fleet": "Ice", "now": "Mono", "sentinels": "Ice"})
 
     def test_the_sixteen_themes_are_the_ones_of_the_main_page(self):
         listed = re.search(r'STUDIO_THEMES=\[([^\]]*)\]', MAIN).group(1)
@@ -86,10 +86,10 @@ class TheThemeOfEachScreen(unittest.TestCase):
     def test_every_colour_the_page_draws_with_is_defined_by_each_palette_family(self):
         used = set(re.findall(r"var\((--[a-z0-9]+)", re.sub(r":root\[data-studio\]\{[^}]*\}", "", SCREENS)))
         plain = ":root{" + SCREENS.split(":root{", 1)[1].split("}", 1)[0]
-        for name in used - {"--k", "--d", "--i", "--sx", "--sy", "--len", "--lw", "--lh", "--page", "--a", "--safe"}:
+        for name in used - {"--k", "--d", "--i", "--sx", "--sy", "--len", "--lw", "--lh", "--page", "--a", "--safe", "--minpx"}:
             self.assertIn(name + ":", plain, f"{name} has no value in the default palette")
         alias = re.search(r":root\[data-studio\]\{([^}]*)\}", SCREENS).group(1)
-        for name in used - {"--k", "--d", "--i", "--sx", "--sy", "--len", "--lw", "--lh", "--page", "--a", "--safe", "--ok", "--warn", "--bad", "--line", "--mut", "--bg"}:
+        for name in used - {"--k", "--d", "--i", "--sx", "--sy", "--len", "--lw", "--lh", "--page", "--a", "--safe", "--minpx", "--ok", "--warn", "--bad", "--line", "--mut", "--bg"}:
             self.assertIn(name + ":", alias, f"{name} is not given to the sixteen themes")
 
     def test_the_page_wears_the_theme_and_changes_it_with_the_screen(self):
@@ -126,7 +126,7 @@ class TheMainPageAndTheSignIn(unittest.TestCase):
                 page = actions_monitor.render_screen(kind, {})
                 data = json.loads(re.search(r"const D=(\{.*\});\n", page).group(1).replace("<\\/", "</"))
                 self.assertEqual(data["params"]["theme"], expected)
-                self.assertEqual(data["themes"], {"overview": "Armor", "now": "Forest", "sentinels": "Armor"})
+                self.assertEqual(data["themes"], {"overview": "Armor", "fleet": "Armor", "now": "Forest", "sentinels": "Armor"})
                 self.assertIn(':root[data-theme="Armor"]{', page)
                 self.assertNotIn("/*THEME_CSS*/", page)
             self.assertEqual(json.loads(re.search(r"const D=(\{.*\});\n", actions_monitor.render_screen("now", {"theme": "light"})).group(1))["params"]["theme_locked"], True)

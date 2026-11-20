@@ -99,7 +99,7 @@ class WhereItLives(unittest.TestCase):
         self.assertNotEqual(first["tag"], second["tag"], "a new logo has a new address, so it is never shown from the cache")
 
     def test_it_is_never_in_the_configuration(self):
-        self.assertTrue(all(not k.startswith("screens.logo") or k.split(".")[1] in ("logo_overview", "logo_now", "logo_sentinels", "logo_corner", "logo_max_width", "logo_max_height") for k in settings_api.FIELDS))
+        self.assertTrue(all(not k.startswith("screens.logo") or k.split(".")[1] in ("logo_overview", "logo_fleet", "logo_now", "logo_sentinels", "logo_corner", "logo_max_width", "logo_max_height") for k in settings_api.FIELDS))
         self.assertFalse([k for k in settings_api.FIELDS if "logo" in k and settings_api.FIELDS[k][2] in ("text", "path")], "no setting holds the picture or a path to it")
         from github_actions_monitor.util import paths
         self.assertEqual(paths.kind_of("org_logo.png"), "data")
@@ -212,7 +212,7 @@ class OnTheScreens(unittest.TestCase):
         self.assertEqual((cfg["logo_overview"], cfg["logo_now"], cfg["logo_sentinels"], cfg["logo_corner"], cfg["logo_max_width"], cfg["logo_max_height"]), (True, False, False, "top-right", 160, 64))
         self.assertIsNone(screens.logo_block(cfg, {"present": False}), "no logo uploaded: nothing is drawn")
         block = screens.logo_block(cfg, {"present": True, "tag": "abcdef0123456789xxxx"})
-        self.assertEqual(block["show"], {"overview": True, "now": False, "sentinels": False})
+        self.assertEqual(block["show"], {"overview": True, "fleet": False, "now": False, "sentinels": False})
         self.assertEqual((block["corner"], block["max_width"], block["max_height"]), ("top-right", 160, 64))
         self.assertEqual(block["url"], "/api/screens/logo?v=abcdef0123456789")
 

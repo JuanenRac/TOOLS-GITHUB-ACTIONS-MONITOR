@@ -70,6 +70,7 @@ Três páginas para um monitor ou uma televisão em que ninguém toca. Não têm
 | Endereço | O que mostra |
 |---|---|
 | `/screen/overview` | Anel e letra da pontuação; a frota (verdes, vermelhos, bloqueados, em espera); as últimas 24 horas e 7 dias em gráficos de área; um mapa de calor dos repositórios por hora; o que está a vermelho há mais tempo; runners e minutos; os últimos eventos; a quota do GitHub como indicador. O cartão da frota mostra também o mapa por grupos: uma barra por cada grupo da vista de frota (o mesmo agrupamento, `fleet.group_by`) com os seus repositórios a vermelho, que precisam de atenção, em ordem ou sem dados; apenas o nome do grupo e números. |
+| `/screen/fleet` | Cada repositório da frota por grupos (o agrupamento e a ordem do separador Frota, primeiro o grupo mais arriscado): um quadrado pequeno para cada repositório saudável e uma etiqueta com o nome para cada um que precisa de atenção, com os totais da frota em cima. O que não cabe é contado («+3 mais»). |
 | `/screen/now` | O que acontece neste minuto: execuções em curso com progresso e duração, a fila, execuções à espera de aprovação, falhas recentes, fusões e versões publicadas, versões por publicar e uma linha em direto das últimas duas horas. |
 | `/screen/sentinels` | Um cartão por cada sentinela (A1 a A12) com o seu nível, os achados em aberto, se as suas fontes são legíveis, a última varredura e um anel que acompanha a varredura; um radar animado que assinala o que está mal e os alertas por gravidade. |
 
@@ -111,14 +112,20 @@ O idioma de um ecrã decide-se por esta ordem: `?lang=xx` no endereço; depois o
 | `screens.safe_margin_percent` | Mantém o conteúdo a esta percentagem de cada borda da janela, para uma televisão que corta a borda (overscan): tudo é desenhado um pouco mais pequeno. 0 (por defeito) usa a janela toda; de 0 a 10. |
 | `screens.night_dim` | Escurece os ecrãs entre `screens.night_dim_from_hour` (22) e `screens.night_dim_to_hour` (7); desativado por defeito. |
 | `screens.show_repo_names` | all, public (por defeito: os repositórios privados aparecem como private-1, private-2...) ou none (todos os nomes ficam ocultos). Use public ou none num ecrã que outras pessoas possam ver. Com uma lista de repositórios escrita à mão em `repos`, a visibilidade é lida com uma listagem da conta a cada `discover_refresh_seconds`; um repositório cuja visibilidade não pôde ser lida conta como privado. Os números (private-1...) só se dão aos repositórios ocultos, pela ordem de um HMAC do nome com uma chave da instalação guardada num ficheiro privado da pasta de dados, pelo que nada dizem sobre onde um repositório cai entre os outros. |
-| `screens.theme_overview`, `screens.theme_now`, `screens.theme_sentinels` | O tema de um ecrã: inherit (por omissão: o de `screens.default_theme`) ou qualquer um dos temas acima. |
+| `screens.theme_overview`, `screens.theme_fleet`, `screens.theme_now`, `screens.theme_sentinels` | O tema de um ecrã: inherit (por omissão: o de `screens.default_theme`) ou qualquer um dos temas acima. |
 | `screens.mode` | three (por omissão: as três páginas separadas, uma por janela) ou rotate (uma só página que passa pelas três e salta para um vermelho novo). |
 | `screens.rotate_every_seconds` | No modo rotate, segundos em cada ecrã (20 por omissão; de 5 a 300). |
 | `screens.alert_hold_seconds` | No modo rotate, segundos que um vermelho novo mantém a janela no seu ecrã (30 por omissão; de 5 a 600), ou até o vermelho desaparecer. |
-| `screens.logo_overview`, `screens.logo_now`, `screens.logo_sentinels` | Em que ecrãs aparece o logótipo (por omissão, só na visão geral). |
+| `screens.logo_overview`, `screens.logo_fleet`, `screens.logo_now`, `screens.logo_sentinels` | Em que ecrãs aparece o logótipo (por omissão, só na visão geral). |
 | `screens.logo_corner` | top-right (por omissão), top-left, bottom-right ou bottom-left. |
 | `screens.logo_max_width`, `screens.logo_max_height` | Tamanho máximo do logótipo em píxeis a 1920 x 1080 (160 x 64 por omissão; cresce com o ecrã). |
 | `screens.group_map` | Ativado por predefinição. Mostra o mapa da frota por grupos no ecrã geral (o agrupamento da vista de frota). Desativado: só os quatro mosaicos. |
+| `screens.life` | Ativado por predefinição. Um número que muda pisca onde mudou, uma nova falha envia uma onda sobre a sua caixa e uma mudança de estado deixa um rasto breve. Nada se mexe com a definição do sistema de menos movimento. |
+| `screens.glance_seconds` | Segundos em que o cabeçalho mostra o que mudou na última atualização, em até três etiquetas («Vermelho +1»); 3 por predefinição, 0 = desligado (0 a 30). |
+| `screens.transition` | Como uma janela que roda passa de um ecrã para o seguinte: fade (predefinição), slide ou none. |
+| `screens.hide_healthy` | Desligado por predefinição. O ecrã Frota omite os quadrados dos repositórios saudáveis; o panorama omite os grupos sem vermelho nem amarelo e as linhas do mapa de calor sem falhas. Os totais mantêm-se. |
+| `screens.idle_dim_minutes` | 0 = desligado (predefinição). Quando nada mudou durante estes minutos e nada está vermelho, o ecrã escurece para poupar o painel; a mudança seguinte acorda-o (1 a 1440). |
+| `screens.min_font_px` | A letra mais pequena dos ecrãs em píxeis, seja qual for o tamanho da janela (12 por predefinição; 8 a 32). |
 | `screens.menu` | Ativado por predefinição. O botão Ecrãs da barra superior. Desativado: o botão desaparece; os ecrãs continuam a funcionar nos seus próprios endereços. |
 | `screens.menu_target` | new (predefinição): um ecrã abre numa nova janela ou separador; same: no separador atual. |
 | `screens.menu_max_windows` | Máximo de janelas que um conjunto multiecrã abre de uma vez (4 por predefinição; de 1 a 9). |
@@ -166,12 +173,15 @@ As três páginas são desenhadas com unidades que seguem o lado curto da janela
 - O nome de um repositório ou de um fluxo que não cabe acaba em reticências e leva o texto completo no `title`; um título, uma etiqueta ou um número nunca acaba em reticências: o título passa para uma segunda linha e um número mais largo do que a sua caixa recebe uma letra menor, até um mínimo.
 - Quando uma lista tem mais linhas do que as que cabem na sua caixa, as mais importantes vêm primeiro (o vermelho antes do verde, o mais recente primeiro) e a última linha diz quantas ficaram de fora ("+3 mais"); nada é escondido sem essa linha.
 - Margem de segurança (overscan): muitas televisões cortam alguns por cento de cada borda, a não ser que o seu modo de imagem seja "just scan" ou "pixel a pixel". `screens.safe_margin_percent` (0 por defeito, de 0 a 10; `?safe=4` para uma janela) mantém o conteúdo a essa distância de cada borda desenhando tudo mais pequeno, e `kiosk.safe_margin_percent` faz o mesmo no quiosque. Experimente de 3 a 5 se as primeiras letras do relógio ou a borda dos cartões forem cortadas.
+- A letra mais pequena é `screens.min_font_px` (12 píxeis por predefinição): numa janela tão pequena que o desenho precisaria de uma letra menor, os ecrãs mantêm a letra e mostram menos linhas, dizendo quantas deixaram de fora, em vez de encolher o texto.
 
 ### Como se comportam
 
 - As falhas piscam menos de duas vezes por segundo (nunca de forma estroboscópica); uma falha nova faz um único clarão; uma falha a que ninguém atende durante `screens.blink_calm_minutes` minutos mantém um halo fixo. Com a definição do sistema para reduzir o movimento, ou com `?blink=off`, nada pisca nem se move. Uma falha nunca é mostrada apenas pela cor: leva um símbolo e uma palavra.
 - Quando o monitor não responde, a página di-lo, escurece e tenta de novo após 5, 10, 20... segundos (até 60).
 - Um ecrã sempre ligado é protegido contra a retenção de imagem: tudo se desloca alguns píxeis a cada minuto e a página pode escurecer à noite.
+- O que muda entre duas atualizações vê-se: o número pisca onde mudou (`screens.life`), uma nova falha envia uma onda sobre a sua caixa e, durante `screens.glance_seconds` segundos, algumas etiquetas do cabeçalho dizem o que mudou («Vermelho +1», «Em curso +2»). A primeira leitura de um ecrã só memoriza; com a definição do sistema de menos movimento nada se mexe, mas as etiquetas aparecem na mesma.
+- Uma janela que roda muda de ecrã com um esbatimento, um deslize ou um corte (`screens.transition`). Um ecrã sem novidades há `screens.idle_dim_minutes` minutos descansa (escurecido) enquanto nada estiver vermelho.
 
 ### Montar vários monitores
 
@@ -202,7 +212,7 @@ Cada separador da página tem uma decisão, escrita no código (`TAB_DECISIONS` 
 | `strend` | Tendência diária | - | `reading` |
 | `syvt` | Ontem vs hoje | - | `reading` |
 | `team` | Saúde da equipa | - | `people` |
-| `fleet` | Frota | `/screen/overview` | - |
+| `fleet` | Frota | `/screen/fleet` | - |
 | `repos` | Repositórios | - | `controls` |
 | `rep` | Relatórios | - | `reading` |
 | `trep` | Relatórios agendados | - | `reading` |

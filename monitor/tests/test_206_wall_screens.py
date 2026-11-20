@@ -126,10 +126,17 @@ class Names(unittest.TestCase):
         self.assertEqual(screens.Names(["a"], meta, "bogus").mode, "public")
 
 
+def fleet_view():
+    """The answer of the fleet view for the four repositories of the double (the same shape as health/fleet.py gives)."""
+    rows = [("pub-a", "ok", 0), ("pub-b", "bad", 8), ("priv-c", "bad", 7), ("pub-d", "warn", 3)]
+    return {"group_by": "ecosystem", "groups": [{"key": "armor", "repos": 4, "bad": 2, "warn": 1, "ok": 1, "unknown": 0, "risk": 18}],
+            "rows": [{"repo": r, "group": "armor", "state": s, "risk": k, "red_workflows": 1 if s == "bad" else 0, "running": 0} for r, s, k in rows]}
+
+
 class ThePayload(unittest.TestCase):
     def build(self, kind, mode="public", snap=True, **cfg):
         c = screens.settings({"screens": {"show_repo_names": mode, **cfg}})
-        return screens.build(kind, state(), snapshot() if snap else None, alerts(), {"enabled": True, "state": "scored", "score": 83.2, "letter": "B", "trend": 2}, c, now=NOW)
+        return screens.build(kind, state(), snapshot() if snap else None, alerts(), {"enabled": True, "state": "scored", "score": 83.2, "letter": "B", "trend": 2}, c, now=NOW, fleet_view=fleet_view(), labels={"armor": "ARMOR"})
 
     def test_nothing_that_could_leak_leaves_the_server(self):
         for kind in screens.KINDS:
@@ -246,7 +253,7 @@ class ThePage(unittest.TestCase):
         self.assertEqual(data["texts"]["ui.scr_title_now"], "Gerade jetzt")
         self.assertIn("ui.a1", data["texts"])
         self.assertIn("ui.lv_bad", data["texts"])
-        self.assertEqual(set(data["settings"]), {"blink", "blink_calm_minutes", "burn_in_protection", "night_dim", "night_dim_from_hour", "night_dim_to_hour"})
+        self.assertEqual(set(data["settings"]), {"blink", "blink_calm_minutes", "burn_in_protection", "night_dim", "night_dim_from_hour", "night_dim_to_hour", "life", "glance_seconds", "transition", "hide_healthy", "idle_dim_minutes", "min_font_px"})
         self.assertNotIn("show_repo_names", json.dumps(data))
 
     def test_every_text_the_page_asks_for_exists_in_eight_languages(self):

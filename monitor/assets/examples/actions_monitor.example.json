@@ -762,6 +762,7 @@
     "resume_max_age_hours": 12
   },
   "modes": {
+    "idle_minutes": 0,
     "start": "normal",
     "default_minutes": 60,
     "fast": {
@@ -1183,13 +1184,19 @@
     "default_density": "normal",
     "default_theme": "inherit",
     "enabled": false,
+    "glance_seconds": 3,
     "group_map": true,
+    "hide_healthy": false,
+    "idle_dim_minutes": 0,
+    "life": true,
     "logo_corner": "top-right",
     "logo_max_height": 64,
     "logo_max_width": 160,
+    "logo_fleet": false,
     "logo_now": false,
     "logo_overview": true,
     "logo_sentinels": false,
+    "min_font_px": 12,
     "mode": "three",
     "night_dim": false,
     "night_dim_from_hour": 22,
@@ -1199,9 +1206,11 @@
     "rotate_seconds": 0,
     "show_repo_names": "public",
     "sound": false,
+    "theme_fleet": "inherit",
     "theme_now": "inherit",
     "theme_overview": "inherit",
-    "theme_sentinels": "inherit"
+    "theme_sentinels": "inherit",
+    "transition": "fade"
   },
   "ui": {
     "alerts_sort": "server",

@@ -1,0 +1,104 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.1.7",
+ "previous": "2.1.6",
+ "digest": "205261e5c907b9265f935aed6b91e59479d82d29fa9fa8dda8e5f4835fc3febf",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "modes.idle_minutes",
+    "kind": "int",
+    "bounds": [
+     0,
+     1440
+    ]
+   },
+   {
+    "key": "screens.glance_seconds",
+    "kind": "int",
+    "bounds": [
+     0,
+     30
+    ],
+    "default": 3
+   },
+   {
+    "key": "screens.hide_healthy",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "screens.idle_dim_minutes",
+    "kind": "int",
+    "bounds": [
+     0,
+     1440
+    ],
+    "default": 0
+   },
+   {
+    "key": "screens.life",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "screens.logo_fleet",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "screens.min_font_px",
+    "kind": "int",
+    "bounds": [
+     8,
+     32
+    ],
+    "default": 12
+   },
+   {
+    "key": "screens.theme_fleet",
+    "kind": "enum",
+    "bounds": [
+     "inherit",
+     "auto",
+     "light",
+     "dark",
+     "Armor",
+     "Aqua",
+     "Midnight",
+     "Ember",
+     "Forest",
+     "Violet",
+     "Solar",
+     "Ice",
+     "Crimson",
+     "Mono",
+     "High contrast",
+     "Metallic",
+     "Professional",
+     "Videogame",
+     "Terminal",
+     "Blueprint",
+     "contrast"
+    ],
+    "default": "inherit"
+   },
+   {
+    "key": "screens.transition",
+    "kind": "enum",
+    "bounds": [
+     "none",
+     "fade",
+     "slide"
+    ],
+    "default": "fade"
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {}
+}
