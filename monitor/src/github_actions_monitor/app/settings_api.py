@@ -84,6 +84,8 @@ def _env_name_except(own):
 WEBHOOK_ENV_RE = _env_name_except(envguard.WEBHOOK_SECRET_ENV)      # webhook.secret_env
 TOKEN_ENV_RE = _env_name_except(envguard.ACCESS_TOKEN_ENV)          # listen.token_env
 SLACK_ENV_RE = _env_name_except(envguard.SLACK_SIGNING_ENV)          # chatops.slack.signing_secret_env
+HEARTBEAT_ENV_RE = _env_name_except(envguard.HEARTBEAT_URL_ENV)      # heartbeat.url_env
+HEARTBEAT_SUFFIX_RE = re.compile(r"^(/[a-z]{1,10})?\Z")      # heartbeat.fail_suffix: empty, or one short word after a slash (/fail)
 DISCORD_ENV_RE = _env_name_except(envguard.DISCORD_KEY_ENV)         # chatops.discord.public_key_env
 NOTIFY_ENV_RE = _env_name_except("")                                # the variable of a channel of notices: no secret of the monitor belongs to it
 LOOP_HOST_RE = re.compile(r"^(127\.0\.0\.1|localhost|\[::1\])\Z")                      # a broker or a service ON THIS COMPUTER
@@ -648,6 +650,18 @@ _f(_T_HOOK, "inbound", "webhook.clock_skew_s", "int", (0, 3600), unit="s")
 _f(_T_HOOK, "inbound", "webhook.max_body_kb", "int", (1, 25600), unit="KB")
 _f(_T_HOOK, "inbound", "webhook.queue_max", "int", (1, 10000), unit="")
 _f(_T_HOOK, "inbound", "webhook.stale_after_h", "int", (1, 168), unit="h")
+_f(_T_POLL, "events_feed", "events_feed.enabled", "bool", restart=False)
+_f(_T_POLL, "events_feed", "events_feed.interval_seconds", "int", (30, 3600), unit="s", restart=False)
+_f(_T_POLL, "events_feed", "events_feed.owner_kind", "enum", ("auto", "org", "user"), restart=False)
+_f(_T_POLL, "events_feed", "events_feed.max_per_tick", "int", (1, 200), unit="", restart=False)
+_f(_T_POLL, "github_status", "github_status.enabled", "bool", restart=False, secure=True)
+_f(_T_POLL, "github_status", "github_status.interval_seconds", "int", (60, 3600), unit="s", restart=False)
+_f(_T_POLL, "github_status", "github_status.mark_reds", "bool", restart=False)
+_f(_T_OUT, "heartbeat", "heartbeat.enabled", "bool", restart=False, secure=True)
+_f(_T_OUT, "heartbeat", "heartbeat.url_env", "text", HEARTBEAT_ENV_RE, secure=True)
+_f(_T_OUT, "heartbeat", "heartbeat.interval_seconds", "int", (30, 86400), unit="s", restart=False)
+_f(_T_OUT, "heartbeat", "heartbeat.send_state", "bool", restart=False)
+_f(_T_OUT, "heartbeat", "heartbeat.fail_suffix", "text", HEARTBEAT_SUFFIX_RE, restart=False)
 _f(_T_HOOK, "inbound", "webhook.persist_deliveries", "bool")
 _f(_T_HOOK, "chatops", "chatops.enabled", "bool", restart=False, secure=True)
 _f(_T_HOOK, "chatops", "chatops.slack.enabled", "bool", restart=False, secure=True)

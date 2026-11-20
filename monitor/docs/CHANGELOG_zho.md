@@ -38,6 +38,12 @@
 
 - **对因投递丢失而保持开放的运行进行核对**(`webhook.stale_after_h`，默认 6，1 到 168)：事件让其保持排队或进行中的运行，如果在这段时间内没有收到最终事件，就会在运行列表中标记为 `stale`，其仓库在下一个周期被重新读取;`GET /api/live-status` 的 `stats.stale` 和 `open_runs` 统计它们。
 
+- **利用账户事件的免费变更检测**(`events_feed.enabled`，默认关闭;`events_feed.interval_seconds`、`events_feed.owner_kind`、`events_feed.max_per_tick`)：监视器用 ETag 读取组织或用户的事件。没有新内容的读取返回 `304`，不消耗配额;出现 push、拉取请求、标签或发布时，只有事件中提到的仓库会在下一个周期被重新读取，而不必等待冷仓库的慢速轮次。若 GitHub 的 `X-Poll-Interval` 更长则以它为准。不需要 Webhook 或隧道;计数器在 `GET /api/live-status` 的 `feed` 中。
+
+- **在栏中显示 GitHub 状态，并标记故障期间出现的红色**(`github_status.enabled`，默认关闭;`github_status.interval_seconds`、`github_status.mark_reds`)：监视器读取 githubstatus.com 的公开摘要(一个很小的 JSON，不使用账户，也不发送任何关于你的信息)，在页面底部的栏中显示 GitHub 的状态，并在 Actions 故障开始和结束时各通知一次(通知类型 `github_incident` 和 `github_incident_over`)。故障持续期间，出现的红色会在文本和字段 `possible_cause` 中注明“可能原因：GitHub 故障”;红色本身绝不会被隐藏。
+
+- **外部心跳，让别人在监视器停止时察觉**(`heartbeat.enabled`，默认关闭;`heartbeat.url_env`、`heartbeat.interval_seconds`、`heartbeat.send_state`、`heartbeat.fail_suffix`)：监视器每隔几分钟向你放在环境变量中的地址发送 ping(机密：绝不写入配置、显示或记录到日志)，healthchecks.io、Cronitor 或 Uptime Kuma 之类的服务会在 ping 停止时报警。ping 最多携带版本和状态;刷新循环卡住的监视器不会发送，因此沉默就是警报(或通过故障地址立即通知)。计数器显示在 `GET /api/health` 中。
+
 ### 修复
 
 - **墙屏为了让列表放得下而隐藏的行现在真的会消失**：页面用 hidden 属性隐藏行，但本身是 flex 盒子的行会忽略它，导致事件列表、队列、失败和热力图的行在卡片底部被切成两半并压在页脚上。现在隐藏优先于任何样式。

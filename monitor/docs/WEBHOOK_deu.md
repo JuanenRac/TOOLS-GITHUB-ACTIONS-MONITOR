@@ -70,6 +70,10 @@ Maßgeblich ist immer die Uhr dieses Rechners, nie die der Zustellung. `webhook.
 - **Verlorene Zustellungen.** Ein Lauf, den ein Ereignis offen ließ (wartend oder laufend) und der innerhalb von `webhook.stale_after_h` Stunden (standardmäßig 6, 1 bis 168) kein Abschlussereignis bekommt, wird in der Laufliste als `stale` markiert, und sein Repository wird im nächsten Zyklus neu gelesen (`stats.stale`; `open_runs` zählt die offen gehaltenen Läufe).
 - **Bereit.** `GET /readyz` (nur von diesem Rechner) antwortet `200`, wenn der Monitor Arbeit annehmen kann, und `503`, wenn nicht, mit der fehlschlagenden Prüfung: `loaded` (ein erstes Lesen liegt vor), `cycle` (die Aktualisierungsschleife hängt nicht und ist nicht beendet), `store` (der Datenordner ist beschreibbar) und `queue` (die Warteschlange hat Platz). `GET /api/health` sagt nur, dass der Prozess lebt.
 
+## Ohne Webhook: die Ereignisse des Kontos (standardmäßig aus)
+
+Mit eingeschaltetem `events_feed.enabled` liest der Monitor alle `events_feed.interval_seconds` (standardmäßig 60; `X-Poll-Interval` gilt, wenn es länger ist) mit einem ETag die Ereignisse des Kontos (`GET /orgs/OWNER/events` oder `/users/OWNER/events`; `events_feed.owner_kind` sagt welche, `auto` versucht zuerst die Organisation). Ein Lesevorgang ohne Neues antwortet `304` und kostet kein Kontingent; hat sich etwas geändert (ein Push, ein Pull Request, ein Tag oder ein Release), wird im nächsten Zyklus nur das im Ereignis genannte Repository neu gelesen, höchstens `events_feed.max_per_tick` pro Durchlauf. Der erste Lesevorgang lernt nur, wo die Liste steht. Es braucht weder Webhook noch Tunnel und kann neben einem laufen. Die Zähler stehen unter `feed` in `GET /api/live-status`.
+
 ## Checkliste für die Live-Ansicht
 
 1. Lege ein Geheimnis mit mindestens 32 Zeichen in der Umgebungsvariable ab, die `webhook.secret_env` nennt, und schalte den Webhook ein.

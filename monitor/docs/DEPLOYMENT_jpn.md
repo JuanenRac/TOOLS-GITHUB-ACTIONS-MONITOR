@@ -124,6 +124,15 @@ launchd（macOS）: `ProgramArguments` = `/usr/bin/python3`、`-m`、`github_act
 | `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py`: 通常のスイートを再実行する代わりに、まさにそのコミットの完全な成功実行の記録（完了、失敗・エラーなし、全テスト実行）を受け入れます。`--skip-clean-suite` は展開した zip のスイートも省略します（簡易チェックは実行）。その旨が表示されます。 |
 | `--progress` | `tools/make_release.py`: スイートの進み具合を 250 テストごとに 1 行で表示します(クリーンインストールのスイートも同様です)。 |
 
+## 外部ハートビート(既定ではオフ)
+
+モニターは、電源を切られたり、スリープしたり、再起動したりするコンピューターで動き、そのとき誰も見ていないことを誰も知りません。`heartbeat.enabled` をオンにすると、モニターは `heartbeat.interval_seconds`(既定 300)ごとにアドレスへ ping を送り、healthchecks.io、Cronitor、Uptime Kuma のようなサービスが ping の途絶を知らせます。
+
+- アドレスは秘密です。`heartbeat.url_env` が指す環境変数(既定は `MONITOR_HEARTBEAT_URL`)に入れてください。設定に書かれたり、表示やログに出たりすることはなく、設定画面は定義されているかどうかだけを示します。`https` である必要があり(`http` は自分のネットワーク内のサービス向けに `notify.allow_private_targets` がある場合のみ)、ユーザー名やパスワードを含めてはならず、通知と同じ保護付きで開かれます。
+- ping に含まれるのは多くても `msg=<バージョン> <ok|degraded>`(`heartbeat.send_state`)で、リポジトリ、アラート、名前は含まれません。
+- モニターが応答できない(更新ループが止まっている、または消えている)ときは ping を送らず、沈黙が警報になります。失敗用アドレスを持つサービス(healthchecks.io の `/fail`)には `heartbeat.fail_suffix` を指定でき、その場合はすぐに通知されます。
+- 完全版では `GET /api/health` に `heartbeat`(送信、失敗、スキップ、直近の結果)が表示されます。
+
 ## GitHub がログインを失効させたとき
 
 各アカウントは独立したプロセスなので、使えなくなったログインはそのアカウントだけに影響します。ログイン自体が使えないという拒否（401、`Bad credentials`、期限切れまたは失効したトークン、停止されたアカウント、ログインなし）が 2 回続くと、アカウントは**ブラインド**になります。ページ、詳細ヘルスチェック、`GET /api/accounts`（`state: blind`）、`bin/monitor_cli.py` がそれを示し、アラートタブに**重大なシステムアラート**（`system.credential_blind`、センチネル `system`）が開き、通知の種類 `credential_blind`（既定で有効）と `credential_back` がチャンネルに一度だけ知らせます。1 つの権限の拒否（1 つのリポジトリへの 403）ではアカウントはブラインドになりません。他のアカウントは動き続け、詳細ヘルスチェックは正常のままです。アカウントは試行を続け、最初に成功したサイクルでアラートが閉じます。

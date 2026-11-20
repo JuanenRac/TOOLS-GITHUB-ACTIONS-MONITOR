@@ -70,6 +70,10 @@ The clock used is always the one of this computer, never the one of the delivery
 - **Lost deliveries.** A run that an event left open (queued or in progress) and that gets no final event within `webhook.stale_after_h` hours (6 by default, 1 to 168) is marked `stale` in the run list and its repository is read again in the next cycle (`stats.stale`; `open_runs` counts the runs held open).
 - **Ready.** `GET /readyz` (this computer only) answers `200` when the monitor is fit to take work and `503` when it is not, with the check that fails: `loaded` (a first read is in), `cycle` (the refresh loop is neither stuck nor gone), `store` (the data folder can be written) and `queue` (the queue has room). `GET /api/health` only says that the process lives.
 
+## Without a webhook: the events of the account (off by default)
+
+With `events_feed.enabled` on, the monitor reads the events of the account (`GET /orgs/OWNER/events`, or `/users/OWNER/events`; `events_feed.owner_kind` says which, and `auto` tries the organization first) every `events_feed.interval_seconds` (60 by default; `X-Poll-Interval` wins when it is longer) with an ETag. A read that finds nothing new answers `304` and costs no allowance; when something changed (a push, a pull request, a tag or a release) only the repository named in the event is read again in the next cycle, at most `events_feed.max_per_tick` per turn. The first read only learns where the list stands. It needs no webhook and no tunnel, and it can run next to one. The counters are `feed` in `GET /api/live-status`.
+
 ## Checklist for the Live view
 
 1. Put a secret of at least 32 characters in the environment variable named by `webhook.secret_env` and switch the webhook on.

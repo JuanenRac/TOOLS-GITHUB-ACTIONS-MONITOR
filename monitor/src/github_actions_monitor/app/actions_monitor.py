@@ -48,6 +48,8 @@ from github_actions_monitor.data_pipeline import activity
 from github_actions_monitor.data_pipeline import fork_ci
 from github_actions_monitor.data_pipeline import discovery
 from github_actions_monitor.data_pipeline import etagcache, knownstates
+from github_actions_monitor.data_pipeline import eventfeed, githubstatus
+from github_actions_monitor.integrations import heartbeat
 from github_actions_monitor.data_pipeline import graphql_checks
 from github_actions_monitor import i18n
 from github_actions_monitor.security import auth_http
@@ -108,6 +110,9 @@ DEFAULTS = {
     "sentinel": {"enabled": True},
     "ai": {"provider": "none"},
     "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30, "max_bad_per_minute": 120, "max_verified_per_minute": 120, "reject_stale": False, "persist_deliveries": True, "clock_skew_s": 300, "max_body_kb": 1024, "queue_max": 500, "stale_after_h": 6},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
+    "events_feed": {"enabled": False, "interval_seconds": 60, "owner_kind": "auto", "max_per_tick": 20},      # optional: the events of the account read with an ETag, to read only the repository that changed (eventfeed.py)
+    "github_status": {"enabled": False, "interval_seconds": 300, "mark_reds": True},      # optional: the state of GitHub (githubstatus.com) in the bar, and the reds that appear during an incident of Actions (githubstatus.py)
+    "heartbeat": {"enabled": False, "url_env": "MONITOR_HEARTBEAT_URL", "interval_seconds": 300, "send_state": True, "fail_suffix": ""},      # optional: a ping to an outside service that raises the alarm when the monitor stops (heartbeat.py)
     "chatops": {"enabled": False, "slack": {"enabled": False, "signing_secret_env": "MONITOR_SLACK_SIGNING_SECRET"}, "discord": {"enabled": False, "public_key_env": "MONITOR_DISCORD_PUBLIC_KEY"}, "allowed_teams": [], "allowed_channels": [], "allowed_users": [],
                 "allowed_words": ["help", "status", "alerts", "red", "queue", "score"], "max_rows": 8, "show_repo_names": "all", "links": True, "max_age_seconds": 300, "rate_per_user_per_minute": 6, "rate_per_channel_per_minute": 20, "rate_per_minute": 60},   # read only commands from Slack and Discord, see chatops/inbound.py (off by default; the proofs are only in the environment)
     "config_check": {"strict": False},      # OFF: a key nobody reads, a wrong type or a number out of range is named at the start; ON: the monitor refuses to start (configcheck.py)
@@ -1385,11 +1390,12 @@ def webhook_count(code, duplicate=False):
 
 def webhook_status(config):
     """What the Live view says about the receiver: whether it is on, whether the secret is long enough (never the secret itself), the counters and the newest event. Read only."""
+    from github_actions_monitor.data_pipeline import eventfeed
     from github_actions_monitor.security import webhook
     cfg = webhook.settings(config)
     newest = LIVE_EVENTS[-1] if LIVE_EVENTS else None
     return {"enabled": cfg["enabled"], "active": webhook.active(config), "secret_ok": len(cfg["secret"]) >= webhook.MIN_SECRET, "text": webhook.status_text(config), "stats": dict(WEBHOOK_STATS),
-            "keep": webhook.live_settings(config)["live_events_keep"], "held": len(LIVE_EVENTS), "queue": webhook.INBOX.snapshot(config), "open_runs": webhook.open_count(), "secret_source": webhook.secret_source(config), "coverage": webhook.coverage(config),
+            "keep": webhook.live_settings(config)["live_events_keep"], "held": len(LIVE_EVENTS), "queue": webhook.INBOX.snapshot(config), "open_runs": webhook.open_count(), "feed": eventfeed.FEED.snapshot(config), "secret_source": webhook.secret_source(config), "coverage": webhook.coverage(config),
             "last": ({k: newest.get(k) for k in ("repo", "workflow", "event", "status", "conclusion", "at")} if newest else None)}
 
 
@@ -1464,6 +1470,73 @@ def webhook_worker(config):
                 webhook_sweep(LIVE_CONFIG or config)
             except Exception as error:   # noqa: BLE001
                 degraded.note("webhook.sweep", error)
+
+
+def outside_tick(config, now=None):
+    """One turn of the cheap reads that keep the monitor in step with the world, each only when it is switched on: the events of the account (which repository changed), the state of GitHub and the outside
+    heartbeat. Nothing here runs in the demo. Returns what happened, for the tests: {"feed": [repositories read again], "status": "start" | "over" | "", "heartbeat": "sent" | ... | ""}."""
+    out = {"feed": [], "status": "", "heartbeat": ""}
+    if DEMO["on"]:
+        return out
+    from github_actions_monitor.integrations import notifiers
+    from github_actions_monitor.security import netguard
+    now = time.time() if now is None else now
+    data = STATE.get("data") or {}
+    if eventfeed.settings(config)["enabled"] and not (rate_block_state()["blocked"] or data.get("paused_quota")) and data.get("repos"):      # a read costs allowance only when something changed; a spent allowance is not asked
+        owner = toolconfig.github_owner(config)
+        names = [r.get("name") if isinstance(r, dict) else r for r in data["repos"]]
+        for repo in eventfeed.FEED.tick(run_gh, owner, config, [n for n in names if isinstance(n, str)], now):
+            webhook_settle(repo)      # the stored conditional reads of the repository are dropped and it is read again in the next cycle
+            HOT_FORCED.add(repo)
+            out["feed"].append(repo)
+    if githubstatus.settings(config)["enabled"]:
+        out["status"] = githubstatus.STATUS.tick(netguard.opener_for(False), config, now)
+        if out["status"]:
+            announce_github_status(out["status"], config)
+    if heartbeat.settings(config)["enabled"]:
+        healthy = LITE["on"] or health_payload(deep=True)["ok"]
+        out["heartbeat"] = heartbeat.HEARTBEAT.tick(config, healthy, TOOL_VERSION, notifiers.settings(config)["allow_private_targets"], now=now)
+    return out
+
+
+def announce_github_status(transition, config):
+    """The start and the end of an incident of GitHub Actions go to the console, the event feed and the notifications, once each. Never raises."""
+    from github_actions_monitor.integrations import notifiers
+    kind = "github_incident" if transition == "start" else "github_incident_over"
+    info = githubstatus.STATUS.snapshot(config)
+    name = (info["incidents"][0]["name"] if info["incidents"] else "") or info["description"] or "Actions"
+    event = {"kind": kind, "code": kind, "level": "warn" if transition == "start" else "ok", "repo": "", "owner": "main", "url": None, "args": {"name": name},
+             "text": i18n.t("evt." + kind, name=name)}
+    print(event["text"], flush=True)
+    sentinel = SENTINEL["obj"]
+    try:
+        if sentinel is not None:
+            sentinel.feed._append([event])
+        notifiers.notify(config, event)
+    except Exception as error:   # noqa: BLE001 - never stops the loop
+        degraded.note("outside.announce", error)
+
+
+def outside_loop(config):
+    """The thread of the cheap outside reads: it looks at the settings every 15 seconds, so a switch turned on in Settings works without a restart. A failure is noted and the loop goes on."""
+    while True:
+        try:
+            outside_tick(LIVE_CONFIG or config)
+        except Exception as error:   # noqa: BLE001 - one bad turn never ends the loop
+            degraded.note("outside.tick", error)
+        time.sleep(15)
+
+
+def outside_start(config):
+    """Starts the thread once."""
+    if OUTSIDE["on"]:
+        return False
+    OUTSIDE["on"] = True
+    threading.Thread(target=outside_loop, args=(config,), name="outside-reads", daemon=True).start()
+    return True
+
+
+OUTSIDE = {"on": False}
 
 
 def webhook_worker_start(config):
@@ -2467,6 +2540,7 @@ def run_cycle(config, generation):
         announce_link(transition, config)
     data["offline"] = LINK.state()
     data["etag"] = ETAG["cache"].stats() if ETAG["cache"] else None
+    data["github_status"] = githubstatus.STATUS.snapshot(config)      # the state of GitHub for the bar (nothing is read here: the loop of the outside reads keeps it)
     maintain(config, data)
     if not WATCH.current(generation):
         return None
@@ -4084,6 +4158,7 @@ def health_payload(deep=False):
         snap = WATCH.snapshot(limit_seconds=watchdog_limit(LIVE_CONFIG or DEFAULTS))
         out["cycle"] = {"phase": snap["phase"], "running_seconds": snap["running_seconds"], "seconds_since_ok": snap["seconds_since_ok"], "stuck": verdict == "stuck", "dead": verdict == "dead", "blocked": verdict == "blocked", "abandoned_calls": cycle_watch.abandoned()}
         out["credential"] = credential.snapshot()
+        out["heartbeat"] = heartbeat.HEARTBEAT.snapshot(LIVE_CONFIG or DEFAULTS)
         if deep and verdict:
             out["ok"] = False
     return out
@@ -4900,6 +4975,7 @@ def main():
     from github_actions_monitor.security import webhook as _webhook
     _webhook.load_memory(paths.folder("data") / "webhook_deliveries.json") if _webhook.guard_settings(config)["persist_deliveries"] else None      # the memory of deliveries survives a restart
     _webhook.freeze_secret_name(config)      # the shared secret of the webhook is read from the environment once, under the name this process started with, and no program the monitor starts inherits it
+    outside_start(config)      # the cheap outside reads (events of the account, state of GitHub, heartbeat): each one only when switched on
     webhook_worker_start(config)      # the events of the receiver are applied by a thread of their own (a bounded queue, see webhook_receive)
     from github_actions_monitor.chatops import inbound as _chat
     envguard.hold(*_chat.env_names(config))      # the proofs of the chat (the signing secret of Slack, the public key of Discord) leave the environment here too

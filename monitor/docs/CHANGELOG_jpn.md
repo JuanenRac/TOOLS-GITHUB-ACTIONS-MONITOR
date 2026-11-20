@@ -38,6 +38,12 @@
 
 - **失われた配信で開いたままになった実行を照合します**(`webhook.stale_after_h`、既定 6、1 から 168):イベントが待機中または実行中のまま残した実行が、この時間内に最終イベントを受け取らない場合、実行一覧で `stale` と印が付き、次のサイクルでそのリポジトリが再び読まれます。`GET /api/live-status` の `stats.stale` と `open_runs` がそれらを数えます。
 
+- **アカウントのイベントによる無料の変更検出**(`events_feed.enabled`、既定はオフ。`events_feed.interval_seconds`、`events_feed.owner_kind`、`events_feed.max_per_tick`):モニターは組織またはユーザーのイベントを ETag 付きで読みます。新しいものがない読み取りは `304` を返して割り当てを消費せず、push、プルリクエスト、タグ、リリースが現れたときは、休眠リポジトリの遅いターンを待たずに、イベントに書かれたリポジトリだけが次のサイクルで再読み込みされます。GitHub の `X-Poll-Interval` が長ければそちらが優先されます。Webhook もトンネルも不要です。カウンターは `GET /api/live-status` の `feed` にあります。
+
+- **バーに GitHub の状態を表示し、障害中に出た赤に印を付けます**(`github_status.enabled`、既定はオフ。`github_status.interval_seconds`、`github_status.mark_reds`):モニターは githubstatus.com の公開サマリー(小さな JSON 1 つ、アカウント不要、あなたに関する情報は送りません)を読み、ページ下部のバーに GitHub の状態を表示して、Actions の障害の開始と終了を 1 回ずつ知らせます(通知の種類 `github_incident` と `github_incident_over`)。障害の間に出た赤には、本文とフィールド `possible_cause` に「考えられる原因: GitHub の障害」と付きます。赤そのものは隠されません。
+
+- **モニターが止まったことに誰かが気づくための外部ハートビート**(`heartbeat.enabled`、既定はオフ。`heartbeat.url_env`、`heartbeat.interval_seconds`、`heartbeat.send_state`、`heartbeat.fail_suffix`):数分ごとに、環境変数に入れたアドレス(秘密:設定に書かれず、表示やログにも出ません)へ ping を送り、healthchecks.io、Cronitor、Uptime Kuma のようなサービスが ping の途絶で警報を出します。ping に含まれるのは多くてもバージョンと状態で、更新ループが止まったモニターは送らないため、沈黙が警報になります(または失敗用アドレスですぐに知らされます)。カウンターは `GET /api/health` に表示されます。
+
 ### 修正
 
 - **壁面画面がリストを収めるために隠す行が、実際に消えるようになりました**: ページは hidden 属性で行を隠していましたが、それ自体がフレックスボックスである行はこれを無視していたため、イベントのリスト、キュー、失敗、ヒートマップの行がカードの下端で半分に切れ、フッターに重なっていました。隠す指定がどのスタイルよりも優先されます。

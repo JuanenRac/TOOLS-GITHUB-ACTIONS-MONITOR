@@ -70,6 +70,10 @@ L'horloge utilisée est toujours celle de cet ordinateur, jamais celle de la liv
 - **Livraisons perdues.** Une exécution qu'un événement a laissée ouverte (en file ou en cours) et qui ne reçoit aucun événement final dans les `webhook.stale_after_h` heures (6 par défaut, de 1 à 168) est marquée `stale` dans la liste des exécutions et son dépôt est relu au cycle suivant (`stats.stale` ; `open_runs` compte les exécutions tenues ouvertes).
 - **Prêt.** `GET /readyz` (cet ordinateur seulement) répond `200` quand le moniteur peut prendre du travail et `503` sinon, avec le contrôle qui échoue : `loaded` (une première lecture est faite), `cycle` (la boucle d'actualisation n'est ni bloquée ni arrêtée), `store` (le dossier de données est inscriptible) et `queue` (la file a de la place). `GET /api/health` dit seulement que le processus vit.
 
+## Sans webhook : les événements du compte (désactivé par défaut)
+
+Avec `events_feed.enabled` activé, le moniteur lit les événements du compte (`GET /orgs/OWNER/events`, ou `/users/OWNER/events` ; `events_feed.owner_kind` dit lequel, et `auto` essaie d'abord l'organisation) tous les `events_feed.interval_seconds` (60 par défaut ; `X-Poll-Interval` l'emporte s'il est plus long) avec un ETag. Une lecture qui ne trouve rien de nouveau répond `304` et ne coûte aucun quota ; quand quelque chose a changé (un push, une pull request, un tag ou une release), seul le dépôt nommé dans l'événement est relu au cycle suivant, au plus `events_feed.max_per_tick` par tour. La première lecture apprend seulement où en est la liste. Il ne demande ni webhook ni tunnel et peut fonctionner à côté d'un. Les compteurs sont `feed` dans `GET /api/live-status`.
+
 ## Liste de contrôle de la vue en direct
 
 1. Mettez un secret d'au moins 32 caractères dans la variable d'environnement indiquée par `webhook.secret_env` et activez le webhook.

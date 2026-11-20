@@ -26,12 +26,16 @@ Opcionales y **apagadas por defecto**. Los eventos del feed (un rojo nuevo, un b
 ## El contrato de los adaptadores
 
 - Para llegar a un servicio que no está en la lista, ejecuta un pequeño receptor en este equipo y apunta `http_local` hacia él. Recibe un POST con `Content-Type: application/json` y este cuerpo: `{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`.
-- `kind` es uno de `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `ai_alert`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `score_dropped`, `security_new`, `security_fixed`, `delivery_new`, `delivery_fixed`, `alerts_digest`, `silence_review`. Los campos solo se añaden. Responde cualquier 2xx; lo demás cuenta como fallo.
+- `kind` es uno de `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `ai_alert`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `github_incident`, `github_incident_over`, `score_dropped`, `security_new`, `security_fixed`, `delivery_new`, `delivery_fixed`, `alerts_digest`, `silence_review`. Los campos solo se añaden. Responde cualquier 2xx; lo demás cuenta como fallo.
 - `mqtt` publica el mismo JSON como carga de un mensaje QoS 0 en `notify.channels.mqtt.topic`.
 
 ## Apprise (opcional, apagado por defecto)
 
 El canal `apprise` entrega el mensaje a la orden `apprise` (instálala tú, por ejemplo `pip install apprise`) para llegar a cualquiera de los servicios que conoce. Las direcciones contienen los secretos de esos servicios, así que están en una variable de entorno cuyo NOMBRE es `notify.channels.apprise.urls_env` (separadas por espacios o comas, como mucho diez); se escriben en un fichero temporal privado durante el instante de la llamada, nunca en los argumentos de la orden, y la orden recibe un entorno sin las claves del monitor. **Apprise abre sus propias conexiones: la protección del monitor contra direcciones privadas no se le aplica**, así que lo que alcance depende de las direcciones que le des; por eso el canal tiene su propio interruptor, apagado por defecto, y está marcado como ajuste de seguridad. Si falta la orden, el canal dice `not_installed`; un fallo se cuenta como cualquier otro y nunca detiene el monitor.
+
+## El estado de GitHub (desactivado por defecto)
+
+Con `github_status.enabled` activado, el monitor lee el resumen público de githubstatus.com cada `github_status.interval_seconds` (300 por defecto): un JSON pequeño, sin cuenta y sin enviar nada sobre ti. La barra inferior de la página muestra el estado de GitHub. Cuando GitHub Actions tiene un incidente el monitor lo avisa una vez (los tipos `github_incident` y `github_incident_over`, que solo se notifican si los añades a `notify.events`), y con `github_status.mark_reds` (activado) un rojo que aparece durante el incidente dice «causa posible: un incidente de GitHub» en su texto y en el campo `possible_cause`. El rojo nunca se oculta.
 
 ## El límite por hora cuenta mensajes
 

@@ -26,12 +26,16 @@
 ## アダプターの取り決め
 
 - 一覧にないサービスへは、このコンピューター上に小さな受信プログラムを動かし、`http_local` をそこへ向けます。`Content-Type: application/json` の POST で次の本文を受け取ります:`{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`。
-- `kind` は `red_new`、`red_fixed`、`stuck_new`、`pending_sign`、`release_due`、`rate_low`、`offline`、`online`、`alerts_up`、`workflow_failed`、`ai_alert`、`collab_new`、`collab_fixed`、`credential_blind`、`credential_back`, `score_dropped`, `security_new`, `security_fixed`、`delivery_new`、`delivery_fixed`、`alerts_digest`、`silence_review` のいずれか。フィールドは追加のみです。2xx で応答してください。それ以外は失敗として数えます。
+- `kind` は `red_new`、`red_fixed`、`stuck_new`、`pending_sign`、`release_due`、`rate_low`、`offline`、`online`、`alerts_up`、`workflow_failed`、`ai_alert`、`collab_new`、`collab_fixed`、`credential_blind`、`credential_back`, `github_incident`, `github_incident_over`, `score_dropped`, `security_new`, `security_fixed`、`delivery_new`、`delivery_fixed`、`alerts_digest`、`silence_review` のいずれか。フィールドは追加のみです。2xx で応答してください。それ以外は失敗として数えます。
 - `mqtt` は同じ JSON を `notify.channels.mqtt.topic` の QoS 0 メッセージのペイロードとして発行します。
 
 ## Apprise（任意、初期状態はオフ）
 
 `apprise` チャンネルは、メッセージを `apprise` コマンド（`pip install apprise` などで各自インストール）に渡し、Apprise が対応するサービスに届けます。アドレスにはそれらのサービスの秘密が含まれるため、`notify.channels.apprise.urls_env` という名前の環境変数に入れます（空白またはカンマ区切り、最大 10 件）。呼び出しの間だけ非公開の一時ファイルに書き込まれ、コマンドの引数には決して入らず、コマンドにはモニターの鍵を含まない環境が渡されます。**Apprise は独自に接続を開くため、プライベートアドレスに対するモニターの保護は適用されません**。届く先は与えたアドレス次第です。そのためこのチャンネルには専用のスイッチがあり、初期状態はオフで、セキュリティ設定として印が付いています。コマンドがない場合は `not_installed` と表示され、失敗は他と同様に数えられ、モニターを止めることはありません。
+
+## GitHub の状態(既定ではオフ)
+
+`github_status.enabled` をオンにすると、モニターは `github_status.interval_seconds`(既定 300)ごとに githubstatus.com の公開サマリーを読みます。小さな JSON 1 つで、アカウントは不要、あなたに関する情報は送られません。ページ下部のバーに GitHub の状態が表示されます。GitHub Actions に障害があるとモニターは 1 回だけ知らせ(種類 `github_incident` と `github_incident_over`。`notify.events` に追加した場合のみ通知されます)、`github_status.mark_reds`(オン)では、障害中に出た赤に、本文とフィールド `possible_cause` で「考えられる原因: GitHub の障害」と付きます。赤そのものは隠されません。
 
 ## 1 時間あたりの上限はメッセージ数を数えます
 

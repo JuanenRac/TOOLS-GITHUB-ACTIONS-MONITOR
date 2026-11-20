@@ -124,6 +124,15 @@ Solo se leen los nombres de esta tabla. En el servicio un valor que no se puede 
 | `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py`: en lugar de repetir la suite ordinaria, acepta el registro de una pasada verde completa de ese mismo commit (terminada, sin fallos ni errores, todos los tests ejecutados); `--skip-clean-suite` tampoco repite la suite del zip extraído (sus comprobaciones rápidas sí se hacen) y lo dice. |
 | `--progress` | `tools/make_release.py`: dice cómo van las suites, una línea cada 250 pruebas, también en la suite de la instalación limpia. |
 
+## Un latido externo (desactivado por defecto)
+
+El monitor se ejecuta en un equipo que puede apagarse, suspenderse o reiniciarse, y entonces nadie se entera de que nadie vigila. Con `heartbeat.enabled` activado, el monitor avisa a una dirección cada `heartbeat.interval_seconds` (300 por defecto) y un servicio como healthchecks.io, Cronitor o Uptime Kuma te dice cuándo dejan de llegar los avisos.
+
+- La dirección es un secreto: ponla en la variable de entorno que nombra `heartbeat.url_env` (`MONITOR_HEARTBEAT_URL` por defecto). Nunca se escribe en la configuración, ni se muestra ni se registra, y Ajustes solo dice si hay una definida. Debe ser `https` (`http` solo con `notify.allow_private_targets`, para un servicio de tu propia red), no llevar usuario ni contraseña, y se abre con la misma protección que las notificaciones.
+- El aviso lleva como mucho `msg=<versión> <ok|degraded>` (`heartbeat.send_state`): nunca un repositorio, una alerta ni un nombre.
+- Cuando el monitor no puede atender (su bucle de refresco está atascado o caído) el aviso no se envía y el silencio es la alarma. A un servicio con dirección de fallo (healthchecks.io: `/fail`) se le puede dar `heartbeat.fail_suffix` y entonces se le avisa de inmediato.
+- En la edición completa `GET /api/health` muestra `heartbeat` (enviados, fallidos, omitidos y el último resultado).
+
 ## Cuando GitHub revoca o caduca el acceso
 
 Cada cuenta es un proceso propio, así que un acceso que deja de funcionar solo afecta a esa cuenta. Tras dos rechazos seguidos que dicen que el acceso mismo no sirve (un 401, `Bad credentials`, un token caducado o revocado, una cuenta suspendida, ningún acceso) la cuenta queda **ciega**: la página, la comprobación de salud profunda, `GET /api/accounts` (`state: blind`) y `bin/monitor_cli.py` lo dicen, se abre una **alerta crítica de sistema** (`system.credential_blind`, centinela `system`) en la pestaña de alertas, y los tipos de notificación `credential_blind` (activado por defecto) y `credential_back` avisan una vez a los canales. El rechazo de un solo permiso (un 403 para un repositorio) no deja ciega a una cuenta. Las demás cuentas siguen y la comprobación de salud profunda se mantiene en verde. La cuenta sigue intentándolo y el primer ciclo bueno cierra la alerta.

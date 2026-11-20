@@ -244,6 +244,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `display.timezone` | `"local"` | general | Time zone of the texts |
 | `ecosystems` | `"all"` | general | Ecosystems watched |
 | `ecosystems_file` | `-` | paths | Ecosystems file |
+| `events_feed.enabled` | `false` | polling | Find changes with the events of the account |
+| `events_feed.interval_seconds` | `60` | polling | Seconds between reads of the events |
+| `events_feed.max_per_tick` | `20` | polling | Repositories read again per turn |
+| `events_feed.owner_kind` | `"auto"` | polling | Kind of account |
 | `exclude` | `[]` | general | Repositories to skip |
 | `extra_reader.any_folder` (secure) | `false` | quota | Accept the token file from any folder |
 | `extra_reader.enabled` (secure) | `false` | quota | Read also with a second account |
@@ -265,8 +269,16 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `github_app.openssl_path` (secure) | `-` | quota | Path of the program openssl |
 | `github_app.share_reads` (secure) | `false` | quota | Let tools take a read-only token of the App |
 | `github_owner` | `""` | general | GitHub account |
+| `github_status.enabled` (secure) | `false` | polling | Show the state of GitHub |
+| `github_status.interval_seconds` | `300` | polling | Seconds between reads of the state |
+| `github_status.mark_reds` | `true` | polling | Mark the reds of an incident |
 | `github_token.enabled` (secure) | `false` | advanced | Keep a GitHub token in the monitor |
 | `github_token.store` (secure) | `"auto"` | advanced | Where the token is kept |
+| `heartbeat.enabled` (secure) | `false` | outputs | Send the outside heartbeat |
+| `heartbeat.fail_suffix` | `""` | outputs | Address ending for a failure |
+| `heartbeat.interval_seconds` | `300` | outputs | Seconds between pings |
+| `heartbeat.send_state` | `true` | outputs | Send the version and the state in the ping |
+| `heartbeat.url_env` (secure) | `"MONITOR_HEARTBEAT_URL"` | outputs | Variable with the address to ping |
 | `hot_hours` | `3` | polling | A repository is hot for |
 | `issues_refresh_seconds` | `180` | polling | Refresh of issues |
 | `kiosk.enabled` | `false` | general | Kiosk profile |

@@ -31,7 +31,7 @@ DIGEST_SECONDS = {"hourly": 3600, "daily": 86400}
 SENTINELS = ("ci", "collab", "security")
 FAMILIES = {"ci": ("red_new", "red_fixed", "stuck_new", "workflow_failed", "alerts_up", "ai_alert", "collab_new", "collab_fixed", "security_new", "security_fixed", "alerts_digest", "silence_review"),
             "release": ("pending_sign", "release_due", "delivery_new", "delivery_fixed"),
-            "system": ("offline", "online", "rate_low", "credential_blind", "credential_back", "quota_warn", "quota_over", "quota_alert")}
+            "system": ("offline", "online", "rate_low", "credential_blind", "credential_back", "github_incident", "github_incident_over", "quota_warn", "quota_over", "quota_alert")}
 ROLE_FAMILIES = {"viewer": ("ci",), "maintainer": ("ci", "release"), "admin": ("ci", "release", "system")}
 DEFAULTS = {"users": {"enabled": False, "max_per_hour": 10}, "digest": {"max_items": 50}}
 DOC = "notify_digest"

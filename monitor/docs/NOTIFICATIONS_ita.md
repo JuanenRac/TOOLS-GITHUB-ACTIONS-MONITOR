@@ -26,12 +26,16 @@ Facoltative e **spenta per impostazione predefinita**. Gli eventi del feed (un n
 ## Il contratto degli adattatori
 
 - Per raggiungere un servizio non in elenco, esegui un piccolo ricevitore su questo computer e punta `http_local` verso di esso. Riceve un POST con `Content-Type: application/json` e questo corpo: `{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`.
-- `kind` è uno tra `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `ai_alert`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `score_dropped`, `security_new`, `security_fixed`, `delivery_new`, `delivery_fixed`, `alerts_digest`, `silence_review`. I campi si aggiungono soltanto. Rispondi con un 2xx qualsiasi; il resto conta come errore.
+- `kind` è uno tra `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `ai_alert`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `github_incident`, `github_incident_over`, `score_dropped`, `security_new`, `security_fixed`, `delivery_new`, `delivery_fixed`, `alerts_digest`, `silence_review`. I campi si aggiungono soltanto. Rispondi con un 2xx qualsiasi; il resto conta come errore.
 - `mqtt` pubblica lo stesso JSON come payload di un messaggio QoS 0 su `notify.channels.mqtt.topic`.
 
 ## Apprise (facoltativo, spento per impostazione predefinita)
 
 Il canale `apprise` consegna il messaggio al comando `apprise` (installalo tu, per esempio `pip install apprise`) per raggiungere uno qualsiasi dei servizi che conosce. Gli indirizzi contengono i segreti di quei servizi, quindi stanno in una variabile d'ambiente il cui NOME è `notify.channels.apprise.urls_env` (separati da spazi o virgole, al massimo dieci); vengono scritti in un file temporaneo privato per l'istante della chiamata, mai negli argomenti del comando, e il comando riceve un ambiente senza le chiavi del monitor. **Apprise apre connessioni proprie: la protezione del monitor contro gli indirizzi privati non si applica**, quindi ciò che raggiunge dipende dagli indirizzi che gli dai; per questo il canale ha un interruttore proprio, spento per impostazione predefinita, ed è segnato come impostazione di sicurezza. Se il comando manca il canale dice `not_installed`; un errore viene contato come gli altri e non ferma mai il monitor.
+
+## Lo stato di GitHub (disattivato per impostazione predefinita)
+
+Con `github_status.enabled` attivo, il monitor legge il riepilogo pubblico di githubstatus.com ogni `github_status.interval_seconds` (300 per impostazione predefinita): un piccolo JSON, senza account, e nulla su di te viene inviato. La barra in fondo alla pagina mostra lo stato di GitHub. Quando GitHub Actions ha un incidente il monitor lo segnala una volta (i tipi `github_incident` e `github_incident_over`, notificati solo se li aggiungi a `notify.events`), e con `github_status.mark_reds` (attivo) un rosso che compare durante l'incidente dice «causa possibile: un incidente di GitHub» nel testo e nel campo `possible_cause`. Il rosso in sé non viene mai nascosto.
 
 ## Il limite orario conta i messaggi
 

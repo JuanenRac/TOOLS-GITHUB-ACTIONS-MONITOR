@@ -124,6 +124,15 @@ Only the names in this table are read. In the service a value that cannot be rea
 | `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py`: instead of running the ordinary suite again, accept the record of a complete green run of that very commit (finished, no failure, no error, every test run); `--skip-clean-suite` also skips the suite of the extracted zip (its smoke checks still run) and says so. |
 | `--progress` | `tools/make_release.py`: says how far the suites are, one line every 250 tests, also in the suite of the clean install. |
 
+## An outside heartbeat (off by default)
+
+The monitor runs on a computer that can be switched off, put to sleep or restarted, and then nobody is told that nobody is watching. With `heartbeat.enabled` on, the monitor pings an address every `heartbeat.interval_seconds` (300 by default) and a service such as healthchecks.io, Cronitor or Uptime Kuma tells you when the pings stop.
+
+- The address is a secret: put it in the environment variable named by `heartbeat.url_env` (`MONITOR_HEARTBEAT_URL` by default). It is never written in the configuration, shown or logged, and Settings only says whether one is defined. It must be `https` (`http` only with `notify.allow_private_targets`, for a service in your own network), carry no user name or password, and is opened with the same guard as the notifications.
+- The ping carries at most `msg=<version> <ok|degraded>` (`heartbeat.send_state`): never a repository, an alert or a name.
+- When the monitor is not fit to serve (its refresh loop is stuck or gone) the ping is not sent and the silence is the alarm. A service with a failure address (healthchecks.io: `/fail`) can be given `heartbeat.fail_suffix` and is then told at once.
+- In the complete edition `GET /api/health` shows `heartbeat` (sent, failed, skipped and the last result).
+
 ## When GitHub revokes or expires the login
 
 Every account is a process of its own, so a login that stops working touches only that account. After two refusals in a row that say the login itself is no good (a 401, `Bad credentials`, an expired or revoked token, a suspended account, no login at all) the account is **blind**: the page, the deep health check, `GET /api/accounts` (`state: blind`) and `bin/monitor_cli.py` say so, a **critical system alert** (`system.credential_blind`, sentinel `system`) opens in the Alerts tab, and the notification kinds `credential_blind` (on by default) and `credential_back` tell the channels once. A refusal of a single permission (a 403 for one repository) does not make an account blind. The other accounts go on and the deep health check stays green. The account keeps trying, and the first good cycle closes the alert.

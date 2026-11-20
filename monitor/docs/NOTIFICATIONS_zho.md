@@ -26,12 +26,16 @@
 ## 适配器约定
 
 - 要连接列表之外的服务,请在本机运行一个小型接收程序,并让 `http_local` 指向它。它会收到 `Content-Type: application/json` 的 POST,正文如下:`{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`。
-- `kind` 为 `red_new`、`red_fixed`、`stuck_new`、`pending_sign`、`release_due`、`rate_low`、`offline`、`online`、`alerts_up`、`workflow_failed`、`ai_alert`、`collab_new`、`collab_fixed`、`credential_blind`、`credential_back`, `score_dropped`, `security_new`, `security_fixed`、`delivery_new`、`delivery_fixed`、`alerts_digest`、`silence_review` 之一。字段只会增加。返回任意 2xx;其他一律算作失败。
+- `kind` 为 `red_new`、`red_fixed`、`stuck_new`、`pending_sign`、`release_due`、`rate_low`、`offline`、`online`、`alerts_up`、`workflow_failed`、`ai_alert`、`collab_new`、`collab_fixed`、`credential_blind`、`credential_back`, `github_incident`, `github_incident_over`, `score_dropped`, `security_new`, `security_fixed`、`delivery_new`、`delivery_fixed`、`alerts_digest`、`silence_review` 之一。字段只会增加。返回任意 2xx;其他一律算作失败。
 - `mqtt` 把同样的 JSON 作为 QoS 0 消息的负载发布到 `notify.channels.mqtt.topic`。
 
 ## Apprise（可选，默认关闭）
 
 `apprise` 渠道把消息交给 `apprise` 命令（请自行安装，例如 `pip install apprise`），从而可以到达它支持的任何服务。这些地址包含各服务的机密，所以放在名称为 `notify.channels.apprise.urls_env` 的环境变量中（用空格或逗号分隔，最多十个）；调用期间它们会写入一个私有的临时文件，绝不放进命令参数，命令得到的环境中不含监视器的密钥。**Apprise 自行建立连接，监视器对私有地址的防护不适用于它**，所以它能到达哪里取决于你给它的地址；因此该渠道有独立的开关，默认关闭，并标记为安全设置。若找不到该命令，渠道会显示 `not_installed`；失败与其他失败一样被计数，绝不会让监视器停止。
+
+## GitHub 状态(默认关闭)
+
+开启 `github_status.enabled` 后，监视器每隔 `github_status.interval_seconds`（默认 300）读取 githubstatus.com 的公开摘要：一个很小的 JSON，不使用账户，也不发送任何关于你的信息。页面底部的栏会显示 GitHub 的状态。当 GitHub Actions 出现故障时，监视器会通知一次（类型 `github_incident` 和 `github_incident_over`，只有加入 `notify.events` 才会发送通知），并且在 `github_status.mark_reds`（开启）下，故障期间出现的红色会在文本和字段 `possible_cause` 中注明“可能原因：GitHub 故障”。红色本身绝不会被隐藏。
 
 ## 每小时上限统计的是消息
 

@@ -70,6 +70,10 @@ O relógio usado é sempre o deste computador, nunca o da entrega. `webhook.cloc
 - **Entregas perdidas.** Uma execução que um evento deixou aberta (em fila ou em curso) e que não recebe evento final em `webhook.stale_after_h` horas (6 por omissão, de 1 a 168) fica marcada como `stale` na lista de execuções e o seu repositório é lido de novo no ciclo seguinte (`stats.stale`; `open_runs` conta as execuções mantidas abertas).
 - **Pronto.** `GET /readyz` (só neste computador) responde `200` quando o monitor pode aceitar trabalho e `503` quando não pode, com a verificação que falha: `loaded` (há uma primeira leitura), `cycle` (o ciclo de atualização nem está preso nem parou), `store` (a pasta de dados aceita escrita) e `queue` (a fila tem espaço). `GET /api/health` só diz que o processo está vivo.
 
+## Sem webhook: os eventos da conta (desativado por omissão)
+
+Com `events_feed.enabled` ativo, o monitor lê os eventos da conta (`GET /orgs/OWNER/events`, ou `/users/OWNER/events`; `events_feed.owner_kind` diz qual, e `auto` tenta primeiro a organização) a cada `events_feed.interval_seconds` (60 por omissão; vale `X-Poll-Interval` se for maior) com um ETag. Uma leitura que não encontra nada de novo responde `304` e não gasta quota; quando algo mudou (um push, um pull request, uma etiqueta ou uma release) só se volta a ler, no ciclo seguinte, o repositório indicado no evento, no máximo `events_feed.max_per_tick` por turno. A primeira leitura só aprende onde está a lista. Não precisa de webhook nem de túnel e pode funcionar ao lado de um. Os contadores são `feed` em `GET /api/live-status`.
+
 ## Lista de verificação da vista em direto
 
 1. Coloque um segredo com pelo menos 32 carateres na variável de ambiente indicada por `webhook.secret_env` e ative o webhook.

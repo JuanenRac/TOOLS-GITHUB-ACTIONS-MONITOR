@@ -26,12 +26,16 @@ Optional und **standardmäßig aus**. Die Ereignisse des Feeds (ein neues Rot, e
 ## Der Adapter-Vertrag
 
 - Für einen Dienst, der nicht in der Liste steht, starten Sie einen kleinen Empfänger auf diesem Rechner und richten `http_local` darauf. Er erhält einen POST mit `Content-Type: application/json` und diesem Rumpf: `{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`.
-- `kind` ist eines von `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `ai_alert`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `score_dropped`, `security_new`, `security_fixed`, `delivery_new`, `delivery_fixed`, `alerts_digest`, `silence_review`. Felder kommen nur hinzu. Antworten Sie mit einem beliebigen 2xx; alles andere zählt als Fehler.
+- `kind` ist eines von `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `ai_alert`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `github_incident`, `github_incident_over`, `score_dropped`, `security_new`, `security_fixed`, `delivery_new`, `delivery_fixed`, `alerts_digest`, `silence_review`. Felder kommen nur hinzu. Antworten Sie mit einem beliebigen 2xx; alles andere zählt als Fehler.
 - `mqtt` veröffentlicht dasselbe JSON als Nutzlast einer QoS-0-Nachricht auf `notify.channels.mqtt.topic`.
 
 ## Apprise (optional, standardmäßig aus)
 
 Der Kanal `apprise` übergibt die Nachricht an den Befehl `apprise` (selbst installieren, zum Beispiel `pip install apprise`), damit jeder der Dienste erreicht werden kann, die er kennt. Die Adressen enthalten die Geheimnisse dieser Dienste, daher stehen sie in einer Umgebungsvariable, deren NAME `notify.channels.apprise.urls_env` ist (durch Leerzeichen oder Kommas getrennt, höchstens zehn); sie werden für den Augenblick des Aufrufs in eine private temporäre Datei geschrieben, nie in die Argumente des Befehls, und der Befehl erhält eine Umgebung ohne die Schlüssel des Monitors. **Apprise öffnet eigene Verbindungen: Der Schutz des Monitors vor privaten Adressen gilt dafür nicht**, was es erreicht, hängt also von den Adressen ab, die du ihm gibst; deshalb hat der Kanal einen eigenen Schalter, standardmäßig aus, und ist als Sicherheitseinstellung markiert. Fehlt der Befehl, sagt der Kanal `not_installed`; ein Fehler wird wie jeder andere gezählt und stoppt den Monitor nie.
+
+## Der Zustand von GitHub (standardmäßig aus)
+
+Mit eingeschaltetem `github_status.enabled` liest der Monitor alle `github_status.interval_seconds` (standardmäßig 300) die öffentliche Zusammenfassung von githubstatus.com: ein kleines JSON, ohne Konto, und nichts über dich wird gesendet. Die Leiste unten auf der Seite zeigt den Zustand von GitHub. Hat GitHub Actions einen Vorfall, meldet der Monitor ihn einmal (die Arten `github_incident` und `github_incident_over`, die nur benachrichtigt werden, wenn du sie zu `notify.events` hinzufügst), und mit `github_status.mark_reds` (an) nennt ein während des Vorfalls auftretendes Rot im Text und im Feld `possible_cause` die „mögliche Ursache: ein Vorfall bei GitHub“. Das Rot selbst wird nie verborgen.
 
 ## Das Limit pro Stunde zählt Nachrichten
 

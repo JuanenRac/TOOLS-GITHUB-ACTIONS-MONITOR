@@ -70,6 +70,10 @@
 - **丢失的投递。** 事件让其保持开放(排队或进行中)的运行，如果在 `webhook.stale_after_h` 小时(默认 6，1 到 168)内没有收到最终事件，就会在运行列表中标记为 `stale`，其仓库在下一个周期被重新读取(`stats.stale`;`open_runs` 统计保持开放的运行)。
 - **就绪。** `GET /readyz`(仅限本机)在监视器可以接收工作时返回 `200`，否则返回 `503` 并给出失败的检查项:`loaded`(已有第一次读取)、`cycle`(刷新循环没有卡住也没有退出)、`store`(数据文件夹可写)和 `queue`(队列有空位)。`GET /api/health` 只表明进程还活着。
 
+## 没有 Webhook:账户事件(默认关闭)
+
+开启 `events_feed.enabled` 后，监视器每隔 `events_feed.interval_seconds`（默认 60;若 `X-Poll-Interval` 更长则以它为准）用 ETag 读取账户事件（`GET /orgs/OWNER/events` 或 `/users/OWNER/events`;由 `events_feed.owner_kind` 指定，`auto` 先尝试组织）。没有新内容的读取返回 `304`，不消耗配额;有变化时（push、拉取请求、标签或发布），只有事件中提到的仓库会在下一个周期被重新读取，每轮最多 `events_feed.max_per_tick` 个。第一次读取只了解列表的位置。它不需要 Webhook 或隧道，也可以与之并用。计数器在 `GET /api/live-status` 的 `feed` 中。
+
 ## 实时视图检查清单
 
 1. 在 `webhook.secret_env` 所指的环境变量中放入至少 32 个字符的密钥，并开启 Webhook。
