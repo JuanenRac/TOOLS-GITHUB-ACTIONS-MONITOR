@@ -390,14 +390,20 @@ def ignored(repo, finding, patterns):
 
 
 def scan_clones(workspace_root, repos, rules=None, ignore=None, maintenance=None):
-    """{repo: [findings]} for the repositories that have a clone with workflows. Plain file reads, no network. `ignore` = the patterns of lint.ignore."""
+    """{repo: [findings]} for the repositories that have a clone with workflows, read from the default branch of the remote that the clone knows (`git show`, no fetch, no network) and, when it has
+    none, from the working tree. `ignore` = the patterns of lint.ignore."""
+    from github_actions_monitor.delivery import mainsource
     result = {}
     for repo in repos:
         clone = Path(workspace_root) / repo
-        if (clone / ".github" / "workflows").is_dir():
-            found = [f for f in lint_path(clone, rules, clone, maintenance) if not ignored(repo, f, ignore)]
-            if found:
-                result[repo] = found
+        if not (clone / ".github" / "workflows").is_dir() and not (clone / ".git").exists():
+            continue
+        texts, _note = mainsource.workflow_texts(clone)      # the default branch of the remote, not the working tree: a clone on an old branch is judged by what main says
+        found = []
+        for name in sorted(texts):
+            found += [f for f in lint_text(texts[name], ".github/workflows/" + name, rules, maintenance) if not ignored(repo, f, ignore)]
+        if found:
+            result[repo] = found
     return result
 
 

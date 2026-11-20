@@ -81,7 +81,7 @@ DEFAULTS = {
     "enabled": True, "refresh_seconds": 900, "alerts_hot_seconds": 900, "alerts_cold_seconds": 3600,
     "hygiene_seconds": 21600, "max_calls_per_tick": 70, "budget_per_hour": 600, "workers": 8,
     "trend_green_pct": 90, "trend_health": 70, "trend_quota_pct": 80,      # the lines of the daily trend: share of green workflows and health below which the line is crossed, share of the API quota above which it is
-    "candidate_days": 2.0, "pending_sign_hours": 24, "notify_command": [], "candidate_min_entries": 1, "stale_pr_days": 7, "hot_hours": 3,
+    "candidate_days": 2.0, "pending_sign_hours": 24, "notify_command": [], "candidate_min_entries": 5, "stale_pr_days": 7, "hot_hours": 3,
     "required_files": [["README.md"], ["LICENSE", "LICENSE.md", "LICENSE.txt", "LICENSE-APACHE", "LICENSE-MIT", "COPYING"], ["CHANGELOG.md"], ["SECURITY.md"]],
     # hygiene (A6): how strict it is. ruleset_mode "name" = a ruleset whose name matches ruleset_names (patterns, ACTIVE) must exist (the old rule); "effective" (the default) = the default
     # branch is protected when GitHub reports an effective rule or a branch protection for it (public endpoints, no admin needed), whatever the ruleset is called; "off" = not checked.

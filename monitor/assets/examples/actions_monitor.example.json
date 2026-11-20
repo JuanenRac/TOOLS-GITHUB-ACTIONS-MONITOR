@@ -76,7 +76,7 @@
     "hot_hours": 3,
     "min_rate_remaining": 800,
     "candidate_days": 2,
-    "candidate_min_entries": 1,
+    "candidate_min_entries": 5,
     "skip_candidate_prefixes": [],
     "stale_pr_days": 7,
     "trend_green_pct": 90,

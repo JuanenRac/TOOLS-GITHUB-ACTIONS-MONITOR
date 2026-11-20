@@ -68,6 +68,40 @@ def read_file(clone, name):
     return text, "no remote branch known; counted from the working tree"
 
 
+MAX_WORKFLOWS = 60
+MAX_WORKFLOW_BYTES = 1_048_576
+
+
+def workflow_texts(clone):
+    """({file name: text}, note) of the workflow files (`.github/workflows/*.yml|yaml`) of a clone, taken from the default branch of the remote like the CHANGELOG: a clone on an old branch of an agent
+    must not make the linter and the scanners judge a workflow that main no longer has. `note` is "" when that was possible, otherwise it says why the working tree was read (same words as
+    `read_file`). At most 60 files of 1 MiB; a file that cannot be read is left out."""
+    clone = Path(clone)
+    ref, _branch = default_ref(clone)
+    texts = {}
+    if ref:
+        ok, listing = _git(clone, "ls-tree", "--name-only", ref, ".github/workflows/")
+        for path in sorted(p.strip() for p in listing.split("\n") if p.strip().endswith((".yml", ".yaml")))[:MAX_WORKFLOWS] if ok else ():
+            good, text = _git(clone, "show", f"{ref}:{path}")
+            if good:
+                texts[path.rsplit("/", 1)[-1]] = text[:MAX_WORKFLOW_BYTES]
+        return texts, ""
+    folder = clone / ".github" / "workflows"
+    try:
+        files = sorted(p for p in folder.iterdir() if p.is_file() and p.suffix in (".yml", ".yaml"))[:MAX_WORKFLOWS]
+    except OSError:
+        return {}, ""
+    for path in files:
+        try:
+            texts[path.name] = path.read_text(encoding="utf-8", errors="replace")[:MAX_WORKFLOW_BYTES]
+        except OSError:
+            continue
+    here = current_branch(clone)
+    if here and here not in ("main", "master"):
+        return texts, f"clone on branch {here}, not on main; read from the working tree"
+    return texts, "no remote branch known; read from the working tree"
+
+
 def read_changelog(clone):
     """(text | None, note) of the CHANGELOG of a clone; see `read_file`."""
     return read_file(clone, "CHANGELOG.md")
