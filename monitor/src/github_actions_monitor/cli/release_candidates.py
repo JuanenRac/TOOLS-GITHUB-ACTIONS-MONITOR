@@ -23,6 +23,7 @@ from github_actions_monitor import i18n
 from github_actions_monitor.util import platform_compat
 from github_actions_monitor.app import toolconfig
 from github_actions_monitor.app import workspace
+from github_actions_monitor.delivery import mainsource
 
 G = workspace.workspace_root_soft()
 OUT_DEFAULT = workspace.audit_dir_soft() / "RELEASE_CANDIDATES.txt"
@@ -37,10 +38,8 @@ def gh_json(*args):
 
 
 def unreleased_count(text):
-    """Number of list entries under `## [Unreleased]` of a CHANGELOG text (shared with the sentinel module)."""
-    text = text.replace("\r\n", "\n")
-    m = re.search(r"^## \[Unreleased\]\s*\n(.*?)(?=^## \[|\Z)", text, re.S | re.M)
-    return len(re.findall(r"^\s*[-*] ", m.group(1) if m else "", re.M))
+    """Number of list entries under `## [Unreleased]` (the one function of the monitor, `delivery/mainsource.py`)."""
+    return mainsource.unreleased_count(text)
 
 
 def main():
@@ -70,7 +69,8 @@ def main():
         cl = d / "CHANGELOG.md"
         if not (d / ".git").exists() or not cl.is_file():
             continue
-        count = unreleased_count(cl.read_text(encoding="utf-8", errors="replace"))
+        text, _ = mainsource.read_changelog(d)
+        count = unreleased_count(text or "")
         if count < args.min_entries:
             continue
         rel = gh_json("api", f"repos/{toolconfig.github_owner()}/{n}/releases/latest")

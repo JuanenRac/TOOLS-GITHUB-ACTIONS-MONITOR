@@ -8,15 +8,21 @@ Three sources, none of them writes anything:
   * the Actions runs of the seeding workflow: when each board was last reconciled, and whether the definitions changed after that.
 Without the read:project scope the tab still works from the definitions and the runs, and says what is missing.
 """
+import io
 import json
 import re
 import subprocess
 import sys
+import tarfile
+import tempfile
 import threading
 import time
 
 from github_actions_monitor import i18n
 from github_actions_monitor.app import toolconfig
+from github_actions_monitor.delivery import mainsource
+
+NO_WINDOW = mainsource.NO_WINDOW
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -53,14 +59,18 @@ print(json.dumps(out))
 
 
 def defs_summary(profile_dir):
-    """Cards per status according to the definitions in the profile repository (run in a child process: nothing is imported here)."""
+    """Cards per status according to the definitions in the profile repository, as they are on the default branch of the remote (a clone on another branch, or behind or ahead of main, must
+    not make a board "drift"); the working tree is read only when that branch is not known. Run in a child process: nothing is imported here."""
     tools = Path(profile_dir) / "tools"
-    if not (tools / "roadmap_defs.py").is_file():
-        return {}, i18n.t("a9.no_defs_file")
-    try:
-        done = subprocess.run([sys.executable, "-I", "-c", DEFS_SCRIPT, str(tools)], capture_output=True, text=True, encoding="utf-8", timeout=60)
-    except (OSError, subprocess.TimeoutExpired) as error:
-        return {}, str(error)[:200]
+    with tempfile.TemporaryDirectory(prefix="a9_defs_") as scratch:
+        from_main = _extract_main_tools(profile_dir, scratch)
+        folder = Path(from_main) if from_main else tools
+        if not (folder / "roadmap_defs.py").is_file():
+            return {}, i18n.t("a9.no_defs_file")
+        try:
+            done = subprocess.run([sys.executable, "-I", "-c", DEFS_SCRIPT, str(folder)], capture_output=True, text=True, encoding="utf-8", timeout=60, creationflags=NO_WINDOW)
+        except (OSError, subprocess.TimeoutExpired) as error:
+            return {}, str(error)[:200]
     if done.returncode != 0:
         return {}, (done.stderr.strip().splitlines() or [i18n.t("a9.defs_failed")])[-1][:200]
     try:
@@ -69,11 +79,28 @@ def defs_summary(profile_dir):
         return {}, i18n.t("a9.defs_not_json")
 
 
+def _extract_main_tools(profile_dir, scratch):
+    """The `tools/` folder of the default branch of the remote, extracted into `scratch` ("" when the clone has no such branch or git cannot do it)."""
+    ref, _ = mainsource.default_ref(profile_dir)
+    if not ref:
+        return ""
+    try:
+        done = subprocess.run(["git", "-C", str(profile_dir), "archive", "--format=tar", ref, "tools"], capture_output=True, timeout=60, creationflags=NO_WINDOW)
+        if done.returncode != 0 or not done.stdout:
+            return ""
+        with tarfile.open(fileobj=io.BytesIO(done.stdout)) as archive:
+            archive.extractall(scratch, filter="data")
+    except (OSError, subprocess.SubprocessError, tarfile.TarError):
+        return ""
+    return str(Path(scratch) / "tools")
+
+
 def defs_age_days(profile_dir, now):
     """Days since the definitions were last changed in git (None when it cannot be read)."""
     try:
-        done = subprocess.run(["git", "-C", str(profile_dir), "log", "-1", "--format=%ct", "--", "tools/roadmap_defs.py", "tools/seed_ecosystem_roadmap.py"],
-                              capture_output=True, text=True, timeout=30)
+        ref = mainsource.default_ref(profile_dir)[0] or "HEAD"      # the date of the definitions on main, not of the branch the clone is on
+        done = subprocess.run(["git", "-C", str(profile_dir), "log", "-1", "--format=%ct", ref, "--", "tools/roadmap_defs.py", "tools/seed_ecosystem_roadmap.py"],
+                              capture_output=True, text=True, timeout=30, creationflags=NO_WINDOW)
         stamp = int(done.stdout.strip())
     except (OSError, ValueError, subprocess.TimeoutExpired):
         return None
@@ -158,7 +185,8 @@ def build(defs, defs_error, live, live_error, runs, last_any, runs_error, defs_a
         if not d:
             problems.append(("no_defs", {}))
         if run is None:
-            problems.append(("never_ran", {}))
+            if not runs_error:      # when the runs could not be read (quota, network) nobody knows: "never ran" would be a claim without evidence, and the error is shown
+                problems.append(("never_ran", {}))
         else:
             if run.get("conclusion") != "success":
                 problems.append(("last_failed", {"conclusion": run.get("conclusion")}))

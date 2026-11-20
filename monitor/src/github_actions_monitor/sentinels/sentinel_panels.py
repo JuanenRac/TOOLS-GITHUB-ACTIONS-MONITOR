@@ -68,7 +68,7 @@ def _a4(s, owner, t):
 
 
 def _a5(s, owner, t):
-    rows = [_row(c.get("repo"), f"{c.get('entries')} entries since the last release", "", "warn", "candidate") for c in s.get("candidates") or []]
+    rows = [_row(c.get("repo"), f"{c.get('entries')} entries since the last release" + (f" ({c['note']})" if c.get("note") else ""), "", "warn", "candidate") for c in s.get("candidates") or []]
     rows += [_row(g.get("repo"), f"signature pending for {int(g.get('hours') or 0)} h", g.get("url"), "warn", "pending_sign") for g in s.get("pending_sign") or []]
     return rows, t("ui.sc_a5", c=len(s.get("candidates") or []), g=len(s.get("green_unreleased") or []))
 
@@ -80,7 +80,7 @@ def _a6(s, owner, t):
 
 def _a7(s, owner, t):
     rows = [_row(b.get("ecosystem"), f"{b.get('used')} / {b.get('limit')} min ({b.get('period')})", "", "bad" if b.get("level") == "over" else "warn", "budget") for b in s.get("budget") or [] if b.get("level") != "ok"]
-    return rows, t("ui.sc_a7", n=s.get("total24", 0))
+    return rows, t("ui.sc_a7", n=("≥" if s.get("partial24") else "") + str(s.get("total24", 0)))
 
 
 def _a8(s, owner, t):
