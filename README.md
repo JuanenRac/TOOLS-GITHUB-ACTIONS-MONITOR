@@ -83,7 +83,7 @@ Method, assumptions and how to measure it in your own use: [`monitor/docs/PRODUC
 
 | | |
 |---|---|
-| **Version** | **2.1.3** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **2.1.5** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Needs** | Python 3.11+ and the GitHub CLI (`gh auth login`); nothing else (the terminal view uses the optional package `rich`) |
 | **Opens** | a page on `127.0.0.1` only, in eight languages |
 | **Writes to GitHub** | never by itself: only batch commands you run with an explicit `--go` |
@@ -91,7 +91,7 @@ Method, assumptions and how to measure it in your own use: [`monitor/docs/PRODUC
 
 <!-- glance:begin -->
 
-**Measured today** (v2.1.3)
+**Measured today** (v2.1.5)
 
 | | |
 |---|---|

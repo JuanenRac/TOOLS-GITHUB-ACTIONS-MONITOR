@@ -8,6 +8,9 @@
 工具本身(监视器 + 哨兵 + 批处理工具)的版本,采用自己的语义化版本号。源文件是英文的 CHANGELOG.md,本文件包含相同的版本和章节。
 
 ## [Unreleased]
+
+## [2.1.5]
+
 - **评分、报告、镜像和分析可以读取每一个运行,而不只是最新的 600 个**(`score.source`,默认 `recent600`,可选 `ledger`):在一个周期读到数千个运行的账户上,页面只保留最新的 600 个,评分正是由它们得出。使用 `ledger` 时由周期读到的全部运行得出,在账本中只计一次;账本现在还保存按小时的汇总(每小时的成功数和失败数),超过 20000 个运行的上限后仍然保留;上限未能完整保留的窗口会如实说明(`data_quality.truncated`),并给出各小时所含的汇总(`data_quality.aggregate`)。使用默认值时,当周期读到的比评分看到的更多,快照会说明(`data_quality.cut`、`data_quality.runs_read`、原因 `recent_cut` 以及页面上的一行)。默认值将在下一个版本变为 `ledger`。早期版本的账本和快照按原样读取。不增加任何对 GitHub 的调用;见评分指南、设置帮助、各指南和技能。
 - **命令行的每个命令都接受 `--format text|table|plain|json|ndjson`**：`table` 会让列适应终端宽度，并把日文和中文的宽字符算作两个单元格；`plain` 是每条记录一行、以制表符分隔，适合 `grep` 和 `awk`；`ndjson` 是每行一个 JSON 对象。`text` 是各命令之前的输出，仍是默认值（可用 `cli.default_format` 更改）；`--json` 不变。
 - **`watch status|alerts` 重复执行该命令的读取**（`--interval`、`--once`、`--no-clear`）：它读取本机的监控器而不是 GitHub，间隔设有下限（`cli.watch.min_interval_seconds`，默认 2），对无法连接的监控器以越来越长的停顿重试，按 Ctrl-C 时以退出码 0 结束。
