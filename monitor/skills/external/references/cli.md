@@ -56,6 +56,7 @@ Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `
 | `--once` | watch: read once and finish |
 | `--exit-on-change` | watch: finish with exit code 6 when what is watched changes |
 | `--no-clear` | watch: do not clear the screen between two reads |
+| `--egress` | doctor: list every host this configuration can call, why, and what fails if it is blocked (nothing is called) |
 | `--version` | print the version |
 
 Other entry points: `bin/mcp_server.py` (MCP over standard input and output; `--allow-ack`, `--allow-lessons`), `bin/ai_hook.py` (gate script of an AI tool), `bin/read_report.py`, `bin/actions_monitor.py --doctor`.
