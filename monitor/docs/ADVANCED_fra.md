@@ -102,3 +102,11 @@ Tout ce qui suit est local et en lecture seule, et désactivé sauf indication c
 - `ui.orientation`, `ui.screen1_tabs`, `ui.now_sort`, `ui.alerts_sort`, `ui.remember_folds` - docs/SCREENS_fra.md
 - `ports.complete`, `ports.lite` - docs/DEPLOYMENT_fra.md
 - `notify.users.enabled` - docs/NOTIFICATIONS_fra.md
+
+## OpenTelemetry avec les conventions de CI/CD et un span par job
+
+Deux interrupteurs de l'export OpenTelemetry (`otlp.*`, tous deux désactivés par défaut) rendent les traces plus faciles à utiliser dans un backend. `otlp.cicd_conventions` ajoute au span de chaque exécution les attributs des conventions sémantiques OpenTelemetry pour le CI/CD (`cicd.pipeline.name`, `cicd.pipeline.run.id`, `cicd.pipeline.run.url.full`, `cicd.pipeline.result`, `cicd.pipeline.run.attempt`, `vcs.repository.name`, `vcs.repository.ref.name`) et nomme le span `RUN <workflow>` ; les attributs `gha.*` restent. `otlp.job_spans` envoie un span pour chaque job terminé (`TASK <job>`), enfant du span de son exécution dans la même trace, avec le runner, son groupe, les libellés, le temps en file et le résultat ; il demande le webhook, car les jobs viennent des événements signés `workflow_job` (un job que le webhook n'a jamais vu n'a pas de span). Rien d'autre ne change : les spans ne portent toujours ni titre, ni auteur, ni message de commit, ni journal.
+
+## Plusieurs espaces de travail
+
+`workspaces.list` contient des entrées `nom=dossier` (un dossier de cet ordinateur, jamais une adresse réseau) et `workspaces.active` nomme celui que le moniteur utilise pour les clones locaux, l'audit et les enregistrements de signature. C'est pour un second jeu de clones (une autre organisation, la copie d'un autre ordinateur) que vous voulez choisir en changeant un mot. La variable `MONITOR_ROOT` l'emporte sur les deux et `workspaces.active` l'emporte sur `workspace_root`. Avec la liste vide (par défaut) rien ne change. `monitor_cli.py toolbox workspaces` les liste et dit lequel est utilisé.

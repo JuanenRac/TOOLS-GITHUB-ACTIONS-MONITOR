@@ -229,6 +229,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `compare.min_resolved` | `3` | sentinel | Least resolved alerts |
 | `compare.min_runs_per_window` | `20` | sentinel | Least finished runs per period |
 | `compare.min_snapshots` | `12` | sentinel | Least hourly snapshots |
+| `compare.progressive` | `false` | sentinel | Answer a long window at once and finish it in the background |
+| `compare.progressive_days` | `7` | sentinel | Days of the first answer |
 | `compare.top_changes` | `10` | sentinel | Rows in the changes |
 | `compare.workdays` | `["1", "2", "3", "4", "5"]` | sentinel | Workdays |
 | `config_check.strict` | `false` | basic | Refuse to start with a bad configuration |
@@ -422,9 +424,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ops.purge.enabled` (secure) | `-` | paths | Allow "purge now" |
 | `ops.purge.require_backup_hours` (secure) | `-` | paths | Require a good copy newer than |
 | `organizations.discover` | `false` | advanced | List the organisations of the login |
+| `otlp.cicd_conventions` | `false` | advanced | Names and attributes of the CI/CD conventions |
 | `otlp.enabled` (secure) | `false` | advanced | Export OpenTelemetry (OTLP) |
 | `otlp.endpoint` (secure) | `""` | advanced | OTLP collector address |
 | `otlp.interval_seconds` | `60` | advanced | Seconds between exports |
+| `otlp.job_spans` | `false` | advanced | One span per job |
 | `outputs.dashboard.enabled` (secure) | `-` | outputs | Document for the status dashboard |
 | `outputs.json.enabled` (secure) | `-` | outputs | Grafana JSON source |
 | `outputs.prometheus.enabled` (secure) | `-` | outputs | Prometheus: /metrics |
@@ -807,3 +811,5 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `webhook.secret_env` (secure) | `"MONITOR_WEBHOOK_SECRET"` | webhook | Environment variable with the shared secret |
 | `webhook.signing_state` | `-` | webhook | Shared secret |
 | `workspace_root` | `""` | paths | Folder with your clones |
+| `workspaces.active` | `""` | paths | Workspace in use |
+| `workspaces.list` | `[]` | paths | Workspaces (name=folder) |

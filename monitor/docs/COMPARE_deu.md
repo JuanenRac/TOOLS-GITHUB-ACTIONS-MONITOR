@@ -63,3 +63,7 @@ Der Reiter Diagramme zeigt den Abschnitt „Zeiträume vergleichen“, wenn der 
 ## Die Einstellungen
 
 Einstellungen, Reiter Sentinel, Block Vergleich von Zeiträumen: `compare.enabled`, `compare.default_window_days`, `compare.default_days_filter`, `compare.workdays`, `compare.min_runs_per_window`, `compare.min_days_of_history`, `compare.min_resolved`, `compare.min_snapshots`, `compare.min_repo_runs`, `compare.top_changes`, `compare.include_in_report` und `compare.cache_seconds`. Eine Antwort wird `compare.cache_seconds` Sekunden behalten und dann neu berechnet.
+
+## Lange Fenster bei einem großen Konto
+
+Mit eingeschaltetem `compare.progressive` (standardmäßig aus) wird ein Vergleich über ein Fenster, das länger als `compare.progressive_days` (standardmäßig 7) ist, sofort mit seinen letzten Tagen beantwortet, und die Antwort sagt es (`partial`: die erfragten Tage, die gezeigten Tage und dass der Rest berechnet wird); das ganze Fenster wird im Hintergrund fertiggestellt, und die nächste Anfrage oder die nächste Aktualisierung der Seite erhält es. Eine Anfrage mit `from` und `to` wird nie geteilt.

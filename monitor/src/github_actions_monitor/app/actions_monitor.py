@@ -151,8 +151,8 @@ DEFAULTS = {
                           "thirdparty_usd_per_minute": 0.0, "alerts": True, "alert_level": "warning"}},      # OFF: kinds of runner, queue and cost by kind, runaway workflows, self-hosted queues (runner_model.py)
     "upstream": {"enabled": False, "refresh_hours": 12, "requests_per_hour": 6, "forks_per_request": 8, "news_days": 7, "notify": False, "repos": []},      # OFF: follow the original repository of each fork, its CI and its latest release (data_pipeline/upstream.py)
     "api": {"v1_enabled": "auto", "experimental_routes": False, "default_limit": 50, "max_limit": 200, "cursor_ttl_seconds": 900, "gzip_min_bytes": 1024},      # auto = on in the service mode, off for one person at one computer: the read API under /api/v1/ (app/api_v1.py)
-    "compare": {"enabled": False, "default_window_days": 7, "default_days_filter": "all", "workdays": ["1", "2", "3", "4", "5"], "min_runs_per_window": 20, "min_days_of_history": 14, "min_resolved": 3, "min_snapshots": 12, "min_repo_runs": 3, "top_changes": 10, "include_in_report": False, "cache_seconds": 60},      # OFF: this period against the one before (compare/): read only, from the ledger and the snapshots of the score
-    "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
+    "compare": {"enabled": False, "default_window_days": 7, "default_days_filter": "all", "workdays": ["1", "2", "3", "4", "5"], "min_runs_per_window": 20, "min_days_of_history": 14, "min_resolved": 3, "min_snapshots": 12, "min_repo_runs": 3, "top_changes": 10, "include_in_report": False, "cache_seconds": 60, "progressive": False, "progressive_days": 7},      # OFF: this period against the one before (compare/): read only, from the ledger and the snapshots of the score
+    "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60, "cicd_conventions": False, "job_spans": False},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
     "organizations": {"discover": False},                                    # OFF: list the organisations of the login (orgs.py)
     "finops": {"jobs_per_cycle": 0, "by_change": False, "co2": False, "co2_watts": 40, "co2_grams_per_kwh": 400},      # the cost of the minutes; by_change and co2 are estimates from the runs already held (data_pipeline/change_cost.py)
     "limits": {"warn_percent": 80, "memory_mb": 512},      # the ceilings the doctor and /metrics compare the setup with (data_pipeline/limits.py)
@@ -161,6 +161,7 @@ DEFAULTS = {
     "network": {"use_proxy": False, "etag": True, "graphql_checks": True, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
     "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
     "pagination": {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3, "cursor_pages": 3},      # pages of 100 followed when a list is full, and said when something is cut (paging.py)
+    "workspaces": {"list": [], "active": ""},      # OFF while the list is empty: several workspaces (name=folder), the one named in active is used (app/workspace.py)
     "backpressure": {"enabled": False, "max_reads_per_cycle": 0, "shed_percent": 150, "min_reads": 20},      # OFF: a bounded queue for the reads of a cycle, the rest waits for the next one (data_pipeline/backpressure.py)
     "sampling": {"default_branch_probe": False, "active_probe": False, "min_coverage_minutes": 30, "api_budget_per_hour": 0},      # how much of a repository the list of runs shows, a second look at the default branch, a budget of requests (sampling.py)
     "savings": {"webhook_first": False, "webhook_live_per_repo": False, "webhook_window_minutes": 60, "webhook_full_minutes": 360, "feeds": {"enabled": False, "method": "atom", "max_age_minutes": 240}},      # read less: OFF (savings.py)
@@ -1433,6 +1434,9 @@ def apply_live_event(record, config):
     try:      # outputs.prometheus.histograms / per_runner (off by default): the histograms and the per-runner figures of the job events; never stops the event
         from github_actions_monitor.integrations import job_metrics
         job_metrics.COLLECTOR.feed(record, config)
+        if (config.get("otlp") or {}).get("job_spans") is True:      # otlp.job_spans (off): the finished jobs become spans of the OpenTelemetry export
+            from github_actions_monitor.integrations import otlp
+            otlp.note_job(record)
     except Exception as error:   # noqa: BLE001
         degraded.note("webhook.metrics", error)
     run = webhook.as_run(record)

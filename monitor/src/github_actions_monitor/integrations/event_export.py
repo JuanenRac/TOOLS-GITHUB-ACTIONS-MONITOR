@@ -61,7 +61,7 @@ def summary(rows):
 def check_destination(path):
     """The destination as a Path, or an ExportError: a new file, with a known suffix, in a folder that exists on this computer (not a network path)."""
     text = str(path)
-    if text.startswith("\\\\") or "://" in text:
+    if text.startswith(("\\\\", "//")) or "://" in text:
         raise ExportError("network_path")
     target = Path(text)
     if not target.parent.is_dir():

@@ -903,7 +903,9 @@
   "otlp": {
     "enabled": false,
     "endpoint": "",
-    "interval_seconds": 60
+    "interval_seconds": 60,
+    "cicd_conventions": false,
+    "job_spans": false
   },
   "organizations": {
     "discover": false
@@ -1085,6 +1087,8 @@
     "min_resolved": 3,
     "min_runs_per_window": 20,
     "min_snapshots": 12,
+    "progressive": false,
+    "progressive_days": 7,
     "top_changes": 10,
     "workdays": ["1", "2", "3", "4", "5"]
   },
@@ -1170,6 +1174,10 @@
     "workflow_hygiene": {
       "enabled": false
     }
+  },
+  "workspaces": {
+    "list": [],
+    "active": ""
   },
   "backpressure": {
     "enabled": false,

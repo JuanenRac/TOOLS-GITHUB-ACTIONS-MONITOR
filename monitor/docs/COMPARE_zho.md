@@ -63,3 +63,7 @@
 ## 设置
 
 设置，哨兵标签，“时段对比”区块：`compare.enabled`、`compare.default_window_days`、`compare.default_days_filter`、`compare.workdays`、`compare.min_runs_per_window`、`compare.min_days_of_history`、`compare.min_resolved`、`compare.min_snapshots`、`compare.min_repo_runs`、`compare.top_changes`、`compare.include_in_report` 和 `compare.cache_seconds`。结果会保留 `compare.cache_seconds` 秒，之后重新计算。
+
+## 大型账户上的长窗口
+
+开启 `compare.progressive`（默认关闭）后，对比 `compare.progressive_days`（默认 7）更长窗口的比较会先立即用最近几天作答，回答中会标明这一点（`partial`：请求的天数、显示的天数以及其余部分正在计算）；整个窗口在后台完成，下一次请求或页面下一次刷新即可得到。带有 `from` 和 `to` 的请求不会被拆分。

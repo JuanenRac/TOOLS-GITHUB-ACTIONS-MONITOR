@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.7",
  "previous": "2.1.6",
- "digest": "5a03a108ed2a9eb62e9c9bee73bedbd7d3146ed7d5b0a4827ced657d561ec6d1",
+ "digest": "018680f63c6927578853e3a347cec4c65e0ce504edd9759f19034e32391a8a3b",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -39,6 +39,20 @@
      1000
     ],
     "default": 150
+   },
+   {
+    "key": "compare.progressive",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "compare.progressive_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     29
+    ],
+    "default": 7
    },
    {
     "key": "finops.by_change",
@@ -107,6 +121,16 @@
     ]
    },
    {
+    "key": "otlp.cicd_conventions",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "otlp.job_spans",
+    "kind": "bool",
+    "default": false
+   },
+   {
     "key": "outputs.prometheus.histogram_max_series",
     "kind": "int",
     "bounds": [
@@ -140,6 +164,19 @@
      600
     ],
     "default": 20
+   },
+   {
+    "key": "workspaces.active",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9._-]{0,40}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "workspaces.list",
+    "kind": "names",
+    "default": []
    }
   ],
   "removed": [],

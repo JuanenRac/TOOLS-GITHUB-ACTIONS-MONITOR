@@ -28,6 +28,7 @@
 | `lessons` | この CI の失敗が教えたこと:`lessons list`、`lessons brief --repo NAME`(push の前に読む)、`lessons failures`、`lessons close` | 不可 |
 | `briefs` | AI ツールが読むタブごとのブリーフ:`briefs index`、`briefs show TAB`、`briefs all` | 可 |
 | `screens` | ページの「画面」メニュー:`screens list`(画面の種類と開けるかどうか)と `screens urls`(キオスクのコマンドにそのまま使える完全なアドレス) | 不可 |
+| `toolbox` | モニターを起動せずにこのコンピューター上で動く運用者向けの小さなツール：`toolbox limits [N]`（設定と上限の比較）、`toolbox workspaces`（ワークスペースと使用中のもの）、`toolbox ledger [--force]`（送信済み通知の台帳。`--force` で消去）、`toolbox summary`（種類・リポジトリ・日別のイベント数）、`toolbox export-events FILE`（名前の末尾に応じて jsonl、csv、parquet、duckdb でイベントを書き出し。parquet と duckdb は各パッケージが必要で、ファイルは新規であること） | いいえ |
 | `credential` | すべてが動いたまま、1つのアカウントの GitHub ログインを差し替える:`credential replace\|reload [--account ID] [--new-token-file FILE\|-]`。トークンは表示しません | 不可 |
 | `install-skill` | モニターのスキル(`internal` または `external`)を、AI ツールがスキルを読むフォルダーにコピーします:`install-skill external --dest FOLDER`。モニターが動いている必要はありません | 不可 |
 | `gh-token` | ツールの読み取りが GitHub App の割り当てを使うよう、1時間有効な GitHub App のインストールトークンを出力します(`github_app.share_reads` がオンのときのみ)。`--json` なしで実行してください | 不可 |

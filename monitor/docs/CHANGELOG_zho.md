@@ -48,6 +48,14 @@
 
 - **按变更类型的 CI 成本和碳估算**（`finops.by_change`、`finops.co2`、`finops.co2_watts` 和 `finops.co2_grams_per_kwh`，默认关闭）：过去 24 小时的运行按依赖、定时、手动、发布、feature、fix、docs、ci、test、refactor、perf、chore 或其他分类，给出分钟数、占比和私有仓库的估算美元（`GET /api/quota` 的 `by_change` 和 `/metrics` 的 `ghamon_ci_change_*`）；碳排放是根据你自己设定的瓦数和每千瓦时克数得出的数量级，绝不是排放报告。本地可复用工作流（只被仓库中其他工作流调用的文件）不计入这些数据。
 
+- **符合 CI/CD 约定的 OpenTelemetry 和每个作业一个 span**（`otlp.cicd_conventions` 和 `otlp.job_spans`，默认关闭）：运行的 span 可带上 OpenTelemetry CI/CD 语义约定的属性（流水线名称、运行 ID 和链接、结果、尝试次数、仓库和分支），并命名为 `RUN <workflow>`；每个已完成的作业可根据 webhook 的已签名 `workflow_job` 事件，作为其运行的子 span 发送（runner、组、标签、排队时间、结果）。
+
+- **多个工作区**（`workspaces.list` 和 `workspaces.active`，列表为空时关闭）：本地克隆的文件夹用 `名称=文件夹` 指定，按名称选择当前使用的；`MONITOR_ROOT` 仍然优先，`workspaces.active` 优先于 `workspace_root`。
+
+- **大型账户上比较的长窗口**（`compare.progressive` 和 `compare.progressive_days`，默认关闭）：比设定天数更长的窗口会先立即用最近几天作答并标记为 `partial`，整个窗口在后台计算后提供给下一次请求。
+
+- **`monitor_cli.py toolbox`**：无需运行监视器、在本机上工作的运维小工具：`limits`（配置与其上限的对比）、`workspaces`、`ledger`（已发送的通知，`--force` 将其清除）、`summary`（按类型、仓库和日期统计事件）以及 `export-events FILE`（按文件名结尾写成 jsonl、csv、parquet 或 duckdb；parquet 和 duckdb 需要各自的包，文件必须是新的，不会覆盖任何文件，也不接受任何查询语言）。
+
 ### 修复
 
 - **发布面板（A5）、就绪表（A11）和发布候选工具统计的是 main 的 CHANGELOG 条目，而不是克隆当前所在分支的条目**：以前从克隆的工作树统计，所以停在某个旧代理分支上的克隆会显示 20 条，而 main 只有 3 条（13 条对 2 条），与最新发布比较的版本也是该分支的版本。现在它们从克隆所知的远程默认分支读取 `CHANGELOG.md`、清单和 `pyproject`（`git show origin/<分支>:<文件>`，从不 fetch，不改动克隆中的任何内容）；不知道该分支时读取工作树，并在该行注明（“克隆在分支 X，不在 main；按工作树统计”）；GitHub 上的 main 前进后克隆尚未获取时同样注明。整个监控器只用一个函数计数（`delivery/mainsource.py`）：`## [Unreleased]` 下的每个列表行算一条，包括嵌套行，CRLF 或 LF 均可，与以前一致。候选表的标题说明该数字是 main 的。

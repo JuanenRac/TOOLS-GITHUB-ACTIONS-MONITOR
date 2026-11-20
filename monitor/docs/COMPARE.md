@@ -63,3 +63,7 @@ The Charts tab shows the section "Compare periods" when the comparison is on: a 
 ## The settings
 
 Settings, Sentinel tab, block Comparison of periods: `compare.enabled`, `compare.default_window_days`, `compare.default_days_filter`, `compare.workdays`, `compare.min_runs_per_window`, `compare.min_days_of_history`, `compare.min_resolved`, `compare.min_snapshots`, `compare.min_repo_runs`, `compare.top_changes`, `compare.include_in_report` and `compare.cache_seconds`. An answer is kept for `compare.cache_seconds` seconds and then computed again.
+
+## Long windows on a big account
+
+With `compare.progressive` on (off by default) a comparison over a window longer than `compare.progressive_days` (7 by default) is answered at once with its last days and the answer says so (`partial`: the days asked, the days shown and that the rest is being computed); the whole window is finished in the background and the next request, or the next refresh of the page, gets it. A request with `from` and `to` is never split.

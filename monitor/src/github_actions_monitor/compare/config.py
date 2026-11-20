@@ -16,9 +16,11 @@ DEFAULTS = {
     "top_changes": 10,
     "include_in_report": False,
     "cache_seconds": 60,
+    "progressive": False,               # a long window (more than progressive_days) is answered at once with its recent part, and the whole one is finished in the background
+    "progressive_days": 7,              # 1..29: how many days the first answer covers
 }
 FILTERS = ("all", "workdays", "weekend")
-BOUNDS = {"default_window_days": (1, 90), "min_runs_per_window": (1, 10000), "min_days_of_history": (1, 3650), "min_resolved": (1, 1000), "min_snapshots": (1, 10000), "min_repo_runs": (1, 1000), "top_changes": (3, 50), "cache_seconds": (0, 3600)}
+BOUNDS = {"progressive_days": (1, 29), "default_window_days": (1, 90), "min_runs_per_window": (1, 10000), "min_days_of_history": (1, 3650), "min_resolved": (1, 1000), "min_snapshots": (1, 10000), "min_repo_runs": (1, 1000), "top_changes": (3, 50), "cache_seconds": (0, 3600)}
 
 
 def _int(value):
@@ -46,7 +48,7 @@ def settings(config):
     user = (config or {}).get("compare") if isinstance((config or {}).get("compare"), dict) else None
     if not user:
         return merged
-    for key in ("enabled", "include_in_report"):
+    for key in ("enabled", "include_in_report", "progressive"):
         if isinstance(user.get(key), bool):
             merged[key] = user[key]
     if user.get("default_days_filter") in FILTERS:

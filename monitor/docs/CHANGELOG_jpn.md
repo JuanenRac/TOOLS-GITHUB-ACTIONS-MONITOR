@@ -48,6 +48,14 @@
 
 - **変更の種類別の CI コストと炭素の推定**（`finops.by_change`、`finops.co2`、`finops.co2_watts`、`finops.co2_grams_per_kwh`。既定ではオフ）：過去 24 時間の実行を、依存関係、スケジュール、手動、リリース、feature、fix、docs、ci、test、refactor、perf、chore、その他に分け、分、割合、プライベートリポジトリの推定ドルを示します（`GET /api/quota` の `by_change` と `/metrics` の `ghamon_ci_change_*`）。炭素は自分で設定したワット数と kWh あたりのグラム数によるおおよその桁で、排出量の報告ではありません。ローカルの再利用可能ワークフロー（リポジトリ内の他のワークフローからのみ呼ばれるファイル）はこれらの数値から除かれます。
 
+- **CI/CD の規約に沿った OpenTelemetry とジョブごとのスパン**（`otlp.cicd_conventions` と `otlp.job_spans`、既定ではオフ）：実行のスパンに CI/CD 向け OpenTelemetry セマンティック規約の属性（パイプライン名、実行 ID とリンク、結果、試行回数、リポジトリとブランチ）を付け、`RUN <workflow>` という名前にできます。完了した各ジョブは、Webhook の署名付き `workflow_job` イベントから、実行のスパンの子スパン（ランナー、グループ、ラベル、キュー待ち時間、結果）として送れます。
+
+- **複数のワークスペース**（`workspaces.list` と `workspaces.active`、リストが空の間はオフ）：ローカルのクローンのフォルダーを `名前=フォルダー` で指定し、使うものを名前で選びます。`MONITOR_ROOT` は引き続き最優先で、`workspaces.active` は `workspace_root` より優先されます。
+
+- **大きなアカウントでの比較の長い期間**（`compare.progressive` と `compare.progressive_days`、既定ではオフ）：設定した日数より長い期間には、まず直近の日数で `partial` と示してすぐ応答し、全期間はバックグラウンドで計算して次のリクエストに返します。
+
+- **`monitor_cli.py toolbox`**：モニターを起動せずにこのコンピューター上で動く運用者向けの小さなツール。`limits`（設定と上限の比較）、`workspaces`、`ledger`（送信済みの通知。`--force` で消去）、`summary`（種類・リポジトリ・日別のイベント）、`export-events FILE`（名前の末尾に応じて jsonl、csv、parquet、duckdb。parquet と duckdb は各パッケージが必要で、ファイルは新規であること。上書きはせず、問い合わせ言語も受け付けません）。
+
 ### 修正
 
 - **リリースパネル（A5）、準備状況の表（A11）、リリース候補ツールは、クローンがいるブランチではなく main の CHANGELOG のエントリ数を数えます**: 以前はクローンの作業ツリーから数えていたため、エージェントの古いブランチに置かれたクローンでは、main が 3 件のところ 20 件（main が 2 件のところ 13 件）と表示され、最新リリースと比べるバージョンもそのブランチのものでした。現在は、クローンが知っているリモートの既定ブランチから `CHANGELOG.md`、マニフェスト、`pyproject` を読みます（`git show origin/<ブランチ>:<ファイル>`、fetch は行わず、クローンは一切変更しません）。そのブランチが分からないときは作業ツリーを読み、行に「ブランチ X のクローン（main ではない）、作業ツリーから集計」と表示します。GitHub が main を進めてからクローンを取得していない場合もそう表示します。数える関数はモニター全体で 1 つです（`delivery/mainsource.py`）。`## [Unreleased]` の下の各リスト行は、入れ子も含めて 1 件と数え、CRLF でも LF でも従来どおりです。候補の表の見出しに、件数が main のものだと明記します。
