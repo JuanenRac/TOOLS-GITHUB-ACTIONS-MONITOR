@@ -44,9 +44,34 @@ def endpoint_ok(url):
     return parts.scheme == "https" or (parts.scheme == "http" and parts.hostname in ("127.0.0.1", "localhost", "::1"))
 
 
-def ids(repo, run_id):
+def ids(repo, run_id, attempt=None):
+    """(trace id, span id): the trace belongs to the run; the span to the attempt (the first attempt keeps the id it always had, a re-run has its own span in the same trace)."""
     digest = hashlib.sha256(f"{repo}/{run_id}".encode()).hexdigest()
+    if isinstance(attempt, int) and not isinstance(attempt, bool) and attempt > 1:
+        return digest[:32], hashlib.sha256(f"{repo}/{run_id}/{attempt}".encode()).hexdigest()[:16]
     return digest[:32], digest[32:48]
+
+
+def _attempt(item):
+    value = item.get("attempt") or item.get("run_attempt")
+    return value if isinstance(value, int) and not isinstance(value, bool) and value > 0 else 1
+
+
+def run_key(run):
+    """What the memory of the exported runs holds: the run and its attempt, because a re-run is another execution."""
+    return (run.get("repo"), run.get("id"), _attempt(run))
+
+
+def remember(keys, keep=5000):
+    """Adds `keys` to the memory of what was sent, oldest first, and forgets only the oldest ones beyond `keep` (never half of the memory at random)."""
+    sent = STATE["sent"]
+    if not isinstance(sent, dict):
+        sent = STATE["sent"] = dict.fromkeys(sent)
+    for key in keys:
+        sent.pop(key, None)
+        sent[key] = None
+    while len(sent) > keep:
+        del sent[next(iter(sent))]
 
 
 def _nano(text):
@@ -91,7 +116,7 @@ def _cicd_attrs(run):
 
 
 def span(run, cicd=False):
-    trace, sid = ids(run.get("repo", ""), run.get("id"))
+    trace, sid = ids(run.get("repo", ""), run.get("id"), _attempt(run))
     start = _nano(run.get("started"))
     end = start + int(max(0, run.get("seconds") or 0) * 1_000_000_000)
     failed = run.get("conclusion") in BAD
@@ -105,7 +130,7 @@ def span(run, cicd=False):
 
 def job_span(job, cicd=False):
     """The span of a finished job: same trace as its run, child of the span of the run, with a stable id of its own."""
-    trace, parent = ids(job.get("repo", ""), job.get("run_id"))
+    trace, parent = ids(job.get("repo", ""), job.get("run_id"), _attempt(job))
     sid = hashlib.sha256(f"{job.get('repo')}/{job.get('run_id')}/{job.get('job_id')}".encode()).hexdigest()[:16]
     start, end = _nano(job.get("job_started")), _nano(job.get("job_completed"))
     failed = job.get("conclusion") in BAD
@@ -162,7 +187,7 @@ def export(config, data, version, now=None, post=None):
         return {"sent_spans": 0, "sent_metrics": 0, "error": ""}
     STATE["next"] = now + cfg["interval_seconds"]
     resource = [attr("service.name", "github-actions-monitor"), attr("service.version", version)]
-    fresh = [r for r in data.get("runs") or [] if r.get("status") == "completed" and (r.get("repo"), r.get("id")) not in STATE["sent"]][:200]
+    fresh = [r for r in data.get("runs") or [] if r.get("status") == "completed" and run_key(r) not in STATE["sent"]][:200]
     jobs = [j for j in JOBS if cfg["job_spans"] and ("job", j.get("repo"), j.get("job_id")) not in STATE["sent"]][:400]
     try:
         if fresh or jobs:
@@ -172,10 +197,7 @@ def export(config, data, version, now=None, post=None):
         degraded.note("otlp.send", error)
         STATE["last_error"] = secretstore.redact(str(error))[:160]
         return {"sent_spans": 0, "sent_metrics": 0, "error": STATE["last_error"]}
-    STATE["sent"].update((r.get("repo"), r.get("id")) for r in fresh)
-    STATE["sent"].update(("job", j.get("repo"), j.get("job_id")) for j in jobs)
-    if len(STATE["sent"]) > 5000:
-        STATE["sent"] = set(list(STATE["sent"])[-2500:])
+    remember([run_key(r) for r in fresh] + [("job", j.get("repo"), j.get("job_id")) for j in jobs])
     STATE.update({"total": STATE["total"] + len(fresh) + len(jobs), "last_ok": int(now), "last_error": ""})
     return {"sent_spans": len(fresh) + len(jobs), "sent_metrics": 1, "error": ""}
 
