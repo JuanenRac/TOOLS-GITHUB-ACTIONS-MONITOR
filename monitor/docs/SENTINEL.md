@@ -97,6 +97,10 @@ All of them are read-only suggestions for a person; the monitor never closes an 
 
 Every threshold above is a setting of the **Sentinel**, **Surface checks (A10)**, **Readiness (A11)**, **Folders and files**, **Analytics** and **Workflow linter** tabs of the Settings page, and a key of `actions_monitor.json`. The full list with its ranges is in `SETTINGS.md`. The Help panel and `--help-topics sentinel` show this page offline.
 
+## What no sentinel hides
+
+A round never gives up on the whole account because of one bad element: every repository, file, item and stage is read inside its own protection, and a failure is written down with its cause (`errors` of the status) while the others go on. What could not be read is **held, not closed**: the alerts known about a repository that cannot be read now stay (marked unread) instead of being counted as fixed, the repository is listed by name as not checked (`unchecked` of the status, the line "Not checked yet" of `read_report.py`) and never counts as zero alerts. A repository that leaves the scope leaves with its alerts and its errors. The reading passes of the CI sentinel (the alerts of code scanning and of secrets, the settings of each repository) have a time ceiling too, `sentinel.deadline_s` (30 seconds; 0 = none): past it no new repository is started, the ones not reached stay due for the next tick and are named. The list of runners names the repositories it did not read (`unchecked` of `/api/runners`). A test of contract runs the same checks on every sentinel of the registry.
+
 ## The second sentinel and the list of alerts
 
 Besides this sentinel (CI), the complete edition has the **Collab sentinel**, which watches open issues and pull requests on a clock of its own and never writes to GitHub: [COLLAB.md](COLLAB.md). The **Alerts** tab puts the alerts of both in one list, with a filter by origin and level and local silences that end by themselves (`alerts.mute_hours`); `GET /api/alerts` serves the same list.

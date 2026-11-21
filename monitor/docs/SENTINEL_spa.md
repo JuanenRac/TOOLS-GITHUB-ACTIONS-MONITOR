@@ -97,6 +97,10 @@ Todas son sugerencias de solo lectura para una persona; el monitor nunca cierra 
 
 Cada umbral de arriba es un ajuste de las pestañas **Centinela**, **Comprobaciones de superficie (A10)**, **Preparación (A11)**, **Carpetas y archivos**, **Analítica** y **Linter de workflows** de la página de Ajustes, y una clave de `actions_monitor.json`. La lista completa con sus rangos está en `SETTINGS_spa.md`. El panel de Ayuda y `--help-topics sentinel` muestran esta página sin conexión.
 
+## Lo que ningún centinela oculta
+
+Una ronda nunca abandona toda la cuenta por un solo elemento malo: cada repositorio, fichero, elemento y etapa se lee dentro de su propia protección, y un fallo queda anotado con su causa (`errors` del estado) mientras los demás siguen. Lo que no se pudo leer se **retiene, no se cierra**: las alertas conocidas de un repositorio que ahora no se puede leer se quedan (marcadas como no leídas) en vez de contarse como arregladas, el repositorio se lista por nombre como no comprobado (`unchecked` del estado, la línea «Aún sin comprobar» de `read_report.py`) y nunca cuenta como cero alertas. Un repositorio que sale del ámbito se va con sus alertas y sus errores. Las pasadas de lectura del centinela de CI (las alertas de code scanning y de secretos, los ajustes de cada repositorio) también tienen un tope de tiempo, `sentinel.deadline_s` (30 segundos; 0 = ninguno): pasado ese tiempo no se empieza ningún repositorio nuevo, los que no se alcanzan siguen pendientes para el próximo ciclo y se nombran. La lista de runners nombra los repositorios que no leyó (`unchecked` de `/api/runners`). Una prueba de contrato ejecuta las mismas comprobaciones en cada centinela del registro.
+
 ## El segundo centinela y la lista de alertas
 
 Además de este centinela (CI), la edición completa tiene el **centinela Collab**, que vigila incidencias y pull requests abiertos con un reloj propio y nunca escribe en GitHub: [COLLAB_spa.md](COLLAB_spa.md). La pestaña **Alertas** reúne las alertas de ambos en una lista, con filtro por origen y nivel y silencios locales que acaban solos (`alerts.mute_hours`); `GET /api/alerts` sirve la misma lista.

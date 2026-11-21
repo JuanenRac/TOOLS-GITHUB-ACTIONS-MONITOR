@@ -185,6 +185,7 @@ class SentinelSupply(sentinel_base.BaseSentinel):
                 self.reader.forget([gone])
             for key in [k for k, a in self.state["alerts"].items() if a["repo"] not in repos]:
                 self.state["alerts"].pop(key, None)
+            sentinel_base.forget_errors(self.errors, repos)
             if repos and all((self.state["per_repo"].get(r) or {}).get("scanned") for r in repos):
                 self.state["last_full_scan"] = stamp(now)
         self.persist()
@@ -214,8 +215,13 @@ class SentinelSupply(sentinel_base.BaseSentinel):
                 mine.update(scanned=now, files=info.get("files", 0), skipped=list(info.get("skipped") or [])[:20], truncated=bool(info.get("truncated")), unchanged=True)
                 self.state["per_repo"][repo] = mine
             return calls
-        left = []
-        found = supply.findings(repo, self.reader.texts(repo), self.config, toolconfig.github_owner(), self.cfg["ignore"], self.cfg["ignore_uses"], left)
+        left, bad = [], []
+        found = supply.findings(repo, self.reader.texts(repo), self.config, toolconfig.github_owner(), self.cfg["ignore"], self.cfg["ignore_uses"], left, bad)
+        if bad:      # the files that could not be linted count as skipped (the repository is partial, never clean) and are named
+            info = {**info, "skipped": list(info.get("skipped") or []) + [{"file": n, "reason": "unlintable"} for n in bad]}
+            self.errors[f"{repo}:files"] = {"message": f"{len(bad)} file(s) could not be linted", "at": stamp(now)}
+        else:
+            self.errors.pop(f"{repo}:files", None)
         self._commit(repo, found, info, now, fingerprint, len(left))
         return calls
 

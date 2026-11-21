@@ -27,6 +27,7 @@
   <img src="https://img.shields.io/badge/Tests-5571_passing-brightgreen.svg" alt="5571 tests">
   <img src="https://img.shields.io/badge/Tests-5574_passing-brightgreen.svg" alt="5574 tests">
   <img src="https://img.shields.io/badge/Tests-5570_passing-brightgreen.svg" alt="5570 tests">
+  <img src="https://img.shields.io/badge/Tests-5576_passing-brightgreen.svg" alt="5576 tests">
 </p>
 
 > Vigia os workflows de todos os seus repositórios e diz-lhe, numa página local, o que está a vermelho, o que está encravado e o que o espera.
@@ -112,6 +113,7 @@ Método, pressupostos e como medi-lo na sua própria utilização: [`monitor/doc
 | **Testes** | 5574 métodos de teste (`python -m unittest discover -s monitor/tests`) |
 | **Definições** | 897 definições, todas com ajuda |
 | **Testes** | 5570 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Testes** | 5576 métodos de teste (`python -m unittest discover -s monitor/tests`) |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, Python 3.11, 3.13 |
 

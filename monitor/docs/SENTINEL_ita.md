@@ -95,6 +95,10 @@ Sono tutti suggerimenti di sola lettura per una persona; il monitor non chiude m
 
 Ogni soglia qui sopra è un'impostazione delle schede **Sentinella**, **Controlli di superficie (A10)**, **Prontezza (A11)**, **Cartelle e file**, **Analitica** e **Linter dei workflow** della pagina Impostazioni, e una chiave di `actions_monitor.json`. L'elenco completo con gli intervalli è in `SETTINGS_ita.md`. Il pannello Guida e `--help-topics sentinel` mostrano questa pagina offline.
 
+## Ciò che nessuna sentinella nasconde
+
+Un giro non abbandona mai l'intero account per un solo elemento difettoso: ogni repository, file, elemento e fase viene letto dentro la propria protezione, e un errore viene annotato con la sua causa (`errors` dello stato) mentre gli altri proseguono. Ciò che non si è potuto leggere viene **trattenuto, non chiuso**: gli avvisi noti di un repository che ora non è leggibile restano (segnati come non letti) invece di contare come risolti, il repository è elencato per nome come non controllato (`unchecked` dello stato, la riga «Non ancora controllati» di `read_report.py`) e non conta mai come zero avvisi. Un repository che esce dall'ambito se ne va con i suoi avvisi e i suoi errori. Anche i passaggi di lettura della sentinella CI (gli avvisi di code scanning e dei segreti, le impostazioni di ogni repository) hanno un limite di tempo, `sentinel.deadline_s` (30 secondi; 0 = nessuno): oltre, non si inizia nessun nuovo repository, quelli non raggiunti restano dovuti per il ciclo successivo e vengono nominati. L'elenco dei runner nomina i repository che non ha letto (`unchecked` di `/api/runners`). Un test di contratto esegue le stesse verifiche su ogni sentinella del registro.
+
 ## La seconda sentinella e l'elenco degli avvisi
 
 Oltre a questa sentinella (CI), l'edizione completa ha la **sentinella Collab**, che osserva issue e pull request aperte con un orologio proprio e non scrive mai su GitHub: [COLLAB_ita.md](COLLAB_ita.md). La scheda **Avvisi** riunisce gli avvisi di entrambe in un elenco, con filtro per origine e livello e silenziamenti locali che finiscono da soli (`alerts.mute_hours`); `GET /api/alerts` serve lo stesso elenco.

@@ -47,6 +47,7 @@ from github_actions_monitor.data_pipeline import trend_day
 from github_actions_monitor.data_pipeline import upstream
 from github_actions_monitor.sentinels import roadmap_a9
 from github_actions_monitor.sentinels import sentinel_ai
+from github_actions_monitor.sentinels import sentinel_base
 import sys as _sys
 from pathlib import Path as _Path
 from github_actions_monitor.app import workspace
@@ -79,7 +80,7 @@ DEFAULT_AUDIT_FILES = {"reconciliation": "RECONCILIATION_TOTAL_*.txt", "rounds":
 DEFAULTS = {
     "audit_files": dict(DEFAULT_AUDIT_FILES),
     "enabled": True, "refresh_seconds": 900, "alerts_hot_seconds": 900, "alerts_cold_seconds": 3600,
-    "hygiene_seconds": 21600, "max_calls_per_tick": 70, "budget_per_hour": 600, "workers": 8,
+    "hygiene_seconds": 21600, "max_calls_per_tick": 70, "budget_per_hour": 600, "workers": 8, "deadline_s": 30,
     "trend_green_pct": 90, "trend_health": 70, "trend_quota_pct": 80,      # the lines of the daily trend: share of green workflows and health below which the line is crossed, share of the API quota above which it is
     "candidate_days": 2.0, "pending_sign_hours": 24, "notify_command": [], "candidate_min_entries": 5, "stale_pr_days": 7, "hot_hours": 3,
     "required_files": [["README.md"], ["LICENSE", "LICENSE.md", "LICENSE.txt", "LICENSE-APACHE", "LICENSE-MIT", "COPYING"], ["CHANGELOG.md"], ["SECURITY.md"]],
@@ -126,6 +127,9 @@ def sentinel_config(config):
     value = (config or {}).get("sentinel")
     if isinstance(value, dict):
         merged.update({k: v for k, v in value.items() if k in DEFAULTS})
+    seconds = merged.get("deadline_s")
+    if not isinstance(seconds, int) or isinstance(seconds, bool) or not 0 <= seconds <= 600:
+        merged["deadline_s"] = DEFAULTS["deadline_s"]      # the time ceiling of a reading pass: 0 = none, out of range = the default
     merged["surface"] = surface.settings(config)   # merged key by key: a partial block keeps the defaults of the rest
     merged["hygiene"] = hygiene_settings(config)
     merged["readiness"] = readiness.settings(config)
@@ -1530,35 +1534,62 @@ class Sentinel:
         todo = self._alerts_due()
         batch = todo[: max(0, budget // 2)]
         if batch:
-            with ThreadPoolExecutor(max_workers=self.cfg["workers"]) as pool:
-                for repo, res in pool.map(self._fetch_alerts, batch):
-                    with self.lock:
-                        self.alerts[repo] = res
-            self.ok("alerts")
-            did = True
-        did = self._org_files_tick() or did
+            if self._read_batch("alerts", self._fetch_alerts, batch, self.alerts):
+                did = True
+        did = self._stage("org_files", self._org_files_tick) or did
         budget = self._stage_budget(0.35)
         todo = self._perms_due()
         batch = todo[: max(0, min(budget // self._perms_cost(), 20))]
         if batch:
-            with ThreadPoolExecutor(max_workers=self.cfg["workers"]) as pool:
-                for repo, res in pool.map(self._fetch_perms, batch):
-                    if res:      # always written down, a failure too: the repository goes to the end of the line and the others are read
-                        with self.lock:
-                            self.perms[repo] = res
-            self.ok("hygiene")
-            did = True
-        did = self._surface_tick() or did
-        did = self._lint_remote_tick() or did
-        did = self._a2_resolve_tick() or did
-        did = self._workflow_marks_tick() or did
-        did = self._upstream_tick() or did
-        did = self._failed_jobs_tick() or did
-        did = self._sign_probe_tick() or did
+            if self._read_batch("hygiene", self._fetch_perms, batch, self.perms):
+                did = True
+        for name, stage in (("surface", self._surface_tick), ("lint_remote", self._lint_remote_tick), ("a2_resolve", self._a2_resolve_tick), ("workflow_marks", self._workflow_marks_tick),
+                            ("upstream", self._upstream_tick), ("failed_jobs", self._failed_jobs_tick), ("sign_probe", self._sign_probe_tick)):
+            did = self._stage(name, stage) or did
         if did or self.dirty:
             self.dirty = False
             self._persist()
         return bool(self._alerts_due() or self._perms_due()) and self._budget() > 0
+
+    def _stage(self, name, stage):
+        """One stage of the tick inside its own try: a stage that breaks is recorded under its name (`errors`) and the stages after it still run; a good run clears the record."""
+        return bool(sentinel_base.guarded(self.errors, name, stage, default=False))
+
+    def _read_batch(self, section, fetch, batch, into):
+        """Reads the batch in parallel, each repository inside its own try: one that raises is recorded under `section:repo`, keeps what was known of it and goes to the end of the line; the others are written."""
+        stop = sentinel_base.round_deadline(self.cfg.get("deadline_s", 0))
+        did = False
+
+        def one(repo):
+            if sentinel_base.expired(stop):
+                return repo, None, True
+            try:
+                got_repo, res = fetch(repo)
+            except Exception as error:   # noqa: BLE001 - one repository never takes the batch with it
+                return repo, str(error)[:80], False
+            return got_repo, res, False
+
+        with ThreadPoolExecutor(max_workers=self.cfg["workers"]) as pool:
+            for repo, res, skipped in pool.map(one, batch):
+                if skipped:
+                    continue      # out of time: it stays due and is named as not checked
+                if isinstance(res, str):
+                    self.error(f"{section}:{repo}", res)
+                    continue
+                self.ok(f"{section}:{repo}")
+                if res:      # always written down, a failure too: the repository goes to the end of the line and the others are read
+                    with self.lock:
+                        into[repo] = res
+                    did = True
+        self.ok(section)
+        return did or bool(batch)
+
+    def unchecked_reads(self, limit=20):
+        """{"alerts": [...], "hygiene": [...]}: the repositories whose alerts or whose settings were never read (a tick that ran out of time, a quota that ran dry, a repository that always fails): the page
+        names them instead of showing zero."""
+        with self.lock:
+            repos = list(self.repo_info)
+            return {"alerts": [r for r in repos if r not in self.alerts][:limit], "hygiene": [r for r in repos if not (self.perms.get(r) or {}).get("at")][:limit]}
 
     def _surface_tick(self):
         """A10 cold work: the local scan (free) and a few extra calls, only while the allowance is healthy and inside the hourly budget."""
@@ -1909,7 +1940,10 @@ class Sentinel:
                 "surface_paused": self.surface_paused, "a2_resolved": dict(self.a2_resolved), "a2_pending_reason": self.a2_reason, "failed_jobs": dict(self.failed_jobs), "local_versions": dict(self.local_versions), "unreleased_notes": dict(self.unreleased_notes), "pins": pins,
                 "upstream": dict(self.upstream), "upstream_calls": self._upstream_requests(), "lint": self._lint(repos), "org_files": self.org_files["names"] if self.cfg["hygiene"]["community_fallback"] else None,
             }
-        return compute_snapshot(inp)
+        snap = compute_snapshot(inp)
+        if isinstance(snap, dict):
+            snap["not_checked"] = self.unchecked_reads()      # the repositories whose alerts or settings were never read: named, never shown as zero
+        return snap
 
     # -- layer B (only on request of the page, only our repositories and actors)
     def gh_text(self, *args, limit=300000):

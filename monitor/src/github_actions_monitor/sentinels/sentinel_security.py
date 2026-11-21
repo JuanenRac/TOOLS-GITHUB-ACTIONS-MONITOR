@@ -358,6 +358,7 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
                 self.state["per_repo"].pop(gone, None)
             for key in [k for k, a in self.state["alerts"].items() if a["repo"] not in repos]:
                 self.state["alerts"].pop(key, None)
+            sentinel_base.forget_errors(self.errors, repos)
             if repos and all((self.state["per_repo"].get(r) or {}).get("scanned") for r in repos):
                 self.state["last_full_scan"] = stamp(now)
         self.persist()

@@ -653,6 +653,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinel.candidate_min_entries` | `-` | sentinel | Entries to be a candidate |
 | `sentinel.ci_red_audit_copy` | `-` | paths | Copy ci_red.json to the audit folder |
 | `sentinel.ci_red_file` | `-` | paths | File for ci_red.json |
+| `sentinel.deadline_s` | `-` | sentinel | Time ceiling per reading pass |
 | `sentinel.dependency_bots` | `-` | sentinel | Accounts that update dependencies |
 | `sentinel.enabled` | `true` | sentinel | Sentinel on |
 | `sentinel.hot_hours` | `-` | sentinel | Hot period |

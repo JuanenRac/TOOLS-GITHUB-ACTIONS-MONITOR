@@ -108,12 +108,17 @@ def collect(config, reader, owner, repos=(), opener=None):
     """{"runners": [...], "counts": {"idle", "busy", "offline"}, "errors": n} - `reader(endpoint)` returns the JSON of the API."""
     cfg = settings(config)
     endpoints = [f"orgs/{owner}/actions/runners?per_page=100"] if cfg["scope"] == "owner" else [f"repos/{owner}/{r}/actions/runners?per_page=100" for r in list(repos)[:30] if NAME_RE.match(r)]
-    found, errors, seen = [], 0, set()
-    for endpoint in endpoints:
+    found, errors, seen, unchecked = [], 0, set(), []
+    names = [None] if cfg["scope"] == "owner" else [r for r in list(repos)[:30] if NAME_RE.match(r)]
+    if cfg["scope"] != "owner":
+        unchecked.extend(r for r in list(repos)[30:] if NAME_RE.match(r))      # the read stops at 30 repositories: the others are named, not shown as having no runners
+    for name, endpoint in zip(names, endpoints, strict=True):
         try:
             body = reader(endpoint)
         except Exception:   # noqa: BLE001 - not an organisation, no permission, offline
             errors += 1
+            if name:
+                unchecked.append(name)      # this one could not be read: named as not checked
             continue
         for item in (body or {}).get("runners") or []:
             if isinstance(item, dict) and item.get("id") not in seen:
@@ -124,14 +129,14 @@ def collect(config, reader, owner, repos=(), opener=None):
                     row.update(read_metrics(url, opener))
                 found.append(row)
     counts = {k: sum(1 for r in found if r["state"] == k) for k in ("idle", "busy", "offline")}
-    return {"runners": found, "counts": counts, "errors": errors}
+    return {"runners": found, "counts": counts, "errors": errors, "unchecked": sorted(unchecked)[:50]}
 
 
 def payload(config, reader, owner, demo=False, repos=()):
     cfg = settings(config)
     if demo:
         return {"enabled": True, "demo": True, "runners": [{"id": 1, "name": "demo-runner", "os": "Linux", "state": "busy", "labels": ["self-hosted", "linux"], "load1": 0.8, "disk_free_percent": 61.0}],
-                "counts": {"idle": 0, "busy": 1, "offline": 0}, "errors": 0}
+                "counts": {"idle": 0, "busy": 1, "offline": 0}, "errors": 0, "unchecked": []}
     if not cfg["enabled"]:
-        return {"enabled": False, "runners": [], "counts": {"idle": 0, "busy": 0, "offline": 0}, "errors": 0}
+        return {"enabled": False, "runners": [], "counts": {"idle": 0, "busy": 0, "offline": 0}, "errors": 0, "unchecked": []}
     return {"enabled": True, **collect(config, reader, owner, repos)}
