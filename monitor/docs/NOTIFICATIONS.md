@@ -35,7 +35,7 @@ The channel `apprise` hands the message to the `apprise` command (install it you
 
 ## The state of GitHub (off by default)
 
-With `github_status.enabled` on, the monitor reads the public summary of githubstatus.com every `github_status.interval_seconds` (300 by default): one small JSON, no account, and nothing about you is sent. The bar at the bottom of the page shows the state of GitHub. When GitHub Actions has an incident the monitor tells it once (the kinds `github_incident` and `github_incident_over`, which are notified only when you add them to `notify.events`), and with `github_status.mark_reds` (on) a red that appears during the incident says "possible cause: an incident of GitHub" in its text and in the field `possible_cause`. The red itself is never hidden.
+With `github_status.enabled` on, the monitor reads the public summary of githubstatus.com every `github_status.interval_seconds` (300 by default): one small JSON, no account, and nothing about you is sent. The bar at the bottom of the page shows the state of GitHub. When GitHub Actions has an incident the monitor tells it once (the kinds `github_incident` and `github_incident_over`, which are notified only when you add them to `notify.events`), and with `github_status.mark_reds` (on) a red that appears during the incident says "possible cause: an incident of GitHub" in its text and in the field `possible_cause`. The red itself is never hidden. With `github_status.quiet_notices` (off by default) the notices of those reds are held until the incident is over and then told once, with how many are still red; a notice is never held longer than six hours, and the reds stay in the feed and on the page.
 
 ## The limit per hour counts messages
 

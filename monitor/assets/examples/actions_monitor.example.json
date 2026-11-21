@@ -547,7 +547,8 @@
   "github_status": {
     "enabled": false,
     "interval_seconds": 300,
-    "mark_reds": true
+    "mark_reds": true,
+    "quiet_notices": false
   },
   "heartbeat": {
     "enabled": false,

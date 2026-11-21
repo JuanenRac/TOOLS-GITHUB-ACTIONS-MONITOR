@@ -35,7 +35,7 @@ El canal `apprise` entrega el mensaje a la orden `apprise` (instálala tú, por 
 
 ## El estado de GitHub (desactivado por defecto)
 
-Con `github_status.enabled` activado, el monitor lee el resumen público de githubstatus.com cada `github_status.interval_seconds` (300 por defecto): un JSON pequeño, sin cuenta y sin enviar nada sobre ti. La barra inferior de la página muestra el estado de GitHub. Cuando GitHub Actions tiene un incidente el monitor lo avisa una vez (los tipos `github_incident` y `github_incident_over`, que solo se notifican si los añades a `notify.events`), y con `github_status.mark_reds` (activado) un rojo que aparece durante el incidente dice «causa posible: un incidente de GitHub» en su texto y en el campo `possible_cause`. El rojo nunca se oculta.
+Con `github_status.enabled` activado, el monitor lee el resumen público de githubstatus.com cada `github_status.interval_seconds` (300 por defecto): un JSON pequeño, sin cuenta y sin enviar nada sobre ti. La barra inferior de la página muestra el estado de GitHub. Cuando GitHub Actions tiene un incidente el monitor lo avisa una vez (los tipos `github_incident` y `github_incident_over`, que solo se notifican si los añades a `notify.events`), y con `github_status.mark_reds` (activado) un rojo que aparece durante el incidente dice «causa posible: un incidente de GitHub» en su texto y en el campo `possible_cause`. El rojo nunca se oculta. Con `github_status.quiet_notices` (desactivado por defecto) los avisos de esos rojos se retienen hasta que el incidente termina y se cuentan una sola vez, con cuántos siguen en rojo; un aviso nunca se retiene más de seis horas y los rojos siguen en el registro y en la página.
 
 ## El límite por hora cuenta mensajes
 

@@ -35,7 +35,7 @@
 
 ## GitHub 状态(默认关闭)
 
-开启 `github_status.enabled` 后，监视器每隔 `github_status.interval_seconds`（默认 300）读取 githubstatus.com 的公开摘要：一个很小的 JSON，不使用账户，也不发送任何关于你的信息。页面底部的栏会显示 GitHub 的状态。当 GitHub Actions 出现故障时，监视器会通知一次（类型 `github_incident` 和 `github_incident_over`，只有加入 `notify.events` 才会发送通知），并且在 `github_status.mark_reds`（开启）下，故障期间出现的红色会在文本和字段 `possible_cause` 中注明“可能原因：GitHub 故障”。红色本身绝不会被隐藏。
+开启 `github_status.enabled` 后，监视器每隔 `github_status.interval_seconds`（默认 300）读取 githubstatus.com 的公开摘要：一个很小的 JSON，不使用账户，也不发送任何关于你的信息。页面底部的栏会显示 GitHub 的状态。当 GitHub Actions 出现故障时，监视器会通知一次（类型 `github_incident` 和 `github_incident_over`，只有加入 `notify.events` 才会发送通知），并且在 `github_status.mark_reds`（开启）下，故障期间出现的红色会在文本和字段 `possible_cause` 中注明“可能原因：GitHub 故障”。红色本身绝不会被隐藏。 开启 `github_status.quiet_notices`（默认关闭）后，这些红灯的通知会保留到事故结束，然后只通报一次，并说明仍为红色的数量；通知最长保留六小时，红灯仍保留在动态和页面中。
 
 ## 每小时上限统计的是消息
 
