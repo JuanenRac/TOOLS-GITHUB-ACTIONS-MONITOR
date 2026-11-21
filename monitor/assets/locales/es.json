@@ -952,7 +952,7 @@
  "cfg.h.score.alert.notify_external": "Envía también la alerta de la puntuación por los canales de notificación externos. Apagado por defecto.",
  "cfg.h.score.calibrating_hours": "Una cuenta vigilada durante menos tiempo que este no muestra puntuación todavía.",
  "cfg.h.score.enabled": "Activa o desactiva la puntuación de la cuenta (número, letra y tendencia).",
- "cfg.h.score.source": "De qué ejecuciones salen la puntuación, los informes, el espejo y la analítica: recent600 (por defecto) son las 600 más recientes de la página; ledger son todas las que leyó el ciclo, contadas una vez en el libro, con totales por hora que sobreviven a su tope. En una cuenta con más de 600 ejecuciones recent600 ve solo una parte reciente de la ventana, y la puntuación lo dice.",
+ "cfg.h.score.source": "De qué ejecuciones salen la puntuación, los informes, el espejo y la analítica: recent600 son las 600 más recientes de la página; ledger (por defecto) son todas las que leyó el ciclo, contadas una vez en el libro, con totales por hora que sobreviven a su tope. En una cuenta con más de 600 ejecuciones recent600 ve solo una parte reciente de la ventana, y la puntuación lo dice.",
  "cfg.h.score.grades.A": "Desde esta puntuación la letra es A; debe ser mayor que la de B.",
  "cfg.h.score.grades.B": "Desde esta puntuación la letra es B; debe ser mayor que la de C.",
  "cfg.h.score.grades.C": "Desde esta puntuación la letra es C; debe ser mayor que la de D.",

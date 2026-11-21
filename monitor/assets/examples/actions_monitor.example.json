@@ -1127,7 +1127,7 @@
   },
   "score": {
     "enabled": true,
-    "source": "recent600",
+    "source": "ledger",
     "window_days": 7,
     "calibrating_hours": 24,
     "min_runs": 20,

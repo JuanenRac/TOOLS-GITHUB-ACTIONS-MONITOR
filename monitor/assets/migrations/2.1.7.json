@@ -948,5 +948,27 @@
    }
   ]
  },
- "manual": {}
+ "manual": {
+  "notices": [
+   {
+    "id": "score_source_ledger",
+    "level": "behavior",
+    "keys": [
+     "score.source"
+    ],
+    "text": {
+     "en": "The score, the reports, the mirror and the analytics now read every run the cycle read (score.source is ledger by default, it was recent600). Set score.source to recent600 to go back; a value you set yourself is kept.",
+     "es": "La puntuación, los informes, el espejo y la analítica leen ahora todas las ejecuciones que leyó el ciclo (score.source es ledger por defecto, antes recent600). Fija score.source en recent600 para volver; un valor que fijaste tú se conserva.",
+     "de": "Bewertung, Berichte, Spiegel und Analytik lesen jetzt jeden Lauf, den der Zyklus gelesen hat (score.source ist standardmäßig ledger, vorher recent600). Setze score.source auf recent600, um zurückzukehren; ein von dir gesetzter Wert bleibt erhalten.",
+     "fr": "Le score, les rapports, le miroir et l'analytique lisent désormais toutes les exécutions lues par le cycle (score.source vaut ledger par défaut, c'était recent600). Fixez score.source à recent600 pour revenir en arrière ; une valeur que vous avez fixée est conservée.",
+     "it": "Punteggio, rapporti, specchio e analitica leggono ora tutte le esecuzioni lette dal ciclo (score.source è ledger per impostazione predefinita, prima recent600). Imposta score.source su recent600 per tornare indietro; un valore impostato da te viene conservato.",
+     "ja": "スコア、レポート、ミラー、分析は、サイクルが読んだすべての実行を読むようになりました(score.source の既定は ledger で、以前は recent600)。戻すには score.source を recent600 にしてください。自分で設定した値はそのまま残ります。",
+     "zh": "评分、报告、镜像和分析现在读取周期读到的全部运行(score.source 默认为 ledger,之前是 recent600)。将 score.source 设为 recent600 即可恢复;您自己设置的值会保留。",
+     "pt": "A pontuação, os relatórios, o espelho e a análise leem agora todas as execuções que o ciclo leu (score.source é ledger por predefinição, antes recent600). Defina score.source como recent600 para voltar atrás; um valor que tenha definido é conservado."
+    },
+    "old_value": "recent600",
+    "new_value": "ledger"
+   }
+  ]
+ }
 }
