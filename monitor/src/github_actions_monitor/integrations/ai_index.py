@@ -6,6 +6,7 @@ An external AI (or a local one) must not depend on a fixed path: the folders of 
 `write()` keeps ai/INDEX.json and ai/README.md up to date at every start. Read only for everybody else: nothing here opens a network connection or reads a file of the person's data.
 """
 import json
+from pathlib import Path
 
 from github_actions_monitor.security import private_io
 from github_actions_monitor.tool_version import TOOL_VERSION
@@ -75,15 +76,19 @@ def build(edition="complete", base=None):
             "tools": [{"id": i, "command": c, "about": a} for i, c, a in TOOLS], "guide": "README.md"}
 
 
-def paths_report(edition="complete", base=None):
-    """The answer of `GET /api/paths`: the folders in use, the main files, and what is still lying next to the launchers (the doctor says the same)."""
+def paths_report(edition="complete", base=None, remote=False):
+    """The answer of `GET /api/paths`: the folders in use, the main files, and what is still lying next to the launchers (the doctor says the same). `remote` = the asker is a client of the network, not
+    this computer: the folders of this computer (they carry the name of its user) are given by their last name only, as `/api/settings` leaves out the paths of the keys."""
     where = paths.describe(base)
+
+    def shown(text):
+        return Path(str(text)).name if remote else str(text)
     files = []
     for name in KNOWN_FILES:
         path = paths.place(name, base)
-        files.append({"name": name, "kind": paths.kind_of(name), "path": str(path), "exists": path.exists()})
-    return {"schema": "monitor_paths/1", "edition": edition, "folders": {k: where[k] for k in paths.KINDS}, "product_folder": where["root"], "config_file": where["config_file"], "files": files,
-            "leftovers": [source.name for source, _destination in rootmigrate.plan(base)], "ai_index": str(paths.place("INDEX.json", base))}
+        files.append({"name": name, "kind": paths.kind_of(name), "path": shown(path), "exists": path.exists()})
+    return {"schema": "monitor_paths/1", "edition": edition, "folders": {k: shown(where[k]) for k in paths.KINDS}, "product_folder": shown(where["root"]), "config_file": shown(where["config_file"]), "files": files,
+            "leftovers": [source.name for source, _destination in rootmigrate.plan(base)], "ai_index": shown(paths.place("INDEX.json", base))}
 
 
 def write(edition="complete", base=None):

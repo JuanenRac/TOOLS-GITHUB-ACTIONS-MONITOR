@@ -1,0 +1,25 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.1.8",
+ "previous": "2.1.7",
+ "digest": "71e55fefb3148c9d4306066a770a1adfab59270e4d9039bac91fcc2f8d39a774",
+ "data_schema": 2,
+ "settings": {
+  "added": [],
+  "removed": [],
+  "changed": [
+   {
+    "key": "webhook.reject_stale",
+    "old": {
+     "default": false
+    },
+    "new": {
+     "default": true
+    }
+   }
+  ]
+ },
+ "manual": {}
+}

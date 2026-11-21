@@ -117,7 +117,7 @@ DEFAULTS = {
     "report_history_days": 30,   # (before 1.5.0: parte_history_days, still read)
     "sentinel": {"enabled": True},
     "ai": {"provider": "none"},
-    "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30, "max_bad_per_minute": 120, "max_verified_per_minute": 120, "reject_stale": False, "persist_deliveries": True, "clock_skew_s": 300, "max_body_kb": 1024, "queue_max": 500, "stale_after_h": 6,
+    "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30, "max_bad_per_minute": 120, "max_verified_per_minute": 120, "reject_stale": True, "persist_deliveries": True, "clock_skew_s": 300, "max_body_kb": 1024, "queue_max": 500, "stale_after_h": 6,
                 "transport": "http", "ws_targets": [], "ws_max_targets": 10, "ws_cleanup": False, "redeliver": {"enabled": False, "hooks": [], "max_per_run": 20, "max_age_hours": 24, "interval_minutes": 60}},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
     "events_feed": {"enabled": False, "interval_seconds": 60, "owner_kind": "auto", "max_per_tick": 20},      # optional: the events of the account read with an ETag, to read only the repository that changed (eventfeed.py)
     "github_status": {"enabled": False, "interval_seconds": 300, "mark_reds": True, "quiet_notices": False},      # optional: the state of GitHub (githubstatus.com) in the bar, and the reds that appear during an incident of Actions (githubstatus.py)
@@ -2929,7 +2929,7 @@ def watchdog_loop(config, every=30):
 HOST_RE = re.compile(r"^[A-Za-z0-9.-]{1,100}\Z")
 
 
-class QuietServer(exclusive.ExclusiveBind, ThreadingHTTPServer):
+class QuietServer(exclusive.BoundedThreads, exclusive.ExclusiveBind, ThreadingHTTPServer):
     """The server of the monitor: a client that disconnects is not an error worth a traceback; any other error is still shown."""
 
     tls_context = None
@@ -3113,6 +3113,8 @@ STORE_RETRY_SECONDS = 5
 
 
 class Handler(BaseHTTPRequestHandler):
+    timeout = exclusive.REQUEST_TIMEOUT      # a connection that sends nothing for this long is closed (plain HTTP too: only the handshake of TLS had a limit); a stream only writes, so it is not affected
+
     def log_message(self, *args):
         pass
 
@@ -3203,6 +3205,8 @@ class Handler(BaseHTTPRequestHandler):
 
         def stop():
             from github_actions_monitor.security import auth
+            if localguard.STATE["network"] and not localguard.access_ok(self.headers, ""):      # the token of a paired device that was revoked (or expired, or whose pairing was switched off) ends the stream at once, not at the next revalidation
+                return True
             config = toolconfig.raw_config()
             every = auth.settings(config)["stream_revalidate_min"] * 60
             if time.time() - last[0] < every:
@@ -3647,13 +3651,10 @@ class Handler(BaseHTTPRequestHandler):
         if not inbound.active(config, provider):      # closed: nothing to say to anyone
             self.json_reply({"ok": False}, 404)
             return
-        if localguard.over_rate("chatops.ip", str(self.client_address[0]), 120):      # one address cannot flood the receiver (each check of a signature costs time)
-            self.json_reply({"ok": False, "error": "rate"}, 429)
-            return
         try:
             size = int(self.headers.get("Content-Length") or 0)
             body = self.rfile.read(size) if 0 <= size <= inbound.MAX_BODY else b"x" * (inbound.MAX_BODY + 1)
-            code, answer, record = inbound.handle(provider, config, body, self.headers, lambda: chatops_snapshot(config))
+            code, answer, record = inbound.handle(provider, config, body, self.headers, lambda: chatops_snapshot(config), address=self.webhook_sender())      # behind the supervisor: the address it saw, not its own
             if record:
                 audit_log.record(toolconfig.raw_config(), "chatops_command", provider + ":" + record["user"], "chat", CHILD["account"] or "", provider + ":" + (record["command"] or "none"),
                                  record["result"], {"channel": record["channel"], "status": code})
@@ -4239,7 +4240,7 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             from github_actions_monitor.integrations import ai_index
-            self.json_reply(ai_index.paths_report("lite" if LITE["on"] else "complete"))
+            self.json_reply(ai_index.paths_report("lite" if LITE["on"] else "complete", remote=(localguard.STATE["network"] or self.remote_through_supervisor()) and not self.is_local()))      # a client of the network does not get the folders of this computer
         elif path == "/api/about":      # the About panel: versions, links, files, health, credits, the update notice; no secret and no repository name
             if not self.guard():
                 return

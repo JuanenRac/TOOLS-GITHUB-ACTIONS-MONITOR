@@ -10,7 +10,12 @@ import json
 import os
 import socket
 import ssl
+import threading
 import urllib.request
+
+REQUEST_TIMEOUT = 30        # seconds a connection may stay without sending or taking a byte (a request that is never completed must not keep a thread for ever)
+MAX_CONNECTIONS = 256       # connections open at the same time on one server
+MAX_PER_ADDRESS = 64        # ... and from one address (this computer and the reverse proxy it declared are not counted: they stand for many people)
 
 
 class ExclusiveBind:
@@ -21,6 +26,63 @@ class ExclusiveBind:
             self.allow_reuse_address = False
             self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
         super().server_bind()
+
+
+class BoundedThreads:
+    """Mixin for a threading HTTP server, placed before it: a ceiling of open connections (`max_connections`, and `max_per_address` for one address that is not this computer). The one that passes it is
+    answered `503` and closed at once, so a client that opens connections and sends nothing cannot take every thread of the monitor. The connection is counted from its accept to the end of its thread."""
+
+    max_connections = MAX_CONNECTIONS
+    max_per_address = MAX_PER_ADDRESS
+    _count_lock = threading.Lock()
+
+    def _counts(self):
+        return self.__dict__.setdefault("_open_counts", {"all": 0, "by_address": {}})
+
+    @staticmethod
+    def _address_of(client_address):
+        return str(client_address[0]) if client_address else ""
+
+    def _counted_for(self, address):
+        return address not in ("127.0.0.1", "::1")
+
+    def process_request(self, request, client_address):
+        address = self._address_of(client_address)
+        with self._count_lock:
+            counts = self._counts()
+            over = counts["all"] >= self.max_connections or (self._counted_for(address) and counts["by_address"].get(address, 0) >= self.max_per_address)
+            if not over:
+                counts["all"] += 1
+                counts["by_address"][address] = counts["by_address"].get(address, 0) + 1
+        if over:
+            try:
+                request.settimeout(1)
+                request.sendall(b"HTTP/1.1 503 Service Unavailable\r\nRetry-After: 5\r\nConnection: close\r\nContent-Length: 0\r\n\r\n")
+            except (OSError, ValueError):
+                pass      # a TLS connection that has not shaken hands cannot be answered: it is closed
+            self.shutdown_request(request)
+            return
+        try:
+            super().process_request(request, client_address)
+        except BaseException:      # the thread could not start: the place is given back
+            self._release(address)
+            raise
+
+    def process_request_thread(self, request, client_address):
+        try:
+            super().process_request_thread(request, client_address)
+        finally:
+            self._release(self._address_of(client_address))
+
+    def _release(self, address):
+        with self._count_lock:
+            counts = self._counts()
+            counts["all"] = max(0, counts["all"] - 1)
+            left = counts["by_address"].get(address, 0) - 1
+            if left > 0:
+                counts["by_address"][address] = left
+            else:
+                counts["by_address"].pop(address, None)
 
 
 def monitor_on(port, host="127.0.0.1", timeout=1.5):

@@ -104,8 +104,9 @@ class TheMemorySurvivesARestart(Base):
 
 
 class OldEventsCanBeRefused(Base):
-    def test_off_by_default_so_an_old_event_is_accepted(self):
-        self.assertEqual(deliver({"webhook": {"enabled": True}}, 1, ago=10 * 3600)[0], 200)
+    def test_on_by_default_so_an_old_event_is_answered_and_the_owner_can_switch_it_off(self):
+        self.assertEqual(deliver({"webhook": {"enabled": True}}, 1, ago=10 * 3600)[1].get("stale"), True)
+        self.assertEqual(deliver({"webhook": {"enabled": True, "reject_stale": False}}, 2, ago=10 * 3600)[0], 200)
 
     def test_on_an_event_older_than_the_window_is_answered_and_not_acted_on(self):
         config = {"webhook": {"enabled": True, "reject_stale": True, "replay_seconds": 600}}
@@ -138,7 +139,7 @@ class TheAllowanceOfGoodRequestsIsASetting(Base):
                 with i18n.use_language(lang):
                     for prefix in ("cfg.f.webhook.", "cfg.h.webhook."):
                         self.assertNotEqual(i18n.t(prefix + name), prefix + name, (lang, prefix + name))
-        self.assertFalse(am.DEFAULTS["webhook"]["reject_stale"])
+        self.assertTrue(am.DEFAULTS["webhook"]["reject_stale"])
         self.assertTrue(hashlib)
 
 

@@ -292,9 +292,13 @@ def answer_text(name, snapshot, cfg, provider, timeout=ANSWER_SECONDS):
     return i18n.t("chatops.busy")
 
 
-def handle(provider, config, body, headers, snapshot, now=None):
+BAD_PER_MINUTE = 120      # the requests whose signature does NOT verify that one address may send in a minute; the ones that verify never count against it
+
+
+def handle(provider, config, body, headers, snapshot, now=None, address=None):
     """(http code, answer, record). `headers` is any mapping with .get; `snapshot()` returns what the commands read. Never raises. `record` is None, or {"command", "user", "channel", "result"} for the log of
-    actions (ids of the chat only: no text of the request and no secret)."""
+    actions (ids of the chat only: no text of the request and no secret). `address` = who sent it (localguard.client_key): only the requests whose signature fails are counted against it, so nobody can
+    leave the commands of the chat without an answer by sending garbage through the same tunnel or proxy (the same rule as the webhook)."""
     now = time.time() if now is None else now
     if provider not in PROVIDERS or not active(config, provider):
         return 404, {"ok": False}, None
@@ -306,6 +310,10 @@ def handle(provider, config, body, headers, snapshot, now=None):
     good, signature = (verify_slack if provider == "slack" else verify_discord)(secret, headers, body, cfg["max_age_seconds"], now)
     if not good:
         count(provider, "bad_signature")
+        if address is not None:
+            from github_actions_monitor.security import localguard
+            if localguard.over_rate("chatops_bad", str(address), BAD_PER_MINUTE, now):
+                return 429, {"ok": False, "error": "rate"}, None
         return 401, {"ok": False}, None
     if replayed(signature, cfg["max_age_seconds"] * 2, now):      # a valid request captured and sent again: answered, never acted on (Slack's own retries land here too)
         count(provider, "replay")

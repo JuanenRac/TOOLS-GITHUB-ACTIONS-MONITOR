@@ -25,7 +25,7 @@ from github_actions_monitor.integrations import channels  # noqa: E402
 from github_actions_monitor.security import webhook  # noqa: E402
 
 SECRET = "s" * 40
-CONFIG = {"webhook": {"enabled": True, "allowed_owners": ["o"]}}
+CONFIG = {"webhook": {"enabled": True, "allowed_owners": ["o"], "reject_stale": False}}
 COUNTER = itertools.count(1)
 
 
@@ -86,7 +86,7 @@ class BodyLimit(Base):
             self.assertEqual(webhook.guard_settings({"webhook": {"max_body_kb": bad}})["max_body"], 1024 * 1024, bad)
 
     def test_a_body_over_the_limit_gets_413_and_one_under_it_goes_on(self):
-        config = {"webhook": {"enabled": True, "allowed_owners": ["o"], "max_body_kb": 2}}
+        config = {"webhook": {"enabled": True, "allowed_owners": ["o"], "reject_stale": False, "max_body_kb": 2}}
         big = run_body() + b" " * 3000
         self.assertEqual(webhook.handle(config, big, headers(big), ["R"])[0], 413)
         small = run_body()
@@ -211,7 +211,7 @@ class Queue(Base):
     def setUp(self):
         super().setUp()
         webhook.INBOX.worker = True      # a worker is "there": nobody takes the jobs, so the queue fills
-        self.config = {"webhook": {"enabled": True, "allowed_owners": ["o"], "queue_max": 2}}
+        self.config = {"webhook": {"enabled": True, "allowed_owners": ["o"], "reject_stale": False, "queue_max": 2}}
 
     def post(self, body=None):
         body = body or run_body(run_id=next(COUNTER))

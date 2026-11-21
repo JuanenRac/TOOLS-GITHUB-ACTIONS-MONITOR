@@ -15,6 +15,7 @@ network mode is on, exactly like a single monitor. The lite edition never runs t
 import json
 import os
 import secrets
+import socket
 import subprocess
 import sys
 import threading
@@ -42,6 +43,12 @@ REMOTE_HEADER = "X-Monitor-Remote"
 BACKOFF = (2, 5, 15, 30, 60, 120)  # seconds to wait before starting a dead account again, growing; the last value repeats
 FORWARD_TIMEOUT = 30
 MAX_BODY = 1_048_576
+DRAIN_MAX = 32 * 1_048_576      # a refused body up to this size is read and thrown away before the 413, so the sender sees the answer and not a cut connection
+CHAT_HEADERS = ("content-type", "user-agent", "x-slack-request-timestamp", "x-slack-signature", "x-signature-ed25519", "x-signature-timestamp")
+CHAT_ROUTES = ("/api/chatops/slack", "/api/chatops/discord")
+STREAM_ROUTES = ("/api/live-events/stream", "/api/ai/stream", "/api/updates/stream")      # the streams of events of an account: they are passed on as they are written, not read whole
+STREAM_LOOK = 5.0      # seconds a stream waits for a byte before it looks again at the session of the client
+STREAM_IDLE = 90.0      # seconds without a single byte (the account sends a keep-alive every 15) after which the stream is let go
 
 
 def webhook_names(account_id=None, others=False):
@@ -407,6 +414,7 @@ PASS_BACK = ("content-type", "set-cookie", "cache-control", "location", "referre
 class Handler(BaseHTTPRequestHandler):
     server_version = "GhaMonitorSupervisor"
     door = False      # True only on the second port that listens on loopback (listen.local_port): the way in of the person at this computer when a reverse proxy is declared
+    timeout = exclusive.REQUEST_TIMEOUT      # a connection that sends nothing for this long is closed
 
     def log_message(self, *args):
         pass
@@ -518,22 +526,58 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         self.route("POST")
 
+    def body_limit(self, sup):
+        """The largest body the supervisor takes for a delivery: the one of the account that admits the most (`webhook.max_body_kb` of each, 1 MiB by default), never less than 1 MiB. The account judges its own limit."""
+        from github_actions_monitor.security import webhook
+        best = MAX_BODY
+        for account_id in accounts.enabled_accounts(sup.base):
+            try:
+                config = json.loads(accounts.config_path(account_id, sup.base).read_text(encoding="utf-8"))
+                best = max(best, webhook.guard_settings(config if isinstance(config, dict) else {})["max_body"])
+            except (OSError, ValueError, AttributeError):
+                continue
+        return best
+
+    def refuse_size(self, size):
+        """413 for a body that is too big, after reading and throwing away what the sender is still sending (up to DRAIN_MAX), so that it receives the 413 and not a closed connection."""
+        left = size if 0 < size <= DRAIN_MAX else 0
+        try:
+            while left > 0:
+                chunk = self.rfile.read(min(65536, left))
+                if not chunk:
+                    break
+                left -= len(chunk)
+        except (OSError, ValueError):
+            pass
+        self.close_connection = True
+        self.json({"ok": False}, 413)
+
     def webhook(self, sup):
         """POST /api/webhook, one address for the whole installation. Like in a single monitor it has no Host check (a tunnel or a proxy changes it) and no access token: its proof is the HMAC of
         GitHub, which the account that receives the event verifies with its own secret. The supervisor only chooses the account by the owner of the repository in the payload."""
+        self.relay(sup, "/api/webhook", None, ("content-type", "x-hub-signature-256", "x-github-event", "x-github-delivery", "user-agent"))
+
+    def chatops(self, sup, route):
+        """POST /api/chatops/slack and /api/chatops/discord, like the webhook: no Host check and no access token (the proof is the signature of the platform, which the account verifies with its own secret).
+        The account is the one asked for with `?account=` or the default one; the address the chat came from travels signed, so the account counts the bad signatures against it."""
+        from github_actions_monitor.chatops import inbound
+        self.relay(sup, route, inbound.MAX_BODY, CHAT_HEADERS)
+
+    def relay(self, sup, route, limit, kept):
+        """The common part of the two deliveries that have a proof of their own: size (the one of the most generous account, or `limit`), account, and the same request to that account with the real sender."""
         try:
             size = int(self.headers.get("Content-Length") or 0)
         except ValueError:
             size = -1
-        if not 0 <= size <= MAX_BODY:
-            self.json({"ok": False}, 413)
+        if not 0 <= size <= (limit or self.body_limit(sup)):
+            self.refuse_size(size)
             return
         body = self.rfile.read(size)      # no limit of requests here: the supervisor cannot tell a good signature from a bad one, the account that owns the secret counts them apart (and is told who sent each one)
         asked, repeated = accounts.asked_account(self.path, self.headers)
         if repeated:
             self.json({"ok": False, "error": "account_repeated"}, 400)
             return
-        account_id = account_of(self.path, self.headers, sup.base) if asked else account_of_event(body, sup.base)
+        account_id = account_of(self.path, self.headers, sup.base) if (asked or route != "/api/webhook") else account_of_event(body, sup.base)
         child = sup.child(account_id) if account_id else None
         if child is None:
             self.json({"ok": True, "ignored": True}, 202)          # no account watches that owner: answered, never acted on (what a single monitor says for a repository it does not watch)
@@ -541,10 +585,10 @@ class Handler(BaseHTTPRequestHandler):
         if child.health is None:
             self.json({"ok": False, "error": "account not ready"}, 503)
             return
-        headers = {k: v for k, v in self.headers.items() if k.lower() in ("content-type", "x-hub-signature-256", "x-github-event", "x-github-delivery", "user-agent")}
+        headers = {k: v for k, v in self.headers.items() if k.lower() in kept}
         headers["Host"] = f"127.0.0.1:{child.port}"
         headers[auth_http.WEBHOOK_PEER_HEADER] = localguard.client_key(self.client_address, self.headers)
-        status, data, back = fetch(child.url("/api/webhook"), timeout=FORWARD_TIMEOUT, data=body, headers=headers, method="POST")
+        status, data, back = fetch(child.url(route), timeout=FORWARD_TIMEOUT, data=body, headers=headers, method="POST")
         self.reply(status or 502, data if status else b'{"ok": false}', back.get("Content-Type", "application/json"))
 
     def team_gate(self):
@@ -571,6 +615,9 @@ class Handler(BaseHTTPRequestHandler):
         route = self.path.split("?")[0]
         if method == "POST" and route == "/api/webhook" and sup is not None:
             self.webhook(sup)
+            return
+        if method == "POST" and route in CHAT_ROUTES and sup is not None:
+            self.chatops(sup, route)
             return
         if method == "POST" and route == "/api/access":
             self.open_session()
@@ -599,7 +646,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         if method == "GET" and route == "/api/paths":
             from github_actions_monitor.integrations import ai_index
-            self.json(ai_index.paths_report("complete"))
+            self.json(ai_index.paths_report("complete", remote=localguard.STATE["network"] and not self.this_computer()))      # a client of the network does not get the folders of this computer
             return
         if method == "GET" and route == "/api/accounts":
             listed = sup.summary()
@@ -739,12 +786,69 @@ class Handler(BaseHTTPRequestHandler):
             headers[REMOTE_HEADER] = "1"          # the account then treats the request like a remote one: the keys that decide exposure and the actions on GitHub stay with the computer of the monitor
         if "Origin" in headers:
             headers["Origin"] = f"http://127.0.0.1:{child.port}"
+        if method == "GET" and route in STREAM_ROUTES:
+            self.stream(child, route, headers)
+            return
         status, data, back = fetch(child.url(strip_account(self.path)), timeout=FORWARD_TIMEOUT, data=body, headers=headers, method=method)
         if status == 0:
             self.json({"error": "account not answering", "account": account_id}, 502)
             return
         extra = {k: v for k, v in back.items() if k.lower() in PASS_BACK and k.lower() not in ("content-type", "cache-control")}
         self.reply(status, data, back.get("Content-Type", "application/json"), extra)
+
+    def stream(self, child, route, headers):
+        """GET of a stream of events of an account (`text/event-stream`): what the account writes goes to the client as it is written. It used to be read whole (up to the end of the stream, cut at 30 seconds with a
+        502), which held one of the few places for streams of the account for nothing. While it is open it makes the two checks a single monitor makes: the access token or the token of a device, on every turn, and
+        the session of the team mode every `auth.stream_revalidate_min` minutes; it ends with the account, with the client, or after STREAM_IDLE seconds of silence."""
+        from github_actions_monitor.security import auth
+        key = CHILD_KEYS.get(child.port)
+        if key:
+            headers = {**headers, SUPERVISOR_KEY_HEADER: key}
+        request = urllib.request.Request(child.url(strip_account(self.path)), headers=headers, method="GET")
+        try:
+            answer = netguard.local_open(request, timeout=STREAM_LOOK)
+        except urllib.error.HTTPError as error:
+            try:
+                data = error.read(MAX_BODY)
+            except OSError:
+                data = b""
+            self.reply(error.code, data, error.headers.get("Content-Type", "application/json"))
+            return
+        except (urllib.error.URLError, OSError, ValueError):
+            self.json({"error": "account not answering"}, 502)
+            return
+        config = self.team_config()
+        every = auth.settings(config)["stream_revalidate_min"] * 60
+        last, quiet = time.time(), 0.0
+        try:
+            self.send_response(answer.status)
+            self.send_header("Content-Type", answer.headers.get("Content-Type", "text/event-stream"))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Accel-Buffering", "no")
+            self.send_header("Connection", "close")
+            self.end_headers()
+            self.close_connection = True
+            while quiet < STREAM_IDLE:
+                if localguard.STATE["network"] and not localguard.access_ok(self.headers, ""):      # a revoked device or a switched-off pairing ends what it was listening to
+                    break
+                if time.time() - last >= every:
+                    last = time.time()
+                    if not auth_http.revalidate(self, config, route):
+                        break
+                try:
+                    chunk = answer.read1(8192)
+                except (TimeoutError, socket.timeout):
+                    quiet += STREAM_LOOK
+                    continue
+                if not chunk:
+                    break
+                quiet = 0.0
+                self.wfile.write(chunk)
+                self.wfile.flush()
+        except (OSError, ValueError):
+            pass      # the client went away, or the account did: nothing more to say
+        finally:
+            answer.close()
 
 
 class DoorHandler(Handler):
@@ -754,7 +858,7 @@ class DoorHandler(Handler):
     door = True
 
 
-class Server(exclusive.ExclusiveBind, ThreadingHTTPServer):
+class Server(exclusive.BoundedThreads, exclusive.ExclusiveBind, ThreadingHTTPServer):
     """The server of the supervisor: with a certificate (`listen.tls_cert_file`) every connection is wrapped in TLS in the thread of its own, and a client that goes away is not worth a traceback."""
 
     tls_context = None
