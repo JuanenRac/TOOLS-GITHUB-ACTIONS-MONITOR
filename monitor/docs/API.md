@@ -93,4 +93,5 @@ These routes serve the page and the tools of this computer. They are not part of
 | `/api/sentinel/security` | What GitHub says is open or missing about security (the Security sentinel; off by default; read only). |
 | `/api/session-token` | A token of one use for the next change of a setting; the page asks for it right before it writes. |
 | `/api/statusbar` | What the bar at the foot of the page shows: edition, address, account and sentinels; no secret and no call to GitHub. |
+| `/api/version` | The version of the code and the start time of the process (`version`, `started`), never cached. The wall screens and the kiosk ask it every `screens.version_check_seconds` seconds and reload themselves when either one changes. |
 | `/api/welcome` | GET: whether the first-start guide is done. POST, this computer: marks it as done or not. |

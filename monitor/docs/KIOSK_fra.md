@@ -47,6 +47,7 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk.high_contrast` | désactivé | fond noir et lignes blanches |
 | `kiosk.rotate_views` | désactivé | un préréglage à plusieurs onglets change d'onglet tout seul ; désactivé, l'écran montre le premier onglet du préréglage |
 | `kiosk.rotate_seconds` | 30 | la durée d'affichage de chaque onglet (de 5 à 600) |
+| `screens.version_check_seconds` | 300 | la fréquence à laquelle la page consulte `/api/version` et se recharge toute seule quand le moniteur a été mis à jour ou redémarré (0 = jamais ; le minimum est 30) |
 | `kiosk.safe_margin_percent` | 0 | la part de chaque bord, en pourcentage, que la page laisse libre pour un téléviseur qui coupe la bordure (overscan) ; de 0 à 10 |
 | `kiosk.scale_with_window` | désactivé | la taille du texte ci-dessus est celle d'une fenêtre de 1080 px sur son petit côté ; activé, elle grandit avec la fenêtre, si bien qu'un téléviseur 4K ressemble à un Full HD |
 

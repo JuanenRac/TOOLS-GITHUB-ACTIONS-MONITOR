@@ -126,6 +126,7 @@ La lingua di uno schermo si decide in quest'ordine: `?lang=xx` nell'indirizzo; p
 | `screens.hide_healthy` | Spento per impostazione predefinita. Lo schermo Flotta omette i quadratini dei repository sani; il panorama omette i gruppi senza rosso né giallo e le righe della mappa di calore senza errori. I totali restano. |
 | `screens.idle_dim_minutes` | 0 = spento (predefinito). Quando non è cambiato nulla per questi minuti e nulla è rosso, lo schermo si attenua per preservare il pannello; il cambiamento successivo lo risveglia (da 1 a 1440). |
 | `screens.min_font_px` | La lettera più piccola degli schermi in pixel, qualunque sia la dimensione della finestra (12 predefinito; da 8 a 32). |
+| `screens.version_check_seconds` | Ogni quanti secondi uno schermo da parete consulta `/api/version` per sapere se il monitor è stato aggiornato o riavviato (300 predefinito; 0 = mai; il minimo è 30). |
 | `screens.menu` | Attivo per impostazione predefinita. Il pulsante Schermi nella barra superiore. Disattivato: il pulsante scompare; gli schermi continuano a funzionare ai loro indirizzi. |
 | `screens.menu_target` | new (predefinito): uno schermo si apre in una nuova finestra o scheda; same: nella scheda corrente. |
 | `screens.menu_max_windows` | Massimo di finestre che un insieme multischermo apre in una volta (4 per impostazione predefinita; da 1 a 9). |
@@ -174,6 +175,7 @@ Le tre pagine sono disegnate con unità che seguono il lato corto della finestra
 - Quando un elenco ha più righe di quante ne contenga il suo riquadro, le più importanti vengono prima (il rosso prima del verde, le più recenti prima) e l'ultima riga dice quante sono rimaste fuori ("+3 altri"); nulla viene nascosto senza quella riga.
 - Margine di sicurezza (overscan): molti televisori tagliano alcuni punti percentuali di ogni bordo, a meno che la loro modalità immagine sia "just scan" o "pixel per pixel". `screens.safe_margin_percent` (0 per impostazione predefinita, da 0 a 10; `?safe=4` per una finestra) tiene il contenuto a quella distanza da ogni bordo disegnando tutto più piccolo, e `kiosk.safe_margin_percent` fa lo stesso per il chiosco. Prova da 3 a 5 se le prime lettere dell'orologio o il bordo delle schede vengono tagliati.
 - La lettera più piccola è `screens.min_font_px` (12 pixel per impostazione predefinita): in una finestra così piccola che il disegno richiederebbe un carattere più piccolo, gli schermi mantengono la lettera e mostrano meno righe, dicendo quante ne hanno lasciate fuori, invece di rimpicciolire il testo.
+- Uno schermo che resta acceso per giorni segue il monitor: ogni `screens.version_check_seconds` secondi (300 per impostazione predefinita) consulta `/api/version` e, quando la versione o l'ora di avvio non sono quelle che ha caricato, si ricarica da solo, così un televisore non resta mai con una pagina vecchia dopo un aggiornamento o un riavvio. Si ricarica solo dopo una risposta valida e diversa: un monitor che non risponde non provoca mai il ricaricamento, e con 0 non consulta mai.
 
 ### Come si comportano
 

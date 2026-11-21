@@ -47,6 +47,7 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk.high_contrast` | off | black background and white lines |
 | `kiosk.rotate_views` | off | a preset with several tabs changes tab by itself; off, the screen shows the first tab of the preset |
 | `kiosk.rotate_seconds` | 30 | how long each tab stays (5 to 600) |
+| `screens.version_check_seconds` | 300 | how often the page asks `/api/version` and reloads itself when the monitor was updated or restarted (0 = never; the least is 30) |
 | `kiosk.safe_margin_percent` | 0 | the part of each edge, in percent, that the page keeps clear for a television that cuts the border (overscan); 0 to 10 |
 | `kiosk.scale_with_window` | off | the type size above is the one of a window of 1080 px on its short side; on, it grows with the window, so a 4K television looks like a Full HD one |
 

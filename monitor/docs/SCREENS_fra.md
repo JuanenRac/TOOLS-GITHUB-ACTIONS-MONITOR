@@ -126,6 +126,7 @@ La langue d'un écran se décide dans cet ordre : `?lang=xx` dans l'adresse ; pu
 | `screens.hide_healthy` | Désactivé par défaut. L'écran Parc omet les carrés des dépôts sains ; la vue d'ensemble omet les groupes sans rouge ni jaune et les lignes de la carte de chaleur sans échec. Les totaux restent. |
 | `screens.idle_dim_minutes` | 0 = désactivé (par défaut). Quand rien n'a changé pendant ce nombre de minutes et que rien n'est rouge, l'écran s'assombrit pour ménager la dalle ; le prochain changement le réveille (1 à 1440). |
 | `screens.min_font_px` | La plus petite lettre des écrans en pixels, quelle que soit la taille de la fenêtre (12 par défaut ; 8 à 32). |
+| `screens.version_check_seconds` | Tous les combien de secondes un écran mural consulte `/api/version` pour savoir si le moniteur a été mis à jour ou redémarré (300 par défaut ; 0 = jamais ; le minimum est 30). |
 | `screens.menu` | Activé par défaut. Le bouton Écrans de la barre du haut. Désactivé : le bouton disparaît ; les écrans continuent de fonctionner à leurs propres adresses. |
 | `screens.menu_target` | new (par défaut) : un écran s'ouvre dans une nouvelle fenêtre ou un nouvel onglet ; same : dans l'onglet actuel. |
 | `screens.menu_max_windows` | Nombre maximal de fenêtres qu'un ensemble multi-écrans ouvre d'un coup (4 par défaut ; de 1 à 9). |
@@ -174,6 +175,7 @@ Les trois pages sont dessinées avec des unités qui suivent le petit côté de 
 - Quand une liste a plus de lignes que sa boîte n'en contient, les plus importantes passent en premier (le rouge avant le vert, le plus récent d'abord) et la dernière ligne dit combien ont été laissées de côté (« +3 de plus ») ; rien n'est masqué sans cette ligne.
 - Marge de sécurité (overscan) : beaucoup de téléviseurs coupent quelques pour cent de chaque bord, sauf si leur mode d'image est « just scan » ou « pixel par pixel ». `screens.safe_margin_percent` (0 par défaut, de 0 à 10 ; `?safe=4` pour une fenêtre) garde le contenu à cette distance de chaque bord en dessinant tout plus petit, et `kiosk.safe_margin_percent` fait de même pour le kiosque. Essayez 3 à 5 si les premières lettres de l'horloge ou la bordure des cartes sont coupées.
 - La plus petite lettre est `screens.min_font_px` (12 pixels par défaut) : dans une fenêtre si petite que la mise en page demanderait une police plus petite, les écrans gardent la lettre et montrent moins de lignes, en disant combien ils en ont laissé de côté, au lieu de réduire le texte.
+- Un écran qui reste allumé pendant des jours suit le moniteur : toutes les `screens.version_check_seconds` secondes (300 par défaut) il consulte `/api/version` et, quand la version ou l'heure de démarrage n'est plus celle qu'il a chargée, il se recharge tout seul ; un téléviseur ne garde donc jamais une page périmée après une mise à jour ou un redémarrage. Il ne se recharge qu'après une réponse valide et différente : un moniteur qui ne répond pas ne provoque jamais le rechargement, et avec 0 il ne consulte jamais.
 
 ### Leur comportement
 

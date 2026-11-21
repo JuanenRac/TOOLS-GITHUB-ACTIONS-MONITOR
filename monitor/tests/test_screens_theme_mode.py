@@ -182,7 +182,8 @@ class TheModeOfTheScreens(unittest.TestCase):
         self.assertIn("!R.hold.keys", SCREENS.replace("![...R.hold.keys]", "!R.hold.keys"))
 
     def test_the_other_screens_are_watched_with_the_same_read_only_call(self):
-        self.assertEqual(len(re.findall(r"fetch\(", SCREENS)), 1, "one call, shared by the screen that is shown and by the ones that are only watched")
+        self.assertEqual(len(re.findall(r"fetch\(", SCREENS)), 2, "one call for the data, shared by the screen that is shown and by the ones that are only watched, and the look at the version of the monitor")
+        self.assertEqual(len(re.findall(r"fetch\(\"/api/screens/data", SCREENS)), 1)
         self.assertIn("if(P.jump)JUMP_KINDS.forEach", SCREENS)
 
     def test_every_new_setting_has_its_row_its_default_and_its_texts_in_eight_languages(self):

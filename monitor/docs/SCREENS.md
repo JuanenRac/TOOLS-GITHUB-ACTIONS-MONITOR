@@ -126,6 +126,7 @@ The language of a screen is decided in this order: `?lang=xx` in the address; th
 | `screens.hide_healthy` | Off by default. The Fleet screen leaves out the squares of the healthy repositories; the overview leaves out the groups without red or yellow and the rows of the heat map without a failure. The totals stay. |
 | `screens.idle_dim_minutes` | 0 = off (default). When nothing has changed for this many minutes and nothing is red, the screen dims to save the panel; the next change wakes it (1 to 1440). |
 | `screens.min_font_px` | The smallest letter of the screens in pixels, whatever the size of the window (12 by default; 8 to 32). |
+| `screens.version_check_seconds` | How often a wall screen asks `/api/version` to know whether the monitor was updated or restarted (300 by default; 0 = never; the least is 30). |
 | `screens.menu` | On by default. The Screens button in the top bar. Off: the button disappears; the screens keep working at their own addresses. |
 | `screens.menu_target` | new (default): a screen opens in a new window or tab; same: in the tab you are in. |
 | `screens.menu_max_windows` | Most windows that a multi-monitor set opens at once (4 by default; 1 to 9). |
@@ -174,6 +175,7 @@ The three pages are drawn in units that follow the short side of the window, so 
 - When a list has more rows than its box holds, the most important come first (red before green, the newest first) and the last line says how many were left out ("+3 more"); nothing is hidden without that line.
 - Safe margin (overscan): many televisions cut a few percent of every edge unless their picture mode is "just scan" or "pixel for pixel". `screens.safe_margin_percent` (0 by default, 0 to 10; `?safe=4` for one window) keeps the content that far from each edge by drawing everything smaller, and `kiosk.safe_margin_percent` does the same for the kiosk. Try 3 to 5 if the first letters of the clock or the border of the cards are cut.
 - The smallest letter is `screens.min_font_px` (12 pixels by default): in a window so small that the layout would need a smaller type, the screens keep the letter and show fewer rows, saying how many they left out, instead of shrinking the text.
+- A screen that stays on for days follows the monitor: every `screens.version_check_seconds` seconds (300 by default) it asks `/api/version` and, when the version or the start time is not the one it loaded, it reloads itself, so a TV never keeps an old page after an update or a restart. It reloads only after a valid answer that differs: a monitor that does not answer never makes it reload, and with 0 it never asks.
 
 ### How they behave
 
