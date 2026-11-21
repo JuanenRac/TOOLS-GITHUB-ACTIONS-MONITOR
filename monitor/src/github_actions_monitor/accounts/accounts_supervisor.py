@@ -600,7 +600,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         if method == "GET" and route == "/api/paths":
             from github_actions_monitor.integrations import ai_index
-            self.json(ai_index.paths_report("complete"))
+            self.json(ai_index.paths_report("complete", remote=localguard.STATE["network"] and not self.this_computer()))      # a client of the network does not get the folders of this computer
             return
         if method == "GET" and route == "/api/accounts":
             listed = sup.summary()

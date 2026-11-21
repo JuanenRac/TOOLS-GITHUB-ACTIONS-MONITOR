@@ -4213,7 +4213,7 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             from github_actions_monitor.integrations import ai_index
-            self.json_reply(ai_index.paths_report("lite" if LITE["on"] else "complete"))
+            self.json_reply(ai_index.paths_report("lite" if LITE["on"] else "complete", remote=(localguard.STATE["network"] or self.remote_through_supervisor()) and not self.is_local()))      # a client of the network does not get the folders of this computer
         elif path == "/api/about":      # the About panel: versions, links, files, health, credits, the update notice; no secret and no repository name
             if not self.guard():
                 return

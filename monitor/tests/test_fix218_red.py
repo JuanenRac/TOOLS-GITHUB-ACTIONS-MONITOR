@@ -4,6 +4,7 @@
 counts only bad signatures against an address, the paths of this computer are not given to a client of the network, the webhook has a freshness window and keeps only the links of GitHub, and the
 supervisor lets the chat through, takes the largest body of its accounts and answers the 413 after reading the body."""
 import json
+import os
 import socket
 import sys
 import tempfile
@@ -21,6 +22,8 @@ sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
+import test_182_supervisor as t182  # noqa: E402
+from github_actions_monitor.accounts import accounts, accounts_supervisor as sup  # noqa: E402
 from github_actions_monitor.app import actions_monitor as am  # noqa: E402
 from github_actions_monitor.app import toolconfig  # noqa: E402
 from github_actions_monitor.chatops import inbound  # noqa: E402
@@ -198,6 +201,144 @@ class ChatOpsRate(unittest.TestCase):
             self.assertGreater(codes.get(429, 0), 0, "past it the garbage itself is limited")
             body = slack_body("status")
             self.assertEqual(self.post(server, body, slack_headers(body, ts=now)), 200, "a signed command of the chat is never counted with the garbage")
+
+
+def strings(value):
+    if isinstance(value, str):
+        yield value
+    elif isinstance(value, dict):
+        for item in value.values():
+            yield from strings(item)
+    elif isinstance(value, list):
+        for item in value:
+            yield from strings(item)
+
+
+class PathsForClients(unittest.TestCase):
+    TOKEN = "t" * 24
+
+    def get(self, server, headers):
+        request = urllib.request.Request(server.base + "/api/paths", headers={"X-Monitor-Access": self.TOKEN, **headers})
+        with urllib.request.urlopen(request, timeout=8) as answer:
+            return json.loads(answer.read())
+
+    def test_a_client_of_the_network_gets_no_absolute_path_and_this_computer_does(self):
+        with LiveServer({}, network=self.TOKEN) as server:
+            remote = self.get(server, {"X-Forwarded-For": "192.168.1.50"})
+            self.assertEqual([x for x in strings(remote) if os.path.isabs(x) or "\\" in x or ":/" in x], [], "no folder of this computer for a client of the network")
+            self.assertIn("actions_monitor.json", remote["config_file"])
+            here = self.get(server, {})
+            self.assertTrue(os.path.isabs(here["config_file"]) and os.path.isabs(here["product_folder"]))
+
+
+STUB = r'''
+import json, os, sys, time
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+account, port = sys.argv[1], int(sys.argv[2])
+
+
+class H(BaseHTTPRequestHandler):
+    def log_message(self, *a): pass
+
+    def send(self, code, payload):
+        body = json.dumps(payload).encode()
+        self.send_response(code); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
+
+    def do_GET(self):
+        path = self.path.split("?")[0]
+        if path == "/api/health":
+            return self.send(200, {"ok": True, "version": "9.9.9", "loaded": True, "offline": False, "account": account, "credential": {"state": "ok", "reason": ""}, "cycle": {"stuck": False}})
+        if path == "/api/live-events/stream":
+            self.send_response(200); self.send_header("Content-Type", "text/event-stream"); self.send_header("Cache-Control", "no-store"); self.end_headers()
+            try:
+                self.wfile.write(b"event: hello\ndata: {}\n\n"); self.wfile.flush()
+                for _ in range(24):
+                    time.sleep(0.5)
+                    self.wfile.write(b": keepalive\n\n"); self.wfile.flush()
+            except OSError:
+                pass
+            return
+        self.send(404, {})
+
+    def do_POST(self):
+        size = int(self.headers.get("Content-Length") or 0)
+        got = 0
+        while got < size:
+            chunk = self.rfile.read(min(65536, size - got))
+            if not chunk:
+                break
+            got += len(chunk)
+        route = self.path.split("?")[0]
+        if route in ("/api/webhook", "/api/chatops/slack", "/api/chatops/discord"):
+            return self.send(200, {"account": account, "route": route, "bytes": got, "peer": self.headers.get("X-Monitor-Webhook-Peer"), "slack": self.headers.get("X-Slack-Signature"), "host": self.headers.get("Host")})
+        self.send(404, {})
+
+
+ThreadingHTTPServer(("127.0.0.1", port), H).serve_forever()
+'''
+
+
+class Supervised(unittest.TestCase):
+    """The real supervisor (its handler and its loop) in front of two accounts that are a small stub: the way the requests of a client of the network travel."""
+    names = ("alpha", "beta")
+    account_config = {}
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
+        self.addCleanup(self.tmp.cleanup)
+        self.base = Path(self.tmp.name)
+        patcher = mock.patch.dict(os.environ, {"MONITOR_ACCOUNTS_DIR": str(self.base / "accounts")})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        for name in self.names:
+            accounts.create_account(name, name + "-owner")
+            more = self.account_config.get(name)
+            if more:
+                path = accounts.config_path(name)
+                data = json.loads(path.read_text(encoding="utf-8"))
+                data.update(more)
+                path.write_text(json.dumps(data), encoding="utf-8")
+        script = self.base / "stub218.py"
+        script.write_text(STUB, encoding="utf-8")
+        self.supervisor = sup.Supervisor(command_for=lambda account_id, port: [sys.executable, "-I", str(script), account_id, str(port)], port_start=t182.free_stretch())
+        self.addCleanup(self.supervisor.stop)
+        self.supervisor.sync()
+        for _ in range(60):
+            self.supervisor.check()
+            if all(c.health is not None for c in self.supervisor.children.values()):
+                break
+            time.sleep(0.25)
+        sup.SUPERVISOR["obj"] = self.supervisor
+        self.addCleanup(lambda: sup.SUPERVISOR.update(obj=None))
+        self.server = sup.Server(("127.0.0.1", 0), sup.Handler)
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+        self.addCleanup(lambda: (self.server.shutdown(), self.server.server_close()))
+        self.port = self.server.server_address[1]
+        self.url = f"http://127.0.0.1:{self.port}"
+        self.saved_state = dict(localguard.STATE)
+        self.addCleanup(self.put_back)
+
+    def put_back(self):
+        localguard.STATE.clear()
+        localguard.STATE.update(self.saved_state)
+        localguard.reset_limits()
+
+    def network(self, token="t" * 24):
+        localguard.configure(True, "127.0.0.1", token)
+        return {"X-Monitor-Access": token}
+
+    def request(self, path, headers=None, data=None, method=None):
+        return t182.get(self.url + path, headers=headers, data=data, method=method)
+
+
+class SupervisorPaths(Supervised):
+    def test_a_client_of_the_network_gets_no_absolute_path_and_this_computer_does(self):
+        key = self.network()
+        status, remote, _ = self.request("/api/paths", {**key, "X-Forwarded-For": "192.168.1.50"})
+        self.assertEqual(status, 200)
+        self.assertEqual([x for x in strings(remote) if os.path.isabs(x)], [])
+        status, here, _ = self.request("/api/paths", key)
+        self.assertTrue(os.path.isabs(here["config_file"]))
 
 
 if __name__ == "__main__":
