@@ -43,6 +43,7 @@ CATALOGUE = (
     {"id": "screen2", "group": "page", "path": "/screen/2", "fixed": {}, "params": ("tabs", "orient", "rotate", "lang", "repo"), "needs": ""},
     {"id": "screen3", "group": "page", "path": "/screen/3", "fixed": {}, "params": ("tabs", "orient", "rotate", "lang", "repo"), "needs": ""},
     {"id": "overview", "group": "wall", "path": "/screen/overview", "fixed": {}, "params": WALL_PARAMS, "needs": "wall"},
+    {"id": "fleet", "group": "wall", "path": "/screen/fleet", "fixed": {}, "params": WALL_PARAMS, "needs": "wall"},
     {"id": "now", "group": "wall", "path": "/screen/now", "fixed": {}, "params": WALL_PARAMS, "needs": "wall"},
     {"id": "sentinels", "group": "wall", "path": "/screen/sentinels", "fixed": {}, "params": WALL_PARAMS, "needs": "wall"},
     {"id": "wall_turning", "group": "wall", "path": "/screen/overview", "fixed": {}, "params": WALL_PARAMS + ("rotate", "jump"), "needs": "wall"},
@@ -143,7 +144,7 @@ def multi_urls(values, cfg, lite=False):
     count = _value("windows", values.get("windows"))
     count = max(1, min(int(count) if count else defaults({"id": "multi"}, cfg)["windows"], cfg["menu_max_windows"]))
     chosen = _value("set", values.get("set")) or "wall"
-    order = {"wall": ("overview", "now", "sentinels"), "wall_turning": ("wall_turning",), "tabs": ("screen1", "screen2", "screen3")}[chosen]
+    order = {"wall": ("overview", "now", "sentinels", "fleet"), "wall_turning": ("wall_turning",), "tabs": ("screen1", "screen2", "screen3")}[chosen]
     by_id = {e["id"]: e for e in CATALOGUE}
     out = []
     for n in range(1, count + 1):

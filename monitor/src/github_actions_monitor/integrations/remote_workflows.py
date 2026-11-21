@@ -22,7 +22,7 @@ NAME_RE = re.compile(r"^(?!\.+\Z)[A-Za-z0-9._-]{1,100}\Z")      # "." and ".." n
 FILE_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\.ya?ml\Z")
 MAX_BYTES = 262144      # a workflow file bigger than this is skipped (the clone scan reads the same limit)
 NOT_EVALUABLE_BY_API = ("stacks", "dependabot_yml", "manifest", "changelog")      # what a list of workflow files cannot say
-REASONS = ("sso", "rate_limited", "auth", "forbidden", "error", "budget", "too_big", "over_limit", "airgapped", "anon_off")
+REASONS = ("sso", "rate_limited", "auth", "forbidden", "timeout", "error", "budget", "too_big", "over_limit", "airgapped", "anon_off")
 RAW_HOST = "raw.githubusercontent.com"
 API_HOST = "api.github.com"
 ANON_LIST_RE = re.compile(r"^repos/([A-Za-z0-9._-]{1,100})/([A-Za-z0-9._-]{1,100})/contents/\.github/workflows\Z")
@@ -31,13 +31,15 @@ MAX_LIST_BYTES = 1048576      # the listing of a folder of workflows is never bi
 
 
 def reason_of(message):
-    """Why a read failed, from the text of the error of `gh`: sso (the token is not authorised for the organization), rate_limited, auth (bad credentials), not_found, forbidden (missing scope or
+    """Why a read failed, from the text of the error of `gh`: sso (the token is not authorised for the organization), rate_limited, timeout (no answer in time), auth (bad credentials), not_found, forbidden (missing scope or
     permission) or error."""
     low = str(message or "").lower()
     if "saml" in low or "sso" in low:
         return "sso"
     if "rate limit" in low:
         return "rate_limited"
+    if "timeout" in low or "timed out" in low:
+        return "timeout"      # gh did not answer in time (a slow or loaded connection): a cause, not a finding
     if "401" in low or "bad credentials" in low:
         return "auth"
     if "404" in low or "not found" in low:

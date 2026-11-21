@@ -37,6 +37,21 @@ python bin/monitor_cli.py watch alerts --exit-on-change --format ndjson
 - `--no-clear` : ne pas effacer l'écran entre deux lectures (l'écran n'est effacé que sur un terminal et seulement en `text` et `table`).
 - Un moniteur qui ne peut pas être lu est réessayé avec une pause de plus en plus longue (l'intervalle doublé, au plus une minute) et l'erreur va sur la sortie d'erreur. **Ctrl-C** termine la boucle avec le code 0.
 
+## `watch branch` : le commit que vous venez de pousser
+
+```
+git push && python bin/monitor_cli.py watch branch
+python bin/monitor_cli.py watch branch --repo acme/widgets --branch main --wait 300
+python bin/monitor_cli.py watch branch --single-pass --format json
+```
+
+`watch branch` demande à git sur quel dépôt (`origin`), quelle branche et quel commit se trouve le dossier courant, et suit dans le moniteur les workflows de ce commit : il attend qu'ils apparaissent, les montre pendant qu'ils tournent et se termine tout seul. Le code de sortie est **0** quand tous les workflows ont réussi et **1** quand l'un a échoué, a été annulé ou n'a pas fini à temps (un échec ne se distingue pas d'un délai dépassé, pour que `git push && monitor_cli.py watch branch` serve dans un script). Il lit les exécutions que le moniteur détient déjà, jamais GitHub, donc il ne consomme pas de quota ; le dépôt doit être l'un de ceux que le moniteur surveille. L'adresse du remote n'est lue que pour trouver propriétaire et nom et n'est jamais affichée (elle peut contenir un jeton).
+
+- `--repo PROPRIÉTAIRE/NOM` et `--branch NOM` remplacent ce que dit git. Avec l'un des deux (ou sans commit), on suit la dernière exécution de chaque workflow de la branche au lieu de celles d'un commit.
+- `--single-pass` (ou `--once`) : une lecture puis fin, avec le code de ce moment (1 tant que les exécutions ne sont pas finies).
+- `--wait SECONDES` : combien de temps attendre la fin des exécutions avant d'abandonner avec 1 (10 à 86400). Sans lui, l'attente est le réglage `cli.watch.branch_timeout_seconds` (900).
+- Un commit détaché n'a pas de branche : indiquez `--branch`. Un dossier sans remote nommé `origin` sur GitHub demande `--repo`.
+
 ## `completions` : compléter les commandes
 
 ```
@@ -62,6 +77,10 @@ Le script est écrit à partir de l'analyseur réel de la ligne de commande : il
 
 Les codes 0 à 5 sont ceux de [CLI_fra.md](CLI_fra.md) ; un test garde ce tableau et le code d'accord.
 
+### Les codes de sortie de `status` pour un opérateur
+
+Par défaut `status` garde les codes du tableau ci-dessus, aucun script ne change. Avec `--status-codes operator` (ou le réglage `cli.status_codes` sur `operator`) la commande ne dit que trois choses : **0** sain, **1** rien ne sert (le moniteur est injoignable ou refuse l'identifiant) et **2** en marche mais demande de l'attention. Demande de l'attention signifie : le moniteur n'atteint pas GitHub, pas encore de données, l'identifiant est aveugle, l'actualisation est en pause car le quota est sous son plancher, la réponse porte une erreur, une réponse qui n'est pas celle d'un moniteur, ou **le code sur le disque est d'une autre version que le processus en marche** (une mise à jour a été appliquée sans redémarrer le moniteur ; `/api/health` le dit par `code_stale` et `--doctor` a la vérification `running`). Une erreur d'usage reste 1. Les raisons sont dans le champ `attention` de `--json`. Les échecs de workflows rouges n'en font pas partie : pour eux, utilisez `alerts --fail-on`.
+
 ## Exemples avec `jq`
 
 Ces exemples n'utilisent que des champs qui font partie de la forme stable des réponses, et un test les exécute contre un faux moniteur (quand `jq` est installé).
@@ -84,8 +103,22 @@ monitor_cli.py team --json | jq -r '.data.ranking[] | .repo'
 | `cli.default_format` | `text` | le format quand ni `--format` ni `--json` ne sont donnés : `text`, `table`, `plain`, `json` ou `ndjson` |
 | `cli.watch.min_interval_seconds` | 2 | la pause la plus courte de `watch` (de 1 à 3600) |
 | `cli.watch.default_interval_seconds` | 5 | la pause de `watch` quand `--interval` n'est pas donné (de 1 à 3600) |
+| `cli.status_codes` | `classic` | les codes de sortie de `status` : `classic` (ceux du tableau) ou `operator` (0 sain, 1 rien ne sert, 2 en marche mais demande de l'attention) |
+| `cli.watch.branch_timeout_seconds` | 900 | combien de temps `watch branch` attend la fin des exécutions du commit (10 à 86400) |
 
 ## Ce que cette version ne fait pas
 
 - `completions` n'a pas de `--install` : il n'écrit jamais dans les fichiers d'un utilisateur.
 - Il n'y a pas de commande `proposals` : le moniteur n'a pas encore de route de propositions sur laquelle agir.
+
+## Sortie redirigée, couleur et largeur
+
+- Sans terminal (une redirection, `tee`, un tube, cron) la commande n'écrit aucune séquence d'échappement, prend la largeur de `COLUMNS` quand c'est un nombre et 80 sinon, et le texte venu de GitHub (un titre, un nom) est débarrassé des séquences d'échappement qu'il pourrait porter.
+- `--color auto|always|never` (par défaut `auto`) : `auto` n'écrit la couleur que dans un terminal et jamais quand `NO_COLOR` est définie (et non vide) ou `TERM=dumb` ; `always` l'écrit quelle que soit la destination ; `never` n'en écrit aucune. Seul l'en-tête de `--format table` est coloré (en gras) ; `json` et `ndjson` ne sont jamais touchés.
+- Un lecteur qui se ferme plus tôt (`monitor_cli.py alerts --format plain | head -1`) termine la commande en silence : ni trace d'erreur ni texte d'erreur.
+
+## `metrics` : les chiffres pour cron et pour le courrier
+
+`monitor_cli.py metrics` écrit les chiffres du moniteur à raison d'une ligne `nom=valeur` chacun, dans un ordre fixe et sans rien d'autre sur la sortie standard : `repos`, `active`, `queued`, `failures_24h`, `successes_24h`, `red_workflows`, `alerts`, `alerts_info`, `alerts_warning`, `alerts_error`, `alerts_critical`, `allowance_remaining`, `allowance_limit` et `offline`. Un chiffre inconnu est omis, jamais écrit comme 0. Elle lit le moniteur, jamais GitHub.
+
+Avec `--if-problem` elle n'écrit rien et sort avec 0 quand aucun workflow n'est rouge et qu'aucune alerte de niveau `--fail-on` (error par défaut) ou pire n'existe ; sinon elle écrit les chiffres et sort avec 5. cron envoie par courrier toute sortie : cette ligne n'envoie donc un message que le jour où quelque chose ne va pas : `*/15 * * * * py -3 /opt/monitor/bin/monitor_cli.py metrics --if-problem`. Un moniteur injoignable n'est jamais un silence : l'erreur va sur la sortie d'erreur et le code est 2.

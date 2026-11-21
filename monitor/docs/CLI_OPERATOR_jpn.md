@@ -37,6 +37,21 @@ python bin/monitor_cli.py watch alerts --exit-on-change --format ndjson
 - `--no-clear`：読み取りの間に画面を消さない（画面を消すのはターミナル上で、かつ `text` と `table` のときだけです）。
 - 読み取れないモニターは、そのたびに長くなる間隔（間隔を倍にし、最大1分）で再試行され、エラーは標準エラー出力に出ます。**Ctrl-C** でループは終了コード0で終わります。
 
+## `watch branch`：今プッシュしたコミット
+
+```
+git push && python bin/monitor_cli.py watch branch
+python bin/monitor_cli.py watch branch --repo acme/widgets --branch main --wait 300
+python bin/monitor_cli.py watch branch --single-pass --format json
+```
+
+`watch branch` は、今いるフォルダーがどのリポジトリ（`origin`）、ブランチ、コミットにあるかを git に尋ね、そのコミットのワークフローをモニターで追跡します。実行が現れるのを待ち、実行中は表示し、自分で終了します。終了コードは、すべてのワークフローが成功したときは **0**、1 つでも失敗・キャンセルされた、または時間内に終わらなかったときは **1** です（失敗とタイムアウトは区別しないので、`git push && monitor_cli.py watch branch` をスクリプトで使えます）。モニターがすでに持っている実行を読むだけで GitHub は読まないため、残り枠を消費しません。リポジトリはモニターが監視しているものである必要があります。リモートのアドレスは所有者と名前を見つけるためだけに読まれ、表示されることはありません（トークンを含む場合があるため）。
+
+- `--repo OWNER/NAME` と `--branch NAME` は git の答えを置き換えます。どちらかを指定した場合（またはコミットがない場合）は、1 つのコミットの実行ではなく、そのブランチの各ワークフローの最新の実行を追跡します。
+- `--single-pass`（または `--once`）: 1 回読んで終了し、その時点のコードを返します（実行が終わっていない間は 1）。
+- `--wait SECONDS`: 実行の完了を待つ時間で、超えると 1 で諦めます（10～86400）。指定しない場合は設定 `cli.watch.branch_timeout_seconds`（900）です。
+- デタッチされたコミットにはブランチがないので `--branch` を指定してください。GitHub 上の `origin` というリモートがないフォルダーには `--repo` が必要です。
+
 ## `completions`：コマンドの補完
 
 ```
@@ -62,6 +77,10 @@ python bin/monitor_cli.py completions powershell | Out-String | Invoke-Expressio
 
 0〜5 は [CLI_jpn.md](CLI_jpn.md) のコードと同じです。この表とコードが一致していることをテストが保っています。
 
+### オペレーター向け `status` の終了コード
+
+既定では `status` は上の表のコードのままで、スクリプトは変わりません。`--status-codes operator`（または設定 `cli.status_codes` を `operator` に）にすると、コマンドは 3 つだけを返します。**0** 正常、**1** 何も応答しない（モニターに届かない、または資格情報が拒否される）、**2** 稼働中だが要注意。要注意とは、モニターが GitHub に届かない、まだデータがない、資格情報が盲目、残り枠が下限を下回って更新が一時停止している、答えにエラーがある、モニターのものではない答え、または **ディスク上のコードが実行中のプロセスと別のバージョン**（更新後にモニターを再起動していない。`/api/health` は `code_stale` で伝え、`--doctor` には `running` の確認があります）のいずれかです。使い方の誤りは引き続き 1 です。理由は `--json` の `attention` フィールドにあります。赤いワークフローの失敗は含まれません。それには `alerts --fail-on` を使ってください。
+
 ## `jq` の例
 
 これらの例は、応答の安定した形に含まれるフィールドだけを使い、（`jq` がインストールされていれば）テストが偽のモニターに対して実行します。
@@ -84,8 +103,22 @@ monitor_cli.py team --json | jq -r '.data.ranking[] | .repo'
 | `cli.default_format` | `text` | `--format` も `--json` もないときの形式：`text`、`table`、`plain`、`json`、`ndjson` |
 | `cli.watch.min_interval_seconds` | 2 | `watch` の最短の間隔（1〜3600） |
 | `cli.watch.default_interval_seconds` | 5 | `--interval` がないときの `watch` の間隔（1〜3600） |
+| `cli.status_codes` | `classic` | `status` の終了コード: `classic`（表のもの）または `operator`（0 正常、1 何も応答しない、2 稼働中だが要注意） |
+| `cli.watch.branch_timeout_seconds` | 900 | `watch branch` がコミットの実行の完了を待つ時間（10～86400） |
 
 ## このバージョンでしないこと
 
 - `completions` に `--install` はありません。ユーザーのファイルには決して書き込みません。
 - `proposals` コマンドはありません。モニターには、操作の対象となる提案用のルートがまだありません。
+
+## リダイレクトした出力、色、幅
+
+- 端末がない場合（リダイレクト、`tee`、パイプ、cron）、コマンドはエスケープシーケンスを書かず、`COLUMNS` が数値ならその幅、そうでなければ 80 を使い、GitHub から来たテキスト（タイトルや名前）に含まれるエスケープシーケンスは取り除かれます。
+- `--color auto|always|never`（既定は `auto`）：`auto` は端末でのみ色を出し、`NO_COLOR` が設定されている（空でない）か `TERM=dumb` のときは出しません。`always` は出力先に関係なく出し、`never` は出しません。色（太字）が付くのは `--format table` の見出しだけで、`json` と `ndjson` には手を加えません。
+- 読み手が先に閉じた場合（`monitor_cli.py alerts --format plain | head -1`）、コマンドは静かに終了します。トレースバックもエラー文も出ません。
+
+## `metrics`：cron とメール向けの数値
+
+`monitor_cli.py metrics` はモニターの数値を 1 行に 1 つの `名前=値` として、決まった順序で、標準出力にほかの文字を混ぜずに書きます：`repos`、`active`、`queued`、`failures_24h`、`successes_24h`、`red_workflows`、`alerts`、`alerts_info`、`alerts_warning`、`alerts_error`、`alerts_critical`、`allowance_remaining`、`allowance_limit`、`offline`。わからない数値は 0 として書かず省きます。読むのはモニターだけで、GitHub には問い合わせません。
+
+`--if-problem` を付けると、赤いワークフローがなく `--fail-on`（既定は error）以上のアラートもないときは何も書かず 0 で終了し、あるときは数値を書いて 5 で終了します。cron は出力があればメールを送るので、次の 1 行は問題がある日だけメールを送ります：`*/15 * * * * py -3 /opt/monitor/bin/monitor_cli.py metrics --if-problem`。モニターに届かないときは沈黙せず、エラーは標準エラー出力に出て終了コードは 2 です。

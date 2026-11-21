@@ -19,7 +19,7 @@
 - 在 `webhook.enabled` 开启**并且**共享密钥（32 个字符或更多）位于 `webhook.secret_env` 所指的环境变量中之前，接收器保持关闭（默认变量为 `MONITOR_WEBHOOK_SECRET`；`MONITOR_WEBHOOK_SECRET_FILE` 可指向一个首行为密钥的文件，容器的 secret 就是这样提供的）。密钥绝不会写入 `actions_monitor.json`、被显示、被记录到日志，也不会被监视器启动的程序继承；设置标签页只说明它是否已定义。旧方式（文件中的 `secret`）仅在 `webhook.allow_config_secret` 为 true 时才会读取，使用期间实时视图会发出警告。
 - 共享密钥是唯一的屏障:GitHub 无法发送访问令牌,因此接收端不要求令牌,只信任签名。接收端已开启但未设置密钥时,它会以 `401` 拒绝每一次投递,doctor 会以红色提示。请把地址放在你自己控制的隧道或代理之后。
 - 每个请求都必须带有 `X-Hub-Signature-256: sha256=<hmac>`，用该密钥生成并以恒定时间比较；其他一律返回 `401`，在验证签名之前不会查看任何内容。
-- 超过 256 KB 的请求体返回 `413`，且在任何计算之前就拒绝。
+- 超过 `webhook.max_body_kb`(默认 1 MiB，最大 25 MiB)的请求体返回 `413`，在读取或计算之前就拒绝;拒绝次数计入 `stats.too_big`。
 - 列表是封闭的：只处理 `workflow_run`、`workflow_job`、`check_run`、`push`、`release`、`check_suite` 和 `ping`，事件中只保留经过验证的短字段（绝不保留提交信息或任何自由文本），其余一律返回 `202` 并丢弃。
 
 ## 如何开启
@@ -51,7 +51,8 @@
 |---|---|
 | `404` | 接收器已关闭，或环境变量中的密钥缺失或短于 32 个字符。 |
 | `401` | 签名不匹配：两边使用同一个密钥，内容类型为 `application/json`。 |
-| `413` | 请求体超过 256 KB。 |
+| `413` | 请求体超过 `webhook.max_body_kb`(默认 1 MiB)。 |
+| `503` | 事件队列已满:GitHub 或你稍后重新发送(`Retry-After`);该次投递不会被记为重复。 |
 | `400` | 没有有效的 `X-GitHub-Delivery` ID，或内容无法理解。 |
 | `202` | 已接受但被忽略：未监视的仓库、列表之外的事件、重复推送，或超出每分钟限额的仓库。 |
 | `429` | 同一地址一分钟内发送了超过 120 个签名正确的请求，或超过 `webhook.max_bad_per_minute`（默认 120）个签名无法验证的请求。 |
@@ -61,6 +62,37 @@
 被人截获后重新发送的有效签名请求会得到应答但不会被执行：每次投递都需要 `X-GitHub-Delivery` ID，已接受的 ID 以及已签名的请求体本身会在 `webhook.replay_seconds` 内被记住（默认一小时，内存有上限），因此被截获后换一个 ID 重发的请求仍是同一次投递，重复请求得到 `202 {"duplicate": true}`。（在 GitHub 页面手动重新投递会重复同一请求体，因此在此窗口内会被忽略。）一个仓库每分钟最多引发 `webhook.max_per_minute` 个被接受的事件，其余只应答并忽略。若载荷包含 `full_name`，其所有者必须是被监视的账户（或 `webhook.allowed_owners` 中的一个）。一个地址每分钟可发送 120 个签名正确的请求，以及 `webhook.max_bad_per_minute` 个签名无法验证的请求；两者在任何模式下都分开计数，因此垃圾请求永远不会耗尽真实投递的配额（使用 `listen.trusted_proxy` 时，地址为代理所看到的地址）。接受事件后，该仓库已保存的条件读取会被丢弃，并在下个周期重新读取，因此实时事件总会与 GitHub 对账。 投递记忆保存在数据文件夹中的私有文件里(`webhook.persist_deliveries`,默认开启;有上限,损坏的文件视为空记忆),因此重启不会让被截获的投递重新生效。开启 `webhook.reject_stale`(默认关闭)后,自身时间早于 `webhook.replay_seconds` 的已签名工作流事件只会得到应答而被忽略。一个地址的签名正确请求的配额是 `webhook.max_verified_per_minute`(120)。`webhook.secret_env` 绝不接受系统变量或你的 GitHub 登录变量(PATH、GH_TOKEN 等),也不接受属于其他设置的密钥,且一个名称只能写在一个设置里。
 
 所用的时钟始终是本机的,绝不是投递方的。`webhook.clock_skew_s`(默认 300 秒,0 到 3600)是两个时钟允许的偏差:相对窗口看起来这么旧的事件不会因此被视为过期(`webhook.reject_stale`);本机时钟走快时标记、之后又被调回的事件仍算作已到达,因此不会因为时钟而把仓库显示为已停止;它从被察觉的那一刻起开始变旧。超前一天以上的标记不被相信。
+
+## 顺序、队列与丢失的投递
+
+- **顺序。** GitHub 不保证投递的顺序。一次运行或一个作业只会向前推进(排队、进行中、已完成):对同一运行说得比已知更少的事件(上一个周期读到的也算)不会改变任何东西，并计入 `GET /api/live-status` 的 `stats.out_of_order`。运行的新尝试会重新开始。
+- **队列。** 被接受的事件在最多 `webhook.queue_max` 个事件(默认 500，1 到 10000)的队列中等待，由一个工作线程应用，因此 GitHub 能很快得到响应。队列已满时，接收端返回带 `Retry-After` 的 `503` 并忘记该次投递，所以 GitHub 重新发送的那次会被接受:事件绝不会被悄悄丢弃。深度见 `GET /api/live-status` 的 `queue`，拒绝次数见 `stats.queue_full`。
+- **丢失的投递。** 事件让其保持开放(排队或进行中)的运行，如果在 `webhook.stale_after_h` 小时(默认 6，1 到 168)内没有收到最终事件，就会在运行列表中标记为 `stale`，其仓库在下一个周期被重新读取(`stats.stale`;`open_runs` 统计保持开放的运行)。
+- **就绪。** `GET /readyz`(仅限本机)在监视器可以接收工作时返回 `200`，否则返回 `503` 并给出失败的检查项:`loaded`(已有第一次读取)、`cycle`(刷新循环没有卡住也没有退出)、`store`(数据文件夹可写)和 `queue`(队列有空位)。`GET /api/health` 只表明进程还活着。
+
+## 没有 Webhook:账户事件(默认关闭)
+
+开启 `events_feed.enabled` 后，监视器每隔 `events_feed.interval_seconds`（默认 60;若 `X-Poll-Interval` 更长则以它为准）用 ETag 读取账户事件（`GET /orgs/OWNER/events` 或 `/users/OWNER/events`;由 `events_feed.owner_kind` 指定，`auto` 先尝试组织）。没有新内容的读取返回 `304`，不消耗配额;有变化时（push、拉取请求、标签或发布），只有事件中提到的仓库会在下一个周期被重新读取，每轮最多 `events_feed.max_per_tick` 个。第一次读取只了解列表的位置。它不需要 Webhook 或隧道，也可以与之并用。计数器在 `GET /api/live-status` 的 `feed` 中。
+
+## 没有公开地址：GitHub 的 WebSocket（默认关闭）
+
+GitHub 无法到达位于家中路由器后面的监视器。把 `webhook.transport` 设为 `websocket` 后，GitHub CLI 反过来工作:`gh webhook forward` 创建一个临时 Webhook，从本机保持一个打开的连接，并把每次投递交给监视器的接收端，因此不会暴露任何东西，也不需要隧道。
+
+- `webhook.ws_targets` 列出要转发的内容:一个仓库用 `owner/repo`，整个组织用 `owner`(个人账户每个仓库需要一项，最多 `webhook.ws_max_targets` 项)。默认为空:只改传输方式不会启动任何东西。接收端必须开启(`webhook.enabled` 和共享密钥)，并重启监视器。
+- 它**会写入 GitHub**(临时钩子)，需要能管理 Webhook 的令牌(`admin:repo_hook`、`admin:org_hook`)。令牌无此权限时，目标的状态显示 `forbidden`，且每隔几分钟才重试一次。
+- 投递用每次启动时生成的密钥签名，该密钥只保存在内存中并通过命令行交给 `gh`，因此本机同一用户的其他进程可能读到它;它只允许该用户向本机上的接收端发送事件。共享密钥本身从不离开环境。GitHub 不会对 WebSocket 的每一帧单独签名:连接由令牌认证。
+- 结束的转发器会以越来越长的等待时间重新启动(5 秒到 5 分钟)。一个钩子只接受一个订阅者:不要为同一目标手动运行 `gh webhook forward`。此传输方式的投递在 GitHub 钩子页面中不显示为可重新发送，因此下面的恢复功能只适用于 `http` 传输。
+- `webhook.ws_cleanup`(关闭)会在启动时删除所列目标中指向 GitHub 转发器的钩子，以清理崩溃遗留的钩子;它会删除钩子，所以只有在确定没有其他会话使用它们时才开启。
+- 每个转发器的状态在 `GET /api/live-status` 的 `forwarders` 中。
+
+## 未送达的投递（默认关闭）
+
+家中的监视器并不总是开着:电脑夜里关机，隧道会断开。GitHub 会保留 Webhook 最近的投递，指出哪些失败，并允许重新发送失败的投递。开启 `webhook.redeliver.enabled` 后，监视器在启动一分钟后检查你在 `webhook.redeliver.hooks` 中列出的 Webhook(`repo:OWNER/REPO#ID` 或 `org:OWNER#ID`，其中 ID 是 GitHub 中该 Webhook 地址末尾的数字)，之后每隔 `webhook.redeliver.interval_minutes`(默认 60)检查一次，并请求 GitHub 重新发送所有尝试都没有收到 2xx 响应的投递。
+
+- **它会写入 GitHub**(重新发送请求)，需要能管理该 Webhook 的令牌。默认关闭;不涵盖 GitHub App 的投递。
+- 每次检查最多 `webhook.redeliver.max_per_run`(20)个投递，不处理比 `webhook.redeliver.max_age_hours`(24;GitHub 保留三天)更早的，从未请求过的优先。一次投递以逐渐增长的等待时间(5、10、20、40、80、160 和 300 秒)重新请求，第八次后放弃(`dead`)。已请求的内容保存在数据文件夹中的私有文件里(投递 ID 和次数，绝不包含载荷)，因此重启不会立刻再次请求。
+- 再次到达的投递会被接收端当作重复来响应，所以请求两次也无妨。
+- `POST /api/webhook/redeliver`(管理员，仅限本机，需一次性令牌)会立即检查，不论计划如何，并在操作日志中留下一行。计数器在 `GET /api/live-status` 的 `redelivery` 中。
 
 ## 实时视图检查清单
 

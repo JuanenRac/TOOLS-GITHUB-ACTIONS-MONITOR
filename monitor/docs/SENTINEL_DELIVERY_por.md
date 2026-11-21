@@ -47,3 +47,7 @@ Na página Definições, subseparador Sentinela, bloco Entrega: `sentinels.deliv
 ## O que não faz
 
 Não escreve no GitHub (nem etiqueta, versão, rótulo, pull request ou issue), não publica nem assina nada, não cria propostas a partir dos seus alertas e não lê o conteúdo de nenhum ficheiro além do CHANGELOG e dos ficheiros de versão que indicar.
+
+## A deriva do ecossistema é informação por defeito
+
+`release.ecosystem_drift` compara o pin de cada repositório na tabela de pins do fornecedor (por exemplo `registry/contract_pins.json` do repositório do contrato, a versão contra a qual cada consumidor foi verificado pela última vez) com a última release publicada do fornecedor. Um repositório atrasado é comunicado por defeito com nível `info`, porque os pins são subidos pelo comboio de releases do ecossistema e não à mão; `signals.ecosystem_drift.level` sobe-o. As leituras que excedem o tempo são listadas em `unavailable` com o motivo `timeout`.

@@ -124,6 +124,15 @@ launchd（macOS）：`ProgramArguments` = `/usr/bin/python3`、`-m`、`github_ac
 | `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py`：不再重复运行常规测试套件，而是接受同一提交的一次完整通过记录（已结束、无失败无错误、所有测试均已运行）；`--skip-clean-suite` 还会跳过解压后 zip 的测试套件（仍执行快速检查）并予以说明。 |
 | `--progress` | `tools/make_release.py`:每运行 250 个测试输出一行进度,干净安装的套件也一样。 |
 
+## 外部心跳(默认关闭)
+
+监视器运行在可能被关机、休眠或重启的电脑上，这时没人知道没有人在监视。开启 `heartbeat.enabled` 后，监视器每隔 `heartbeat.interval_seconds`（默认 300）向一个地址发送 ping，healthchecks.io、Cronitor 或 Uptime Kuma 之类的服务会在 ping 停止时通知你。
+
+- 该地址是机密：请放在 `heartbeat.url_env` 所指的环境变量中（默认 `MONITOR_HEARTBEAT_URL`）。它绝不会写入配置、显示或记录到日志，设置页只说明是否已定义。它必须是 `https`（仅在 `notify.allow_private_targets` 开启时才允许 `http`，用于你自己网络中的服务），不能包含用户名或密码，并使用与通知相同的保护方式打开。
+- ping 最多携带 `msg=<版本> <ok|degraded>`（`heartbeat.send_state`）：绝不包含仓库、告警或名称。
+- 当监视器无法服务（其刷新循环卡住或消失）时不会发送 ping，沉默就是警报。对有故障地址的服务（healthchecks.io：`/fail`），可以设置 `heartbeat.fail_suffix`，这样会立即通知它。
+- 在完整版中，`GET /api/health` 会显示 `heartbeat`（已发送、失败、跳过以及最近一次结果）。
+
 ## 当 GitHub 撤销登录或登录过期时
 
 每个账户都是独立的进程，所以登录失效只影响该账户。连续两次被拒绝，且拒绝表明登录本身无效（401、`Bad credentials`、令牌过期或被撤销、账户被停用、根本没有登录）后，该账户进入**失明**状态：页面、深度健康检查、`GET /api/accounts`（`state: blind`）和 `bin/monitor_cli.py` 都会说明，警报标签页会打开一条**严重的系统警报**（`system.credential_blind`，哨兵 `system`），通知类型 `credential_blind`（默认开启）和 `credential_back` 会各通知渠道一次。仅某一项权限被拒绝（某个仓库的 403）不会让账户失明。其他账户继续运行，深度健康检查保持正常。该账户会继续尝试，第一个成功的周期会关闭警报。
@@ -223,3 +232,20 @@ gh workflow run docker-audit.yml -f ref=<tag>
 ```
 
 同样的脚本也可以在装有 Docker 的 Linux 机器上运行（`tools/docker_audit/run_all.sh`）；`tools/docker_audit/LEEME.txt` 说明如何阅读每个结果。
+
+## 在手机上使用监视器
+
+本节的内容默认都是关闭的或无害的。
+
+- **可安装的应用**(`pwa.enabled`):页面提供清单、两个图标和一个小型 service worker,浏览器因此可以把监视器安装为应用。文件为 `/manifest.webmanifest`、`/sw.js`、`/pwa/offline`、`/pwa/icon-192.png` 和 `/pwa/icon-512.png`;在网络模式下,它们像其他页面一样在访问令牌之后提供。worker 只保存离线页面和图标:绝不保存页面,也绝不保存 API 的任何响应。应用回到前台或网络恢复时,页面会立即请求最新数据(`pwa.refresh_on_return`)。
+- **紧凑视图**(`ui.compact`):`auto` 在窄窗口中使用,`on` 始终使用,`off` 从不使用;`?compact=1` 或 `?compact=0` 只改变一个窗口。菜单移到顶部成为一排标签页,表格可横向滚动,触屏的点击目标至少 44 像素,对话框会跟随屏幕键盘留下的高度。
+- **用二维码配对**(`pairing.enabled`,仅限网络模式):打开命令面板(Ctrl+K),选择「配对手机」,再选「新二维码」。该码只能使用一次,有效 `pairing.code_minutes` 分钟;新码会使旧码失效。手机扫描后点击打开页面上的按钮,即可获得自己的令牌(一个 cookie),绝不是访问令牌。同一窗口列出已配对的设备并可收回其中一台:它的令牌立即失效。最多 `pairing.max_devices` 台设备;设备在 `pairing.device_days` 天后需重新配对(0 = 永不)。监视器只在数据文件夹的 `devices.json` 中保存每个令牌的哈希,错误的码像错误的访问令牌一样计入该地址,每次配对和每次收回都会在操作日志中留下一行。
+
+| 路由 | 作用 |
+|---|---|
+| `GET /api/devices` | 已配对的设备以及配对是否开启(仅限此电脑) |
+| `POST /api/pair/start` | 打开一个一次性码并返回其地址和二维码(仅限此电脑,需要页面的一次性令牌) |
+| `POST /api/pair/redeem` | 手机使用该码(`{"code": "..."}`)并获得其 cookie |
+| `POST /api/devices/revoke` | 收回一台设备(`{"id": "..."}`;仅限此电脑) |
+
+- **命令面板和快捷键**(`ui.palette`):Ctrl+K 打开标签页、仓库和操作的搜索框;`?` 列出快捷键,`/` 转到标签页的搜索框,`r` 刷新,`[` `]` 切换标签页。

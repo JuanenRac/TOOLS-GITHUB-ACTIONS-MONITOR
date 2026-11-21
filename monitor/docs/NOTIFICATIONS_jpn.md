@@ -26,12 +26,16 @@
 ## アダプターの取り決め
 
 - 一覧にないサービスへは、このコンピューター上に小さな受信プログラムを動かし、`http_local` をそこへ向けます。`Content-Type: application/json` の POST で次の本文を受け取ります:`{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`。
-- `kind` は `red_new`、`red_fixed`、`stuck_new`、`pending_sign`、`release_due`、`rate_low`、`offline`、`online`、`alerts_up`、`workflow_failed`、`ai_alert`、`collab_new`、`collab_fixed`、`credential_blind`、`credential_back`, `score_dropped`, `security_new`, `security_fixed`、`delivery_new`、`delivery_fixed`、`alerts_digest`、`silence_review` のいずれか。フィールドは追加のみです。2xx で応答してください。それ以外は失敗として数えます。
+- `kind` は `red_new`、`red_fixed`、`stuck_new`、`pending_sign`、`release_due`、`rate_low`、`offline`、`online`、`alerts_up`、`workflow_failed`、`ai_alert`、`collab_new`、`collab_fixed`、`credential_blind`、`credential_back`, `github_incident`, `github_incident_over`, `score_dropped`, `security_new`, `security_fixed`、`delivery_new`、`delivery_fixed`、`alerts_digest`、`silence_review` のいずれか。フィールドは追加のみです。2xx で応答してください。それ以外は失敗として数えます。
 - `mqtt` は同じ JSON を `notify.channels.mqtt.topic` の QoS 0 メッセージのペイロードとして発行します。
 
 ## Apprise（任意、初期状態はオフ）
 
 `apprise` チャンネルは、メッセージを `apprise` コマンド（`pip install apprise` などで各自インストール）に渡し、Apprise が対応するサービスに届けます。アドレスにはそれらのサービスの秘密が含まれるため、`notify.channels.apprise.urls_env` という名前の環境変数に入れます（空白またはカンマ区切り、最大 10 件）。呼び出しの間だけ非公開の一時ファイルに書き込まれ、コマンドの引数には決して入らず、コマンドにはモニターの鍵を含まない環境が渡されます。**Apprise は独自に接続を開くため、プライベートアドレスに対するモニターの保護は適用されません**。届く先は与えたアドレス次第です。そのためこのチャンネルには専用のスイッチがあり、初期状態はオフで、セキュリティ設定として印が付いています。コマンドがない場合は `not_installed` と表示され、失敗は他と同様に数えられ、モニターを止めることはありません。
+
+## GitHub の状態(既定ではオフ)
+
+`github_status.enabled` をオンにすると、モニターは `github_status.interval_seconds`(既定 300)ごとに githubstatus.com の公開サマリーを読みます。小さな JSON 1 つで、アカウントは不要、あなたに関する情報は送られません。ページ下部のバーに GitHub の状態が表示されます。GitHub Actions に障害があるとモニターは 1 回だけ知らせ(種類 `github_incident` と `github_incident_over`。`notify.events` に追加した場合のみ通知されます)、`github_status.mark_reds`(オン)では、障害中に出た赤に、本文とフィールド `possible_cause` で「考えられる原因: GitHub の障害」と付きます。赤そのものは隠されません。
 
 ## 1 時間あたりの上限はメッセージ数を数えます
 
@@ -42,7 +46,7 @@
 既定ではオフです（`notify.users.enabled`）。チームモードが有効なとき、各ユーザーは `GET/POST /api/auth/me/notify` で、チャンネル（`ntfy`、`teams`、`email`）、センチネル（`ci`、`collab`）、最低レベル（`info`、`warn`、`bad`）、システムのイベントを受け取るか、メッセージをすぐ受け取るかダイジェスト（`hourly`、`daily`）にまとめるかを選びます。ロールが通知される内容を決めます。閲覧者は見られるアカウントのCIイベント、メンテナーは加えて人の対応を待つもの（署名待ちのビルド、公開期限のリリース）、管理者は加えてシステムのイベントです。アカウントのイベントは、そのアカウントを見られない人には届きません。`notify.users.max_per_hour` が1人あたりのメッセージ数を制限します。
 
 - `ntfy`: `notify.channels.ntfy.server`（https、またはこのコンピューター上のサーバー）上の各ユーザーのトピック。アクセストークンは任意です。
-- `teams`: Teamsチャンネルの受信Webhookのアドレス（Microsoftのホストのみ）。
+- `teams`: Teamsチャンネルの受信Webhookのアドレス（Microsoftのホストのみ）。メッセージは常に `Content-Length` 付きで送られ（Teams が拒否する分割送信は行いません）、Workflows のアドレス（`logic.azure.com`、`powerplatform.com`）にはアダプティブカードとして送られます。
 - `email`: ユーザーのアドレス。ログイン不要のこのコンピューター上のリレー経由で送信します（`notify.channels.email`）。
 
 TeamsのWebhookアドレスとntfyのトークンはシステムが暗号化して保管し（DPAPI、キーチェーン、Secret Service、または非公開ファイル）、応答、ログ、設定には決して現れません。ユーザーを削除すると一緒に削除されます。`MONITOR_SECRET_BACKEND=file` で非公開ファイルを強制できます。各チャンネルは管理者が有効にするまでオフです。ダイジェストはユーザーがまだ見ていないアラートを集め（最大 `notify.digest.max_items`）、`POST /api/auth/me/notify/seen` で既読にすると送信されません。`POST /api/auth/me/notify/test` はユーザーのチャンネルにテストメッセージを送ります。管理者は `GET /api/auth/notify` で全員の設定（秘密は含まない）を読めます。
@@ -59,3 +63,9 @@ TeamsのWebhookアドレスとntfyのトークンはシステムが暗号化し�
 - **サービスと短い cron**（`alerts.service`）：スケジュールまたは手動でのみ実行され時々失敗するワークフローは、`failures` 回連続で失敗したとき、または直近の実行の `rate_percent` が失敗したときだけ通知されます。繰り返さず、通知は一度、解消も一度です。`workflows` でこのクラスに追加できます。
 - **コミットでまとめる**（`alerts.group`）：1つのリポジトリの `min` 件以上のワークフローが同じコミットで赤になると、1件の通知にまとめて列挙します。
 - **多いときの要約**（`alerts.digest`）：直近1時間に `threshold` 件の通知が出た後は、残りを保留し `minutes` 分ごとに1件の要約として通知します。保留されたイベントはイベントフィードに残ります。
+
+## 通知を繰り返さない
+
+`notify.dedupe_ledger` をオンにすると（既定ではオフ）、モニターは通知済みの内容の台帳をデータフォルダーの小さなファイルに保存します。保存するのはイベントの種類、リポジトリ、ワークフロー、実行へのリンクのハッシュで、テキストは含みません。ページの再読み込み、再起動、パイプラインが一時的にウィンドウから外れて戻った場合でも同じ通知は再送されず、同じワークフローの新しい実行は新しい通知になります。ラベルは `notify.dedupe_hours` 時間（既定 24）覚えられます。`notify.max_event_age_hours`（0 = オフ）は、イベント自体の日付がそれより古い場合も破棄します。数日前の出来事はニュースではないからです。
+
+Microsoft Teams チャンネルは、従来の Office 365 コネクタ（`webhook.office.com`、`outlook.office.com`）に加えて、Power Automate の **Workflows** フローのアドレス（ホスト `logic.azure.com` と `api.powerplatform.com`）も受け付けます。トリガー「Teams の webhook 要求を受信したとき」でフローを作り、そのアドレスをチャンネルが指す環境変数に入れると、モニターはプレーンテキストのメッセージを投稿します。

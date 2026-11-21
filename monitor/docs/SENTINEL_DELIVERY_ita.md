@@ -47,3 +47,7 @@ Nella pagina Impostazioni, sotto-scheda Sentinella, blocco Consegna: `sentinels.
 ## Cosa non fa
 
 Non scrive su GitHub (né tag, release, etichette, pull request o issue), non pubblica né firma nulla, non crea proposte dai suoi avvisi e non legge il contenuto di alcun file tranne il CHANGELOG e i file di versione indicati.
+
+## La deriva dell'ecosistema è un'informazione per impostazione predefinita
+
+`release.ecosystem_drift` confronta il pin di ogni repository nella tabella dei pin del fornitore (per esempio `registry/contract_pins.json` del repository del contratto, la versione rispetto alla quale ogni consumatore è stato verificato per ultimo) con l'ultima release pubblicata del fornitore. Un repository in ritardo viene segnalato per impostazione predefinita al livello `info`, perché i pin li alza il treno di release dell'ecosistema e non a mano; `signals.ecosystem_drift.level` lo alza. Le letture scadute compaiono in `unavailable` con il motivo `timeout`.

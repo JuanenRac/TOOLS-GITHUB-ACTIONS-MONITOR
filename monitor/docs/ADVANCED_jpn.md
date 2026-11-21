@@ -77,6 +77,7 @@
 - **act**: 既定でオフ、実行ごとに確認、`リポジトリ:ファイル:イベント` の閉じたリスト、本物のシークレットなし。クローンはワークスペース内の実在フォルダーでなければならず、他の場所へのリンクであるフォルダーは `act.allow_symlinks` がオンでない限り拒否されます。時間制限と Stop は、その実行が起動したプロセスツリー全体を終了し、作成した `act-` コンテナーを削除します。
 - **自分のトークン**は、あればシステムのストアに保管されます。通常のファイル（権限 600）は最も弱い保管方法です。トークンは `gh` にのみ渡され、`act` やあなたのコマンドには渡りません。`--doctor` は保管先を表示し、トークン自体は表示しません。
 - **避けるべき組み合わせ**（`--doctor` が指摘します）: すべてのインターフェースでのネットワークモード、ネットワークモード中に実行される AI アクション、ネットワークモード中の `act`、通常ファイル内のトークン。
+- **互いに打ち消し合う設定**（`--doctor` の `conflicts` チェックが名前を挙げ、起動時に表示され、`config_check.strict` ではその状態での起動を拒否します）: `repos` と `exclude` の両方にあるリポジトリ、リポジトリ一覧と `ecosystems`、隔離されたインストールでオンの `updates.check`、サウンドがオフなのにこのコンピューターのビープ音・壁面画面の音・環境音・チク音がオン、開始と終了が同じ静音時間、有効化されていないのに実行する AI アクション、オフなのに切り替えるキオスク。
 - MCP サーバーは標準入出力のみで動作します。ネットワークポートの背後に置かないでください。
 
 `listen.trusted_proxy`(既定でオフ):「同じ」コンピューター上のあなた自身のリバースプロキシが唯一の入口である場合に限ります。その場合、失敗した試行はプロキシではなく `X-Forwarded-For` の最後のアドレス(あなたのプロキシが追加するもの。nginx では `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`)に数えられ、さらに、利用できる `X-Forwarded-For` のないリクエストに限り、それら全体の合計でも3倍の上限で数えられます(この共通のロックが、正しいトークンを持つリクエストを止めることはありません)。モニターはループバックで届くあらゆる接続でそのヘッダーを信じるため、別のマシン上のプロキシでは決して使わず、他の誰かがモニターに直接届く場合はオフのままにしてください。プロキシを宣言している場合(`listen.proxy_public_host`、`listen.secure_cookie` または `listen.trusted_proxy`)、メインポートに届くものはこのコンピューターとは見なされません。`listen.local_port`(0 = オフ、それ以外は 1024〜65535)は、モニターのあるコンピューターを操作する人のために `127.0.0.1` だけで待ち受ける第2のポートを開きます(デプロイガイド参照)。 プロキシが別のコンテナや別のマシンにある場合は、そのアドレスまたはネットワークを `listen.trusted_proxies`（`MONITOR_TRUSTED_PROXIES`。Docker Compose ファイルではネットワーク `MONITOR_SUBNET`）に列挙してください。それらのアドレスまたはこのコンピューターからの接続では、試行回数の集計に `X-Forwarded-For` が信用されます。リクエストがこのコンピューターとして扱われることはありません。
@@ -102,3 +103,19 @@
 - `ui.orientation`, `ui.screen1_tabs`, `ui.now_sort`, `ui.alerts_sort`, `ui.remember_folds` - docs/SCREENS_jpn.md
 - `ports.complete`, `ports.lite` - docs/DEPLOYMENT_jpn.md
 - `notify.users.enabled` - docs/NOTIFICATIONS_jpn.md
+
+## CI/CD の規約に沿った OpenTelemetry とジョブごとのスパン
+
+OpenTelemetry エクスポート（`otlp.*`、どちらも既定ではオフ）の 2 つのスイッチで、トレースをバックエンドで扱いやすくできます。`otlp.cicd_conventions` は各実行のスパンに CI/CD 向け OpenTelemetry セマンティック規約の属性（`cicd.pipeline.name`、`cicd.pipeline.run.id`、`cicd.pipeline.run.url.full`、`cicd.pipeline.result`、`cicd.pipeline.run.attempt`、`vcs.repository.name`、`vcs.repository.ref.name`）を加え、スパン名を `RUN <workflow>` にします。`gha.*` 属性は残ります。`otlp.job_spans` は完了したジョブごとに 1 つのスパン（`TASK <job>`）を、同じトレース内でその実行のスパンの子として送ります。ランナー、そのグループ、ラベル、キュー待ち時間、結果が付きます。ジョブは署名付きの `workflow_job` イベントから得るため Webhook が必要です（Webhook が一度も見ていないジョブにはスパンがありません）。ほかは変わらず、スパンにはタイトル、作者、コミットメッセージ、ログは含まれません。
+
+## 複数のワークスペース
+
+`workspaces.list` には `名前=フォルダー` の項目（このコンピューター上のフォルダーで、ネットワークアドレスは不可）を入れ、`workspaces.active` でモニターがローカルのクローン、監査、署名記録に使うものを指定します。別のクローン群（別の組織や別のコンピューターのコピー）を 1 語変えるだけで切り替えたいときに使います。環境変数 `MONITOR_ROOT` は両方より優先され、`workspaces.active` は `workspace_root` より優先されます。リストが空（既定）なら何も変わりません。`monitor_cli.py toolbox workspaces` で一覧と使用中のものを確認できます。
+## GitHub 上の管理された操作、ストリーム、公開範囲
+
+- **理由と実行者**（`github_actions.require_reason`、オン）：理由（3～200 文字）と実行者名（`github_actions.operator`、チームモードではサインイン中の人）がない操作の計画をサーバーは拒否します。両方が `github_actions_log.jsonl` と操作ログに記録されます。`github_actions.comment_on_target`（オフ）をオンにすると、閉じた issue やプルリクエストにもそれらを書いたコメントが付きます（GitHub が表示する実行者はトークンまたは App のため）。
+- **対象を直前に再確認**：すでに閉じた issue、終了した実行、マージ済みのプルリクエストは `stale` と答え、何も送られません。
+- **権限の診断**（`github_actions.preflight`、オン）：計画の前に、認証情報にそれができるか（書き込み権限があり、ブランチへ push できる人の一覧から外れていない）を副作用なしで確認し、できなければ理由付きで拒否します。
+- **書き込めるのは 1 つだけ**（`github_actions.writer_lock`、オン）：このコンピューターで最初に操作したモニターがロックを取り、ほかのモニターと `--profile qa` で起動したモニターは、すべての操作を拒否する観察者になります。
+- **ストリームはセッションとともに終わります**：ライブストリームは `auth.stream_revalidate_min` 分（10）ごとにセッションを確認し、取り消し・期限切れ・ユーザー削除・ロールの変更で許可されなくなると終了します。
+- **インデックスされません**（`listen.noindex`、オン）：すべての応答に `X-Robots-Tag: noindex, nofollow` が付き、`/robots.txt` はすべてを禁止します。doctor の公開範囲チェックは、ネットワークモードに TLS とログインがあるかを示し、誰でも開けるページはフィッシングと判定されることがあるので公開しないよう注意します。Caddy や Cloudflare Tunnel の背後では `listen.proxy_public_host` を設定します。HTTPS のもとでポートなしのその名前だけが追加で受け入れられるホストです。

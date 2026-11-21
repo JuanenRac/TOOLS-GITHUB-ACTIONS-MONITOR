@@ -196,6 +196,40 @@ class Scanning(unittest.TestCase):
         self.assertEqual(sentinel.get_alerts(), [])
         self.assertEqual(sentinel.get_status()["unavailable"], {"branch": 1})
 
+    def test_a_branch_protected_by_a_ruleset_is_not_unprotected(self):
+        sentinel, fake, _ = build(self)
+        quiet_repo(fake)
+        fake.answers = {"/protection": (404, None, ""), "rules/branches/": (200, [{"type": "deletion"}, {"type": "non_fast_forward"}], '"r1"'), "/branches/main": (200, {"protected": True}, '"m1"'), **fake.answers}
+        sentinel.tick(NOW)
+        self.assertEqual(sentinel.get_alerts(), [])
+        self.assertEqual(sentinel.state["per_repo"]["r"]["facts"]["branch_rules"], ["deletion", "non_fast_forward"])
+        self.assertEqual(sentinel.get_status()["unavailable"], {})
+
+    def test_a_ruleset_without_the_required_rules_is_flagged_with_the_missing_ones(self):
+        sentinel, fake, _ = build(self, {"signals": {"branch": {"require": ["pull_request", "deletion"]}}})
+        quiet_repo(fake)
+        fake.answers = {"/protection": (404, None, ""), "rules/branches/": (200, [{"type": "deletion"}], '"r1"'), "/branches/main": (200, {"protected": True}, '"m1"'), **fake.answers}
+        sentinel.tick(NOW)
+        alert = sentinel.get_alerts()[0]
+        self.assertEqual((alert["code"], alert["details"]["missing"]), ("security.branch_unprotected", "pull_request"))
+        self.assertIn("pull_request", alert["title"])
+
+    def test_no_classic_protection_and_no_rules_is_still_unprotected(self):
+        sentinel, fake, _ = build(self)
+        quiet_repo(fake)
+        fake.answers = {"/protection": (404, None, ""), "rules/branches/": (200, [], '"r1"'), "/branches/main": (200, {"protected": False}, '"m1"'), **fake.answers}
+        sentinel.tick(NOW)
+        self.assertEqual([a["code"] for a in sentinel.get_alerts()], ["security.branch_unprotected"])
+
+    def test_a_failed_read_says_its_cause_and_is_not_a_finding(self):
+        self.assertEqual([ss.error_kind(e) for e in ("timeout", "API rate limit exceeded", "connection reset", "boom")], ["timeout", "rate", "network", "error"])
+        sentinel, fake, _ = build(self, repos=("bad", "r"))
+        quiet_repo(fake)
+        sentinel.tick(NOW)
+        status = sentinel.get_status()
+        self.assertEqual((status["errors"][0]["section"], status["errors"][0]["kind"], status["error_kinds"]), ("bad", "error", {"error": 1}))
+        self.assertEqual(sentinel.get_alerts(), [])
+
     def test_a_304_keeps_what_was_known_and_the_conditional_header_is_sent(self):
         sentinel, fake, _ = build(self)
         quiet_repo(fake)

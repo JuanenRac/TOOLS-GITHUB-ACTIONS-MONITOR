@@ -28,12 +28,14 @@
 | `lessons` | what the failures of this CI have taught: `lessons list`, `lessons brief --repo NAME` (read it before a push), `lessons failures`, `lessons close` | no |
 | `briefs` | the briefs of the tabs that AI tools read: `briefs index`, `briefs show TAB`, `briefs all` | yes |
 | `screens` | the Screens menu of the page: `screens list` (every kind of screen and whether it can be opened) and `screens urls` (the full addresses, ready for a kiosk command) | no |
+| `toolbox` | the small tools of the operator that work on this computer, with no monitor running: `toolbox limits [N]` (the setup against its ceilings), `toolbox workspaces` (the workspaces and the one in use), `toolbox ledger [--force]` (the ledger of notifications already sent; `--force` forgets it), `toolbox summary` (the events by kind, repository and day) and `toolbox export-events FILE` (the events as jsonl, csv, parquet or duckdb by the end of the name; parquet and duckdb need their package, the file must be new) | no |
 | `credential` | another GitHub login for one account while everything runs: `credential replace\|reload [--account ID] [--new-token-file FILE\|-]`; it never prints a token | no |
 | `install-skill` | copies a skill of the monitor (`internal` or `external`) to the folder an AI tool reads its skills from: `install-skill external --dest FOLDER`; the monitor need not be running | no |
 | `gh-token` | prints a one-hour installation token of the GitHub App so that the reads of a tool spend the allowance of the App (only with `github_app.share_reads` on); run it without `--json` | no |
 | `watch` | the same read again and again (`watch status\|alerts`, `--interval`, `--once`, `--exit-on-change`); see [CLI_OPERATOR.md](CLI_OPERATOR.md) | no |
 | `completions` | the completion script for `bash`, `zsh`, `fish` or `powershell`, written from the real parser (it only prints) | no |
 | `kiosk` | the address of the monitor for a TV or a wall (`ops`, `team`, `release`, `quiet`); see [KIOSK.md](KIOSK.md) | no |
+| `metrics` | the figures as `name=value` lines for cron and mail; with `--if-problem` it writes nothing when all is well; see [CLI_OPERATOR.md](CLI_OPERATOR.md) | no |
 
 Options of every command: `--json` (the answer as one JSON document: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (port 8766), `--timeout SECONDS` (1 to 60), `--lang CODE`. In the network mode put the access token in the environment variable `MONITOR_ACCESS_TOKEN`, the one the monitor itself reads (`MONITOR_TOKEN` is accepted as an alias; `--token TOKEN` is the last resort, because a flag shows in the list of processes). The order is: `MONITOR_ACCESS_TOKEN`, then `MONITOR_TOKEN`, then `--token`. It travels in the header `X-Monitor-Access`, never in the address and never on screen. A `--url` with plain `http` to another computer prints a warning on stderr (the token and the answers would travel unencrypted): use `https` outside a network you control.
 

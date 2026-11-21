@@ -47,3 +47,7 @@ En la página Ajustes, subpestaña Centinela, bloque Entrega: `sentinels.deliver
 ## Lo que no hace
 
 No escribe en GitHub (ni etiqueta, versión, etiqueta de clasificación, pull request ni issue), no publica ni firma nada, no crea propuestas a partir de sus alertas y no lee el contenido de ningún fichero salvo el CHANGELOG y los ficheros de versión que indiques.
+
+## La deriva del ecosistema es información por defecto
+
+`release.ecosystem_drift` compara el pin de cada repositorio en la tabla de pins del proveedor (por ejemplo `registry/contract_pins.json` del repositorio del contrato, la versión contra la que se comprobó cada consumidor por última vez) con la última release publicada del proveedor. Un repositorio atrasado se informa por defecto con nivel `info`, porque los pins los sube el tren de releases del ecosistema y no a mano; `signals.ecosystem_drift.level` lo sube. Las lecturas que superan el tiempo se listan en `unavailable` con el motivo `timeout`.

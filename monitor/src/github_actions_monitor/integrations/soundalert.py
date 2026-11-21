@@ -12,7 +12,8 @@ The page makes its own sound with the Web Audio API (see actions_monitor.html); 
 It never uses the network or a proxy, never runs a shell, never raises (a missing program is simply not a sound), keeps one burst apart from the next by `sound.cooldown_seconds` and keeps the quiet hours.
 Settings in actions_monitor.json, block `sound`: enabled (true), on_new_red (true), on_connection_lost (true), on_live_recovered (true), cooldown_seconds (30), volume (40, for the page), server_beep (false),
 one switch per kind of event (on_warning, on_resolved, on_report, on_lesson, on_sentinel, on_stuck, on_score_drop, on_info; all true; they rule the sound of this computer too), theme ("classic" or "soft",
-for the page) and the quiet hours (quiet_enabled false, quiet_from_hour 22, quiet_to_hour 7).
+for the page) the quiet hours (quiet_enabled false, quiet_from_hour 22, quiet_to_hour 7), `voices` (a text of kind=sound pairs that gives a kind another sound of the library; see soundlib.py), and the two optional
+backgrounds of the page and the wall screens, `ambient` / `ambient_volume` (false, 10) and `tick` / `tick_seconds` (false, 1).
 """
 import shutil
 import subprocess
@@ -20,11 +21,14 @@ import sys
 import threading
 import time
 
+from github_actions_monitor.integrations import soundlib
+
 KINDS = ("new_red", "connection_lost", "live_recovered", "warning", "resolved", "report", "lesson", "sentinel", "stuck", "score_drop", "info")      # one switch `on_<kind>` each; the page has one sound for each (see the table in docs/SOUNDS.md)
 PRIORITY = ("new_red", "sentinel", "stuck", "score_drop", "connection_lost", "warning", "resolved", "report", "lesson", "info", "live_recovered")      # the order in which kinds sound when several come in one look
 BURST = 3
 THEMES = ("classic", "soft")
-DEFAULTS = {"enabled": True, **{f"on_{kind}": True for kind in KINDS}, "cooldown_seconds": 30, "volume": 40, "server_beep": False, "theme": "classic", "quiet_enabled": False, "quiet_from_hour": 22, "quiet_to_hour": 7}
+DEFAULTS = {"enabled": True, **{f"on_{kind}": True for kind in KINDS}, "cooldown_seconds": 30, "volume": 40, "server_beep": False, "theme": "classic", "quiet_enabled": False, "quiet_from_hour": 22, "quiet_to_hour": 7,
+            "voices": {}, "ambient": False, "ambient_volume": 10, "tick": False, "tick_seconds": 1}
 # the tones of this computer, one pattern per kind with the rhythm of the pattern of the page: (Hz, milliseconds)
 TONES = {"new_red": ((880, 150), (1175, 150)), "sentinel": ((330, 140), (330, 140), (330, 140)), "stuck": ((740, 350), (370, 350)), "score_drop": ((784, 160), (622, 160), (466, 280)),
          "connection_lost": ((392, 300), (262, 400)), "warning": ((660, 160), (660, 160)), "resolved": ((523, 120), (659, 120), (784, 250)), "report": ((1047, 120), (784, 300)),
@@ -42,15 +46,16 @@ def settings(config):
     """The block `sound` with every value in its range (a wrong value falls back to the default)."""
     block = config.get("sound") if isinstance(config, dict) and isinstance(config.get("sound"), dict) else {}
     out = dict(DEFAULTS)
-    for key in ("enabled", "server_beep", "quiet_enabled", *[f"on_{kind}" for kind in KINDS]):
+    for key in ("enabled", "server_beep", "quiet_enabled", "ambient", "tick", *[f"on_{kind}" for kind in KINDS]):
         if isinstance(block.get(key), bool):
             out[key] = block[key]
     if block.get("theme") in THEMES:
         out["theme"] = block["theme"]
-    for key, low, high in (("cooldown_seconds", 0, 3600), ("volume", 1, 100), ("quiet_from_hour", 0, 23), ("quiet_to_hour", 0, 23)):
+    for key, low, high in (("cooldown_seconds", 0, 3600), ("volume", 1, 100), ("quiet_from_hour", 0, 23), ("quiet_to_hour", 0, 23), ("ambient_volume", 1, 50), ("tick_seconds", 1, 60)):
         value = block.get(key)
         if isinstance(value, int) and not isinstance(value, bool) and low <= value <= high:
             out[key] = value
+    out["voices"] = soundlib.parse_voices(block.get("voices"))      # a kind of event with another sound of the library (soundlib.py)
     return out
 
 
@@ -78,7 +83,13 @@ def allowed(cfg, reason, now=None, mark=True):
     return True
 
 
-def _play(runner=None, kinds=("new_red",)):
+def tones_of(kind, voices=None):
+    """The (Hz, milliseconds) of a kind on this computer: the sound the settings gave it (sound.voices) or its own."""
+    name = (voices or {}).get(kind)
+    return soundlib.server_tones(name) if name else TONES[kind]
+
+
+def _play(runner=None, kinds=("new_red",), voices=None):
     """Plays the kinds one after the other, in this thread. Returns the way it sounded ("winsound", "afplay", "canberra", "bell") or "" when nothing could."""
     runner = runner or (lambda args: subprocess.run(args, shell=False, check=False, timeout=5, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))
     kinds = [k for k in kinds if k in KINDS] or ["new_red"]
@@ -87,7 +98,7 @@ def _play(runner=None, kinds=("new_red",)):
             import winsound
             try:
                 for kind in kinds:
-                    for hertz, length in TONES[kind]:
+                    for hertz, length in tones_of(kind, voices):
                         winsound.Beep(hertz, length)
                     time.sleep(0.25)
                 return "winsound"
@@ -120,7 +131,7 @@ def beep_kinds(config, kinds, now=None, runner=None, wait=False):
     chosen = [k for k in PRIORITY if k in wanted and cfg[f"on_{k}"]][:BURST]
     if not chosen or not allowed(cfg, chosen[0], now):
         return []
-    thread = threading.Thread(target=_play, args=(runner, tuple(chosen)), daemon=True)
+    thread = threading.Thread(target=_play, args=(runner, tuple(chosen)), kwargs={"voices": cfg["voices"]} if cfg["voices"] else {}, daemon=True)
     thread.start()
     if wait:
         thread.join(5)

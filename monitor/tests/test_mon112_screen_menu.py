@@ -217,7 +217,7 @@ class TheCommandAndTheTool(unittest.TestCase):
                 code = cli.main(["screens", action, "--url", url, "--lang", "en"])
             self.assertEqual(code, cli.EXIT_OK)
             self.assertIn(expect, out.getvalue())
-            self.assertIn("12 kinds of screen", out.getvalue())
+            self.assertIn("13 kinds of screen", out.getvalue())
         bad = io.StringIO()
         with contextlib.redirect_stdout(bad), contextlib.redirect_stderr(bad):
             self.assertEqual(cli.main(["screens", "open", "--url", url, "--lang", "en"]), cli.EXIT_USAGE)

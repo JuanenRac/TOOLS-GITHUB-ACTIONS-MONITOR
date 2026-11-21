@@ -209,11 +209,11 @@ class TheScreensInABrowser(unittest.TestCase):
         for off in answers[6:]:
             self.assertEqual({f["name"] for f in off["fails"]}, {"none"}, "?blink=off: nothing blinks")
 
-    def test_rotation_turns_through_the_three_pages_in_order(self):
+    def test_rotation_turns_through_the_pages_in_order(self):
         report, still = self.many([("/screen/overview?lang=en&rotate=5",), ("/screen/now?lang=en&rotate=2",)])
         self.assertTrue(report["ok"], report)
         self.assertEqual(report["errors"], [])
-        self.assertEqual(report["seq"][:3], ["overview", "now", "sentinels"], report["seq"])
+        self.assertEqual(report["seq"][:3], ["overview", "fleet", "now"], report["seq"])
         for url in report["reqs"]:
             self.assertTrue(url.startswith("/api/screens/data?screen="), url)
         self.assertEqual(set(still["seq"]), {"now"}, "a turn faster than five seconds is no turn")

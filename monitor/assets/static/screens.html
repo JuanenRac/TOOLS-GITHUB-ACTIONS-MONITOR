@@ -19,15 +19,16 @@
 *{box-sizing:border-box;margin:0;padding:0}
 [hidden]{display:none!important}
 /* --safe is the part of each edge (in percent of the window) that a television may cut and the screens keep clear (screens.safe_margin_percent, ?safe=): the type shrinks with it, so the whole design fits in what is left */
-html{--k:1;--d:1;--safe:0;font-size:calc(var(--k)*var(--d)*(1 - var(--safe)/50)*min(100vw/120,100vh/67.5));background:var(--bg);color:var(--tx)}
+html{--k:1;--d:1;--safe:0;--minpx:12;font-size:max(calc(var(--minpx)*1px/.8),calc(var(--k)*var(--d)*(1 - var(--safe)/50)*min(100vw/120,100vh/67.5)));background:var(--bg);color:var(--tx)}
 html[data-density=compact]{--d:.9}
 html[data-density=large]{--d:1.12}
-@media (orientation:portrait){html{font-size:calc(var(--k)*var(--d)*(1 - var(--safe)/50)*min(100vw/62,100vh/108))}}
+@media (orientation:portrait){html{font-size:max(calc(var(--minpx)*1px/.8),calc(var(--k)*var(--d)*(1 - var(--safe)/50)*min(100vw/62,100vh/108)))}}
 body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans CJK SC","Noto Sans CJK JP",sans-serif;background:radial-gradient(120% 90% at 50% 0%,var(--bg2),var(--bg));height:100vh;overflow:hidden;font-size:1rem;line-height:1.25;transition:filter 2s,opacity .6s}
 :lang(ja) body{font-family:system-ui,"Yu Gothic UI","Meiryo","Hiragino Sans","Noto Sans CJK JP","Noto Sans JP",sans-serif}
 :lang(zh) body{font-family:system-ui,"Microsoft YaHei UI","PingFang SC","Noto Sans CJK SC","Noto Sans SC",sans-serif}
 :root[data-studio] body{background:var(--page,var(--bg))}
 body.dim{filter:brightness(.35)}
+body.idle{filter:brightness(.5)}
 body.offline #stage{opacity:.5;filter:grayscale(.7)}
 #wrap{position:absolute;inset:0;overflow:hidden}
 #stage{position:absolute;inset:0;transform:translate(calc(var(--sx,0)*.3rem),calc(var(--sy,0)*.3rem));display:flex;flex-direction:column;padding:calc(1rem + var(--safe)*1vh) calc(1.2rem + var(--safe)*1vw) calc(.8rem + var(--safe)*1vh);gap:.7rem;transition:transform 30s linear,opacity .6s,filter .6s}
@@ -45,9 +46,11 @@ header{display:flex;align-items:center;justify-content:space-between;gap:1rem;fl
 #banner{flex:0 0 auto;border:1px solid var(--bad);color:var(--bad);border-radius:.5rem;padding:.35rem .8rem;font-weight:600;font-size:1.05rem;background:color-mix(in srgb,var(--bad) 12%,transparent)}
 #banner[hidden]{display:none}
 #banner.warn{border-color:var(--warn);color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent)}
-.screen{flex:1 1 0;min-height:0;display:grid;gap:.8rem;transition:opacity .6s}
+.screen{flex:1 1 0;min-height:0;display:grid;gap:.8rem;transition:opacity .6s,transform .6s}
 .screen[hidden]{display:none}
 .screen.out{opacity:0}
+.screen.out.slide{transform:translateX(-4rem)}
+.wavehost{position:relative}
 .card{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:.8rem;padding:.8rem 1rem;min-width:0;min-height:0;display:flex;flex-direction:column;gap:.5rem;position:relative;overflow:hidden;box-shadow:0 0 1.4rem var(--glow)}
 .card h2{font-size:.95rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);line-height:1.15;overflow-wrap:anywhere;flex:0 0 auto}
 .card .body{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;gap:.35rem}
@@ -170,6 +173,28 @@ header>.orglogo:first-child{margin-right:1rem}header>.orglogo:last-child{margin-
 /* overview */
 #s-overview{grid-template-columns:1.05fr 1.2fr 1.6fr 1.15fr;grid-template-rows:1.1fr 1.25fr .8fr;grid-template-areas:"score fleet trend trend" "heat heat top queue" "events events events api"}
 #a-score{grid-area:score}#a-fleet{grid-area:fleet}#a-trend{grid-area:trend}#a-heat{grid-area:heat}#a-top{grid-area:top}#a-queue{grid-area:queue}#a-events{grid-area:events}#a-api{grid-area:api}
+/* fleet: the repositories by group, a square for each healthy one and a chip with the name for each one that needs a look */
+#s-fleet{grid-template-columns:1fr;grid-template-rows:auto 1fr;grid-template-areas:"fsum" "fgrp"}
+#f-sum{grid-area:fsum}#f-grp{grid-area:fgrp}
+#f-fleet{grid-template-columns:repeat(4,1fr);flex:0 0 auto}
+#f-fleet .tile{padding:.2rem .6rem}#f-fleet .tile .big{font-size:2.2rem;line-height:1.1}
+.fgroups{display:grid;grid-template-columns:repeat(auto-fit,minmax(17rem,1fr));grid-auto-rows:minmax(0,1fr);gap:.7rem;height:100%;min-height:0}
+.fg{border:1px solid var(--line);border-radius:.6rem;padding:.4rem .6rem;display:flex;flex-direction:column;gap:.3rem;min-height:0;min-width:0;overflow:hidden;position:relative}
+.fg .gh{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:0 .5rem;font-size:.9rem;line-height:1.15;flex:0 0 auto;min-width:0}
+.fg .gh b{min-width:0;overflow-wrap:anywhere}
+.fg .gh span{color:var(--mut);font-size:.85rem;min-width:0;overflow-wrap:anywhere}
+.fg .tiles{flex:1 1 0;min-height:0;display:flex;flex-wrap:wrap;align-content:flex-start;gap:.25rem;overflow:hidden}
+.tiles .ft{width:.85rem;height:.85rem;border-radius:.2rem;background:var(--ok);opacity:.8}
+.tiles .tn{font-size:.8rem;line-height:1.25;padding:0 .4rem;border-radius:.3rem;border:1px solid var(--line);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tiles .tn.s-bad{color:var(--bad);border-color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,transparent)}
+.tiles .tn.s-warn{color:var(--warn);border-color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent)}
+.tiles .tn.s-unknown{color:var(--mut)}
+.tiles .more{flex:0 0 100%}
+.fgroups>.more{grid-column:1/-1}
+/* the glance: what changed in the last look, for a few seconds, in the middle of the header */
+#glance{display:flex;flex-wrap:wrap;gap:.2rem .4rem;min-width:0;justify-content:center;align-items:center}
+#glance span{border:1px solid var(--line);border-radius:.4rem;padding:0 .45rem;font-size:.85rem;line-height:1.3;white-space:nowrap;color:var(--tx)}
+#glance span.up{border-color:var(--bad);color:var(--bad)}#glance span.down{border-color:var(--ok);color:var(--ok)}
 /* now */
 #s-now{grid-template-columns:1.5fr 1fr 1fr;grid-template-rows:1fr 1fr .62fr;grid-template-areas:"run queue fail" "run appr merge" "tl tl tl"}
 #n-run{grid-area:run}#n-queue{grid-area:queue}#n-fail{grid-area:fail}#n-appr{grid-area:appr}#n-merge{grid-area:merge}#n-tl{grid-area:tl}
@@ -177,6 +202,8 @@ header>.orglogo:first-child{margin-right:1rem}header>.orglogo:last-child{margin-
 #s-sentinels{grid-template-columns:1fr 3.2fr;grid-template-rows:1fr;grid-template-areas:"side cards"}
 #c-side{grid-area:side;display:grid;grid-template-rows:1.3fr 1fr;gap:.8rem;min-height:0}#c-cards{grid-area:cards}
 @media (orientation:portrait){
+#s-fleet{grid-template-columns:1fr}
+#f-fleet{grid-template-columns:repeat(2,1fr)}
 #s-overview{grid-template-columns:1fr 1fr;grid-template-rows:.9fr .8fr .9fr 1fr .8fr .8fr;grid-template-areas:"score fleet" "trend trend" "heat heat" "top top" "queue api" "events events"}
 #s-now{grid-template-columns:1fr 1fr;grid-template-rows:1.3fr .9fr .9fr .7fr .6fr;grid-template-areas:"run run" "queue appr" "fail fail" "merge merge" "tl tl"}
 #s-sentinels{grid-template-columns:1fr;grid-template-rows:.55fr 1.7fr;grid-template-areas:"side" "cards"}
@@ -196,6 +223,10 @@ header>.orglogo:first-child{margin-right:1rem}header>.orglogo:last-child{margin-
 @keyframes ping{0%{opacity:1;r:3.2}18%{opacity:.35;r:2.2}100%{opacity:.35;r:2.2}}
 @keyframes slide{0%{background-position:0 0}100%{background-position:3rem 0}}
 @keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes changed{0%{background:color-mix(in srgb,var(--cy) 55%,transparent)}100%{background:transparent}}
+@keyframes trail{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--cy) 70%,transparent)}100%{box-shadow:0 0 1.6rem 1.2rem transparent}}
+@keyframes wave{0%{transform:scale(.7);opacity:.85}100%{transform:scale(1.5);opacity:0}}
+@keyframes enterslide{from{opacity:0;transform:translateX(4rem)}to{opacity:1;transform:none}}
 .card,.sen{animation:rise .7s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*70ms)}
 .pulse{animation:pulse 2.4s ease-in-out infinite}
 .fail{animation:failblink 1.6s ease-in-out infinite}
@@ -207,6 +238,11 @@ header>.orglogo:first-child{margin-right:1rem}header>.orglogo:last-child{margin-
 .radar .sweep{animation:sweep 7s linear infinite}
 .radar .blip.hot{animation:ping 7s linear infinite;animation-delay:calc(var(--a)/360*7s)}
 .live-dot{animation:pulse 1.6s ease-in-out infinite}
+.changed{animation:changed 1.4s ease-out 1}
+.trail{animation:trail 1.8s ease-out 1}
+.wavefx{position:absolute;inset:0;border-radius:inherit;border:.15rem solid var(--bad);pointer-events:none;animation:wave 1.4s ease-out 1 forwards}
+.screen.enter{animation:fade .6s ease-out both}
+.screen.enter.slide{animation:enterslide .6s cubic-bezier(.2,.8,.2,1) both}
 }
 .fail{border-color:var(--bad);box-shadow:0 0 1.1rem .1rem var(--halo)}
 .fail.calm{box-shadow:0 0 .8rem 0 var(--halo)}
@@ -220,7 +256,7 @@ header>.orglogo:first-child{margin-right:1rem}header>.orglogo:last-child{margin-
 <header>
  <img class="orglogo" id="lg-tl" alt="" hidden>
  <div class="brand"><span class="pulse" aria-hidden="true"></span><b id="h-title"></b><span class="tag" id="h-tag"></span></div>
- <div class="mid"><div class="dots" id="h-dots" aria-hidden="true"></div></div>
+ <div class="mid"><div class="dots" id="h-dots" aria-hidden="true"></div><div id="glance" role="status" aria-live="off" hidden></div></div>
  <div class="clock" id="clock" aria-live="off"></div>
  <img class="orglogo" id="lg-tr" alt="" hidden>
 </header>
@@ -234,6 +270,10 @@ header>.orglogo:first-child{margin-right:1rem}header>.orglogo:last-child{margin-
  <section class="card" id="a-queue" style="--i:5"><h2 id="a-queue-h"></h2><div class="body"><div class="list" id="queue"></div></div></section>
  <section class="card" id="a-events" style="--i:6"><h2 id="a-events-h"></h2><div class="body"><div class="ticker" id="events"></div></div></section>
  <section class="card" id="a-api" style="--i:7"><h2 id="a-api-h"></h2><div class="body"><div class="gauge" id="gauge"></div><div class="mut" id="api-note" style="text-align:center"></div></div></section>
+</main>
+<main class="screen" id="s-fleet" aria-labelledby="h-title" hidden>
+ <section class="card" id="f-sum" style="--i:0"><h2 id="f-sum-h"></h2><div class="body"><div class="fleet" id="f-fleet"></div></div></section>
+ <section class="card" id="f-grp" style="--i:1"><h2 id="f-grp-h"></h2><div class="body"><div class="fgroups" id="f-groups"></div></div></section>
 </main>
 <main class="screen" id="s-now" aria-labelledby="h-title" hidden>
  <section class="card" id="n-run" style="--i:0"><h2 id="n-run-h"></h2><div class="body"><div class="list" id="n-run-l"></div></div></section>
@@ -276,7 +316,7 @@ function applyTheme(name){
   if(t==="light"||t==="dark"||t==="contrast")delete root.dataset.studio;else root.dataset.studio="1";
 }
 applyTheme(THEME_OF(D.screen));
-root.dataset.density=P.density;root.style.setProperty("--k",P.scale);root.style.setProperty("--safe",String(P.safe||0));
+root.dataset.density=P.density;root.style.setProperty("--k",P.scale);root.style.setProperty("--minpx",String(S.min_font_px||12));root.style.setProperty("--safe",String(P.safe||0));
 /* the logo of the organization: one image, in the corner and on the screens the settings say */
 const LG=D.logo,LG_IDS={"top-left":"lg-tl","top-right":"lg-tr","bottom-left":"lg-bl","bottom-right":"lg-br"};
 function logoPaint(kind){
@@ -382,7 +422,7 @@ function fitFigures(){
 const lampHtml=l=>'<span class="ico lamp l-'+esc(l)+' '+esc(l)+'" aria-hidden="true"></span>';
 const levelWord=l=>T("ui.lv_"+l);
 /* ---------- the common frame ---------- */
-const titles={overview:"ui.scr_title_overview",now:"ui.scr_title_now",sentinels:"ui.scr_title_sentinels"};
+const titles={overview:"ui.scr_title_overview",fleet:"ui.scr_title_fleet",now:"ui.scr_title_now",sentinels:"ui.scr_title_sentinels"};
 function frame(){
   const k=STATE.kind;
   $("h-title").textContent=T(titles[k]);
@@ -395,7 +435,12 @@ function frame(){
 function clock(){
   const d=new Date();
   $("clock").innerHTML=esc(d.toLocaleTimeString(D.locale,{hour:"2-digit",minute:"2-digit",second:"2-digit"}))+"<small>"+esc(d.toLocaleDateString(D.locale,{weekday:"long",day:"numeric",month:"long"}))+"</small>";
-  nightDim(d);
+  nightDim(d);idleDim();
+}
+/* nothing has changed for screens.idle_dim_minutes and nothing is red: the screen rests (it wakes with the next change) */
+function idleDim(){
+  const m=S.idle_dim_minutes;
+  body.classList.toggle("idle",!!m&&STATE.prevRed.size===0&&Date.now()-LIFE.changedAt>m*60000);
 }
 function nightDim(d){
   if(!S.night_dim){body.classList.remove("dim");return}
@@ -418,33 +463,109 @@ function banner(kind,text){
 /*SOUNDS-BEGIN*/
 /* the sounds of the monitor, one per kind of event, made with the Web Audio API (no audio file): the page and the wall screens carry this same block (a test keeps the two copies equal).
    A note is [Hz, start (s), length (s), Hz at the end (a slide)]. The themes change the colour (wave, attack, release, pitch), never the rhythm, so a kind is the same pattern in every theme. */
-const SND_PATTERNS={
-  red:{w:"sine",n:[[880,0,.15],[1175,.22,.15]]},
-  sentinel:{w:"triangle",n:[[330,0,.14],[330,.2,.14],[330,.4,.14]]},
-  stuck:{w:"sine",n:[[740,0,.7,370]]},
-  score:{w:"triangle",n:[[784,0,.16],[622,.2,.16],[466,.4,.28]]},
-  conn:{w:"sine",n:[[392,0,.3],[262,.38,.4]]},
-  warning:{w:"triangle",n:[[660,0,.16],[660,.26,.16]]},
-  resolved:{w:"sine",n:[[523,0,.12],[659,.14,.12],[784,.28,.25]]},
-  report:{w:"triangle",n:[[1047,0,.12],[784,.16,.3]]},
-  lesson:{w:"sine",n:[[1319,0,.08],[1568,.1,.08],[1976,.2,.16]]},
-  info:{w:"sine",n:[[988,0,.22]]},
-  live:{w:"sine",n:[[392,0,.12],[523,.14,.12],[659,.28,.12],[880,.42,.22]]}
+/*SND-LIBRARY-BEGIN*/
+const SND_LIBRARY={
+ "red":{"w":"sine","n":[[880,0,0.15],[1175,0.22,0.15]]},
+ "sentinel":{"w":"triangle","n":[[330,0,0.14],[330,0.2,0.14],[330,0.4,0.14]]},
+ "stuck":{"w":"sine","n":[[740,0,0.7,370]]},
+ "score":{"w":"triangle","n":[[784,0,0.16],[622,0.2,0.16],[466,0.4,0.28]]},
+ "conn":{"w":"sine","n":[[392,0,0.3],[262,0.38,0.4]]},
+ "warning":{"w":"triangle","n":[[660,0,0.16],[660,0.26,0.16]]},
+ "resolved":{"w":"sine","n":[[523,0,0.12],[659,0.14,0.12],[784,0.28,0.25]]},
+ "report":{"w":"triangle","n":[[1047,0,0.12],[784,0.16,0.3]]},
+ "lesson":{"w":"sine","n":[[1319,0,0.08],[1568,0.1,0.08],[1976,0.2,0.16]]},
+ "info":{"w":"sine","n":[[988,0,0.22]]},
+ "live":{"w":"sine","n":[[392,0,0.12],[523,0.14,0.12],[659,0.28,0.12],[880,0.42,0.22]]},
+ "bell":{"w":"sine","n":[[1319,0,0.5]]},
+ "chime":{"w":"sine","n":[[1047,0,0.12],[1319,0.15,0.3]]},
+ "ding_dong":{"w":"sine","n":[[880,0,0.3],[659,0.38,0.45]]},
+ "doorbell":{"w":"sine","n":[[659,0,0.25],[523,0.3,0.4]]},
+ "ding":{"w":"triangle","n":[[1568,0,0.3]]},
+ "ping_high":{"w":"sine","n":[[2093,0,0.1]]},
+ "ping_low":{"w":"sine","n":[[440,0,0.25]]},
+ "tick_soft":{"w":"triangle","n":[[1760,0,0.03]]},
+ "tock_soft":{"w":"triangle","n":[[1175,0,0.04]]},
+ "double_tick":{"w":"triangle","n":[[1760,0,0.03],[1760,0.12,0.03]]},
+ "tick_tock":{"w":"triangle","n":[[1760,0,0.04],[1175,0.3,0.06]]},
+ "knock":{"w":"triangle","n":[[196,0,0.06],[196,0.14,0.06]]},
+ "knock_three":{"w":"triangle","n":[[196,0,0.06],[196,0.14,0.06],[196,0.28,0.06]]},
+ "blip":{"w":"square","n":[[1500,0,0.06]]},
+ "bloop":{"w":"sine","n":[[320,0,0.1,700]]},
+ "bubble":{"w":"sine","n":[[500,0,0.12,900],[700,0.16,0.1,1100]]},
+ "drop":{"w":"sine","n":[[1200,0,0.18,500]]},
+ "droplet":{"w":"sine","n":[[1500,0,0.07,900],[1100,0.14,0.1,600]]},
+ "arpeggio_up":{"w":"sine","n":[[523,0.0,0.12],[659,0.1,0.12],[784,0.2,0.12],[1047,0.3,0.12]]},
+ "arpeggio_down":{"w":"sine","n":[[1047,0.0,0.12],[784,0.1,0.12],[659,0.2,0.12],[523,0.3,0.12]]},
+ "minor_up":{"w":"triangle","n":[[440,0.0,0.14],[523,0.12,0.14],[659,0.24,0.14]]},
+ "minor_down":{"w":"triangle","n":[[659,0.0,0.14],[523,0.12,0.14],[440,0.24,0.14]]},
+ "fanfare":{"w":"square","n":[[523,0,0.1],[523,0.12,0.1],[523,0.24,0.1],[784,0.38,0.4]]},
+ "level_up":{"w":"square","n":[[392,0.0,0.08],[523,0.08,0.08],[659,0.16,0.08],[784,0.24,0.08],[1047,0.32,0.08]]},
+ "coin":{"w":"square","n":[[988,0,0.07],[1319,0.08,0.35]]},
+ "harp_up":{"w":"sine","n":[[392,0.0,0.2],[494,0.07,0.2],[587,0.14,0.2],[784,0.21,0.2],[988,0.28,0.2],[1175,0.35,0.2]]},
+ "harp_down":{"w":"sine","n":[[1175,0.0,0.2],[988,0.07,0.2],[784,0.14,0.2],[587,0.21,0.2],[494,0.28,0.2],[392,0.35,0.2]]},
+ "marimba":{"w":"triangle","n":[[523,0.0,0.1],[659,0.13,0.1],[523,0.26,0.1],[784,0.39,0.1]]},
+ "xylophone":{"w":"sine","n":[[1047,0.0,0.07],[1319,0.09,0.07],[1568,0.18,0.07],[2093,0.27,0.07]]},
+ "pluck":{"w":"triangle","n":[[330,0,0.1],[247,0.12,0.2]]},
+ "cascade":{"w":"sine","n":[[1568,0.0,0.08],[1319,0.06,0.08],[1047,0.12,0.08],[880,0.18,0.08],[659,0.24,0.08],[523,0.3,0.08]]},
+ "sparkle":{"w":"sine","n":[[1568,0.0,0.05],[2093,0.05,0.05],[1760,0.1,0.05],[2349,0.15,0.05],[2093,0.2,0.05]]},
+ "ascend":{"w":"triangle","n":[[330,0.0,0.1],[392,0.1,0.1],[440,0.2,0.1],[494,0.3,0.1],[587,0.4,0.1]]},
+ "descend":{"w":"triangle","n":[[587,0.0,0.1],[494,0.1,0.1],[440,0.2,0.1],[392,0.3,0.1],[330,0.4,0.1]]},
+ "notify_a":{"w":"sine","n":[[880,0,0.1],[1175,0.12,0.1],[1568,0.24,0.18]]},
+ "notify_b":{"w":"triangle","n":[[1568,0,0.1],[1175,0.12,0.1],[880,0.24,0.18]]},
+ "notify_c":{"w":"sine","n":[[784,0,0.08],[988,0.1,0.08],[784,0.2,0.08],[988,0.3,0.16]]},
+ "sweep_up":{"w":"sine","n":[[300,0,0.45,1400]]},
+ "sweep_down":{"w":"sine","n":[[1400,0,0.45,300]]},
+ "whistle_up":{"w":"sine","n":[[800,0,0.3,1800]]},
+ "whistle_down":{"w":"sine","n":[[1750,0,0.3,800]]},
+ "zap":{"w":"sawtooth","n":[[1800,0,0.18,200]]},
+ "laser":{"w":"square","n":[[2200,0,0.22,300]]},
+ "radar":{"w":"sine","n":[[1000,0,0.08],[1000,0.33,0.08],[1000,0.66,0.08]]},
+ "sonar":{"w":"sine","n":[[700,0,0.9,650]]},
+ "beacon":{"w":"sine","n":[[880,0,0.06],[880,0.25,0.06],[880,0.5,0.06],[880,0.75,0.06]]},
+ "heartbeat":{"w":"sine","n":[[110,0,0.12],[90,0.18,0.16]]},
+ "alarm_fast":{"w":"square","n":[[880,0,0.1],[660,0.14,0.1],[880,0.28,0.1],[660,0.42,0.1]]},
+ "siren":{"w":"sawtooth","n":[[600,0,0.45,1000],[1000,0.45,0.45,600]]},
+ "klaxon":{"w":"sawtooth","n":[[220,0,0.4],[220,0.5,0.4]]},
+ "buzzer":{"w":"square","n":[[150,0,0.4]]},
+ "gong":{"w":"sine","n":[[196,0,0.9]]},
+ "phone":{"w":"square","n":[[1000,0,0.08],[800,0.1,0.08],[1000,0.2,0.08],[800,0.3,0.08]]},
+ "cuckoo":{"w":"sine","n":[[784,0,0.2],[622,0.28,0.3]]}
 };
+/*SND-LIBRARY-END*/
+const SND_PATTERNS=SND_LIBRARY;
+/* a kind of event may sound as another sound of the library (sound.voices, screens.sound_voices): {kind of the settings: name of the library}; the page names four kinds differently (red, score, conn, live) */
+const SND_PAGEKEY={new_red:"red",connection_lost:"conn",score_drop:"score",live_recovered:"live"};
+let SND_VOICES={};
+function setVoices(map){const o={};if(map&&typeof map==="object")Object.keys(map).forEach(k=>{const pk=SND_PAGEKEY[k]||k,n=map[k];if(Object.prototype.hasOwnProperty.call(SND_PATTERNS,pk)&&typeof n==="string"&&Object.prototype.hasOwnProperty.call(SND_PATTERNS,n))o[pk]=n});SND_VOICES=o;return o}
 const SND_THEMES={classic:{w:"",atk:.02,rel:.15,mul:1,gain:1},soft:{w:"sine",atk:.06,rel:.35,mul:.75,gain:.8}};
 let AUDIO=null;
 function audioCtx(){try{if(!AUDIO){const C=window.AudioContext||window.webkitAudioContext;if(C)AUDIO=new C()}if(AUDIO&&AUDIO.state!=="running"&&AUDIO.state!=="closed")AUDIO.resume();return AUDIO}catch(e){return null}}
 /* plays the patterns of the kinds one after the other (a string or a list); false when the browser does not let the page sound yet, so the caller can keep them and try again */
 function playTones(vol,kinds,theme){const c=audioCtx();if(!c||c.state!=="running")return false;
   const list=Array.isArray(kinds)?kinds:[kinds||"red"],th=SND_THEMES[theme]||SND_THEMES.classic,v=Math.max(0.01,Math.min(1,vol||0.4))*0.5*th.gain;let t=c.currentTime+0.02;
-  list.forEach(k=>{const p=SND_PATTERNS[k]||SND_PATTERNS.red;let end=0;
+  list.forEach(k=>{const p=SND_PATTERNS[SND_VOICES[k]||k]||SND_PATTERNS[k]||SND_PATTERNS.red;let end=0;
     p.n.forEach(([f,d,len,to])=>{const o=c.createOscillator(),g=c.createGain();o.type=th.w||p.w;o.frequency.setValueAtTime(f*th.mul,t+d);if(to)o.frequency.linearRampToValueAtTime(to*th.mul,t+d+len);o.connect(g);g.connect(c.destination);
       g.gain.setValueAtTime(0.0001,t+d);g.gain.exponentialRampToValueAtTime(v,t+d+th.atk);g.gain.exponentialRampToValueAtTime(0.0001,t+d+len+th.rel);o.start(t+d);o.stop(t+d+len+th.rel+0.02);end=Math.max(end,d+len+th.rel)});
     t+=end+0.25});
   return true}
+/* the ambience (sound.ambient, off by default): two soft low notes that never stop while it is on; a fifth when the fleet is calm, a rougher interval while something is red. It follows the volume of the sound settings
+   at a fraction of it and has no rhythm of its own, so it never hides a pattern. false (and silence) when the browser does not let the page sound yet */
+let AMB=null;
+function ambientStop(){if(!AMB)return;try{AMB.g.gain.exponentialRampToValueAtTime(0.0001,AMB.ctx.currentTime+0.5);AMB.a.stop(AMB.ctx.currentTime+0.6);AMB.b.stop(AMB.ctx.currentTime+0.6)}catch(e){}AMB=null}
+function ambientSet(on,vol,tense){const c=audioCtx();if(!on||!c||c.state!=="running"){ambientStop();return false}
+  const v=Math.max(0.002,Math.min(1,vol||0.1))*0.4,t=c.currentTime;
+  if(!AMB){const g=c.createGain(),a=c.createOscillator(),b=c.createOscillator();a.type="sine";b.type="sine";g.gain.setValueAtTime(0.0001,t);a.connect(g);b.connect(g);g.connect(c.destination);a.start(t);b.start(t);AMB={g:g,a:a,b:b,ctx:c,tense:null}}
+  if(AMB.tense!==!!tense){AMB.tense=!!tense;AMB.a.frequency.setValueAtTime(tense?104:110,t);AMB.b.frequency.setValueAtTime(tense?147:165,t)}
+  AMB.g.gain.exponentialRampToValueAtTime(v,t+1.5);return true}
+/* the tick (sound.tick, off by default): one very short, dry click every `tick_seconds`; sndTickDue says when the next one is due so the page and the wall screens keep the same pace */
+let SND_TICKAT=0;
+function sndTickDue(secs,now){if(!(secs>=1))return false;if(now-SND_TICKAT>=secs*1000-100){SND_TICKAT=now;return true}return false}
+function playTick(vol){const c=audioCtx();if(!c||c.state!=="running")return false;const t=c.currentTime+0.01,o=c.createOscillator(),g=c.createGain(),v=Math.max(0.01,Math.min(1,vol||0.4))*0.18;
+  o.type="square";o.frequency.setValueAtTime(1900,t);o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+0.002);g.gain.exponentialRampToValueAtTime(0.0001,t+0.025);o.start(t);o.stop(t+0.04);return true}
 /*SOUNDS-END*/
 /* the sounds of the wall are the ones of the page (the block above is the same text): one per kind of event, with the volume, the theme, the switches and the quiet hours of the settings, and only in a window that asks for them (?sound=on) in a monitor that allows them (screens.sound) */
-const SC=Object.assign({enabled:true,theme:"classic",volume:40,cooldown_seconds:30,quiet_enabled:false,quiet_from_hour:22,quiet_to_hour:7},D.sound||{});
+const SC=Object.assign({enabled:true,theme:"classic",volume:40,cooldown_seconds:30,quiet_enabled:false,quiet_from_hour:22,quiet_to_hour:7,ambient:false,ambient_volume:10,tick:false,tick_seconds:1},D.sound||{});
+setVoices(SC.voices);
 const SND_SW={red:"new_red",conn:"connection_lost",score:"score_drop",live:"live_recovered"};
 function sndQuiet(){if(!SC.quiet_enabled||SC.quiet_from_hour===SC.quiet_to_hour)return false;const h=new Date().getHours(),a=SC.quiet_from_hour,b=SC.quiet_to_hour;return a<b?(h>=a&&h<b):(h>=a||h<b)}
 function beep(kinds){
@@ -460,6 +581,10 @@ function sndDrain(){
 }
 ["pointerup","click","touchend","keydown"].forEach(ev=>document.addEventListener(ev,()=>{if(P.sound){audioCtx();sndDrain()}},{capture:true}));
 setInterval(()=>{if(P.sound&&STATE.sq.length)sndDrain()},3000);
+/* the ambience and the tick of the wall (sound.ambient, sound.tick; off by default) only in a window that asks for sound, outside the quiet hours */
+function sndAmbience(){const on=P.sound&&SC.enabled!==false&&SC.ambient===true&&!sndQuiet();try{return ambientSet(on,(SC.ambient_volume==null?10:SC.ambient_volume)/100,STATE.prevRed.size>0)}catch(e){return false}}
+function sndTicks(){if(!(P.sound&&SC.enabled!==false&&SC.tick===true&&!sndQuiet()))return false;if(!sndTickDue(SC.tick_seconds,Date.now()))return false;return playTick(SC.volume/100)}
+setInterval(()=>{sndAmbience()},2000);setInterval(()=>{try{sndTicks()}catch(e){}},1000);
 /* alerts of the sentinels that rise between two looks sound as their level (a serious one, a warning); the first look only remembers */
 function alertSound(al){
   if(!al||typeof al.by_level!=="object")return;const bl=al.by_level,sv=num(bl.critical)+num(bl.error),wn=num(bl.warning);
@@ -504,7 +629,7 @@ function renderOverview(d){
   if(gr&&gr.groups&&gr.groups.length){
     gm.hidden=false;
     const gname=g=>gr.by==="state"?T("ui.lv_"+g.key):(g.label||(gr.by==="none"?T("ui.scr_grp_all"):T("ui.scr_grp_nogroup")));
-    gm.innerHTML='<div class="gh">'+esc(T("ui.scr_grp_head",{by:T("ui.scr_grp_"+gr.by)}))+(gr.more?" · "+esc(T("ui.scr_grp_more",{n:gr.more})):"")+"</div>"+gr.groups.map(g=>{
+    gm.innerHTML='<div class="gh">'+esc(T("ui.scr_grp_head",{by:T("ui.scr_grp_"+gr.by)}))+(gr.more?" · "+esc(T("ui.scr_grp_more",{n:gr.more})):"")+"</div>"+gr.groups.filter(g=>!S.hide_healthy||num(g.bad)+num(g.warn)>0).map(g=>{
       const n=Math.max(1,num(g.repos)),seg=["bad","warn","ok","unknown"].map(s=>'<i class="s-'+s+'" style="width:'+(100*num(g[s])/n)+'%" title="'+esc(T("ui.lv_"+s)+": "+num(g[s]))+'"></i>').join("");
       return '<div class="g"><span class="gn" title="'+esc(gname(g))+'">'+esc(gname(g))+'</span><span class="gb">'+seg+'</span><span class="gv">'+num(g.repos)+"</span></div>"}).join("");
     fit(gm,1);
@@ -517,7 +642,7 @@ function renderOverview(d){
   $("ch7").innerHTML=areaSvg(d.trend7d||[],["ok","bad"],["var(--ok)","var(--bad)"],120,80)+'<div class="axis"><span>'+esc(T("ui.scr_ago",{dur:"7 "+T("ui.scr_u_d")}))+"</span><span>"+esc(T("ui.scr_now"))+"</span></div>";
   /* heat */
   const heat=$("heat");
-  heat.innerHTML=(d.heat||[]).map(r=>'<div class="hr'+(r.red?" red":"")+'"><div class="hn" title="'+esc(r.repo)+'">'+(r.red?'<span class="ico lamp l-bad" aria-hidden="true"></span>':"")+esc(r.repo)+"</div>"+r.cells.map(c=>'<div class="c c'+c+'"></div>').join("")+"</div>").join("")||'<div class="empty">'+esc(T("ui.scr_none"))+"</div>";
+  heat.innerHTML=(d.heat||[]).filter(r=>!S.hide_healthy||r.red||r.cells.some(c=>c>=2)).map(r=>'<div class="hr'+(r.red?" red":"")+'"><div class="hn" title="'+esc(r.repo)+'">'+(r.red?'<span class="ico lamp l-bad" aria-hidden="true"></span>':"")+esc(r.repo)+"</div>"+r.cells.map(c=>'<div class="c c'+c+'"></div>').join("")+"</div>").join("")||'<div class="empty">'+esc(T("ui.scr_none"))+"</div>";
   fit(heat);
   /* top red */
   const tr=$("top-red"),top=d.top_red||[];
@@ -540,6 +665,68 @@ function renderOverview(d){
   const al=d.alerts||{};
   $("f-right").textContent=T("ui.scr_alerts_open",{n:num(al.total)});
   return [...(top.map(r=>"top:"+r.repo+":"+r.workflow)),...(num(f.red)>0?["fleet-red"]:[])];
+}
+/* ---------- fleet ---------- */
+function renderFleet(d){
+  $("f-sum-h").textContent=T("ui.scr_fleet");$("f-grp-h").textContent=T("ui.scr_fleet_groups");
+  const f=d.fleet||{},tl=[["green","t-ok",f.green],["red","t-bad",f.red],["stuck","t-warn",f.stuck],["waiting","t-info",f.waiting]],fl=$("f-fleet");
+  if(!fl.firstChild){fl.innerHTML=tl.map(([k,c])=>'<div class="tile '+c+'" id="ff-'+k+'"><div class="big"></div><div class="lab"><span class="ico lamp l-'+(k==="green"?"ok":k==="red"?"bad":k==="stuck"?"warn":"info")+'" aria-hidden="true"></span><span></span></div></div>').join("")}
+  tl.forEach(([k,c,v])=>{const e=$("ff-"+k);tween(e.querySelector(".big"),num(v));e.querySelector(".lab span:last-child").textContent=T("ui.scr_"+k)+(k==="green"?" · "+T("ui.scr_of",{n:num(f.total)}):"")});
+  const redTile=$("ff-red");if(num(f.red)>0)failMark(redTile,"fleet-red",null);else redTile.classList.remove("fail","calm");
+  const box=$("f-groups"),gs=d.groups;
+  if(!gs||!gs.length){box.innerHTML='<div class="empty">'+esc(T("ui.scr_none"))+"</div>";return num(f.red)>0?["fleet-red"]:[]}
+  const gname=g=>d.by==="state"?T("ui.lv_"+g.key):(g.label||(d.by==="none"?T("ui.scr_grp_all"):T("ui.scr_grp_nogroup")));
+  const keys=num(f.red)>0?["fleet-red"]:[];
+  box.innerHTML=gs.map((g,gi)=>{
+    const tiles=(g.tiles||[]).filter(x=>!S.hide_healthy||x.state!=="ok").map(x=>{
+      if(x.state==="ok")return '<i class="ft" title="'+esc(x.name)+'"></i>';
+      if(x.state==="bad")keys.push("fleet:"+x.name);
+      return '<span class="tn s-'+esc(x.state)+'" title="'+esc(x.name+" · "+T("ui.lv_"+x.state))+'">'+esc(x.name)+"</span>"}).join("");
+    return '<div class="fg" id="fg-'+gi+'"><div class="gh"><b title="'+esc(gname(g))+'">'+esc(gname(g))+"</b><span>"+num(g.repos)+" · "+num(g.bad)+" "+esc(T("ui.lv_bad"))+(num(g.warn)?" · "+num(g.warn)+" "+esc(T("ui.lv_warn")):"")+'</span></div><div class="tiles">'+tiles+"</div></div>"}).join("")
+    +(d.more_groups?'<div class="more">'+esc(T("ui.scr_grp_more",{n:d.more_groups}))+"</div>":"");
+  box.querySelectorAll(".tiles").forEach(l=>fit(l));
+  gs.forEach((g,gi)=>{if(num(g.bad)>0)failMark($("fg-"+gi),"fg:"+g.key,null)});
+  return keys;
+}
+/* ---------- life: what changed between two looks flashes where it changed, a new red sends a wave, and a few chips say it for a few seconds ---------- */
+const LIFE={prev:{},timer:0,changedAt:Date.now()};
+function lifeMetrics(kind,d){
+  const m={},put=(k,v,label,el,bad)=>{if(typeof v==="number"&&isFinite(v))m[k]={v:v,label:label,el:el,bad:!!bad}};
+  if(kind==="overview"||kind==="fleet"){
+    const f=d.fleet||{},pre=kind==="fleet"?"ff-":"ft-";
+    put("green",f.green,"ui.scr_green",pre+"green");put("red",f.red,"ui.scr_red",pre+"red",true);put("stuck",f.stuck,"ui.scr_stuck",pre+"stuck",true);put("waiting",f.waiting,"ui.scr_waiting",pre+"waiting");
+    if(kind==="overview"){const q=d.queue||{},sc=d.score||{};put("running",q.running,"ui.scr_running","queue");put("queued",q.queued,"ui.scr_queued","queue");put("score",sc.state==="scored"?sc.value:null,"ui.scr_score","r-score");put("alerts",(d.alerts||{}).total,"ui.scr_sen_alerts","f-right")}
+    else (d.groups||[]).forEach((g,gi)=>put("g:"+g.key,g.bad,"ui.scr_red","fg-"+gi,true));
+  }else if(kind==="now"){
+    const t=d.totals||{};
+    put("running",t.running,"ui.scr_now_running","n-run-h");put("queued",t.queued,"ui.scr_queued","n-queue-h");put("approval",t.approval,"ui.scr_approval","n-appr-h");put("failures",t.failures,"ui.scr_red","n-fail-h",true);
+  }else if(kind==="sentinels"&&d.enabled){
+    (d.cards||[]).forEach(c=>put("c:"+c.id,c.open,"ui."+c.id,"sc-"+c.id,c.level==="bad"));
+  }
+  return m;
+}
+function wave(el){
+  if(reduce||!P.blink||!el)return;
+  el.classList.add("wavehost");const w=document.createElement("i");w.className="wavefx";el.appendChild(w);setTimeout(()=>w.remove(),1500);
+}
+function glance(items){
+  const box=$("glance");if(!box)return;
+  if(!items.length||!(S.glance_seconds>0)){return}
+  items.sort((a,b)=>(b.bad&&b.delta>0)-(a.bad&&a.delta>0)||Math.abs(b.delta)-Math.abs(a.delta));
+  const shown=items.slice(0,3),rest=items.length-shown.length;
+  box.innerHTML=shown.map(i=>'<span class="'+((i.bad?i.delta>0:false)?"up":(i.bad?"down":""))+'">'+esc(T(i.label))+" "+(i.delta>0?"+":"−")+Math.abs(Math.round(i.delta*10)/10)+"</span>").join("")+(rest>0?"<span>"+esc(T("ui.scr_more",{n:rest}))+"</span>":"");
+  box.hidden=false;clearTimeout(LIFE.timer);LIFE.timer=setTimeout(()=>{box.hidden=true;box.textContent=""},S.glance_seconds*1000);
+}
+function life(kind,d){
+  const m=lifeMetrics(kind,d),prev=LIFE.prev[kind];LIFE.prev[kind]=m;
+  if(!prev)return;      /* the first look of a screen only remembers */
+  const items=[];
+  Object.keys(m).forEach(k=>{
+    if(!prev[k]||prev[k].v===m[k].v)return;
+    const delta=m[k].v-prev[k].v;LIFE.changedAt=Date.now();items.push({label:m[k].label,delta:delta,bad:m[k].bad});
+    if(S.life){const el=$(m[k].el);if(el){flash(el,"changed");if(m[k].bad&&delta>0)wave(el);else flash(el,"trail")}}
+  });
+  glance(items);
 }
 /* ---------- now ---------- */
 function runRow(r){
@@ -609,7 +796,7 @@ function renderSentinels(d){
   $("f-right").textContent=sw.age_seconds==null?"":T("ui.scr_sen_swept",{ago:ago(sw.age_seconds)});
   return cards.filter(c=>c.level==="bad").map(c=>"sen:"+c.id);
 }
-RENDER.overview=renderOverview;RENDER.now=renderNow;RENDER.sentinels=renderSentinels;
+RENDER.overview=renderOverview;RENDER.fleet=renderFleet;RENDER.now=renderNow;RENDER.sentinels=renderSentinels;
 /* ---------- loop ---------- */
 function show(kind){
   KINDS.forEach(k=>{const e=$("s-"+k);if(e)e.hidden=k!==kind});
@@ -619,9 +806,9 @@ function show(kind){
 }
 function paint(d){
   const keys=(RENDER[STATE.kind]||(()=>[]))(d)||[];
-  observe(STATE.kind,d);
+  observe(STATE.kind,d);life(STATE.kind,d);
   const r=newFails(keys);
-  if(r.isNew){beep(["red"]);$("stage").classList.remove("fail-new");void $("stage").offsetWidth;if(!reduce&&P.blink)flash($("stage"),"fail-new")}
+  if(r.isNew){LIFE.changedAt=Date.now();beep(["red"]);$("stage").classList.remove("fail-new");void $("stage").offsetWidth;if(!reduce&&P.blink)flash($("stage"),"fail-new")}
   if(r.fixed){flash($("ft-green"),"flash-ok");beep(["resolved"])}
   alertSound(d.alerts);
   const m=d.meta||{};
@@ -635,6 +822,7 @@ function paint(d){
 }
 async function load(){
   clearTimeout(STATE.timer);
+  if(D.viewer_aware&&document.hidden){STATE.timer=setTimeout(load,30000);return}      /* modes.idle_minutes on: a hidden window does not ask the monitor; it asks again when it is shown */
   let wait=P.refresh*1000;
   try{
     const r=await getData(STATE.kind);
@@ -659,8 +847,9 @@ function goTo(next){
   if(next===STATE.kind)return;
   const cur=$("s-"+STATE.kind);STATE.moving=true;
   if(history.replaceState)try{history.replaceState(null,"","/screen/"+next+location.search)}catch(e){}
-  const go=()=>{show(next);load();$("s-"+next).classList.remove("out");STATE.moving=false};
-  if(reduce){go()}else{cur.classList.add("out");setTimeout(go,500)}
+  const mode=reduce?"none":(S.transition||"fade"),enter=$("s-"+next);
+  const go=()=>{show(next);load();enter.classList.remove("out","slide");if(mode!=="none"){enter.classList.remove("enter");void enter.offsetWidth;enter.classList.add("enter");enter.classList.toggle("slide",mode==="slide");setTimeout(()=>enter.classList.remove("enter","slide"),700)}STATE.moving=false};
+  if(mode==="none"){go()}else{cur.classList.toggle("slide",mode==="slide");cur.classList.add("out");setTimeout(go,500)}
 }
 function schedule(){
   clearTimeout(R.timer);
@@ -701,9 +890,10 @@ function getData(kind){return fetch("/api/screens/data?screen="+encodeURICompone
 async function peek(kind){
   try{const r=await getData(kind);if(r.ok)observe(kind,await r.json())}catch(e){}
 }
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&D.viewer_aware&&Date.now()-STATE.got>P.refresh*1000)load()});
 $("fs").addEventListener("click",()=>{try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen()}catch(e){}});
 show(STATE.kind);clock();setInterval(clock,1000);setInterval(slideTimeline,1000);burnIn();schedule();load();
-window.__screens={state:STATE,show:show,paint:paint,observe:observe,turn:R,params:P,theme:applyTheme,schedule:schedule};
+window.__screens={state:STATE,show:show,paint:paint,observe:observe,turn:R,params:P,theme:applyTheme,schedule:schedule,life:LIFE,goTo:goTo,settings:S};
 })();
 </script>
 </body>

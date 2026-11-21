@@ -36,6 +36,14 @@
 - 一回の確認で複数の種類が出ても一つの連続音になります。最大三つのパターンで、重大なものから先に鳴り、残りは次の連続音を待ちます。二つの連続音が重なることはありません。
 - ミュートしたアラート(アラートタブ)は鳴りません。
 
+## サウンドライブラリ
+
+各イベントの種類が従来から持つ 11 種類の音に加えて、モニターには 54 種類の音のライブラリ（合計 65）があり、どのイベントの種類にも割り当てられます。音はブラウザー内で生成され（このコンピューターのビープ音も同じ音符から作られます）、音声ファイルをダウンロードする必要はありません。種類の音は最初の 11 個で、残りは自由に割り当てられます: `bell`, `chime`, `ding_dong`, `doorbell`, `ding`, `ping_high`, `ping_low`, `tick_soft`, `tock_soft`, `double_tick`, `tick_tock`, `knock`, `knock_three`, `blip`, `bloop`, `bubble`, `drop`, `droplet`, `arpeggio_up`, `arpeggio_down`, `minor_up`, `minor_down`, `fanfare`, `level_up`, `coin`, `harp_up`, `harp_down`, `marimba`, `xylophone`, `pluck`, `cascade`, `sparkle`, `ascend`, `descend`, `notify_a`, `notify_b`, `notify_c`, `sweep_up`, `sweep_down`, `whistle_up`, `whistle_down`, `zap`, `laser`, `radar`, `sonar`, `beacon`, `heartbeat`, `alarm_fast`, `siren`, `klaxon`, `buzzer`, `gong`, `phone`, `cuckoo`。
+
+種類に別の音を与えるには、`sound.voices` に `種類=音` の組をコンマで区切って書きます（例: `new_red=coin,warning=drop`）。種類は `new_red`, `sentinel`, `stuck`, `score_drop`, `connection_lost`, `warning`, `resolved`, `report`, `lesson`, `info`, `live_recovered` です。ライブラリにない名前は無視され、その種類は自分の音のままです。壁面画面は `screens.sound_voices` に独自の一覧、`screens.sound_volume` に独自の音量を持てます。1 秒を超える音はなく、すべての音は互いに異なります。
+
+既定でオフの 2 つのオプション背景音があります。`sound.ambient`（とても小さな低音 2 つ。赤がないときは穏やかに、あるときはざらついた音）と `sound.tick`（`sound.tick_seconds` ごとの非常に短い乾いたクリック音で、画面の停止に気づけます）。どちらもミュートチップ、主スイッチ、静音時間に従います。
+
 ## 設定(設定、サウンド)
 
 すべて設定ファイルと設定タブにあります。音量、テーマ、スイッチはすぐに反映されます。
@@ -49,6 +57,10 @@
 | `sound.cooldown_seconds` | 同じ種類の音の間隔。 |
 | `sound.quiet_enabled`, `sound.quiet_from_hour`, `sound.quiet_to_hour` | サイレント時間(既定はオフ)。このコンピューターの二つの時刻の間は何も鳴りません。真夜中をまたげます。 |
 | `sound.server_beep` | 既定でオフ。ページが開かれていないとき、またはブラウザーが音をブロックしているとき、モニター自身がこのコンピューターで音を鳴らします。上の表のイベントの種類ごとに別のパターン(Windows のトーン、macOS のシステムサウンド、Linux の canberra イベント)で、ページと同じスイッチと静音時間帯に従い、一度に最大 3 種類までを 1 回にまとめて鳴らします。ローカルのみ。 |
+| `sound.voices` | イベントの種類にライブラリの別の音を与えます（`種類=音` の組をコンマ区切り）。既定は空です。 |
+| `sound.ambient`, `sound.ambient_volume` | 環境音（既定はオフ）とその音量（1～50）。 |
+| `sound.tick`, `sound.tick_seconds` | 時計のチク音（既定はオフ）と間隔の秒数（1～60）。 |
+| `screens.sound_voices`, `screens.sound_volume` | `sound.voices` と同じものを壁面画面専用に、また独自の音量（0 = `sound.volume` の音量）。 |
 
 ## 音を試す
 

@@ -65,17 +65,23 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/chatops` | POST | admin | read only commands from a chat; the paths below are its routes |
 | `/api/chatops/discord` | POST | public | an interaction of Discord, read only (signed with Ed25519, off by default) |
 | `/api/chatops/slack` | POST | public | a slash command of Slack, read only (signed with the v0 HMAC of Slack, off by default) |
+| `/api/clone-anomalies` | GET | maintainer | the users who cloned more different repositories than the threshold in the window, read from the audit log of the organization (maintainer; `audit_feed.clone_alert.enabled`; `available` is false when the plan has no git events) |
 | `/api/compare` | GET | viewer | this period against the one before, read only, from the ledger and the snapshots of the score (`?window=`, `?days=`, `?baseline=`, `?from=`/`?to=`, `?format=json|ndjson|csv`): every figure with its change, direction and state (`insufficient_data`, `baseline_unavailable` instead of a made-up number), and what changed (Complete only, off by default) |
 | `/api/credential` | POST | admin | replace the GitHub login without restarting (this computer only) |
+| `/api/credential/probe` | POST | admin | does the login (and the GitHub App) work: who it is, classic or fine-grained, scopes it lacks, repositories seen, allowance left, installations of the App (this computer only; at most one real check every 10 seconds) |
 | `/api/data` | GET | viewer | the main picture: repositories, runs, failing, active, rate |
+| `/api/devices` | GET | viewer | the devices paired with a QR code and whether pairing is on (this computer only; empty while `pairing.enabled` is off) |
+| `/api/devices/revoke` | POST | admin | take one paired device away ({id}); its token stops working at once (this computer only) |
 | `/api/discovery` | GET | viewer | repositories the monitor found and suggestions |
 | `/api/discovery/group` | POST | maintainer | put discovered repositories in a group |
 | `/api/events` | GET | viewer | the event journal |
+| `/api/expected-red` | GET,POST | viewer / maintainer | the workflows marked as red on purpose with a reason, an owner and an end (GET: the list with each state; POST {action: add|remove, repo, workflow, reason, owner, days}: a maintainer, `expected_red.enabled`, a note of this monitor) |
 | `/api/gh-action` | POST | admin | prefix of the actions on GitHub (plan and confirm, see below) |
 | `/api/gh-action/confirm` | POST | admin | confirm an action on GitHub (this computer only) |
 | `/api/gh-action/plan` | POST | admin | plan an action on GitHub; nothing is sent until it is confirmed (this computer only) |
 | `/api/github-app/status` | GET | admin | state of the optional GitHub App for reads (this computer only) |
 | `/api/github-token` | GET,POST | admin / admin | state or change of the token the monitor keeps (administrators, this computer only) |
+| `/api/glossary` | GET | viewer | what each figure means exactly (written with the real parameters of the calculation and of the settings), the attacks the rules of the linter look for, the limits of the analysis and a few places to learn more (read only) |
 | `/api/health` | GET | public | is it alive; `?deep=1` fails when the refresh cycle is stuck |
 | `/api/help/search` | GET | viewer | search the documentation |
 | `/api/help/topic` | GET | viewer | one documentation topic |
@@ -84,6 +90,7 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/live-events` | GET | viewer | the newest webhook events |
 | `/api/live-events/stream` | GET | viewer | server-sent events of the webhook events as they are accepted (off by default) |
 | `/api/live-status` | GET | viewer | state of the incoming webhook receiver |
+| `/api/meta-columns` | GET | viewer | the metadata columns of the Repositories table (`fleet.meta_columns`) and the value of each repository found so far; a thread reads a few files per call |
 | `/api/mirror` | GET | viewer | state of the local mirror of artifacts |
 | `/api/mode` | GET,POST | viewer / maintainer | the working mode (normal, fast, turbo, low) and its time left |
 | `/api/notify` | GET | viewer | state of the notification channels |
@@ -94,6 +101,10 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/ops/status` | GET | viewer | the operation of the installation: the mode (service or local), the last backup (when, how old, ok or the stable code of the failure, size, sealed or not), the schedule, the purge switch, the retention policy in force and the report of the last restore; no path and no secret (Complete only) |
 | `/api/otlp` | GET | viewer | state of the OpenTelemetry export |
 | `/api/outputs` | GET | viewer | Prometheus, Grafana JSON and dashboard outputs |
+| `/api/pair` | GET,POST | viewer / admin | prefix of the pairing of a phone (see the routes below) |
+| `/api/pair/redeem` | POST | admin | a phone spends the one-use pairing code ({code}) and gets its own access cookie (the code is its proof; needs `pairing.enabled` and the network mode) |
+| `/api/pair/start` | POST | admin | open a one-use pairing code and answer its address and QR code (this computer only; needs `pairing.enabled` and the network mode) |
+| `/api/pair/status` | GET | viewer | the same answer as /api/devices (this computer only) |
 | `/api/paths` | GET | viewer | the folders and files of this monitor in use and what is left in the old places |
 | `/api/quota` | GET | viewer | plan, billable minutes, allowance of the API, concurrency, long jobs |
 | `/api/quota-pool/status` | GET | viewer | every read source with its allowance, the sum, and what each way of reading less has spared (this computer only) |
@@ -146,4 +157,6 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/v1/me` | GET | viewer | who is asking: `mode` (individual or team), `authenticated`, `user`, `role` and `accounts` of the team session (null without one), `capabilities` (`read`, `write`, `admin`, `v1_write` always false), `limits`, the version of the monitor and `contract` (the version of the frozen shape); read only; 404 while the prefix is closed |
 | `/api/v1/repos` | GET | viewer | the watched repositories, one line each (`repo`, `ecosystem`, `state`, `risk`, `runs_24h`, `failures_24h`, `red_workflows`, `stuck_runs`, `alerts`, `last_run_at`) in pages: `?limit=`, `?cursor=` (the `next_cursor` of the previous page), `?state=`, `?ecosystem=`, `?q=`, `?fields=a,b`, `?profile=compact`; errors in one envelope with a stable `code`; read only; 404 while the prefix is closed |
 | `/api/webhook` | POST | public | the incoming webhook of GitHub (signed with HMAC) |
+| `/api/webhook/redeliver` | POST | admin | ask GitHub now to send again the webhook deliveries that never arrived, for the hooks named in `webhook.redeliver.hooks` (administrators, this computer only; it writes to GitHub) |
 | `/api/welcome` | GET,POST | viewer / maintainer | the first-run welcome flag (POST: this computer only) |
+| `/api/whats-new` | GET | viewer | the entries of the changelog of the versions after `?since=VERSION` up to the installed one, in the language of the page; `display.whats_new` turns it off (read only) |

@@ -33,7 +33,7 @@ from github_actions_monitor.security import envguard, netguard, private_io
 from github_actions_monitor.util import tzdisplay
 
 CHANNELS = ("telegram", "discord", "slack", "matrix", "mqtt", "http_local", "apprise")
-KNOWN_EVENTS = ("red_new", "red_fixed", "stuck_new", "pending_sign", "release_due", "rate_low", "offline", "online", "alerts_up", "workflow_failed", "ai_alert", "collab_new", "collab_fixed", "credential_blind", "credential_back", "score_dropped", "security_new", "security_fixed", "delivery_new", "delivery_fixed", "alerts_digest", "silence_review")
+KNOWN_EVENTS = ("red_new", "red_fixed", "stuck_new", "pending_sign", "release_due", "rate_low", "offline", "online", "alerts_up", "workflow_failed", "ai_alert", "collab_new", "collab_fixed", "credential_blind", "credential_back", "github_incident", "github_incident_over", "score_dropped", "security_new", "security_fixed", "delivery_new", "delivery_fixed", "alerts_digest", "silence_review")
 DEFAULT_EVENTS = ["red_new", "stuck_new", "pending_sign", "offline", "credential_blind", "silence_review"]
 LOOPBACK = ("127.0.0.1", "localhost", "::1", "[::1]")
 ENV_RE = envguard.NamePattern()      # the NAME of the variable of a channel: a plain name that is not a variable of the system or a secret of the monitor
@@ -297,6 +297,10 @@ def notify(config, event, opener=None, connect=None, now=None):
         return []
     live = [(n, c) for n, c in cfg["channels"].items() if c.get("enabled")]
     if not live:
+        return []
+    from github_actions_monitor.integrations import notify_dedupe      # notify.dedupe_ledger / max_event_age_hours (off by default): the same notification is not sent twice
+    if not notify_dedupe.allow(config, event, now):
+        STATS["deduped"] = STATS.get("deduped", 0) + 1
         return []
     allow = cfg["allow_private_targets"]
     broken = [{"channel": n, "ok": False, "reason": check_channel(n, c, allow)} for n, c in live if check_channel(n, c, allow)]   # a channel that cannot send books nothing

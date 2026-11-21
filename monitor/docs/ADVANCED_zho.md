@@ -77,6 +77,7 @@
 - **act**：默认关闭，每次运行都要确认，`仓库:文件:事件` 封闭列表，不使用真实密钥。克隆必须是工作区内的真实文件夹：作为指向别处的链接的文件夹会被拒绝，除非开启 `act.allow_symlinks`。时间限制和停止会结束该运行启动的整个进程树，并删除它创建的 `act-` 容器。
 - **你自己的令牌**在有系统存储时保存在其中；普通文件（权限 600）是最弱的存储。它只交给 `gh`，从不交给 `act` 或你的命令。`--doctor` 显示存储位置，从不显示令牌。
 - **应避免的组合**（`--doctor` 会指出）：在所有接口上开启网络模式；网络模式开启时 AI 操作可执行；网络模式开启时使用 `act`；令牌保存在普通文件中。
+- **互相抵消的设置**（`--doctor` 的 `conflicts` 检查会指出它们，启动时会打印，`config_check.strict` 会拒绝带着它们启动）：同时出现在 `repos` 和 `exclude` 中的仓库；带有仓库列表的 `ecosystems`；隔离网络的安装中开启的 `updates.check`；声音关闭而本机蜂鸣、墙面屏幕声音、环境音或滴答声开启；开始和结束相同的安静时段；未启用却执行的 AI 操作；关闭状态下仍在轮换的看板模式。
 - MCP 服务器只通过标准输入输出通信；切勿放在网络端口之后。
 
 `listen.trusted_proxy`(默认关闭):仅当同一台计算机上属于你自己的反向代理是唯一入口时使用。此时失败的尝试会计入 `X-Forwarded-For` 的最后一个地址(你的代理追加的那个;在 nginx 中为 `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`),而不是代理本身,并且仅对到达时没有可用 `X-Forwarded-For` 的请求,再把它们合计计数,上限为三倍(这个共同的锁定绝不会拦下带有正确令牌的请求)。监控会相信任何经回环地址到达的连接上的该请求头,因此绝不要与位于另一台机器上的代理一起使用;如果其他人可以直接访问监控,请保持关闭。声明了代理(`listen.proxy_public_host`、`listen.secure_cookie` 或 `listen.trusted_proxy`)时,从主端口到达的任何请求都不算作本机;`listen.local_port`(0 = 关闭,否则为 1024 到 65535)会为在运行监控的电脑前的人再打开一个只监听 `127.0.0.1` 的端口(见部署指南)。 如果代理位于另一个容器或另一台机器上，请在 `listen.trusted_proxies`（`MONITOR_TRUSTED_PROXIES`；在 Docker Compose 文件中为网络 `MONITOR_SUBNET`）中列出其地址或网络：来自这些地址或本机的连接，其 `X-Forwarded-For` 会被信任用于统计尝试次数；这绝不会使请求被视为本机。
@@ -102,3 +103,19 @@
 - `ui.orientation`, `ui.screen1_tabs`, `ui.now_sort`, `ui.alerts_sort`, `ui.remember_folds` - docs/SCREENS_zho.md
 - `ports.complete`, `ports.lite` - docs/DEPLOYMENT_zho.md
 - `notify.users.enabled` - docs/NOTIFICATIONS_zho.md
+
+## 符合 CI/CD 约定的 OpenTelemetry 和每个作业一个 span
+
+OpenTelemetry 导出的两个开关（`otlp.*`，默认均关闭）让 trace 在后端更好用。`otlp.cicd_conventions` 会给每次运行的 span 加上 OpenTelemetry CI/CD 语义约定的属性（`cicd.pipeline.name`、`cicd.pipeline.run.id`、`cicd.pipeline.run.url.full`、`cicd.pipeline.result`、`cicd.pipeline.run.attempt`、`vcs.repository.name`、`vcs.repository.ref.name`），并把 span 命名为 `RUN <workflow>`；`gha.*` 属性保留。`otlp.job_spans` 为每个已完成的作业发送一个 span（`TASK <job>`），在同一条 trace 中作为其运行 span 的子 span，带有 runner、其组、标签、排队时间和结果；它需要 webhook，因为作业来自已签名的 `workflow_job` 事件（webhook 从未见过的作业没有 span）。其余不变：span 仍不包含标题、作者、提交信息或日志。
+
+## 多个工作区
+
+`workspaces.list` 保存 `名称=文件夹` 形式的条目（本机上的文件夹，绝不是网络地址），`workspaces.active` 指定监视器用于本地克隆、审计和签名记录的那一个。适用于想只改一个词就切换的第二组克隆（另一个组织、另一台计算机的副本）。环境变量 `MONITOR_ROOT` 优先于两者，`workspaces.active` 优先于 `workspace_root`。列表为空（默认）时一切不变。`monitor_cli.py toolbox workspaces` 会列出它们并说明正在使用哪一个。
+## GitHub 上受管控的操作、流与暴露范围
+
+- **理由和操作人**（`github_actions.require_reason`，开启）：服务器拒绝规划没有理由（3 到 200 个字符）和操作人姓名（`github_actions.operator`，团队模式下为已登录的人）的任何操作；两者都会写入 `github_actions_log.jsonl` 和操作日志。开启 `github_actions.comment_on_target`（默认关闭）后，被关闭的议题或拉取请求还会收到带有这些信息的评论，因为 GitHub 显示的执行者是令牌或应用。
+- **操作前再次查看目标**：已关闭的议题、已结束的运行或已合并的拉取请求会返回 `stale`，不会发送任何内容。
+- **权限诊断**（`github_actions.preflight`，开启）：规划前以无副作用的方式询问凭据能否执行（有写权限，且未被排除在可推送到该分支的名单之外）；不能则带着原因拒绝。
+- **只有一个写入者**（`github_actions.writer_lock`，开启）：本机上第一个执行操作的监视器获得锁；其余监视器以及用 `--profile qa` 启动的监视器都是拒绝一切操作的观察者。
+- **流随会话结束**：实时流每隔 `auth.stream_revalidate_min` 分钟（10）重新检查其会话，会话被撤销或过期、用户被删除或角色不再允许时即结束。
+- **不被收录**（`listen.noindex`，开启）：每个响应都带有 `X-Robots-Tag: noindex, nofollow`，且 `/robots.txt` 禁止一切。doctor 的暴露检查会说明网络模式是否有 TLS 和登录，并提醒对任何人开放的页面可能被标记为钓鱼：请勿公开。在 Caddy 或 Cloudflare Tunnel 之后请设置 `listen.proxy_public_host`：在 HTTPS 下该不带端口的名称是唯一额外接受的主机。

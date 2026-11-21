@@ -261,13 +261,18 @@ def presented(headers):
     return (headers.get("X-Monitor-Access") or "").strip()
 
 
+DEVICE_CHECK = {"fn": None}      # set by the server: tells whether a token is the one of a paired device (security/devices.py); None while the pairing is off
+
+
 def access_ok(headers, query_token=""):
-    """True when no access token is needed (loopback mode) or the request proves it knows it. Constant-time comparison."""
+    """True when no access token is needed (loopback mode) or the request proves it knows it: the access token of the monitor or the token of a paired device (constant-time comparison)."""
     if not STATE["network"]:
         return True
     wanted = STATE["token"].encode()
     for candidate in (presented(headers), query_token):
         if candidate and hmac.compare_digest(str(candidate).encode(), wanted):
+            return True
+        if candidate and DEVICE_CHECK["fn"] is not None and str(candidate).startswith("dev_") and DEVICE_CHECK["fn"](str(candidate)):
             return True
     return False
 

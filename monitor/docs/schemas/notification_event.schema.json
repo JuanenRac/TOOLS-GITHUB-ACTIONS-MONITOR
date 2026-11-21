@@ -29,6 +29,8 @@
         "collab_fixed",
         "credential_blind",
         "credential_back",
+        "github_incident",
+        "github_incident_over",
         "score_dropped",
         "security_new",
         "security_fixed",

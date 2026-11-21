@@ -114,7 +114,7 @@ class Health(unittest.TestCase):
         self.assertNotIn("bogus", cfg["health"]["weights"])
 
     def test_the_snapshot_carries_a_release_row_and_the_ready_count(self):
-        s = snapshot(unreleased={"ARMOR-A": 2}, local_versions={"ARMOR-A": "0.2.0"})
+        s = snapshot(unreleased={"ARMOR-A": 5}, local_versions={"ARMOR-A": "0.2.0"})
         self.assertEqual((s["a11"]["ready"], s["a11"]["rows"][0]["next"]), (1, "cut"))
         self.assertEqual(s["a11"]["sections"][0]["rows"][0][0], "ARMOR-A")
         self.assertIn("a11", s)

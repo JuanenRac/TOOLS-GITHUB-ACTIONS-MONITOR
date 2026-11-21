@@ -7,6 +7,9 @@ Resolution order (first that gives a folder wins), so the tools can be copied to
   2. "workspace_root" / "audit_dir" / "signed_dir" in actions_monitor.json next to this file;
   3. the first parent of this file that holds a file named .monitor-root.
 
+Several workspaces (OPTIONAL, `workspaces.list` and `workspaces.active`, off while the list is empty): the list holds `name=folder` entries and `workspaces.active` names the one in use, so a second set
+of clones (another organisation, another machine's copy) is chosen by changing one word instead of editing paths. The active workspace wins over `workspace_root`, and the environment variable wins over both.
+
 Without a workspace the monitor still runs, in a reduced mode that shows only what the GitHub API gives (no local signing queue, no audit report, no
 CHANGELOG scan) and says so on the page; only the batch tools (plan, dispatch, hygiene) need the clones.
 
@@ -15,6 +18,7 @@ Inside the workspace the signing records are in `<root>/_signed` and the audit f
 """
 import json
 import os
+import re
 from pathlib import Path
 
 from github_actions_monitor import i18n
@@ -41,11 +45,54 @@ def _config(key):
     return Path(value) if value else None
 
 
+WS_ENTRY = re.compile(r"^([A-Za-z0-9._-]{1,40})=(?!\\\\|//)(?!.*://)([^\x00-\x1f]{1,255})\Z")      # name=folder on this computer (never a network address)
+
+
+def _raw_config():
+    try:
+        own = paths.config_file() if Path(HERE).resolve() == paths.ROOT.resolve() else paths.place("actions_monitor.json", HERE)
+        data = json.loads(own.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def named_workspaces(config=None):
+    """{name: Path} of `workspaces.list` (an entry that is not `name=folder` is left out; the first of a repeated name wins)."""
+    config = _raw_config() if config is None else config
+    block = config.get("workspaces") if isinstance(config.get("workspaces"), dict) else {}
+    out = {}
+    for item in block.get("list") or [] if isinstance(block.get("list"), list) else []:
+        match = WS_ENTRY.match(item) if isinstance(item, str) else None
+        if match and match.group(1) not in out:
+            out[match.group(1)] = Path(match.group(2).strip())
+    return out
+
+
+def active_workspace(config=None):
+    """(name, Path) of the workspace `workspaces.active` names, or None (nothing named, or a name that is not in the list)."""
+    config = _raw_config() if config is None else config
+    block = config.get("workspaces") if isinstance(config.get("workspaces"), dict) else {}
+    name = block.get("active") if isinstance(block.get("active"), str) else ""
+    found = named_workspaces(config)
+    return (name, found[name]) if name in found else None
+
+
+def describe(config=None):
+    """What the toolbox prints: every workspace, whether its folder exists, and which one is in use."""
+    config = _raw_config() if config is None else config
+    active = active_workspace(config)
+    return {"active": active[0] if active else "", "workspaces": [{"name": n, "folder_exists": p.is_dir(), "active": bool(active) and active[0] == n} for n, p in sorted(named_workspaces(config).items())]}
+
+
 def workspace_root():
     """The folder with the repositories. Stops with a clear message when it cannot be found."""
     env = _env("MONITOR_ROOT", "JUANENRAC_ROOT")
     if env:
         return env
+    chosen = active_workspace()
+    if chosen:
+        return chosen[1]
     configured = _config("workspace_root")
     if configured:
         return configured

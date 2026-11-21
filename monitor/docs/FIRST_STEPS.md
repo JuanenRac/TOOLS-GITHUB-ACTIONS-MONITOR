@@ -20,3 +20,13 @@
 **6. Save or print a report.** The two buttons at the top of the page save the report of the open tab (TXT, PDF and, if you want, JSON, each through the **Save as** window of your browser) or print it as a clean page ([Outputs for other tools](OUTPUTS.md)).
 
 **Good to know.** If you use a plan with private repositories, choose it in Settings > Basic to see your quotas ([Quotas and plans](QUOTAS.md)). The sentinel is explained in [The sentinel](SENTINEL.md). The tool only reads GitHub; it writes only after you confirm.
+
+## Reading comfortably
+
+- **Density** (`display.density`, or `?density=dense` for one window): `dense` tightens the spacing and the type of every tab.
+- **Less movement** (`display.reduce_motion`): `auto` follows the setting of your system, `on` stops every animation and transition. The state of a workflow is always written in words and drawn with a shape too, never only in colour.
+- **Colours for colour blindness** (`display.palette`, or `?palette=colorblind`): blue, vermilion, yellow and a lighter blue, one set for the dark mode and another for the light one. The contrast gate (`python tools/check_contrast.py`) checks every theme and simulates the three kinds of colour blindness.
+- **No jumps while you read** (`display.live_throttle_s`): while the pointer or the focus is inside the tab you read, the periodic refresh waits; a refresh you ask for is applied at once.
+- **What is new** (`display.whats_new`): after an update a notice offers the entries of the changelog of the versions you skipped; open it again from the palette. `GET /api/whats-new?since=2.1.5` answers with the entries (read only).
+- **Glossary and limits**: open it from the palette. `GET /api/glossary` answers with the figures written with your real parameters, the attacks the rules look for, the limits of the analysis and a few places to learn more. With `report_export.limits` on, the saved and printed reports end with the limits.
+- **The filter of the header** covers the tabs Now, Alerts, Charts, the tabs of the Sentinel (Sentinel, CI, Collab, Security, Delivery, Supply), Repositories and History; the others (Trend of the Sentinel, Team, Fleet, Reports, Lessons, Updates and Settings) are always global. A note under the filter says so.

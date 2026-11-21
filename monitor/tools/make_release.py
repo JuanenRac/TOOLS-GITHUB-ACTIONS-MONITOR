@@ -71,7 +71,7 @@ def lf_for_scripts(data):
     return data.replace(b"\r\n", b"\n") if data.startswith(b"#!") else data
 
 
-TEXT_SUFFIXES = (".py", ".md", ".json", ".txt", ".html", ".sh", ".command")      # the text the zip carries with one line ending, whatever machine builds it
+TEXT_SUFFIXES = (".py", ".md", ".json", ".txt", ".html", ".sh", ".command", ".yml")      # the text the zip carries with one line ending, whatever machine builds it
 CRLF_SUFFIXES = (".bat", ".cmd")      # Windows launchers: CRLF in the zip as in a Windows checkout
 
 
@@ -90,12 +90,12 @@ def members():
     names += sorted(p for p in (HERE / "src").rglob("*") if p.is_file() and p.suffix in DATA_SUFFIXES and "__pycache__" not in p.parts)      # the data files the package loads (ai_presets.json): without them the product starts with empty presets
     names += sorted((HERE / "tools").glob("*.py"))
     names += sorted((HERE / "assets" / "migrations").glob("*.json"))      # the registry of migrations the updater reads
-    names += [HERE / "assets" / "examples" / n for n in DATA_JSON] + [HERE / "assets" / "static" / "actions_monitor.html", HERE / "assets" / "static" / "screens.html"]
+    names += [HERE / "assets" / "examples" / n for n in DATA_JSON] + [HERE / "assets" / "static" / "actions_monitor.html", HERE / "assets" / "static" / "screens.html", HERE / "assets" / "static" / "ui_extras.js"]
     names += [HERE / n for n in LEGAL] + [HERE / "CHANGELOG.md", HERE / "README.txt"]
     names += sorted((HERE / "docs").glob("README_*.txt")) + sorted((HERE / "docs").glob("QUICKSTART_*.txt")) + sorted((HERE / "assets" / "locales").glob("*.json")) + sorted((HERE / "assets" / "ai").glob("*.md"))
     names += sorted((HERE / "docs").glob("*.md"))
     names += sorted((HERE / "skills").rglob("*.md"))      # the two skills of the monitor (internal and external) with their references
-    names += sorted((HERE / "docs").rglob("*.json"))   # the example dashboard of Grafana
+    names += sorted((HERE / "docs").rglob("*.json")) + sorted((HERE / "docs").rglob("*.yml"))   # the example dashboards of Grafana and the observability pack (alert rules, Alertmanager)
     names += sorted((HERE / "tests").glob("*.py")) + sorted((HERE / "tests" / "fixtures").glob("*.json"))
     return [p for p in names if p.is_file()]
 

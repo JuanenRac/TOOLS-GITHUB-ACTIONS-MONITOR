@@ -28,7 +28,12 @@ AUDITED = {
     "/api/ai/prompts/clear": "prompt_log_clear",        # the local record of prompts is emptied (how many lines, never their text)
     "/api/ai/actions/unlock": "ai_unlock",              # the actions of the AI are unlocked for a while
     "/api/screens/logo": "screens_logo_upload",                # the logo of the organization is uploaded (its kind and size go in, never its content)
+    "/api/webhook/redeliver": "webhook_redeliver",      # GitHub is asked to send again the deliveries that never arrived (how many, never a payload)
     "/api/screens/logo/remove": "screens_logo_remove",         # the logo of the organization is removed
+    "/api/pair/start": "device_pair_start",                    # a one-use code for a phone is opened (never the code itself)
+    "/api/pair/redeem": "device_pair",                         # a phone spends the code and becomes a paired device (its id, never its token)
+    "/api/expected-red": "expected_red_change",                # a workflow is marked or unmarked as expected red (the repository and the workflow, never the reason)
+    "/api/devices/revoke": "device_revoke",                    # a paired device is taken away
 }
 
 #: route -> why it is not in this table
@@ -38,6 +43,7 @@ EXEMPT = {
     "/api/settings": "recorded by its own line (settings_change) with the names of the settings",
     "/api/alerts/mute": "recorded by its own line (alert_mute) once the silence exists",
     "/api/alerts/unmute": "recorded by its own line (alert_unmute) once the silence is gone",
+    "/api/credential/probe": "tests the login and the GitHub App with a few small reads and says what they can do; changes nothing and writes nothing on GitHub",
     "/api/hot-only": "a display switch of this process; it changes no stored state",
     "/api/webhook": "a delivery from GitHub signed with the shared secret, not an action of a person",
     "/api/chatops/slack": "a signed command of the chat; every command that reaches the monitor leaves its own line (chatops_command) with the ids of the chat, and it only reads",

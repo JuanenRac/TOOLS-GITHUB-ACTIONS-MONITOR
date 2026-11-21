@@ -63,3 +63,7 @@ La pestaña Gráficos muestra la sección «Comparar periodos» cuando la compar
 ## Los ajustes
 
 Ajustes, pestaña Centinela, bloque Comparación de periodos: `compare.enabled`, `compare.default_window_days`, `compare.default_days_filter`, `compare.workdays`, `compare.min_runs_per_window`, `compare.min_days_of_history`, `compare.min_resolved`, `compare.min_snapshots`, `compare.min_repo_runs`, `compare.top_changes`, `compare.include_in_report` y `compare.cache_seconds`. Una respuesta se conserva `compare.cache_seconds` segundos y luego se calcula de nuevo.
+
+## Ventanas largas en una cuenta grande
+
+Con `compare.progressive` encendido (apagado por defecto) una comparación sobre una ventana más larga que `compare.progressive_days` (7 por defecto) se responde ya con sus últimos días y la respuesta lo dice (`partial`: los días pedidos, los días mostrados y que el resto se está calculando); la ventana entera se termina en segundo plano y la siguiente petición, o el siguiente refresco de la página, la recibe. Una petición con `from` y `to` nunca se parte.

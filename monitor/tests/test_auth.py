@@ -541,7 +541,7 @@ class Recovery(unittest.TestCase):
 
 class Wiring(unittest.TestCase):
     def test_settings_defaults_example_and_help_exist(self):
-        keys = ("enabled", "session_hours", "max_failed_logins", "lockout_minutes", "min_length", "allow_bearer", "audit")
+        keys = ("enabled", "session_hours", "max_failed_logins", "lockout_minutes", "min_length", "allow_bearer", "audit", "stream_revalidate_min")
         example = json.loads((HERE / "assets" / "examples" / "actions_monitor.example.json").read_text(encoding="utf-8"))
         self.assertEqual(sorted(am.DEFAULTS["auth"]), sorted(keys))
         self.assertEqual(sorted(example["auth"]), sorted(keys))

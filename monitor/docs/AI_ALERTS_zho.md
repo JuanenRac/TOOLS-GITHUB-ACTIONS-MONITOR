@@ -66,3 +66,7 @@
 | vLLM | 本地 | `openai-compatible` | `http://127.0.0.1:8000/v1` | 无(本地服务器) | `meta-llama/Llama-3.2-3B-Instruct`, `Qwen/Qwen2.5-7B-Instruct`, `mistralai/Mistral-7B-Instruct-v0.3` | 保留在本机 | 协议兼容,尚未用本工具测试 |
 | LocalAI | 本地 | `openai-compatible` | `http://127.0.0.1:8081/v1` | 无(本地服务器) | `llama-3.2-3b-instruct`, `mixtral-8x7b-instruct`, `phi-4` | 保留在本机 | 协议兼容,尚未用本工具测试 |
 | Jan | 本地 | `openai-compatible` | `http://127.0.0.1:1337/v1` | 无(本地服务器) | `llama3.2-3b-instruct`, `qwen2.5-7b-instruct`, `gemma-3-4b-it` | 保留在本机 | 协议兼容,尚未用本工具测试 |
+
+## 哨兵向 AI 报告的内容
+
+安全、交付和供应链哨兵没有面板，它们的警报以 `GET /api/ai/state` 中的信号 `sentinel.security`、`sentinel.delivery` 和 `sentinel.supply` 传递（每个代码和仓库一行，最严重的在前）；当有事需要关注（`watch` 或 `act`）时，还会在事件流、钩子和简报中按代码和仓库各发一个事件（每个哨兵最多 25 个，另加一个统计其余数量的事件；`info` 级别的警报，例如共享契约的固定版本落后，只出现在状态中）。当哨兵没能读完全部内容（带原因的读取失败、尚未检查的仓库、暂停、无权读取的来源）时，会增加 `watch` 级别的 `sentinel.<名称>.coverage`：该信号开启期间，空的警报列表并不代表干净。Collab 哨兵保留自己的面板，只增加覆盖信号。

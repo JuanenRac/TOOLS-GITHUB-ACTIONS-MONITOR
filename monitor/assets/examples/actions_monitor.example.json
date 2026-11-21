@@ -76,7 +76,7 @@
     "hot_hours": 3,
     "min_rate_remaining": 800,
     "candidate_days": 2,
-    "candidate_min_entries": 1,
+    "candidate_min_entries": 5,
     "skip_candidate_prefixes": [],
     "stale_pr_days": 7,
     "trend_green_pct": 90,
@@ -272,7 +272,8 @@
           "enabled": true
         },
         "branch": {
-          "enabled": true
+          "enabled": true,
+          "require": []
         },
         "workflow": {
           "enabled": true
@@ -311,6 +312,8 @@
         "pr_draft_max_days": 30,
         "pr_conflict_days": 7,
         "watch_external_comments": false,
+        "external_days": 1,
+        "team_members": [],
         "ignore_labels": ["monitor:ignore"]
       },
       "search_api": false
@@ -332,7 +335,7 @@
         },
         "ecosystem_drift": {
           "enabled": true,
-          "level": "warning"
+          "level": "info"
         },
         "release_without_notes": {
           "enabled": true,
@@ -519,7 +522,39 @@
     "max_verified_per_minute": 120,
     "persist_deliveries": true,
     "reject_stale": false,
-    "clock_skew_s": 300
+    "clock_skew_s": 300,
+    "max_body_kb": 1024,
+    "queue_max": 500,
+    "stale_after_h": 6,
+    "transport": "http",
+    "ws_targets": [],
+    "ws_max_targets": 10,
+    "ws_cleanup": false,
+    "redeliver": {
+      "enabled": false,
+      "hooks": [],
+      "max_per_run": 20,
+      "max_age_hours": 24,
+      "interval_minutes": 60
+    }
+  },
+  "events_feed": {
+    "enabled": false,
+    "interval_seconds": 60,
+    "owner_kind": "auto",
+    "max_per_tick": 20
+  },
+  "github_status": {
+    "enabled": false,
+    "interval_seconds": 300,
+    "mark_reds": true
+  },
+  "heartbeat": {
+    "enabled": false,
+    "url_env": "MONITOR_HEARTBEAT_URL",
+    "interval_seconds": 300,
+    "send_state": true,
+    "fail_suffix": ""
   },
   "kiosk": {
     "enabled": false,
@@ -530,12 +565,42 @@
     "safe_margin_percent": 0,
     "scale_with_window": false
   },
+  "expected_red": {
+    "enabled": false,
+    "max_days": 30
+  },
+  "audit_feed": {
+    "clone_alert": {
+      "enabled": false,
+      "threshold": 5,
+      "window_hours": 24,
+      "bot_patterns": [
+        "-bot",
+        "_bot",
+        "deploy",
+        "guardian"
+      ],
+      "check_minutes": 30
+    }
+  },
+  "pwa": {
+    "enabled": false,
+    "refresh_on_return": true
+  },
+  "pairing": {
+    "enabled": false,
+    "code_minutes": 5,
+    "max_devices": 10,
+    "device_days": 90
+  },
   "cli": {
     "prefer_v1": true,
     "default_format": "text",
+    "status_codes": "classic",
     "watch": {
       "min_interval_seconds": 2,
-      "default_interval_seconds": 5
+      "default_interval_seconds": 5,
+      "branch_timeout_seconds": 900
     }
   },
   "chatops": {
@@ -566,7 +631,10 @@
   "outputs": {
     "prometheus": {
       "enabled": false,
-      "per_repo": true
+      "per_repo": true,
+      "histograms": false,
+      "per_runner": false,
+      "histogram_max_series": 200
     },
     "json": {
       "enabled": false
@@ -648,6 +716,10 @@
         "enabled": false,
         "severity": "info"
       },
+      "container_input_name": {
+        "enabled": false,
+        "severity": "warn"
+      },
       "archived_action": {
         "enabled": false
       }
@@ -664,6 +736,9 @@
     "enabled": false,
     "events": ["red_new", "stuck_new", "pending_sign", "offline", "credential_blind"],
     "max_per_hour": 20,
+    "dedupe_ledger": false,
+    "dedupe_hours": 24,
+    "max_event_age_hours": 0,
     "channels": {
       "telegram": {
         "enabled": false,
@@ -726,7 +801,12 @@
   },
   "display": {
     "timezone": "local",
-    "blink_red_tiles": true
+    "blink_red_tiles": true,
+    "live_throttle_s": 30,
+    "whats_new": true,
+    "density": "normal",
+    "reduce_motion": "auto",
+    "palette": "default"
   },
   "sound": {
     "enabled": true,
@@ -747,7 +827,34 @@
     "quiet_enabled": false,
     "quiet_from_hour": 22,
     "quiet_to_hour": 7,
-    "theme": "classic"
+    "theme": "classic",
+    "voices": "",
+    "ambient": false,
+    "ambient_volume": 10,
+    "tick": false,
+    "tick_seconds": 1
+  },
+  "mcp": {
+    "prompts": true,
+    "write_tools": false
+  },
+  "siem": {
+    "queue_max": 500,
+    "sinks": []
+  },
+  "mcp": {
+    "prompts": true,
+    "write_tools": false
+  },
+  "siem": {
+    "queue_max": 500,
+    "sinks": []
+  },
+  "selfwatch": {
+    "enabled": true,
+    "rss_warn_mb": 1024,
+    "threads_warn": 400,
+    "interval_seconds": 60
   },
   "updates": {
     "check": true,
@@ -762,6 +869,7 @@
     "resume_max_age_hours": 12
   },
   "modes": {
+    "idle_minutes": 0,
     "start": "normal",
     "default_minutes": 60,
     "fast": {
@@ -791,6 +899,7 @@
   },
   "quota": {
     "billing_api": false,
+    "chip": true,
     "warn_percent": 75,
     "alert_percent": 90,
     "default_runner": "linux",
@@ -816,9 +925,11 @@
     "lockout_minutes": 15,
     "min_length": 10,
     "allow_bearer": false,
-    "audit": true
+    "audit": true,
+    "stream_revalidate_min": 10
   },
   "listen": {
+    "noindex": true,
     "network": false,
     "host": "127.0.0.1",
     "token_env": "MONITOR_ACCESS_TOKEN",
@@ -840,7 +951,12 @@
   "github_actions": {
     "enabled": false,
     "allowed": ["rerun_failed", "cancel"],
-    "merge_method": "squash"
+    "merge_method": "squash",
+    "require_reason": true,
+    "operator": "",
+    "comment_on_target": false,
+    "preflight": true,
+    "writer_lock": true
   },
   "act": {
     "enabled": false,
@@ -896,13 +1012,27 @@
   "otlp": {
     "enabled": false,
     "endpoint": "",
-    "interval_seconds": 60
+    "interval_seconds": 60,
+    "cicd_conventions": false,
+    "job_spans": false
   },
   "organizations": {
     "discover": false
   },
   "finops": {
-    "jobs_per_cycle": 0
+    "jobs_per_cycle": 0,
+    "by_change": false,
+    "co2": false,
+    "co2_watts": 40,
+    "co2_grams_per_kwh": 400
+  },
+  "limits": {
+    "warn_percent": 80,
+    "memory_mb": 512
+  },
+  "refresh": {
+    "share_by_workflow": false,
+    "share_seconds": 20
   },
   "fleet": {
     "page_size": 50,
@@ -910,7 +1040,10 @@
     "sort": "risk",
     "show_all_active": true,
     "labels": [],
-    "saved_filters": []
+    "saved_filters": [],
+    "meta_columns": [],
+    "meta_per_call": 20,
+    "meta_ttl_hours": 6
   },
   "lessons": {
     "enabled": true,
@@ -988,7 +1121,8 @@
     "json": false,
     "name": "monitor-{tab}-{date}",
     "paper": "a4",
-    "pdf_path": "auto"
+    "pdf_path": "auto",
+    "limits": true
   },
   "score": {
     "enabled": true,
@@ -1066,6 +1200,8 @@
     "min_resolved": 3,
     "min_runs_per_window": 20,
     "min_snapshots": 12,
+    "progressive": false,
+    "progressive_days": 7,
     "top_changes": 10,
     "workdays": ["1", "2", "3", "4", "5"]
   },
@@ -1152,6 +1288,16 @@
       "enabled": false
     }
   },
+  "workspaces": {
+    "list": [],
+    "active": ""
+  },
+  "backpressure": {
+    "enabled": false,
+    "max_reads_per_cycle": 0,
+    "shed_percent": 150,
+    "min_reads": 20
+  },
   "sampling": {
     "active_probe": false,
     "api_budget_per_hour": 0,
@@ -1183,13 +1329,19 @@
     "default_density": "normal",
     "default_theme": "inherit",
     "enabled": false,
+    "glance_seconds": 3,
     "group_map": true,
+    "hide_healthy": false,
+    "idle_dim_minutes": 0,
+    "life": true,
     "logo_corner": "top-right",
     "logo_max_height": 64,
     "logo_max_width": 160,
+    "logo_fleet": false,
     "logo_now": false,
     "logo_overview": true,
     "logo_sentinels": false,
+    "min_font_px": 12,
     "mode": "three",
     "night_dim": false,
     "night_dim_from_hour": 22,
@@ -1199,9 +1351,13 @@
     "rotate_seconds": 0,
     "show_repo_names": "public",
     "sound": false,
+    "sound_voices": "",
+    "sound_volume": 0,
+    "theme_fleet": "inherit",
     "theme_now": "inherit",
     "theme_overview": "inherit",
-    "theme_sentinels": "inherit"
+    "theme_sentinels": "inherit",
+    "transition": "fade"
   },
   "ui": {
     "alerts_sort": "server",
@@ -1216,7 +1372,9 @@
     "screen3_orientation": "auto",
     "screen3_tabs": "",
     "theme": "auto",
-    "about_org_logo": false
+    "about_org_logo": false,
+    "compact": "auto",
+    "palette": true
   },
   "audit_dir": "",
   "readpool": {

@@ -107,3 +107,10 @@ Senza comando si apre la pagina. I comandi rispondono una volta (aggiungi `--jso
 | 6 | fallito e fallito anche il ritorno: ripristina la copia a mano |
 | 7 | nessuna connessione a GitHub e nessuno zip |
 | 8 | non confermato |
+
+## L'avviso nomina il comando del tuo modo di installare
+
+L'avviso di una versione più recente (console, Informazioni, `/api/about`) dice ora il comando esatto del modo in cui è stato installato questo monitor, nel campo `command` accanto a `channel`: il prodotto decompresso (`py -3 monitor/bin/monitor_cli.py update`), un gestore di servizi (`... update apply --systemd-unit <unità>`), un container (`docker pull ghcr.io/juanenrac/tools-github-actions-monitor:<versione>`), pipx, uv o un'estensione del comando `gh`. L'avviso non esegue nulla.
+## Protezioni dell'assistente di servizio
+
+Con `updates.systemd_helper` (o `--systemd-unit`) l'aggiornatore controlla ora il servizio prima di toccarlo: un'unità la cui directory di lavoro e il cui comando non puntano a QUESTA cartella appartiene a un'altra installazione e non viene né fermata né avviata; un'unità non viene avviata finché qualcos'altro (un monitor in primo piano) risponde sulla sua porta; un riavvio non è dato per fatto finché il processo è ancora quello vecchio (l'unità deve mostrare un nuovo PID); e `update status --systemd-unit UNITÀ` elenca solo gli errori del servizio dall'ultimo avvio. Sono domande di sola lettura a `systemctl --user show` e `journalctl --user`; una domanda senza risposta non blocca nulla.

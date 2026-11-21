@@ -28,12 +28,14 @@
 | `lessons` | この CI の失敗が教えたこと:`lessons list`、`lessons brief --repo NAME`(push の前に読む)、`lessons failures`、`lessons close` | 不可 |
 | `briefs` | AI ツールが読むタブごとのブリーフ:`briefs index`、`briefs show TAB`、`briefs all` | 可 |
 | `screens` | ページの「画面」メニュー:`screens list`(画面の種類と開けるかどうか)と `screens urls`(キオスクのコマンドにそのまま使える完全なアドレス) | 不可 |
+| `toolbox` | モニターを起動せずにこのコンピューター上で動く運用者向けの小さなツール：`toolbox limits [N]`（設定と上限の比較）、`toolbox workspaces`（ワークスペースと使用中のもの）、`toolbox ledger [--force]`（送信済み通知の台帳。`--force` で消去）、`toolbox summary`（種類・リポジトリ・日別のイベント数）、`toolbox export-events FILE`（名前の末尾に応じて jsonl、csv、parquet、duckdb でイベントを書き出し。parquet と duckdb は各パッケージが必要で、ファイルは新規であること） | いいえ |
 | `credential` | すべてが動いたまま、1つのアカウントの GitHub ログインを差し替える:`credential replace\|reload [--account ID] [--new-token-file FILE\|-]`。トークンは表示しません | 不可 |
 | `install-skill` | モニターのスキル(`internal` または `external`)を、AI ツールがスキルを読むフォルダーにコピーします:`install-skill external --dest FOLDER`。モニターが動いている必要はありません | 不可 |
 | `gh-token` | ツールの読み取りが GitHub App の割り当てを使うよう、1時間有効な GitHub App のインストールトークンを出力します(`github_app.share_reads` がオンのときのみ)。`--json` なしで実行してください | 不可 |
 | `watch` | 同じ読み取りを繰り返します（`watch status\|alerts`、`--interval`、`--once`、`--exit-on-change`）。[CLI_OPERATOR_jpn.md](CLI_OPERATOR_jpn.md) を参照 | 不可 |
 | `completions` | `bash`、`zsh`、`fish`、`powershell` の補完スクリプト。実際のパーサーから作られ、出力するだけです | 不可 |
 | `kiosk` | テレビや壁面向けのモニターのアドレス（`ops`、`team`、`release`、`quiet`）。[KIOSK_jpn.md](KIOSK_jpn.md) を参照 | 不可 |
+| `metrics` | cron とメール向けに数値を `名前=値` の行で出力します。`--if-problem` を付けると問題がないときは何も出力しません。[CLI_OPERATOR.md](CLI_OPERATOR.md) を参照 | いいえ |
 
 全コマンド共通のオプション：`--json`（応答を 1 つの JSON 文書で：`{"ok", "exit", "data"}`）、`--account ID`、`--url URL`、`--lite`（ポート 8766）、`--timeout 秒`（1〜60）、`--lang コード`。ネットワークモードではアクセストークンを、モニター自身が読む環境変数 `MONITOR_ACCESS_TOKEN` に設定します(`MONITOR_TOKEN` は別名として受け付けます。`--token TOKEN` は最後の手段で、オプションはプロセス一覧に表示されるためです)。優先順位は `MONITOR_ACCESS_TOKEN`、`MONITOR_TOKEN`、`--token` の順です。ヘッダー `X-Monitor-Access` で送られ、アドレスや画面には出ません。別のコンピューターへの暗号化されていない `http` の `--url` では stderr に警告を出します(トークンと応答が平文で送られるため)。管理下にないネットワークでは `https` を使ってください。
 

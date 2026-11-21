@@ -9,7 +9,7 @@ What it reads, per repository, and the alert each signal can raise (all of it ca
   security.dependabot          open Dependabot alerts, counted by severity (from `signals.dependabot.min_severity` up)
   security.code_scanning       open code scanning alerts, the same
   security.secret              open secret scanning alerts (always critical: a secret that GitHub found is a secret that is out)
-  security.branch_unprotected  the default branch has no protection at all
+  security.branch_unprotected  the default branch has no protection at all: neither the classic branch protection nor a ruleset (the `protected` flag of the branch and the active rules of the branch are read too, because a repository protected by a ruleset answers 404 to the classic endpoint); `signals.branch.require` can name rule types the rules must have (`pull_request`, `required_status_checks`, `non_fast_forward`, `deletion`, ...), and a protected branch that lacks one is flagged with the missing ones
   security.workflow_write      the workflows get write permission on the repository by default
   security.codeowners_missing  there is no CODEOWNERS file (off by default: many repositories do not want one)
   security.runs_deleted        a workflow run that matters (a push to the default branch, a manual run, a `pull_request_target`) was deleted after the monitor saw it (off by default; see `deleted_runs.py`)
@@ -51,7 +51,7 @@ SIGNALS = ("dependabot", "code_scanning", "secret", "branch", "workflow", "codeo
 DEFAULTS = {
     "enabled": False, "refresh_seconds": 1800, "max_repos_per_tick": 5, "deadline_s": 30, "min_rate_remaining": 1500, "repos": "all", "plan_na": True,
     "signals": {"dependabot": {"enabled": True, "min_severity": "high"}, "code_scanning": {"enabled": True, "min_severity": "high"}, "secret": {"enabled": True},
-                "branch": {"enabled": True}, "workflow": {"enabled": True}, "codeowners": {"enabled": False},
+                "branch": {"enabled": True, "require": []}, "workflow": {"enabled": True}, "codeowners": {"enabled": False},
                 "runs_deleted": {"enabled": False, "check_window_days": deleted_runs.WINDOW_DAYS, "max_checks": deleted_runs.MAX_CHECKS}},
     "penalty": {"critical": 25, "high": 10, "medium": 3, "low": 1, "branch": 5, "workflow": 3, "codeowners": 1, "runs_deleted": 10},
 }
@@ -87,6 +87,8 @@ def settings(config):
                 continue
             if isinstance(entry.get("enabled"), bool):
                 merged["signals"][name]["enabled"] = entry["enabled"]
+            if name == "branch" and isinstance(entry.get("require"), list) and all(isinstance(x, str) and re.fullmatch(r"[a-z_]{1,40}", x) for x in entry["require"]):
+                merged["signals"]["branch"]["require"] = sorted(set(entry["require"]))
             if "min_severity" in merged["signals"][name] and entry.get("min_severity") in SEVERITIES:
                 merged["signals"][name]["min_severity"] = entry["min_severity"]
             for key, (low, high) in (("check_window_days", (1, 90)), ("max_checks", (1, 500))):
@@ -124,6 +126,27 @@ def why_of(status, message=""):
     if PLAN_RE.search(str(message or "")):
         return "plan"
     return "permission" if status == 403 else "off"
+
+
+def error_kind(error):
+    """Why a repository could not be read, from the error of the call: `timeout` (gh did not answer in time), `rate` (the allowance or a secondary limit), `network`, or `error` (anything else). It is a cause, never a finding."""
+    text = str(error or "").lower()
+    if "timed out" in text or "timeout" in text:
+        return "timeout"
+    if "rate limit" in text or "secondary" in text or "abuse" in text:
+        return "rate"
+    if any(w in text for w in ("connect", "network", "dns", "tls", "eof", "reset", "no answer", "no route")):
+        return "network"
+    return "error"
+
+
+def error_counts(errors):
+    """{kind: repositories} of the reads that failed, so the status says why and not only how many."""
+    out = {}
+    for e in errors.values():
+        kind = e.get("kind") or error_kind(e.get("message"))
+        out[kind] = out.get(kind, 0) + 1
+    return out
 
 
 def severity_of(kind, raw):
@@ -170,6 +193,10 @@ def evaluate(repo, facts, cfg, now, known=None):
         add("security.secret", "critical", n=len(secret["items"]))
     if rules["branch"]["enabled"] and facts.get("branch_protected") is False:
         add("security.branch_unprotected", "warning", branch=facts.get("default_branch") or "")
+    elif rules["branch"]["enabled"] and facts.get("branch_protected") is True and rules["branch"].get("require") and isinstance(facts.get("branch_rules"), list):
+        missing = [t for t in rules["branch"]["require"] if t not in facts["branch_rules"]]
+        if missing:
+            add("security.branch_unprotected", "warning", branch=facts.get("default_branch") or "", missing=",".join(missing))
     if rules["workflow"]["enabled"] and facts.get("workflow_permissions") == "write":
         add("security.workflow_write", "warning")
     if rules["codeowners"]["enabled"] and facts.get("codeowners") is False:
@@ -262,6 +289,16 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
         self.last_link = headers.get("link", "")      # the cursor of the next page, for the lists that reject ?page=
         return 200, data, (tag if etagcache.ETAG_RE.match(tag) else "")
 
+    def _side(self, etag, key, endpoint):
+        """(status, body) of a secondary read of the branch check; 304 keeps what was known, anything that is not an answer of the API counts as no answer (0)."""
+        status, body, tag = self.fetch(endpoint, etag.get(key, ""))
+        if status == 200:
+            etag[key] = tag
+        elif status != 304:
+            etag.pop(key, None)
+            status = 0
+        return status, body
+
     def more_pages(self, endpoint_first):
         """The items of the next pages of a list that hands out a cursor in the Link header (paging.follow_cursor), up to `pagination.cursor_pages` more pages; {"items", "pages", "cut"}."""
         pages = paging.settings(self.config)["cursor_pages"]
@@ -310,7 +347,7 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
                 self.scan(repo, now)
                 self.errors.pop(repo, None)
             except Exception as error:      # one repository that fails never stops the round
-                self.errors[repo] = {"message": str(error)[:80], "at": stamp(now)}
+                self.errors[repo] = {"message": str(error)[:80], "at": stamp(now), "kind": error_kind(error)}
                 with self.lock:
                     record = self.state["per_repo"].setdefault(repo, {})
                     record["fails"] = int(record.get("fails", 0)) + 1
@@ -380,13 +417,33 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
                         facts.pop(kind, None)
                         silent.add(kind)
             if rules["branch"]["enabled"]:
-                status, _body = read("branch", f"repos/{owner}/{repo}/branches/{quote(facts.get('default_branch') or 'main', safe='')}/protection")
+                branch = quote(facts.get("default_branch") or "main", safe="")
+                status, _body = read("branch", f"repos/{owner}/{repo}/branches/{branch}/protection")
                 if status == 200:
                     facts["branch_protected"] = True
-                elif status == 404:      # "Branch not protected": the answer for an unprotected branch (403 is a login that may not read it: unavailable, not a finding)
-                    facts["branch_protected"] = False
+                    facts.pop("branch_rules", None)
+                elif status == 404:
+                    # no classic protection: the branch may still be protected by a ruleset (`protected` of the branch and the active rules of the branch say so) before it is called unprotected
                     unavailable.pop("branch", None)
                     why.pop("branch", None)
+                    protected, types = False, None
+                    meta_status, meta = self._side(etag, "branch_meta", f"repos/{owner}/{repo}/branches/{branch}")
+                    if meta_status == 200 and isinstance(meta, dict):
+                        protected = bool(meta.get("protected"))
+                    elif meta_status == 304:
+                        protected = bool(facts.get("branch_protected"))
+                    rules_status, rules_body = self._side(etag, "branch_rules", f"repos/{owner}/{repo}/rules/branches/{branch}")
+                    if rules_status == 200 and isinstance(rules_body, list):
+                        types = sorted({str(r.get("type")) for r in rules_body if isinstance(r, dict) and r.get("type")})
+                        protected = protected or bool(types)
+                    elif rules_status == 304:
+                        types = facts.get("branch_rules")
+                        protected = protected or bool(types)
+                    facts["branch_protected"] = protected
+                    if types is not None and protected:
+                        facts["branch_rules"] = types
+                    else:
+                        facts.pop("branch_rules", None)
                 elif status != 304:
                     facts.pop("branch_protected", None)
             if rules["workflow"]["enabled"]:
@@ -437,6 +494,8 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
 
     def _title(self, alert):
         d = alert.get("detail") or {}
+        if alert["code"] == "security.branch_unprotected" and d.get("missing"):
+            return i18n.t("security.t.branch_weak", repo=alert["repo"], branch=d.get("branch", ""), missing=d["missing"])
         return i18n.t(TITLE_KEYS[alert["code"]], repo=alert["repo"], n=d.get("n", 0), critical=d.get("critical", 0), workflow=d.get("workflow", ""), actor=d.get("actor", ""), high=d.get("high", 0), branch=d.get("branch", ""))
 
     def _event(self, kind, alert):
@@ -535,7 +594,7 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
         readable, total, na_plan = self.source_counts()
         if level == "ok" and ((total and readable / total < self.min_source_coverage()) or (na_plan and not total)):
             level = "unknown"      # nothing open because most of what weighs could not be read (or the plan has none of it): not a clean bill of health
-        return {"sources_readable": readable, "sources_total": total, "sources_na_plan": na_plan, "unavailable_why": self.unavailable_why(), "enabled": True, "level": level, "loading": "" if checked or not repos else "starting", "errors": [{"section": r, "at": e["at"]} for r, e in sorted(self.errors.items())],
+        return {"sources_readable": readable, "sources_total": total, "sources_na_plan": na_plan, "unavailable_why": self.unavailable_why(), "enabled": True, "level": level, "loading": "" if checked or not repos else "starting", "errors": [{"section": r, "at": e["at"], "message": e.get("message", ""), "kind": e.get("kind") or error_kind(e.get("message"))} for r, e in sorted(self.errors.items())], "error_kinds": error_counts(self.errors),
                 "refresh_seconds": self.refresh_seconds, "repos_in_scope": len(repos), "repos_checked": checked, "last_full_scan": last, "paused": self.paused, "unavailable": self.unavailable(), "unchecked": sentinel_base.unchecked(repos, self.state["per_repo"]), "round_cut": self.round_cut}
 
     def get_metrics(self):

@@ -96,3 +96,7 @@ For a sealed copy put the variable named by `ops.backup.key_env` in `/etc/github
 All of them are in the Settings tab (Folders and files) and in [SETTINGS.md](SETTINGS.md): `ops.backup.*` (enabled, dir, interval_hours, keep, include_config, compress_level, encrypt, key_env), `ops.purge.*` (enabled, require_backup_hours) and `ops.doctor.*` (strict_exit, backup_max_age_days, min_free_mb, sqlite_check, sqlite_timeout_s, webhook_min_length). Every switch starts off or conservative, and the security ones (the scheduled copy, including the settings, sealing, the purge) are marked as such.
 
 See also [STORAGE.md](STORAGE.md) (the backends and the retention), [DEPLOYMENT.md](DEPLOYMENT.md) (service, container, TLS) and [CLI.md](CLI.md).
+
+## The monitor watches its own memory and threads
+
+Every `selfwatch.interval_seconds` (60) the monitor reads its own resident memory, its threads and its processor use and shows them in `/api/health` as `selfwatch` (`state`: `ok` or `high`). When the memory goes over `selfwatch.rss_warn_mb` (1024) or the threads over `selfwatch.threads_warn` (400) it notes it once in the counter of swallowed failures (`high`, with the numbers), releases what it can and notes the return to normal. Switch it off with `selfwatch.enabled`. Set `selfwatch.rss_warn_mb` a little under the limit of your container. The CI runs the monitor in a container of one processor and 512 MB with an account of 120 workflows (`tools/limits_check.py`).

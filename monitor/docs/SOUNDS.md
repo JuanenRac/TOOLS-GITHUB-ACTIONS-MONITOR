@@ -36,6 +36,14 @@ The page makes its own sounds with the Web Audio API, one for each kind of event
 - Several kinds in one look make one burst: at most three patterns, the most serious first; the rest wait for the next burst. Two bursts are never on top of each other.
 - A silenced alert (Alerts tab) never sounds.
 
+## The library of sounds
+
+Besides the eleven sounds that each kind of event always had, the monitor carries a library of 54 sounds (65 in all) that you can assign to any kind of event. They are made in the browser (and, for the beep of this computer, from the same notes), so there is no audio file to download. The sounds of the kinds are the first eleven; the rest are free to assign: `bell`, `chime`, `ding_dong`, `doorbell`, `ding`, `ping_high`, `ping_low`, `tick_soft`, `tock_soft`, `double_tick`, `tick_tock`, `knock`, `knock_three`, `blip`, `bloop`, `bubble`, `drop`, `droplet`, `arpeggio_up`, `arpeggio_down`, `minor_up`, `minor_down`, `fanfare`, `level_up`, `coin`, `harp_up`, `harp_down`, `marimba`, `xylophone`, `pluck`, `cascade`, `sparkle`, `ascend`, `descend`, `notify_a`, `notify_b`, `notify_c`, `sweep_up`, `sweep_down`, `whistle_up`, `whistle_down`, `zap`, `laser`, `radar`, `sonar`, `beacon`, `heartbeat`, `alarm_fast`, `siren`, `klaxon`, `buzzer`, `gong`, `phone`, `cuckoo`.
+
+To give a kind another sound write `kind=sound` pairs separated by commas in `sound.voices`, for instance `new_red=coin,warning=drop`. The kinds are `new_red`, `sentinel`, `stuck`, `score_drop`, `connection_lost`, `warning`, `resolved`, `report`, `lesson`, `info`, `live_recovered`. A name that is not in the library is ignored and the kind keeps its own sound. The wall screens can add their own list in `screens.sound_voices` and their own volume in `screens.sound_volume`. Nothing sounds longer than one second, and every sound is different from the others.
+
+Two optional backgrounds, both off by default: `sound.ambient` (two very soft low notes, calm while nothing is red and rougher while something is) and `sound.tick` (a very short dry click every `sound.tick_seconds`, so a frozen screen is heard). Both follow the mute chip, the main switch and the quiet hours.
+
 ## Settings (Settings, Sound)
 
 All of them are in the configuration file and in the Settings tab; the volume, the theme and the switches take effect at once.
@@ -49,6 +57,10 @@ All of them are in the configuration file and in the Settings tab; the volume, t
 | `sound.cooldown_seconds` | Pause between two sounds of the same kind. |
 | `sound.quiet_enabled`, `sound.quiet_from_hour`, `sound.quiet_to_hour` | Quiet hours (off by default): between the two hours of this computer nothing sounds; they may cross midnight. |
 | `sound.server_beep` | Off by default. The monitor itself sounds on this computer when no page is open or the browser blocks sound: one pattern for each kind of event in the table above (tones of Windows, system sounds of macOS, events of canberra on Linux), by the same switches and quiet hours as the page, one burst of at most three kinds at a time; local only. |
+| `sound.voices` | Gives a kind of event another sound of the library (`kind=sound` pairs separated by commas). Empty by default. |
+| `sound.ambient`, `sound.ambient_volume` | Background ambience (off by default) and its volume, 1 to 50. |
+| `sound.tick`, `sound.tick_seconds` | Clock tick (off by default) and the seconds between ticks, 1 to 60. |
+| `screens.sound_voices`, `screens.sound_volume` | The same as `sound.voices`, only for the wall screens, and their own volume (0 = the one of `sound.volume`). |
 
 ## Try each sound
 

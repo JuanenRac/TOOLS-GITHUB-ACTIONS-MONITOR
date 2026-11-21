@@ -63,3 +63,7 @@
 ## 設定
 
 設定、センチネルタブ、「期間の比較」ブロック：`compare.enabled`、`compare.default_window_days`、`compare.default_days_filter`、`compare.workdays`、`compare.min_runs_per_window`、`compare.min_days_of_history`、`compare.min_resolved`、`compare.min_snapshots`、`compare.min_repo_runs`、`compare.top_changes`、`compare.include_in_report`、`compare.cache_seconds`。回答は `compare.cache_seconds` 秒間保持され、その後に再計算されます。
+
+## 大きなアカウントでの長い期間
+
+`compare.progressive` をオンにすると（既定ではオフ）、`compare.progressive_days`（既定 7）より長い期間の比較には、まず直近の日数ですぐに応答し、応答にもそれが示されます（`partial`：求められた日数、表示した日数、残りは計算中であること）。全期間はバックグラウンドで完了し、次のリクエストやページの次回更新で返ります。`from` と `to` を指定したリクエストは分割されません。

@@ -30,6 +30,7 @@ from pathlib import Path
 
 from github_actions_monitor import i18n
 from github_actions_monitor.data_pipeline import alertflow
+from github_actions_monitor.integrations import soundlib
 from github_actions_monitor.app import screens, surface
 from github_actions_monitor.app import toolconfig
 from github_actions_monitor.security import envguard
@@ -70,6 +71,8 @@ OLLAMA_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}/?\Z
 HTTPS_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250})?\Z")
 AI_URL_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#!$&()*+,;=%-]{4,250}|http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/-]{0,100})?)?\Z")   # https, or a server on this computer
 PROXY_HOST_RE = re.compile(r"^([A-Za-z0-9]([A-Za-z0-9.-]{0,98}[A-Za-z0-9])?)?\Z")      # the public NAME of an HTTPS proxy: a host name only, no port, path, user or space (empty = none)
+WORKSPACE_RE = re.compile(r"^[A-Za-z0-9._-]{1,40}=(?!\\\\|//)(?!.*://)[^\x00-\x1f]{1,255}\Z")      # workspaces.list: name=folder on this computer, never a network address
+WS_NAME_RE = re.compile(r"^[A-Za-z0-9._-]{0,40}\Z")      # workspaces.active: the name of one of the list, or nothing
 WORKDAY_RE = re.compile(r"^[1-7]\Z")      # compare.workdays: one day of the week, Monday = 1
 ENV_NAME_RE = re.compile(r"^([A-Z_][A-Z0-9_]{0,63})?\Z")
 AI_ENV_RE = re.compile(r"^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|MONITOR_[A-Z0-9_]*)\Z)([A-Z_][A-Z0-9_]{0,63})?\Z")   # the NAME of the variable of the key of a provider: never a variable of the system or of the monitor   # the NAME of an environment variable, never the key itself
@@ -84,6 +87,10 @@ def _env_name_except(own):
 WEBHOOK_ENV_RE = _env_name_except(envguard.WEBHOOK_SECRET_ENV)      # webhook.secret_env
 TOKEN_ENV_RE = _env_name_except(envguard.ACCESS_TOKEN_ENV)          # listen.token_env
 SLACK_ENV_RE = _env_name_except(envguard.SLACK_SIGNING_ENV)          # chatops.slack.signing_secret_env
+HEARTBEAT_ENV_RE = _env_name_except(envguard.HEARTBEAT_URL_ENV)      # heartbeat.url_env
+WS_TARGET_RE = re.compile(r"^[A-Za-z0-9-]{1,39}(/[A-Za-z0-9._-]{1,100})?\Z")      # webhook.ws_targets: `owner/repo` or `owner`
+REDELIVER_HOOK_RE = re.compile(r"^(repo:[A-Za-z0-9-]{1,39}/[A-Za-z0-9._-]{1,100}|org:[A-Za-z0-9-]{1,39})#[0-9]{1,12}\Z")      # webhook.redeliver.hooks
+HEARTBEAT_SUFFIX_RE = re.compile(r"^(/[a-z]{1,10})?\Z")      # heartbeat.fail_suffix: empty, or one short word after a slash (/fail)
 DISCORD_ENV_RE = _env_name_except(envguard.DISCORD_KEY_ENV)         # chatops.discord.public_key_env
 NOTIFY_ENV_RE = _env_name_except("")                                # the variable of a channel of notices: no secret of the monitor belongs to it
 LOOP_HOST_RE = re.compile(r"^(127\.0\.0\.1|localhost|\[::1\])\Z")                      # a broker or a service ON THIS COMPUTER
@@ -137,6 +144,7 @@ _f("basic", "plan", "quota.default_runner", "enum", ("linux", "windows", "macos"
 _f("basic", "plan", "quota.warn_percent", "int", (1, 100), unit="%", restart=False)
 _f("basic", "plan", "quota.alert_percent", "int", (1, 100), unit="%", restart=False)
 _f("basic", "plan", "quota.billing_api", "bool", restart=False, secure=True)
+_f("basic", "plan", "quota.chip", "bool", restart=False)
 _f("basic", "safety", "session_guard", "bool", restart=False, secure=True)
 _f("basic", "discovery", "discovery.events", "bool", restart=False)
 _f("basic", "discovery", "discovery.suggest_groups", "bool", restart=False)
@@ -152,6 +160,8 @@ _f(_T_GENERAL, "identity", "github_owner", "text", OWNER_RE)
 _f(_T_GENERAL, "identity", "language", "enum", ("",) + tuple(i18n.LANGS), False)
 _f(_T_GENERAL, "identity", "display.timezone", "text", TZ_RE, False)
 _f(_T_GENERAL, "identity", "display.blink_red_tiles", "bool", restart=False)
+_f(_T_GENERAL, "identity", "display.live_throttle_s", "int", (0, 300), unit="s", restart=False)
+_f(_T_GENERAL, "identity", "display.whats_new", "bool", restart=False)
 _f(_T_GENERAL, "screens", "ui.orientation", "enum", ("auto", "portrait", "landscape"), restart=False)
 _f(_T_GENERAL, "screens", "ui.rotate_seconds", "int", (0, 3600), unit="s", restart=False)
 _f(_T_GENERAL, "screens", "ui.screen1_tabs", "text", re.compile(r"^[a-z,]{0,60}\Z"), restart=False)
@@ -167,15 +177,29 @@ _f(_T_GENERAL, "kiosk", "kiosk.scale_with_window", "bool", restart=False)
 _f(_T_GENERAL, "kiosk", "kiosk.high_contrast", "bool", restart=False)
 _f(_T_GENERAL, "kiosk", "kiosk.rotate_views", "bool", restart=False)
 _f(_T_GENERAL, "kiosk", "kiosk.rotate_seconds", "int", (5, 600), unit="s", restart=False)
+_f(_T_GENERAL, "pwa", "pwa.enabled", "bool", restart=False)
+_f(_T_GENERAL, "pwa", "pwa.refresh_on_return", "bool", restart=False)
+_f(_T_GENERAL, "pairing", "pairing.enabled", "bool", restart=False, secure=True)
+_f(_T_GENERAL, "pairing", "pairing.code_minutes", "int", (1, 30), restart=False)
+_f(_T_GENERAL, "pairing", "pairing.max_devices", "int", (1, 50), unit="", restart=False)
+_f(_T_GENERAL, "pairing", "pairing.device_days", "int", (0, 365), restart=False)
 _f(_T_GENERAL, "cli", "cli.default_format", "enum", ("text", "table", "plain", "json", "ndjson"), restart=False)
 _f(_T_GENERAL, "cli", "cli.watch.min_interval_seconds", "int", (1, 3600), unit="s", restart=False)
 _f(_T_GENERAL, "cli", "cli.watch.default_interval_seconds", "int", (1, 3600), unit="s", restart=False)
+_f(_T_GENERAL, "cli", "cli.watch.branch_timeout_seconds", "int", (10, 86400), unit="s", restart=False)
+_f(_T_GENERAL, "cli", "cli.status_codes", "enum", ("classic", "operator"), restart=False)
 _f(_T_GENERAL, "wall", "screens.enabled", "bool", restart=False)
 _f(_T_GENERAL, "look", "ui.theme", "enum", screens.GLOBAL_THEMES, restart=False)
 _f(_T_GENERAL, "look", "ui.remember_folds", "bool", restart=False)
 _f(_T_GENERAL, "look", "ui.about_org_logo", "bool", restart=False)
+_f(_T_GENERAL, "look", "ui.compact", "enum", ("auto", "on", "off"), restart=False)
+_f(_T_GENERAL, "look", "ui.palette", "bool", restart=False)
+_f(_T_GENERAL, "look", "display.density", "enum", ("normal", "dense"), restart=False)
+_f(_T_GENERAL, "look", "display.reduce_motion", "enum", ("auto", "on"), restart=False)
+_f(_T_GENERAL, "look", "display.palette", "enum", ("default", "colorblind"), restart=False)
 _f(_T_GENERAL, "wall", "screens.default_theme", "enum", screens.THEME_CHOICES, restart=False)
 _f(_T_GENERAL, "wall", "screens.theme_overview", "enum", screens.THEME_CHOICES, restart=False)
+_f(_T_GENERAL, "wall", "screens.theme_fleet", "enum", screens.THEME_CHOICES, restart=False)
 _f(_T_GENERAL, "wall", "screens.theme_now", "enum", screens.THEME_CHOICES, restart=False)
 _f(_T_GENERAL, "wall", "screens.theme_sentinels", "enum", screens.THEME_CHOICES, restart=False)
 _f(_T_GENERAL, "wall", "screens.mode", "enum", screens.MODES, restart=False)
@@ -187,6 +211,8 @@ _f(_T_GENERAL, "wall", "screens.rotate_seconds", "int", (0, 3600), unit="s", res
 _f(_T_GENERAL, "wall", "screens.blink", "bool", restart=False)
 _f(_T_GENERAL, "wall", "screens.blink_calm_minutes", "int", (0, 1440), unit="min", restart=False)
 _f(_T_GENERAL, "wall", "screens.sound", "bool", restart=False)
+_f(_T_GENERAL, "wall", "screens.sound_voices", "text", re.compile(r"^(?:(?:" + "|".join(soundlib.PAGE_KEY) + r")=(?:" + "|".join(soundlib.LIBRARY) + r")(?:,(?!\Z)|\Z)){0,11}\Z"), restart=False)
+_f(_T_GENERAL, "wall", "screens.sound_volume", "int", (0, 100), unit="%", restart=False)
 _f(_T_GENERAL, "wall", "screens.safe_margin_percent", "int", (0, 10), unit="%", restart=False)
 _f(_T_GENERAL, "wall", "screens.burn_in_protection", "bool", restart=False)
 _f(_T_GENERAL, "wall", "screens.night_dim", "bool", restart=False)
@@ -194,12 +220,19 @@ _f(_T_GENERAL, "wall", "screens.night_dim_from_hour", "int", (0, 23), unit="h", 
 _f(_T_GENERAL, "wall", "screens.night_dim_to_hour", "int", (0, 23), unit="h", restart=False)
 _f(_T_GENERAL, "wall", "screens.show_repo_names", "enum", ("all", "public", "none"), secure=True, restart=False)
 _f(_T_GENERAL, "wall", "screens.group_map", "bool", restart=False)
+_f(_T_GENERAL, "wall", "screens.life", "bool", restart=False)
+_f(_T_GENERAL, "wall", "screens.glance_seconds", "int", (0, 30), unit="s", restart=False)
+_f(_T_GENERAL, "wall", "screens.transition", "enum", screens.TRANSITIONS, restart=False)
+_f(_T_GENERAL, "wall", "screens.hide_healthy", "bool", restart=False)
+_f(_T_GENERAL, "wall", "screens.idle_dim_minutes", "int", (0, 1440), unit="min", restart=False)
+_f(_T_GENERAL, "wall", "screens.min_font_px", "int", (screens.MIN_FONT_LOW, screens.MIN_FONT_HIGH), unit="px", restart=False)
 _f(_T_GENERAL, "wall", "screens.menu", "bool", restart=False)
 _f(_T_GENERAL, "wall", "screens.menu_target", "enum", ("new", "same"), restart=False)
 _f(_T_GENERAL, "wall", "screens.menu_max_windows", "int", (1, 9), restart=False)
 _f(_T_GENERAL, "wall", "screens.menu_rotate_seconds", "int", (5, 300), unit="s", restart=False)
 _f(_T_GENERAL, "wall", "screens.menu_tv_scale", "float", (0.5, 3.0), unit="x", restart=False)
 _f(_T_GENERAL, "logo", "screens.logo_overview", "bool", restart=False)
+_f(_T_GENERAL, "logo", "screens.logo_fleet", "bool", restart=False)
 _f(_T_GENERAL, "logo", "screens.logo_now", "bool", restart=False)
 _f(_T_GENERAL, "logo", "screens.logo_sentinels", "bool", restart=False)
 _f(_T_GENERAL, "logo", "screens.logo_corner", "enum", screens.CORNERS, restart=False)
@@ -216,9 +249,13 @@ _f(_T_GENERAL, "fleet", "fleet.sort", "enum", ("risk", "name", "last_run", "stat
 _f(_T_GENERAL, "fleet", "fleet.show_all_active", "bool", restart=False)
 _f(_T_GENERAL, "fleet", "fleet.labels", "names", restart=False)
 _f(_T_GENERAL, "fleet", "fleet.saved_filters", "names", restart=False)
+_f(_T_GENERAL, "fleet", "fleet.meta_columns", "metacols", restart=False)
+_f(_T_GENERAL, "fleet", "fleet.meta_per_call", "int", (1, 200), unit="calls", restart=False)
+_f(_T_GENERAL, "fleet", "fleet.meta_ttl_hours", "int", (1, 168), restart=False)
 _f("quota", "modes", "modes.auto_low", "bool", restart=False)
 _f("quota", "modes", "modes.auto_low_enter", "int", (50, 4000), restart=False, unit="calls")
 _f("quota", "modes", "modes.auto_low_exit", "int", (100, 5000), restart=False, unit="calls")
+_f("quota", "modes", "modes.idle_minutes", "int", (0, 1440), restart=False, unit="min")
 _f("quota", "modes", "modes.low.refresh_seconds", "int", (10, 3600), restart=False, unit="s")
 _f("quota", "modes", "modes.low.cold_refresh_seconds", "int", (30, 86400), restart=False, unit="s")
 _f("quota", "modes", "modes.low.runs_per_repo", "int", (5, 100), restart=False)
@@ -271,6 +308,11 @@ _f(_T_GENERAL, "sound", "sound.quiet_to_hour", "int", (0, 23), unit="h", restart
 _f(_T_GENERAL, "sound", "sound.cooldown_seconds", "int", (0, 3600), unit="s", restart=False)
 _f(_T_GENERAL, "sound", "sound.volume", "int", (1, 100), unit="%", restart=False)
 _f(_T_GENERAL, "sound", "sound.server_beep", "bool", restart=False, secure=True)
+_f(_T_GENERAL, "sound", "sound.voices", "text", re.compile(r"^(?:(?:" + "|".join(soundlib.PAGE_KEY) + r")=(?:" + "|".join(soundlib.LIBRARY) + r")(?:,(?!\Z)|\Z)){0,11}\Z"), restart=False)
+_f(_T_GENERAL, "sound", "sound.ambient", "bool", restart=False)
+_f(_T_GENERAL, "sound", "sound.ambient_volume", "int", (1, 50), unit="%", restart=False)
+_f(_T_GENERAL, "sound", "sound.tick", "bool", restart=False)
+_f(_T_GENERAL, "sound", "sound.tick_seconds", "int", (1, 60), unit="s", restart=False)
 _f(_T_GENERAL, "scope", "mode", "enum", ("full", "lite"))
 _f(_T_GENERAL, "scope", "repos", "repos")
 _f(_T_GENERAL, "scope", "ecosystems", "eco")
@@ -295,6 +337,14 @@ _f(_T_POLL, "pagination", "pagination.workflow_pages", "int", (1, 20), unit="", 
 _f(_T_POLL, "pagination", "pagination.job_pages", "int", (1, 20), unit="", restart=False)
 _f(_T_POLL, "pagination", "pagination.collab_pages", "int", (1, 20), unit="", restart=False)
 _f(_T_POLL, "pagination", "pagination.cursor_pages", "int", (0, 20), unit="", restart=False)
+_f(_T_POLL, "backpressure", "backpressure.enabled", "bool", restart=False)
+_f(_T_POLL, "backpressure", "backpressure.max_reads_per_cycle", "int", (0, 5000), restart=False, unit="")
+_f(_T_POLL, "backpressure", "backpressure.shed_percent", "int", (100, 1000), restart=False, unit="%")
+_f(_T_POLL, "backpressure", "backpressure.min_reads", "int", (1, 500), restart=False, unit="")
+_f(_T_POLL, "limits", "limits.warn_percent", "int", (50, 99), restart=False, unit="%")
+_f(_T_POLL, "limits", "limits.memory_mb", "int", (64, 65536), restart=False, unit="MB")
+_f(_T_POLL, "shared_refresh", "refresh.share_by_workflow", "bool", restart=False)
+_f(_T_POLL, "shared_refresh", "refresh.share_seconds", "int", (1, 600), restart=False, unit="s")
 _f(_T_POLL, "sampling", "sampling.default_branch_probe", "bool", restart=False)
 _f(_T_POLL, "sampling", "sampling.active_probe", "bool", restart=False)
 _f(_T_POLL, "sampling", "sampling.min_coverage_minutes", "int", (0, 10080), unit="min", restart=False)
@@ -386,6 +436,15 @@ _f(_T_SENT, "collab", "sentinels.collab.rules.pr_review_pending_days", "int", (1
 _f(_T_SENT, "collab", "sentinels.collab.rules.pr_draft_max_days", "int", (1, 365))
 _f(_T_SENT, "collab", "sentinels.collab.rules.pr_conflict_days", "int", (1, 90))
 _f(_T_SENT, "collab", "sentinels.collab.rules.watch_external_comments", "bool")
+_f(_T_SENT, "collab", "sentinels.collab.rules.external_days", "int", (1, 90))
+_f(_T_SENT, "collab", "sentinels.collab.rules.team_members", "names")
+_f(_T_SENT, "expected_red", "expected_red.enabled", "bool", restart=False)
+_f(_T_SENT, "expected_red", "expected_red.max_days", "int", (1, 365), restart=False)
+_f(_T_SENT, "clones", "audit_feed.clone_alert.enabled", "bool", restart=False)
+_f(_T_SENT, "clones", "audit_feed.clone_alert.threshold", "int", (1, 1000), unit="repos", restart=False)
+_f(_T_SENT, "clones", "audit_feed.clone_alert.window_hours", "int", (1, 168), restart=False)
+_f(_T_SENT, "clones", "audit_feed.clone_alert.check_minutes", "int", (5, 1440), restart=False)
+_f(_T_SENT, "clones", "audit_feed.clone_alert.bot_patterns", "names", restart=False)
 _f(_T_SENT, "collab", "sentinels.collab.rules.ignore_labels", "names")
 # --- Security sentinel (1.9.1; the weights of the penalty it puts on the score, sentinels.security.penalty.*, are read from the file)
 _f(_T_SENT, "security", "sentinels.security.enabled", "bool")
@@ -522,6 +581,8 @@ _f(_T_SENT, "compare", "compare.min_repo_runs", "int", (1, 1000), restart=False,
 _f(_T_SENT, "compare", "compare.top_changes", "int", (3, 50), restart=False, unit="")
 _f(_T_SENT, "compare", "compare.include_in_report", "bool", restart=False)
 _f(_T_SENT, "compare", "compare.cache_seconds", "int", (0, 3600), restart=False)
+_f(_T_SENT, "compare", "compare.progressive", "bool", restart=False)
+_f(_T_SENT, "compare", "compare.progressive_days", "int", (1, 29), restart=False, unit="d")
 # --- The log of actions (Complete only): who changed what, with a chain of hashes; on by default, only names and never values
 _f(_T_SENT, "audit_log", "audit_log.enabled", "bool", restart=False, secure=True)
 _f(_T_SENT, "audit_log", "audit_log.max_mb", "int", (1, 500), restart=False, unit="MB")
@@ -536,6 +597,8 @@ _f(_T_SENT, "report_schedule", "report_schedule.keep", "int", (1, 500), restart=
 _f(_T_SENT, "report_schedule", "report_schedule.top", "int", (1, 50), restart=False, unit="")
 # --- Folders and files
 _f(_T_PATHS, "workspace", "workspace_root", "path")
+_f(_T_PATHS, "workspace", "workspaces.list", "names", restart=False)
+_f(_T_PATHS, "workspace", "workspaces.active", "text", WS_NAME_RE, restart=False)
 _f(_T_PATHS, "workspace", "signed_dir", "path")
 _f(_T_PATHS, "workspace", "audit_dir", "path")
 _f(_T_PATHS, "workspace", "tools_dir", "path")
@@ -566,10 +629,20 @@ _f(_T_PATHS, "ops_doctor", "ops.doctor.backup_max_age_days", "int", (1, 365), re
 _f(_T_PATHS, "ops_doctor", "ops.doctor.min_free_mb", "int", (50, 10000000), restart=False, unit="MB")
 _f(_T_PATHS, "ops_doctor", "ops.doctor.sqlite_check", "enum", ("quick", "deep", "off"), restart=False)
 _f(_T_PATHS, "ops_doctor", "ops.doctor.sqlite_timeout_s", "int", (1, 600), restart=False, unit="s")
+_f(_T_OUT, "siem", "siem.queue_max", "int", (10, 10000), restart=False)
+_f(_T_AI, "mcp", "mcp.prompts", "bool", restart=False)
+_f(_T_AI, "mcp", "mcp.write_tools", "bool", restart=False, secure=True)
+_f(_T_PATHS, "selfwatch", "selfwatch.enabled", "bool", restart=False)
+_f(_T_PATHS, "selfwatch", "selfwatch.rss_warn_mb", "int", (64, 262144), restart=False, unit="MB")
+_f(_T_PATHS, "selfwatch", "selfwatch.threads_warn", "int", (20, 100000), restart=False)
+_f(_T_PATHS, "selfwatch", "selfwatch.interval_seconds", "int", (5, 3600), restart=False, unit="s")
 _f(_T_PATHS, "ops_doctor", "ops.doctor.webhook_min_length", "int", (8, 128), restart=False, unit="")
 # --- Outputs and exports
 _f(_T_OUT, "prometheus", "outputs.prometheus.enabled", "bool", restart=False, secure=True)
 _f(_T_OUT, "prometheus", "outputs.prometheus.per_repo", "bool", restart=False)
+_f(_T_OUT, "prometheus", "outputs.prometheus.histograms", "bool", restart=False)
+_f(_T_OUT, "prometheus", "outputs.prometheus.per_runner", "bool", restart=False)
+_f(_T_OUT, "prometheus", "outputs.prometheus.histogram_max_series", "int", (10, 2000), restart=False, unit="")
 _f(_T_OUT, "json", "outputs.json.enabled", "bool", restart=False, secure=True)
 _f(_T_OUT, "dashboard", "outputs.dashboard.enabled", "bool", restart=False, secure=True)
 # Save and print the report of a tab (reporting/tab_report.py): which formats the dialog marks, the suggested file name, the paper and the way the PDF is made
@@ -579,6 +652,7 @@ _f(_T_OUT, "report_export", "report_export.json", "bool", restart=False)
 _f(_T_OUT, "report_export", "report_export.name", "text", REPORT_NAME_RE, restart=False)
 _f(_T_OUT, "report_export", "report_export.paper", "enum", ("a4", "letter"), restart=False)
 _f(_T_OUT, "report_export", "report_export.pdf_path", "enum", ("auto", "own", "browser"), restart=False)
+_f(_T_OUT, "report_export", "report_export.limits", "bool", restart=False)
 # --- Integrations: external AI, incoming webhook
 _f(_T_AI, "provider", "ai.provider", "enum", ("none", "ollama", "openai-compatible", "anthropic", "copilot"), secure=True)
 _f(_T_AI, "provider", "ai.model", "text", MODEL_RE)
@@ -645,6 +719,30 @@ _f(_T_HOOK, "inbound", "webhook.max_bad_per_minute", "int", (1, 6000), unit="")
 _f(_T_HOOK, "inbound", "webhook.max_verified_per_minute", "int", (1, 6000), unit="")
 _f(_T_HOOK, "inbound", "webhook.reject_stale", "bool")
 _f(_T_HOOK, "inbound", "webhook.clock_skew_s", "int", (0, 3600), unit="s")
+_f(_T_HOOK, "inbound", "webhook.max_body_kb", "int", (1, 25600), unit="KB")
+_f(_T_HOOK, "inbound", "webhook.queue_max", "int", (1, 10000), unit="")
+_f(_T_HOOK, "inbound", "webhook.stale_after_h", "int", (1, 168), unit="h")
+_f(_T_HOOK, "inbound", "webhook.transport", "enum", ("http", "websocket"), secure=True)
+_f(_T_HOOK, "inbound", "webhook.ws_targets", "names", secure=True)
+_f(_T_HOOK, "inbound", "webhook.ws_max_targets", "int", (1, 50), unit="")
+_f(_T_HOOK, "inbound", "webhook.ws_cleanup", "bool", secure=True)
+_f(_T_HOOK, "redeliver", "webhook.redeliver.enabled", "bool", restart=False, secure=True)
+_f(_T_HOOK, "redeliver", "webhook.redeliver.hooks", "names", restart=False, secure=True)
+_f(_T_HOOK, "redeliver", "webhook.redeliver.max_per_run", "int", (1, 100), unit="", restart=False)
+_f(_T_HOOK, "redeliver", "webhook.redeliver.max_age_hours", "int", (1, 72), unit="h", restart=False)
+_f(_T_HOOK, "redeliver", "webhook.redeliver.interval_minutes", "int", (5, 1440), unit="min", restart=False)
+_f(_T_POLL, "events_feed", "events_feed.enabled", "bool", restart=False)
+_f(_T_POLL, "events_feed", "events_feed.interval_seconds", "int", (30, 3600), unit="s", restart=False)
+_f(_T_POLL, "events_feed", "events_feed.owner_kind", "enum", ("auto", "org", "user"), restart=False)
+_f(_T_POLL, "events_feed", "events_feed.max_per_tick", "int", (1, 200), unit="", restart=False)
+_f(_T_POLL, "github_status", "github_status.enabled", "bool", restart=False, secure=True)
+_f(_T_POLL, "github_status", "github_status.interval_seconds", "int", (60, 3600), unit="s", restart=False)
+_f(_T_POLL, "github_status", "github_status.mark_reds", "bool", restart=False)
+_f(_T_OUT, "heartbeat", "heartbeat.enabled", "bool", restart=False, secure=True)
+_f(_T_OUT, "heartbeat", "heartbeat.url_env", "text", HEARTBEAT_ENV_RE, secure=True)
+_f(_T_OUT, "heartbeat", "heartbeat.interval_seconds", "int", (30, 86400), unit="s", restart=False)
+_f(_T_OUT, "heartbeat", "heartbeat.send_state", "bool", restart=False)
+_f(_T_OUT, "heartbeat", "heartbeat.fail_suffix", "text", HEARTBEAT_SUFFIX_RE, restart=False)
 _f(_T_HOOK, "inbound", "webhook.persist_deliveries", "bool")
 _f(_T_HOOK, "chatops", "chatops.enabled", "bool", restart=False, secure=True)
 _f(_T_HOOK, "chatops", "chatops.slack.enabled", "bool", restart=False, secure=True)
@@ -676,6 +774,9 @@ _f("notify", "main", "notify.allow_private_targets", "bool", secure=True)
 _f("notify", "main", "network.use_proxy", "bool", restart=False, secure=True)
 _f("notify", "main", "notify.events", "names")
 _f("notify", "main", "notify.max_per_hour", "int", (1, 600), unit="")
+_f("notify", "main", "notify.dedupe_ledger", "bool", restart=False)
+_f("notify", "main", "notify.dedupe_hours", "int", (1, 720), restart=False, unit="h")
+_f("notify", "main", "notify.max_event_age_hours", "int", (0, 8760), restart=False, unit="h")
 _f("notify", "ch_telegram", "notify.channels.telegram.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
 _f("notify", "ch_telegram", "notify.channels.telegram.token_env", "text", NOTIFY_ENV_RE, label=["cfg.p.token_env"], help="cfg.h.p.token_env")
 _f("notify", "ch_telegram", "notify.channels.telegram.chat_id", "text", CHAT_RE, label=["cfg.p.chat_id"], help="cfg.h.p.chat_id")
@@ -732,7 +833,7 @@ _f("lint", "lint_maintenance", "lint.maintenance.inactive", "bool", restart=Fals
 _f("lint", "lint_maintenance", "lint.maintenance.inactive_years", "int", (1, 10), restart=False)
 _f("lint", "lint_maintenance", "lint.maintenance.refresh_seconds", "int", (3600, 2592000), restart=False)
 _f("lint", "lint_maintenance", "lint.maintenance.max_calls_per_tick", "int", (1, 100), restart=False, unit="calls")
-for _rule in ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "own_action_main", "permissions_top", "archived_action"):
+for _rule in ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "own_action_main", "permissions_top", "archived_action", "container_input_name"):
     _f("lint", "rule_" + _rule, f"lint.rules.{_rule}.enabled", "bool", label=["cfg.p.rule_on"], help="cfg.h.rule_on")
     if _rule != "archived_action":      # that rule only informs: it has no severity to choose
         _f("lint", "rule_" + _rule, f"lint.rules.{_rule}.severity", "enum", ("info", "warn", "bad"), label=["cfg.p.severity"], help="cfg.h.p.severity")
@@ -741,6 +842,7 @@ _f("console", "tui", "tui.theme", "enum", ("dark", "light"), False)
 _f("console", "tui", "tui.refresh_seconds", "int", (2, 300), False)
 # --- Advanced: opt-in features, every one OFF by default (network, own token, actions on GitHub, act, mirror, runners, OTLP, organisations, FinOps)
 _f("advanced", "network", "listen.network", "bool", secure=True)
+_f("advanced", "network", "listen.noindex", "bool", restart=False, secure=True)
 _f("advanced", "network", "listen.host", "text", LISTEN_HOST_RE, secure=True)
 _f("advanced", "network", "listen.token_env", "text", TOKEN_ENV_RE, secure=True)
 _f("advanced", "network", "listen.allowed_hosts", "names", secure=True)
@@ -755,6 +857,7 @@ _f("advanced", "network", "listen.trusted_proxies", "names", secure=True)
 # --- Team mode: users with roles (off by default; one person alone needs nothing of this)
 _f("advanced", "auth", "auth.enabled", "bool", restart=False, secure=True)
 _f("advanced", "auth", "auth.session_hours", "int", (1, 720), restart=False, secure=True, unit="h")
+_f("advanced", "auth", "auth.stream_revalidate_min", "int", (1, 1440), restart=False, secure=True, unit="min")
 _f("advanced", "auth", "auth.max_failed_logins", "int", (3, 20), restart=False, secure=True, unit="")
 _f("advanced", "auth", "auth.lockout_minutes", "int", (1, 1440), restart=False, secure=True, unit="min")
 _f("advanced", "auth", "auth.min_length", "int", (8, 64), restart=False, secure=True, unit="")
@@ -767,6 +870,11 @@ _f("advanced", "token", "github_token.store", "enum", ("auto", "system", "file")
 _f("advanced", "ghactions", "github_actions.enabled", "bool", restart=False, secure=True)
 _f("advanced", "ghactions", "github_actions.allowed", "names", restart=False, secure=True)
 _f("advanced", "ghactions", "github_actions.merge_method", "enum", ("squash", "merge", "rebase"), restart=False, secure=True)
+_f("advanced", "ghactions", "github_actions.require_reason", "bool", restart=False, secure=True)
+_f("advanced", "ghactions", "github_actions.operator", "text", re.compile(r"^[A-Za-z0-9 ._@-]{0,60}\Z"), restart=False)
+_f("advanced", "ghactions", "github_actions.comment_on_target", "bool", restart=False, secure=True)
+_f("advanced", "ghactions", "github_actions.preflight", "bool", restart=False, secure=True)
+_f("advanced", "ghactions", "github_actions.writer_lock", "bool", restart=False, secure=True)
 _f("advanced", "act", "act.enabled", "bool", restart=False, secure=True)
 _f("advanced", "act", "act.allowed", "acts", restart=False, secure=True)
 _f("advanced", "act", "act.timeout_seconds", "int", (30, 7200), restart=False)
@@ -808,8 +916,14 @@ _f("advanced", "runner_model", "runners.model.alert_level", "enum", ("info", "wa
 _f("advanced", "otlp", "otlp.enabled", "bool", restart=False, secure=True)
 _f("advanced", "otlp", "otlp.endpoint", "text", OTLP_RE, restart=False, secure=True)
 _f("advanced", "otlp", "otlp.interval_seconds", "int", (15, 3600), restart=False)
+_f("advanced", "otlp", "otlp.cicd_conventions", "bool", restart=False)
+_f("advanced", "otlp", "otlp.job_spans", "bool", restart=False)
 _f("advanced", "orgs", "organizations.discover", "bool", restart=False)
 _f("advanced", "finops", "finops.jobs_per_cycle", "int", (0, 50), restart=False, unit="calls")
+_f("advanced", "finops", "finops.by_change", "bool", restart=False)
+_f("advanced", "finops", "finops.co2", "bool", restart=False)
+_f("advanced", "finops", "finops.co2_watts", "int", (1, 2000), restart=False, unit="")
+_f("advanced", "finops", "finops.co2_grams_per_kwh", "int", (1, 2000), restart=False, unit="")
 _f(_T_AI, "alerts", "ai_alerts.enabled", "bool", restart=False)
 _f(_T_AI, "alerts", "ai_alerts.folder", "path", restart=False)
 _f(_T_AI, "alerts", "ai_alerts.brief_max_bytes", "int", (512, 20000), restart=False, unit="")
@@ -860,7 +974,7 @@ SCHEMA = [(tab, key, kind, bounds, restart) for tab, _block, key, kind, bounds, 
 FIELDS = {row[1]: row for row in SCHEMA}
 GROUPS = tuple(dict.fromkeys(row[0] for row in SCHEMA))
 assert set(GROUPS) <= set(TAB_ORDER)
-OUTPUT_DEFAULTS = {"prometheus": {"enabled": False, "per_repo": True}, "json": {"enabled": False}, "dashboard": {"enabled": False}}
+OUTPUT_DEFAULTS = {"prometheus": {"enabled": False, "per_repo": True, "histograms": False, "per_runner": False, "histogram_max_series": 200}, "json": {"enabled": False}, "dashboard": {"enabled": False}}
 STATUS_KEYS = {"webhook.signing_state", "chatops.slack.state", "chatops.discord.state"}      # computed, read-only: never written
 
 
@@ -956,7 +1070,7 @@ def check_value(path, value):
             return False, "path"      # the folder of the copies: never empty and a relative one never climbs out of the data folder
         return True, text
     if kind == "names":
-        pattern = USES_RE if path == "sentinels.supply.ignore_uses" else WORKDAY_RE if path == "compare.workdays" else FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else RUNNER_LABEL_RE if path in RUNNER_LABEL_KEYS else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path in ("sentinel.hygiene.ruleset_names", "sentinels.delivery.expected_assets") else (PATH_RE if path in PATH_KEYS else (alertflow.SILENCE_RE if path == "alerts.silences" else (alertflow.PATTERN_RE if path == "alerts.service.workflows" else (PAIR_RE if path in PAIR_KEYS else NAME_RE)))))))
+        pattern = WS_TARGET_RE if path == "webhook.ws_targets" else REDELIVER_HOOK_RE if path == "webhook.redeliver.hooks" else USES_RE if path == "sentinels.supply.ignore_uses" else WORKSPACE_RE if path == "workspaces.list" else WORKDAY_RE if path == "compare.workdays" else FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else RUNNER_LABEL_RE if path in RUNNER_LABEL_KEYS else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path in ("sentinel.hygiene.ruleset_names", "sentinels.delivery.expected_assets") else (PATH_RE if path in PATH_KEYS else (alertflow.SILENCE_RE if path == "alerts.silences" else (alertflow.PATTERN_RE if path == "alerts.service.workflows" else (PAIR_RE if path in PAIR_KEYS else NAME_RE)))))))
         if not isinstance(value, list) or len(value) > 200 or not all(isinstance(v, str) and pattern.match(v) for v in value):
             return False, "names"
         if path == "sentinel.hygiene.ruleset_names" and not value:
@@ -1001,6 +1115,17 @@ def check_value(path, value):
             if not isinstance(group, list) or not group or len(group) > 8 or not all(isinstance(n, str) and FILE_NAME_RE.match(n) and ".." not in n for n in group):
                 return False, "list"
         return True, [list(g) for g in value]
+    if kind == "metacols":      # fleet.meta_columns: [{"name", "path", "regex"}], at most 5, each one checked by data_pipeline/meta_columns.py (a risky expression is refused)
+        from github_actions_monitor.data_pipeline import meta_columns
+        if not isinstance(value, list) or len(value) > meta_columns.MAX_COLUMNS:
+            return False, "list"
+        clean = []
+        for item in value:
+            column, _why = meta_columns.valid_column(item)
+            if column is None or set(item) - {"name", "path", "regex"}:
+                return False, "list"
+            clean.append({"name": column["name"], "path": column["path"], "regex": column["regex"]})
+        return True, clean
     if kind == "sources":
         if not isinstance(value, list) or len(value) > 20:
             return False, "list"

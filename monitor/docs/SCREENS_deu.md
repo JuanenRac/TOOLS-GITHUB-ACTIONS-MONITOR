@@ -70,6 +70,7 @@ Drei Seiten für einen Monitor oder Fernseher, den niemand bedient. Sie haben ke
 | Adresse | Was sie zeigt |
 |---|---|
 | `/screen/overview` | Ring und Buchstabe der Bewertung; die Flotte (grün, rot, hängend, wartend); die letzten 24 Stunden und 7 Tage als Flächendiagramme; eine Heatmap der Repositories nach Stunde; was am längsten rot ist; Runner und Minuten; die letzten Ereignisse; das GitHub-Kontingent als Anzeige. Die Flottenkarte zeigt außerdem die Karte nach Gruppen: ein Balken je Gruppe der Flottenansicht (dieselbe Gruppierung, `fleet.group_by`) mit ihren Repositorys, die rot sind, Aufmerksamkeit brauchen, in Ordnung sind oder keine Daten haben; nur der Gruppenname und Zahlen. |
+| `/screen/fleet` | Jedes Repository der Flotte nach Gruppen (Gruppierung und Reihenfolge des Reiters Flotte, die riskanteste Gruppe zuerst): ein kleines Quadrat für jedes gesunde Repository und ein Chip mit dem Namen für jedes, das Aufmerksamkeit braucht, oben die Summen der Flotte. Was nicht passt, wird gezählt („+3 weitere“). |
 | `/screen/now` | Was in dieser Minute geschieht: laufende Läufe mit Fortschritt und Dauer, die Warteschlange, Läufe, die auf Freigabe warten, aktuelle Fehlschläge, Merges und Releases, fällige Releases und eine Live-Linie der letzten zwei Stunden. |
 | `/screen/sentinels` | Eine Karte je Wächter (A1 bis A12) mit Stufe, offenen Befunden, ob seine Quellen lesbar sind, dem letzten Durchlauf und einem Ring, der dem Durchlauf folgt; ein animiertes Radar, das markiert, was nicht stimmt, und die Warnungen nach Schweregrad. |
 
@@ -111,14 +112,20 @@ Die Sprache einer Anzeige wird in dieser Reihenfolge bestimmt: `?lang=xx` in der
 | `screens.safe_margin_percent` | Hält den Inhalt um diesen Prozentsatz vom Rand des Fensters entfernt, für einen Fernseher, der den Rand abschneidet (Overscan): alles wird etwas kleiner gezeichnet. 0 (Standard) nutzt das ganze Fenster; 0 bis 10. |
 | `screens.night_dim` | Dunkelt die Anzeigen zwischen `screens.night_dim_from_hour` (22) und `screens.night_dim_to_hour` (7) ab; standardmäßig aus. |
 | `screens.show_repo_names` | all, public (Standard: private Repositories erscheinen als private-1, private-2...) oder none (jeder Name wird ausgeblendet). Für einen Bildschirm, den andere sehen können, public oder none verwenden. Bei einer von Hand geschriebenen Liste in `repos` wird die Sichtbarkeit alle `discover_refresh_seconds` mit einer Auflistung des Kontos gelesen; ein Repository, dessen Sichtbarkeit nicht gelesen werden konnte, gilt als privat. Die Nummern (private-1...) erhalten nur die verborgenen Repositorys, in der Reihenfolge eines HMAC des Namens mit einem Schlüssel der Installation, der in einer privaten Datei im Datenordner liegt; sie sagen also nichts darüber, wo ein Repository unter den anderen liegt. |
-| `screens.theme_overview`, `screens.theme_now`, `screens.theme_sentinels` | Das Design einer Anzeige: inherit (Standard: das von `screens.default_theme`) oder eines der obigen Designs. |
+| `screens.theme_overview`, `screens.theme_fleet`, `screens.theme_now`, `screens.theme_sentinels` | Das Design einer Anzeige: inherit (Standard: das von `screens.default_theme`) oder eines der obigen Designs. |
 | `screens.mode` | three (Standard: die drei Seiten getrennt, eine pro Fenster) oder rotate (eine einzige Seite, die durch die drei wechselt und zu einem neuen Rot springt). |
 | `screens.rotate_every_seconds` | Im Modus rotate die Sekunden pro Anzeige (Standard 20; 5 bis 300). |
 | `screens.alert_hold_seconds` | Im Modus rotate die Sekunden, die ein neues Rot das Fenster auf seiner Anzeige hält (Standard 30; 5 bis 600), oder bis das Rot verschwindet. |
-| `screens.logo_overview`, `screens.logo_now`, `screens.logo_sentinels` | Auf welchen Anzeigen das Logo erscheint (standardmäßig nur auf der Übersicht). |
+| `screens.logo_overview`, `screens.logo_fleet`, `screens.logo_now`, `screens.logo_sentinels` | Auf welchen Anzeigen das Logo erscheint (standardmäßig nur auf der Übersicht). |
 | `screens.logo_corner` | top-right (Standard), top-left, bottom-right oder bottom-left. |
 | `screens.logo_max_width`, `screens.logo_max_height` | Größte Größe des Logos in Pixeln bei 1920 x 1080 (Standard 160 x 64; es wächst mit dem Bildschirm). |
 | `screens.group_map` | Standardmäßig an. Zeigt auf dem Übersichtsbildschirm die Karte der Flotte nach Gruppen (die Gruppierung der Flottenansicht). Aus: nur die vier Kacheln. |
+| `screens.life` | Standardmäßig an. Eine Zahl, die sich ändert, blitzt dort auf, wo sie sich geändert hat, ein neuer Fehler schickt eine Welle über sein Feld und ein Zustandswechsel hinterlässt eine kurze Spur. Mit der Systemeinstellung für weniger Bewegung bewegt sich nichts. |
+| `screens.glance_seconds` | Sekunden, die die Kopfzeile in bis zu drei Chips zeigt, was sich bei der letzten Aktualisierung geändert hat („Rot +1“); Standard 3, 0 = aus (0 bis 30). |
+| `screens.transition` | Wie eine rotierende Anzeige von einer Anzeige zur nächsten wechselt: fade (Standard), slide oder none. |
+| `screens.hide_healthy` | Standardmäßig aus. Die Flottenanzeige lässt die Quadrate der gesunden Repositories weg; die Übersicht lässt Gruppen ohne Rot oder Gelb und die Zeilen der Wärmekarte ohne Fehler weg. Die Summen bleiben. |
+| `screens.idle_dim_minutes` | 0 = aus (Standard). Hat sich so viele Minuten nichts geändert und ist nichts rot, wird die Anzeige gedimmt, um das Panel zu schonen; die nächste Änderung weckt sie (1 bis 1440). |
+| `screens.min_font_px` | Die kleinste Schrift der Anzeigen in Pixeln, egal wie groß das Fenster ist (Standard 12; 8 bis 32). |
 | `screens.menu` | Standardmäßig an. Die Schaltfläche Bildschirme in der oberen Leiste. Aus: Die Schaltfläche verschwindet; die Bildschirme laufen weiter unter ihren eigenen Adressen. |
 | `screens.menu_target` | new (Standard): Ein Bildschirm öffnet sich in einem neuen Fenster oder Tab; same: im aktuellen Tab. |
 | `screens.menu_max_windows` | Höchstzahl Fenster, die ein Mehrbildschirm-Satz auf einmal öffnet (Standard 4; 1 bis 9). |
@@ -166,12 +173,15 @@ Die drei Seiten werden in Einheiten gezeichnet, die der kurzen Seite des Fenster
 - Ein Name eines Repositorys oder Workflows, der nicht passt, endet mit Auslassungspunkten und trägt seinen vollen Text im `title`; eine Überschrift, eine Beschriftung oder eine Zahl endet nie mit Auslassungspunkten: die Überschrift bekommt eine zweite Zeile, und eine Zahl, die breiter ist als ihr Kasten, bekommt eine kleinere Schrift bis zu einer Untergrenze.
 - Hat eine Liste mehr Zeilen, als in ihren Kasten passen, stehen die wichtigsten zuerst (Rot vor Grün, das Neueste zuerst), und die letzte Zeile sagt, wie viele weggelassen wurden ("+3 weitere"); ohne diese Zeile wird nichts verborgen.
 - Sicherer Rand (Overscan): Viele Fernseher schneiden einige Prozent jedes Rands ab, sofern ihr Bildmodus nicht "Just Scan" oder "Pixel für Pixel" ist. `screens.safe_margin_percent` (standardmäßig 0, 0 bis 10; `?safe=4` für ein Fenster) hält den Inhalt so weit von jedem Rand entfernt, indem alles kleiner gezeichnet wird, und `kiosk.safe_margin_percent` tut dasselbe für den Kiosk. 3 bis 5 versuchen, wenn die ersten Buchstaben der Uhr oder der Rand der Karten abgeschnitten werden.
+- Die kleinste Schrift ist `screens.min_font_px` (standardmäßig 12 Pixel): In einem so kleinen Fenster, dass das Layout eine kleinere Schrift bräuchte, behalten die Anzeigen die Schrift und zeigen weniger Zeilen, wobei sie sagen, wie viele sie weggelassen haben, statt den Text zu verkleinern.
 
 ### Wie sie sich verhalten
 
 - Fehler blinken weniger als zweimal pro Sekunde (nie als Stroboskop); ein neuer Fehler löst einen einzigen Blitz aus; ein Fehler, um den sich `screens.blink_calm_minutes` Minuten niemand gekümmert hat, behält einen festen Schein. Mit der Systemeinstellung für weniger Bewegung oder mit `?blink=off` blinkt und bewegt sich nichts. Ein Fehler wird nie nur durch Farbe gezeigt: Er trägt ein Symbol und ein Wort.
 - Antwortet der Monitor nicht, sagt die Seite es, wird abgedunkelt und versucht es nach 5, 10, 20... Sekunden erneut (bis 60).
 - Ein dauerhaft eingeschalteter Bildschirm ist gegen Einbrennen geschützt: Alles verschiebt sich jede Minute um einige Pixel, und die Seite kann nachts abdunkeln.
+- Was sich zwischen zwei Aktualisierungen ändert, sieht man: Die Zahl blitzt dort auf, wo sie sich geändert hat (`screens.life`), ein neuer Fehler schickt eine Welle über sein Feld, und `screens.glance_seconds` Sekunden lang sagen einige Chips in der Kopfzeile, was sich geändert hat („Rot +1“, „Laufend +2“). Der erste Blick einer Anzeige merkt sich nur; mit der Systemeinstellung für weniger Bewegung bewegt sich nichts, die Chips erscheinen aber.
+- Eine rotierende Anzeige wechselt mit Überblendung, Schieben oder Schnitt (`screens.transition`). Eine Anzeige ohne Neuigkeiten seit `screens.idle_dim_minutes` Minuten ruht (gedimmt), solange nichts rot ist.
 
 ### Mehrere Monitore einrichten
 
@@ -202,7 +212,7 @@ Jeder Tab der Seite hat eine Entscheidung, die im Code steht (`TAB_DECISIONS` in
 | `strend` | Tagestrend | - | `reading` |
 | `syvt` | Gestern vs. heute | - | `reading` |
 | `team` | Teamzustand | - | `people` |
-| `fleet` | Flotte | `/screen/overview` | - |
+| `fleet` | Flotte | `/screen/fleet` | - |
 | `repos` | Repositories | - | `controls` |
 | `rep` | Berichte | - | `reading` |
 | `trep` | Geplante Berichte | - | `reading` |

@@ -25,7 +25,7 @@ SIGNALS = ("unreleased_pending", "tag_without_release", "release_without_notes",
 CODES = {name: "release." + name for name in SIGNALS}
 SIGNAL_OF = {code: name for name, code in CODES.items()}
 LEVELS = ("info", "warning", "error", "critical")
-DEFAULT_LEVEL = {"unreleased_pending": "info", "tag_without_release": "warning", "release_without_notes": "info", "version_mismatch": "warning", "ecosystem_drift": "warning", "assets_missing": "warning"}
+DEFAULT_LEVEL = {"unreleased_pending": "info", "tag_without_release": "warning", "release_without_notes": "info", "version_mismatch": "warning", "ecosystem_drift": "info", "assets_missing": "warning"}
 REPO_SIGNALS = tuple(s for s in SIGNALS if s != "ecosystem_drift")      # the ones read from one repository alone
 MAX_LISTED = 5      # what an alert lists of tags, patterns and versions (the numbers carry the rest)
 VERSION_TAG_RE = re.compile(r"^[vV]?\d+(\.\d+)*([-+.][0-9A-Za-z.-]+)?\Z")

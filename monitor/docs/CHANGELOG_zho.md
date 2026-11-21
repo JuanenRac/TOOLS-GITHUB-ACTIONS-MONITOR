@@ -11,6 +11,36 @@
 
 ### 新增
 
+- **整个页面的密度、减少动效和色觉障碍配色**(`display.density`、`display.reduce_motion`、`display.palette`;`?density=`、`?palette=` 可只改变一个窗口):`dense` 会收紧所有标签页(不只是「现在」)的间距和字号;`reduce_motion: on` 无论系统如何设置都会停止所有动画和过渡;`colorblind` 配色(蓝、朱红、黄和较浅的蓝,每种模式一套)让三种常见色觉障碍者都能区分四种状态,状态始终同时用文字和形状表示。
+
+- **对比度检查**(`tools/check_contrast.py`,由 CI 运行):深色、浅色模式和十六个主题中每个表面上的每段文字都达到 4.5:1,状态颜色达到 3:1,色觉障碍配色通过三种色觉的模拟检查,而新增用 `opacity` 淡化文字会使构建失败。
+
+- **阅读时页面不会跳动**(`display.live_throttle_s`,默认 30,0 为关闭):当指针或键盘焦点位于你正在阅读的标签页内时,数据的定期刷新会等待,离开后才应用,且间隔不会短于此秒数;你主动要求的刷新会立即应用。
+
+- **更新后的新功能**(`display.whats_new`,开启):一个从不打断你的提示,以你的语言列出你所跳过版本的更新日志条目,内容读取自已安装的版本(`GET /api/whats-new`);你已看过的内容在显示任何东西之前就保存在浏览器中,命令面板可随时打开它。
+
+- **术语表和分析的限制**(`GET /api/glossary`;`report_export.limits`,开启):命令面板会打开一个窗口,精确说明每个数字的含义(main 上的红色、成功率、连续失败、时长、排队等待、近期失败率),用计算和你的设置中的真实参数写成,还列出检查规则所查找的攻击、六个深入了解的地方以及分析的限制,保存和打印的报告现在也以这些限制结尾。
+
+- **顶部筛选会说明其范围,仓库选择会说明当前状态,空白或出错的页面会说明该怎么做**:一条备注列出遵循筛选的标签页和始终全局的标签页;仓库选择会显示加载中、带重试按钮的失败或暂无内容;错误栏带有重试按钮,没有仓库或没有未处理警报的页面会显示带下一步操作的提示框。
+
+- **每个红色都会说明由什么触发**(拉取请求、推送到 main、定时、手动、合并队列、链式工作流):该类别会随红色行、`/api/data` 中失败的运行(`cls`)和 `ci.red` 警报一同出现,以小标签显示,并可在警报标签页中按它筛选(「触发方式」)。
+
+- **带原因、负责人和结束时间的「预期红色」**(`expected_red.enabled`,默认关闭;`expected_red.max_days`,30):暂时有意保持红色的工作流(例如正在建设的流水线)可在警报标签页或命令面板中标记;标记有效期间它的红色单独列出、不计数、不报警,到期后红色恢复并产生一条警报。这不是按模式静音:它指定一个工作流(或用 `*` 代表整个仓库),必须有原因和负责人,且不能超过最长天数。`GET` 和 `POST /api/expected-red`;这是本监视器的备注,绝不会更改 GitHub。
+
+- **按用户统计的异常克隆警告**(`audit_feed.clone_alert.enabled`,默认关闭;`threshold`、`window_hours`、`check_minutes`、`bot_patterns`):它最多每 `check_minutes` 分钟读取一次组织的审计日志(git 事件,只有部分套餐提供),点名在窗口内克隆的不同仓库数超过阈值的用户,并按名称排除机器人;警报写明用户和仓库,绝不包含地址。`GET /api/clone-anomalies`。
+
+- **仓库表中的元数据列**(`fleet.meta_columns`,默认为空;`fleet.meta_per_call`、`fleet.meta_ttl_hours`):最多五列,其值取自每个仓库某个文件的一行,通过路径和正则表达式查找(模板版本、SDK 的固定版本)。文件以条件读取方式读取,值按文件的 SHA 缓存,每轮只读取少量文件,缺失的文件显示为短横线,可能耗费指数时间的正则表达式会被拒绝。`GET /api/meta-columns`。
+
+- **无人回复的团队外部人员**(`sentinels.collab.rules.external_days`、`sentinels.collab.rules.team_members`):开启对外部人员的关注后,团队外部人员的议题或拉取请求在所选天数后仍无人回复,就会产生警报(此前仅限议题,且为一天后);团队名单中的人不会被追问,只保存一个标记,绝不保存姓名。
+
+- **监视器可以作为应用安装到手机、平板或电脑上**(`pwa.enabled`,默认关闭;`pwa.refresh_on_return`,开启):页面提供清单、图标和一个小型 service worker,它只保存离线页面和图标,绝不保存页面或任何数据;应用回到前台或网络恢复时,页面会立即请求最新数据。这些文件在网络模式的访问令牌之后提供。
+
+- **适合手机的紧凑视图**(`ui.compact`,默认 `auto`;`?compact=1` 或 `?compact=0` 只改变一个窗口):在窄窗口中,菜单移到顶部成为一排标签页,间距收紧,表格可横向滚动,触屏的点击目标至少 44 像素,对话框会跟随屏幕键盘留下的高度。
+
+- **手机和平板可以用一次性二维码配对**(`pairing.enabled`,默认关闭,仅限网络模式;`pairing.code_minutes`、`pairing.max_devices`、`pairing.device_days`):窗口会显示由监视器自己绘制的二维码,其中的码只能使用一次;手机获得自己的令牌而不是访问令牌,并可在同一窗口中单独收回。只保存令牌的哈希,错误的码会计入该地址,每次配对和每次收回都会在操作日志中留下一行。
+
+- **Ctrl+K 命令面板和键盘快捷键**(`ui.palette`,默认开启):搜索框接受词语的任意部分,可跳转到标签页或仓库、刷新、切换主题、打开帮助或配对手机;`?` 列出快捷键,`/` 转到标签页的搜索框,`r` 刷新,`[` `]` 切换标签页。
+
 - **为会裁掉边缘的电视（过扫描）提供安全边距**（`screens.safe_margin_percent` 和 `kiosk.safe_margin_percent`，默认 0，范围 0 到 10；单个窗口用 `?safe=`）：墙屏在窗口的这一部分之内把所有内容画得更小，展台让其页面与每条边保持该距离，因此时钟和卡片的边框不会被裁掉。屏幕和展台的指南说明了如何选择。
 - **展台的字号可以随窗口增大**（`kiosk.scale_with_window`，默认关闭；单个窗口用 `?fit=1` 或 `?fit=0`）：展台的字号是短边为 1080 px 的窗口中的大小，开启后它会随窗口增大，因此 4K 电视、超宽显示器或竖屏显示的页面与全高清屏一样，而不是字号很小的页面。
 - **`tools/check_screens.py` 用 DOM 测量墙屏和展台**：每个屏幕在八种语言、七种窗口尺寸（1920x1080、2560x1440、3840x2160、超宽的 3440x1440 和 5120x1440，以及竖屏的 1080x1920 和 2160x3840）下，并使用能给它施压的数据（90 个字符的仓库名、德语复合词、没有空格的日语名称、监视器能发送的最多行数、七位数字、没有数据、只有一条数据、过期的读数）。它会报告滚动的页面、超出边缘或安全边距的文字或方框、放不下的内容、以省略号结尾的标题、相互遮盖的两段文字、小于窗口短边百分之一的字号以及未加提示就被隐藏的行，并把每个发现写成 JSON。浏览器测试在常规测试集中测量少数单元，在 CI 中测量整个矩阵。
@@ -18,9 +48,27 @@
 
 - **通过浏览器的“另存为”窗口保存标签页报告**:页面顶部的按钮会打开一个窗口,含 TXT(已勾选)、PDF(已勾选)和 JSON(可选,未勾选)复选框;确认后,浏览器的“另存为”窗口会按格式各打开一次,并给出建议文件名 `monitor-<标签页>-<日期>.<扩展名>` 和正确的文件类型;没有该窗口的浏览器会直接下载文件并告知去向。PDF 由监视器自行编写,不使用任何库,采用标准字体 Helvetica(`GET /api/report/tab.pdf`,仅限本计算机,记录在操作日志中);日语和中文,以及在窗口中选择“浏览器”时,改用浏览器的打印窗口,绝不会生成字符乱码的 PDF。
 
+- **知道是否有人在查看的轮询**（`modes.idle_minutes`，默认 0 = 关闭；建议从 10 开始）：当这么多分钟内没有任何页面、墙面屏幕或实时流向监视器请求数据时，刷新周期会拉长到当前模式的低速间隔，直到有人再次查看；被隐藏的标签页在隐藏期间不再请求。只要告警还能从本机发出（通知渠道、Webhook 接收器、给 AI 的输出、聊天或本机蜂鸣），就绝不会进入低速，哨兵也保持各自的节奏。`/api/health` 会说明它是否处于低速以及是什么让它保持原有节奏。
+
+- **专属的仓库总览墙面屏幕**（`/screen/fleet`，四个中的第二个：概览、仓库总览、此刻、哨兵）：按“仓库总览”标签相同的分组方式和顺序显示车队中的每个仓库，健康的用小方块，需要关注的用带名称的标签，顶部为合计。放不下的会被计数（“另外 3 项”），隐藏的仓库与其他屏幕一样命名，并拥有自己的主题（`screens.theme_fleet`）、标志（`screens.logo_fleet`）、屏幕菜单条目以及在多显示器组合中的位置。
+
+- **墙面屏幕有了动态效果**（`screens.life`、`screens.glance_seconds`）：两次更新之间变化的数字会在变化处闪动，新的失败会在其框上发出一圈波纹，状态变化会留下短暂的拖尾，页头的几个标签会在几秒内说明发生了什么变化（“红色 +1”“运行中 +2”）。闪烁不会超过每秒两次，系统设置为减少动态效果时什么都不会动。
+
+- **墙面屏幕可以只显示需要关注的内容，并在安静时休息**（`screens.hide_healthy`、`screens.idle_dim_minutes`、`screens.transition`；默认关闭或与以前相同）：可以省略健康的仓库、没有红色或黄色的分组以及热力图中安静的行；一段时间没有新变化的屏幕会变暗直到下一次变化；从一个屏幕切到下一个可以淡入淡出、滑动或直接切换。
+
+- **墙面屏幕的最小字号**（`screens.min_font_px`，默认 12 像素，8 到 32）：在较小的窗口中，屏幕会保持字号并显示更少的行，同时说明省略了多少（“另外 3 项”），而不是缩小文字。`tools/check_screens.py` 现在也会测量仓库总览屏幕以及以像素计的最小字号。
+
 - **打印标签页报告**:打印按钮显示与 PDF 相同的简洁报告(标题含标签页名称、日期和时间、监视器版本、主要数据、警报以及该标签页的表格,没有菜单和栏)并打开打印窗口;文本文件、数据文件、PDF 和打印页面都来自 `GET /api/report/tab` 提供的同一份报告,适用于所有标签页和八种语言。
 
 - **报告设置**:`report_export.txt`、`report_export.pdf` 和 `report_export.json` 选择默认勾选的复选框,`report_export.name` 为建议文件名,`report_export.paper` 为 PDF 纸张(A4 或 Letter),`report_export.pdf_path` 为 PDF 的生成方式(自动、监视器或浏览器)。
+
+- **一项测试证明哨兵不需要界面**：在一个从不加载页面、Web 服务器或任何界面模块的全新进程中，每个开启的哨兵都会启动自己的线程，通过所给的读取器读取并完成一个周期；关闭的哨兵则从不运行。
+
+- **面向运维人员的 `status` 退出码**（`--status-codes operator` 或设置 `cli.status_codes`；默认 `classic`，任何脚本都不变）：0 正常，1 无服务（无法连接监视器或凭据被拒），2 在运行但需要关注（离线、尚无数据、凭据失明、因配额暂停刷新、出错，或磁盘上的代码与运行进程版本不同）。`/api/health` 现在会给出 `code_stale`，`status` 会打印原因（`--json` 中的 `attention`），`--doctor` 新增 `running` 检查，用于发现更新后没有重启的监视器。
+
+- **`monitor_cli.py watch branch`**：`git push && monitor_cli.py watch branch` 跟踪当前文件夹所在提交的工作流（仓库、分支和提交来自 git；`--repo`、`--branch`、`--single-pass`、`--wait`），等待它们出现并结束，全部通过时以 0 结束，有失败或未按时结束时以 1 结束（`cli.watch.branch_timeout_seconds`，默认 900）。它读取监视器已有的运行记录，不消耗配额，也从不输出远程地址。
+
+- **指出无法同时生效的设置**（`--doctor` 的 `conflicts`、启动时，以及 `config_check.strict` 会拒绝启动）：同时在 `repos` 和 `exclude` 中的仓库、带仓库列表的 `ecosystems`、隔离网络下的 `updates.check`、声音关闭而蜂鸣、墙面屏幕、环境音或滴答声开启、开始和结束相同的安静时段、未启用却执行的 AI 操作，以及关闭状态下仍在轮换的看板模式。每条消息都有八种语言版本。
 
 - **全屏、屏幕菜单和热门仓库按钮移到保存与打印按钮旁**:全屏、屏幕菜单和热门仓库筛选的按钮现在位于页面顶部的栏中,在保存和打印报告的按钮左侧,并保持原有顺序;在展示模式和全部仓库视图中仍和以前一样隐藏。
 
@@ -30,7 +78,99 @@
 - **“关于”面板显示监视器的标志,并可按需显示您组织的标志**(`ui.about_org_logo`,默认关闭,位于“常规”选项卡):监视器的图形始终在最上方,开启该设置后,为墙面屏幕上传的图片(“此浏览器”选项卡)会显示在旁边,并带有页面语言的替代文字。两者都随面板宽度变化且不变形;如果没有上传标志或其文件无法读取,会用一条简短提示取代图片,面板继续正常工作。
 - **工作流检查器现在可以提示已归档或不再维护的 Action**(规则 `archived_action`,因为要查询 GitHub,默认关闭;仅提供信息):它列出工作流所用的 GitHub Action 和可复用工作流中仓库已归档的;如果同时开启 `lint.maintenance.inactive`,还会列出已有 `lint.maintenance.inactive_years` 年(默认 2 年)没有推送的。它通过已为哨兵协调好的配额,每个 Action 只向 GitHub 查询一次(每次扫描最多 `lint.maintenance.max_calls_per_tick` 个,每个回答保留 `lint.maintenance.refresh_seconds` 秒),不会超过信息级别,绝不会使 `--fail-on` 失败,没有网络时不做任何判断并说明有多少个 Action 无法读取。命令行中使用 `--check-actions` 和 `--inactive-years N`。
 
+- **Webhook 请求体的上限成为设置，敌意投递语料库守护接收端**(`webhook.max_body_kb`，默认 1024，1 到 25600)：接收端曾拒绝所有超过 256 KB 的请求体，因此 GitHub 的大型投递(包含许多提交的 push、check suite)在它这一侧失败。现在上限由你设置(默认 1 MiB，最高到 GitHub 发送的 25 MiB)，超过它的请求体在读取前就以 `413` 拒绝，拒绝次数单独计入 `GET /api/live-status` 的 `stats.too_big`。测试向接收端发送空的、null 的、类型错误的、巨大的、未知的和重复的投递：它总是以状态码回应，从不崩溃也不会一直等待。
+
+- **迟到的投递不再让运行倒退**：GitHub 不保证投递的顺序，在 `completed` 之后到达的 `queued` 事件可能把已结束的运行显示为等待中。运行或作业现在只会向前推进(排队、进行中、已完成)：对它说得比已知更少的事件(上一个周期读到的也算)不会改变任何东西，并计入 `GET /api/live-status` 的 `stats.out_of_order`。运行的新尝试会重新开始。测试会喂入三种状态的每一种顺序。
+
+- **Webhook 事件在有界队列中等待，`/readyz` 说明监视器能否接收工作**(`webhook.queue_max`，默认 500，1 到 10000)：被接受的事件由工作线程应用，因此 GitHub 能很快得到响应。队列已满时，接收端返回带 `Retry-After` 的 `503` 并忘记该次投递，所以 GitHub 重新发送的那次会被接受，事件绝不会被悄悄丢弃。`GET /readyz`(仅限本机)返回 `200`，或带失败检查项的 `503`(`loaded`、`cycle`、`store`、`queue`);`GET /api/health` 仍然只表明进程还活着。队列深度和拒绝次数见 `GET /api/live-status`。
+
+- **对因投递丢失而保持开放的运行进行核对**(`webhook.stale_after_h`，默认 6，1 到 168)：事件让其保持排队或进行中的运行，如果在这段时间内没有收到最终事件，就会在运行列表中标记为 `stale`，其仓库在下一个周期被重新读取;`GET /api/live-status` 的 `stats.stale` 和 `open_runs` 统计它们。
+
+- **利用账户事件的免费变更检测**(`events_feed.enabled`，默认关闭;`events_feed.interval_seconds`、`events_feed.owner_kind`、`events_feed.max_per_tick`)：监视器用 ETag 读取组织或用户的事件。没有新内容的读取返回 `304`，不消耗配额;出现 push、拉取请求、标签或发布时，只有事件中提到的仓库会在下一个周期被重新读取，而不必等待冷仓库的慢速轮次。若 GitHub 的 `X-Poll-Interval` 更长则以它为准。不需要 Webhook 或隧道;计数器在 `GET /api/live-status` 的 `feed` 中。
+
+- **在栏中显示 GitHub 状态，并标记故障期间出现的红色**(`github_status.enabled`，默认关闭;`github_status.interval_seconds`、`github_status.mark_reds`)：监视器读取 githubstatus.com 的公开摘要(一个很小的 JSON，不使用账户，也不发送任何关于你的信息)，在页面底部的栏中显示 GitHub 的状态，并在 Actions 故障开始和结束时各通知一次(通知类型 `github_incident` 和 `github_incident_over`)。故障持续期间，出现的红色会在文本和字段 `possible_cause` 中注明“可能原因：GitHub 故障”;红色本身绝不会被隐藏。
+
+- **外部心跳，让别人在监视器停止时察觉**(`heartbeat.enabled`，默认关闭;`heartbeat.url_env`、`heartbeat.interval_seconds`、`heartbeat.send_state`、`heartbeat.fail_suffix`)：监视器每隔几分钟向你放在环境变量中的地址发送 ping(机密：绝不写入配置、显示或记录到日志)，healthchecks.io、Cronitor 或 Uptime Kuma 之类的服务会在 ping 停止时报警。ping 最多携带版本和状态;刷新循环卡住的监视器不会发送，因此沉默就是警报(或通过故障地址立即通知)。计数器显示在 `GET /api/health` 中。
+
+- **凭据助手：自动找到 GitHub App 的安装，并用按钮测试令牌**(`github_app.installation_id` 可以留空;`POST /api/credential/probe`，仅限本机;配额标签页的“测试令牌”按钮)：监视器现在会找到所监视账户的安装，或 App 仅有的那个，而不是取看到的第一个;当有多个账户且没有一个是监视器的账户时，会列出它们以便填写一个。测试会说明登录是谁、是经典令牌(以及缺少哪些权限范围)还是细粒度令牌或 App、能看到多少个仓库(以及单点登录是否截断了列表)、剩余多少配额，对于 App 还会给出名称、安装和缺少的权限。每 10 秒最多做一次真实检查;不会向 GitHub 写入任何内容，也不会显示任何令牌或密钥。
+
+- **没有公开地址的 Webhook，通过 GitHub 的 WebSocket**(`webhook.transport` = `websocket`;`webhook.ws_targets`、`webhook.ws_max_targets`、`webhook.ws_cleanup`;默认关闭)：监视器为你列出的每个仓库或组织运行并看护 `gh webhook forward`，它会创建一个临时 Webhook，并通过本机打开的连接把每次投递交给监视器的接收端，因此不会暴露任何东西，也不需要隧道。它会写入 GitHub(临时钩子)，需要能管理 Webhook 的令牌;结束的转发器会以更长的等待时间重新启动，令牌无权管理钩子的转发器会在 `GET /api/live-status` 的 `forwarders` 中显示 `forbidden`。投递用每次启动时生成的密钥签名，只有本进程的接收端在共享密钥之外接受它。
+
+- **恢复关机的电脑错过的 Webhook 投递**(`webhook.redeliver.enabled`，默认关闭;`webhook.redeliver.hooks`、`webhook.redeliver.max_per_run`、`webhook.redeliver.max_age_hours`、`webhook.redeliver.interval_minutes`;`POST /api/webhook/redeliver`)：启动一分钟后，之后每小时一次，监视器读取你指定的 Webhook 最近的投递，并请求 GitHub 重新发送所有尝试都没有收到 2xx 响应的投递，每次检查有数量上限、逐渐增长的等待时间(5 到 300 秒)，第八次请求后停止。已请求的内容记在私有文件里，因此重启不会立刻再次请求;运维人员可以立即发起请求，该请求会在操作日志中留下一行。它会写入 GitHub，所以默认关闭，且只触及你指定的钩子;计数器在 `GET /api/live-status` 的 `redelivery` 中。
+- **`/metrics` 增加作业直方图、计费和 runner**（`outputs.prometheus.histograms`、`outputs.prometheus.per_runner` 和 `outputs.prometheus.histogram_max_series`，默认关闭）：在内存中用已签名的 `workflow_job` 和 `workflow_run` 事件构建，包括 `ghamon_job_wait_seconds`（按 runner 组和标签统计的排队时间，每个作业只计一次）、`ghamon_job_run_seconds`、`ghamon_workflow_run_seconds`、`ghamon_jobs_total` 和当前对 runner 的需求（`ghamon_runner_jobs_waiting`、`ghamon_runner_oldest_wait_seconds`），每个直方图有序列数上限（其余计为 `other`）。当月计费报告（`quota.billing_api`）以 `ghamon_billing_*` 写出（总计、包含、付费、按 SKU、美元），自托管 runner 写为 `ghamon_runners{state}`，并按 runner 给出状态、作业数、失败作业数和忙碌秒数（也出现在 `GET /api/runners/model` 的 `per_runner` 中）。抓取从不读取 GitHub。
+
+- **`/metrics` 增加周期及其熔断**：上一个刷新周期及其各阶段的耗时和所有周期的直方图（`ghamon_tick_*`）、周期数和失败周期数、上一次正常结束的时间、暂时性失败后重试的读取（`ghamon_read_retries_total`），以及因连续多次失败而等待下次读取的仓库（`ghamon_repos_circuit_open`、`ghamon_repos_read_failing`）。
+
+- **带背压的读取队列**（`backpressure.enabled`、`backpressure.max_reads_per_cycle`、`backpressure.shed_percent` 和 `backpressure.min_reads`，默认关闭）：一个周期的读取经过一个有界队列（先是红色仓库，然后是热点仓库、从未读取的仓库和最久未读取的），放不下的等到下一个周期；周期超过间隔的设定比例时，允许的读取数减半，每个较快的周期之后恢复十分之一。可通过 `ghamon_read_queue_*` 查看。
+
+- **按账户和桶的配额，以及页眉中最紧张的桶**（`quota.chip`，默认开启）：`GET /api/quota` 包含 `accounts`，即每个来源的各个桶（core、graphql、search 等）、已用比例和重置时间；页眉在最紧张的桶不是 core 时显示该桶、在用的其他桶数量，并在悬停时显示明细。不读取任何新数据：使用周期本来就会发出的免费 `rate_limit` 调用。
+
+- **`docs/grafana/` 中的可观测性包**：`ghamon_alert_rules.yml`（Prometheus 规则及其 PromQL：监视器不响应、红色工作流、配额和计费、周期缓慢或停滞、处于熔断中的仓库、按直方图统计的 runner 等待、离线 runner）、`alertmanager.example.yml`（路由到 webhook、Grafana OnCall 和 n8n；所有地址均为示例）和 `n8n_ghamon_alerts.json`（接收告警的工作流）。在 `docs/OUTPUTS.md` 中有八种语言的说明。
+
+- **限制与容量**（`limits.warn_percent` 和 `limits.memory_mb`）：doctor 新增 `capacity` 检查，把配置与其上限比较（相对于配额和采样预算的每小时调用数、保存的运行占用的内存、相对于 `discover_limit` 的仓库数），在达到上限之前发出警告；`/metrics` 将运行中的情况显示为 `ghamon_limit_used_percent`（保存的事件、流、读取队列、直方图序列）。
+
+- **一次读取供大家共用**（`refresh.share_by_workflow` 和 `refresh.share_seconds`，默认关闭）：当周期、页面、墙屏或 API 客户端同时请求同一次运行的作业时，第一个从 GitHub 读取，其余的使用它的结果；失败的读取不会被记住。`/metrics` 统计节省的读取次数。
+
+- **通知不重复**（`notify.dedupe_ledger`、`notify.dedupe_hours` 和 `notify.max_event_age_hours`，默认关闭）：数据文件夹中的小台账（只有哈希和时间，没有文本）可避免在重新加载页面、重启后以及流水线暂时离开窗口时重复同一通知；事件自身日期早于设定小时数的不再通知。指南说明了 Microsoft Teams 渠道接受 Power Automate Workflows 流程的地址。
+
+- **按变更类型的 CI 成本和碳估算**（`finops.by_change`、`finops.co2`、`finops.co2_watts` 和 `finops.co2_grams_per_kwh`，默认关闭）：过去 24 小时的运行按依赖、定时、手动、发布、feature、fix、docs、ci、test、refactor、perf、chore 或其他分类，给出分钟数、占比和私有仓库的估算美元（`GET /api/quota` 的 `by_change` 和 `/metrics` 的 `ghamon_ci_change_*`）；碳排放是根据你自己设定的瓦数和每千瓦时克数得出的数量级，绝不是排放报告。本地可复用工作流（只被仓库中其他工作流调用的文件）不计入这些数据。
+
+- **符合 CI/CD 约定的 OpenTelemetry 和每个作业一个 span**（`otlp.cicd_conventions` 和 `otlp.job_spans`，默认关闭）：运行的 span 可带上 OpenTelemetry CI/CD 语义约定的属性（流水线名称、运行 ID 和链接、结果、尝试次数、仓库和分支），并命名为 `RUN <workflow>`；每个已完成的作业可根据 webhook 的已签名 `workflow_job` 事件，作为其运行的子 span 发送（runner、组、标签、排队时间、结果）。
+
+- **多个工作区**（`workspaces.list` 和 `workspaces.active`，列表为空时关闭）：本地克隆的文件夹用 `名称=文件夹` 指定，按名称选择当前使用的；`MONITOR_ROOT` 仍然优先，`workspaces.active` 优先于 `workspace_root`。
+
+- **大型账户上比较的长窗口**（`compare.progressive` 和 `compare.progressive_days`，默认关闭）：比设定天数更长的窗口会先立即用最近几天作答并标记为 `partial`，整个窗口在后台计算后提供给下一次请求。
+
+- **`monitor_cli.py toolbox`**：无需运行监视器、在本机上工作的运维小工具：`limits`（配置与其上限的对比）、`workspaces`、`ledger`（已发送的通知，`--force` 将其清除）、`summary`（按类型、仓库和日期统计事件）以及 `export-events FILE`（按文件名结尾写成 jsonl、csv、parquet 或 duckdb；parquet 和 duckdb 需要各自的包，文件必须是新的，不会覆盖任何文件，也不接受任何查询语言）。
+- **超过六十种声音的声音库**（`sound.voices`、`screens.sound_voices`、`screens.sound_volume`）：每种事件保持原有声音，也可以指定声音库中的任意其他声音，适用于页面、本机蜂鸣，以及拥有自己列表和音量的墙面屏幕。声音在浏览器中合成（无需下载），没有任何一个超过一秒，且各不相同；单一来源（`soundlib.py`）由 `tools/make_sound_library.py` 复制到页面和墙面屏幕，测试会检查副本是否最新。八种语言的声音指南列出了每一种声音。
+
+- **可选的背景环境音和时钟滴答声**（`sound.ambient`、`sound.ambient_volume`、`sound.tick`、`sound.tick_seconds`；默认都关闭）：环境音是两个很轻的低音，有红色时会变粗糙；滴答声是每隔几秒一声极短的干脆咔哒声，让卡住的屏幕能被听出来。两者在页面和墙面屏幕中都遵循静音标签、总开关和安静时段。
+- **命令行在没有终端时输出干净**（`--color auto|always|never`、`NO_COLOR`）：输出被重定向、通过管道交给 `tee` 或由 cron 运行时，不写任何转义序列，宽度取自 `COLUMNS` 或 80，并清除来自 GitHub 的标题或名称中可能带有的转义序列；读取端提前关闭（`| head`）时命令安静结束，而不是抛出回溯。只有 `--format table` 的表头会着色。
+
+- **`monitor_cli.py metrics` 输出供 cron 和邮件使用的数值**：每个数值一行 `名称=值`，顺序固定，标准输出中没有其他内容；加上 `--if-problem` 时，如果没有红色工作流且没有 `--fail-on` 及更严重级别的警报，则完全不输出（退出码 0），因此 cron 只在出问题的那天才发邮件（附带数值，退出码 5）。
+
+- **新版本提示会给出与你的安装方式相符的命令**：解压后的产品、服务管理器、容器、pipx、uv 或 `gh` 的扩展（`/api/about` 应答中的 `channel` 和 `command`，以及控制台和“关于”面板）。提示本身不会运行任何东西。
+- **更新程序服务助手的防护**：使用 `updates.systemd_helper`（或 `--systemd-unit`）时，它拒绝停止或启动属于另一个安装的服务，在其他程序占用其端口时拒绝启动，进程仍是旧进程时不把重启视为完成；`update status --systemd-unit 单元` 只列出该服务自上次启动以来的错误。
+
+- **GitHub 发布会等待软件包**：镜像工作流现在由版本标签触发，把镜像发布到镜像仓库，只有当镜像在两个平台上都能按标签响应时，才发布（先创建为草稿的）发布版本。
+
+- **CI 在断网状态下运行测试套件并审计依赖**：一个作业在只有回环接口的网络命名空间中运行全部测试，另一个作业通过 `tools/audit_dependencies.py` 运行 `pip-audit`；抑制项必须带有理由和到期日期，过期或已无用的抑制项会使作业失败。
+
+- **每周对外部来源做冒烟测试**：工作流 `sources-smoke.yml` 读取 GitHub 真实的状态页、安全公告、REST API 描述和项目的最新发布，当某个来源改变了监视器所读取的格式时即失败（`tools/smoke_sources.py`；有测试保证其端点列表与代码实际调用的一致）。
+
+- **工作流检查器能发现容器操作中带连字符输入的陷阱**（规则 `container_input_name`，默认关闭，`warn`）：GitHub 把 `fail-on-findings` 以 `INPUT_FAIL-ON-FINDINGS` 传入，因此读取 `INPUT_FAIL_ON_FINDINGS` 的脚本永远看不到该值；发现项会指出脚本、行号和输入名。
+
+- **停止响应的存储会得到干净的 503**：需要数据库的路由会返回带有 `Retry-After` 和 `storage_unavailable` 的 `503`，而不是断开连接；监视器继续运行，存储恢复后的下一个请求会正常处理；实时流会告诉浏览器重连前要等待多久（`retry:`），并用 `Last-Event-ID` 续传。端到端测试会切断真实服务器的数据库来验证这一点。
+
+- **监视器监视自身的内存和线程**（`selfwatch.enabled`、`selfwatch.rss_warn_mb` 1024、`selfwatch.threads_warn` 400、`selfwatch.interval_seconds` 60）：`/api/health` 带有 `selfwatch`，超过限制时会带着数值在被吞掉失败的计数器中记录一次并尽可能释放；CI 在一个处理器、512 MB 的容器中用 120 个工作流的账户运行监视器（`tools/limits_check.py`）。
+
+- **GitHub 上的操作需要理由和操作人，并由服务器把关**（`github_actions.require_reason`、`github_actions.operator`、`github_actions.comment_on_target`、`github_actions.preflight`、`github_actions.writer_lock`）：没有理由（3 到 200 个字符）和操作人的计划会被服务器拒绝，无论页面发送什么，两者都会写入日志；操作前会再次查看目标（变化则返回 `stale`），以无副作用的方式询问凭据能否执行（权限诊断还会读取可推送名单），本机只有一个监视器可以写入，用 `--profile qa` 启动的监视器是观察者。开启 `github_actions.comment_on_target` 后，被关闭的议题或拉取请求还会收到带有这些信息的评论。
+
+- **实时流随其会话结束**（`auth.stream_revalidate_min`，10）：实时流每隔几分钟重新检查开启它的会话，会话被撤销或过期、用户被删除或角色不再允许时即关闭，因此没有连接会保留已失效的权限。
+
+- **监视器请求搜索引擎不要收录，并说明暴露到网络意味着什么**（`listen.noindex`，开启）：每个响应都带有 `X-Robots-Tag: noindex, nofollow`，`/robots.txt` 禁止一切；doctor 的暴露检查会给出地址、是否有 TLS 以及是否需要登录，并提醒对任何人开放的页面可能被标记为钓鱼。使用 Caddy 和 Cloudflare Tunnel 请求头的测试保证代理之后对 Host 和 Origin 的检查可靠。
+
+- **监视器网络目标表，以及被阻止时会失败的内容**（`monitor_cli.py doctor --egress`）：当前配置可能访问的每个主机、用途、使其成为目标的设置以及阻止它的后果，供出站策略严格的计算机使用；有测试保证该表与代码中出现的主机一致。
+
+- **发送到 SIEM 的事件**（可选，关闭；`siem.sinks`、`siem.queue_max`）：Elasticsearch（bulk）、Splunk HEC、Loki、Microsoft Sentinel（用共享密钥签名）、BigQuery 或简单的 HTTP 接收端，每个目标有自己的过滤器（`from_minutes`、`levels`、`repos_filter`）、固定的字段列表，令牌从环境变量读取而绝不从文件读取，遵守监视器的网络规则（除非目标允许，否则不使用私有地址），接收端宕机时使用有界队列，离线模式下完全不发送。
+
+- **MCP 服务器新增引导式提示和自我描述，应答带有页面链接，并能在受控条件下写入**（`mcp.prompts` 开启，`mcp.write_tools` 关闭）：提示 `am_i_affected`、`investigate_red` 和 `weekly_review` 给 AI 一个带编号的计划；工具 `describe_capabilities`、`ping` 和 `whoami` 说明服务器能做什么；关于警报、诊断和配额的应答带有 `dashboard_url`；仅在设置开启时才存在的工具 `gh_action` 会规划操作并显示预览，在同一调用带着 `confirm: true` 和该计划回来之前不发送任何内容，并经过与页面相同的防护。
+
+- **CI 哨兵的工作流检查器读取远程默认分支，而不是克隆的工作区**：本地克隆的工作流文件与 CHANGELOG 和版本一样，通过 `git show origin/<默认分支>` 读取（不 fetch、不联网），因此停留在旧分支的克隆不会再让检查器评判 main 上并不存在的工作流；没有远程分支时读取工作区并予以说明。
+
+- **只有在 [Unreleased] 下有五条以上条目时才会建议发布**：`sentinel.candidate_min_entries` 的默认值现在是 5（原为 1），因此 CI 哨兵的发布候选和发布就绪度不再因为一两个小改动而出现。你自己选择的值会保留；该数字可在设置中设为 1 到 100。
+
 ### 修复
+
+- **A5 的签名队列不再提供无需签名的内容**：一次运行只有在不是试运行（“Prepare the draft”步骤已执行）、有等待中的发布草稿或仓库没有已发布版本、且该版本尚未带签名发布时才会进入。五个错误的行（四个版本已发布并签名的手动构建，以及一个其 `--sign --publish --bench` 命令会出错的试运行）消失。队列中的每次运行每六小时检查一次（该运行的作业和其仓库的发布，两次读取，每个周期最多三次运行），离开队列的条目会以“已检查：vX 已发布”或“试运行”（而不是“未检查”）列在队列下方。
+
+- **当规则集已保护仓库时，安全哨兵不再声称该仓库没有分支保护**（`security.branch_unprotected`）：仅由规则集保护的仓库在经典端点上返回 404，导致 135 个仓库被误报。只要有经典保护或分支上的有效规则，就视为已保护（经典保护缺失时会读取分支的 `protected` 标志和 `rules/branches/<分支>`）。`signals.branch.require` 可指定规则必须具备的规则类型（`pull_request`、`required_status_checks` 等），已保护但缺少某项的分支会连同缺少项一起提示；默认列表为空。
+
+- **安全哨兵无法读取的仓库会说明原因**：状态中的错误带有消息和原因（`timeout`、`rate`、`network`、`error`），`error_kinds` 对其计数；读取失败是覆盖缺口，绝不是发现。交付和供应链哨兵中超时的读取会以原因 `timeout`（八种语言）列出，而不是笼统的 `error`。
+
+- **`release.ecosystem_drift` 默认是信息（`info`）**：共享契约使用方的固定版本由生态的发布列车提升而非手工修改，因此落后的固定版本不再算警告。固定表仍从提供方的默认分支读取，并与其最新发布版本比较；可用 `signals.ecosystem_drift.level` 重新提高级别。
+
+- **AI 现在能了解安全、交付和供应链哨兵**：它们的警报成为 `GET /api/ai/state` 中的信号 `sentinel.security`、`sentinel.delivery` 和 `sentinel.supply`（每个代码和仓库一行，最严重的在前），当为 `watch` 或 `act` 时，会在 `ai_alerts.jsonl`、事件流、钩子和 `ALERTS_BRIEF.md` 中按代码和仓库各发一个事件（每个哨兵最多 25 个，另加一个统计其余数量的事件；`info` 警报只保留在状态中）。每个哨兵（包括 Collab）在没能读完全部内容时（带原因的读取失败、尚未检查的仓库、暂停、无权读取的来源）会增加 `sentinel.<名称>.coverage`：开启期间，空的警报列表并不代表干净。
 
 - **发布面板（A5）、就绪表（A11）和发布候选工具统计的是 main 的 CHANGELOG 条目，而不是克隆当前所在分支的条目**：以前从克隆的工作树统计，所以停在某个旧代理分支上的克隆会显示 20 条，而 main 只有 3 条（13 条对 2 条），与最新发布比较的版本也是该分支的版本。现在它们从克隆所知的远程默认分支读取 `CHANGELOG.md`、清单和 `pyproject`（`git show origin/<分支>:<文件>`，从不 fetch，不改动克隆中的任何内容）；不知道该分支时读取工作树，并在该行注明（“克隆在分支 X，不在 main；按工作树统计”）；GitHub 上的 main 前进后克隆尚未获取时同样注明。整个监控器只用一个函数计数（`delivery/mainsource.py`）：`## [Unreleased]` 下的每个列表行算一条，包括嵌套行，CRLF 或 LF 均可，与以前一致。候选表的标题说明该数字是 main 的。
 - **仓库有标签 `dependencies` 时，A6 不再说它缺失**：GitHub 的标签搜索对确实存在的标签返回空（曾误报一个有该标签的仓库），因此监控器现在还会按确切名称查询该标签。
@@ -41,6 +181,8 @@
 - **墙屏为了让列表放得下而隐藏的行现在真的会消失**：页面用 hidden 属性隐藏行，但本身是 flex 盒子的行会忽略它，导致事件列表、队列、失败和热力图的行在卡片底部被切成两半并压在页脚上。现在隐藏优先于任何样式。
 - **墙屏的标题、标签和数字在八种语言下都不再以省略号结尾，也不再超出方框**：标题会换到第二行，比方框更宽的数字（七位、较长的单位）会使用更小的字号直到下限，标题旁的标签以及图例、严重程度或磁贴的标签会换行或缩短，而不是把时钟挤出去，热力图为每一行保留高度，墙屏上没有任何字号小于基准大小的 0.8。
 - **展台不再显示表格的列选择器**：在墙上没有人能点击它，而且它的方框展开时会盖住仓库表格。
+
+- **Teams 渠道始终发送 `Content-Length`，并为 Teams 的 Workflows 使用自适应卡片**：拒绝分块发送请求体的 Teams 目标不再失败，Workflows 流程的地址(`logic.azure.com`、`powerplatform.com`)会以卡片形式收到消息，这类流程读取的就是卡片;频道的旧连接器仍然收到纯文本。一个会拒绝分块请求体的假服务器测试对此进行检查。
 
 ## [2.1.5]
 

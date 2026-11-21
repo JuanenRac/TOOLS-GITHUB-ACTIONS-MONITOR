@@ -245,6 +245,16 @@ def main_triggered(text):
     return False
 
 
+AUTOMATIC_OFF = {"workflow_call", "workflow_dispatch"}
+
+
+def callable_only(text):
+    """True for a workflow that other workflows call (`workflow_call`) and that nothing starts by itself (no push, pull request, schedule...): a reusable workflow. It has no runs of its own, so the
+    rankings that count workflows or minutes leave it out (its jobs already count inside the run of the caller)."""
+    events = workflow_events(text)
+    return bool(events) and "workflow_call" in events and not any(e not in AUTOMATIC_OFF for e in events)
+
+
 def scan_workflow(text, name=""):
     """What one workflow file says, from its text (no YAML parser on purpose: the standard library only). Returns plain data."""
     unpinned, reusable = [], []
@@ -257,7 +267,7 @@ def scan_workflow(text, name=""):
         (reusable if ".github/workflows/" in path else unpinned).append(spec)
     prt = bool(PRT.search(text))
     return {"file": name, "unpinned": sorted(set(unpinned)), "reusable_unpinned": sorted(set(reusable)), "write_all": bool(WRITE_ALL.search(text)),
-            "main_triggered": main_triggered(text), "prt": prt, "prt_danger": bool(prt and PR_REF.search(text)),
+            "main_triggered": main_triggered(text), "callable_only": callable_only(text), "prt": prt, "prt_danger": bool(prt and PR_REF.search(text)),
             "cron": sorted(set(m.strip() for m in CRON.findall(text))) if SCHEDULE_KEY.search(text) else []}
 
 
@@ -957,6 +967,11 @@ class Collector:
             self.scans = {**self.remote_scans, **fresh}      # a clone wins over a reading through the API
             self.scan_at = self.clock()
         return True
+
+    def local_reusables(self):
+        """{repo: {file}}: the workflows that only other workflows of the repository call, from the scans held (a clone or a reading through the API)."""
+        with self.lock:
+            return {repo: {w["file"] for w in (scan or {}).get("workflows") or [] if isinstance(w, dict) and w.get("callable_only")} for repo, scan in self.scans.items()}
 
     def set_remote(self, repo, scan):
         """Keeps the scan of a repository read without a clone (None forgets it); it feeds A10 and the resolution of A2 until a clone of the repository appears."""

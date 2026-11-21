@@ -124,6 +124,15 @@ Só são lidos os nomes desta tabela. No serviço, um valor ilegível é ignorad
 | `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py`: em vez de repetir a suite ordinária, aceita o registo de uma execução verde completa desse mesmo commit (terminada, sem falhas nem erros, todos os testes executados); `--skip-clean-suite` também não repete a suite do zip extraído (as verificações rápidas continuam) e di-lo. |
 | `--progress` | `tools/make_release.py`: mostra o andamento das suites, uma linha a cada 250 testes, também na suite da instalação limpa. |
 
+## Um batimento externo (desativado por omissão)
+
+O monitor corre num computador que pode ser desligado, suspenso ou reiniciado, e então ninguém fica a saber que ninguém está a vigiar. Com `heartbeat.enabled` ativo, o monitor envia um aviso a um endereço a cada `heartbeat.interval_seconds` (300 por omissão) e um serviço como healthchecks.io, Cronitor ou Uptime Kuma diz-te quando os avisos deixam de chegar.
+
+- O endereço é um segredo: coloca-o na variável de ambiente que `heartbeat.url_env` indica (`MONITOR_HEARTBEAT_URL` por omissão). Nunca é escrito na configuração, mostrado nem registado, e as Definições só dizem se há um definido. Tem de ser `https` (`http` só com `notify.allow_private_targets`, para um serviço da tua própria rede), não pode ter utilizador nem palavra-passe e é aberto com a mesma proteção das notificações.
+- O aviso leva no máximo `msg=<versão> <ok|degraded>` (`heartbeat.send_state`): nunca um repositório, um alerta ou um nome.
+- Quando o monitor não está apto a servir (o seu ciclo de atualização está preso ou desapareceu) o aviso não é enviado e o silêncio é o alarme. A um serviço com endereço de falha (healthchecks.io: `/fail`) pode dar-se `heartbeat.fail_suffix` e então é avisado logo.
+- Na edição completa, `GET /api/health` mostra `heartbeat` (enviados, falhados, omitidos e o último resultado).
+
 ## Quando o GitHub revoga ou deixa caducar o acesso
 
 Cada conta é um processo próprio, pelo que um acesso que deixa de funcionar só afeta essa conta. Após duas recusas seguidas que dizem que o próprio acesso não serve (um 401, `Bad credentials`, um token caducado ou revogado, uma conta suspensa, nenhum acesso), a conta fica **cega**: a página, a verificação de saúde profunda, `GET /api/accounts` (`state: blind`) e o `bin/monitor_cli.py` dizem-no, abre-se um **alerta crítico de sistema** (`system.credential_blind`, sentinela `system`) no separador de alertas, e os tipos de notificação `credential_blind` (ativo por defeito) e `credential_back` avisam os canais uma vez. A recusa de uma só permissão (um 403 para um repositório) não torna uma conta cega. As outras contas continuam e a verificação de saúde profunda mantém-se verde. A conta continua a tentar e o primeiro ciclo bom fecha o alerta.
@@ -223,3 +232,20 @@ gh workflow run docker-audit.yml -f ref=<tag>
 ```
 
 Os mesmos scripts correm numa máquina Linux com Docker (`tools/docker_audit/run_all.sh`); `tools/docker_audit/LEEME.txt` explica como ler cada resultado.
+
+## O monitor no telemóvel
+
+Tudo nesta secção está desligado ou é inofensivo por defeito.
+
+- **Aplicação instalável** (`pwa.enabled`): a página oferece um manifesto, dois ícones e um pequeno service worker, para que um navegador possa instalar o monitor como aplicação. Os ficheiros são `/manifest.webmanifest`, `/sw.js`, `/pwa/offline`, `/pwa/icon-192.png` e `/pwa/icon-512.png`; no modo de rede são servidos atrás do token de acesso como qualquer página. O worker guarda apenas a página offline e os ícones: nunca a página, nunca uma resposta da API. Quando a aplicação volta ao primeiro plano, ou a rede regressa, a página pede logo dados novos (`pwa.refresh_on_return`).
+- **Vista compacta** (`ui.compact`): `auto` usa-a numa janela estreita, `on` sempre, `off` nunca; `?compact=1` ou `?compact=0` altera-a numa janela. O menu passa para cima como uma fila de separadores, as tabelas deslizam para o lado, um ecrã tátil recebe alvos de pelo menos 44 pixéis e as caixas de diálogo seguem a altura que o teclado no ecrã deixa.
+- **Emparelhamento com um código QR** (`pairing.enabled`, só no modo de rede): abra a paleta (Ctrl+K) e escolha "Emparelhar um telemóvel", depois "Novo código QR". O código funciona uma vez e durante `pairing.code_minutes` minutos; um código novo anula o anterior. O telemóvel lê-o, carrega no botão da página que se abre e recebe um token próprio (um cookie), nunca o token de acesso. A mesma janela lista os dispositivos emparelhados e retira um: o seu token deixa de funcionar de imediato. No máximo `pairing.max_devices` dispositivos; um dispositivo tem de ser emparelhado de novo passados `pairing.device_days` dias (0 = nunca). O monitor guarda apenas o hash de cada token em `devices.json` da pasta de dados, um código errado conta contra o endereço como um token de acesso errado, e cada emparelhamento e cada revogação deixam uma linha no registo de ações.
+
+| Rota | O que faz |
+|---|---|
+| `GET /api/devices` | os dispositivos emparelhados e se o emparelhamento está ativo (só este computador) |
+| `POST /api/pair/start` | abre um código de uso único e responde com o seu endereço e o seu código QR (só este computador, com o token de uso único da página) |
+| `POST /api/pair/redeem` | o telemóvel gasta o código (`{"code": "..."}`) e recebe o seu cookie |
+| `POST /api/devices/revoke` | retira um dispositivo (`{"id": "..."}`; só este computador) |
+
+- **Paleta e atalhos** (`ui.palette`): Ctrl+K abre uma caixa de pesquisa de separadores, repositórios e ações; `?` lista os atalhos, `/` vai à pesquisa do separador, `r` atualiza e `[` `]` mudam de separador.

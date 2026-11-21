@@ -50,3 +50,7 @@ GitHub 对某个仓库不回应的来源（该功能在那里是关闭的，或�
 ## 设置
 
 在设置页面的“哨兵”子标签中，“安全”区块：`sentinels.security.enabled`、`sentinels.security.refresh_seconds`、`sentinels.security.max_repos_per_tick`、`sentinels.security.min_rate_remaining`、`sentinels.security.repos`, `sentinels.security.plan_na`、`sentinels.security.signals.dependabot.enabled`、`sentinels.security.signals.dependabot.min_severity`、`sentinels.security.signals.code_scanning.enabled`、`sentinels.security.signals.code_scanning.min_severity`、`sentinels.security.signals.secret.enabled`、`sentinels.security.signals.branch.enabled`、`sentinels.security.signals.workflow.enabled` 和 `sentinels.security.signals.codeowners.enabled`, `sentinels.security.signals.runs_deleted.enabled`, `sentinels.security.signals.runs_deleted.check_window_days`, `sentinels.security.signals.runs_deleted.max_checks`。每个发现从评分的安全部分扣除的点数（`sentinels.security.penalty`）从文件中读取；见示例文件。
+
+## 通过规则集的分支保护
+
+默认分支只要有经典分支保护**或**有效的规则集，就视为受保护（仅由规则集保护的仓库在经典端点上返回 404，所以哨兵还会读取分支的 `protected` 标志和分支的有效规则）。`signals.branch.require` 可列出规则必须具备的规则类型（例如 `pull_request`、`required_status_checks`）；已保护但缺少其中某项的分支会连同缺少项一起提示。默认列表为空：任何保护都足够。因调用超时而无法读取的仓库会连同原因（`timeout`、`rate`、`network`、`error`）列在状态的 `errors` 和 `error_kinds` 中，绝不算作发现。

@@ -158,6 +158,62 @@ def _expires(text):
     return datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp()
 
 
+def installation_rows(data):
+    """[{"id", "account", "type"}] from the answer of GET /app/installations (what is not a dictionary with a numeric id is left out; the names are cut and cleaned)."""
+    rows = []
+    for item in data if isinstance(data, list) else []:
+        if isinstance(item, dict) and str(item.get("id", "")).isdigit() and len(str(item["id"])) <= 12:
+            account = item.get("account") if isinstance(item.get("account"), dict) else {}
+            rows.append({"id": str(item["id"]), "account": clean(str(account.get("login") or ""))[:60], "type": clean(str(item.get("target_type") or account.get("type") or ""))[:20]})
+    return rows
+
+
+def pick_installation(rows, configured="", owner=""):
+    """(id, reason): the installation to read with. The one written in `github_app.installation_id` when the App has it; else the one of the account of the monitor (`github_owner`); else the only one. With several
+    and none of them that account, nothing is chosen (reason `several`): guessing the first would read with the wrong account. reason is "" when one was chosen, `unknown_id` when the configured one is not an
+    installation of this App, `none` when the App is installed nowhere."""
+    if not rows:
+        return "", "none"
+    if configured:
+        return (configured, "") if any(r["id"] == configured for r in rows) else ("", "unknown_id")
+    same = [r for r in rows if owner and r["account"].lower() == owner.lower()]
+    if len(same) == 1:
+        return same[0]["id"], ""
+    if len(rows) == 1:
+        return rows[0]["id"], ""
+    return "", "several"
+
+
+def discover(config, opener=None, signer=None, now=None):
+    """The installations of the App and the one the monitor reads with, found by itself: {"ok", "installations": [...], "chosen", "reason"}. `reason` is "" when one was chosen, else off, failed, none, several or
+    unknown_id (see pick_installation). Reads only; never prints the key or a token."""
+    cfg = settings(config)
+    out = {"ok": False, "installations": [], "chosen": "", "reason": "off"}
+    if not (cfg["enabled"] and cfg["app_id"] and cfg["key_path"]):
+        return out
+    try:
+        from github_actions_monitor.app import toolconfig
+        owner = toolconfig.github_owner(config)
+        jwt = make_jwt(cfg["app_id"], cfg["key_path"], now, signer)
+        data, _ = _call("GET", "/app/installations", jwt, opener=opener)
+    except Exception:   # noqa: BLE001 - a broken App is "could not look", never a traceback with a key in it
+        out["reason"] = "failed"
+        return out
+    rows = installation_rows(data)
+    chosen, reason = pick_installation(rows, cfg["installation_id"], owner)
+    out.update(ok=True, installations=rows, chosen=chosen, reason=reason)
+    return out
+
+
+def _installation_of(config, data):
+    """The installation id out of the answer of GET /app/installations, by pick_installation; raises with the reason when none fits."""
+    from github_actions_monitor.app import toolconfig
+    chosen, reason = pick_installation(installation_rows(data), "", toolconfig.github_owner(config))
+    if not chosen:
+        raise RuntimeError("the App is not installed on any account" if reason == "none" else "the App is installed on several accounts and none is the one of the monitor: write github_app.installation_id")
+    return chosen
+
+
 def token(config, opener=None, signer=None, now=None, force=False):
     """The installation token to read with, or "" (off, no key, App not installed, a recent failure): the caller then uses the token of the user. Nothing here ever prints the key or the token."""
     cfg = settings(config)
@@ -173,9 +229,7 @@ def token(config, opener=None, signer=None, now=None, force=False):
         install = cfg["installation_id"] or _STATE["installation"]
         if not install:
             data, _ = _call("GET", "/app/installations", jwt, opener=opener)
-            if not data:
-                raise RuntimeError("the App is not installed on any account")
-            install = str(data[0]["id"])
+            install = _installation_of(config, data)
             _STATE["installation"] = install
         data, _ = _call("POST", f"/app/installations/{install}/access_tokens", jwt, b"{}", opener=opener)
         _STATE.update({"token": data["token"], "expires": _expires(data["expires_at"]), "error": "", "failed_at": 0.0, "code": "", "noticed": ""})
@@ -200,9 +254,7 @@ def shared_token(config, opener=None, signer=None, now=None):
         install = cfg["installation_id"] or _STATE["installation"]
         if not install:
             data, _ = _call("GET", "/app/installations", jwt, opener=opener)
-            if not data:
-                return "", "failed"
-            install = str(data[0]["id"])
+            install = _installation_of(config, data)
         asked = json.dumps({"permissions": {name: "read" for name in PERMISSIONS}}, separators=(",", ":")).encode()
         data, _ = _call("POST", f"/app/installations/{install}/access_tokens", jwt, asked, opener=opener)
         granted = data.get("permissions")

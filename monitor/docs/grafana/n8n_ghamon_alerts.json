@@ -1,0 +1,43 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "name": "Monitor alerts from Alertmanager",
+ "nodes": [
+  {
+   "parameters": {"httpMethod": "POST", "path": "ghamon-alerts", "options": {}},
+   "name": "Alertmanager webhook",
+   "type": "n8n-nodes-base.webhook",
+   "typeVersion": 2,
+   "position": [0, 0]
+  },
+  {
+   "parameters": {
+    "assignments": {
+     "assignments": [
+      {"id": "1", "name": "status", "value": "={{ $json.body.status }}", "type": "string"},
+      {"id": "2", "name": "summary", "value": "={{ $json.body.alerts.map(a => (a.labels.alertname || '') + ': ' + (a.annotations.summary || '')).join('\\n') }}", "type": "string"}
+     ]
+    },
+    "options": {}
+   },
+   "name": "Write the message",
+   "type": "n8n-nodes-base.set",
+   "typeVersion": 3.4,
+   "position": [240, 0]
+  },
+  {
+   "parameters": {},
+   "name": "Send it where you want (replace this node)",
+   "type": "n8n-nodes-base.noOp",
+   "typeVersion": 1,
+   "position": [480, 0]
+  }
+ ],
+ "connections": {
+  "Alertmanager webhook": {"main": [[{"node": "Write the message", "type": "main", "index": 0}]]},
+  "Write the message": {"main": [[{"node": "Send it where you want (replace this node)", "type": "main", "index": 0}]]}
+ },
+ "active": false,
+ "settings": {},
+ "meta": {"note": "Made for the alert rules of docs/grafana/ghamon_alert_rules.yml; the last node does nothing until you replace it with your chat, mail or ticket node."}
+}

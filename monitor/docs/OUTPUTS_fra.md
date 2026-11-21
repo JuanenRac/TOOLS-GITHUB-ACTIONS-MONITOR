@@ -91,3 +91,45 @@ La barre en haut de la page (dans tous les onglets) produit UN rapport de l'ongl
 - Le rapport est servi par `GET /api/report/tab?tab=now&lang=fr` (`&fmt=json`, `&fmt=txt` ou `&fmt=options`), identique dans les deux éditions.
 
 Réglages (Réglages > Sorties pour d'autres outils > « Enregistrer et imprimer le rapport d'un onglet ») : `report_export.txt`, `report_export.pdf` et `report_export.json` (quelles cases démarrent cochées : TXT et PDF oui, JSON non), `report_export.name` (nom suggéré, par défaut `monitor-{tab}-{date}`), `report_export.paper` (`a4` ou `letter`, par défaut `a4`) et `report_export.pdf_path` (`auto`, `own` ou `browser`, par défaut `auto`).
+
+## Métriques du serveur : cycle, file de lectures, facturation, runners et histogrammes
+
+En plus des jauges ci-dessus, `/metrics` écrit (une valeur inconnue est omise) :
+
+| Métrique | Étiquettes | Signification |
+|---|---|---|
+| `ghamon_ticks_total`, `ghamon_tick_failures_total` | | cycles de rafraîchissement terminés et cycles finis en erreur (compteurs) |
+| `ghamon_tick_last_seconds`, `ghamon_tick_phase_seconds`, `ghamon_tick_seconds` | `phase` | durée du dernier cycle, de chacune de ses phases et histogramme de tous |
+| `ghamon_tick_last_ok_timestamp_seconds`, `ghamon_tick_reads_last` | | quand le dernier cycle s'est bien terminé et combien de dépôts il a lus |
+| `ghamon_read_retries_total` | | lectures échouées pour une cause passagère et répétées (compteur) |
+| `ghamon_repos_circuit_open`, `ghamon_repos_read_failing`, `ghamon_repos_read_fail_streak_max` | | dépôts qui attendent avant la prochaine lecture après plusieurs échecs de suite (le circuit), dépôts dont la dernière lecture a échoué, la plus longue série |
+| `ghamon_read_queue_depth`, `ghamon_read_queue_allowed`, `ghamon_read_queue_oldest_wait_cycles`, `ghamon_read_queue_deferred_total`, `ghamon_read_queue_shed_cycles_total` | | la file de lectures avec contre-pression (seulement si `backpressure.enabled` est activé) |
+| `ghamon_billing_minutes_total`, `ghamon_billing_minutes_included`, `ghamon_billing_minutes_paid`, `ghamon_billing_sku_minutes`, `ghamon_billing_usd` | `sku`, `product` | le rapport de facturation du mois (seulement si `quota.billing_api` est activé ; un scrape ne lit jamais GitHub, il écrit le dernier rapport tenu par le cycle) |
+| `ghamon_runners` | `state` | runners auto-hébergés libres, occupés et hors ligne (`runners.enabled`) |
+| `ghamon_runner_up`, `ghamon_runner_busy` | `runner` | par runner (`outputs.prometheus.per_runner`) |
+| `ghamon_runner_kind_jobs_waiting`, `ghamon_runner_kind_oldest_wait_seconds` | `kind` | jobs non démarrés et plus ancienne attente par type de runner (`runners.model.enabled`) |
+
+Avec `outputs.prometheus.histograms` activé (et le webhook qui reçoit des événements de jobs), il écrit aussi des **histogrammes**, construits en mémoire à partir des événements signés `workflow_job` et `workflow_run` :
+
+| Métrique | Étiquettes | Signification |
+|---|---|---|
+| `ghamon_job_wait_seconds` | `runner_group`, `label` | temps en file d'un job, compté **une fois par job** |
+| `ghamon_job_run_seconds` | `runner_group`, `label`, `conclusion` | durée des jobs terminés |
+| `ghamon_workflow_run_seconds` | `conclusion` | durée des exécutions terminées |
+| `ghamon_jobs_total` | `label`, `conclusion` | jobs terminés (compteur) |
+| `ghamon_runner_jobs_waiting`, `ghamon_runner_oldest_wait_seconds` | `label` | la demande de runners maintenant : jobs en file non démarrés et plus ancienne attente |
+
+`outputs.prometheus.histogram_max_series` (200 par défaut) borne les séries de chaque histogramme : celles au-delà sont comptées sous la valeur d'étiquette `other`. Avec `outputs.prometheus.per_runner` activé, il ajoute par runner auto-hébergé `ghamon_runner_jobs_total`, `ghamon_runner_jobs_failed_total` et `ghamon_runner_busy_seconds_total` (aussi dans `GET /api/runners/model` sous `per_runner`).
+
+## Pack d'observabilité : règles d'alerte, Alertmanager, OnCall et n8n
+
+`docs/grafana/` contient, en plus des deux tableaux de bord, un pack à copier et adapter :
+
+- `ghamon_alert_rules.yml` : règles pour Prometheus (aussi vmalert) avec leur PromQL : un moniteur qui ne répond pas, workflows rouges et séries, quota et facturation près de la fin, un cycle lent ou arrêté, dépôts dans le circuit, lectures qui attendent trop, jobs qui attendent un runner (`histogram_quantile(0.95, sum by (le, label) (rate(ghamon_job_wait_seconds_bucket[30m])))`), runners hors ligne et demande sans runner libre.
+- `alertmanager.example.yml` : routes par gravité vers trois récepteurs (un webhook par défaut, Grafana OnCall et n8n). Toutes les adresses sont `https://example.invalid/...` : rien n'est envoyé tant que vous n'y mettez pas les vôtres, et aucun secret n'a sa place dans le fichier.
+- `n8n_ghamon_alerts.json` : un flux n8n qui reçoit le webhook d'Alertmanager et écrit un message par alerte ; son dernier nœud ne fait rien tant que vous n'y mettez pas votre nœud de chat, de courrier ou de ticket.
+- `prometheus.example.yml` et `docker-compose.observability.yml` lancent Prometheus, Alertmanager et Grafana sur l'ordinateur du moniteur pour essayer le pack (les conteneurs partagent le réseau de l'hôte, les ports sont sur `127.0.0.1` et le mot de passe de Grafana vient de votre shell, jamais du fichier).
+## Où le moniteur appelle, et événements vers un SIEM
+
+- **Table des destinations réseau** : `monitor_cli.py doctor --egress` (aussi avec `--json`) liste chaque hôte que la configuration ACTUELLE peut appeler, à quoi il sert, le réglage qui en fait une destination et ce qui échoue s'il est bloqué : `api.github.com`, `github.com` et `objects.githubusercontent.com` (mises à jour), `raw.githubusercontent.com` (`lint.anonymous_public`), ntfy, Telegram, les webhooks de discussion, le fournisseur d'IA choisi, le collecteur OTLP et les puits SIEM. Avec `airgapped`, rien n'est utilisé. Un test garde la table égale aux hôtes que nomme le code.
+- **SIEM** (désactivé) : `siem.sinks` dans le fichier liste les destinations, chacune avec `enabled: true` pour être utilisée : `elasticsearch` (bulk), `splunk_hec`, `loki`, `sentinel` (Log Analytics, signé avec la clé partagée), `bigquery` (`insertAll`) ou `http` (lignes JSON). Le jeton ou la clé est lu dans la variable d'environnement nommée par `token_env`, jamais dans le fichier. Chaque puits filtre avec `from_minutes` (5), `levels` et `repos_filter` ; les événements ont une liste fermée de champs (ni jeton ni texte de log) ; un récepteur sur une adresse privée est refusé sauf si le puits a `allow_private` ; si un récepteur est en panne, les événements attendent dans une file de `siem.queue_max` (500) et les plus anciens sont abandonnés d'abord. Rien n'est envoyé en mode hors ligne.

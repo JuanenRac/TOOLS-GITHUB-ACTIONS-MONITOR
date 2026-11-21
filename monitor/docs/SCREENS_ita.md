@@ -70,6 +70,7 @@ Tre pagine per un monitor o una TV che nessuno tocca. Non hanno menu laterale n�
 | Indirizzo | Cosa mostra |
 |---|---|
 | `/screen/overview` | Anello e lettera del punteggio; la flotta (verdi, rossi, bloccati, in attesa); le ultime 24 ore e 7 giorni in grafici ad area; una mappa di calore dei repository per ora; ciò che è rosso da più tempo; runner e minuti; gli ultimi eventi; la quota di GitHub come indicatore. La scheda della flotta mostra anche la mappa per gruppi: una barra per ogni gruppo della vista flotta (lo stesso raggruppamento, `fleet.group_by`) con i suoi repository in rosso, che richiedono attenzione, in ordine o senza dati; solo il nome del gruppo e i numeri. |
+| `/screen/fleet` | Ogni repository della flotta per gruppo (il raggruppamento e l'ordine della scheda Flotta, prima il gruppo più a rischio): un quadratino per ogni repository sano e un'etichetta con il nome per ognuno che richiede attenzione, con i totali della flotta in alto. Ciò che non ci sta viene contato («+3 altre»). |
 | `/screen/now` | Ciò che accade in questo minuto: esecuzioni in corso con avanzamento e durata, la coda, esecuzioni in attesa di approvazione, errori recenti, merge e release, release in arrivo e una linea in diretta delle ultime due ore. |
 | `/screen/sentinels` | Una scheda per ogni sentinella (da A1 ad A12) con il suo livello, i rilievi aperti, se le sue fonti sono leggibili, l'ultima scansione e un anello che segue la scansione; un radar animato che segna ciò che non va e gli avvisi per gravità. |
 
@@ -111,14 +112,20 @@ La lingua di uno schermo si decide in quest'ordine: `?lang=xx` nell'indirizzo; p
 | `screens.safe_margin_percent` | Tiene il contenuto a questa percentuale da ogni bordo della finestra, per un televisore che taglia il bordo (overscan): tutto viene disegnato un po' più piccolo. 0 (predefinito) usa tutta la finestra; da 0 a 10. |
 | `screens.night_dim` | Attenua gli schermi tra `screens.night_dim_from_hour` (22) e `screens.night_dim_to_hour` (7); disattivato per impostazione predefinita. |
 | `screens.show_repo_names` | all, public (predefinito: i repository privati compaiono come private-1, private-2...) o none (ogni nome è nascosto). Usare public o none per uno schermo che altre persone possono vedere. Con un elenco di repository scritto a mano in `repos`, la visibilità si legge con un elenco dell'account ogni `discover_refresh_seconds`; un repository la cui visibilità non si è potuta leggere conta come privato. I numeri (private-1...) vanno solo ai repository nascosti, nell'ordine di un HMAC del nome con una chiave dell'installazione conservata in un file privato della cartella dei dati: non dicono nulla su dove cade un repository tra gli altri. |
-| `screens.theme_overview`, `screens.theme_now`, `screens.theme_sentinels` | Il tema di uno schermo: inherit (predefinito: quello di `screens.default_theme`) o uno dei temi sopra. |
+| `screens.theme_overview`, `screens.theme_fleet`, `screens.theme_now`, `screens.theme_sentinels` | Il tema di uno schermo: inherit (predefinito: quello di `screens.default_theme`) o uno dei temi sopra. |
 | `screens.mode` | three (predefinito: le tre pagine separate, una per finestra) o rotate (una sola pagina che passa per le tre e salta a un nuovo rosso). |
 | `screens.rotate_every_seconds` | In modalità rotate, secondi su ogni schermo (20 per impostazione predefinita; da 5 a 300). |
 | `screens.alert_hold_seconds` | In modalità rotate, secondi in cui un nuovo rosso tiene la finestra sul suo schermo (30 per impostazione predefinita; da 5 a 600), o finché il rosso sparisce. |
-| `screens.logo_overview`, `screens.logo_now`, `screens.logo_sentinels` | Su quali schermi compare il logo (di default solo la panoramica). |
+| `screens.logo_overview`, `screens.logo_fleet`, `screens.logo_now`, `screens.logo_sentinels` | Su quali schermi compare il logo (di default solo la panoramica). |
 | `screens.logo_corner` | top-right (predefinito), top-left, bottom-right o bottom-left. |
 | `screens.logo_max_width`, `screens.logo_max_height` | Dimensione massima del logo in pixel a 1920 x 1080 (160 x 64 per impostazione predefinita; cresce con lo schermo). |
 | `screens.group_map` | Attivo per impostazione predefinita. Mostra la mappa della flotta per gruppi nella schermata generale (il raggruppamento della vista flotta). Disattivato: solo i quattro riquadri. |
+| `screens.life` | Attivo per impostazione predefinita. Una cifra che cambia lampeggia dove è cambiata, un nuovo errore manda un'onda sul suo riquadro e un cambio di stato lascia una breve scia. Nulla si muove con l'impostazione del sistema per meno movimento. |
+| `screens.glance_seconds` | Secondi in cui l'intestazione mostra ciò che è cambiato all'ultimo aggiornamento, in al massimo tre etichette («Rosso +1»); 3 predefinito, 0 = spento (da 0 a 30). |
+| `screens.transition` | Come una finestra che ruota passa da uno schermo al successivo: fade (predefinito), slide o none. |
+| `screens.hide_healthy` | Spento per impostazione predefinita. Lo schermo Flotta omette i quadratini dei repository sani; il panorama omette i gruppi senza rosso né giallo e le righe della mappa di calore senza errori. I totali restano. |
+| `screens.idle_dim_minutes` | 0 = spento (predefinito). Quando non è cambiato nulla per questi minuti e nulla è rosso, lo schermo si attenua per preservare il pannello; il cambiamento successivo lo risveglia (da 1 a 1440). |
+| `screens.min_font_px` | La lettera più piccola degli schermi in pixel, qualunque sia la dimensione della finestra (12 predefinito; da 8 a 32). |
 | `screens.menu` | Attivo per impostazione predefinita. Il pulsante Schermi nella barra superiore. Disattivato: il pulsante scompare; gli schermi continuano a funzionare ai loro indirizzi. |
 | `screens.menu_target` | new (predefinito): uno schermo si apre in una nuova finestra o scheda; same: nella scheda corrente. |
 | `screens.menu_max_windows` | Massimo di finestre che un insieme multischermo apre in una volta (4 per impostazione predefinita; da 1 a 9). |
@@ -166,12 +173,15 @@ Le tre pagine sono disegnate con unità che seguono il lato corto della finestra
 - Il nome di un repository o di un workflow che non ci sta finisce con i puntini e porta il testo completo nel `title`; un titolo, un'etichetta o una cifra non finisce mai con i puntini: il titolo passa a una seconda riga e una cifra più larga del suo riquadro riceve un carattere più piccolo, fino a un minimo.
 - Quando un elenco ha più righe di quante ne contenga il suo riquadro, le più importanti vengono prima (il rosso prima del verde, le più recenti prima) e l'ultima riga dice quante sono rimaste fuori ("+3 altri"); nulla viene nascosto senza quella riga.
 - Margine di sicurezza (overscan): molti televisori tagliano alcuni punti percentuali di ogni bordo, a meno che la loro modalità immagine sia "just scan" o "pixel per pixel". `screens.safe_margin_percent` (0 per impostazione predefinita, da 0 a 10; `?safe=4` per una finestra) tiene il contenuto a quella distanza da ogni bordo disegnando tutto più piccolo, e `kiosk.safe_margin_percent` fa lo stesso per il chiosco. Prova da 3 a 5 se le prime lettere dell'orologio o il bordo delle schede vengono tagliati.
+- La lettera più piccola è `screens.min_font_px` (12 pixel per impostazione predefinita): in una finestra così piccola che il disegno richiederebbe un carattere più piccolo, gli schermi mantengono la lettera e mostrano meno righe, dicendo quante ne hanno lasciate fuori, invece di rimpicciolire il testo.
 
 ### Come si comportano
 
 - I guasti lampeggiano meno di due volte al secondo (mai in modo stroboscopico); un nuovo guasto produce un solo lampo; un guasto di cui nessuno si occupa per `screens.blink_calm_minutes` minuti mantiene un alone fisso. Con l'impostazione del sistema per ridurre il movimento, oppure con `?blink=off`, nulla lampeggia né si muove. Un guasto non è mai indicato solo dal colore: porta un simbolo e una parola.
 - Quando il monitor non risponde, la pagina lo dice, si attenua e riprova dopo 5, 10, 20... secondi (fino a 60).
 - Uno schermo sempre acceso è protetto dal burn-in: tutto si sposta di qualche pixel ogni minuto e la pagina può attenuarsi di notte.
+- Ciò che cambia tra due aggiornamenti si vede: la cifra lampeggia dove è cambiata (`screens.life`), un nuovo errore manda un'onda sul suo riquadro e, per `screens.glance_seconds` secondi, alcune etichette dell'intestazione dicono cosa è cambiato («Rosso +1», «In corso +2»). La prima lettura di uno schermo si limita a ricordare; con l'impostazione del sistema per meno movimento nulla si muove, ma le etichette compaiono lo stesso.
+- Una finestra che ruota cambia schermo con una dissolvenza, uno scorrimento o uno stacco (`screens.transition`). Uno schermo senza novità da `screens.idle_dim_minutes` minuti riposa (attenuato) finché nulla è rosso.
 
 ### Montare più monitor
 
@@ -202,7 +212,7 @@ Ogni scheda della pagina ha una decisione, scritta nel codice (`TAB_DECISIONS` d
 | `strend` | Andamento giornaliero | - | `reading` |
 | `syvt` | Ieri vs oggi | - | `reading` |
 | `team` | Salute del team | - | `people` |
-| `fleet` | Flotta | `/screen/overview` | - |
+| `fleet` | Flotta | `/screen/fleet` | - |
 | `repos` | Repository | - | `controls` |
 | `rep` | Rapporti | - | `reading` |
 | `trep` | Report pianificati | - | `reading` |

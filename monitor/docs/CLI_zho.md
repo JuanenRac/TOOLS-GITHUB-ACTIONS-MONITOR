@@ -28,12 +28,14 @@
 | `lessons` | 这个 CI 的失败教会了什么:`lessons list`、`lessons brief --repo NAME`(推送前阅读)、`lessons failures`、`lessons close` | 不支持 |
 | `briefs` | AI 工具读取的各标签页摘要:`briefs index`、`briefs show TAB`、`briefs all` | 支持 |
 | `screens` | 页面的“屏幕”菜单:`screens list`(每种屏幕及其能否打开)和 `screens urls`(可直接用于展台命令的完整地址) | 不支持 |
+| `toolbox` | 无需运行监视器、在本机上工作的运维小工具：`toolbox limits [N]`（配置与其上限的对比）、`toolbox workspaces`（工作区及正在使用的工作区）、`toolbox ledger [--force]`（已发送通知的台账；`--force` 将其清除）、`toolbox summary`（按类型、仓库和日期统计事件）以及 `toolbox export-events FILE`（按文件名结尾把事件写成 jsonl、csv、parquet 或 duckdb；parquet 和 duckdb 需要各自的包，文件必须是新的） | 否 |
 | `credential` | 在一切运行时为某个账户更换 GitHub 登录:`credential replace\|reload [--account ID] [--new-token-file FILE\|-]`;从不打印令牌 | 不支持 |
 | `install-skill` | 把监视器的一个技能(`internal` 或 `external`)复制到 AI 工具读取技能的文件夹:`install-skill external --dest FOLDER`;无需监视器正在运行 | 不支持 |
 | `gh-token` | 打印 GitHub App 的一小时安装令牌,使工具的读取消耗 App 的配额(仅在 `github_app.share_reads` 开启时);请不带 `--json` 运行 | 不支持 |
 | `watch` | 反复进行同一次读取（`watch status\|alerts`、`--interval`、`--once`、`--exit-on-change`）；参见 [CLI_OPERATOR_zho.md](CLI_OPERATOR_zho.md) | 不支持 |
 | `completions` | `bash`、`zsh`、`fish` 或 `powershell` 的补全脚本，由真实解析器生成（只打印） | 不支持 |
 | `kiosk` | 电视或墙面所用的监控器地址（`ops`、`team`、`release`、`quiet`）；参见 [KIOSK_zho.md](KIOSK_zho.md) | 不支持 |
+| `metrics` | 以 `名称=值` 的行输出数值，供 cron 和邮件使用；加上 `--if-problem` 时一切正常则不输出任何内容；参见 [CLI_OPERATOR.md](CLI_OPERATOR.md) | 否 |
 
 所有命令的选项：`--json`（以单个 JSON 文档输出：`{"ok", "exit", "data"}`）、`--account ID`、`--url URL`、`--lite`（端口 8766）、`--timeout 秒数`（1 到 60）、`--lang 代码`。在网络模式下,请把访问令牌放在监视器自己读取的环境变量 `MONITOR_ACCESS_TOKEN` 中(`MONITOR_TOKEN` 作为别名也可用;`--token TOKEN` 是最后手段,因为命令行选项会出现在进程列表中)。优先顺序:`MONITOR_ACCESS_TOKEN`、`MONITOR_TOKEN`、`--token`。令牌通过请求头 `X-Monitor-Access` 传送,绝不出现在地址或屏幕上。对其他计算机使用未加密 `http` 的 `--url` 时,会在 stderr 打印警告(令牌和响应将以明文传输):在不受你控制的网络中请使用 `https`。
 

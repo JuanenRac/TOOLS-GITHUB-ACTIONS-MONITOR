@@ -133,6 +133,8 @@ class Workflow(unittest.TestCase):
         block = self.text.split("    permissions:\n")[1].split("    env:")[0]
         granted = dict(re.findall(r"^\s+([a-z-]+): (read|write)", block, re.M))
         self.assertEqual(granted, {"contents": "read", "packages": "write", "id-token": "write", "attestations": "write"})
+        last = self.text.split("\n  release:\n")[1].split("    env:")[0]      # the job that publishes the release only edits it and reads the registry
+        self.assertEqual(dict(re.findall(r"^\s+([a-z-]+): (read|write)", last.split("    permissions:\n")[1], re.M)), {"contents": "write", "packages": "read"})
 
     def test_both_platforms_and_the_tags(self):
         self.assertIn("--platform linux/amd64,linux/arm64", self.text)
@@ -143,10 +145,11 @@ class Workflow(unittest.TestCase):
         for item in re.findall(r"uses:\s*(\S+)", self.text):
             self.assertTrue(item.startswith("actions/"), item)
 
-    def test_nothing_is_pushed_unless_a_release_is_published_or_someone_asks_by_hand(self):
-        self.assertIn("release:\n    types: [published]", self.text)
+    def test_nothing_is_pushed_unless_a_version_tag_is_pushed_or_someone_asks_by_hand(self):
+        self.assertIn('push:\n    tags: ["v*"]', self.text)
+        self.assertNotIn("types: [published]", self.text, "a release that is published cannot wait for the package: the tag starts the build")
         self.assertRegex(self.text, r"(?s)push:\s+description:.*?default: false")
-        self.assertIn("PUBLISH: ${{ github.event_name == 'release' || inputs.push }}", self.text)
+        self.assertIn("PUBLISH: ${{ github.event_name == 'push' || inputs.push }}", self.text)
         self.assertIn('if [ "$PUBLISH" = "true" ]; then output="--push"; else output="--output type=cacheonly"; fi', self.text)
         self.assertNotIn("pull_request", self.text, "a pull request never reaches the registry")
         self.assertNotIn("pull_request_target", self.text)

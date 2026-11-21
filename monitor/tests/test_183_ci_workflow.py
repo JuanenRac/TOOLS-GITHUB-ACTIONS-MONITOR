@@ -79,7 +79,7 @@ class TheImageWorkflowIsAcceptedByGitHub(unittest.TestCase):
             match = re.match(r"\s*-?\s*uses:\s*([^\s#]+)", line)
             if match:
                 self.assertRegex(match.group(1), r"^actions/[a-z-]+@[0-9a-f]{40}$", line.strip())
-        self.assertRegex(source, r"(?m)^on:\n  release:\n    types: \[published\]\n  workflow_dispatch:\n    inputs:\n      push:\n")
+        self.assertRegex(source, r"(?m)^on:\n  push:\n    tags: \[\"v\*\"\]\n  workflow_dispatch:\n    inputs:\n      push:\n")
         self.assertIn("permissions: {}", source)
 
     def test_it_has_no_tab_and_every_job_has_a_time_limit_and_its_own_permissions(self):
@@ -92,7 +92,7 @@ class TheImageWorkflowIsAcceptedByGitHub(unittest.TestCase):
 
     def test_the_push_is_a_separate_step_that_only_a_release_or_the_flag_takes(self):
         source = text(IMAGE)
-        self.assertIn("PUBLISH: ${{ github.event_name == 'release' || inputs.push }}", source)
+        self.assertIn("PUBLISH: ${{ github.event_name == 'push' || inputs.push }}", source)
         self.assertIn("default: false", source)
 
 

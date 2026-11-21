@@ -91,3 +91,45 @@ A barra no topo da página (em todos os separadores) faz UM relatório do separa
 - O relatório é servido por `GET /api/report/tab?tab=now&lang=pt` (`&fmt=json`, `&fmt=txt` ou `&fmt=options`), igual nas duas edições.
 
 Definições (Definições > Saídas para outras ferramentas > «Guardar e imprimir o relatório de um separador»): `report_export.txt`, `report_export.pdf` e `report_export.json` (que caixas começam marcadas: TXT e PDF sim, JSON não), `report_export.name` (nome sugerido, por omissão `monitor-{tab}-{date}`), `report_export.paper` (`a4` ou `letter`, por omissão `a4`) e `report_export.pdf_path` (`auto`, `own` ou `browser`, por omissão `auto`).
+
+## Métricas do servidor: ciclo, fila de leituras, faturação, runners e histogramas
+
+Além dos indicadores acima, `/metrics` escreve (um valor desconhecido é omitido):
+
+| Métrica | Etiquetas | Significado |
+|---|---|---|
+| `ghamon_ticks_total`, `ghamon_tick_failures_total` | | ciclos de atualização terminados e ciclos que acabaram com erro (contadores) |
+| `ghamon_tick_last_seconds`, `ghamon_tick_phase_seconds`, `ghamon_tick_seconds` | `phase` | duração do último ciclo, de cada uma das suas fases e o histograma de todos |
+| `ghamon_tick_last_ok_timestamp_seconds`, `ghamon_tick_reads_last` | | quando o último ciclo acabou bem e quantos repositórios leu |
+| `ghamon_read_retries_total` | | leituras que falharam por uma causa passageira e foram repetidas (contador) |
+| `ghamon_repos_circuit_open`, `ghamon_repos_read_failing`, `ghamon_repos_read_fail_streak_max` | | repositórios que esperam antes da leitura seguinte por terem falhado várias vezes seguidas (o circuito), repositórios cuja última leitura falhou, a sequência mais longa |
+| `ghamon_read_queue_depth`, `ghamon_read_queue_allowed`, `ghamon_read_queue_oldest_wait_cycles`, `ghamon_read_queue_deferred_total`, `ghamon_read_queue_shed_cycles_total` | | a fila de leituras com contrapressão (só com `backpressure.enabled` ligado) |
+| `ghamon_billing_minutes_total`, `ghamon_billing_minutes_included`, `ghamon_billing_minutes_paid`, `ghamon_billing_sku_minutes`, `ghamon_billing_usd` | `sku`, `product` | o relatório de faturação do mês (só com `quota.billing_api` ligado; um scrape nunca lê o GitHub, escreve o último relatório que o ciclo tinha) |
+| `ghamon_runners` | `state` | runners próprios livres, ocupados e desligados (`runners.enabled`) |
+| `ghamon_runner_up`, `ghamon_runner_busy` | `runner` | por runner (`outputs.prometheus.per_runner`) |
+| `ghamon_runner_kind_jobs_waiting`, `ghamon_runner_kind_oldest_wait_seconds` | `kind` | jobs por começar e a espera mais antiga por tipo de runner (`runners.model.enabled`) |
+
+Com `outputs.prometheus.histograms` ligado (e o webhook a receber eventos de jobs) escreve também **histogramas**, construídos em memória com os eventos assinados `workflow_job` e `workflow_run`:
+
+| Métrica | Etiquetas | Significado |
+|---|---|---|
+| `ghamon_job_wait_seconds` | `runner_group`, `label` | tempo na fila de um job, contado **uma vez por job** |
+| `ghamon_job_run_seconds` | `runner_group`, `label`, `conclusion` | duração dos jobs terminados |
+| `ghamon_workflow_run_seconds` | `conclusion` | duração das execuções terminadas |
+| `ghamon_jobs_total` | `label`, `conclusion` | jobs terminados (contador) |
+| `ghamon_runner_jobs_waiting`, `ghamon_runner_oldest_wait_seconds` | `label` | a procura de runners agora: jobs em fila por começar e a espera mais antiga |
+
+`outputs.prometheus.histogram_max_series` (200 por predefinição) limita as séries de cada histograma: as que passam do limite contam-se sob o valor de etiqueta `other`. Com `outputs.prometheus.per_runner` ligado acrescenta, por runner próprio, `ghamon_runner_jobs_total`, `ghamon_runner_jobs_failed_total` e `ghamon_runner_busy_seconds_total` (também em `GET /api/runners/model` como `per_runner`).
+
+## Pacote de observabilidade: regras de alerta, Alertmanager, OnCall e n8n
+
+`docs/grafana/` traz, além dos dois painéis, um pacote para copiar e adaptar:
+
+- `ghamon_alert_rules.yml`: regras para o Prometheus (também vmalert) com o seu PromQL: um monitor que não responde, workflows vermelhos e sequências, quota e faturação perto do fim, um ciclo lento ou parado, repositórios no circuito, leituras que esperam demais, jobs que esperam um runner (`histogram_quantile(0.95, sum by (le, label) (rate(ghamon_job_wait_seconds_bucket[30m])))`), runners desligados e procura sem nenhum runner livre.
+- `alertmanager.example.yml`: rotas por gravidade para três recetores (um webhook por omissão, Grafana OnCall e n8n). Todos os endereços são `https://example.invalid/...`: nada é enviado até pôr os seus, e nenhum segredo deve ir no ficheiro.
+- `n8n_ghamon_alerts.json`: um fluxo do n8n que recebe o webhook do Alertmanager e escreve uma mensagem por alerta; o seu último nó não faz nada até lá pôr o seu nó de chat, correio ou ticket.
+- `prometheus.example.yml` e `docker-compose.observability.yml` arrancam o Prometheus, o Alertmanager e o Grafana no computador do monitor para experimentar o pacote (os contentores partilham a rede do host, as portas estão em `127.0.0.1` e a palavra-passe do Grafana vem da sua shell, nunca do ficheiro).
+## Para onde o monitor chama, e eventos para um SIEM
+
+- **Tabela de destinos de rede**: `monitor_cli.py doctor --egress` (também com `--json`) lista cada anfitrião que a configuração ATUAL pode chamar, para que serve, a definição que o torna destino e o que falha se for bloqueado: `api.github.com`, `github.com` e `objects.githubusercontent.com` (atualizações), `raw.githubusercontent.com` (`lint.anonymous_public`), ntfy, Telegram, os webhooks de conversa, o fornecedor de IA escolhido, o coletor OTLP e os destinos SIEM. Com `airgapped` nada está em uso. Um teste mantém a tabela igual aos anfitriões que o código nomeia.
+- **SIEM** (desligado): `siem.sinks` no ficheiro lista os destinos, cada um com `enabled: true` para ser usado: `elasticsearch` (bulk), `splunk_hec`, `loki`, `sentinel` (Log Analytics, assinado com a chave partilhada), `bigquery` (`insertAll`) ou `http` (linhas JSON). O token ou a chave é lido da variável de ambiente indicada por `token_env`, nunca do ficheiro. Cada destino filtra com `from_minutes` (5), `levels` e `repos_filter`; os eventos têm uma lista fechada de campos (sem token nem texto de log); um recetor num endereço privado é recusado salvo `allow_private`; se um recetor está em baixo os eventos esperam numa fila de `siem.queue_max` (500) e os mais antigos são descartados primeiro. No modo sem ligação nada é enviado.

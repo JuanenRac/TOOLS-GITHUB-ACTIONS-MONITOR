@@ -778,7 +778,7 @@ class OwnToken(unittest.TestCase):
 
 # --- actions on GitHub --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 class GitHubActions(unittest.TestCase):
-    CONFIG = {"github_actions": {"enabled": True, "allowed": ["rerun_failed", "cancel", "close_pr", "merge_pr"], "merge_method": "rebase"}}
+    CONFIG = {"github_actions": {"enabled": True, "allowed": ["rerun_failed", "cancel", "close_pr", "merge_pr"], "merge_method": "rebase", "require_reason": False, "preflight": False, "writer_lock": False}}
 
     def setUp(self):
         _testenv.guard(self)
@@ -789,6 +789,8 @@ class GitHubActions(unittest.TestCase):
     def run_gh(self, args, timeout=40):
         if args[:2] == ["api", "-i"]:
             return 0, "HTTP/2 200\n" + self.scopes + "\n{}", ""
+        if "-X" not in args:      # a read (the server looks at the target again before it acts) sends nothing
+            return 0, "{}", ""
         self.sent.append(args)
         return 0, "{}", ""
 

@@ -78,7 +78,7 @@ USER_RULES = (
     ("logs", r"actions_monitor_log\.txt|ai_actions_log\.jsonl|github_actions_log\.jsonl|auth_audit\.jsonl|ai_prompts\.jsonl|loop\.log"),
     ("data", r"etag_cache\.json|events_monitor\.jsonl|events_state\.json|eventos_monitor\.jsonl|eventos_estado\.json|analytics_history\.json|sentinel_cache\.json|sentinel_history\.json|"
             r"sentinel_ai_cache\.json|collab_state\.json|security_state\.json|supply_state\.json|delivery_state\.json|alert_mutes\.json|failures\.jsonl|update_check\.json|welcome_state\.json|orgs_state\.json|degraded\.json|targets\.candidates\.json|"
-            r"storage\.sqlite3|org_logo\.(?:png|jpg|webp|svg|tmp)|access_token|credential|accounts|state|secrets|_global|_no_workspace|update_history\.jsonl"),
+            r"devices\.json|storage\.sqlite3|org_logo\.(?:png|jpg|webp|svg|tmp)|access_token|credential|accounts|state|secrets|_global|_no_workspace|update_history\.jsonl"),
 )
 _USER_RE = tuple((kind, re.compile(r"^(?:" + body + r")\Z")) for kind, body in USER_RULES)
 _VARIANT = re.compile(r"_(lite|demo)(?=\.|$)")
@@ -155,6 +155,10 @@ _add("dir.downgrade", "DOWNGRADE", "VUELTA A UNA VERSIÓN ANTERIOR", "DOWNGRADE"
 _add("dir.same", "same version (reinstall)", "misma versión (reinstalar)", "gleiche Version (neu installieren)", "même version (réinstaller)", "stessa versione (reinstalla)", "同じバージョン（再インストール）", "相同版本（重新安装）", "mesma versão (reinstalar)")
 _add("c.systemd", "The user service {unit} is stopped and started again by this update (systemctl --user); nothing needs the administrator.", "El servicio de usuario {unit} se detiene y se vuelve a arrancar con esta actualización (systemctl --user); no hace falta el administrador.", "Der Benutzerdienst {unit} wird von diesem Update angehalten und wieder gestartet (systemctl --user); der Administrator wird nicht gebraucht.", "Le service utilisateur {unit} est arrêté puis redémarré par cette mise à jour (systemctl --user) ; l'administrateur n'est pas nécessaire.", "Il servizio utente {unit} viene fermato e riavviato da questo aggiornamento (systemctl --user); non serve l'amministratore.", "ユーザーサービス {unit} はこの更新で停止され再起動されます（systemctl --user）。管理者権限は不要です。", "此次更新会停止并重新启动用户服务 {unit}（systemctl --user），无需管理员权限。", "O serviço de utilizador {unit} é parado e arrancado de novo por esta atualização (systemctl --user); não é preciso o administrador.")
 _add("c.systemd_stop", "systemctl --user could not stop {unit} ({why}): the update was not started.", "systemctl --user no pudo detener {unit} ({why}): la actualización no se inició.", "systemctl --user konnte {unit} nicht anhalten ({why}): das Update wurde nicht gestartet.", "systemctl --user n'a pas pu arrêter {unit} ({why}) : la mise à jour n'a pas démarré.", "systemctl --user non ha potuto fermare {unit} ({why}): l'aggiornamento non è partito.", "systemctl --user が {unit} を停止できませんでした（{why}）。更新は開始されませんでした。", "systemctl --user 无法停止 {unit}（{why}）：更新未开始。", "systemctl --user não conseguiu parar {unit} ({why}): a atualização não começou.")
+_add("c.systemd_foreign", "The service {unit} belongs to another installation ({where}), not to this folder: it was not touched.", "El servicio {unit} pertenece a otra instalación ({where}), no a esta carpeta: no se tocó.", "Der Dienst {unit} gehört zu einer anderen Installation ({where}), nicht zu diesem Ordner: er wurde nicht angerührt.", "Le service {unit} appartient à une autre installation ({where}), pas à ce dossier : il n'a pas été touché.", "Il servizio {unit} appartiene a un'altra installazione ({where}), non a questa cartella: non è stato toccato.", "サービス {unit} はこのフォルダーではなく別のインストール（{where}）のものです。何も変更していません。", "服务 {unit} 属于另一个安装（{where}），不属于此文件夹：未做任何改动。", "O serviço {unit} pertence a outra instalação ({where}), não a esta pasta: não foi tocado.")
+_add("c.systemd_port", "The port {port} is already answered by a monitor that {unit} did not start (one in the foreground?): stop it first, the service was not started.", "El puerto {port} ya lo atiende un monitor que no arrancó {unit} (¿uno en primer plano?): páralo antes, el servicio no se arrancó.", "Der Port {port} wird schon von einem Monitor bedient, den {unit} nicht gestartet hat (einer im Vordergrund?): zuerst beenden, der Dienst wurde nicht gestartet.", "Le port {port} est déjà servi par un moniteur que {unit} n'a pas lancé (un au premier plan ?) : arrêtez-le d'abord, le service n'a pas été démarré.", "La porta {port} è già servita da un monitor che {unit} non ha avviato (uno in primo piano?): fermalo prima, il servizio non è stato avviato.", "ポート {port} は {unit} が起動していないモニター（フォアグラウンドのもの？）がすでに使っています。先に止めてください。サービスは起動していません。", "端口 {port} 已被不是由 {unit} 启动的监视器占用（前台运行的那个？）：请先停止它，服务未启动。", "A porta {port} já é atendida por um monitor que {unit} não iniciou (um em primeiro plano?): pare-o primeiro, o serviço não foi iniciado.")
+_add("c.systemd_samepid", "{unit} was started but its process is still the old one (PID {pid}): the restart did not happen.", "{unit} se arrancó pero su proceso sigue siendo el viejo (PID {pid}): el reinicio no ocurrió.", "{unit} wurde gestartet, aber sein Prozess ist noch der alte (PID {pid}): der Neustart hat nicht stattgefunden.", "{unit} a été démarré mais son processus est toujours l'ancien (PID {pid}) : le redémarrage n'a pas eu lieu.", "{unit} è stato avviato ma il suo processo è ancora quello vecchio (PID {pid}): il riavvio non è avvenuto.", "{unit} は起動しましたが、プロセスは古いまま（PID {pid}）です。再起動は行われていません。", "{unit} 已启动，但其进程仍是旧的（PID {pid}）：重启并未发生。", "{unit} foi iniciado mas o seu processo continua a ser o antigo (PID {pid}): o reinício não aconteceu.")
+_add("c.systemd_errors", "Errors of {unit} since its last start: {n}", "Errores de {unit} desde su último arranque: {n}", "Fehler von {unit} seit dem letzten Start: {n}", "Erreurs de {unit} depuis son dernier démarrage : {n}", "Errori di {unit} dall'ultimo avvio: {n}", "{unit} の前回の起動以降のエラー：{n}", "{unit} 自上次启动以来的错误：{n}", "Erros de {unit} desde o último arranque: {n}")
 _add("c.systemd_start", "systemctl --user could not start {unit} ({why}).", "systemctl --user no pudo arrancar {unit} ({why}).", "systemctl --user konnte {unit} nicht starten ({why}).", "systemctl --user n'a pas pu démarrer {unit} ({why}).", "systemctl --user non ha potuto avviare {unit} ({why}).", "systemctl --user が {unit} を起動できませんでした（{why}）。", "systemctl --user 无法启动 {unit}（{why}）。", "systemctl --user não conseguiu arrancar {unit} ({why}).")
 _add("c.handover", "The monitor on port {port} stops by itself, the update is applied and it starts again; if it does not start, the previous version comes back.", "El monitor del puerto {port} se detiene solo, se aplica la actualización y vuelve a arrancar; si no arranca, vuelve la versión anterior.", "Der Monitor auf Port {port} beendet sich selbst, das Update wird eingespielt und er startet neu; startet er nicht, kommt die vorherige Version zurück.", "Le moniteur du port {port} s'arrête de lui-même, la mise à jour est appliquée et il redémarre ; s'il ne démarre pas, la version précédente revient.", "Il monitor sulla porta {port} si ferma da solo, l'aggiornamento viene applicato e riparte; se non parte, torna la versione precedente.", "ポート {port} のモニターは自動的に停止し、更新が適用されて再起動します。起動しない場合は以前のバージョンに戻ります。", "端口 {port} 上的监视器会自行停止，应用更新后重新启动；若无法启动，则恢复到之前的版本。", "O monitor da porta {port} para sozinho, a atualização é aplicada e volta a arrancar; se não arrancar, regressa a versão anterior.")
 _add("c.running", "The monitor is running on port {port}: stop it before updating.", "El monitor está en marcha en el puerto {port}: páralo antes de actualizar.", "Der Monitor läuft auf Port {port}: beende ihn vor dem Update.", "Le moniteur tourne sur le port {port} : arrêtez-le avant de mettre à jour.", "Il monitor è in esecuzione sulla porta {port}: fermalo prima di aggiornare.", "モニターがポート {port} で稼働中です。更新前に停止してください。", "监视器正在端口 {port} 运行：更新前请先停止。", "O monitor está em execução na porta {port}: pare-o antes de atualizar.")
@@ -515,6 +519,77 @@ def systemctl_user(action, unit, timeout=30):
     except (OSError, subprocess.SubprocessError) as error:
         return 1, str(error)[:160] or type(error).__name__
     return done.returncode, ((done.stdout or "") + (done.stderr or "")).strip()[-160:]
+
+
+SYSTEMD_READ = {"run": None}      # read-only questions (`systemctl --user show`, `journalctl --user`); the tests put a double here, apart from SYSTEMCTL
+
+
+def _ask(argv, timeout=15):
+    """The text a read-only command answers, or '' (no systemd, no such unit, a timeout): a question that cannot be answered never blocks anything."""
+    run = SYSTEMD_READ["run"] or subprocess.run
+    try:
+        done = run(argv, capture_output=True, text=True, timeout=timeout, stdin=subprocess.DEVNULL)
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    return (done.stdout or "") if getattr(done, "returncode", 1) == 0 else ""
+
+
+def unit_properties(unit, names=("MainPID", "ActiveState", "LoadState", "WorkingDirectory", "FragmentPath", "ExecStart", "ActiveEnterTimestamp")):
+    """{property: value} of a user unit, from `systemctl --user show` (empty when it cannot be read)."""
+    if not UNIT_RE.match(str(unit or "")):
+        return {}
+    text = _ask(["systemctl", "--user", "show", unit] + ["--property=" + n for n in names])
+    out = {}
+    for line in text.splitlines():
+        key, sep, value = line.partition("=")
+        if sep and key in names:
+            out[key] = value.strip()
+    return out
+
+
+def _norm(path):
+    return str(path).replace("\\", "/").rstrip("/").lower()
+
+
+def unit_foreign(unit, root, props=None):
+    """'' when the unit runs THIS installation (or when that cannot be told), else the folder it belongs to: a unit whose working directory and command do not mention this folder is another checkout's."""
+    props = unit_properties(unit) if props is None else props
+    if props.get("LoadState") not in (None, "loaded"):      # a unit systemd does not know is nobody's: nothing to protect
+        return ""
+    where = props.get("WorkingDirectory") or ""
+    command = props.get("ExecStart") or ""
+    here = _norm(root)
+    if not (where or command):
+        return ""
+    if here and (here in _norm(where) or here in _norm(command)):
+        return ""
+    return where or command[:120]
+
+
+def unit_pid(unit):
+    try:
+        return int(unit_properties(unit, ("MainPID",)).get("MainPID") or 0)
+    except ValueError:
+        return 0
+
+
+def wait_new_pid(unit, old, timeout=20):
+    """Waits until the unit has a process that is not `old` (a restart that kept the old process is not a restart). Returns the new PID, or 0 when none came."""
+    deadline = time.time() + timeout
+    pid = unit_pid(unit)
+    while not (pid and pid != old) and time.time() < deadline:
+        time.sleep(0.5)
+        pid = unit_pid(unit)
+    return pid if pid and pid != old else 0
+
+
+def unit_errors(unit, limit=20):
+    """The error lines of the unit since its last start (and only those), from `journalctl --user`; [] when there are none or the journal cannot be read."""
+    since = unit_properties(unit, ("ActiveEnterTimestamp",)).get("ActiveEnterTimestamp") or ""
+    if not since or not UNIT_RE.match(str(unit or "")):
+        return []
+    text = _ask(["journalctl", "--user", "-u", unit, "--since", since, "-p", "err", "-o", "cat", "--no-pager", "-n", str(int(limit))])
+    return [line.strip()[:300] for line in text.splitlines() if line.strip()][-limit:]
 
 
 def ports_of(cfg):
@@ -1474,6 +1549,11 @@ class Updater:
             report.update(code=NOT_CONFIRMED, error="not confirmed")
             return report
         if opts.get("systemd_unit"):
+            foreign = unit_foreign(opts["systemd_unit"], self.root)
+            if foreign:
+                report.update(code=BLOCKED, error=tr("c.systemd_foreign", unit=opts["systemd_unit"], where=foreign))
+                return report
+            opts["_pid_before"] = unit_pid(opts["systemd_unit"])
             code, why = systemctl_user("stop", opts["systemd_unit"])
             if code != 0:
                 report.update(code=BLOCKED, error=tr("c.systemd_stop", unit=opts["systemd_unit"], why=why or "?"))
@@ -1714,9 +1794,18 @@ class Updater:
         logs.mkdir(parents=True, exist_ok=True)
         unit = opts.get("systemd_unit")
         if unit:      # the manager starts it, with its own environment and its own log: this process only waits for it
+            foreign = unit_foreign(unit, self.root)
+            if foreign:
+                raise RuntimeError(tr("c.systemd_foreign", unit=unit, where=foreign))
+            state = unit_properties(unit, ("ActiveState", "LoadState"))
+            if state.get("LoadState") == "loaded" and state.get("ActiveState") not in (None, "active", "activating") and self.detect()["running"].get("lite" if edition == "lite" else "complete", {}).get("open"):
+                raise RuntimeError(tr("c.systemd_port", unit=unit, port=port))      # something else answers on the port the unit is about to use
             code, why = systemctl_user("start", unit)
             if code != 0:
                 raise RuntimeError(tr("c.systemd_start", unit=unit, why=why or "?"))
+            old = opts.get("_pid_before") or 0
+            if old and not wait_new_pid(unit, old, float(opts.get("pid_timeout", 20))):
+                raise RuntimeError(tr("c.systemd_samepid", unit=unit, pid=old))
             journal["monitor_started"] = True
             return self._wait_started(port, to, holder, opts)
         log = open(logs / "updater_start.log", "ab")
@@ -2473,7 +2562,14 @@ def main(argv=None, out=None, inp=input):
         updater = make_updater()
         if command == "status":
             info = updater.detect()
-            say(json.dumps(info, indent=1) if args.json else render_state(info))
+            unit = args.systemd_unit if args.systemd_unit and UNIT_RE.match(args.systemd_unit) else ""
+            if unit:      # only what went wrong since the last start of the service, not the whole journal
+                info["systemd"] = {"unit": unit, "errors_since_start": unit_errors(unit), "pid": unit_pid(unit)}
+            extra = ""
+            if unit:
+                found = info["systemd"]["errors_since_start"]
+                extra = "\n" + tr("c.systemd_errors", unit=unit, n=len(found)) + "".join("\n  " + e for e in found)
+            say(json.dumps(info, indent=1) if args.json else render_state(info) + extra)
             return OK
         if command == "releases":
             rels = updater.annotate()

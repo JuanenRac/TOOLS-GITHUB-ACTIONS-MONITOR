@@ -26,6 +26,17 @@ ENDPOINT_RE = re.compile(r'"(/api/[a-z0-9/_-]*[a-z0-9_-])"')
 
 #: endpoint -> (methods, what it is, for the AIs). Every endpoint named in the code must be here.
 NOTES = {
+    "/api/clone-anomalies": ("GET", "the users who cloned more different repositories than the threshold in the window, read from the audit log of the organization (maintainer; `audit_feed.clone_alert.enabled`; `available` is false when the plan has no git events)"),
+    "/api/expected-red": ("GET,POST", "the workflows marked as red on purpose with a reason, an owner and an end (GET: the list with each state; POST {action: add|remove, repo, workflow, reason, owner, days}: a maintainer, `expected_red.enabled`, a note of this monitor)"),
+    "/api/meta-columns": ("GET", "the metadata columns of the Repositories table (`fleet.meta_columns`) and the value of each repository found so far; a thread reads a few files per call"),
+    "/api/glossary": ("GET", "what each figure means exactly (written with the real parameters of the calculation and of the settings), the attacks the rules of the linter look for, the limits of the analysis and a few places to learn more (read only)"),
+    "/api/whats-new": ("GET", "the entries of the changelog of the versions after `?since=VERSION` up to the installed one, in the language of the page; `display.whats_new` turns it off (read only)"),
+    "/api/devices": ("GET", "the devices paired with a QR code and whether pairing is on (this computer only; empty while `pairing.enabled` is off)"),
+    "/api/devices/revoke": ("POST", "take one paired device away ({id}); its token stops working at once (this computer only)"),
+    "/api/pair": ("GET,POST", "prefix of the pairing of a phone (see the routes below)"),
+    "/api/pair/redeem": ("POST", "a phone spends the one-use pairing code ({code}) and gets its own access cookie (the code is its proof; needs `pairing.enabled` and the network mode)"),
+    "/api/pair/start": ("POST", "open a one-use pairing code and answer its address and QR code (this computer only; needs `pairing.enabled` and the network mode)"),
+    "/api/pair/status": ("GET", "the same answer as /api/devices (this computer only)"),
     "/api/about": ("GET", "version, edition, folders, health and a text to paste in a support request"),
     "/api/access": ("GET,POST", "the access token of the network mode (this computer only)"),
     "/api/accounts": ("GET", "the accounts of an installation with several, with their state (running, blind)"),
@@ -116,6 +127,8 @@ NOTES = {
     "/api/gh-action": ("POST", "prefix of the actions on GitHub (plan and confirm, see below)"),
     "/api/gh-action/confirm": ("POST", "confirm an action on GitHub (this computer only)"),
     "/api/gh-action/plan": ("POST", "plan an action on GitHub; nothing is sent until it is confirmed"),
+    "/api/webhook/redeliver": ("POST", "ask GitHub now to send again the webhook deliveries that never arrived, for the hooks named in `webhook.redeliver.hooks` (administrators, this computer only; it writes to GitHub)"),
+    "/api/credential/probe": ("POST", "does the login (and the GitHub App) work: who it is, classic or fine-grained, scopes it lacks, repositories seen, allowance left, installations of the App (this computer only; at most one real check every 10 seconds)"),
     "/api/github-app/status": ("GET", "state of the optional GitHub App for reads (this computer only)"),
     "/api/github-token": ("GET,POST", "state or change of the token the monitor keeps (administrators, this computer only)"),
     "/api/health": ("GET", "is it alive; `?deep=1` fails when the refresh cycle is stuck"),
@@ -212,12 +225,25 @@ def role_of(method, path):
     return needed or "public"
 
 
+SENTINEL_SIGNAL_NOTES = {
+    "sentinel.security": "the alerts of the Security sentinel (Dependabot, code scanning, secrets, branch protection by rule or ruleset, workflow permissions): one row per code and repository, worst first; the stream carries one event per row that is watch or act",
+    "sentinel.delivery": "the alerts of the Delivery sentinel (unreleased changes, tags without release, version mismatch, ecosystem drift, assets): one row per code and repository; the stream carries the rows that are watch or act",
+    "sentinel.supply": "the alerts of the Supply chain sentinel (unpinned actions, wide permissions, pull_request_target): one row per code and repository",
+    "sentinel.security.coverage": "present only when the Security sentinel could not read everything (reads that failed with their cause, repositories not checked yet, a pause, sources it may not read): an empty list is not a clean one while it is open",
+    "sentinel.delivery.coverage": "present only when the Delivery sentinel could not read everything, with the causes",
+    "sentinel.supply.coverage": "present only when the Supply chain sentinel could not read everything, with the causes",
+    "sentinel.collab.coverage": "present only when the Collab sentinel could not read everything, with the causes",
+}
+
+
 def signal_ids():
     """Every signal id that signals.py can make, from its source, plus one for each panel of the Sentinel."""
     from github_actions_monitor.sentinels import sentinel_panels
     text = (MON / "src" / "github_actions_monitor" / "data_pipeline" / "signals.py").read_text(encoding="utf-8")
     found = set(re.findall(r'_signal\("([a-z0-9_.]+)"', text))
-    return sorted(found | {"sentinel." + key for key in sentinel_panels.ORDER})
+    from github_actions_monitor.data_pipeline import signals as signals_mod
+    own = {"sentinel." + n for n in signals_mod.SENTINEL_WITH_SIGNAL} | {f"sentinel.{n}.coverage" for n in signals_mod.SENTINEL_NAMES}      # the ones signals.py builds from a name
+    return sorted(found | own | {"sentinel." + key for key in sentinel_panels.ORDER})
 
 
 def panel_ids():
@@ -234,7 +260,9 @@ def signals_md():
     lines = ["# Signals and panels", "", "Generated from the code. `GET /api/ai/state` lists the signals the monitor says now, each with a level (`act` somebody has to do something, `watch` keep an eye on it, `info` nothing to do) and rows with",
              "the repository, a link, how old it is and the next step. `GET /api/sentinel/panels` gives the panels of the Sentinel as data.", "", "| signal | what it says |", "| --- | --- |"]
     for sid in signal_ids():
-        if sid.startswith("sentinel."):
+        if sid in SENTINEL_SIGNAL_NOTES:
+            lines.append(f"| `{sid}` | {SENTINEL_SIGNAL_NOTES[sid]} |")
+        elif sid.startswith("sentinel."):
             title = i18n.tl("en", f"ui.{sid.split('.')[1]}_title") if sid != "sentinel.collab" else i18n.tl("en", "ui.collab_title")
             lines.append(f"| `{sid}` | the panel `{sid.split('.')[1]}` of the Sentinel: {title} |")
         else:

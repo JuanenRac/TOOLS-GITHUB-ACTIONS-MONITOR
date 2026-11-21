@@ -39,7 +39,7 @@ SESSION_COOKIE = "monitor_session"
 SCRYPT_N, SCRYPT_R, SCRYPT_P = 2 ** 14, 8, 1
 PBKDF2_ROUNDS = 600_000
 MAX_PASSWORD_BYTES = 256
-DEFAULTS = {"enabled": False, "session_hours": 12, "max_failed_logins": 5, "lockout_minutes": 15, "min_length": 10, "allow_bearer": False, "audit": True}
+DEFAULTS = {"enabled": False, "session_hours": 12, "max_failed_logins": 5, "lockout_minutes": 15, "min_length": 10, "allow_bearer": False, "audit": True, "stream_revalidate_min": 10}
 AUDIT_MAX_BYTES = 1_000_000
 AUDIT_FILE = None                           # tests point this to a temporary file; None = auth_audit.jsonl in the product folder
 _lock = threading.RLock()
@@ -60,6 +60,7 @@ def settings(config):
             "lockout_minutes": _int(cfg.get("lockout_minutes"), 1, 1440, DEFAULTS["lockout_minutes"]),
             "min_length": _int(cfg.get("min_length"), 8, 64, DEFAULTS["min_length"]),
             "allow_bearer": cfg.get("allow_bearer") is True,
+            "stream_revalidate_min": _int(cfg.get("stream_revalidate_min"), 1, 1440, DEFAULTS["stream_revalidate_min"]),
             "audit": cfg.get("audit") is not False}
 
 
@@ -131,12 +132,12 @@ def password_problem(password, username, minimum):
 # --- the permissions of each route ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 #: POST routes a maintainer may use (they only change what belongs to the monitor); every other POST is for an admin, so a route added later is closed until someone lists it here on purpose
-MAINTAINER_POST = ("/api/alerts/mute", "/api/alerts/unmute", "/api/ai/ack", "/api/hot-only", "/api/mode", "/api/refresh-repos", "/api/sentinel/parte/save", "/api/discovery/group", "/api/welcome",
+MAINTAINER_POST = ("/api/expected-red", "/api/alerts/mute", "/api/alerts/unmute", "/api/ai/ack", "/api/hot-only", "/api/mode", "/api/refresh-repos", "/api/sentinel/parte/save", "/api/discovery/group", "/api/welcome",
                    "/api/session-token")
 #: POST routes a viewer may use because they only READ (and spend the one daily budget of the AI): the assistant answers a fixed question from what that role already sees
 VIEWER_POST = ("/api/assistant/ask",)
 #: GET routes only an admin reads (they describe what is configured to reach the outside)
-MAINTAINER_GET = ("/api/audit-log",)      # the log of actions: never a viewer (an administrator, or a maintainer when audit_log.maintainers_can_read says so, is decided by the route)
+MAINTAINER_GET = ("/api/clone-anomalies", "/api/audit-log",)      # the log of actions: never a viewer (an administrator, or a maintainer when audit_log.maintainers_can_read says so, is decided by the route)
 ADMIN_GET = ("/api/run-log", "/api/github-token", "/api/advanced", "/api/github-app/status", "/api/auth/users", "/api/auth/audit", "/api/ai/prompts")
 #: routes that never need a session: the login itself, the health check, the page shell, and the webhook and the network access, which have a proof of their own
 PUBLIC = ("/api/auth/login", "/api/auth/me", "/api/auth/bootstrap", "/api/auth/logout", "/api/health", "/api/webhook", "/api/chatops/slack", "/api/chatops/discord", "/api/access", "/login")

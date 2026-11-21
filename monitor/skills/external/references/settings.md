@@ -140,6 +140,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `api.max_limit` | `200` | advanced | Most items per page |
 | `api.v1_enabled` | `"auto"` | advanced | Read API under /api/v1/ |
 | `audit_dir` | `""` | paths | Folder of audit files |
+| `audit_feed.clone_alert.bot_patterns` | `["-bot", "_bot", "deploy", "guardian"]` | sentinel | Names that are robots |
+| `audit_feed.clone_alert.check_minutes` | `30` | sentinel | Minutes between two reads of the audit log |
+| `audit_feed.clone_alert.enabled` | `false` | sentinel | Warn about abnormal clones |
+| `audit_feed.clone_alert.threshold` | `5` | sentinel | Repositories cloned before warning |
+| `audit_feed.clone_alert.window_hours` | `24` | sentinel | Window of the clones (hours) |
 | `audit_log.enabled` (secure) | `-` | sentinel | Log of actions on |
 | `audit_log.keep_generations` (secure) | `-` | sentinel | Rotated files kept |
 | `audit_log.maintainers_can_read` (secure) | `-` | sentinel | Maintainers may read it |
@@ -152,6 +157,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `auth.max_failed_logins` (secure) | `5` | advanced | Wrong passwords before a lock |
 | `auth.min_length` (secure) | `10` | advanced | Shortest password |
 | `auth.session_hours` (secure) | `12` | advanced | Session length |
+| `auth.stream_revalidate_min` (secure) | `10` | advanced | Look at a live stream's session every |
+| `backpressure.enabled` | `false` | polling | Limit the reads of a cycle (backpressure) |
+| `backpressure.max_reads_per_cycle` | `0` | polling | Most reads per cycle (0 = no fixed limit) |
+| `backpressure.min_reads` | `20` | polling | Fewest reads per cycle when it cuts |
+| `backpressure.shed_percent` | `150` | polling | Cut the reads when a cycle lasts this share of the pause |
 | `cache.etag.enabled` | `true` | cache | Conditional reads on |
 | `cache.etag.revalidate_active` | `true` | cache | Read lists with running work in full |
 | `cache.etag.skip_stateful` | `true` | cache | Always read live state in full |
@@ -211,6 +221,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ci.stuck.workflow_minutes` | `[]` | sentinel | Fixed limits per workflow |
 | `cli.default_format` | `"text"` | general | Default format of the command line |
 | `cli.prefer_v1` | `true` | advanced | The command line asks /api/v1/ first |
+| `cli.status_codes` | `"classic"` | general | Exit codes of status |
+| `cli.watch.branch_timeout_seconds` | `900` | general | How long watch branch waits |
 | `cli.watch.default_interval_seconds` | `5` | general | Usual interval of watch |
 | `cli.watch.min_interval_seconds` | `2` | general | Fastest refresh of watch |
 | `cold_refresh_seconds` | `600` | polling | Refresh of cold repositories |
@@ -225,6 +237,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `compare.min_resolved` | `3` | sentinel | Least resolved alerts |
 | `compare.min_runs_per_window` | `20` | sentinel | Least finished runs per period |
 | `compare.min_snapshots` | `12` | sentinel | Least hourly snapshots |
+| `compare.progressive` | `false` | sentinel | Answer a long window at once and finish it in the background |
+| `compare.progressive_days` | `7` | sentinel | Days of the first answer |
 | `compare.top_changes` | `10` | sentinel | Rows in the changes |
 | `compare.workdays` | `["1", "2", "3", "4", "5"]` | sentinel | Workdays |
 | `config_check.strict` | `false` | basic | Refuse to start with a bad configuration |
@@ -241,23 +255,46 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `discovery.suggest_groups` | `true` | basic | Suggest groups for unclassified repositories |
 | `dispatch.required_ci` | `["ci.yml"]` | advanced | Workflows that must pass before a build is fired |
 | `display.blink_red_tiles` | `true` | general | Blink red tiles |
+| `display.density` | `"normal"` | general | Density of the page |
+| `display.live_throttle_s` | `30` | general | Seconds between updates while you read |
+| `display.palette` | `"default"` | general | Colours for colour blindness |
+| `display.reduce_motion` | `"auto"` | general | Less movement |
 | `display.timezone` | `"local"` | general | Time zone of the texts |
+| `display.whats_new` | `true` | general | Show what's new after an update |
 | `ecosystems` | `"all"` | general | Ecosystems watched |
 | `ecosystems_file` | `-` | paths | Ecosystems file |
+| `events_feed.enabled` | `false` | polling | Find changes with the events of the account |
+| `events_feed.interval_seconds` | `60` | polling | Seconds between reads of the events |
+| `events_feed.max_per_tick` | `20` | polling | Repositories read again per turn |
+| `events_feed.owner_kind` | `"auto"` | polling | Kind of account |
 | `exclude` | `[]` | general | Repositories to skip |
+| `expected_red.enabled` | `false` | sentinel | Expected red |
+| `expected_red.max_days` | `30` | sentinel | Most days of an expected red |
 | `extra_reader.any_folder` (secure) | `false` | quota | Accept the token file from any folder |
 | `extra_reader.enabled` (secure) | `false` | quota | Read also with a second account |
 | `extra_reader.file` (secure) | `""` | quota | File with the token of the second account |
+| `finops.by_change` | `false` | advanced | Cost of the CI by kind of change |
+| `finops.co2` | `false` | advanced | Estimate the carbon of the CI minutes |
+| `finops.co2_grams_per_kwh` | `400` | advanced | Grams of CO2 per kWh of the grid (for the carbon estimate) |
+| `finops.co2_watts` | `40` | advanced | Watts of a runner (for the carbon estimate) |
 | `finops.jobs_per_cycle` | `0` | advanced | Jobs read per cycle for their system |
 | `fleet.group_by` | `"ecosystem"` | general | Group the fleet by |
 | `fleet.labels` | `[]` | general | Labels by repository name |
+| `fleet.meta_columns` | `[]` | general | Metadata columns of the repositories |
+| `fleet.meta_per_call` | `20` | general | Files read per round for the metadata columns |
+| `fleet.meta_ttl_hours` | `6` | general | Hours before a metadata value is read again |
 | `fleet.page_size` | `50` | general | Repositories per page |
 | `fleet.saved_filters` | `[]` | general | Saved filters |
 | `fleet.show_all_active` | `true` | general | Every run that is going |
 | `fleet.sort` | `"risk"` | general | Order inside a group |
 | `github_actions.allowed` (secure) | `["rerun_failed", "cancel"]` | advanced | Actions that can be planned |
+| `github_actions.comment_on_target` (secure) | `false` | advanced | Comment on the issue or pull request |
 | `github_actions.enabled` (secure) | `false` | advanced | Allow actions on GitHub |
 | `github_actions.merge_method` (secure) | `"squash"` | advanced | Merge method |
+| `github_actions.operator` | `""` | advanced | Name of the operator |
+| `github_actions.preflight` (secure) | `true` | advanced | Check the permission before planning |
+| `github_actions.require_reason` (secure) | `true` | advanced | A reason and an operator for every action |
+| `github_actions.writer_lock` (secure) | `true` | advanced | Only one monitor writes |
 | `github_app.app_id` (secure) | `""` | quota | App number (app_id) |
 | `github_app.enabled` (secure) | `false` | quota | Read with a GitHub App |
 | `github_app.installation_id` (secure) | `""` | quota | Installation number (optional) |
@@ -265,8 +302,16 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `github_app.openssl_path` (secure) | `-` | quota | Path of the program openssl |
 | `github_app.share_reads` (secure) | `false` | quota | Let tools take a read-only token of the App |
 | `github_owner` | `""` | general | GitHub account |
+| `github_status.enabled` (secure) | `false` | polling | Show the state of GitHub |
+| `github_status.interval_seconds` | `300` | polling | Seconds between reads of the state |
+| `github_status.mark_reds` | `true` | polling | Mark the reds of an incident |
 | `github_token.enabled` (secure) | `false` | advanced | Keep a GitHub token in the monitor |
 | `github_token.store` (secure) | `"auto"` | advanced | Where the token is kept |
+| `heartbeat.enabled` (secure) | `false` | outputs | Send the outside heartbeat |
+| `heartbeat.fail_suffix` | `""` | outputs | Address ending for a failure |
+| `heartbeat.interval_seconds` | `300` | outputs | Seconds between pings |
+| `heartbeat.send_state` | `true` | outputs | Send the version and the state in the ping |
+| `heartbeat.url_env` (secure) | `"MONITOR_HEARTBEAT_URL"` | outputs | Variable with the address to ping |
 | `hot_hours` | `3` | polling | A repository is hot for |
 | `issues_refresh_seconds` | `180` | polling | Refresh of issues |
 | `kiosk.enabled` | `false` | general | Kiosk profile |
@@ -283,6 +328,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `lessons.max_entries` | `5000` | ai | Most lines in the book |
 | `lessons.recurring_from` | `2` | ai | A kind of failure repeats from |
 | `lessons.retention_days` | `180` | ai | Keep failures for |
+| `limits.memory_mb` | `512` | polling | Memory the held runs may take |
+| `limits.warn_percent` | `80` | polling | Warn at this share of a limit |
 | `lint.anonymous_public` (secure) | `-` | lint | Read public repositories without any credential |
 | `lint.api.max_calls_per_tick` | `-` | lint | API calls per cycle for workflow files |
 | `lint.api.max_files_per_repo` | `-` | lint | Workflow files read per repository |
@@ -297,6 +344,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `lint.own_owners` | `-` | lint | Accounts whose actions are your own |
 | `lint.refresh_seconds` | `-` | lint | Scan every |
 | `lint.rules.archived_action.enabled` | `-` | lint | lint.rules.archived_action.enabled |
+| `lint.rules.container_input_name.enabled` | `-` | lint | lint.rules.container_input_name.enabled |
+| `lint.rules.container_input_name.severity` | `-` | lint | lint.rules.container_input_name.severity |
 | `lint.rules.injection.enabled` | `-` | lint | lint.rules.injection.enabled |
 | `lint.rules.injection.severity` | `-` | lint | lint.rules.injection.severity |
 | `lint.rules.no_timeout.enabled` | `-` | lint | lint.rules.no_timeout.enabled |
@@ -324,6 +373,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `listen.local_port` (secure) | `0` | advanced | Local-only port for this computer |
 | `listen.max_failed_attempts` (secure) | `10` | advanced | Wrong access tokens allowed |
 | `listen.network` (secure) | `false` | advanced | Listen beyond this computer |
+| `listen.noindex` (secure) | `true` | advanced | Keep search engines out |
 | `listen.proxy_public_host` (secure) | `""` | advanced | Public name of the HTTPS proxy (without a port) |
 | `listen.query_access` (secure) | `false` | advanced | Accept the access token in the address (deprecated) |
 | `listen.secure_cookie` (secure) | `false` | advanced | Mark the access cookie as Secure |
@@ -340,6 +390,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `logs.failed_step.max_bytes` | `2000` | ai | Size of the failed step text |
 | `logs.failed_step.max_per_minute` | `10` | ai | Lookups of a failed step per minute |
 | `max_workers` | `20` | polling | Parallel requests |
+| `mcp.prompts` | `true` | ai | MCP server: guided prompts |
+| `mcp.write_tools` (secure) | `false` | ai | MCP server: allow actions on GitHub |
 | `min_rate_remaining` | `800` | polling | Pause below this allowance |
 | `mirror.enabled` (secure) | `false` | advanced | Keep a local copy of artifacts |
 | `mirror.folder` | `""` | advanced | Folder of the copies |
@@ -350,6 +402,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `modes.auto_low` | `-` | quota | Low mode by itself |
 | `modes.auto_low_enter` | `-` | quota | Calls left to enter Low |
 | `modes.auto_low_exit` | `-` | quota | Calls left to leave Low |
+| `modes.idle_minutes` | `0` | quota | Minutes without viewers before going cold |
 | `modes.low.cold_refresh_seconds` | `-` | quota | Low: seconds between readings of the rest |
 | `modes.low.hot_hours` | `-` | quota | Low: hours a repository stays hot |
 | `modes.low.refresh_seconds` | `-` | quota | Low: seconds between readings of hot repositories |
@@ -385,9 +438,12 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `notify.channels.telegram.chat_id` | `-` | notify | notify.channels.telegram.chat_id |
 | `notify.channels.telegram.enabled` | `-` | notify | notify.channels.telegram.enabled |
 | `notify.channels.telegram.token_env` | `-` | notify | notify.channels.telegram.token_env |
+| `notify.dedupe_hours` | `-` | notify | Hours a notification is remembered |
+| `notify.dedupe_ledger` | `-` | notify | Do not repeat a notification |
 | `notify.digest.max_items` | `-` | notify | Alerts kept for a digest |
 | `notify.enabled` (secure) | `-` | notify | Notifications on |
 | `notify.events` | `-` | notify | Events that notify |
+| `notify.max_event_age_hours` | `-` | notify | Do not notify events older than (hours, 0 = off) |
 | `notify.max_per_hour` | `-` | notify | Messages per hour |
 | `notify.users.enabled` (secure) | `-` | notify | Notifications for each user |
 | `notify.users.max_per_hour` | `-` | notify | Messages per user per hour |
@@ -409,22 +465,34 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ops.purge.enabled` (secure) | `-` | paths | Allow "purge now" |
 | `ops.purge.require_backup_hours` (secure) | `-` | paths | Require a good copy newer than |
 | `organizations.discover` | `false` | advanced | List the organisations of the login |
+| `otlp.cicd_conventions` | `false` | advanced | Names and attributes of the CI/CD conventions |
 | `otlp.enabled` (secure) | `false` | advanced | Export OpenTelemetry (OTLP) |
 | `otlp.endpoint` (secure) | `""` | advanced | OTLP collector address |
 | `otlp.interval_seconds` | `60` | advanced | Seconds between exports |
+| `otlp.job_spans` | `false` | advanced | One span per job |
 | `outputs.dashboard.enabled` (secure) | `-` | outputs | Document for the status dashboard |
 | `outputs.json.enabled` (secure) | `-` | outputs | Grafana JSON source |
 | `outputs.prometheus.enabled` (secure) | `-` | outputs | Prometheus: /metrics |
+| `outputs.prometheus.histogram_max_series` | `-` | outputs | Prometheus: most series per histogram |
+| `outputs.prometheus.histograms` | `-` | outputs | Prometheus: histograms of jobs |
 | `outputs.prometheus.per_repo` | `-` | outputs | Prometheus: series per repository |
+| `outputs.prometheus.per_runner` | `-` | outputs | Prometheus: figures of each self-hosted runner |
 | `pagination.collab_pages` | `3` | polling | Pages of issues and pull requests per repository |
 | `pagination.cursor_pages` | `3` | polling | Pages followed by cursor (alerts) |
 | `pagination.job_pages` | `2` | polling | Pages of jobs per run |
 | `pagination.workflow_pages` | `3` | polling | Pages of workflows per repository |
+| `pairing.code_minutes` | `5` | general | Minutes a pairing code lasts |
+| `pairing.device_days` | `90` | general | Days a paired device keeps its access |
+| `pairing.enabled` (secure) | `false` | general | Pair phones with a QR code |
+| `pairing.max_devices` | `10` | general | Most paired devices |
 | `ports.complete` | `8765` | general | Port of the complete edition |
 | `ports.lite` | `8766` | general | Port of the lite edition |
 | `profiles_file` | `-` | paths | Batch profiles file |
+| `pwa.enabled` | `false` | general | Installable app (PWA) |
+| `pwa.refresh_on_return` | `true` | general | Refresh when the app returns |
 | `quota.alert_percent` | `90` | basic | Alert at this share of the included minutes |
 | `quota.billing_api` (secure) | `false` | basic | Read the real usage from the billing report of GitHub |
+| `quota.chip` | `true` | basic | Header chip shows the tightest bucket |
 | `quota.default_runner` | `"linux"` | basic | System assumed for the minute estimate |
 | `quota.failover` | `false` | quota | When an allowance runs out, read with another source |
 | `quota.failover_max_age_minutes` | `60` | quota | Oldest copy that may be shown |
@@ -438,8 +506,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `readpool.reserve.app` | `-` | quota | readpool.reserve.app |
 | `readpool.reserve.extra` | `-` | quota | readpool.reserve.extra |
 | `readpool.reserve.user` | `-` | quota | readpool.reserve.user |
+| `refresh.share_by_workflow` | `false` | polling | Share one read of a workflow between callers |
+| `refresh.share_seconds` | `20` | polling | Seconds a shared read stays valid |
 | `refresh_seconds` | `45` | polling | Refresh of hot repositories |
 | `report_export.json` | `false` | outputs | JSON marked |
+| `report_export.limits` | `true` | outputs | Limits of the analysis in the reports |
 | `report_export.name` | `"monitor-{tab}-{date}"` | outputs | Suggested file name |
 | `report_export.paper` | `"a4"` | outputs | Paper of the PDF |
 | `report_export.pdf` | `true` | outputs | PDF marked |
@@ -516,8 +587,13 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `screens.default_density` | `"normal"` | general | Density of the wall screens |
 | `screens.default_theme` | `"inherit"` | general | Theme of the wall screens |
 | `screens.enabled` | `false` | general | Wall screens |
+| `screens.glance_seconds` | `3` | general | Seconds of the glance |
 | `screens.group_map` | `true` | general | Group map on the overview screen |
+| `screens.hide_healthy` | `false` | general | Hide what is healthy |
+| `screens.idle_dim_minutes` | `0` | general | Minutes until a quiet screen rests |
+| `screens.life` | `true` | general | Life on the wall screens |
 | `screens.logo_corner` | `"top-right"` | general | Corner of the logo |
+| `screens.logo_fleet` | `false` | general | Logo on the screen: Fleet |
 | `screens.logo_max_height` | `64` | general | Largest height of the logo |
 | `screens.logo_max_width` | `160` | general | Largest width of the logo |
 | `screens.logo_now` | `false` | general | Logo on the screen: Right now |
@@ -528,6 +604,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `screens.menu_rotate_seconds` | `20` | general | Seconds per screen in the turning presets |
 | `screens.menu_target` | `"new"` | general | Where the Screens menu opens a screen |
 | `screens.menu_tv_scale` | `1.5` | general | Size of the TV preset |
+| `screens.min_font_px` | `12` | general | Smallest letter of the screens |
 | `screens.mode` | `"three"` | general | Wall screens mode |
 | `screens.night_dim` | `false` | general | Dim at night |
 | `screens.night_dim_from_hour` | `22` | general | Dim from (hour) |
@@ -538,9 +615,17 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `screens.safe_margin_percent` | `0` | general | Safe margin of the screens |
 | `screens.show_repo_names` (secure) | `"public"` | general | Repository names on wall screens |
 | `screens.sound` | `false` | general | Sound on wall screens |
+| `screens.sound_voices` | `""` | general | Sounds of the wall screens |
+| `screens.sound_volume` | `0` | general | Volume of the wall screens |
+| `screens.theme_fleet` | `"inherit"` | general | Theme of the screen: Fleet |
 | `screens.theme_now` | `"inherit"` | general | Theme of the screen: Right now |
 | `screens.theme_overview` | `"inherit"` | general | Theme of the screen: Overview |
 | `screens.theme_sentinels` | `"inherit"` | general | Theme of the screen: Sentinels |
+| `screens.transition` | `"fade"` | general | Change between screens |
+| `selfwatch.enabled` | `true` | paths | The monitor watches itself |
+| `selfwatch.interval_seconds` | `60` | paths | Seconds between two readings |
+| `selfwatch.rss_warn_mb` | `1024` | paths | Warn when its memory is above |
+| `selfwatch.threads_warn` | `400` | paths | Warn when it runs more threads than |
 | `sentinel.a2_full_sample_unknown` | `-` | sentinel | Unknown when sample is full |
 | `sentinel.a2_resolve_batch_min` | `-` | sentinel | A2 lookups in one request from |
 | `sentinel.a2_resolve_batch_pages` | `-` | sentinel | A2 pages per repository |
@@ -652,12 +737,14 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinels.collab.min_rate_remaining` | `-` | sentinel | Collab allowance floor |
 | `sentinels.collab.refresh_seconds` | `-` | sentinel | Collab cycle |
 | `sentinels.collab.repos` | `-` | sentinel | Collab repositories |
+| `sentinels.collab.rules.external_days` | `-` | sentinel | Days before a person from outside is chased |
 | `sentinels.collab.rules.ignore_labels` | `-` | sentinel | Ignored labels |
 | `sentinels.collab.rules.issue_critical_labels` | `-` | sentinel | Critical labels |
 | `sentinels.collab.rules.issue_stale_days` | `-` | sentinel | Days without activity (issue) |
 | `sentinels.collab.rules.pr_conflict_days` | `-` | sentinel | Days with conflicts |
 | `sentinels.collab.rules.pr_draft_max_days` | `-` | sentinel | Days of a draft |
 | `sentinels.collab.rules.pr_review_pending_days` | `-` | sentinel | Days waiting for review |
+| `sentinels.collab.rules.team_members` | `-` | sentinel | People who are part of the team |
 | `sentinels.collab.rules.watch_external_comments` | `-` | sentinel | Watch outsiders |
 | `sentinels.collab.search_api` | `-` | sentinel | Read issues and pull requests with the Search API |
 | `sentinels.delivery.changelog_paths` | `-` | sentinel | CHANGELOG files |
@@ -725,7 +812,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinels.supply.signals.unpinned.level` | `-` | sentinel | Actions not pinned to a commit: level |
 | `session_guard` (secure) | `true` | basic | One-use token for changes |
 | `show_unclassified` | `true` | general | Show unclassified repositories |
+| `siem.queue_max` | `500` | outputs | Events waiting for a SIEM |
 | `signed_dir` | `""` | paths | Folder of signature records |
+| `sound.ambient` | `false` | general | Background ambience |
+| `sound.ambient_volume` | `10` | general | Ambience volume |
 | `sound.cooldown_seconds` | `30` | general | Seconds between two sounds |
 | `sound.enabled` | `true` | general | Sound alerts |
 | `sound.on_connection_lost` | `true` | general | Sound when the connection drops |
@@ -744,6 +834,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sound.quiet_to_hour` | `7` | general | Quiet until |
 | `sound.server_beep` (secure) | `false` | general | Beep of this computer (page closed) |
 | `sound.theme` | `"classic"` | general | Theme of the sounds |
+| `sound.tick` | `false` | general | Clock tick |
+| `sound.tick_seconds` | `1` | general | Seconds between ticks |
+| `sound.voices` | `""` | general | Sound of each kind of event |
 | `sound.volume` | `40` | general | Volume of the page |
 | `startup.resume_max_age_hours` | `12` | basic | Show the last picture after a restart (hours) |
 | `stuck_minutes` | `120` | polling | A build is stuck after |
@@ -753,8 +846,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `tui.theme` | `-` | console | Colours |
 | `ui.about_org_logo` | `false` | general | Organization logo in About |
 | `ui.alerts_sort` | `"server"` | general | Order of the alerts |
+| `ui.compact` | `"auto"` | general | Compact view |
 | `ui.now_sort` | `"ecosystem"` | general | Order of the runs happening now |
 | `ui.orientation` | `"auto"` | general | Orientation of the page |
+| `ui.palette` | `true` | general | Palette and shortcuts |
 | `ui.remember_folds` | `true` | general | Remember folded sections |
 | `ui.rotate_seconds` | `0` | general | Seconds between tabs of a screen |
 | `ui.screen1_orientation` | `"auto"` | general | Orientation of screen 1 |
@@ -779,12 +874,26 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `webhook.enabled` (secure) | `false` | webhook | Receiver on |
 | `webhook.live_events_keep` | `-` | webhook | Events kept |
 | `webhook.max_bad_per_minute` | `120` | webhook | Requests with a bad signature per address |
+| `webhook.max_body_kb` | `1024` | webhook | Largest body accepted |
 | `webhook.max_per_minute` | `30` | webhook | Events accepted per repository |
 | `webhook.max_verified_per_minute` | `120` | webhook | Requests with a good signature per address |
 | `webhook.persist_deliveries` | `true` | webhook | Remember deliveries after a restart |
+| `webhook.queue_max` | `500` | webhook | Events waiting to be applied |
 | `webhook.record_events` | `-` | webhook | Keep events |
+| `webhook.redeliver.enabled` (secure) | `false` | webhook | Ask GitHub to send again what never arrived |
+| `webhook.redeliver.hooks` (secure) | `[]` | webhook | Webhooks to look at |
+| `webhook.redeliver.interval_minutes` | `60` | webhook | Minutes between looks |
+| `webhook.redeliver.max_age_hours` | `24` | webhook | Oldest delivery to ask for (hours) |
+| `webhook.redeliver.max_per_run` | `20` | webhook | Most deliveries asked for per look |
 | `webhook.reject_stale` | `false` | webhook | Refuse old events |
 | `webhook.replay_seconds` | `3600` | webhook | Delivery ids remembered |
 | `webhook.secret_env` (secure) | `"MONITOR_WEBHOOK_SECRET"` | webhook | Environment variable with the shared secret |
 | `webhook.signing_state` | `-` | webhook | Shared secret |
+| `webhook.stale_after_h` | `6` | webhook | Hours before a run left open counts as lost |
+| `webhook.transport` (secure) | `"http"` | webhook | How GitHub reaches the receiver |
+| `webhook.ws_cleanup` (secure) | `false` | webhook | Delete the temporary hooks a crash left |
+| `webhook.ws_max_targets` | `10` | webhook | Most forwarders at once |
+| `webhook.ws_targets` (secure) | `[]` | webhook | Repositories or organizations to forward |
 | `workspace_root` | `""` | paths | Folder with your clones |
+| `workspaces.active` | `""` | paths | Workspace in use |
+| `workspaces.list` | `[]` | paths | Workspaces (name=folder) |

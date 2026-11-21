@@ -7,7 +7,7 @@
 
 Generated from the code. It reads what the running monitor says (and never writes to GitHub). `--json` prints one JSON document; the exit codes are stable.
 
-Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `briefs`, `api`, `install-skill`, `gh-token`, `ai`, `backup`, `update`, `compare`, `screens`, `watch`, `completions`, `kiosk`.
+Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `briefs`, `api`, `install-skill`, `gh-token`, `ai`, `backup`, `update`, `compare`, `screens`, `toolbox`, `watch`, `completions`, `kiosk`, `metrics`.
 
 | flag | what |
 | --- | --- |
@@ -41,7 +41,7 @@ Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `
 | `--to-dir` | backup restore: restore into this empty folder (files backend) instead of the installation |
 | `--dest` | install-skill: the folder the skill is copied into (a subfolder github-actions-monitor-<name> is made) |
 | `--read-only` | gh-token: required, prints a one-hour read-only token of the GitHub App (only with github_app.share_reads on) |
-| `--repo` | lessons: only this repository |
+| `--repo` | lessons and watch branch: only this repository (OWNER/NAME for watch branch) |
 | `--severity` | team: only the repositories in this state or a worse one |
 | `--compare` | score: also compare with the history of the window |
 | `--window` | compare: length of the period, in days (7, 30d...) |
@@ -56,6 +56,13 @@ Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `
 | `--once` | watch: read once and finish |
 | `--exit-on-change` | watch: finish with exit code 6 when what is watched changes |
 | `--no-clear` | watch: do not clear the screen between two reads |
+| `--single-pass` | watch: read once and finish (the same as --once) |
+| `--branch` | watch branch: the branch to follow (default: the one of the current folder) |
+| `--wait` | watch branch: seconds to wait for the runs to finish (10 to 86400; default cli.watch.branch_timeout_seconds) |
+| `--status-codes` | status: exit codes, classic (0 to 5, the usual ones) or operator (0 healthy, 1 nothing serving, 2 up but needs attention) |
+| `--if-problem` | metrics: write nothing and exit 0 when there is no red workflow and no alert at --fail-on (error by default) or worse; otherwise write the figures and exit 5 (for cron, which mails any output) |
+| `--color` | Colour of the answer: auto (only on a terminal, never with NO_COLOR), always or never (no escape sequence at all) |
+| `--egress` | doctor: list every host this configuration can call, why, and what fails if it is blocked (nothing is called) |
 | `--version` | print the version |
 
 Other entry points: `bin/mcp_server.py` (MCP over standard input and output; `--allow-ack`, `--allow-lessons`), `bin/ai_hook.py` (gate script of an AI tool), `bin/read_report.py`, `bin/actions_monitor.py --doctor`.

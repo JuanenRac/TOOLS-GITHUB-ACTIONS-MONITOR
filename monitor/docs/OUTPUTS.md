@@ -91,3 +91,45 @@ The bar at the top of the page (on every tab) makes ONE report of the tab that i
 - The report is served by `GET /api/report/tab?tab=now&lang=en` (`&fmt=json`, `&fmt=txt` or `&fmt=options`), the same in both editions.
 
 Settings (Settings > Outputs for other tools > "Save and print the report of a tab"): `report_export.txt`, `report_export.pdf` and `report_export.json` (which boxes start marked: TXT and PDF yes, JSON no), `report_export.name` (suggested name, default `monitor-{tab}-{date}`), `report_export.paper` (`a4` or `letter`, default `a4`) and `report_export.pdf_path` (`auto`, `own` or `browser`, default `auto`).
+
+## Metrics of the server: cycle, queue of reads, billing, runners and histograms
+
+Besides the gauges above, `/metrics` writes (a value that is not known is left out):
+
+| Metric | Labels | Meaning |
+|---|---|---|
+| `ghamon_ticks_total`, `ghamon_tick_failures_total` | | refresh cycles finished and cycles that ended with an error (counters) |
+| `ghamon_tick_last_seconds`, `ghamon_tick_phase_seconds`, `ghamon_tick_seconds` | `phase` | duration of the last cycle, of each of its phases, and the histogram of all of them |
+| `ghamon_tick_last_ok_timestamp_seconds`, `ghamon_tick_reads_last` | | when the last cycle ended well and how many repositories it read |
+| `ghamon_read_retries_total` | | reads that failed for a passing reason and were repeated (counter) |
+| `ghamon_repos_circuit_open`, `ghamon_repos_read_failing`, `ghamon_repos_read_fail_streak_max` | | repositories that wait before the next read because they failed several times in a row (the circuit), repositories whose last read failed, the longest streak |
+| `ghamon_read_queue_depth`, `ghamon_read_queue_allowed`, `ghamon_read_queue_oldest_wait_cycles`, `ghamon_read_queue_deferred_total`, `ghamon_read_queue_shed_cycles_total` | | the queue of reads with backpressure (only while `backpressure.enabled` is on) |
+| `ghamon_billing_minutes_total`, `ghamon_billing_minutes_included`, `ghamon_billing_minutes_paid`, `ghamon_billing_sku_minutes`, `ghamon_billing_usd` | `sku`, `product` | the billing report of the month (only while `quota.billing_api` is on; a scrape never reads GitHub, it writes the last report the cycle held) |
+| `ghamon_runners` | `state` | self-hosted runners idle, busy and offline (`runners.enabled`) |
+| `ghamon_runner_up`, `ghamon_runner_busy` | `runner` | per runner (`outputs.prometheus.per_runner`) |
+| `ghamon_runner_kind_jobs_waiting`, `ghamon_runner_kind_oldest_wait_seconds` | `kind` | jobs not started and the oldest wait by kind of runner (`runners.model.enabled`) |
+
+With `outputs.prometheus.histograms` on (and the webhook receiving job events) it also writes **histograms**, built in memory from the signed `workflow_job` and `workflow_run` events:
+
+| Metric | Labels | Meaning |
+|---|---|---|
+| `ghamon_job_wait_seconds` | `runner_group`, `label` | time in the queue of a job, counted **once per job** |
+| `ghamon_job_run_seconds` | `runner_group`, `label`, `conclusion` | duration of the jobs that finished |
+| `ghamon_workflow_run_seconds` | `conclusion` | duration of the runs that finished |
+| `ghamon_jobs_total` | `label`, `conclusion` | jobs that finished (counter) |
+| `ghamon_runner_jobs_waiting`, `ghamon_runner_oldest_wait_seconds` | `label` | the demand for runners now: jobs queued and not started, and the oldest wait |
+
+`outputs.prometheus.histogram_max_series` (200 by default) bounds the series of each histogram: the ones beyond it are counted under the label value `other`. With `outputs.prometheus.per_runner` on it adds, per self-hosted runner, `ghamon_runner_jobs_total`, `ghamon_runner_jobs_failed_total` and `ghamon_runner_busy_seconds_total` (also in `GET /api/runners/model` as `per_runner`).
+
+## Observability pack: alert rules, Alertmanager, OnCall and n8n
+
+`docs/grafana/` carries, besides the two dashboards, a pack you copy and adapt:
+
+- `ghamon_alert_rules.yml`: rules for Prometheus (also vmalert) with their PromQL: a monitor that does not answer, red workflows and streaks, allowance and billing near their end, a cycle that is slow or stalled, repositories in the circuit, reads that wait too long, jobs that wait for a runner (`histogram_quantile(0.95, sum by (le, label) (rate(ghamon_job_wait_seconds_bucket[30m])))`), runners offline and demand with no idle runner.
+- `alertmanager.example.yml`: routes by severity to three receivers (a default webhook, Grafana OnCall and n8n). Every address is `https://example.invalid/...`: nothing is sent until you write yours, and no secret belongs in the file.
+- `n8n_ghamon_alerts.json`: an n8n workflow that receives the Alertmanager webhook and writes one message per alert; its last node does nothing until you put your chat, mail or ticket node there.
+- `prometheus.example.yml` and `docker-compose.observability.yml` start Prometheus, Alertmanager and Grafana on the computer of the monitor to try the pack (the containers share the network of the host, the ports are on `127.0.0.1` and the Grafana password comes from your shell, never from the file).
+## Where the monitor calls, and events towards a SIEM
+
+- **Table of network destinations**: `monitor_cli.py doctor --egress` (also with `--json`) lists every host the CURRENT configuration can call, what it is for, the setting that makes it a destination and what fails if it is blocked: `api.github.com`, `github.com` and `objects.githubusercontent.com` (updates), `raw.githubusercontent.com` (`lint.anonymous_public`), ntfy, Telegram, the chat webhooks, the AI provider you chose, the OTLP collector and the SIEM sinks. With `airgapped` nothing is in use. A test keeps the table equal to the hosts named by the code.
+- **SIEM** (off): `siem.sinks` in the file lists the destinations, each with `enabled: true` to be used: `elasticsearch` (bulk), `splunk_hec`, `loki`, `sentinel` (Log Analytics, signed with the shared key), `bigquery` (`insertAll`) or `http` (JSON lines). The token or key is read from the environment variable named by `token_env`, never from the file. Each sink filters with `from_minutes` (5), `levels` and `repos_filter`; the events have a closed list of fields (no token, no log text); a receiver on a private address is refused unless the sink has `allow_private`; when a receiver is down the events wait in a queue of `siem.queue_max` (500) and the oldest are dropped first. Nothing is sent in the offline mode.

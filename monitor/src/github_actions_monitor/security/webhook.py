@@ -31,7 +31,10 @@ FULL_NAME_RE = re.compile(r"^([A-Za-z0-9-]{1,39})/([A-Za-z0-9._-]{1,100})\Z")
 MIN_SECRET = 32
 SECRET_ENV = "MONITOR_WEBHOOK_SECRET"      # the default name of the variable that holds the shared secret
 ENV_NAME_RE = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}\Z")
-MAX_BODY = 262144
+MAX_BODY = 1048576               # the default of `webhook.max_body_kb` (1 MiB); GitHub itself sends at most 25 MiB
+MAX_BODY_KB_LIMIT = 25600
+QUEUE_MAX = 500                  # the default of `webhook.queue_max`: events waiting to be applied
+STALE_AFTER_H = 6                # the default of `webhook.stale_after_h`
 CLOCK_SKEW_S = 300               # the default of `webhook.clock_skew_s`: seconds two clocks (the one of the delivery and the one of this computer) may differ before an event looks stale or a mark looks like it is in the future
 MAX_VERIFIED_PER_MINUTE = 120    # the default of `webhook.max_verified_per_minute`: requests that carry a good signature one address (a tunnel is ONE address) may send per minute
 SEEN_SAVE_EVERY = 2.0            # seconds: the memory of deliveries is written at most this often
@@ -118,7 +121,8 @@ def guard_settings(config):
     owners = [o for o in (cfg.get("allowed_owners") or []) if isinstance(o, str) and re.match(r"^[A-Za-z0-9-]{1,39}$", o)] if isinstance(cfg.get("allowed_owners"), list) else []
     return {"replay_seconds": number("replay_seconds", 3600, 60, 86400), "max_per_minute": number("max_per_minute", 30, 1, 600), "max_bad_per_minute": number("max_bad_per_minute", 120, 1, 6000),
             "max_verified_per_minute": number("max_verified_per_minute", MAX_VERIFIED_PER_MINUTE, 1, 6000), "reject_stale": cfg.get("reject_stale") is True, "persist_deliveries": cfg.get("persist_deliveries", True) is True,
-            "clock_skew_s": number("clock_skew_s", CLOCK_SKEW_S, 0, 3600), "allowed_owners": owners}
+            "clock_skew_s": number("clock_skew_s", CLOCK_SKEW_S, 0, 3600), "allowed_owners": owners,
+            "max_body": number("max_body_kb", MAX_BODY // 1024, 1, MAX_BODY_KB_LIMIT) * 1024, "queue_max": number("queue_max", QUEUE_MAX, 1, 10000), "stale_after_h": number("stale_after_h", STALE_AFTER_H, 1, 168)}
 
 
 _guard_lock = threading.Lock()
@@ -128,6 +132,13 @@ _per_repo = {}                        # repository -> times of the events accept
 
 _accepted = collections.deque(maxlen=5000)     # when each event that named a watched repository was accepted (bounded)
 _started = [time.time()]
+
+
+_local = [""]      # the secret of the forwarder that `gh webhook forward` signs with (made at every start, kept in memory only; see wsforward.py)
+
+
+def set_local_secret(value):
+    _local[0] = value if isinstance(value, str) else ""
 
 
 _store = {"path": None, "dirty": False, "saved": 0.0}      # the file where the memory of deliveries survives a restart (set by load_memory; tests do not set it)
@@ -178,7 +189,11 @@ def reset():
         _seen.clear()
         _per_repo.clear()
         _accepted.clear()
+        _order.clear()
+        _open.clear()
+        _stale[0] = 0
         _started[0] = time.time()
+    INBOX.clear()
 
 
 def note_accepted(now=None):
@@ -285,16 +300,18 @@ def event_is_stale(event, body, window, now=None, skew=0):
     return moment is not None and moment < now - window - max(0, skew)
 
 
-def handle(config, body, headers, watched, address=None):
+def handle(config, body, headers, watched, address=None, size=None):
     """(http code, answer dict, repo or None). `headers` is any mapping with .get. Never raises. `address` = who sent it (localguard.client_key): the requests whose signature does NOT verify are
-    counted apart (`webhook.max_bad_per_minute`) from the ones that do, so nobody can use up the allowance of the deliveries of GitHub by sending garbage from the same address or tunnel."""
+    counted apart (`webhook.max_bad_per_minute`) from the ones that do, so nobody can use up the allowance of the deliveries of GitHub by sending garbage from the same address or tunnel.
+    `size` is the length the sender declared when the body was not read because it is over the limit (`webhook.max_body_kb`): nothing of it is read or computed."""
     from github_actions_monitor.security import localguard
     if not active(config):
         return 404, {"ok": False}, None
-    if len(body) > MAX_BODY:
-        return 413, {"ok": False, "error": text("too_big")}, None
     guard = guard_settings(config)
-    if not verify(settings(config)["secret"], body, headers.get("X-Hub-Signature-256")):
+    if (size if size is not None else len(body)) > guard["max_body"]:
+        return 413, {"ok": False, "error": text("too_big")}, None
+    signature = headers.get("X-Hub-Signature-256")
+    if not (verify(settings(config)["secret"], body, signature) or (_local[0] and verify(_local[0], body, signature))):
         if address is not None and localguard.over_rate("webhook_bad", address, guard["max_bad_per_minute"]):
             return 429, {"ok": False, "error": "rate"}, None
         return 401, {"ok": False, "error": text("bad_signature")}, None
@@ -376,6 +393,7 @@ def parse_event(event, body):
     """A small, validated record of a `workflow_run` or `workflow_job` event, or None for any other event or a payload that does not look right.
 
     {"event", "repo", "workflow", "run_id", "status", "conclusion", "branch", "sha", "attempt", "url", "seconds", "queue", "job", "steps": {name: seconds}}
+    plus, for a job, "job_id", "labels", "runner_group" and "runner_name" (kept out of the live list: only the histograms use them)
     Only these short fields are kept (never the commit message, the actor's e-mail or any free text of the payload)."""
     if event not in ("workflow_run", "workflow_job"):
         return None
@@ -407,6 +425,12 @@ def parse_event(event, body):
     else:
         record["workflow"] = _name(obj.get("workflow_name"))
         record["job"] = _name(obj.get("name"))
+        record["job_id"] = obj["id"]      # one count per job in the histograms (integrations/job_metrics.py); never sent to the live list (not in LIVE_FIELDS)
+        record["labels"] = [x for x in (obj.get("labels") or []) if isinstance(x, str) and re.match(r"^[A-Za-z0-9._*?=/-]{1,60}\Z", x)][:8] if isinstance(obj.get("labels"), list) else []
+        record["runner_group"] = _name(obj.get("runner_group_name"), 80)
+        record["runner_name"] = _name(obj.get("runner_name"), 80)
+        record["job_started"] = _stamp(obj.get("started_at"))      # the absolute times of a job feed the spans of the OpenTelemetry export (otlp.job_spans); not in LIVE_FIELDS
+        record["job_completed"] = _stamp(obj.get("completed_at"))
         created, started, done = _time(obj.get("created_at")), _time(obj.get("started_at")), _time(obj.get("completed_at"))
         record["queue"] = max(0, int(started - created)) if created is not None and started is not None else None
         record["seconds"] = max(0, int(done - started)) if started is not None and done is not None else None
@@ -425,6 +449,119 @@ def as_run(record):
         return None
     return {"repo": record["repo"], "id": record["run_id"], "name": record["workflow"], "title": "", "event": record.get("run_event") or "webhook", "branch": record["branch"], "path": record["path"], "sha": record["sha"],
             "actor": "", "status": record["status"], "conclusion": record["conclusion"], "started": record["started"], "seconds": record["seconds"] or 0, "url": record["url"], "attempt": record.get("attempt")}
+
+
+# --- the order of the events, the queue that applies them and the runs that never ended ---------------------------------------------------------------------------------------------
+STATUS_RANK = {"queued": 0, "waiting": 0, "pending": 0, "requested": 0, "in_progress": 1, "completed": 2}      # what a run or a job says about itself only moves forward: queued, then in progress, then completed
+ORDER_MAX = 5000
+_order = collections.OrderedDict()      # (event, repo, run, job, attempt) -> the highest rank an event of it has carried (bounded; the oldest fall out first)
+_open = collections.OrderedDict()       # (repo, run id) -> when the first event of a run that is not completed arrived
+_stale = [0]                            # runs that were open for longer than `webhook.stale_after_h` without a final event, since this process started
+
+
+def _rank(status):
+    return STATUS_RANK.get(status, -1)
+
+
+def is_late(record, known=None):
+    """True when the event says LESS than what is already known about the same run or job: a delivery that arrived after a later one (GitHub does not promise the order) must never take a completed run back to
+    in progress. `known` is the status the run list already holds for it (from the cycle); the memory of this module covers the rest. An event that says the same or more is never late, so a repeated or a newer
+    one still goes through. Nothing is written for a late event."""
+    rank = _rank(record.get("status"))
+    key = (record.get("event"), record.get("repo"), record.get("run_id"), record.get("job") or "", record.get("attempt") or 0)
+    with _guard_lock:
+        seen = max(_order.get(key, -1), _rank(known))
+        if rank < seen:
+            return True
+        _order[key] = max(rank, _order.get(key, -1))
+        _order.move_to_end(key)
+        while len(_order) > ORDER_MAX:
+            _order.popitem(last=False)
+    return False
+
+
+def note_open(record, now=None):
+    """A run reported by an event is open (queued, waiting or in progress) until an event says completed; a run that stays open too long is the trace of a lost delivery (see stale_open)."""
+    if record.get("event") != "workflow_run":
+        return
+    key = (record.get("repo"), record.get("run_id"))
+    with _guard_lock:
+        if record.get("status") == "completed":
+            _open.pop(key, None)
+            return
+        _open.setdefault(key, time.time() if now is None else now)
+        while len(_open) > ORDER_MAX:
+            _open.popitem(last=False)
+
+
+def open_count():
+    with _guard_lock:
+        return len(_open)
+
+
+def stale_total():
+    return _stale[0]
+
+
+def stale_open(config, now=None):
+    """The runs that have been open for more than `webhook.stale_after_h` hours with no final event: they are forgotten here (the next read of the repository tells the truth) and returned as [(repo, run id)]."""
+    now = time.time() if now is None else now
+    limit = guard_settings(config)["stale_after_h"] * 3600
+    with _guard_lock:
+        old = [key for key, since in _open.items() if now - since > limit]
+        for key in old:
+            _open.pop(key, None)
+        _stale[0] += len(old)
+    return old
+
+
+def forget(headers_delivery, body):
+    """Takes a delivery out of the memory of replays: it was refused for a reason of ours (the queue was full), so the delivery GitHub sends again must not be taken for a duplicate."""
+    with _guard_lock:
+        for key in (headers_delivery, "body:" + hashlib.sha256(body).hexdigest()):
+            _seen.pop(key, None)
+        _store["dirty"] = True
+
+
+class Inbox:
+    """The bounded queue of accepted events waiting to be applied. A full queue refuses (the caller answers 503 and GitHub or an operator sends it again): an event is never dropped in silence."""
+
+    def __init__(self):
+        self.cond = threading.Condition()
+        self.jobs = collections.deque()
+        self.stats = {"queued": 0, "full": 0, "done": 0, "failed": 0}
+        self.worker = False      # True once a thread takes the jobs; until then the caller applies them itself
+
+    def put(self, job, limit):
+        with self.cond:
+            if len(self.jobs) >= limit:
+                self.stats["full"] += 1
+                return False
+            self.jobs.append(job)
+            self.stats["queued"] += 1
+            self.cond.notify()
+            return True
+
+    def take(self, timeout):
+        with self.cond:
+            if not self.jobs:
+                self.cond.wait(timeout)
+            return self.jobs.popleft() if self.jobs else None
+
+    def depth(self):
+        with self.cond:
+            return len(self.jobs)
+
+    def snapshot(self, config=None):
+        return {"depth": self.depth(), "max": guard_settings(config)["queue_max"], "worker": self.worker, **self.stats}
+
+    def clear(self):
+        with self.cond:
+            self.jobs.clear()
+            self.stats.update(queued=0, full=0, done=0, failed=0)
+
+
+INBOX = Inbox()
 
 
 # --- the live events as a read-only stream (server-sent events), OFF by default -------------------------------------------------------------------------------------------------
@@ -458,8 +595,11 @@ def sse_release():
         SSE_STREAMS[0] = max(0, SSE_STREAMS[0] - 1)
 
 
-def _sse_frame(name, data, ident=None):
-    return (f"id: {ident}\n" if ident is not None else "") + f"event: {name}\ndata: {json.dumps(data, ensure_ascii=True)}\n\n"
+SSE_RETRY_MS = 3000      # how long a browser waits before it reconnects when the stream breaks (the `retry:` field of the hello frame)
+
+
+def _sse_frame(name, data, ident=None, retry=None):
+    return (f"id: {ident}\n" if ident is not None else "") + f"event: {name}\n" + (f"retry: {int(retry)}\n" if retry else "") + f"data: {json.dumps(data, ensure_ascii=True)}\n\n"
 
 
 def sse_frames(config, snapshot, stop=lambda: False, sleep=time.sleep, clock=time.time, since=None, keepalive=15, poll=1.0):
@@ -470,7 +610,7 @@ def sse_frames(config, snapshot, stop=lambda: False, sleep=time.sleep, clock=tim
     started = clock()
     total, events = snapshot()
     seen = total if since is None else max(0, min(int(since), total))
-    yield _sse_frame("hello", {"held": len(events), "total": total})
+    yield _sse_frame("hello", {"held": len(events), "total": total}, retry=SSE_RETRY_MS)
     last_beat = started
     while not stop() and clock() - started < cfg["max_seconds"]:
         total, events = snapshot()

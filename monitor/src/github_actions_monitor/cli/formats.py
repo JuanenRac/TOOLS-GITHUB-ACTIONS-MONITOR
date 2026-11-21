@@ -12,7 +12,6 @@ A command that answers with a list gives its records (alerts, accounts, reposito
 fields. The records are taken from the same document that --json prints, so the three structured formats never disagree.
 """
 import json
-import shutil
 import unicodedata
 
 FORMATS = ("text", "table", "plain", "json", "ndjson")
@@ -37,7 +36,8 @@ def _cell(value):
         return "true" if value else "false"
     if isinstance(value, (dict, list)):
         return json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
-    return " ".join(str(value).replace("\t", " ").split())
+    from . import terminal      # text from GitHub may carry escape sequences: a cell never does
+    return " ".join(terminal.clean(str(value)).replace("\t", " ").split())
 
 
 def _pick(record, column):
@@ -94,13 +94,12 @@ def clip(text, cells):
 
 
 def terminal_width(default=100):
-    try:
-        return max(40, shutil.get_terminal_size((default, 24)).columns)
-    except (OSError, ValueError):
-        return default
+    """Columns of the terminal; with none (a redirect, a pipe) COLUMNS or 80, so the same command writes the same table everywhere."""
+    from . import terminal
+    return terminal.width(default=terminal.DEFAULT_WIDTH if default == 100 else default)
 
 
-def table(columns, rows, width=None):
+def table(columns, rows, width=None, color=False):
     """The rows as aligned columns that fit `width` cells: the widest columns give way first, never below 8 cells. The header is the names of the columns."""
     width = width or terminal_width()
     cells = [[_cell(row.get(c)) for c in columns] for row in rows]
@@ -115,7 +114,8 @@ def table(columns, rows, width=None):
             value = clip(value, size)
             parts.append(value + " " * (size - width_of(value)))
         return (" " * gap).join(parts).rstrip()
-    return "\n".join([line(columns), line(["-" * min(s, 20) for s in sizes])] + [line(r) for r in cells])
+    from . import terminal
+    return "\n".join([terminal.bold(line(columns), color), line(["-" * min(s, 20) for s in sizes])] + [line(r) for r in cells])
 
 
 def plain(columns, rows):
@@ -131,18 +131,19 @@ def document(code, payload, ascii_only=False):
     return json.dumps({"ok": code == 0, "exit": code, "data": payload}, ensure_ascii=ascii_only, indent=1)
 
 
-def render(fmt, command, payload, lines, code, ascii_only=False, width=None):
+def render(fmt, command, payload, lines, code, ascii_only=False, width=None, color=False):
     """The text a command prints for the chosen format. An unknown format is the text of the command (never a traceback)."""
     if fmt == "json":
         return document(code, payload, ascii_only)
     if fmt == "text" or fmt not in FORMATS:
         return "\n".join(lines)
+    from . import terminal
     columns, rows = records(command, payload)
     if fmt == "ndjson":
         return ndjson(rows)
     if fmt == "plain":
         return plain(columns, rows)
-    return table(columns, rows, width) if rows else "\n".join(lines)
+    return table(columns, rows, width, color) if rows else terminal.clean("\n".join(lines))
 
 
 def choose(flag_format, flag_json, configured=None, env=None):

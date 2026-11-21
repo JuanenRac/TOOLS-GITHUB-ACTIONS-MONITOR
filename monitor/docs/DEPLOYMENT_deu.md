@@ -124,6 +124,15 @@ Gelesen werden nur die Namen dieser Tabelle. Im Dienst wird ein nicht lesbarer W
 | `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py`: statt die gewöhnliche Suite erneut auszuführen, wird die Aufzeichnung eines vollständigen grünen Laufs genau dieses Commits akzeptiert (beendet, ohne Fehlschlag und Fehler, alle Tests ausgeführt); `--skip-clean-suite` wiederholt auch die Suite des entpackten Zips nicht (die Schnellprüfungen laufen weiter) und sagt das. |
 | `--progress` | `tools/make_release.py`: zeigt den Fortschritt der Suiten, eine Zeile alle 250 Tests, auch in der Suite der sauberen Installation. |
 
+## Ein externer Herzschlag (standardmäßig aus)
+
+Der Monitor läuft auf einem Rechner, der ausgeschaltet, in den Ruhezustand versetzt oder neu gestartet werden kann, und dann erfährt niemand, dass niemand zuschaut. Mit eingeschaltetem `heartbeat.enabled` pingt der Monitor alle `heartbeat.interval_seconds` (standardmäßig 300) eine Adresse an, und ein Dienst wie healthchecks.io, Cronitor oder Uptime Kuma meldet, wenn die Pings ausbleiben.
+
+- Die Adresse ist ein Geheimnis: Lege sie in der Umgebungsvariable ab, die `heartbeat.url_env` nennt (standardmäßig `MONITOR_HEARTBEAT_URL`). Sie wird nie in die Konfiguration geschrieben, angezeigt oder protokolliert, und die Einstellungen sagen nur, ob eine definiert ist. Sie muss `https` sein (`http` nur mit `notify.allow_private_targets`, für einen Dienst im eigenen Netz), darf weder Benutzer noch Passwort enthalten und wird mit demselben Schutz geöffnet wie die Benachrichtigungen.
+- Der Ping enthält höchstens `msg=<Version> <ok|degraded>` (`heartbeat.send_state`): nie ein Repository, eine Warnung oder einen Namen.
+- Ist der Monitor nicht arbeitsfähig (seine Aktualisierungsschleife hängt oder fehlt), wird der Ping nicht gesendet, und die Stille ist der Alarm. Einem Dienst mit Fehleradresse (healthchecks.io: `/fail`) kann man `heartbeat.fail_suffix` geben, dann wird er sofort benachrichtigt.
+- In der kompletten Edition zeigt `GET /api/health` `heartbeat` (gesendet, fehlgeschlagen, übersprungen und das letzte Ergebnis).
+
 ## Wenn GitHub den Zugang widerruft oder er abläuft
 
 Jedes Konto ist ein eigener Prozess, ein ausfallender Zugang betrifft also nur dieses Konto. Nach zwei Ablehnungen in Folge, die sagen, dass der Zugang selbst unbrauchbar ist (ein 401, `Bad credentials`, ein abgelaufenes oder widerrufenes Token, ein gesperrtes Konto, gar kein Zugang), ist das Konto **blind**: Die Seite, die tiefe Gesundheitsprüfung, `GET /api/accounts` (`state: blind`) und `bin/monitor_cli.py` sagen es, ein **kritischer Systemalarm** (`system.credential_blind`, Wächter `system`) erscheint im Tab Alarme, und die Benachrichtigungsarten `credential_blind` (standardmäßig an) und `credential_back` informieren die Kanäle einmal. Die Ablehnung einer einzelnen Berechtigung (ein 403 für ein Repository) macht ein Konto nicht blind. Die anderen Konten laufen weiter, und die tiefe Gesundheitsprüfung bleibt grün. Das Konto versucht es weiter, und der erste gute Zyklus schließt den Alarm.
@@ -223,3 +232,20 @@ gh workflow run docker-audit.yml -f ref=<tag>
 ```
 
 Dieselben Skripte laufen auf einem Linux-Rechner mit Docker (`tools/docker_audit/run_all.sh`); `tools/docker_audit/LEEME.txt` erklärt, wie jedes Ergebnis zu lesen ist.
+
+## Der Monitor auf dem Handy
+
+Alles in diesem Abschnitt ist standardmäßig aus oder harmlos.
+
+- **Installierbare App** (`pwa.enabled`): Die Seite bietet ein Manifest, zwei Symbole und einen kleinen Service Worker, damit ein Browser den Monitor als App installieren kann. Die Dateien sind `/manifest.webmanifest`, `/sw.js`, `/pwa/offline`, `/pwa/icon-192.png` und `/pwa/icon-512.png`; im Netzwerkmodus werden sie wie jede Seite hinter dem Zugriffstoken ausgeliefert. Der Worker speichert nur die Offline-Seite und die Symbole: nie die Seite, nie eine Antwort der API. Kehrt die App in den Vordergrund zurück oder das Netz wieder, fragt die Seite sofort frische Daten ab (`pwa.refresh_on_return`).
+- **Kompakte Ansicht** (`ui.compact`): `auto` nutzt sie in einem schmalen Fenster, `on` immer, `off` nie; `?compact=1` oder `?compact=0` ändert sie für ein Fenster. Das Menü rückt als Tab-Reihe nach oben, Tabellen scrollen seitlich, ein Touchscreen erhält Ziele von mindestens 44 Pixeln und die Dialoge folgen der Höhe, die die Bildschirmtastatur übrig lässt.
+- **Kopplung per QR-Code** (`pairing.enabled`, nur im Netzwerkmodus): Öffnen Sie die Palette (Strg+K) und wählen Sie „Handy koppeln“, dann „Neuer QR-Code“. Der Code gilt einmal und `pairing.code_minutes` Minuten lang; ein neuer Code macht den vorigen ungültig. Das Handy scannt ihn, tippt auf die Schaltfläche der sich öffnenden Seite und erhält ein eigenes Token (ein Cookie), nie das Zugriffstoken. Dasselbe Fenster listet die gekoppelten Geräte und entzieht eines: Sein Token funktioniert sofort nicht mehr. Höchstens `pairing.max_devices` Geräte; nach `pairing.device_days` Tagen muss ein Gerät neu gekoppelt werden (0 = nie). Der Monitor speichert nur den Hash jedes Tokens in `devices.json` im Datenordner, ein falscher Code zählt wie ein falsches Zugriffstoken gegen die Adresse, und jede Kopplung und jeder Entzug hinterlässt eine Zeile im Aktionsprotokoll.
+
+| Route | Was sie tut |
+|---|---|
+| `GET /api/devices` | die gekoppelten Geräte und ob die Kopplung an ist (nur dieser Rechner) |
+| `POST /api/pair/start` | öffnet einen Einmalcode und antwortet mit Adresse und QR-Code (nur dieser Rechner, mit dem Einmal-Token der Seite) |
+| `POST /api/pair/redeem` | das Handy löst den Code ein (`{"code": "..."}`) und erhält sein Cookie |
+| `POST /api/devices/revoke` | entzieht ein Gerät (`{"id": "..."}`; nur dieser Rechner) |
+
+- **Palette und Tastenkürzel** (`ui.palette`): Strg+K öffnet ein Suchfeld für Tabs, Repositories und Aktionen; `?` listet die Kürzel, `/` springt zum Suchfeld des Tabs, `r` aktualisiert und `[` `]` wechseln den Tab.

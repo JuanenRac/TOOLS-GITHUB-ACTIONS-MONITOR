@@ -107,3 +107,10 @@
 | 6 | 失败且回滚也失败：请手动恢复备份 |
 | 7 | 无法连接 GitHub 且未提供 zip |
 | 8 | 未确认 |
+
+## 提示会给出与你的安装方式相符的命令
+
+新版本提示（控制台、关于、`/api/about`）现在会在 `channel` 旁边的 `command` 字段中给出与本监视器安装方式相符的确切命令：解压后的产品（`py -3 monitor/bin/monitor_cli.py update`）、服务管理器（`... update apply --systemd-unit <单元>`）、容器（`docker pull ghcr.io/juanenrac/tools-github-actions-monitor:<版本>`）、pipx、uv 或 `gh` 命令的扩展。提示本身不会运行任何东西。
+## 服务助手的防护
+
+使用 `updates.systemd_helper`（或 `--systemd-unit`）时，更新程序现在会在触碰服务之前先检查：工作目录和命令未指向“此”文件夹的单元属于另一个安装，既不会被停止也不会被启动；当其他程序（前台运行的监视器）占用其端口时不会启动该单元；进程仍是旧进程时不会把重启视为完成（单元必须显示新的 PID）；`update status --systemd-unit 单元` 只列出该服务自上次启动以来的错误。这些都是对 `systemctl --user show` 和 `journalctl --user` 的只读查询；无法回答的查询不会阻止任何操作。

@@ -25,6 +25,7 @@ from pathlib import Path
 from github_actions_monitor import i18n
 from github_actions_monitor.app import toolconfig
 from github_actions_monitor.data_pipeline import causes
+from github_actions_monitor.data_pipeline import githubstatus
 from github_actions_monitor.data_pipeline import alertflow
 from github_actions_monitor.security import envguard, private_io
 from github_actions_monitor.storage import locks, state_io
@@ -79,6 +80,9 @@ def diff(old, new, loaded):
             ev("red_new", "bad", r["repo"], r.get("url"), repo=r["repo"], workflow=r["workflow"])
             events[-1]["reusable"] = r.get("reusable") or []      # the reusable workflows it calls: the same cause for many is told once (ci.group.reusable)
             events[-1].update({k: r[k] for k in ("sha", "branch", "file") if r.get(k)})      # what the silences by pattern and the grouping by commit look at
+            if githubstatus.STATUS.incident():      # GitHub Actions has an incident right now: the red may not be a defect of the repository (the red itself is never hidden)
+                events[-1]["possible_cause"] = events[-1]["args"]["possible_cause"] = "github_incident"
+                events[-1]["text"] += i18n.t("evt.possible_github_incident")
     for key, r in old["reds"].items():
         if key not in new["reds"]:
             ev("red_fixed", "ok", r["repo"], r.get("url"), repo=r["repo"], workflow=r["workflow"])

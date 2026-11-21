@@ -129,3 +129,9 @@ AI が読むフィード(`ALERTS_BRIEF.md`、ストリーム、MCP サーバー)
 | vLLM | ローカル | `openai-compatible` | `http://127.0.0.1:8000/v1` | なし(ローカルサーバー) | `meta-llama/Llama-3.2-3B-Instruct`, `Qwen/Qwen2.5-7B-Instruct`, `mistralai/Mistral-7B-Instruct-v0.3` | このコンピューターから出ない | プロトコル互換で、このツールでは未検証 |
 | LocalAI | ローカル | `openai-compatible` | `http://127.0.0.1:8081/v1` | なし(ローカルサーバー) | `llama-3.2-3b-instruct`, `mixtral-8x7b-instruct`, `phi-4` | このコンピューターから出ない | プロトコル互換で、このツールでは未検証 |
 | Jan | ローカル | `openai-compatible` | `http://127.0.0.1:1337/v1` | なし(ローカルサーバー) | `llama3.2-3b-instruct`, `qwen2.5-7b-instruct`, `gemma-3-4b-it` | このコンピューターから出ない | プロトコル互換で、このツールでは未検証 |
+
+## MCP サーバー：プロンプト、自己説明、リンク、管理された書き込み
+
+- **プロンプト**（`mcp.prompts`、オン）：`prompts/list` と `prompts/get` は、AI が即興ではなく従う番号付きの手順を渡します：`am_i_affected`（パッケージ、アクション、インシデントが自分のリポジトリにあるか）、`investigate_red`（リポジトリがなぜ赤いか）、`weekly_review`（今週人の手が必要なこと）。プロンプトはテキストにすぎません。
+- **自己説明**：ツール `describe_capabilities`（サーバーにできることとオンのスイッチ）、`ping`、`whoami`。アラート、診断、割り当てに関する応答には、同じ内容を表示するページのアドレス `dashboard_url` が付きます。
+- **書き込み**（`mcp.write_tools`、オフ）：ツール `gh_action` は GitHub 上の操作を計画し、プレビュー（メソッド、エンドポイント、リポジトリ、番号、理由、影響する件数）と `plan_id` を返します。同じ呼び出しが `confirm: true` とその `plan_id` を付けて戻るまで何も送信されません。ページと同じモジュールを通るため、`github_actions.enabled`、理由、認証情報の権限、書き込みは 1 つだけ、も必要で、実行者 `mcp` として操作ログに記録されます。設定がオフならツール自体が存在しません。

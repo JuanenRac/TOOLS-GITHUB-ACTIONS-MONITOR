@@ -124,6 +124,15 @@ Vengono lette solo i nomi di questa tabella. Nel servizio un valore illeggibile 
 | `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py`: invece di rieseguire la suite ordinaria, accetta la registrazione di un'esecuzione verde completa di quello stesso commit (terminata, senza fallimenti né errori, tutti i test eseguiti); `--skip-clean-suite` non ripete nemmeno la suite dello zip estratto (i controlli rapidi restano) e lo dichiara. |
 | `--progress` | `tools/make_release.py`: mostra l'avanzamento delle suite, una riga ogni 250 test, anche nella suite dell'installazione pulita. |
 
+## Un battito esterno (disattivato per impostazione predefinita)
+
+Il monitor gira su un computer che può essere spento, messo in sospensione o riavviato, e allora nessuno viene a sapere che nessuno sorveglia. Con `heartbeat.enabled` attivo, il monitor invia un ping a un indirizzo ogni `heartbeat.interval_seconds` (300 per impostazione predefinita) e un servizio come healthchecks.io, Cronitor o Uptime Kuma ti dice quando i ping si fermano.
+
+- L'indirizzo è un segreto: mettilo nella variabile d'ambiente indicata da `heartbeat.url_env` (`MONITOR_HEARTBEAT_URL` per impostazione predefinita). Non viene mai scritto nella configurazione, mostrato o registrato, e le Impostazioni dicono solo se ne è definito uno. Deve essere `https` (`http` solo con `notify.allow_private_targets`, per un servizio della tua rete), non avere utente né password e viene aperto con la stessa protezione delle notifiche.
+- Il ping porta al massimo `msg=<versione> <ok|degraded>` (`heartbeat.send_state`): mai un repository, un avviso o un nome.
+- Quando il monitor non è in grado di servire (il suo ciclo di aggiornamento è bloccato o assente) il ping non viene inviato e il silenzio è l'allarme. A un servizio con indirizzo di guasto (healthchecks.io: `/fail`) si può dare `heartbeat.fail_suffix` e allora viene avvisato subito.
+- Nell'edizione completa `GET /api/health` mostra `heartbeat` (inviati, falliti, saltati e l'ultimo risultato).
+
 ## Quando GitHub revoca o fa scadere l'accesso
 
 Ogni account è un processo a sé, quindi un accesso che smette di funzionare tocca solo quell'account. Dopo due rifiuti di fila che dicono che l'accesso stesso non serve (un 401, `Bad credentials`, un token scaduto o revocato, un account sospeso, nessun accesso) l'account è **cieco**: la pagina, il controllo di salute approfondito, `GET /api/accounts` (`state: blind`) e `bin/monitor_cli.py` lo dicono, si apre un **allarme critico di sistema** (`system.credential_blind`, sentinella `system`) nella scheda Allarmi, e i tipi di notifica `credential_blind` (attivo per impostazione predefinita) e `credential_back` avvisano i canali una volta. Il rifiuto di un solo permesso (un 403 per un repository) non rende cieco un account. Gli altri account continuano e il controllo di salute approfondito resta verde. L'account continua a provare e il primo ciclo buono chiude l'allarme.
@@ -223,3 +232,20 @@ gh workflow run docker-audit.yml -f ref=<tag>
 ```
 
 Gli stessi script girano su una macchina Linux con Docker (`tools/docker_audit/run_all.sh`); `tools/docker_audit/LEEME.txt` spiega come leggere ogni risultato.
+
+## Il monitor sul telefono
+
+Tutto in questa sezione è spento o innocuo per impostazione predefinita.
+
+- **App installabile** (`pwa.enabled`): la pagina offre un manifest, due icone e un piccolo service worker, così un browser può installare il monitor come app. I file sono `/manifest.webmanifest`, `/sw.js`, `/pwa/offline`, `/pwa/icon-192.png` e `/pwa/icon-512.png`; in modalità di rete sono serviti dietro il token di accesso come ogni pagina. Il worker conserva solo la pagina offline e le icone: mai la pagina, mai una risposta dell'API. Quando l'app torna in primo piano, o torna la rete, la pagina chiede subito dati freschi (`pwa.refresh_on_return`).
+- **Vista compatta** (`ui.compact`): `auto` la usa in una finestra stretta, `on` sempre, `off` mai; `?compact=1` o `?compact=0` la cambia per una finestra. Il menu passa in alto come una riga di schede, le tabelle scorrono di lato, uno schermo tattile riceve bersagli di almeno 44 pixel e i dialoghi seguono l'altezza lasciata dalla tastiera sullo schermo.
+- **Abbinamento con un codice QR** (`pairing.enabled`, solo in modalità di rete): apri la tavolozza (Ctrl+K) e scegli "Abbina un telefono", poi "Nuovo codice QR". Il codice vale una sola volta e per `pairing.code_minutes` minuti; un nuovo codice annulla il precedente. Il telefono lo scansiona, preme il pulsante della pagina che si apre e riceve un token proprio (un cookie), mai il token di accesso. La stessa finestra elenca i dispositivi abbinati e ne revoca uno: il suo token smette subito di funzionare. Al massimo `pairing.max_devices` dispositivi; un dispositivo va abbinato di nuovo dopo `pairing.device_days` giorni (0 = mai). Il monitor conserva solo l'hash di ogni token in `devices.json` della cartella dei dati, un codice errato conta contro l'indirizzo come un token di accesso errato, e ogni abbinamento e ogni revoca lasciano una riga nel registro delle azioni.
+
+| Percorso | Cosa fa |
+|---|---|
+| `GET /api/devices` | i dispositivi abbinati e se l'abbinamento è attivo (solo questo computer) |
+| `POST /api/pair/start` | apre un codice monouso e risponde con il suo indirizzo e il suo codice QR (solo questo computer, con il token monouso della pagina) |
+| `POST /api/pair/redeem` | il telefono usa il codice (`{"code": "..."}`) e riceve il suo cookie |
+| `POST /api/devices/revoke` | revoca un dispositivo (`{"id": "..."}`; solo questo computer) |
+
+- **Tavolozza e scorciatoie** (`ui.palette`): Ctrl+K apre una casella di ricerca di schede, repository e azioni; `?` elenca le scorciatoie, `/` va alla ricerca della scheda, `r` aggiorna e `[` `]` cambiano scheda.

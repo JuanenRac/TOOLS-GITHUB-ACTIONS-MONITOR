@@ -53,3 +53,8 @@
 - **套餐可能是 `unknown`。** 私有和免费仓库不会说明账户的套餐:`account.plan` 保持 `unknown` 时,配额、包含分钟数和并发上限显示为*未知*,并附上可以知道的数字(已统计的分钟数),绝不会报错。选择套餐即可看到百分比。
 - **每个监视器一个所有者。** 仓库以名称标识;要监视另一个组织,请用其自己的 `github_owner` 启动第二个监视器。
 - **合并队列**只监视默认分支(事件 `merge_group`、位于 `gh-readonly-queue/<默认>/...` 的运行),队列的运行与其他运行一样计入分钟数。
+
+## 按变更类型的成本和碳估算
+
+- `finops.by_change`（默认关闭）将过去 24 小时的每次运行归入一种变更类型，并按类型汇总分钟数、运行数、占比以及私有仓库的估算美元。类型来自运行本身的信息：依赖机器人（或以“bump”“update”开头的标题）为 *dependencies*；事件 `schedule` 为 *scheduled*，`workflow_dispatch` 为 *manual*，`release` 为 *release*；其余按约定式提交标题的类型（`feat`、`fix`、`docs`、`ci`、`test`、`refactor`、`perf`、`chore`）或 *other*。本地可复用工作流（只被仓库中其他工作流调用的文件）不计入，因为它们的作业已计入调用方的运行。见 `GET /api/quota`（`by_change`）和 `/metrics`（`ghamon_ci_change_minutes`、`ghamon_ci_change_runs`、`ghamon_ci_change_estimated_usd`）。
+- `finops.co2`（默认关闭）为这些分钟添加碳排放**估算**：分钟数 x `finops.co2_watts`（默认 40 W）x `finops.co2_grams_per_kwh`（默认 400 g）。GitHub 不公布这些数据：结果只是用于比较各周的数量级，绝不是排放报告（`ghamon_ci_co2_grams_estimate`）。

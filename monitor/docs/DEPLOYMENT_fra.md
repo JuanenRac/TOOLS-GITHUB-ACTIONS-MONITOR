@@ -124,6 +124,15 @@ Seuls les noms de ce tableau sont lus. Dans le service, une valeur illisible est
 | `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py` : au lieu de relancer la suite ordinaire, accepte l'enregistrement d'une exécution verte complète de ce même commit (terminée, sans échec ni erreur, tous les tests exécutés) ; `--skip-clean-suite` ne relance pas non plus la suite du zip extrait (ses contrôles rapides restent faits) et le dit. |
 | `--progress` | `tools/make_release.py` : indique l'avancement des suites, une ligne tous les 250 tests, y compris dans la suite de l'installation propre. |
 
+## Un battement externe (désactivé par défaut)
+
+Le moniteur tourne sur un ordinateur qui peut être éteint, mis en veille ou redémarré, et alors personne n'apprend que personne ne surveille. Avec `heartbeat.enabled` activé, le moniteur envoie un ping à une adresse tous les `heartbeat.interval_seconds` (300 par défaut) et un service comme healthchecks.io, Cronitor ou Uptime Kuma vous dit quand les pings s'arrêtent.
+
+- L'adresse est un secret : mettez-la dans la variable d'environnement que nomme `heartbeat.url_env` (`MONITOR_HEARTBEAT_URL` par défaut). Elle n'est jamais écrite dans la configuration, affichée ni journalisée, et les Réglages disent seulement si une est définie. Elle doit être en `https` (`http` seulement avec `notify.allow_private_targets`, pour un service de votre propre réseau), ne porter ni nom d'utilisateur ni mot de passe, et s'ouvre avec la même protection que les notifications.
+- Le ping porte au plus `msg=<version> <ok|degraded>` (`heartbeat.send_state`) : jamais un dépôt, une alerte ou un nom.
+- Quand le moniteur n'est pas en état de servir (sa boucle d'actualisation est bloquée ou absente), le ping n'est pas envoyé et le silence est l'alarme. Un service avec une adresse d'échec (healthchecks.io : `/fail`) peut recevoir `heartbeat.fail_suffix` et est alors prévenu aussitôt.
+- Dans l'édition complète, `GET /api/health` montre `heartbeat` (envoyés, échoués, omis et le dernier résultat).
+
 ## Quand GitHub révoque l'accès ou qu'il expire
 
 Chaque compte est un processus à part : un accès qui cesse de fonctionner ne touche que ce compte. Après deux refus de suite qui disent que l'accès lui-même est inutilisable (un 401, `Bad credentials`, un jeton expiré ou révoqué, un compte suspendu, aucun accès), le compte est **aveugle** : la page, le contrôle de santé approfondi, `GET /api/accounts` (`state: blind`) et `bin/monitor_cli.py` le disent, une **alerte critique du système** (`system.credential_blind`, sentinelle `system`) s'ouvre dans l'onglet Alertes, et les types de notification `credential_blind` (activé par défaut) et `credential_back` préviennent les canaux une fois. Le refus d'une seule permission (un 403 pour un dépôt) ne rend pas un compte aveugle. Les autres comptes continuent et le contrôle de santé approfondi reste au vert. Le compte continue d'essayer, et le premier bon cycle ferme l'alerte.
@@ -223,3 +232,20 @@ gh workflow run docker-audit.yml -f ref=<tag>
 ```
 
 Les mêmes scripts s'exécutent sur une machine Linux avec Docker (`tools/docker_audit/run_all.sh`) ; `tools/docker_audit/LEEME.txt` explique comment lire chaque résultat.
+
+## Le moniteur sur le téléphone
+
+Tout ce qui figure dans cette section est désactivé ou inoffensif par défaut.
+
+- **Application installable** (`pwa.enabled`) : la page propose un manifeste, deux icônes et un petit service worker, afin qu'un navigateur puisse installer le moniteur comme une application. Les fichiers sont `/manifest.webmanifest`, `/sw.js`, `/pwa/offline`, `/pwa/icon-192.png` et `/pwa/icon-512.png` ; en mode réseau ils sont servis derrière le jeton d'accès comme n'importe quelle page. Le worker ne garde que la page hors ligne et les icônes : jamais la page, jamais une réponse de l'API. Quand l'application revient au premier plan, ou que le réseau revient, la page demande aussitôt des données fraîches (`pwa.refresh_on_return`).
+- **Vue compacte** (`ui.compact`) : `auto` l'utilise dans une fenêtre étroite, `on` toujours, `off` jamais ; `?compact=1` ou `?compact=0` la change pour une fenêtre. Le menu passe en haut comme une rangée d'onglets, les tableaux défilent latéralement, un écran tactile reçoit des cibles d'au moins 44 pixels et les boîtes de dialogue suivent la hauteur que laisse le clavier à l'écran.
+- **Appairage avec un code QR** (`pairing.enabled`, mode réseau uniquement) : ouvrez la palette (Ctrl+K) et choisissez « Appairer un téléphone », puis « Nouveau code QR ». Le code ne sert qu'une fois et pendant `pairing.code_minutes` minutes ; un nouveau code annule le précédent. Le téléphone le scanne, appuie sur le bouton de la page qui s'ouvre et reçoit son propre jeton (un cookie), jamais le jeton d'accès. La même fenêtre liste les appareils appairés et en retire un : son jeton cesse de fonctionner aussitôt. Au plus `pairing.max_devices` appareils ; un appareil doit être appairé de nouveau après `pairing.device_days` jours (0 = jamais). Le moniteur ne garde que le hachage de chaque jeton dans `devices.json` du dossier de données, un mauvais code compte contre l'adresse comme un mauvais jeton d'accès, et chaque appairage et chaque révocation laissent une ligne dans le journal des actions.
+
+| Route | Ce qu'elle fait |
+|---|---|
+| `GET /api/devices` | les appareils appairés et si l'appairage est activé (cet ordinateur seulement) |
+| `POST /api/pair/start` | ouvre un code à usage unique et répond avec son adresse et son code QR (cet ordinateur seulement, avec le jeton à usage unique de la page) |
+| `POST /api/pair/redeem` | le téléphone utilise le code (`{"code": "..."}`) et reçoit son cookie |
+| `POST /api/devices/revoke` | retire un appareil (`{"id": "..."}` ; cet ordinateur seulement) |
+
+- **Palette et raccourcis** (`ui.palette`) : Ctrl+K ouvre une zone de recherche d'onglets, de dépôts et d'actions ; `?` liste les raccourcis, `/` va à la recherche de l'onglet, `r` actualise et `[` `]` changent d'onglet.

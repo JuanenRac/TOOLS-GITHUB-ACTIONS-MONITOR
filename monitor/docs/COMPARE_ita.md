@@ -63,3 +63,7 @@ La scheda Grafici mostra la sezione «Confronta i periodi» quando il confronto 
 ## Le impostazioni
 
 Impostazioni, scheda Sentinella, blocco Confronto tra periodi: `compare.enabled`, `compare.default_window_days`, `compare.default_days_filter`, `compare.workdays`, `compare.min_runs_per_window`, `compare.min_days_of_history`, `compare.min_resolved`, `compare.min_snapshots`, `compare.min_repo_runs`, `compare.top_changes`, `compare.include_in_report` e `compare.cache_seconds`. Una risposta viene conservata per `compare.cache_seconds` secondi e poi ricalcolata.
+
+## Finestre lunghe su un account grande
+
+Con `compare.progressive` attivo (spento per impostazione predefinita) un confronto su una finestra più lunga di `compare.progressive_days` (7 per impostazione predefinita) riceve subito una risposta con i suoi ultimi giorni e la risposta lo dice (`partial`: i giorni richiesti, i giorni mostrati e che il resto è in calcolo); l'intera finestra viene completata in background e la richiesta successiva, o il prossimo aggiornamento della pagina, la riceve. Una richiesta con `from` e `to` non viene mai divisa.

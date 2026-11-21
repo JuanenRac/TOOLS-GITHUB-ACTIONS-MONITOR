@@ -19,7 +19,7 @@ An accepted event only marks the repository named in it for a refresh in the nex
 - Off until `webhook.enabled` is on **and** the shared secret (32 characters or more) is in the environment variable named by `webhook.secret_env` (`MONITOR_WEBHOOK_SECRET` by default; `MONITOR_WEBHOOK_SECRET_FILE` can name a file whose first line is the secret, as the secrets of a container do). The secret is never written in `actions_monitor.json`, shown, logged, or inherited by the programs the monitor starts; the Settings tab only says whether it is defined. The old way (a `secret` in the file) is read only when `webhook.allow_config_secret` is true, and the Live view warns while it is used.
 - The shared secret is the only barrier: GitHub cannot send an access token, so the receiver asks for none and trusts nothing but the signature. With the receiver on and no secret set it refuses every delivery with `401`, and the doctor says so in red. Keep the address behind a tunnel or proxy that you control.
 - Every request must carry `X-Hub-Signature-256: sha256=<hmac>`, made with that secret and compared in constant time; anything else gets `401`, and nothing of the payload is looked at before the signature is checked.
-- A body over 256 KB gets `413`, before anything is computed.
+- A body over `webhook.max_body_kb` (1 MiB by default, up to 25 MiB) gets `413`, before anything is read or computed; the refusals are counted in `stats.too_big`.
 - The lists are closed: only `workflow_run`, `workflow_job`, `check_run`, `push`, `release`, `check_suite` and `ping` are acted on, only short validated fields of an event are kept (never a commit message or any free text), and everything else is answered `202` and dropped.
 
 ## How to switch it on
@@ -51,7 +51,8 @@ The Live view says how much of the time the events cover the state: **covered by
 |---|---|
 | `404` | The receiver is off, or the secret is missing or shorter than 32 characters in the environment variable. |
 | `401` | The signature does not match: use the same secret on both sides and the content type `application/json`. |
-| `413` | The body is over 256 KB. |
+| `413` | The body is over `webhook.max_body_kb` (1 MiB by default). |
+| `503` | The queue of events is full: GitHub or you send it again later (`Retry-After`); the delivery is not remembered as a duplicate. |
 | `400` | No valid `X-GitHub-Delivery` id, or a payload that is not understood. |
 | `202` | Accepted and ignored: a repository that is not watched, an event outside the list, a repeated delivery or a repository over its limit per minute. |
 | `429` | One address sent more than 120 correctly signed requests in a minute, or more than `webhook.max_bad_per_minute` (120 by default) whose signature does not verify. |
@@ -61,6 +62,37 @@ The Live view says how much of the time the events cover the state: **covered by
 A valid signed request that someone captured and sends again is answered but not acted on: every delivery needs its `X-GitHub-Delivery` id, the ids already accepted, and the signed body itself, are remembered for `webhook.replay_seconds` (one hour by default, bounded memory), so a captured request sent again with another id is the same delivery, and a repeat gets `202 {"duplicate": true}`. (A manual re-delivery from the GitHub page repeats the same body, so it is ignored inside that window.) One repository can cause at most `webhook.max_per_minute` accepted events a minute; the rest are answered and ignored. If the payload names `full_name`, its owner must be the watched account (or one listed in `webhook.allowed_owners`). One address may send 120 correctly signed requests a minute and `webhook.max_bad_per_minute` whose signature does not verify; the two are counted apart, in every mode, so garbage never uses up the allowance of the real deliveries (with `listen.trusted_proxy` the address is the one the proxy saw). After an accepted event the stored conditional reads of that repository are dropped and the repository is read again in the next cycle, so a live event is always reconciled with GitHub. The memory of deliveries is kept in a private file of the data folder (`webhook.persist_deliveries`, on by default; bounded, and a damaged file is an empty memory), so a restart does not make a captured delivery valid again. With `webhook.reject_stale` on (off by default) a signed workflow event whose own time is older than `webhook.replay_seconds` is answered and ignored. The allowance of correctly signed requests of one address is `webhook.max_verified_per_minute` (120). `webhook.secret_env` never accepts a variable of the system or of your login to GitHub (PATH, GH_TOKEN...) nor a secret that belongs to another setting, and a name can be written in one setting only.
 
 The clock used is always the one of this computer, never the one of the delivery. `webhook.clock_skew_s` (300 seconds by default, 0 to 3600) is how far two clocks may differ: an event that looks that much older than the window is not stale for it (`webhook.reject_stale`), and an event marked while the clock of this computer was ahead of the real time and was set back since still counts as arrived, so a repository is not shown as dead because of a clock; it ages from the moment it is noticed. A mark more than a day ahead is not believed.
+
+## Order, queue and lost deliveries
+
+- **Order.** GitHub does not promise the order of deliveries. A run or a job only moves forward (queued, in progress, completed): an event that says less than what is already known about the same run (what the last cycle read counts too) changes nothing and is counted in `stats.out_of_order` of `GET /api/live-status`. A new attempt of a run starts again.
+- **Queue.** An accepted event waits in a queue of at most `webhook.queue_max` events (500 by default, 1 to 10000) and a worker applies it, so GitHub is answered fast. When the queue is full the receiver answers `503` with `Retry-After` and forgets the delivery, so the one GitHub sends again is accepted: an event is never dropped in silence. The depth is `queue` in `GET /api/live-status` and the refusals are `stats.queue_full`.
+- **Lost deliveries.** A run that an event left open (queued or in progress) and that gets no final event within `webhook.stale_after_h` hours (6 by default, 1 to 168) is marked `stale` in the run list and its repository is read again in the next cycle (`stats.stale`; `open_runs` counts the runs held open).
+- **Ready.** `GET /readyz` (this computer only) answers `200` when the monitor is fit to take work and `503` when it is not, with the check that fails: `loaded` (a first read is in), `cycle` (the refresh loop is neither stuck nor gone), `store` (the data folder can be written) and `queue` (the queue has room). `GET /api/health` only says that the process lives.
+
+## Without a webhook: the events of the account (off by default)
+
+With `events_feed.enabled` on, the monitor reads the events of the account (`GET /orgs/OWNER/events`, or `/users/OWNER/events`; `events_feed.owner_kind` says which, and `auto` tries the organization first) every `events_feed.interval_seconds` (60 by default; `X-Poll-Interval` wins when it is longer) with an ETag. A read that finds nothing new answers `304` and costs no allowance; when something changed (a push, a pull request, a tag or a release) only the repository named in the event is read again in the next cycle, at most `events_feed.max_per_tick` per turn. The first read only learns where the list stands. It needs no webhook and no tunnel, and it can run next to one. The counters are `feed` in `GET /api/live-status`.
+
+## Without a public address: the WebSocket of GitHub (off by default)
+
+A monitor at home, behind a router, cannot be reached by GitHub. With `webhook.transport` set to `websocket` the GitHub CLI does the reverse: `gh webhook forward` makes a temporary webhook, keeps a connection open from this computer and hands every delivery to the receiver of the monitor, so nothing is exposed and no tunnel is needed.
+
+- `webhook.ws_targets` lists what to forward: `owner/repo` for one repository or `owner` for a whole organization (a personal account needs one entry for each repository, at most `webhook.ws_max_targets`). Empty by default: changing the transport alone starts nothing. The receiver must be on (`webhook.enabled` and the shared secret) and the monitor restarted.
+- It **writes to GitHub** (the temporary hooks) and needs a token that can manage webhooks (`admin:repo_hook`, `admin:org_hook`). With a token that cannot, the state of the target says `forbidden` and it is asked again only every few minutes.
+- The deliveries are signed with a secret made at every start, kept in memory and handed to `gh` on its command line, so another process of the same user on this computer could read it; it only lets that user send events to a receiver that is on this computer. The shared secret itself never leaves the environment. GitHub does not sign every frame of the WebSocket separately: the connection is authenticated by the token.
+- A forwarder that ends is started again with a longer wait each time (5 seconds up to 5 minutes). A hook accepts one subscriber: do not run `gh webhook forward` by hand for the same target. The deliveries of this transport do not appear as redeliverable in the page of the hook in GitHub, so the recovery below only works with the `http` transport.
+- `webhook.ws_cleanup` (off) deletes, at start, the hooks that point to the forwarder of GitHub in the listed targets, which cleans what a crash left; it deletes hooks, so turn it on only when you know no other session uses them.
+- The state of each forwarder is `forwarders` in `GET /api/live-status`.
+
+## Deliveries that never arrived (off by default)
+
+A monitor at home is not always on: the computer is off at night, the tunnel drops. GitHub keeps the recent deliveries of a webhook, says which ones failed, and lets a failed one be sent again. With `webhook.redeliver.enabled` on, the monitor looks at the webhooks you name in `webhook.redeliver.hooks` (`repo:OWNER/REPO#ID` or `org:OWNER#ID`, where ID is the number at the end of the address of the webhook in GitHub) a minute after the start and then every `webhook.redeliver.interval_minutes` (60 by default), and asks GitHub to send again the deliveries that no attempt answered with a 2xx.
+
+- **It writes to GitHub** (the request to deliver again) and needs a token that can manage the webhook. Off by default; the deliveries of a GitHub App are not covered.
+- At most `webhook.redeliver.max_per_run` (20) deliveries per look, none older than `webhook.redeliver.max_age_hours` (24; GitHub keeps them three days), the ones never asked for first. A delivery is asked for again with a growing wait (5, 10, 20, 40, 80, 160 and 300 seconds) and given up (`dead`) after the eighth time. What was asked is kept in a private file of the data folder (the delivery id and the count, never a payload), so a restart does not ask again at once.
+- A delivery that arrives again is answered as a duplicate by the receiver, so asking twice does no harm.
+- `POST /api/webhook/redeliver` (administrators, this computer only, with the one-use token) looks now, whatever the schedule, and leaves a line in the log of actions. The counters are `redelivery` in `GET /api/live-status`.
 
 ## Checklist for the Live view
 
