@@ -162,6 +162,8 @@ when this file and `tool_version.py` disagree.
 
 - **A release is suggested only from five entries under [Unreleased]**: `sentinel.candidate_min_entries` now starts at 5 (it was 1), so the release candidates of the CI sentinel and the release readiness no longer appear for one or two small changes. A value you chose yourself is kept; the number can be set from 1 to 100 in Settings.
 
+- **Releases are published as immutable releases**: the order of a release is a DRAFT first, then every file (`github_actions_monitor.zip`, `SHA256SUMS`, `monitor_updater.py`) is uploaded and checked, and only then the release is published or, in the image-first order, the tag is pushed so that `release-image.yml` publishes it; once public a release accepts no new file. `CONTRIBUTING` (eight languages) describes the order. Turning on the setting of GitHub is the maintainer's choice and nothing here turns it on.
+
 ### Fixed
 
 - **The signing queue of A5 no longer offers what does not have to be signed**: a run enters it only when it is not a dry run (the step "Prepare the draft" ran), a draft release is waiting or the repository has no published release, and the version is not already published with its signature. The five false rows (four manual builds whose version was already published and signed, and one dry run whose `--sign --publish --bench` command would have been wrong) are gone. Each run of the queue is looked at once every six hours (the jobs of the run and the releases of its repository, two reads, at most three runs a cycle) and what leaves is listed under the queue as "checked: already published vX" or "dry run" instead of "not checked".
