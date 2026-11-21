@@ -29,7 +29,7 @@ FILE_RE = re.compile(r"^[A-Za-z0-9._-]{1,80}\.ya?ml\Z")
 JOB_RE = re.compile(r"^[A-Za-z0-9_-]{1,60}\Z")
 CLOSED_LIST = ("rerun_failed", "rerun", "close_issue", "act_local")
 RUNNABLE = ("rerun_failed", "rerun", "close_issue")        # act_local is only a suggestion
-DEFAULTS = {"enabled": False, "execute": False, "require_approval": False, "allowed": ["rerun_failed", "close_issue"], "max_per_hour": 5, "ttl_seconds": 600}
+DEFAULTS = {"enabled": False, "execute": False, "require_approval": True, "allowed": ["rerun_failed", "close_issue"], "max_per_hour": 5, "ttl_seconds": 600}
 LOCK_AFTER = 2
 # the shapes the module recognises in a text (owner/repo is optional in the text: the repository comes from the context, never from here)
 _PATTERNS = [
@@ -141,10 +141,10 @@ class Actions:
             from github_actions_monitor.security import secretstore
             done = (runner or subprocess.run)(proposal["argv"], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60, stdin=subprocess.DEVNULL, shell=False,
                                               **(secretstore.gh_kwargs() if proposal["argv"][0] == "gh" else {}))
-            code, tail = done.returncode, secretstore.redact(((done.stdout or "") + (done.stderr or "")).strip()[-300:], secretstore.APPLIED["token"])
+            code, tail = done.returncode, secretstore.redact(((done.stdout or "") + (done.stderr or "")).strip(), secretstore.APPLIED["token"])[-300:]
         except (OSError, subprocess.SubprocessError) as error:
             from github_actions_monitor.security import secretstore
-            code, tail = 1, secretstore.redact(str(error)[:200], secretstore.APPLIED["token"])
+            code, tail = 1, secretstore.redact(str(error), secretstore.APPLIED["token"])[:200]
         with self.lock:
             self.failures = 0 if code == 0 else self.failures + 1
             if self.failures >= LOCK_AFTER:

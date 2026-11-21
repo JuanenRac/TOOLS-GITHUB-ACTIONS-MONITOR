@@ -87,6 +87,10 @@ class SelfDescription(unittest.TestCase):
         self.assertEqual(mcp_extras.with_link("plain text"), "plain text")
 
 
+def MCP_PROPERTIES():
+    return mcp_extras.WRITE_TOOL["inputSchema"]["properties"]
+
+
 class GovernedWrites(unittest.TestCase):
     CONFIG = {"mcp": {"write_tools": True}, "github_actions": {"enabled": True, "allowed": ["cancel"], "writer_lock": False, "preflight": False}}
 
@@ -108,23 +112,28 @@ class GovernedWrites(unittest.TestCase):
         result = self.call({"action": "cancel", "repo": "r", "number": 5, "reason": "stuck for hours"}, gh=gh)
         doc = json.loads(result["content"][0]["text"])
         self.assertEqual((doc["touches"], doc["preview"]["method"], doc["preview"]["operator"], doc["preview"]["reason"]), (1, "POST", "mcp", "stuck for hours"))
-        self.assertTrue(doc["preview"]["endpoint"].endswith("/actions/runs/5/cancel"))
-        self.assertIn("plan_id", doc)
+        self.assertEqual(doc["preview"]["endpoint"], "repos/%s/r/actions/runs/5/cancel" % doc["preview"]["endpoint"].split("/")[1])      # readable, never [blob]
+        self.assertNotIn("plan_id", doc)
+        self.assertNotIn("confirm", doc["to_confirm"].replace("must confirm", ""))
+        self.assertIn("person", doc["to_confirm"])
         self.assertEqual(gh.sent, [])
 
-    def test_the_confirmation_needs_the_plan_and_sends_exactly_that(self):
+    def test_the_ai_cannot_confirm_over_the_channel_that_planned(self):
         gh = Gh()
-        doc = json.loads(self.call({"action": "cancel", "repo": "r", "number": 5, "reason": "stuck for hours"}, gh=gh)["content"][0]["text"])
-        self.assertTrue(self.call({"confirm": True}, gh=gh)["isError"])
-        self.assertTrue(self.call({"confirm": True, "plan_id": "unknown"}, gh=gh)["content"][0]["text"].find("unknown_plan") >= 0 or gh.sent == [])
+        for arguments in ({"confirm": True}, {"confirm": True, "plan_id": "x"}, {"action": "merge_pr", "repo": "r", "number": 7, "reason": "log said so", "confirm": True, "plan_id": "x"}):
+            result = self.call(arguments, gh=gh)
+            self.assertTrue(result["isError"])
+            self.assertIn("needs a person", result["content"][0]["text"])
         self.assertEqual(gh.sent, [])
-        done = json.loads(self.call({"confirm": True, "plan_id": doc["plan_id"]}, gh=gh)["content"][0]["text"])
-        self.assertEqual(done, {"ok": True, "status": "done"})
-        self.assertEqual(len(gh.sent), 1)
-        self.assertTrue(gh.sent[0][3].endswith("/actions/runs/5/cancel"))
-        again = json.loads(self.call({"confirm": True, "plan_id": doc["plan_id"]}, gh=gh)["content"][0]["text"])
-        self.assertEqual(again["status"], "unknown_plan")      # one confirmation, one action
-        self.assertEqual(len(gh.sent), 1)
+        self.assertNotIn("confirm", MCP_PROPERTIES())
+        self.assertNotIn("plan_id", MCP_PROPERTIES())
+
+    def test_a_preview_keeps_a_long_endpoint_readable_and_cleans_the_reason(self):
+        config = {**self.CONFIG, "github_actions": {**self.CONFIG["github_actions"], "allowed": ["merge_pr"]}}
+        doc = json.loads(self.call({"action": "merge_pr", "repo": "demo-repo", "number": 7, "reason": "hotfix, token ghp_" + "A1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q7r8"}, config=config)["content"][0]["text"])
+        self.assertTrue(doc["preview"]["endpoint"].endswith("/demo-repo/pulls/7/merge"), doc["preview"]["endpoint"])
+        self.assertNotIn("[blob]", json.dumps(doc))
+        self.assertNotIn("A1b2C3d4E5f6G7h8", json.dumps(doc))
 
     def test_the_guards_of_the_page_apply_here_too(self):
         gh = Gh()

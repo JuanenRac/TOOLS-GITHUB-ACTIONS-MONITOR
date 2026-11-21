@@ -172,10 +172,24 @@ def a2_unchecked(runs_by_repo):
     return sorted(r for r, runs in runs_by_repo.items() if not runs)
 
 
+def _is_full(repo, runs, caps):
+    """True when the run list of `repo` reaches the size asked of GitHub on its last read (`caps["asked"]`: the mode in force, a cold read, runs the webhook added). When nobody recorded it, the list is full
+    when it is as long as the biggest size of the file or has exactly one of the file sizes (the old rule): what is not known is never taken as complete."""
+    own = len([x for x in runs if not x.get("probe")])      # runs only the second look of the default branch found never make a list "full"
+    if not own:
+        return False
+    caps = caps or {}
+    asked = (caps.get("asked") or {}).get(repo) if isinstance(caps.get("asked"), dict) else None
+    if isinstance(asked, (int, float)) and not isinstance(asked, bool) and asked > 0:
+        return own >= int(asked)
+    sizes = {int(c) for c in (caps.get("cold_runs_per_repo"), caps.get("runs_per_repo")) if isinstance(c, (int, float)) and not isinstance(c, bool) and c}
+    return bool(sizes) and (own in sizes or own >= max(sizes))
+
+
 def a2_full_sample(runs_by_repo, cfg):
-    """Repositories whose run list is as long as the sample asked for: an older workflow may be hidden beyond it (informative)."""
-    caps = {int((cfg or {}).get("cold_runs_per_repo") or 0), int((cfg or {}).get("runs_per_repo") or 0)} - {0}
-    return sorted(r for r, runs in runs_by_repo.items() if runs and len([x for x in runs if not x.get("probe")]) in caps)      # runs only the second look of the default branch found never make a list "full"
+    """Repositories whose run list reaches the sample asked for (the limit in force for the cycle: mode, cold read, webhook additions): an older workflow may be hidden beyond it (informative).
+    The rule is "as long as or longer than the limit", never an equality."""
+    return sorted(r for r, runs in runs_by_repo.items() if runs and _is_full(r, runs, cfg))
 
 
 def a2_missing(runs_by_repo, caps, scans=None):
@@ -729,7 +743,6 @@ def minutes(runs_by_repo, now, caps=None):
     """Minutes of the runs of the sample per repository. A repository whose sample is FULL (as long as the lists the monitor asks for) and whose oldest run is still inside the window has more runs than
     the sample shows: its figure is a minimum (`partial24`, `partial7d`), never to be read as the real use (a repository with 151 runs in a day showed the 20 latest)."""
     rows = {}
-    sizes = {int(c) for c in ((caps or {}).get("runs_per_repo"), (caps or {}).get("cold_runs_per_repo")) if isinstance(c, (int, float)) and c}
     for repo, runs in runs_by_repo.items():
         d1 = d7 = n1 = 0
         oldest = None
@@ -745,7 +758,7 @@ def minutes(runs_by_repo, now, caps=None):
             if age <= 7 * 86400:
                 d7 += run.get("seconds") or 0
         if d7:
-            full = len([x for x in runs if not x.get("probe")]) in sizes
+            full = _is_full(repo, runs, caps)
             rows[repo] = {"min24": round(d1 / 60), "min7d": round(d7 / 60), "runs24": n1, "partial24": bool(full and oldest is not None and oldest <= 86400),
                           "partial7d": bool(full and oldest is not None and oldest <= 7 * 86400)}
     return rows
@@ -1784,6 +1797,16 @@ class Sentinel:
             with self.lock:
                 self.sparse["running"] = False
 
+    def _sample_caps(self):
+        """The run-list sizes of the monitor (runs_per_repo, cold_runs_per_repo) and, per repository, the size really asked on its last read (the mode in force, a cold read): A2 and the minutes compare with those."""
+        asked = {}
+        try:
+            info = self.ctx["sample_fn"]() if "sample_fn" in self.ctx else {}
+            asked = {r: v.get("asked") for r, v in dict(info).items() if isinstance(v, dict) and v.get("asked")}
+        except Exception:
+            asked = {}
+        return {"runs_per_repo": self.config.get("runs_per_repo"), "cold_runs_per_repo": self.config.get("cold_runs_per_repo"), "asked": asked}
+
     def _a2_resolve_tick(self):
         """A2: for a repository with a full run sample that hides a workflow of its clone, asks GitHub for the last run of THAT workflow on the default branch
         (one call each, `gh run list -w <file> --branch <default> -L 1`). Same quota gate as A10, at most `a2_resolve_max_calls_per_tick` calls a tick; the answers are
@@ -1793,7 +1816,7 @@ class Sentinel:
             return False
         repos = self.ctx["repos_fn"]()
         runs = {r: list((self.ctx["runs_fn"]().get(r) or {}).get("runs", [])) for r in repos}
-        caps = {"runs_per_repo": self.config.get("runs_per_repo"), "cold_runs_per_repo": self.config.get("cold_runs_per_repo")}
+        caps = self._sample_caps()
         missing = a2_missing(runs, caps, dict(self.surface.scans))
         now_ts, ttl = time.time(), float(self.cfg.get("a2_resolve_ttl_seconds") or 0)
         todo = [(repo, name) for repo, files in sorted(missing.items()) for name in files or [] if not a2_fresh(self.a2_resolved.get(f"{repo}|{name}"), now_ts, ttl) and not self._waiting_question(f"a2|{repo}|{name}", now_ts)]
@@ -1987,7 +2010,7 @@ class Sentinel:
                 {"provider": "none", "enabled": False, "message": i18n.t("ai.off"), "label": i18n.t("ai.label")},
                 "cache_age": round(time.time() - self.saved_at) if (self.saved_at and not self.gql_at) else None,
                 "api": {"calls_last_hour": len([t for t in self.calls if t > time.time() - 3600]), "budget_per_hour": self.cfg["budget_per_hour"]},
-                "sample_caps": {"runs_per_repo": self.config.get("runs_per_repo"), "cold_runs_per_repo": self.config.get("cold_runs_per_repo")},
+                "sample_caps": self._sample_caps(),
                 "surface_paused": self.surface_paused, "a2_resolved": dict(self.a2_resolved), "a2_pending_reason": self.a2_reason, "failed_jobs": dict(self.failed_jobs), "local_versions": dict(self.local_versions), "unreleased_notes": dict(self.unreleased_notes), "pins": pins,
                 "upstream": dict(self.upstream), "upstream_calls": self._upstream_requests(), "lint": self._lint(repos), "org_files": self.org_files["names"] if self.cfg["hygiene"]["community_fallback"] else None,
             }

@@ -25,6 +25,7 @@ import urllib.parse
 import urllib.request
 
 SHARED = ipaddress.ip_network("100.64.0.0/10")
+SITE_LOCAL = ipaddress.ip_network("fec0::/10")      # IPv6 site-local: deprecated, but still routed on some internal networks
 
 
 class Refused(OSError):
@@ -41,7 +42,7 @@ def blocked_ip(value):
         ip = ip.ipv4_mapped
     if ip.version == 6 and ip.sixtofour is not None and blocked_ip(ip.sixtofour):
         return True
-    return bool(ip.is_loopback or ip.is_private or ip.is_link_local or ip.is_multicast or ip.is_unspecified or ip.is_reserved or (ip.version == 4 and ip in SHARED))
+    return bool(ip.is_loopback or ip.is_private or ip.is_link_local or ip.is_multicast or ip.is_unspecified or ip.is_reserved or (ip.version == 4 and ip in SHARED) or (ip.version == 6 and ip in SITE_LOCAL))
 
 
 def resolve(host, port=443, resolver=None):

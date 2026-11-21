@@ -1,6 +1,6 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
-"""The log of actions (Complete only): who did what, when and on which account, one JSON line each, appended and never rewritten. Every line carries the hash of the line before it, so a line that is changed, cut out or put in later breaks the chain and `verify` says where. It never holds a secret: names of settings and short identifiers go in, never a value of a setting, a password, a token, a cookie or a body; every text passes through the same cleaning as the notes for AIs and a key whose name looks like a secret is dropped.
+"""The log of actions (Complete only): who did what, when and on which account, one JSON line each, appended and never rewritten. Every line carries the hash of the line before it, so a line that is changed, cut out of the middle or put in later breaks the chain and `verify` says where. The last hash is also kept in a small file next to the log (`.anchor`), so that a tail that is cut off is told too (`anchor_mismatch`); a log written before the anchor existed has none until its next line. It never holds a secret: names of settings and short identifiers go in, never a value of a setting, a password, a token, a cookie or a body; every text passes through the same cleaning as the notes for AIs and a key whose name looks like a secret is dropped.
 
 It sits next to the audit of the accesses (`auth.audit`: logins, locks, refusals), which stays as it is; the log of actions is the one an administrator reads to know WHAT was changed. The file is private; past `max_mb` the old part is kept as `.1` (one generation) and the chain goes on in the new file. Several processes may write the same file (the supervisor and the accounts in a container share the state folder): each line is chained to the last line that is IN THE FILE, read under a lock between processes, so the chain stays whole. A failure to write never stops a request."""
 import hashlib
@@ -120,6 +120,30 @@ def _tail_hash(target):
     return ""
 
 
+def anchor_path(where):
+    return where.with_name(where.name + ".anchor")
+
+
+def _write_anchor(where, last):
+    """Keeps the hash of the last line next to the log: `verify` compares it with the end of the chain. When it cannot be written it is removed (an old anchor would call a good log cut)."""
+    try:
+        private_io.write_private(anchor_path(where), json.dumps({"hash": last, "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}, separators=(",", ":")))
+    except OSError:
+        try:
+            anchor_path(where).unlink()
+        except OSError:
+            pass
+
+
+def _read_anchor(where):
+    """The hash kept by the last line that was written, or None when there is no (readable) anchor."""
+    try:
+        found = json.loads(anchor_path(where).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return found.get("hash") if isinstance(found, dict) and isinstance(found.get("hash"), str) else None
+
+
 def degraded_note(where, error):
     try:
         from github_actions_monitor.app import degraded
@@ -191,6 +215,7 @@ def record(config, action, user="", role="", account="", target="", result="ok",
                 entry["hash"] = _digest(entry["prev"], {k: v for k, v in entry.items() if k != "hash"})
                 with private_io.open_append(where) as handle:
                     handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
+                _write_anchor(where, entry["hash"])
                 _last.update(path=str(where), hash=entry["hash"])
         return entry
     except OSError as error:      # includes the timeout of the lock between processes
@@ -268,7 +293,11 @@ def verify(target=None):
         if broken:
             return {"ok": False, "entries": total + count, "broken_at": broken, "segment": name, "segments": len(parts), "complete": bool(complete)}
         total += count
-    return {"ok": True, "entries": total, "broken_at": None, "segments": len(parts), "complete": True if complete is None else bool(complete)}
+    anchor = _read_anchor(where)
+    complete = True if complete is None else bool(complete)
+    if anchor is not None and anchor != previous:      # the end of the chain is not the last line that was written: lines were cut off the tail (or the whole file went)
+        return {"ok": False, "entries": total, "broken_at": None, "segment": "anchor", "segments": len(parts), "complete": complete, "anchor": "anchor_mismatch"}
+    return {"ok": True, "entries": total, "broken_at": None, "segments": len(parts), "complete": complete}
 
 
 def may_read(config, role):
