@@ -174,6 +174,11 @@
 - **发布以不可变发布的方式进行**：一次发布的顺序是先建草稿，再上传并核对全部文件（`github_actions_monitor.zip`、`SHA256SUMS`、`monitor_updater.py`），然后才公开发布；在镜像优先的顺序中，则推送标签，由 `release-image.yml` 公开。发布公开后不再接受新文件。`CONTRIBUTING`（八种语言）描述了该顺序。是否开启 GitHub 的该设置由维护者决定，这里不会开启。
 - **一个 CI 作业用 zizmor 分析工作流**：`.github/workflows/zizmor.yml` 在每个拉取请求、每次推送到 main 以及手动触发时，调用以完整提交 SHA 固定的共享可复用工作流；只有高严重度的发现会使其失败，其余列在摘要中，已审阅的发现带着理由在 `.github/zizmor.yml` 中被忽略。它只有读取权限，不使用任何密钥。
 - **节省的时间,作为估算显示在分析中**(`productivity.enabled`,默认关闭):分析部分可以用生产力指南中的公式,逐项任务(监视工作流和找出失败运行的原因)显示监控器每周节省多少分钟。没有监控器时的分钟数是使用者在设置中写下的记录(`productivity.*`,九项带帮助的设置):没有记录的任务显示 `no_data`,不会编造数字;失败运行由监控器根据它掌握的运行统计;来自假设百分比的节省标为 `assumed`,来自使用者自己有监控器时分钟数的标为 `measured`。修复故障不计入。它出现在 `/api/analytics`(`time_saved`)、A12 面板摘要、带数据的演示以及指南和技能中;不调用 GitHub。
+- **`monitor_cli alerts --since 24h` 与已打开警报的历史**：监视器现在在静默文件中记录每条警报首次和最近一次被看到的时间以及关闭时间（`GET /api/alerts?since=24h` 会增加 `since`）；警报消失十分钟后才算已关闭，哨兵未能应答时则从不关闭，因此重启或读取失败不会关闭任何警报。该命令列出在该时间段内某一时刻处于打开状态的警报，包括已关闭的；如果监视器太旧、无法保存历史，它会如实说明。历史保存在本地，最多 500 条、保留 90 天，不会从 GitHub 读取任何内容。
+
+- **`monitor_cli proposals` 与 AI 操作执行前的批准**（`ai.actions.require_approval`，默认关闭）：`proposals list|show ID|approve ID|reject ID|execute ID` 处理 AI 提出的操作，且只能在本机使用。`approve` 和 `reject` 记录是谁决定的（`POST /api/ai/actions/review`，写入审计日志，不会执行任何操作）；`execute` 走与页面相同的入口（精确的命令、`ai.actions.execute`、每小时上限、本地日志）。开启该设置后，提案必须先被批准才会执行；被拒绝的提案无论设置如何都不会执行。`GET /api/ai/actions` 列出等待中的提案，但不包含其参数。
+
+- **doctor 新增两项检查：`compare_window` 与 `etag`**：前者用数字说明两个时期的对比能否用它要求的历史（`compare.min_days_of_history`）和保留的历史（`retention.events_days`）回溯两个窗口；后者给出本机运行的监视器中 GitHub 以 304 应答的条件读取比例，并在响应不带 ETag 时发出警告，因为那样什么都节省不了。`/api/quota` 在“少读取的方式”列表中给出 ETag 缓存的计数器。只读；功能关闭或没有监视器运行时两者都正常。
 
 ### 修复
 

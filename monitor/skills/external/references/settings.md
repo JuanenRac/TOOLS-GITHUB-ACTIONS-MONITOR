@@ -18,6 +18,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.actions.enabled` (secure) | `-` | ai | Proposals on |
 | `ai.actions.execute` (secure) | `-` | ai | Run with confirmation |
 | `ai.actions.max_per_hour` | `-` | ai | Actions per hour |
+| `ai.actions.require_approval` (secure) | `-` | ai | Approve before it runs |
 | `ai.actions.ttl_seconds` | `-` | ai | Proposal lifetime |
 | `ai.airgap_hosts` (secure) | `-` | ai | Private addresses allowed |
 | `ai.airgapped` (secure) | `-` | ai | Air-gapped mode of the AI |

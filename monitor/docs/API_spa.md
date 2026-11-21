@@ -63,8 +63,9 @@ Estas rutas sirven la página y las herramientas de este equipo. No forman parte
 | `/api/act/status` | El estado de la ejecución local en curso. |
 | `/api/act/stop` | POST, este equipo. Detiene la ejecución local. |
 | `/api/advanced` | El estado de las funciones que se activan por elección: la red, el almacén del token de GitHub, las acciones en GitHub, la ejecución local y el modo demo; nunca un token. |
-| `/api/ai/actions` | El estado de las acciones de la IA (bloqueadas o no), su registro y el estado de la IA. |
+| `/api/ai/actions` | El estado de las acciones de la IA (bloqueadas o no), su registro, las propuestas en espera (`proposals`) y el estado de la IA. |
 | `/api/ai/actions/confirm` | POST, este equipo. Ejecuta una acción propuesta por la IA, tras confirmarla; queda registrada. |
+| `/api/ai/actions/review` | POST, este equipo. Aprueba o rechaza una propuesta de la IA (`id`, `decision`); queda registrado. No se ejecuta nada. |
 | `/api/ai/actions/unlock` | POST, este equipo. Desbloquea las acciones de la IA durante un tiempo limitado; queda registrado. |
 | `/api/ai/budget` | Las llamadas y el coste estimado de hoy de cada modelo de IA, los límites y los últimos fallos; no consulta a ningún proveedor. |
 | `/api/ai/test` | POST, este equipo. Prueba la conexión de la IA configurada; no cambia nada. |

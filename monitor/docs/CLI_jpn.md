@@ -18,7 +18,8 @@
 | `doctor` | この環境に対する `--doctor` の検査（モニターが動いていなくても可） | 可 |
 | `backup` | インストール全体の完全バックアップ（モニターが動いていなくても可）：`backup create [FILE] [--account ID]`、`verify FILE [--deep]`、`restore FILE [--account ID] [--to-dir DIR] [--force]`、`status`、`list`。`--encrypt` と `--key-env NAME` で暗号化（任意のライブラリ）。[OPS_jpn.md](OPS_jpn.md) を参照 | 不可 |
 | `accounts` | スーパーバイザーのアカウント一覧（複数アカウント時のみ） | 不可 |
-| `alerts` | すべての番人のアラートを 1 つの一覧で：`--sentinel ci\|collab\|security\|supply\|delivery`、`--level info\|warning\|error`、`--muted show\|hide\|only` | 不可 |
+| `alerts` | すべての番人のアラートを 1 つの一覧で：`--sentinel ci\|collab\|security\|supply\|delivery`、`--level info\|warning\|error`、`--muted show\|hide\|only`；`--since 90m|24h|7d|2w` はその期間のどこかで開いていたものを、閉じたものも含めて一覧にします（モニターが動作中に保持する履歴から。アラートは 10 分間見えなくなると閉じたと数えます） | 不可 |
+| `proposals` | AI が提案した操作（`ai.actions.enabled`）：`proposals list`、`show ID`、`approve ID`、`reject ID`、`execute ID`（ID は短縮できます）。`approve` と `reject` は決定を記録するだけです。`execute` はページと同じ入口で実行し、`ai.actions.execute` が必要で、`ai.actions.require_approval` がオンなら先に承認が必要です。承認・却下・実行はこのコンピューターからのみ可能です | 不可 |
 | `score` | アカウントのスコア：数値、文字評価、傾向、要素、カバレッジ、リポジトリ別の内訳。`--compare` で期間の履歴と比較します | 不可 |
 | `compare` | 今の期間と直前の期間の比較：数値とその変化・方向、悪化または改善したもの。`--window 7\|30d`、`--days all\|workdays\|weekend`、`--baseline previous\|year_ago`、`--format table\|json\|ndjson\|csv`。数値のデータが少ないと終了コード 4、`--fail-on` 指定で悪化があれば 5 | 不可 |
 | `api` | クライアント向けの読み取りAPI:`api openapi` は固定された各ルートの OpenAPI 文書を出力し(ファイルにリダイレクトできます)、`api me` はモニターがこのクライアントを何者と見ているか(モード、ユーザー、ロール、セッションができること、契約のバージョン)を示します。`api.v1_enabled` が閉じているモニターはそう伝えます。`api contract-check` はクライアント向けの契約スイートをそれに対して実行します(検査が失敗すると終了コード4) | 不可 |
@@ -93,4 +94,4 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python bin/monitor
 
 ## バックアップと doctor
 
-`backup` と `doctor` はインストールのフォルダを対象に動作するため、モニターが動いている必要はありません。`doctor` は、すべて正常なら (警告があっても) `0`、チェックが失敗したら `1`、警告のみで `--strict` (または `ops.doctor.strict_exit`) がオンなら `3`、doctor 自体を実行できなければ `4` で終了します。これは doctor のコードで、他のコマンドは上の終了コードのままです。`backup` は完了すれば `0`、拒否された場合やパッケージの検証に失敗した場合は `1` で終了します。チェック、復元、定期バックアップは [OPS_jpn.md](OPS_jpn.md) のガイドにあります。
+`backup` と `doctor` はインストールのフォルダを対象に動作するため、モニターが動いている必要はありません。`doctor` は、すべて正常なら (警告があっても) `0`、チェックが失敗したら `1`、警告のみで `--strict` (または `ops.doctor.strict_exit`) がオンなら `3`、doctor 自体を実行できなければ `4` で終了します。これは doctor のコードで、他のコマンドは上の終了コードのままです。`backup` は完了すれば `0`、拒否された場合やパッケージの検証に失敗した場合は `1` で終了します。チェック、復元、定期バックアップは [OPS_jpn.md](OPS_jpn.md) のガイドにあります。 doctor には `compare_window`（2 期間の比較が、必要とし保持する履歴で期間 2 つ分さかのぼれるか）と `etag`（ここで動いているモニターで条件付き読み取りが 304 で返された割合と、GitHub の応答が ETag なしで届いていないか）もあります。

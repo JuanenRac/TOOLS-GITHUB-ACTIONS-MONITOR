@@ -26,6 +26,7 @@ AUDITED = {
     "/api/ai/actions/confirm": "ai_action",             # an action proposed by the AI is run
     "/api/assistant/ask": "assistant_ask",              # a fixed question to the assistant (the action and the ids it read, never the text of the question or of the answer)
     "/api/ai/prompts/clear": "prompt_log_clear",        # the local record of prompts is emptied (how many lines, never their text)
+    "/api/ai/actions/review": "ai_action_review",       # a proposal of the AI is approved or rejected (the id and the decision, never the command text)
     "/api/ai/actions/unlock": "ai_unlock",              # the actions of the AI are unlocked for a while
     "/api/screens/logo": "screens_logo_upload",                # the logo of the organization is uploaded (its kind and size go in, never its content)
     "/api/webhook/redeliver": "webhook_redeliver",      # GitHub is asked to send again the deliveries that never arrived (how many, never a payload)

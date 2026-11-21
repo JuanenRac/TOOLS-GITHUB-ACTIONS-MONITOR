@@ -63,8 +63,9 @@ Diese Routen bedienen die Seite und die Werkzeuge dieses Rechners. Sie gehören 
 | `/api/act/status` | Der Zustand des laufenden lokalen Laufs. |
 | `/api/act/stop` | POST, dieser Rechner. Stoppt den lokalen Lauf. |
 | `/api/advanced` | Der Zustand der Funktionen, die man bewusst einschaltet: Netzwerk, Speicher des GitHub-Tokens, Aktionen auf GitHub, lokaler Lauf und Demo-Modus; nie ein Token. |
-| `/api/ai/actions` | Der Zustand der Aktionen der KI (gesperrt oder nicht), ihr Protokoll und der Zustand der KI. |
+| `/api/ai/actions` | Der Zustand der Aktionen der KI (gesperrt oder nicht), ihr Protokoll, die wartenden Vorschläge (`proposals`) und der Zustand der KI. |
 | `/api/ai/actions/confirm` | POST, dieser Rechner. Führt eine von der KI vorgeschlagene Aktion nach Ihrer Bestätigung aus; wird protokolliert. |
+| `/api/ai/actions/review` | POST, dieser Rechner. Gibt einen Vorschlag der KI frei oder lehnt ihn ab (`id`, `decision`); wird protokolliert. Nichts wird ausgeführt. |
 | `/api/ai/actions/unlock` | POST, dieser Rechner. Schaltet die Aktionen der KI für begrenzte Zeit frei; wird protokolliert. |
 | `/api/ai/budget` | Die Aufrufe und die geschätzten Kosten von heute je KI-Modell, die Grenzen und die letzten Fehler; fragt keinen Anbieter. |
 | `/api/ai/test` | POST, dieser Rechner. Prüft die Verbindung der eingerichteten KI; ändert nichts. |

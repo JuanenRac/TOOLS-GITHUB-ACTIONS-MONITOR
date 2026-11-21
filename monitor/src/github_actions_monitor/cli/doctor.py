@@ -22,10 +22,10 @@ from pathlib import Path
 
 from github_actions_monitor.util import paths
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder
-ORDER = ("python", "gh", "login", "quota", "access", "estimate", "network", "folder", "port", "running", "docker", "rich", "textual", "targets", "token", "exposure", "risks", "conflicts", "backend", "degraded", "credential", "timezone", "github_app", "layout", "storage", "retention")
+ORDER = ("python", "gh", "login", "quota", "access", "estimate", "network", "folder", "port", "running", "docker", "rich", "textual", "targets", "token", "exposure", "risks", "conflicts", "backend", "degraded", "credential", "timezone", "github_app", "layout", "storage", "retention", "compare_window", "etag")
 FIX = {"access": "gh auth refresh -h github.com -s repo,read:org   |   https://github.com/settings/tokens (Configure SSO)", "estimate": "", "python": "https://www.python.org/downloads/", "gh": "winget install --id GitHub.cli   |   brew install gh   |   sudo apt install gh", "login": "gh auth login",
        "quota": "gh api rate_limit", "network": "gh api rate_limit", "folder": "", "port": "python bin/actions_monitor.py --port 8800", "running": "", "docker": "", "rich": "pip install rich",
-       "textual": "pip install textual", "targets": "python bin/actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "conflicts": "", "backend": "", "degraded": "", "credential": "", "timezone": "", "github_app": "", "layout": "python -m github_actions_monitor.util.rootmigrate --apply", "storage": "python tools/migrate_storage.py --from file --to sqlite", "retention": "",
+       "textual": "pip install textual", "targets": "python bin/actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "conflicts": "", "backend": "", "degraded": "", "credential": "", "timezone": "", "github_app": "", "layout": "python -m github_actions_monitor.util.rootmigrate --apply", "storage": "python tools/migrate_storage.py --from file --to sqlite", "retention": "", "compare_window": "", "etag": "",
        "volumes": "", "supervisor": "python bin/monitor_cli.py health --deep", "limits": "", "capacity": "python bin/monitor_cli.py doctor --json", "sqlite_hot": "python tools/backup_storage.py backup FILE.zip --backend sqlite", "backup_age": "python bin/monitor_cli.py backup create", "disk": "", "metrics": "", "latency": "python bin/monitor_cli.py doctor --latency"}
 ORDER_OPS = ("volumes", "supervisor", "limits", "capacity", "sqlite_hot", "backup_age", "disk", "metrics")
 EXIT_OK, EXIT_FAIL, EXIT_WARN, EXIT_DOCTOR_ERROR = 0, 1, 3, 4
@@ -103,7 +103,7 @@ def _writable(folder):
         return False
 
 
-def run(runner=default_runner, folder=HERE, ports=None, python=None, config=None, edition=None, reader=None):
+def run(runner=default_runner, folder=HERE, ports=None, python=None, config=None, edition=None, reader=None, etag_reader=None):
     """The list of checks, in ORDER (and, for edition="complete", ORDER_OPS after them). `config` is the content of the configuration file ({} when there is none)."""
     config = config if isinstance(config, dict) else {}
     version = python or sys.version_info[:3]
@@ -163,6 +163,8 @@ def run(runner=default_runner, folder=HERE, ports=None, python=None, config=None
     out["layout"] = layout_check(folder)
     out["storage"] = storage_check(config, folder, "off" if edition == "complete" else "integrity")
     out["retention"] = retention_check(config, folder)
+    out["compare_window"] = compare_window_check(config)
+    out["etag"] = etag_check(config, busy, reader=etag_reader)
     order = ORDER
     if edition == "complete":
         from github_actions_monitor.ops import checks as ops_checks
@@ -355,6 +357,73 @@ def retention_check(config, folder=HERE, env=None):
             notes.append(f"{label}: not configured")
     detail = f"{biggest // 1024} KB" if biggest < 1024 * 1024 else f"{biggest // (1024 * 1024)} MB"
     return ("warn", detail + " - " + "; ".join(notes[:3])) if notes else ("ok", detail)
+
+
+def compare_window_check(config):
+    """("ok" | "warn", detail): can the comparison of two periods (`compare.enabled`) work with the window it is set to? The baseline `previous` is the window of the same length right before, so it
+    reaches back two windows; the monitor must have watched that long (`compare.min_days_of_history` is the floor it asks for) and keeps the events that long (the retention is raised to it by itself).
+    Off when the comparison is off. A window the monitor cannot look back far enough for does not fail: the answer of the comparison says `baseline_unavailable` with the reason, and this check says it first."""
+    from github_actions_monitor.compare import config as compare_config
+    try:
+        cfg = compare_config.settings(config)
+    except Exception:       # noqa: BLE001 - a check never stops the doctor
+        return "warn", "?"
+    if not cfg["enabled"]:
+        return "ok", "off"
+    window = cfg["default_window_days"]
+    need = 2 * window
+    detail = "%d d + %d d = %d d of history" % (window, window, need)
+    notes = []
+    if need > cfg["min_days_of_history"]:
+        notes.append("compare.min_days_of_history is %d: before %d d of watching the baseline of the last %d d says baseline_unavailable" % (cfg["min_days_of_history"], need, window))
+    from github_actions_monitor.storage import retention
+    asked = retention.settings(config)
+    if asked["enabled"] and asked["events_days"] < need + 1:
+        notes.append("retention.events_days is %d and is raised to %d for it" % (asked["events_days"], need + 1))
+    return ("warn", detail + " - " + "; ".join(notes)) if notes else ("ok", detail)
+
+
+ETAG_MIN_CALLS = 50          # fewer conditional reads than this say nothing yet
+
+
+def _read_quota(port):
+    """The /api/quota document of a monitor on this computer (None when nothing answers like one). Loopback only, no proxy, a short wait."""
+    import urllib.request
+    try:
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        with opener.open("http://127.0.0.1:%d/api/quota" % int(port), timeout=2.0) as answer:
+            document = json.loads(answer.read(262144).decode("utf-8"))
+        return document if isinstance(document, dict) else None
+    except Exception:   # noqa: BLE001 - a check never stops the doctor
+        return None
+
+
+def etag_check(config, busy, reader=None):
+    """("ok" | "warn", detail): how the conditional reads (ETag, `network.etag`) are doing in the monitor that runs here: the share of reads GitHub answered with 304 (no quota spent), and whether
+    answers come back without an ETag (something between this computer and GitHub strips it, and then nothing is spared). "off" when `network.etag` or `cache.etag.enabled` is off; "not running" when
+    no monitor answers; "few reads yet" below ETAG_MIN_CALLS. Read only, from /api/quota of this computer."""
+    network = config.get("network") if isinstance(config.get("network"), dict) else {}
+    cache = config.get("cache") if isinstance(config.get("cache"), dict) else {}
+    cache_etag = cache.get("etag") if isinstance(cache.get("etag"), dict) else {}
+    if network.get("etag") is False or cache_etag.get("enabled") is False:
+        return "ok", "off"
+    for port in busy:
+        document = (reader or _read_quota)(port)
+        ways = ((document or {}).get("savings") or {}).get("ways") if isinstance((document or {}).get("savings"), dict) else None
+        way = next((w for w in (ways or []) if isinstance(w, dict) and w.get("id") == "etag"), None)
+        if way is None:
+            continue
+        calls, saved, missing = way.get("calls"), way.get("saved", way.get("spared")), way.get("no_etag") or 0
+        if not isinstance(calls, int) or isinstance(calls, bool):
+            return "ok", "running, no figures yet"
+        if calls < ETAG_MIN_CALLS:
+            return "ok", "%d reads, few reads yet" % calls
+        share = way.get("hit_pct")
+        detail = "%s %% of %d reads were 304 (%d spared)" % (share if share is not None else "?", calls, saved if isinstance(saved, int) else 0)
+        if missing and missing * 5 > calls:
+            return "warn", detail + ", %d answers without ETag" % missing
+        return "ok", detail
+    return "ok", "not running"
 
 
 def github_app_check(config):

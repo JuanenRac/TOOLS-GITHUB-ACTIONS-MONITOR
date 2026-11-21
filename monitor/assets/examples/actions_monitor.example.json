@@ -437,6 +437,7 @@
     "actions": {
       "enabled": false,
       "execute": false,
+      "require_approval": false,
       "allowed": ["rerun_failed", "close_issue"],
       "max_per_hour": 5,
       "ttl_seconds": 600

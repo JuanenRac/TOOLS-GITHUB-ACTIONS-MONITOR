@@ -5,7 +5,9 @@
 
   status    one screen: version, edition, repositories, what runs, what fails, the allowance
   accounts  the accounts the supervisor watches (the complete edition with an `accounts/` folder)
-  alerts    the alerts of every sentinel in one list (--sentinel ci|collab, --level, --muted)
+  alerts    the alerts of every sentinel in one list (--sentinel ci|collab, --level, --muted); with --since 24h the ones that were open at some moment of that time, closed ones too
+  proposals the actions the AI proposed: list | show ID | approve ID | reject ID | execute ID (this computer only; nothing runs without `ai.actions.execute`, and with
+            `ai.actions.require_approval` not before it is approved)
   live      the last events that arrived through the webhook and the state of the receiver
   metrics   the figures of the monitor as one `name=value` line each (nothing else on the standard output), made for cron and for mail; with --if-problem it writes nothing at all
             when all is well, so cron sends no mail
@@ -58,6 +60,7 @@ BACKUP_ACTIONS = ("create", "verify", "restore", "status", "list")
 SKILL_ACTIONS = ("internal", "external")
 AI_ACTIONS = ("models", "doctor", "test")
 LESSONS_ACTIONS = ("list", "brief", "failures", "close")
+PROPOSALS_ACTIONS = ("list", "show", "approve", "reject", "execute")
 BRIEFS_ACTIONS = ("index", "show", "all")
 DOCS_ACTIONS = ("list", "show")
 DOCS_TAIL = {"en": "", "es": "_spa", "de": "_deu", "fr": "_fra", "it": "_ita", "ja": "_jpn", "zh": "_zho", "pt": "_por"}      # the suffix of the translated guides of docs/
@@ -73,11 +76,11 @@ from github_actions_monitor.cli import watch as watch_loop      # noqa: E402
 from github_actions_monitor.cli import branchwatch      # noqa: E402
 from github_actions_monitor.app import codestale      # noqa: E402
 from github_actions_monitor.surfaces import kiosk      # noqa: E402
-COMMANDS = COMMANDS + ("toolbox", "watch", "completions", "kiosk", "metrics")      # the operator commands (docs/CLI_OPERATOR.md)
+COMMANDS = COMMANDS + ("toolbox", "watch", "completions", "kiosk", "metrics", "proposals")      # the operator commands (docs/CLI_OPERATOR.md)
 STATUS_CODES = ("classic", "operator")      # `cli.status_codes` / --status-codes: classic = the codes 0 to 5 of every command; operator = status alone says 0 healthy, 1 nothing serving, 2 up but needs attention
 EXIT_CHANGED = watch_loop.EXIT_CHANGED      # 6: `watch --exit-on-change` saw something change (only when the flag is given)
 OPERATOR_WORDS = {"watch": watch_loop.WATCHABLE, "completions": completions.SHELLS, "kiosk": tuple(kiosk.PRESETS)}
-WORDS_BY_COMMAND = {"ai-hook": AI_HOOK_ACTIONS, "credential": CREDENTIAL_ACTIONS, "lessons": LESSONS_ACTIONS, "install-skill": SKILL_ACTIONS, "ai": AI_ACTIONS, **OPERATOR_WORDS}
+WORDS_BY_COMMAND = {"proposals": PROPOSALS_ACTIONS, "ai-hook": AI_HOOK_ACTIONS, "credential": CREDENTIAL_ACTIONS, "lessons": LESSONS_ACTIONS, "install-skill": SKILL_ACTIONS, "ai": AI_ACTIONS, **OPERATOR_WORDS}
 CLIENT = monitor_admin.CLIENT      # the session of the team mode and the authority of the certificate: one dict, shared
 PORTS = dict(ports.DEFAULTS)      # the defaults; the port in use is ports.resolve (configuration file, MONITOR_PORT)
 TOKEN_VARIABLES = ("MONITOR_ACCESS_TOKEN", "MONITOR_TOKEN")      # the first is the one the monitor itself reads; the second is an alias
@@ -330,7 +333,35 @@ def cmd_accounts(ctx):
     return answer, lines, EXIT_AUTH if blind else EXIT_OK
 
 
+def _since_text(seconds):
+    """90 -> "90 s", 5400 -> "90 min", 86400 -> "24 h", 172800 -> "2 d": the length of a window as the person would say it."""
+    for unit, size, floor in (("d", 86400, 172800), ("h", 3600, 3600), ("min", 60, 60)):
+        if seconds % size == 0 and seconds >= floor:
+            return f"{seconds // size} {unit}"
+    return f"{seconds} s"
+
+
+def cmd_alerts_since(ctx):
+    """alerts --since LENGTH (90m, 24h, 7d): the alerts that were open at some moment of that time, the closed ones too, from the ledger the monitor keeps (it starts to fill when the monitor runs, so a
+    young monitor cannot know older ones). Closing needs ten minutes of absence, so a restart does not close anything."""
+    answer = fetch(ctx["base"], "/api/alerts", {"account": ctx["account"], "sentinel": ctx.get("sentinel"), "level": ctx.get("level"), "muted": "show", "since": ctx["since"]}, ctx["timeout"], ctx["token"])
+    window = answer.get("since")
+    if not isinstance(window, dict):      # a monitor older than this command ignores ?since= and would answer the current list: say so, never pass it off as the history
+        raise CliError(EXIT_DEGRADED, i18n.t("cli.alerts_since_old"))
+    if window.get("error"):
+        raise CliError(EXIT_USAGE, i18n.t("cli.alerts_since_bad"))
+    rows = window.get("alerts") or []
+    lines = [i18n.t("cli.alerts_since_head", n=len(rows), since=_since_text(window.get("seconds") or 0))]
+    for a in rows:
+        mark = {"critical": "[CRIT]", "error": "[ERR ]", "warning": "[warn]", "info": "[info]"}.get(a.get("level"), "[    ]")
+        end = i18n.t("cli.alerts_since_resolved", at=a["resolved_at"]) if a.get("resolved_at") else i18n.t("cli.alerts_since_open")
+        lines.append(f"  {mark} {a.get('sentinel', '?'):<6} {a.get('code', '')}  {a.get('repo') or '-'}  {a.get('title', '')}  ({a.get('first_seen', '?')} - {end})")
+    return {"since": window.get("seconds"), "alerts": rows}, lines, EXIT_OK
+
+
 def cmd_alerts(ctx):
+    if ctx.get("since"):
+        return cmd_alerts_since(ctx)
     answer = fetch(ctx["base"], "/api/alerts", {"account": ctx["account"], "sentinel": ctx.get("sentinel"), "level": ctx.get("level"), "muted": ctx.get("muted")}, ctx["timeout"], ctx["token"])
     alerts = answer.get("alerts") or []
     lines = [i18n.t("cli.alerts_head", n=len(alerts))]
@@ -344,6 +375,48 @@ def cmd_alerts(ctx):
         if any(worst.get(a.get("level"), 0) >= worst[wanted] and not a.get("muted_until") for a in alerts):
             code = EXIT_ALERTS
     return answer, lines, code
+
+
+def _proposal_line(row):
+    return f"  {row.get('id', '?')}  {row.get('status', '?'):<8} {row.get('repo') or '-':<22} {row.get('command', '')}  ({i18n.t('cli.proposals_left', s=row.get('expires_in_s', 0))})"
+
+
+def cmd_proposals(ctx):
+    """proposals list | show ID | approve ID | reject ID | execute ID: the actions the AI proposed (`ai.actions.enabled`), read from `/api/ai/actions`. approve and reject record the decision and run nothing;
+    execute runs the proposal through the same door as the page (the exact command, `ai.actions.execute` on, a rate limit, a local log, and approved first when `ai.actions.require_approval` is on).
+    approve, reject and execute are for this computer only. An id may be shortened to a prefix that names one proposal. 0 done; 1 wrong use; 4 the monitor refused or it could not be done."""
+    action = ctx["action"] or "list"
+    if action not in PROPOSALS_ACTIONS:
+        raise CliError(EXIT_USAGE, i18n.t("cli.proposals_action"))
+    answer = fetch(ctx["base"], "/api/ai/actions", None, ctx["timeout"], ctx["token"])
+    rows = [r for r in (answer.get("proposals") or []) if isinstance(r, dict)]
+    state = answer.get("state") if isinstance(answer.get("state"), dict) else {}
+    if action == "list":
+        lines = [i18n.t("cli.proposals_head", n=len(rows), approval=i18n.t("cli.proposals_approval_on" if state.get("require_approval") else "cli.proposals_approval_off"))]
+        lines += [_proposal_line(r) for r in rows]
+        return {"proposals": rows, "state": state}, lines, EXIT_OK
+    wanted = (ctx.get("file") or "").strip()
+    if not wanted:
+        raise CliError(EXIT_USAGE, i18n.t("cli.proposals_need_id"))
+    found = [r for r in rows if r.get("id") == wanted] or [r for r in rows if str(r.get("id", "")).startswith(wanted)]
+    if len(found) != 1:
+        raise CliError(EXIT_USAGE, i18n.t("cli.proposals_unknown" if not found else "cli.proposals_ambiguous", id=wanted))
+    row = found[0]
+    if action == "show":
+        return {"proposal": row}, [_proposal_line(row), i18n.t("cli.proposals_detail", action=row.get("action", "?"), runnable=i18n.t("cli.yes" if row.get("runnable") else "cli.no"), by=row.get("by") or "-")], EXIT_OK
+    if action in ("approve", "reject"):
+        status, result = post_json(ctx["base"], "/api/ai/actions/review", {"id": row["id"], "decision": action, "by": "cli"}, ctx["timeout"], ctx["token"], guarded=True)
+    else:
+        status, result = post_json(ctx["base"], "/api/ai/actions/confirm", {"id": row["id"], "command": row.get("command")}, max(ctx["timeout"], 70.0), ctx["token"], guarded=True)
+    if status in (401, 403):
+        raise CliError(EXIT_AUTH, i18n.t("cli.proposals_refused", code=result.get("code") or result.get("error") or status))
+    ok = status == 200 and result.get("ok") is True
+    reason = str(result.get("reason") or result.get("error") or status)
+    line = i18n.t("cli.proposals_done_" + action, id=row["id"]) if ok else i18n.t("cli.proposals_failed", id=row["id"], reason=i18n.t("cli.proposals_reason_" + reason) if reason in PROPOSAL_REASONS else reason)
+    return {"action": action, "id": row["id"], "ok": ok, "reason": reason}, [line], EXIT_OK if ok else EXIT_DEGRADED
+
+
+PROPOSAL_REASONS = ("off", "unknown", "expired", "mismatch", "rejected", "not_approved", "locked", "rate", "failed", "decided", "bad_decision")
 
 
 def _signed(number):
@@ -1127,7 +1200,7 @@ def cmd_watch(ctx):
     return None, None, code
 
 
-HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "compare": cmd_compare, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "briefs": cmd_briefs, "docs": cmd_docs, "screens": cmd_screens, "toolbox": cmd_toolbox, "api": cmd_api, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai, "watch": cmd_watch, "completions": cmd_completions, "kiosk": cmd_kiosk, "metrics": cmd_metrics}
+HANDLERS = {"proposals": cmd_proposals, "credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "compare": cmd_compare, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "briefs": cmd_briefs, "docs": cmd_docs, "screens": cmd_screens, "toolbox": cmd_toolbox, "api": cmd_api, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai, "watch": cmd_watch, "completions": cmd_completions, "kiosk": cmd_kiosk, "metrics": cmd_metrics}
 
 
 def cmd_update(rest):
@@ -1148,7 +1221,7 @@ def cmd_update(rest):
 def build_parser():
     ap = argparse.ArgumentParser(prog="monitor_cli.py", description=i18n.t("cli.description"), epilog=i18n.t("cli.epilog"), formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", choices=COMMANDS, help=i18n.t("cli.help_command"))
-    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + BRIEFS_ACTIONS + DOCS_ACTIONS + API_ACTIONS + SKILL_ACTIONS + AI_ACTIONS + BACKUP_ACTIONS + SCREENS_ACTIONS + TOOLBOX_ACTIONS + tuple(w for words in OPERATOR_WORDS.values() for w in words), default=None, help=i18n.t("cli.help_ai_action"))
+    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + PROPOSALS_ACTIONS + BRIEFS_ACTIONS + DOCS_ACTIONS + API_ACTIONS + SKILL_ACTIONS + AI_ACTIONS + BACKUP_ACTIONS + SCREENS_ACTIONS + TOOLBOX_ACTIONS + tuple(w for words in OPERATOR_WORDS.values() for w in words), default=None, help=i18n.t("cli.help_ai_action"))
     ap.add_argument("file", nargs="?", default="", help=i18n.t("cli.help_file"))
     ap.add_argument("--json", action="store_true", help=i18n.t("cli.help_json"))
     for name in ("assistant", "cursor", "generic"):
@@ -1170,6 +1243,7 @@ def build_parser():
     ap.add_argument("--sentinel", choices=("ci", "collab", "security", "supply", "delivery", "system"), default="", help=i18n.t("cli.help_sentinel"))
     ap.add_argument("--level", choices=LEVELS, default="", help=i18n.t("cli.help_level"))
     ap.add_argument("--muted", choices=("show", "hide", "only"), default="hide", help=i18n.t("cli.help_muted"))
+    ap.add_argument("--since", metavar="LENGTH", default="", help=i18n.t("cli.help_since"))
     ap.add_argument("--fail-on", choices=LEVELS, default="", dest="fail_on", help=i18n.t("cli.help_fail_on"))
     ap.add_argument("--strict", action="store_true", help=i18n.t("cli.help_strict"))
     ap.add_argument("--force", action="store_true", help=i18n.t("cli.help_force"))
@@ -1241,7 +1315,7 @@ def main(argv=None):
     scheme = {"operator": False}      # set once the configuration is read: the exit code of a `status` that fails follows the scheme in use
     try:
         ctx = {"base": base_url(args.url, args.lite), "account": args.account, "timeout": max(1.0, min(60.0, args.timeout)), "token": resolve_token(flag=args.token, token_file=args.token_file),
-               "sentinel": args.sentinel, "level": args.level, "muted": args.muted, "fail_on": args.fail_on, "lite": args.lite, "compare": args.compare, "severity": args.severity, "window": args.window if re.fullmatch(r"[0-9]{1,3}d?", args.window) else "", "days": args.days, "baseline": args.baseline, "format": args.format,
+               "sentinel": args.sentinel, "level": args.level, "since": args.since.strip() if re.fullmatch(r"\s*[0-9]{1,6}\s*[smhdwSMHDW]?\s*", args.since) else ("bad" if args.since.strip() else ""), "muted": args.muted, "fail_on": args.fail_on, "lite": args.lite, "compare": args.compare, "severity": args.severity, "window": args.window if re.fullmatch(r"[0-9]{1,3}d?", args.window) else "", "days": args.days, "baseline": args.baseline, "format": args.format,
                "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run, "deep": args.deep, "file": args.file, "strict": args.strict, "force": args.force, "encrypt": args.encrypt, "key_env": args.key_env if re.fullmatch(r"[A-Z_][A-Z0-9_]{0,63}", args.key_env) else "", "to_dir": args.to_dir, "new_token_file": args.new_token_file, "dest": args.dest, "read_only": args.read_only, "repo": args.repo if re.fullmatch(r"[A-Za-z0-9._/-]{0,201}", args.repo) else "",
                "provider": args.provider if re.fullmatch(r"[A-Za-z0-9-]{0,40}", args.provider) else "", "model": args.model if re.fullmatch(r"[A-Za-z0-9._:/@+-]{0,100}", args.model) else "", "refresh": args.refresh}
         raw = _config() if args.command in ("watch", "kiosk", "status") or not (args.format or args.json) else {}
