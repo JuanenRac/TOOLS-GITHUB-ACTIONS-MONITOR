@@ -52,6 +52,14 @@ python bin/monitor_cli.py watch branch --single-pass --format json
 - `--wait SEGUNDOS`: quanto esperar pelo fim das execuções antes de desistir com 1 (10 a 86400). Sem ele, a espera é a definição `cli.watch.branch_timeout_seconds` (900).
 - Um commit solto não tem ramo: indique `--branch`. Uma pasta sem um remoto chamado `origin` no GitHub precisa de `--repo`.
 
+## `monitor N`: um ecrã que se atualiza
+
+`monitor_cli.py monitor [N]` é o `watch status` que volta a ler a cada N segundos (um número de 1 a 9999, elevado a `cli.watch.min_interval_seconds`; sem N, o valor predefinido de `cli.watch.default_interval_seconds`). As restantes opções funcionam como no `watch` (`--format`, `--no-clear`, `--url`, `--status-codes operator` ...) e Ctrl-C termina-o com 0.
+
+## `doctor --latency`: quanto tardam os eventos
+
+`monitor_cli.py doctor --latency` acrescenta uma verificação ao doctor. Lê os eventos da conta (a mesma lista que usa o detetor gratuito de alterações `events_feed`) e, para os últimos pushes, a execução desse mesmo commit, e indica o tempo de ida e volta, a mediana e o pior atraso entre o início da execução e o evento, e quanto pode esperar uma alteração no pior caso com o seu `events_feed.interval_seconds` (no campo `data` de `--json`). Só lê: não se cria nada no GitHub, nem issues nem execuções de teste. Uma leitura que falha dá um aviso «não avaliável» com a sua causa, nunca uma falha do monitor. Com mais de 120 segundos de atraso a verificação avisa.
+
 ## `completions`: completar os comandos
 
 ```
@@ -79,7 +87,7 @@ Os códigos 0 a 5 são os de [CLI_por.md](CLI_por.md); um teste mantém esta tab
 
 ### Os códigos de saída de `status` para um operador
 
-Por predefinição o `status` mantém os códigos da tabela acima, por isso nenhum script muda. Com `--status-codes operator` (ou a definição `cli.status_codes` em `operator`) o comando diz apenas três coisas: **0** saudável, **1** nada serve (o monitor não é alcançável ou recusa a credencial) e **2** a funcionar mas precisa de atenção. Precisa de atenção significa: o monitor não chega ao GitHub, ainda não há dados, a credencial está cega, a atualização está em pausa porque a quota está abaixo do mínimo, a resposta traz um erro, uma resposta que não é a de um monitor, ou **o código no disco é de outra versão que o processo em execução** (foi aplicada uma atualização e o monitor não foi reiniciado; o `/api/health` di-lo como `code_stale` e o `--doctor` tem a verificação `running`). Um erro de utilização continua a ser 1. Os motivos estão no campo `attention` de `--json`. As falhas de workflows vermelhos não contam: para essas use `alerts --fail-on`.
+Por predefinição o `status` mantém os códigos da tabela acima, por isso nenhum script muda. Com `--status-codes operator` (ou a definição `cli.status_codes` em `operator`) o comando diz apenas três coisas: **0** saudável, **1** nada serve (o monitor não é alcançável ou recusa a credencial) e **2** a funcionar mas precisa de atenção. Precisa de atenção significa: o monitor não chega ao GitHub, ainda não há dados, a credencial está cega, a atualização está em pausa porque a quota está abaixo do mínimo, a resposta traz um erro, uma resposta que não é a de um monitor, ou **o código no disco é de outra versão que o processo em execução** (foi aplicada uma atualização e o monitor não foi reiniciado; o `/api/health` di-lo como `code_stale` e o `--doctor` tem a verificação `running`). Um erro de utilização continua a ser 1. Os motivos estão no campo `attention` de `--json`. As falhas de workflows vermelhos não contam: para essas use `alerts --fail-on`. O `watch status` segue os mesmos códigos também quando uma leitura falha: um monitor inalcançável ou que recusa a credencial termina o ciclo com 1, uma resposta ilegível com 2.
 
 ## Exemplos com `jq`
 

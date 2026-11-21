@@ -52,6 +52,14 @@ python bin/monitor_cli.py watch branch --single-pass --format json
 - `--wait SECONDES` : combien de temps attendre la fin des exécutions avant d'abandonner avec 1 (10 à 86400). Sans lui, l'attente est le réglage `cli.watch.branch_timeout_seconds` (900).
 - Un commit détaché n'a pas de branche : indiquez `--branch`. Un dossier sans remote nommé `origin` sur GitHub demande `--repo`.
 
+## `monitor N` : un écran qui se rafraîchit
+
+`monitor_cli.py monitor [N]` est `watch status` qui relit toutes les N secondes (un nombre de 1 à 9999, relevé à `cli.watch.min_interval_seconds` ; sans N, la valeur par défaut de `cli.watch.default_interval_seconds`). Les autres options fonctionnent comme dans `watch` (`--format`, `--no-clear`, `--url`, `--status-codes operator` ...) et Ctrl-C l'arrête avec 0.
+
+## `doctor --latency` : le retard des événements
+
+`monitor_cli.py doctor --latency` ajoute un contrôle au doctor. Il lit les événements du compte (la même liste que le détecteur gratuit de changements `events_feed`) et, pour les derniers pushes, l'exécution de ce même commit, puis indique l'aller-retour, la médiane et le pire retard entre le début de l'exécution et l'événement, et combien de temps un changement peut attendre au pire avec votre `events_feed.interval_seconds` (dans le champ `data` de `--json`). Il ne fait que lire : rien n'est créé sur GitHub, ni ticket ni exécution de test. Une lecture qui échoue donne un avertissement « non évaluable » avec sa cause, jamais une panne du moniteur. Au-delà de 120 secondes de retard, le contrôle avertit.
+
 ## `completions` : compléter les commandes
 
 ```
@@ -79,7 +87,7 @@ Les codes 0 à 5 sont ceux de [CLI_fra.md](CLI_fra.md) ; un test garde ce tablea
 
 ### Les codes de sortie de `status` pour un opérateur
 
-Par défaut `status` garde les codes du tableau ci-dessus, aucun script ne change. Avec `--status-codes operator` (ou le réglage `cli.status_codes` sur `operator`) la commande ne dit que trois choses : **0** sain, **1** rien ne sert (le moniteur est injoignable ou refuse l'identifiant) et **2** en marche mais demande de l'attention. Demande de l'attention signifie : le moniteur n'atteint pas GitHub, pas encore de données, l'identifiant est aveugle, l'actualisation est en pause car le quota est sous son plancher, la réponse porte une erreur, une réponse qui n'est pas celle d'un moniteur, ou **le code sur le disque est d'une autre version que le processus en marche** (une mise à jour a été appliquée sans redémarrer le moniteur ; `/api/health` le dit par `code_stale` et `--doctor` a la vérification `running`). Une erreur d'usage reste 1. Les raisons sont dans le champ `attention` de `--json`. Les échecs de workflows rouges n'en font pas partie : pour eux, utilisez `alerts --fail-on`.
+Par défaut `status` garde les codes du tableau ci-dessus, aucun script ne change. Avec `--status-codes operator` (ou le réglage `cli.status_codes` sur `operator`) la commande ne dit que trois choses : **0** sain, **1** rien ne sert (le moniteur est injoignable ou refuse l'identifiant) et **2** en marche mais demande de l'attention. Demande de l'attention signifie : le moniteur n'atteint pas GitHub, pas encore de données, l'identifiant est aveugle, l'actualisation est en pause car le quota est sous son plancher, la réponse porte une erreur, une réponse qui n'est pas celle d'un moniteur, ou **le code sur le disque est d'une autre version que le processus en marche** (une mise à jour a été appliquée sans redémarrer le moniteur ; `/api/health` le dit par `code_stale` et `--doctor` a la vérification `running`). Une erreur d'usage reste 1. Les raisons sont dans le champ `attention` de `--json`. Les échecs de workflows rouges n'en font pas partie : pour eux, utilisez `alerts --fail-on`. `watch status` suit les mêmes codes aussi quand une lecture échoue : un moniteur injoignable ou qui refuse l'identifiant termine la boucle avec 1, une réponse illisible avec 2.
 
 ## Exemples avec `jq`
 

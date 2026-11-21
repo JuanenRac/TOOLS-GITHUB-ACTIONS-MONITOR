@@ -10,6 +10,8 @@
   metrics   the figures of the monitor as one `name=value` line each (nothing else on the standard output), made for cron and for mail; with --if-problem it writes nothing at all
             when all is well, so cron sends no mail
   doctor    the checks of --doctor for this installation (no monitor needed); --strict makes a warning exit 3
+            --latency adds one check that reads the events of the account and the runs of the latest pushes and tells how late the events are (reads only)
+  monitor   `monitor [N]`: `watch status` that refreshes every N seconds, for a terminal left open
   backup    create | verify | restore | status | list: the complete backup package of this installation (no monitor needed); --key-env NAME with --encrypt seals it (optional library), --deep on
             verify restores it into a temporary folder, restore takes --account ID, --to-dir DIR and --force
   ai-hook   install | status | uninstall the gate script that tells an AI tool what the monitor sees (--assistant, --cursor or --generic; --scope project|user); it needs no
@@ -733,6 +735,8 @@ def cmd_doctor(ctx):
         checks = doctor.run(config=config, edition=edition)
     except Exception:      # noqa: BLE001 - the doctor itself could not run: its own exit code, not a traceback
         return {"ok": False, "exit": doctor.EXIT_DOCTOR_ERROR}, [i18n.t("doctor.broken")], doctor.EXIT_DOCTOR_ERROR
+    if ctx.get("latency"):      # `doctor --latency`: reads only, the delay between a push and its run in the events of the account (a failed read is "not evaluable", never a defect)
+        checks = list(checks) + [doctor.latency_check(doctor.default_runner, config)]
     strict = bool(ctx.get("strict")) or doctor.strict_from(config)
     return doctor.as_json(checks, edition, strict), doctor.text(checks, i18n.t, edition).rstrip("\n").split("\n"), doctor.exit_code(checks, strict)
 
@@ -1043,11 +1047,17 @@ def cmd_watch(ctx):
     interval = watch_loop.interval_for(ctx.get("interval"), ctx.get("raw"))
     on_branch = command == "branch"
 
+    operator = command == "status" and status_scheme(ctx) == "operator"      # `watch status` follows the codes of the operator also when the read fails (network, refusal, an answer that cannot be read)
+
     def read():
         try:
             return handler(ctx)
         except (AttributeError, TypeError, KeyError, ValueError, IndexError):
-            raise CliError(EXIT_DEGRADED, i18n.t("cli.bad_shape")) from None
+            raise CliError(operator_status_code(EXIT_DEGRADED) if operator else EXIT_DEGRADED, i18n.t("cli.bad_shape")) from None
+        except CliError as error:
+            if operator and error.code != EXIT_USAGE:
+                raise CliError(operator_status_code(error.code), error.text) from None
+            raise
 
     def show(payload, lines, code):
         out = formats.render(ctx["format"], command, payload, lines, code, width=terminal.width(), color=ctx.get("color", False))
@@ -1138,8 +1148,20 @@ def build_parser():
     ap.add_argument("--if-problem", action="store_true", dest="if_problem", help=i18n.t("cli.help_if_problem"))
     ap.add_argument("--color", choices=terminal.MODES, default="auto", help=i18n.t("cli.help_color"))
     ap.add_argument("--egress", action="store_true", help=i18n.t("cli.help_egress"))
+    ap.add_argument("--latency", action="store_true", help=i18n.t("cli.help_latency"))
     ap.add_argument("--version", action="store_true", help=i18n.t("cli.help_version"))
     return ap
+
+
+def monitor_words(args_list):
+    """`monitor [N]` is `watch status` that refreshes every N seconds (the interval of the setting when N is not given; raised to the floor `cli.watch.min_interval_seconds`): the screen of a terminal left open. The
+    rest of the options are kept, so `monitor 10 --json` and `monitor --url ...` work. Anything else is returned as it came."""
+    if args_list[:1] != ["monitor"]:
+        return args_list
+    rest = args_list[1:]
+    if rest and re.fullmatch(r"[0-9]{1,4}", rest[0]):
+        return ["watch", "status", "--interval", rest[0]] + rest[1:]
+    return ["watch", "status"] + rest
 
 
 def main(argv=None):
@@ -1149,6 +1171,7 @@ def main(argv=None):
     if "--version" in args_list and args_list[:1] != ["update"]:
         print(f"monitor_cli {TOOL_VERSION}")
         return EXIT_OK
+    args_list = monitor_words(args_list)
     if args_list[:1] == ["update"]:      # the updater parses its own options (and has its own exit codes)
         return cmd_update(args_list[1:])
     parser = build_parser()
@@ -1174,6 +1197,7 @@ def main(argv=None):
                     "branch": args.branch, "repo_asked": args.repo, "wait": args.wait, "status_codes": args.status_codes, "if_problem": args.if_problem, "color": terminal.use_color(args.color)})
         scheme["operator"] = args.command == "status" and status_scheme(ctx) == "operator"
         ctx["egress"] = args.egress
+        ctx["latency"] = args.latency
         CLIENT.update({"session": "", "ca": (args.ca_file or os.environ.get("MONITOR_CA_FILE") or "").strip()})
         if CLIENT["ca"] and not os.path.isfile(CLIENT["ca"]):
             raise CliError(EXIT_USAGE, i18n.t("cli.ca_file_bad", file=CLIENT["ca"]))
