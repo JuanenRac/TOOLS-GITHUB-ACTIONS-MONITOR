@@ -164,6 +164,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 - **Une release n'est proposée qu'à partir de cinq entrées sous [Unreleased]** : `sentinel.candidate_min_entries` démarre maintenant à 5 (c'était 1), si bien que les candidates à une release de la sentinelle CI et la préparation de version n'apparaissent plus pour un ou deux petits changements. Une valeur choisie par vous est conservée ; le nombre se règle de 1 à 100 dans les Réglages.
 
 - **Les releases sont publiées comme releases immuables** : l'ordre d'une release est d'abord un BROUILLON, puis tous les fichiers (`github_actions_monitor.zip`, `SHA256SUMS`, `monitor_updater.py`) sont téléversés et vérifiés, et seulement ensuite la release est publiée ou, dans l'ordre image d'abord, l'étiquette est poussée pour que `release-image.yml` la publie ; une fois publique, une release n'accepte plus de fichier. `CONTRIBUTING` (huit langues) décrit l'ordre. Activer le réglage de GitHub relève du mainteneur et rien ici ne l'active.
+- **Un job de CI analyse les workflows avec zizmor** : `.github/workflows/zizmor.yml` appelle le workflow réutilisable partagé, fixé par son SHA complet, à chaque pull request, chaque push sur main et à la main ; seuls les constats de gravité haute le font échouer, le reste est listé dans le résumé et ceux déjà revus sont ignorés avec leur motif dans `.github/zizmor.yml`. Il n'a d'autre permission que lire et n'utilise aucun secret.
 
 ### Corrigé
 

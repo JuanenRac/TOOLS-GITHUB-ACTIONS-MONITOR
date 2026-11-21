@@ -165,6 +165,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 - **A release is suggested only from five entries under [Unreleased]**: `sentinel.candidate_min_entries` now starts at 5 (it was 1), so the release candidates of the CI sentinel and the release readiness no longer appear for one or two small changes. A value you chose yourself is kept; the number can be set from 1 to 100 in Settings.
 
 - **Releases are published as immutable releases**: the order of a release is a DRAFT first, then every file (`github_actions_monitor.zip`, `SHA256SUMS`, `monitor_updater.py`) is uploaded and checked, and only then the release is published or, in the image-first order, the tag is pushed so that `release-image.yml` publishes it; once public a release accepts no new file. `CONTRIBUTING` (eight languages) describes the order. Turning on the setting of GitHub is the maintainer's choice and nothing here turns it on.
+- **A CI job analyses the workflows with zizmor**: `.github/workflows/zizmor.yml` calls the shared reusable workflow, pinned by its full commit SHA, on every pull request, every push to main and by hand; only findings of high severity fail it, the rest are listed in the summary, and the reviewed ones are ignored with their reason in `.github/zizmor.yml`. It has no permission beyond reading and uses no secret.
 
 ### Fixed
 

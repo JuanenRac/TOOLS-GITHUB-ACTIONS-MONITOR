@@ -164,6 +164,7 @@
 - **只有在 [Unreleased] 下有五条以上条目时才会建议发布**：`sentinel.candidate_min_entries` 的默认值现在是 5（原为 1），因此 CI 哨兵的发布候选和发布就绪度不再因为一两个小改动而出现。你自己选择的值会保留；该数字可在设置中设为 1 到 100。
 
 - **发布以不可变发布的方式进行**：一次发布的顺序是先建草稿，再上传并核对全部文件（`github_actions_monitor.zip`、`SHA256SUMS`、`monitor_updater.py`），然后才公开发布；在镜像优先的顺序中，则推送标签，由 `release-image.yml` 公开。发布公开后不再接受新文件。`CONTRIBUTING`（八种语言）描述了该顺序。是否开启 GitHub 的该设置由维护者决定，这里不会开启。
+- **一个 CI 作业用 zizmor 分析工作流**：`.github/workflows/zizmor.yml` 在每个拉取请求、每次推送到 main 以及手动触发时，调用以完整提交 SHA 固定的共享可复用工作流；只有高严重度的发现会使其失败，其余列在摘要中，已审阅的发现带着理由在 `.github/zizmor.yml` 中被忽略。它只有读取权限，不使用任何密钥。
 
 ### 修复
 

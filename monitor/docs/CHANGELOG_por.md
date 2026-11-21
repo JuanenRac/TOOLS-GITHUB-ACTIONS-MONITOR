@@ -163,6 +163,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 - **Uma versão só é sugerida a partir de cinco entradas em [Unreleased]**: `sentinel.candidate_min_entries` começa agora em 5 (era 1), pelo que os candidatos a versão do sentinela de CI e a prontidão da versão já não aparecem por uma ou duas alterações pequenas. Um valor que escolheu é mantido; o número pode ser definido de 1 a 100 nas Definições.
 
 - **As releases são publicadas como releases imutáveis**: a ordem de uma release é primeiro um RASCUNHO, depois todos os ficheiros (`github_actions_monitor.zip`, `SHA256SUMS`, `monitor_updater.py`) são enviados e verificados, e só então a release é publicada ou, na ordem imagem primeiro, a etiqueta é enviada para que `release-image.yml` a publique; depois de pública, uma release não aceita ficheiros novos. `CONTRIBUTING` (oito idiomas) descreve a ordem. Ativar a definição do GitHub é decisão do mantenedor e nada aqui a ativa.
+- **Um trabalho de CI analisa os workflows com o zizmor**: `.github/workflows/zizmor.yml` chama o workflow reutilizável partilhado, fixado pelo seu SHA completo, em cada pull request, cada push para main e à mão; só os achados de gravidade alta o fazem falhar, o resto fica listado no resumo e os já revistos são ignorados com o seu motivo em `.github/zizmor.yml`. Não tem outra permissão além de ler e não usa segredos.
 
 ### Corrigido
 

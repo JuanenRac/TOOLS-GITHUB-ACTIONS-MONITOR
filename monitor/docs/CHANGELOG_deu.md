@@ -163,6 +163,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 - **Ein Release wird erst ab fünf Einträgen unter [Unreleased] vorgeschlagen**: `sentinel.candidate_min_entries` beginnt jetzt bei 5 (vorher 1), sodass Release-Kandidaten des CI-Wächters und die Release-Bereitschaft nicht mehr für ein oder zwei kleine Änderungen erscheinen. Ein selbst gewählter Wert bleibt erhalten; die Zahl lässt sich in den Einstellungen von 1 bis 100 setzen.
 
 - **Releases werden als unveränderliche Releases veröffentlicht**: Die Reihenfolge eines Releases ist zuerst ein ENTWURF, dann werden alle Dateien (`github_actions_monitor.zip`, `SHA256SUMS`, `monitor_updater.py`) hochgeladen und geprüft, und erst dann wird das Release veröffentlicht oder, in der Reihenfolge „Image zuerst“, der Tag gepusht, damit `release-image.yml` es veröffentlicht; ein öffentliches Release nimmt keine neuen Dateien mehr an. `CONTRIBUTING` (acht Sprachen) beschreibt die Reihenfolge. Die Einstellung von GitHub einzuschalten ist Sache des Maintainers; nichts hier schaltet sie ein.
+- **Ein CI-Job analysiert die Workflows mit zizmor**: `.github/workflows/zizmor.yml` ruft den gemeinsamen wiederverwendbaren Workflow, per vollständigem Commit-SHA festgelegt, bei jedem Pull Request, jedem Push auf main und von Hand auf; nur Funde hoher Schwere lassen ihn fehlschlagen, der Rest steht in der Zusammenfassung, und geprüfte werden mit Begründung in `.github/zizmor.yml` ignoriert. Er hat kein Recht außer Lesen und nutzt kein Geheimnis.
 
 ### Behoben
 
