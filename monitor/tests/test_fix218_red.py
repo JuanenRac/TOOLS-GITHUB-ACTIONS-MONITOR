@@ -11,6 +11,9 @@ import threading
 import time
 import types
 import unittest
+import unittest.mock as mock
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
@@ -20,7 +23,12 @@ sys.path.insert(0, str(HERE / "tests"))
 import _testenv  # noqa: F401,E402
 from github_actions_monitor.app import actions_monitor as am  # noqa: E402
 from github_actions_monitor.app import toolconfig  # noqa: E402
-from github_actions_monitor.security import devices, localguard  # noqa: E402
+from github_actions_monitor.chatops import inbound  # noqa: E402
+from github_actions_monitor.security import devices, envguard, localguard  # noqa: E402
+from test_chatops import ENV as CHAT_ENV  # noqa: E402
+from test_chatops import config as chat_config  # noqa: E402
+from test_chatops import slack_body, slack_headers  # noqa: E402
+from test_164 import LiveServer  # noqa: E402
 
 
 class Network(unittest.TestCase):
@@ -155,6 +163,41 @@ class IdleConnections(unittest.TestCase):
         server = types.SimpleNamespace(max_connections=100, max_per_address=2)
         self.assertTrue(exclusive.BoundedThreads._counted_for(server, "192.168.1.20"))
         self.assertFalse(exclusive.BoundedThreads._counted_for(server, "127.0.0.1"))
+
+
+class ChatOpsRate(unittest.TestCase):
+    def setUp(self):
+        inbound.reset()
+        localguard.reset_limits()
+        patch = mock.patch.dict(envguard.HELD, CHAT_ENV)
+        patch.start()
+        self.addCleanup(patch.stop)
+        self.addCleanup(inbound.reset)
+        self.addCleanup(localguard.reset_limits)
+
+    def post(self, server, body, headers):
+        request = urllib.request.Request(server.base + "/api/chatops/slack", data=body, method="POST", headers=headers)
+        try:
+            with urllib.request.urlopen(request, timeout=8) as answer:
+                return answer.status
+        except urllib.error.HTTPError as error:
+            with error:
+                return error.code
+
+    def test_garbage_without_the_secret_does_not_leave_the_legitimate_command_in_429(self):
+        saved = am.STATE["data"]
+        am.STATE["data"] = None
+        self.addCleanup(am.STATE.__setitem__, "data", saved)
+        now = int(time.time())
+        with LiveServer(chat_config()) as server:
+            codes = {}
+            for _ in range(130):
+                code = self.post(server, slack_body("status"), {})
+                codes[code] = codes.get(code, 0) + 1
+            self.assertEqual(codes.get(401), inbound.BAD_PER_MINUTE, "up to the limit the garbage is told 401")
+            self.assertGreater(codes.get(429, 0), 0, "past it the garbage itself is limited")
+            body = slack_body("status")
+            self.assertEqual(self.post(server, body, slack_headers(body, ts=now)), 200, "a signed command of the chat is never counted with the garbage")
 
 
 if __name__ == "__main__":

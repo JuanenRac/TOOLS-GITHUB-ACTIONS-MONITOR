@@ -3624,13 +3624,10 @@ class Handler(BaseHTTPRequestHandler):
         if not inbound.active(config, provider):      # closed: nothing to say to anyone
             self.json_reply({"ok": False}, 404)
             return
-        if localguard.over_rate("chatops.ip", str(self.client_address[0]), 120):      # one address cannot flood the receiver (each check of a signature costs time)
-            self.json_reply({"ok": False, "error": "rate"}, 429)
-            return
         try:
             size = int(self.headers.get("Content-Length") or 0)
             body = self.rfile.read(size) if 0 <= size <= inbound.MAX_BODY else b"x" * (inbound.MAX_BODY + 1)
-            code, answer, record = inbound.handle(provider, config, body, self.headers, lambda: chatops_snapshot(config))
+            code, answer, record = inbound.handle(provider, config, body, self.headers, lambda: chatops_snapshot(config), address=localguard.client_key(self.client_address, self.headers))
             if record:
                 audit_log.record(toolconfig.raw_config(), "chatops_command", provider + ":" + record["user"], "chat", CHILD["account"] or "", provider + ":" + (record["command"] or "none"),
                                  record["result"], {"channel": record["channel"], "status": code})
