@@ -80,11 +80,11 @@ LIB = r"""
     while(stack.length){const c=stack.pop();base=mix(c,base,c.a)}
     return spread?spread.map(c=>mix(c,base,c.a)):[base];
   }
-  function contrast(el){
+  function contrast(el,z){
     const s=css(el),fg=rgba(s.color),list=backdrop(el);if(!fg||!list)return null;
     let a=fg.a;for(let n=el;n&&n!==document.documentElement;n=n.parentElement){const o=parseFloat(css(n).opacity);if(!isNaN(o)&&o<1)a*=o}
     let worst=99;for(const bg of list){const f=mix(fg,bg,a),hi=Math.max(lum(f),lum(bg)),lo=Math.min(lum(f),lum(bg));worst=Math.min(worst,(hi+0.05)/(lo+0.05))}
-    const fs=parseFloat(s.fontSize),bold=parseInt(s.fontWeight,10)>=700,large=fs>=24||(fs>=18.66&&bold);
+    const fs=parseFloat(s.fontSize)*(z||1),bold=parseInt(s.fontWeight,10)>=700,large=fs>=24||(fs>=18.66&&bold);      /* large text is judged at the size it is drawn: the kiosk and the big windows zoom the page */
     return {ratio:worst,need:large?3:4.5};
   }
   /* ---- the measure ---- */
@@ -126,7 +126,7 @@ LIB = r"""
       const range=document.createRange();range.selectNodeContents(t);const rr=[...range.getClientRects()].filter(r=>r.width>0.5&&r.height>0.5);if(!rr.length)continue;
       const fs=parseFloat(css(el).fontSize);
       if(fs*zoom<minFont-0.01)add(ctx,"small",el,(fs*zoom).toFixed(1)+"px < "+minFont.toFixed(1)+"px");
-      const cr=contrast(el);cTexts++;if(cr)cSeen++;if(cr&&cr.ratio<cr.need-0.01)add(ctx,"contrast",el,cr.ratio.toFixed(2)+":1 < "+cr.need+":1");
+      const cr=contrast(el,zoom);cTexts++;if(cr)cSeen++;if(cr&&cr.ratio<cr.need-0.01)add(ctx,"contrast",el,cr.ratio.toFixed(2)+":1 < "+cr.need+":1");
       for(const line of rr){      /* one rectangle for each line of the text: the box around a text of several lines would cover its neighbours */
         const r=clipRect({left:line.left,right:line.right,top:line.top,bottom:line.bottom},el);      /* what can be seen of it: a box that clips cuts it, and the box tests above report that */
         if(r.right<=r.left||r.bottom<=r.top)continue;
