@@ -77,12 +77,13 @@ RENOVATE_RE = re.compile(r"[Uu]pdate\s+(?:dependency\s+)?(?P<pkg>\S+)(?:\s+(?:ac
 DEPENDENCY_BOTS = ("dependabot", "renovate")
 DEFAULT_AUDIT_FILES = {"reconciliation": "RECONCILIATION_TOTAL_*.txt", "rounds": "ROUNDS_MAP_2*.txt", "rounds_extra": "ROUNDS_MAP_EXTRA_*.txt"}   # A8: names of the files of the audit folder
 
+SCHEDULE_DISABLE_DAYS = 60      # GitHub switches the scheduled workflows of a PUBLIC repository off after this many days without activity
 DEFAULTS = {
     "audit_files": dict(DEFAULT_AUDIT_FILES),
     "enabled": True, "refresh_seconds": 900, "alerts_hot_seconds": 900, "alerts_cold_seconds": 3600,
     "hygiene_seconds": 21600, "max_calls_per_tick": 70, "budget_per_hour": 600, "workers": 8, "deadline_s": 30,
     "trend_green_pct": 90, "trend_health": 70, "trend_quota_pct": 80,      # the lines of the daily trend: share of green workflows and health below which the line is crossed, share of the API quota above which it is
-    "candidate_days": 2.0, "pending_sign_hours": 24, "notify_command": [], "candidate_min_entries": 5, "stale_pr_days": 7, "hot_hours": 3,
+    "candidate_days": 2.0, "schedule_countdown_after_days": 45, "pending_sign_hours": 24, "notify_command": [], "candidate_min_entries": 5, "stale_pr_days": 7, "hot_hours": 3,
     "required_files": [["README.md"], ["LICENSE", "LICENSE.md", "LICENSE.txt", "LICENSE-APACHE", "LICENSE-MIT", "COPYING"], ["CHANGELOG.md"], ["SECURITY.md"]],
     # hygiene (A6): how strict it is. ruleset_mode "name" = a ruleset whose name matches ruleset_names (patterns, ACTIVE) must exist (the old rule); "effective" (the default) = the default
     # branch is protected when GitHub reports an effective rule or a branch protection for it (public endpoints, no admin needed), whatever the ruleset is called; "off" = not checked.
@@ -130,6 +131,9 @@ def sentinel_config(config):
     seconds = merged.get("deadline_s")
     if not isinstance(seconds, int) or isinstance(seconds, bool) or not 0 <= seconds <= 600:
         merged["deadline_s"] = DEFAULTS["deadline_s"]      # the time ceiling of a reading pass: 0 = none, out of range = the default
+    days = merged.get("schedule_countdown_after_days")
+    if not isinstance(days, int) or isinstance(days, bool) or not 1 <= days < SCHEDULE_DISABLE_DAYS:
+        merged["schedule_countdown_after_days"] = DEFAULTS["schedule_countdown_after_days"]      # days without a push before the countdown of the scheduled workflows is shown
     merged["surface"] = surface.settings(config)   # merged key by key: a partial block keeps the defaults of the rest
     merged["hygiene"] = hygiene_settings(config)
     merged["readiness"] = readiness.settings(config)
@@ -558,6 +562,36 @@ def hygiene_review(info, perms, required_files, hyg=None, org_files=None):
     return problems, unknown
 
 
+def has_schedule(scan, runs):
+    """True when the repository has a workflow with a `schedule` trigger, from what the monitor already holds: the scan of its workflow files (a cron line), else the runs it has seen (event `schedule`).
+    None when neither says anything (no scan and no run): nothing is known."""
+    workflows = (scan or {}).get("workflows")
+    if workflows:
+        return any(w.get("cron") for w in workflows if isinstance(w, dict))
+    seen = [r for r in runs or [] if not redrule.is_dynamic(r)]
+    if not seen:
+        return None
+    return any(r.get("event") == "schedule" for r in seen)
+
+
+def schedule_countdown(info, private, scan, runs, after_days, now):
+    """The countdown to the day GitHub switches off the scheduled workflows of a PUBLIC repository (60 days without a push), as an information row, or None when there is nothing to say. It is read from
+    what the monitor already holds (the date of the last push, the workflow files or the runs seen) and never asks GitHub for anything. Private repositories, repositories without a scheduled workflow and
+    repositories pushed less than `after_days` ago have no row. When the date of the last push is not known the row says it cannot be evaluated; it never invents a number. Never red."""
+    if private is not False or has_schedule(scan, runs) is not True:
+        return None
+    pushed = parse_time(info.get("pushed"))
+    if pushed is None:
+        return {"code": "schedule_countdown", "level": "unknown", "days_left": None, "text": i18n.t("hyg.schedule_countdown_unknown")}
+    idle = int((now - pushed).total_seconds() // 86400)
+    if idle <= after_days:
+        return None
+    left = SCHEDULE_DISABLE_DAYS - idle
+    if left <= 0:
+        return {"code": "schedule_countdown", "level": "info", "days_left": 0, "text": i18n.t("hyg.schedule_countdown_due", days=idle)}
+    return {"code": "schedule_countdown", "level": "info", "days_left": left, "text": i18n.t("hyg.schedule_countdown", days=left, idle=idle)}
+
+
 def hygiene_problems(info, perms, required_files, hyg=None, org_files=None):
     """A6: list of (code, text) of what is wrong; what cannot be known is in hygiene_review."""
     return hygiene_review(info, perms, required_files, hyg, org_files)[0]
@@ -884,6 +918,7 @@ def compute_snapshot(inp):
     extra = a2_resolved_runs(resolved, branches, now.timestamp(), ttl)
     red = red_workflows({r: runs + extra.get(r, []) for r, runs in runs_by_repo.items()}, branches)
     red, disabled_apart = redrule.split_disabled(red, perms)      # a workflow switched off by hand is not red (ci.disabled_apart)
+    redrule.mark_stale(red, set(data.get("errors") or ()), now.timestamp())      # ci.stale_result_hours: information only, never red or green by itself
     jobs_known = inp.get("failed_jobs") or {}
     for row in red:      # which jobs of the run failed, when ci.failed_jobs read them (causes.py)
         found = jobs_known.get(f"{row['repo']}|{row.get('run_id')}")
@@ -948,8 +983,14 @@ def compute_snapshot(inp):
         if not p:
             pending += 1
         probs, unk = hygiene_review(info[repo], p, cfg["required_files"], cfg.get("hygiene"), inp.get("org_files"))
+        countdown = schedule_countdown(info[repo], ((data.get("repo_meta") or {}).get(repo) or {}).get("private"), (inp.get("scans") or {}).get(repo), runs_by_repo.get(repo),
+                                       cfg.get("schedule_countdown_after_days", DEFAULTS["schedule_countdown_after_days"]), now)
+        if countdown and "schedule" in set((cfg.get("hygiene") or {}).get("skip") or []):
+            countdown = None      # the check of the scheduled workflows is left out: its countdown too
+        if countdown and any(code == "schedule" for code, _text in probs) and countdown["days_left"] == 0:
+            countdown = None      # already switched off and already said
         hyg_rows.append({"repo": repo, "problems": [{"code": c, "text": t} for c, t in probs], "unknown": [{"code": c, "text": t} for c, t in unk], "checked": bool(p),
-                         "protection": protection_source((p or {}).get("branch_rules"))})
+                         "protection": protection_source((p or {}).get("branch_rules")), **({"info": [countdown]} if countdown else {})})
     mins = minutes(runs_by_repo, now, caps)
     errors = [{"section": k, "message": v["message"], "at": v["at"]} for k, v in sorted(inp["errors"].items())]
     sev_total = {"critical": 0, "high": 0}

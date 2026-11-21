@@ -93,4 +93,5 @@ curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/re
 | `/api/sentinel/security` | GitHub がセキュリティについて未対応・不足としている内容(セキュリティ センチネル。既定ではオフ、読み取り専用)。 |
 | `/api/session-token` | 次の設定変更用の使い捨てトークン。ページは書き込む直前にこれを要求します。 |
 | `/api/statusbar` | ページ下部のバーが表示する内容: エディション、アドレス、アカウント、センチネル。秘密も GitHub への呼び出しもありません。 |
+| `/api/version` | コードのバージョンとプロセスの起動時刻(`version`、`started`)。キャッシュされません。壁面画面とキオスクは `screens.version_check_seconds` 秒ごとにこれを確認し、どちらかが変わると自動で再読み込みします。 |
 | `/api/welcome` | GET: 初回起動ガイドが完了しているか。POST(このコンピューター): 完了かどうかを記録します。 |

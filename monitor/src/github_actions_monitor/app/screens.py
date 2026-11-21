@@ -39,6 +39,7 @@ THEME_CHOICES = ("inherit",) + SCREEN_THEMES
 MODES = ("three", "rotate")
 CORNERS = ("top-right", "top-left", "bottom-right", "bottom-left")
 DENSITIES = ("compact", "normal", "large")
+MIN_VERSION_CHECK, MAX_VERSION_CHECK = 30, 86400      # the range of screens.version_check_seconds (0 = off)
 MAX_SAFE = 10      # the most a television may cut from each edge that the screens keep clear (screens.safe_margin_percent, ?safe=), in percent of the window
 NAMES = ("all", "public", "none")
 DEFAULTS = {"enabled": False, "blink": True, "blink_calm_minutes": 30, "rotate_seconds": 0, "default_theme": "inherit", "default_density": "normal", "refresh_seconds": 10, "burn_in_protection": True,
@@ -46,7 +47,7 @@ DEFAULTS = {"enabled": False, "blink": True, "blink_calm_minutes": 30, "rotate_s
             "theme_overview": "inherit", "theme_fleet": "inherit", "theme_now": "inherit", "theme_sentinels": "inherit", "mode": "three", "rotate_every_seconds": 20, "alert_hold_seconds": 30,
             "logo_overview": True, "logo_fleet": False, "logo_now": False, "logo_sentinels": False, "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64, "group_map": True,
             "menu": True, "menu_target": "new", "menu_max_windows": 4, "menu_rotate_seconds": 20, "menu_tv_scale": 1.5, "safe_margin_percent": 0,
-            "life": True, "glance_seconds": 3, "transition": "fade", "hide_healthy": False, "idle_dim_minutes": 0, "min_font_px": 12}   # the five before the last belong to the Screens menu (screenmenu.py)
+            "life": True, "glance_seconds": 3, "transition": "fade", "hide_healthy": False, "idle_dim_minutes": 0, "min_font_px": 12, "version_check_seconds": 300}   # the five before the last belong to the Screens menu (screenmenu.py)
 SENTINEL_KEY = re.compile(r"^ui\.a(1[0-2]|[1-9])\Z")
 SENTINELS = tuple("a%d" % n for n in range(1, 13))
 LEVELS = ("ok", "warn", "bad", "info", "unknown")
@@ -158,7 +159,18 @@ def settings(config):
             "safe_margin_percent": _int(block.get("safe_margin_percent"), 0, MAX_SAFE, d["safe_margin_percent"]),
             "life": _flag(block.get("life"), d["life"]), "glance_seconds": _int(block.get("glance_seconds"), 0, 30, d["glance_seconds"]), "transition": _choice(block.get("transition"), TRANSITIONS, d["transition"]),
             "hide_healthy": _flag(block.get("hide_healthy"), d["hide_healthy"]), "idle_dim_minutes": _int(block.get("idle_dim_minutes"), 0, 1440, d["idle_dim_minutes"]),
-            "min_font_px": _int(block.get("min_font_px"), MIN_FONT_LOW, MIN_FONT_HIGH, d["min_font_px"])}
+            "min_font_px": _int(block.get("min_font_px"), MIN_FONT_LOW, MIN_FONT_HIGH, d["min_font_px"]),
+            "version_check_seconds": version_seconds(block.get("version_check_seconds"), d["version_check_seconds"])}
+
+
+def version_seconds(value, fallback):
+    """`screens.version_check_seconds`: how often a wall screen or a kiosk asks /api/version to know whether the monitor was updated or restarted under it. 0 = never; a value from 1 to 29 is raised to
+    MIN_VERSION_CHECK so that no screen asks more than twice a minute; a missing or wrong value is the default."""
+    if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+        return fallback
+    if value == 0:
+        return 0
+    return max(MIN_VERSION_CHECK, min(MAX_VERSION_CHECK, value))
 
 
 def global_theme(config):
@@ -260,7 +272,7 @@ def page_data(kind, cfg, prm, lang=None, logo=None, global_name="auto"):
     """The object embedded in the page: language, texts of this language, the settings that matter to the page, the parameters of the window, the theme of each screen and the logo."""
     return {"screen": kind, "kinds": list(KINDS), "lang": lang or i18n.language(), "html_lang": i18n.HTML_LANG.get(lang or i18n.language(), "en"), "locale": i18n.BROWSER_LOCALE.get(lang or i18n.language(), "en-GB"),
             "texts": {k: i18n.t(k) for k in page_keys()}, "version": TOOL_VERSION,
-            "settings": {k: cfg[k] for k in ("blink", "blink_calm_minutes", "burn_in_protection", "night_dim", "night_dim_from_hour", "night_dim_to_hour", "life", "glance_seconds", "transition", "hide_healthy", "idle_dim_minutes", "min_font_px")}, "params": prm,
+            "settings": {k: cfg[k] for k in ("blink", "blink_calm_minutes", "burn_in_protection", "night_dim", "night_dim_from_hour", "night_dim_to_hour", "life", "glance_seconds", "transition", "hide_healthy", "idle_dim_minutes", "min_font_px", "version_check_seconds")}, "params": prm,
             "themes": {k: resolve_theme(cfg, k, global_name) for k in KINDS}, "logo": logo_block(cfg, logo)}
 
 

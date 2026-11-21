@@ -35,7 +35,8 @@ QUEUE_PREFIX = "gh-readonly-queue/"
 AWAITING_DAYS = 14
 DEFAULT_INACTIVE_DAYS = 90
 DEFAULT_RED_AGE_DAYS = 30
-POLICY = {"events": RED_EVENTS, "fork_runs": False, "automation": False, "inactive_days": DEFAULT_INACTIVE_DAYS, "red_age_days": DEFAULT_RED_AGE_DAYS, "branches": (), "repo_branches": {}, "disabled_apart": True, "dependabot_alerts": True, "copilot_alerts": False}      # replaced by configure(): the whole monitor shares one rule
+DEFAULT_STALE_RESULT_HOURS = 0      # ci.stale_result_hours: 0 = a result is never called stale
+POLICY = {"events": RED_EVENTS, "fork_runs": False, "automation": False, "inactive_days": DEFAULT_INACTIVE_DAYS, "red_age_days": DEFAULT_RED_AGE_DAYS, "stale_result_hours": DEFAULT_STALE_RESULT_HOURS, "branches": (), "repo_branches": {}, "disabled_apart": True, "dependabot_alerts": True, "copilot_alerts": False}      # replaced by configure(): the whole monitor shares one rule
 
 
 def configure(config):
@@ -51,6 +52,8 @@ def configure(config):
     age = block.get("red_age_days")
     age = age if isinstance(age, int) and not isinstance(age, bool) and 1 <= age <= 3650 else DEFAULT_RED_AGE_DAYS
     POLICY["red_age_days"] = age if block.get("red_ages") is not False else 0      # 0 = a red never ages
+    hours = block.get("stale_result_hours")
+    POLICY["stale_result_hours"] = hours if isinstance(hours, int) and not isinstance(hours, bool) and 0 <= hours <= 8760 else DEFAULT_STALE_RESULT_HOURS
     POLICY["disabled_apart"] = block.get("disabled_apart") is not False
     POLICY["dependabot_alerts"] = block.get("dependabot_alerts") is not False      # a failing Dependabot update is an alert of its own (medium)
     POLICY["copilot_alerts"] = block.get("copilot_alerts") is True      # the activity of Copilot that failed is a notice (information) only when asked for
@@ -213,6 +216,29 @@ def _age_limit(red_age_days, items):
     if not gaps:
         return red_age_days
     return max(red_age_days, 2 * gaps[len(gaps) // 2] / 86400)
+
+
+def is_stale_result(since, now=None, policy=None):
+    """True when the last result of a workflow (the time of its run) is older than `ci.stale_result_hours` (0 = never). It is information only: a stale result is neither red nor green and changes nothing in
+    the score; a time that cannot be read is not stale."""
+    policy = policy or POLICY
+    hours = policy.get("stale_result_hours") or 0
+    stamp = _epoch(since)
+    if not hours or stamp is None:
+        return False
+    return (time.time() if now is None else now) - stamp > hours * 3600
+
+
+def mark_stale(rows, failed=(), now=None, policy=None):
+    """Adds `stale_result: True` to the rows (workflows, not runs; each with `repo` and `since`) whose last result is older than `ci.stale_result_hours`. A repository whose runs could not be read this
+    time (`failed`) is not marked: an old picture kept because a read failed is not a workflow that stopped running. With the setting at 0 the rows are not touched. Returns the same list."""
+    policy = policy or POLICY
+    if not (policy.get("stale_result_hours") or 0):
+        return rows
+    for row in rows:
+        if isinstance(row, dict) and row.get("repo") not in failed and is_stale_result(row.get("since"), now, policy):
+            row["stale_result"] = True
+    return rows
 
 
 def classify(runs, branch, now=None, policy=None):

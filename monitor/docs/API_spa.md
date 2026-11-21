@@ -93,4 +93,5 @@ Estas rutas sirven la página y las herramientas de este equipo. No forman parte
 | `/api/sentinel/security` | Lo que GitHub dice que está abierto o falta en seguridad (el centinela de Seguridad; apagado por defecto; solo lectura). |
 | `/api/session-token` | Un token de un solo uso para el siguiente cambio de un ajuste; la página lo pide justo antes de escribir. |
 | `/api/statusbar` | Lo que muestra la barra al pie de la página: edición, dirección, cuenta y centinelas; sin secretos ni llamadas a GitHub. |
+| `/api/version` | La versión del código y la hora de arranque del proceso (`version`, `started`), nunca en caché. Las pantallas de pared y el quiosco la consultan cada `screens.version_check_seconds` segundos y se recargan solas cuando cambia cualquiera de las dos. |
 | `/api/welcome` | GET: si la guía de primer inicio está hecha. POST, este equipo: la marca como hecha o no. |

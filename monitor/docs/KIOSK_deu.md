@@ -47,6 +47,7 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk.high_contrast` | aus | schwarzer Hintergrund und weiße Linien |
 | `kiosk.rotate_views` | aus | ein Preset mit mehreren Tabs wechselt den Tab von selbst; aus, zeigt der Bildschirm den ersten Tab des Presets |
 | `kiosk.rotate_seconds` | 30 | wie lange jeder Tab bleibt (5 bis 600) |
+| `screens.version_check_seconds` | 300 | wie oft die Seite `/api/version` abfragt und sich selbst neu lädt, wenn der Monitor aktualisiert oder neu gestartet wurde (0 = nie; mindestens 30) |
 | `kiosk.safe_margin_percent` | 0 | der Teil jedes Rands in Prozent, den die Seite für einen Fernseher frei hält, der den Rand abschneidet (Overscan); 0 bis 10 |
 | `kiosk.scale_with_window` | aus | die Schriftgröße oben gilt für ein Fenster, dessen kurze Seite 1080 px misst; an, wächst sie mit dem Fenster, sodass ein 4K-Fernseher wie ein Full-HD-Gerät aussieht |
 

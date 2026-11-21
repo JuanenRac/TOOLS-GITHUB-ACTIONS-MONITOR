@@ -126,6 +126,7 @@ El idioma de una pantalla se decide en este orden: `?lang=xx` en la dirección; 
 | `screens.hide_healthy` | Apagado por defecto. La pantalla Flota omite los cuadrados de los repositorios sanos; el panorama omite los grupos sin rojo ni amarillo y las filas del mapa de calor sin fallos. Los totales se mantienen. |
 | `screens.idle_dim_minutes` | 0 = apagado (por defecto). Cuando no ha cambiado nada durante estos minutos y nada está en rojo, la pantalla se atenúa para cuidar el panel; el siguiente cambio la despierta (de 1 a 1440). |
 | `screens.min_font_px` | La letra más pequeña de las pantallas en píxeles, sea cual sea el tamaño de la ventana (12 por defecto; de 8 a 32). |
+| `screens.version_check_seconds` | Cada cuánto una pantalla de pared consulta `/api/version` para saber si el monitor se actualizó o se reinició (300 por defecto; 0 = nunca; el mínimo es 30). |
 | `screens.menu` | Activado por defecto. El botón Pantallas de la barra superior. Desactivado: el botón desaparece; las pantallas siguen funcionando en sus propias direcciones. |
 | `screens.menu_target` | new (por defecto): una pantalla se abre en una ventana o pestaña nueva; same: en la pestaña en la que estás. |
 | `screens.menu_max_windows` | Máximo de ventanas que un conjunto multipantalla abre de una vez (4 por defecto; de 1 a 9). |
@@ -174,6 +175,7 @@ Las tres páginas se dibujan con unidades que siguen el lado corto de la ventana
 - Cuando una lista tiene más filas de las que caben en su caja, van primero las más importantes (rojo antes que verde, lo más reciente primero) y la última línea dice cuántas se quedaron fuera ("+3 más"); nada se oculta sin esa línea.
 - Margen de seguridad (overscan): muchos televisores recortan unos puntos porcentuales de cada borde salvo que su modo de imagen sea "just scan" o "pixel a pixel". `screens.safe_margin_percent` (0 por defecto, de 0 a 10; `?safe=4` para una ventana) mantiene el contenido a esa distancia de cada borde dibujando todo más pequeño, y `kiosk.safe_margin_percent` hace lo mismo con el kiosco. Prueba de 3 a 5 si se cortan las primeras letras del reloj o el borde de las tarjetas.
 - La letra más pequeña es `screens.min_font_px` (12 píxeles por defecto): en una ventana tan pequeña que el diseño necesitaría una letra menor, las pantallas conservan la letra y muestran menos filas, diciendo cuántas dejaron fuera, en lugar de encoger el texto.
+- Una pantalla que está encendida durante días sigue al monitor: cada `screens.version_check_seconds` segundos (300 por defecto) consulta `/api/version` y, cuando la versión o la hora de arranque no son las que cargó, se recarga sola, así que un televisor nunca se queda con una página vieja tras una actualización o un reinicio. Solo se recarga tras una respuesta válida y distinta: un monitor que no responde nunca provoca la recarga, y con 0 nunca consulta.
 
 ### Cómo se comportan
 

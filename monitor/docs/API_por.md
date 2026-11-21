@@ -93,4 +93,5 @@ Estas rotas servem a página e as ferramentas deste computador. Não fazem parte
 | `/api/sentinel/security` | O que o GitHub diz estar aberto ou em falta na segurança (a sentinela de Segurança; desligada por predefinição; só leitura). |
 | `/api/session-token` | Um token de uso único para a próxima alteração de uma definição; a página pede-o mesmo antes de escrever. |
 | `/api/statusbar` | O que mostra a barra no fundo da página: edição, endereço, conta e sentinelas; sem segredos e sem chamadas ao GitHub. |
+| `/api/version` | A versão do código e a hora de arranque do processo (`version`, `started`), nunca em cache. Os ecrãs de parede e o quiosque consultam-na a cada `screens.version_check_seconds` segundos e recarregam-se sozinhos quando qualquer uma das duas muda. |
 | `/api/welcome` | GET: se o guia do primeiro arranque está concluído. POST, este computador: marca-o como concluído ou não. |

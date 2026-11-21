@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.7",
  "previous": "2.1.6",
- "digest": "2bbd057d0e151d25859a929bba365f8bf9a7d304f47e334c278c3281677ad037",
+ "digest": "80f818f1c1ca10affbdea5ebd9cb01cf7c7cc176bd61bb5a4e87fa8ae07c8c29",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -125,6 +125,15 @@
     "key": "ci.branches_by_repo",
     "kind": "names",
     "default": []
+   },
+   {
+    "key": "ci.stale_result_hours",
+    "kind": "int",
+    "bounds": [
+     0,
+     8760
+    ],
+    "default": 0
    },
    {
     "key": "cli.status_codes",
@@ -717,6 +726,15 @@
     "default": "fade"
    },
    {
+    "key": "screens.version_check_seconds",
+    "kind": "int",
+    "bounds": [
+     0,
+     86400
+    ],
+    "default": 300
+   },
+   {
     "key": "selfwatch.enabled",
     "kind": "bool",
     "default": true
@@ -754,6 +772,14 @@
     "bounds": [
      0,
      600
+    ]
+   },
+   {
+    "key": "sentinel.schedule_countdown_after_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     59
     ]
    },
    {

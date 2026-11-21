@@ -211,6 +211,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ci.red_ages` | `true` | sentinel | A red nobody attends to ages |
 | `ci.red_events` | `["push", "schedule", "workflow_dispatch", "merge_group", "workflow_run", "repository_dispatch"]` | sentinel | Events that can make a branch red |
 | `ci.rerun_timing` | `false` | sentinel | Ask GitHub for the duration of re-runs |
+| `ci.stale_result_hours` | `0` | sentinel | Hours until a result is called stale |
 | `ci.stuck.awaiting_stuck` | `true` | sentinel | A run waiting for approval can be stuck |
 | `ci.stuck.ghost_days` | `7` | sentinel | Days in the queue until a run is a ghost |
 | `ci.stuck.ghost_enabled` | `true` | sentinel | Tell apart runs queued for days |
@@ -637,6 +638,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `screens.theme_overview` | `"inherit"` | general | Theme of the screen: Overview |
 | `screens.theme_sentinels` | `"inherit"` | general | Theme of the screen: Sentinels |
 | `screens.transition` | `"fade"` | general | Change between screens |
+| `screens.version_check_seconds` | `300` | general | Look for a new version every |
 | `selfwatch.enabled` | `true` | paths | The monitor watches itself |
 | `selfwatch.interval_seconds` | `60` | paths | Seconds between two readings |
 | `selfwatch.rss_warn_mb` | `1024` | paths | Warn when its memory is above |
@@ -688,6 +690,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinel.refresh_seconds` | `-` | sentinel | Sentinel cycle |
 | `sentinel.require_verified_signature` (secure) | `-` | sentinel | Verified signature |
 | `sentinel.required_files` | `-` | sentinel | Required files |
+| `sentinel.schedule_countdown_after_days` | `-` | sentinel | Countdown of scheduled workflows after (days without a push) |
 | `sentinel.skip_candidate_prefixes` | `-` | sentinel | Prefixes without release |
 | `sentinel.stale_pr_days` | `-` | sentinel | A PR is stale after |
 | `sentinel.surface.budget_share` | `-` | surface | Share of the budget for A10 |

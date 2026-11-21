@@ -893,6 +893,7 @@ async function peek(kind){
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&D.viewer_aware&&Date.now()-STATE.got>P.refresh*1000)load()});
 $("fs").addEventListener("click",()=>{try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen()}catch(e){}});
 show(STATE.kind);clock();setInterval(clock,1000);setInterval(slideTimeline,1000);burnIn();schedule();load();
+(function(){/* the monitor was updated or restarted under this page: reload (screens.version_check_seconds, 0 = never; at least 30). Only a valid answer that differs from the first one reloads, so a server that does not answer never makes a loop */const every=Number(S.version_check_seconds)||0;if(every>=30){let base=null;const look=async()=>{try{const r=await fetch("/api/version",{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(!j||typeof j.version!=="string"||typeof j.started!=="number")return;if(base===null){base=j;return}if(j.version!==base.version||j.started!==base.started)location.reload()}catch(e){}};look();setInterval(look,every*1000)}})();
 window.__screens={state:STATE,show:show,paint:paint,observe:observe,turn:R,params:P,theme:applyTheme,schedule:schedule,life:LIFE,goTo:goTo,settings:S};
 })();
 </script>

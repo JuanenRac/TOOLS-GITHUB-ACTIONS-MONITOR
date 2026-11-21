@@ -126,6 +126,7 @@ O idioma de um ecrã decide-se por esta ordem: `?lang=xx` no endereço; depois o
 | `screens.hide_healthy` | Desligado por predefinição. O ecrã Frota omite os quadrados dos repositórios saudáveis; o panorama omite os grupos sem vermelho nem amarelo e as linhas do mapa de calor sem falhas. Os totais mantêm-se. |
 | `screens.idle_dim_minutes` | 0 = desligado (predefinição). Quando nada mudou durante estes minutos e nada está vermelho, o ecrã escurece para poupar o painel; a mudança seguinte acorda-o (1 a 1440). |
 | `screens.min_font_px` | A letra mais pequena dos ecrãs em píxeis, seja qual for o tamanho da janela (12 por predefinição; 8 a 32). |
+| `screens.version_check_seconds` | De quanto em quanto tempo um ecrã de parede consulta `/api/version` para saber se o monitor foi atualizado ou reiniciado (300 por predefinição; 0 = nunca; o mínimo é 30). |
 | `screens.menu` | Ativado por predefinição. O botão Ecrãs da barra superior. Desativado: o botão desaparece; os ecrãs continuam a funcionar nos seus próprios endereços. |
 | `screens.menu_target` | new (predefinição): um ecrã abre numa nova janela ou separador; same: no separador atual. |
 | `screens.menu_max_windows` | Máximo de janelas que um conjunto multiecrã abre de uma vez (4 por predefinição; de 1 a 9). |
@@ -174,6 +175,7 @@ As três páginas são desenhadas com unidades que seguem o lado curto da janela
 - Quando uma lista tem mais linhas do que as que cabem na sua caixa, as mais importantes vêm primeiro (o vermelho antes do verde, o mais recente primeiro) e a última linha diz quantas ficaram de fora ("+3 mais"); nada é escondido sem essa linha.
 - Margem de segurança (overscan): muitas televisões cortam alguns por cento de cada borda, a não ser que o seu modo de imagem seja "just scan" ou "pixel a pixel". `screens.safe_margin_percent` (0 por defeito, de 0 a 10; `?safe=4` para uma janela) mantém o conteúdo a essa distância de cada borda desenhando tudo mais pequeno, e `kiosk.safe_margin_percent` faz o mesmo no quiosque. Experimente de 3 a 5 se as primeiras letras do relógio ou a borda dos cartões forem cortadas.
 - A letra mais pequena é `screens.min_font_px` (12 píxeis por predefinição): numa janela tão pequena que o desenho precisaria de uma letra menor, os ecrãs mantêm a letra e mostram menos linhas, dizendo quantas deixaram de fora, em vez de encolher o texto.
+- Um ecrã que fica ligado durante dias acompanha o monitor: a cada `screens.version_check_seconds` segundos (300 por predefinição) consulta `/api/version` e, quando a versão ou a hora de arranque não são as que carregou, recarrega-se sozinho, pelo que uma televisão nunca fica com uma página velha após uma atualização ou um reinício. Só se recarrega após uma resposta válida e diferente: um monitor que não responde nunca provoca o recarregamento, e com 0 nunca consulta.
 
 ### Como se comportam
 

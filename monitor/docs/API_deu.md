@@ -93,4 +93,5 @@ Diese Routen bedienen die Seite und die Werkzeuge dieses Rechners. Sie gehören 
 | `/api/sentinel/security` | Was GitHub als offen oder fehlend zur Sicherheit meldet (der Sicherheitswächter; standardmäßig aus; nur lesen). |
 | `/api/session-token` | Ein Einmal-Token für die nächste Änderung einer Einstellung; die Seite fordert es direkt vor dem Schreiben an. |
 | `/api/statusbar` | Was die Leiste am Seitenende zeigt: Ausgabe, Adresse, Konto und Wächter; kein Geheimnis und kein Aufruf an GitHub. |
+| `/api/version` | Die Version des Codes und die Startzeit des Prozesses (`version`, `started`), nie im Cache. Die Wandanzeigen und der Kiosk fragen sie alle `screens.version_check_seconds` Sekunden ab und laden sich selbst neu, wenn sich eines von beiden ändert. |
 | `/api/welcome` | GET: ob die Erststart-Anleitung erledigt ist. POST, dieser Rechner: markiert sie als erledigt oder nicht. |

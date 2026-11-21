@@ -93,4 +93,5 @@ Ces routes servent la page et les outils de cet ordinateur. Elles ne font pas pa
 | `/api/sentinel/security` | Ce que GitHub dit d'ouvert ou de manquant en sécurité (la sentinelle Sécurité ; désactivée par défaut ; lecture seule). |
 | `/api/session-token` | Un jeton à usage unique pour le prochain changement d'un réglage ; la page le demande juste avant d'écrire. |
 | `/api/statusbar` | Ce que montre la barre en bas de la page : édition, adresse, compte et sentinelles ; aucun secret et aucun appel à GitHub. |
+| `/api/version` | La version du code et l'heure de démarrage du processus (`version`, `started`), jamais mises en cache. Les écrans muraux et le kiosque la consultent toutes les `screens.version_check_seconds` secondes et se rechargent tout seuls quand l'une des deux change. |
 | `/api/welcome` | GET : si le guide du premier démarrage est terminé. POST, cet ordinateur : le marque comme terminé ou non. |

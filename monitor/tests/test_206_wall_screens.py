@@ -253,7 +253,7 @@ class ThePage(unittest.TestCase):
         self.assertEqual(data["texts"]["ui.scr_title_now"], "Gerade jetzt")
         self.assertIn("ui.a1", data["texts"])
         self.assertIn("ui.lv_bad", data["texts"])
-        self.assertEqual(set(data["settings"]), {"blink", "blink_calm_minutes", "burn_in_protection", "night_dim", "night_dim_from_hour", "night_dim_to_hour", "life", "glance_seconds", "transition", "hide_healthy", "idle_dim_minutes", "min_font_px"})
+        self.assertEqual(set(data["settings"]), {"blink", "blink_calm_minutes", "burn_in_protection", "night_dim", "night_dim_from_hour", "night_dim_to_hour", "life", "glance_seconds", "transition", "hide_healthy", "idle_dim_minutes", "min_font_px", "version_check_seconds"})
         self.assertNotIn("show_repo_names", json.dumps(data))
 
     def test_every_text_the_page_asks_for_exists_in_eight_languages(self):
@@ -282,8 +282,9 @@ class ThePage(unittest.TestCase):
         self.assertEqual(len(re.findall(r"<button", html)), 1, "one discreet button (full screen) and nothing that changes anything")
         self.assertNotRegex(html, r"method\s*:\s*[\"']POST|\.post\(|XMLHttpRequest", "read only")
         fetches = re.findall(r"fetch\(([^)]*)\)", html)
-        self.assertEqual(len(fetches), 1)
+        self.assertEqual(len(fetches), 2, "the data of the screens and the version of the monitor (screens.version_check_seconds), both reads")
         self.assertIn('"/api/screens/data?screen="', fetches[0])
+        self.assertIn('"/api/version"', fetches[1])
         body = html.split("<body>", 1)[1].split("<script>", 1)[0]
         words = [w for w in re.findall(r"[A-Za-zÀ-ÿ]{3,}", re.sub(r"<[^>]+>", " ", body))]
         self.assertEqual(words, [], "every visible text comes from the catalogue")

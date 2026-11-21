@@ -47,6 +47,7 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk.high_contrast` | オフ | 黒い背景と白い線 |
 | `kiosk.rotate_views` | オフ | 複数のタブを持つプリセットは自動でタブを切り替える。オフの場合、画面にはプリセットの最初のタブが表示される |
 | `kiosk.rotate_seconds` | 30 | 各タブを表示する時間（5〜600） |
+| `screens.version_check_seconds` | 300 | ページが `/api/version` を確認し、モニターが更新または再起動されたときに自動で再読み込みする間隔(0 = 確認しない、最小 30) |
 | `kiosk.safe_margin_percent` | 0 | 端を切り取るテレビ（オーバースキャン）のために、ページが各端で空けておく割合（%）。0〜10 |
 | `kiosk.scale_with_window` | オフ | 上の文字サイズは、短い辺が 1080 px のウィンドウでの大きさです。オンにするとウィンドウに合わせて大きくなり、4K テレビでもフルHDと同じ見た目になります |
 

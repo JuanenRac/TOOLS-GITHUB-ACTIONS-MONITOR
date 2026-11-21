@@ -47,6 +47,7 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk.high_contrast` | 关 | 黑色背景和白色线条 |
 | `kiosk.rotate_views` | 关 | 含有多个标签页的预设会自动切换标签页；关闭时，屏幕显示该预设的第一个标签页 |
 | `kiosk.rotate_seconds` | 30 | 每个标签页停留的时间（5 到 600） |
+| `screens.version_check_seconds` | 300 | 页面多久查询一次 `/api/version`,并在监视器更新或重启后自动重新加载(0 = 从不;最小 30) |
 | `kiosk.safe_margin_percent` | 0 | 页面为会裁掉边缘的电视（过扫描）在每条边上留空的百分比；0 到 10 |
 | `kiosk.scale_with_window` | 关闭 | 上面的字号是短边为 1080 px 的窗口中的大小；开启后它随窗口增大，4K 电视看起来就和全高清电视一样 |
 

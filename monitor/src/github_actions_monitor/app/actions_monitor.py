@@ -104,7 +104,7 @@ DEFAULTS = {
     "stuck_minutes": 120,
     "workspace_root": "", "audit_dir": "", "signed_dir": "",      # "" = look for them (the environment, then the folder that holds the repositories): workspace.py
     "alerts": {"silences_expire_days": 0, "silences": [], "service": {"enabled": False, "failures": 3, "rate_percent": 0, "workflows": []}, "group": {"by_commit": False, "min": 3}, "digest": {"minutes": 0, "threshold": 10}},      # what reaches the channels when there are many alerts (alertflow.py): all off or empty
-    "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group", "workflow_run", "repository_dispatch"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "dormant_repos": True, "forks_need_own_ci": True, "fork_own_ci_days": 90, "red_ages": True, "red_age_days": 30, "disabled_apart": True, "dependabot_alerts": True, "copilot_alerts": False, "extra_branches": [], "branches_by_repo": [], "rerun_timing": False, "group": {"reusable": False, "min": 2}, "failed_jobs": {"enabled": False, "max_per_cycle": 4, "group_by": "auto"},
+    "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group", "workflow_run", "repository_dispatch"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "dormant_repos": True, "forks_need_own_ci": True, "fork_own_ci_days": 90, "red_ages": True, "red_age_days": 30, "stale_result_hours": 0, "disabled_apart": True, "dependabot_alerts": True, "copilot_alerts": False, "extra_branches": [], "branches_by_repo": [], "rerun_timing": False, "group": {"reusable": False, "min": 2}, "failed_jobs": {"enabled": False, "max_per_cycle": 4, "group_by": "auto"},
            "stuck": {"learned": False, "percentile": 95, "margin": 2.0, "min_samples": 3, "min_minutes": 30, "max_minutes": 720, "queue_minutes": 0, "workflow_minutes": [], "runner_minutes": [], "awaiting_stuck": True, "ghost_enabled": True, "ghost_days": 7, "no_runner_check": False}},      # which runs may make a branch red (redrule.py)
     "watchdog_minutes": 10,      # a refresh cycle that runs longer than this is dumped to the log and restarted in a new thread (0 = off)
     "watchdog_max_abandoned": 8,      # calls to GitHub that gave up waiting but never returned: with this many still alive no new call is started and the health check says so (0 = no limit)
@@ -144,7 +144,7 @@ DEFAULTS = {
                 "theme_overview": "inherit", "theme_fleet": "inherit", "theme_now": "inherit", "theme_sentinels": "inherit", "mode": "three", "rotate_every_seconds": 20, "alert_hold_seconds": 30, "logo_overview": True, "logo_fleet": False, "logo_now": False, "logo_sentinels": False,
                 "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64, "group_map": True,
                 "menu": True, "menu_target": "new", "menu_max_windows": 4, "menu_rotate_seconds": 20, "menu_tv_scale": 1.5, "safe_margin_percent": 0,
-                "life": True, "glance_seconds": 3, "transition": "fade", "hide_healthy": False, "idle_dim_minutes": 0, "min_font_px": 12},   # the wall screens /screen/overview, /screen/now and /screen/sentinels (docs/SCREENS.md, screens.py): read only, from what the monitor already holds
+                "life": True, "glance_seconds": 3, "transition": "fade", "hide_healthy": False, "idle_dim_minutes": 0, "min_font_px": 12, "version_check_seconds": 300},   # the wall screens /screen/overview, /screen/now and /screen/sentinels (docs/SCREENS.md, screens.py): read only, from what the monitor already holds
     "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "on_warning": True, "on_resolved": True, "on_report": True, "on_lesson": True, "on_sentinel": True, "on_stuck": True, "on_score_drop": True, "on_info": True, "on_live_recovered": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False, "theme": "classic", "quiet_enabled": False, "quiet_from_hour": 22, "quiet_to_hour": 7, "voices": "", "ambient": False, "ambient_volume": 10, "tick": False, "tick_seconds": 1},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
     "mcp": {"prompts": True, "write_tools": False},      # the MCP server (bin/mcp_server.py): guided prompts on, the governed write tool OFF (integrations/mcp_extras.py)
     "siem": {"queue_max": 500, "sinks": []},      # OFF: events towards Elasticsearch, Splunk, Loki, Sentinel, BigQuery or an HTTP receiver; each sink is enabled by hand in the file (integrations/siem.py)
@@ -1406,6 +1406,8 @@ def build(config, repos, started, refreshed, loading, progress_text):
         figures["aged"], figures["aged_days"] = len(aged_rows), redrule.POLICY.get("red_age_days") or 0
         quiet_rows = [{k: row.get(k) for k in ("repo", "workflow", "since", "url", "streak", "conclusion")} for row in held["inactive"] if not row.get("aged")]      # abandoned workflows (ci.inactive_days) that failed: not red, but not hidden either
         figures["quiet"], figures["quiet_days"] = len(quiet_rows), redrule.POLICY.get("inactive_days") or 0
+        for listed in (expected_rows, ignored_rows, aged_rows, quiet_rows):      # ci.stale_result_hours: a result older than that is said so (information only; a repository that could not be read is not marked)
+            redrule.mark_stale(listed, errors)
         activity_view = activity.summarize(repos, {r: [x for x in runs if x["repo"] == r] for r in repos}, {r: (SAMPLE_INFO.get(r) or {}).get("total") for r in repos}, errors, time.time(), activity.settings(config))
         figures["dormant"], figures["inactive_repos"] = len(activity_view["dormant"]), len(activity_view["inactive"])
         by_repo_runs = {r: [x for x in runs if x["repo"] == r] for r in repos}
@@ -4153,6 +4155,10 @@ class Handler(BaseHTTPRequestHandler):
                 return
             payload, code = readiness()
             self.json_reply(payload, code)
+        elif path == "/api/version":      # what a page that stays open for days asks to know whether the monitor was updated or restarted under it (wall screens, kiosk): never cached, no GitHub call
+            if not self.guard():
+                return
+            self.json_reply({"version": TOOL_VERSION, "started": int(STARTED)}, headers={"Cache-Control": "no-store"})
         elif path == "/api/health":   # for a service manager or a container check: local only, no GitHub call
             if not self.guard():
                 return
