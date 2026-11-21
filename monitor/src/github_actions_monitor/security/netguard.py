@@ -81,8 +81,18 @@ def _handlers(allow_private, resolver, use_proxy=False):
 
     class Secure(http.client.HTTPSConnection):
         def connect(self):
-            sock = _connect(self, allow_private, resolver)
-            self.sock = ssl.create_default_context().wrap_socket(sock, server_hostname=self.host)      # the certificate is checked against the NAME, the socket goes to the checked address
+            sock = _connect(self, allow_private, resolver)      # with a proxy this is the socket to the proxy
+            name = self.host
+            if getattr(self, "_tunnel_host", None):      # through a proxy: CONNECT host:port first (the destination was judged by CheckedProxy), the TLS goes over that tunnel
+                self.sock = sock
+                try:
+                    self._tunnel()
+                except BaseException:
+                    self.close()
+                    raise
+                sock = self.sock
+                name = self._tunnel_host
+            self.sock = ssl.create_default_context().wrap_socket(sock, server_hostname=name)      # the certificate is checked against the NAME, the socket goes to the checked address
 
     class HttpHandler(urllib.request.HTTPHandler):
         def http_open(self, req):

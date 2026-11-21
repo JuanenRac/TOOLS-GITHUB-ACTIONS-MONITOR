@@ -11,8 +11,10 @@
 # The environment variables are listed in monitor/docs/DEPLOYMENT.md. The image listens on every interface of the container in the NETWORK MODE (every request needs the access token) and
 # publishes no port by itself: publish 8765 on 127.0.0.1 or put the reverse proxy of deploy/compose.yaml in front of it.
 ARG PYTHON_VERSION=3.13
+# The base image is pinned by the digest of its manifest list (both platforms), so a build of the same commit always starts from the same layers. To move to a newer one, change both lines together.
+ARG PYTHON_DIGEST=sha256:e48f59cdba69a3cbd9ed2cf0f348d90d45a8d350d98134cf1070bc106ee9ed90
 
-FROM python:${PYTHON_VERSION}-slim AS gh
+FROM python:${PYTHON_VERSION}-slim@${PYTHON_DIGEST} AS gh
 RUN apt-get update \
  && apt-get install -y --no-install-recommends curl ca-certificates gnupg \
  && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg -o /usr/share/keyrings/githubcli.gpg \
@@ -21,12 +23,12 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends gh \
  && rm -rf /var/lib/apt/lists/*
 
-FROM python:${PYTHON_VERSION}-slim AS app
+FROM python:${PYTHON_VERSION}-slim@${PYTHON_DIGEST} AS app
 COPY monitor /build
 RUN python -m compileall -q -j 0 /build/src \
  && rm -rf /build/tests /build/config /build/data /build/logs /build/ai
 
-FROM python:${PYTHON_VERSION}-slim
+FROM python:${PYTHON_VERSION}-slim@${PYTHON_DIGEST}
 ARG VERSION=dev
 LABEL org.opencontainers.image.title="GitHub Actions monitor" \
       org.opencontainers.image.description="Watches the GitHub Actions of an account or an organisation: the page, the sentinel, the alerts and the command line." \

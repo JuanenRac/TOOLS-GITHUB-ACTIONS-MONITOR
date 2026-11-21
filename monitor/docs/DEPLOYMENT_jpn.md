@@ -113,6 +113,7 @@ launchd（macOS）: `ProgramArguments` = `/usr/bin/python3`、`-m`、`github_act
 | `MONITOR_TEAM_MODE` | `1` = チームモード（`auth.enabled`）: ユーザー、ロール、セッション。 |
 | `MONITOR_ADMIN_USER` | `MONITOR_ADMIN_PASSWORD_FILE` と併用: チームモードがオンでユーザーがまだいないときにサービスが作成する最初の管理者。 |
 | `MONITOR_ADMIN_PASSWORD_FILE` | `MONITOR_ADMIN_USER` のパスワードを 1 行目に書いたファイル(たとえば Docker シークレット)。 |
+| `MONITOR_WEBHOOK_SECRET_FILE` | 受信 Webhook の共有シークレットを 1 行目に書いたファイル(たとえば Docker シークレット)。`MONITOR_WEBHOOK_SECRET` の代わりに使います。Docker Compose では `deploy/compose.webhook.yaml` を追加し、シークレットを `deploy/webhook_secret.txt` に置きます。 |
 | `MONITOR_SERVICE` | `1` = サービスとして動作: 使えないログインでも諦めず、doctor が保持設定を確認します。イメージとサービスが設定します。 |
 | `MONITOR_URL` | `bin/monitor_cli.py` とヘルスチェック用: モニターのアドレス（イメージでは 2 つ目のポート）。 |
 | `MONITOR_CA_FILE` | `bin/monitor_cli.py` 用: モニターの HTTPS 証明書に署名した認証局の PEM ファイル。 |

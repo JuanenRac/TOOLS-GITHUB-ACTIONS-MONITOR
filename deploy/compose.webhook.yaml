@@ -1,0 +1,16 @@
+# Optional: the secret of the incoming webhook (MONITOR_WEBHOOK_SECRET) as a file, a Docker secret, instead of a variable of the environment. Add it to the compose file with -f:
+#
+#   printf '%s' "the-shared-secret" > deploy/webhook_secret.txt && sudo chown 10001:10001 deploy/webhook_secret.txt && chmod 600 deploy/webhook_secret.txt
+#   docker compose -f deploy/compose.yaml -f deploy/compose.webhook.yaml up -d
+#
+# The monitor reads the first line of the file named by MONITOR_WEBHOOK_SECRET_FILE. Nothing changes for whoever does not add this file.
+services:
+  monitor:
+    environment:
+      MONITOR_WEBHOOK_SECRET_FILE: /run/secrets/webhook_secret
+    secrets:
+      - webhook_secret
+
+secrets:
+  webhook_secret:
+    file: ./webhook_secret.txt
