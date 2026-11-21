@@ -12,6 +12,7 @@ sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
+import _timing  # noqa: E402
 from github_actions_monitor.data_pipeline import freshness  # noqa: E402
 
 CFG = {"fresh_s": 10, "stale_serve_h": 1, "query_timeout_s": 5}
@@ -88,7 +89,7 @@ class TheStates(Base):
         started = time.time()
         state, value, age = freshness.serve("k", slow, CFG, self.clock)
         self.assertEqual((state, value["n"], age), ("stale", 1, 60.0))
-        self.assertLess(time.time() - started, 1.0, "nobody waits for the refresh")
+        self.assertLess(time.time() - started, _timing.limit(1.0), "nobody waits for the refresh")
         self.assertEqual(freshness.mark(value, state, age)["freshness"], {"state": "stale", "age_s": 60})
         again = freshness.serve("k", slow, CFG, self.clock)
         self.assertEqual(again[0], "stale")
@@ -126,7 +127,7 @@ class TheCeiling(Base):
         started = time.time()
         state, value, _ = freshness.serve("k", self.build(delay=0.6), cfg, self.clock)
         self.assertEqual((state, value), ("timeout", None))
-        self.assertLess(time.time() - started, 0.5)
+        self.assertLess(time.time() - started, _timing.limit(0.5))
         self.assertTrue(wait_until(lambda: freshness.serve("k", self.build(), cfg, self.clock)[0] == "fresh"), "the late answer is there for the next request")
         self.assertEqual(len(self.calls), 1, "and the query was not started a second time")
 
