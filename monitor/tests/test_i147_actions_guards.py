@@ -143,7 +143,7 @@ class OneWriter(unittest.TestCase):
     def test_the_first_monitor_writes_and_a_live_second_one_is_an_observer_until_the_first_ends(self):
         cfg = config(writer_lock=True)
         self.assertEqual(ghactions.writer_state(cfg, {}, self.lock), ("writer", ""))
-        self.assertEqual(self.lock.read_text(encoding="ascii"), str(os.getpid()))
+        self.assertEqual(self.lock.read_text(encoding="ascii").split()[0], str(os.getpid()))
         self.assertEqual(ghactions.writer_state(cfg, {}, self.lock), ("writer", ""))      # the same monitor again
         self.lock.write_text("999999", encoding="ascii")      # another monitor, alive
         with mock.patch.object(ghactions, "pid_alive", return_value=True):

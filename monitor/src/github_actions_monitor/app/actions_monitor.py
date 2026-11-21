@@ -1557,10 +1557,14 @@ def outside_tick(config, now=None):
             out["feed"].append(repo)
     if redeliver.settings(config)["enabled"] and not (rate_block_state()["blocked"] or data.get("paused_quota")):
         out["redelivered"] = redeliver.RECOVERY.run(config, run_gh, now)      # GitHub is asked to send again what never arrived (off by default: it writes to GitHub)
+    githubstatus.STATUS.attach(githubstatus.HELD_FILE)
     if githubstatus.settings(config)["enabled"]:
         out["status"] = githubstatus.STATUS.tick(netguard.opener_for(False), config, now)
         if out["status"]:
             announce_github_status(out["status"], config)
+    if not out["status"] and githubstatus.STATUS.release_due(config, now):      # held notices are never kept for ever: after 6 hours, with a site that cannot be read, switched off or after a restart they are told
+        out["status"] = "over"
+        announce_github_status("over", config)
     if heartbeat.settings(config)["enabled"]:
         healthy = LITE["on"] or health_payload(deep=True)["ok"]
         out["heartbeat"] = heartbeat.HEARTBEAT.tick(config, healthy, TOOL_VERSION, notifiers.settings(config)["allow_private_targets"], now=now)
@@ -3800,7 +3804,7 @@ class Handler(BaseHTTPRequestHandler):
                 size = int(self.headers.get("Content-Length") or 0)
                 request = json.loads(self.rfile.read(size) if 0 < size <= 4096 else b"{}")
                 request = request if isinstance(request, dict) else {}
-                self.json_reply(handle_action_post(path, request), 200)
+                self.json_reply(handle_action_post(path, request, auth_http.acting_user(self)), 200)
             except Exception as error:   # noqa: BLE001
                 self.json_reply({"ok": False, "error": str(error)[:200]}, 400)
             return
@@ -5059,7 +5063,7 @@ def _register_cloud_hook():
 _register_cloud_hook()
 
 
-def handle_action_post(path, request):
+def handle_action_post(path, request, who=""):
     """The endpoints that DO something on request of the page: confirm an action of the AI, unlock the actions, test the AI connection, send a test notification."""
     config = toolconfig.raw_config()
     if path in AI_MODEL_POST:
@@ -5068,6 +5072,9 @@ def handle_action_post(path, request):
     if path == "/api/ai/actions/confirm":
         from github_actions_monitor.integrations import ai_actions
         return ai_actions.ACTIONS.run(request.get("id"), request.get("command"), config)
+    if path == "/api/ai/actions/review":     # approve or reject a proposal; the person with a session counts, never the name the request claims
+        from github_actions_monitor.integrations import ai_actions
+        return ai_actions.ACTIONS.review(request.get("id"), request.get("decision"), who or str(request.get("by") or "")[:60])
     if path == "/api/ai/actions/unlock":
         from github_actions_monitor.integrations import ai_actions
         ai_actions.ACTIONS.unlock()
@@ -5078,6 +5085,8 @@ def handle_action_post(path, request):
         if sentinel is None or sentinel.ai_cfg["provider"] == "none":
             return {"ok": False, "error": i18n.t("ai.is_off")}
         return sentinel_ai.test_connection(sentinel.ai_cfg, sentinel.ai_store)
+    if path != "/api/notify/test":      # a route that was forgotten above must not fall into the notification test
+        return {"ok": False, "reason": "unknown_route"}
     from github_actions_monitor.integrations import notifiers
     cfg = notifiers.settings(config)
     name = request.get("channel")
@@ -5301,7 +5310,7 @@ def handle_advanced_post(path, request, who=""):
         from github_actions_monitor.integrations import ghactions
         if path.endswith("plan"):
             item, why = ghactions.plan(config, toolconfig.github_owner(config), request.get("action"), request.get("repo"), request.get("number"), reason=request.get("reason"),
-                                       operator=request.get("operator") or who, run_gh=run_gh_checked)
+                                       operator=who or request.get("operator"), run_gh=run_gh_checked)      # in the team mode the person with a session is the operator: the request cannot name another one
             return {"ok": item is not None, "status": why, "plan": item}
         return ghactions.execute(config, request.get("plan"), run_gh_checked)
     from github_actions_monitor.integrations import actlocal
