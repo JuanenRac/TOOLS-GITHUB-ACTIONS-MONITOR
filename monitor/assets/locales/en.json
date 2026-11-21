@@ -1311,6 +1311,8 @@
  "egress.use.telegram": "Notifications to Telegram.",
  "egress.fail.ntfy": "If blocked: that channel fails and is noted; the other channels and the page are not affected.",
  "egress.use.ntfy": "Notifications to ntfy (the server of the channel can be your own).",
+ "egress.use.github_status": "The state of GitHub shown in the bar (githubstatus.com).",
+ "egress.fail.github_status": "If blocked: the bar shows no state of GitHub and a red is not marked as an incident; nothing else is affected.",
  "egress.fail.github_raw": "If blocked: those repositories are reported as not read, never as clean.",
  "egress.use.github_raw": "Workflow files of public repositories read without a credential.",
  "egress.fail.github_download": "If blocked: no notice of a newer version and the updater cannot download a release (a zip can still be given by hand).",
