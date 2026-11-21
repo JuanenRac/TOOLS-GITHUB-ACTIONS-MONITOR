@@ -317,4 +317,35 @@
       box(list,"es-al",'<p>'+h(tx("ui.es_alerts_clear"))+'</p><button type="button" data-r>'+h(tx("ui.es_refresh"))+'</button>',b=>{b.querySelector("[data-r]").onclick=()=>{try{tick(true)}catch(e){}}});
     else if(list&&list.querySelector(".alrow")){const old=document.getElementById("es-al");if(old)old.remove()}
   },2000);
+
+  /* ---- the rest of the lists: an empty one says what to do next (a sentence and a button), never just "None" ---- */
+  const NEXT=[["ui.no_data","ui.es_h_data",["refresh","cfg"]],["ui.t_none","ui.es_h_runs24",["refresh","repos"]],["ui.h_none","ui.es_h_hist",["refresh"]],["ui.team_none","ui.es_h_team",["refresh"]],
+              ["ui.rep_none","ui.es_h_rep",["refresh"]],["ui.rs_none","ui.es_h_reports",["cfg"]],["ui.upd_none","ui.es_h_upd",["refresh"]]];
+  const waitFor=NEXT.map(n=>[tx(n[0]).trim(),n[1],n[2]]);
+  function nextSteps(){
+    document.querySelectorAll(".mut").forEach(e=>{
+      if(e.dataset.es||e.children.length||e.closest("#err,.es-box"))return;
+      const text=e.textContent.trim(),hit=waitFor.find(n=>n[0]===text);
+      if(!hit)return;
+      e.dataset.es="1";
+      const box=document.createElement("span");box.className="es-next";box.setAttribute("role","status");
+      box.appendChild(document.createTextNode(" "+tx(hit[1])+" "));
+      hit[2].forEach(a=>{const b=document.createElement("button");b.type="button";
+        if(a==="refresh"){b.textContent=tx("ui.es_refresh");b.onclick=()=>{try{tick(true)}catch(x){}}}
+        else{b.textContent=a==="cfg"?tx("ui.es_open_settings"):tx("ui.es_open_repos");b.onclick=()=>showTab(a)}
+        box.appendChild(b);box.appendChild(document.createTextNode(" "))});
+      e.appendChild(box);
+    });
+  }
+  setInterval(()=>{if(!document.hidden)nextSteps()},2000);
+
+  /* ---- the duration of a run in progress counts up on the page itself, between two refreshes (no request): every [data-live] holds the instant the run started ---- */
+  setInterval(()=>{
+    if(document.hidden)return;
+    document.querySelectorAll("[data-live]").forEach(e=>{
+      const from=+e.dataset.live;if(!from)return;
+      const s=Math.max(0,(Date.now()-from)/1000);
+      e.textContent=e.dataset.liveT==="took"?tx("ui.took",{dur:fmt(s)}):fmt(s);
+    });
+  },1000);
 })();
