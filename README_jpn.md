@@ -30,6 +30,7 @@
   <img src="https://img.shields.io/badge/Tests-5576_passing-brightgreen.svg" alt="5576 tests">
   <img src="https://img.shields.io/badge/Tests-5597_passing-brightgreen.svg" alt="5597 tests">
   <img src="https://img.shields.io/badge/Tests-5580_passing-brightgreen.svg" alt="5580 tests">
+  <img src="https://img.shields.io/badge/Tests-5573_passing-brightgreen.svg" alt="5573 tests">
 </p>
 
 > 所有するすべてのリポジトリのワークフローを監視し、赤いもの・止まっているもの・対応待ちのものを、ローカルの1ページで教えます。
@@ -119,6 +120,8 @@
 | **テスト** | テストメソッド 5576 件(`python -m unittest discover -s monitor/tests`) |
 | **テスト** | テストメソッド 5597 件(`python -m unittest discover -s monitor/tests`) |
 | **設定** | 設定 890 件、すべてヘルプ付き |
+| **テスト** | テストメソッド 5573 件(`python -m unittest discover -s monitor/tests`) |
+| **設定** | 設定 891 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows、Python 3.11, 3.13 |
 

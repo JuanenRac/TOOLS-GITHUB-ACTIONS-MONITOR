@@ -132,6 +132,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `analytics.keep_days` | `-` | analytics | History |
 | `analytics.max_samples` | `-` | analytics | Most samples |
 | `analytics.min_samples` | `-` | analytics | Least samples |
+| `analytics.query_timeout_s` | `-` | analytics | Time ceiling of a heavy query |
 | `analytics.slow_factor` | `-` | analytics | Slower than usual |
 | `analytics.steps` | `-` | analytics | Time per step |
 | `api.cursor_ttl_seconds` | `900` | advanced | Seconds a page cursor lives |
@@ -167,7 +168,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `cache.etag.revalidate_active` | `true` | cache | Read lists with running work in full |
 | `cache.etag.skip_stateful` | `true` | cache | Always read live state in full |
 | `cache.etag.ttl_hours` | `24` | cache | Entry lifetime |
+| `cache.heavy_fresh_s` | `5` | cache | Fresh for |
 | `cache.negative_ttl_s` | `300` | cache | Remember a refusal for |
+| `cache.stale_serve_h` | `1` | cache | Serve a stale copy for |
 | `central.max_age_minutes` | `120` | quota | Minutes before the central panel is behind |
 | `central.source` (secure) | `"off"` | quota | Central panel as a base line |
 | `chatops.allowed_channels` (secure) | `[]` | webhook | Allowed channels |

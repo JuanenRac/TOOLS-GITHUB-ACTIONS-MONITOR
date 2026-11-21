@@ -30,6 +30,7 @@
   <img src="https://img.shields.io/badge/Tests-5576_passing-brightgreen.svg" alt="5576 tests">
   <img src="https://img.shields.io/badge/Tests-5597_passing-brightgreen.svg" alt="5597 tests">
   <img src="https://img.shields.io/badge/Tests-5580_passing-brightgreen.svg" alt="5580 tests">
+  <img src="https://img.shields.io/badge/Tests-5573_passing-brightgreen.svg" alt="5573 tests">
 </p>
 
 > Überwacht die Workflows aller deiner Repositories und zeigt dir auf einer lokalen Seite, was rot ist, was hängt und was auf dich wartet.
@@ -119,6 +120,8 @@ Methode, Annahmen und wie Sie es in Ihrer eigenen Nutzung messen: [`monitor/docs
 | **Tests** | 5576 Testmethoden (`python -m unittest discover -s monitor/tests`) |
 | **Tests** | 5597 Testmethoden (`python -m unittest discover -s monitor/tests`) |
 | **Einstellungen** | 890 Einstellungen, alle mit Hilfe |
+| **Tests** | 5573 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Einstellungen** | 891 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, Python 3.11, 3.13 |
 

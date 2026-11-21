@@ -30,6 +30,7 @@
   <img src="https://img.shields.io/badge/Tests-5576_passing-brightgreen.svg" alt="5576 tests">
   <img src="https://img.shields.io/badge/Tests-5597_passing-brightgreen.svg" alt="5597 tests">
   <img src="https://img.shields.io/badge/Tests-5580_passing-brightgreen.svg" alt="5580 tests">
+  <img src="https://img.shields.io/badge/Tests-5573_passing-brightgreen.svg" alt="5573 tests">
 </p>
 
 > Vigila los workflows de todos tus repositorios y te dice, en una página local, qué está en rojo, qué está atascado y qué te espera.
@@ -119,6 +120,8 @@ Método, supuestos y cómo medirlo en tu propio uso: [`monitor/docs/PRODUCTIVITY
 | **Tests** | 5576 métodos de test (`python -m unittest discover -s monitor/tests`) |
 | **Tests** | 5597 métodos de test (`python -m unittest discover -s monitor/tests`) |
 | **Ajustes** | 890 ajustes, todos con ayuda |
+| **Tests** | 5573 métodos de test (`python -m unittest discover -s monitor/tests`) |
+| **Ajustes** | 891 ajustes, todos con ayuda |
 | **Idiomas** | 8 (inglés, español, alemán, francés, italiano, japonés, chino y portugués) |
 | **Probado en el CI en** | ubuntu, windows, Python 3.11, 3.13 |
 

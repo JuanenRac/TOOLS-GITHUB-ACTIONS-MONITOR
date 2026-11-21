@@ -60,6 +60,10 @@ Il confronto legge il registro del punteggio. Finché `compare.enabled` è attiv
 
 La scheda Grafici mostra la sezione «Confronta i periodi» quando il confronto è attivo: un selettore di periodo, giorni e riferimento, una riga per cifra con la sua variazione, gli avvisi e gli elenchi delle modifiche.
 
+## Risposte fresche, obsolete e lente
+
+Il confronto e i rapporti facoltativi sono interrogazioni pesanti, quindi la loro risposta è tenuta in memoria e ogni richiesta la trova in uno di tre stati. **Fresca** (più giovane di `cache.heavy_fresh_s`, 5 secondi): servita così com'è, senza ricalcolarla. **Obsoleta** (più vecchia di questo e più giovane di `cache.stale_serve_h` ore, 1 ora): servita subito e segnata con `X-Monitor-Freshness: stale` / `X-Monitor-Age: N` mentre un calcolo la rinnova in secondo piano; una risposta fresca non porta questa intestazione. **Scaduta** (più vecchia o mai fatta): calcolata ora, e una copia così vecchia non viene mai servita. Un calcolo ha un limite, `analytics.query_timeout_s` (120 secondi): oltre, la risposta è `504` con il codice `query_timeout` invece di attendere per sempre; un calcolo non si può uccidere, quindi finisce da solo, la sua risposta è conservata per la richiesta successiva e nel frattempo non se ne avvia un secondo per la stessa interrogazione. Niente di tutto ciò chiama GitHub.
+
 ## Le impostazioni
 
 Impostazioni, scheda Sentinella, blocco Confronto tra periodi: `compare.enabled`, `compare.default_window_days`, `compare.default_days_filter`, `compare.workdays`, `compare.min_runs_per_window`, `compare.min_days_of_history`, `compare.min_resolved`, `compare.min_snapshots`, `compare.min_repo_runs`, `compare.top_changes`, `compare.include_in_report` e `compare.cache_seconds`. Una risposta viene conservata per `compare.cache_seconds` secondi e poi ricalcolata.

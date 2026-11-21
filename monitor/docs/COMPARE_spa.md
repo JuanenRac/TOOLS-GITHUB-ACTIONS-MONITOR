@@ -60,6 +60,10 @@ La comparación lee el libro de la puntuación. Mientras `compare.enabled` está
 
 La pestaña Gráficos muestra la sección «Comparar periodos» cuando la comparación está activa: un selector de periodo, días y referencia, una línea por cifra con su cambio, las alertas y las listas de cambios.
 
+## Respuestas frescas, obsoletas y lentas
+
+La comparación y los informes opcionales son consultas pesadas, así que su respuesta se guarda en memoria y cada petición la encuentra en uno de tres estados. **Fresca** (más joven que `cache.heavy_fresh_s`, 5 segundos): se sirve tal cual, sin calcularla otra vez. **Obsoleta** (más vieja que eso y más joven que `cache.stale_serve_h` horas, 1 hora): se sirve al instante y se marca con `X-Monitor-Freshness: stale` / `X-Monitor-Age: N` mientras un cálculo la renueva en segundo plano; una respuesta fresca no lleva esa cabecera. **Caducada** (más vieja o nunca hecha): se calcula ahora, y una copia tan vieja nunca se sirve. Un cálculo tiene un tope, `analytics.query_timeout_s` (120 segundos): pasado ese tiempo la respuesta es `504` con el código `query_timeout` en vez de esperar para siempre; un cálculo no se puede matar, así que termina solo, su respuesta se guarda para la petición siguiente y mientras tanto no se empieza un segundo cálculo de la misma consulta. Nada de esto llama a GitHub.
+
 ## Los ajustes
 
 Ajustes, pestaña Centinela, bloque Comparación de periodos: `compare.enabled`, `compare.default_window_days`, `compare.default_days_filter`, `compare.workdays`, `compare.min_runs_per_window`, `compare.min_days_of_history`, `compare.min_resolved`, `compare.min_snapshots`, `compare.min_repo_runs`, `compare.top_changes`, `compare.include_in_report` y `compare.cache_seconds`. Una respuesta se conserva `compare.cache_seconds` segundos y luego se calcula de nuevo.

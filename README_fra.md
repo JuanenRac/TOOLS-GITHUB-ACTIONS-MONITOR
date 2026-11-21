@@ -30,6 +30,7 @@
   <img src="https://img.shields.io/badge/Tests-5576_passing-brightgreen.svg" alt="5576 tests">
   <img src="https://img.shields.io/badge/Tests-5597_passing-brightgreen.svg" alt="5597 tests">
   <img src="https://img.shields.io/badge/Tests-5580_passing-brightgreen.svg" alt="5580 tests">
+  <img src="https://img.shields.io/badge/Tests-5573_passing-brightgreen.svg" alt="5573 tests">
 </p>
 
 > Surveille les workflows de tous vos dépôts et vous dit, sur une page locale, ce qui est rouge, ce qui est bloqué et ce qui vous attend.
@@ -119,6 +120,8 @@ Méthode, hypothèses et comment le mesurer dans votre propre usage: [`monitor/d
 | **Tests** | 5576 méthodes de test (`python -m unittest discover -s monitor/tests`) |
 | **Tests** | 5597 méthodes de test (`python -m unittest discover -s monitor/tests`) |
 | **Réglages** | 890 réglages, tous avec aide |
+| **Tests** | 5573 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Réglages** | 891 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, Python 3.11, 3.13 |
 

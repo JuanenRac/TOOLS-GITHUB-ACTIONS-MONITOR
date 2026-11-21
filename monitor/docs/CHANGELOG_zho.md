@@ -181,6 +181,7 @@
 - **doctor 新增两项检查：`compare_window` 与 `etag`**：前者用数字说明两个时期的对比能否用它要求的历史（`compare.min_days_of_history`）和保留的历史（`retention.events_days`）回溯两个窗口；后者给出本机运行的监视器中 GitHub 以 304 应答的条件读取比例，并在响应不带 ETag 时发出警告，因为那样什么都节省不了。`/api/quota` 在“少读取的方式”列表中给出 ETag 缓存的计数器。只读；功能关闭或没有监视器运行时两者都正常。
 - **提交的综合状态也统计打开的拉取请求**(`sentinel.surface.checks.commit_state.include_pr_heads`,默认关闭,以及 `pr_heads_max`,5):开启后,会查看每个打开的拉取请求(最新的,不含草稿)的头部提交及来自任何应用的检查,并用 `仓库#编号` 一行显示红色或待定的;红色的拉取请求只是一行,不是分支的失败,读不到的头部或列表会列为不可评估,绝不会算作绿色。列表需要一次调用,每个拉取请求再需要一次;见哨兵指南和设置帮助。
 - **更新程序显示其进程的完整日志，并可丢弃副本**：页面的更新菜单读取上一次更新进程日志的最后几行（`GET /api/updates/log`，token、secret、password 之后的值已隐藏），并列出副本文件夹中的副本（`GET /api/updates/copies`），每个副本旁有 **丢弃副本** 按钮（`POST /api/updates/discard`，管理员，仅限本机，会被记录）。它会先询问，回退所需的副本要询问两次，正在运行的更新的副本则永远不会丢弃；只会删除该副本，不会动安装或数据。更新程序也有对应的命令：`copies`、`discard --name 副本名 [--force] [--yes]` 和 `log [--lines N]`。
+- **耗时查询的新鲜、过期和失效回答,并带有时间上限**(`cache.heavy_fresh_s` 5、`cache.stale_serve_h` 1、`analytics.query_timeout_s` 120):比较和可选报告的回答保存在内存中;新鲜的原样返回,稍旧的立即返回并标记 `X-Monitor-Freshness: stale`(附带其年龄),同时由一次计算在后台刷新,更旧或从未生成的则现在计算(绝不提供那么旧的副本)。超过上限的查询会返回带代码 `query_timeout` 的 `504`,而不是让请求永远等待,慢查询也不会为同一个问题启动两次。不增加任何对 GitHub 的调用;见比较指南和设置帮助。
 
 ### 修复
 
