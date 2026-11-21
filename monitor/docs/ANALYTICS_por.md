@@ -35,3 +35,15 @@ Se todas as leituras de um ciclo falham por um problema de ligação (não de lo
 ## Durante quanto tempo se guarda o histórico
 
 Além de `keep_days` do bloco de análises, a passagem de retenção remove os dias do histórico mais antigos do que `retention.analytics_days` (180 por omissão); as próprias amostras são limitadas por `max_samples`. Veja [STORAGE_por.md](STORAGE_por.md).
+
+
+## Tempo poupado (uma estimativa)
+
+Desligado por predefinição (`productivity.enabled`). Ligado, a secção mostra, tarefa a tarefa, quantos minutos por semana o monitor poupa, com a fórmula de [PRODUCTIVITY_por.md](PRODUCTIVITY_por.md): vezes por semana x minutos de cada vez sem o monitor x poupança da tarefa.
+
+- Quantificam-se duas tarefas. **Vigiar** (olhar à mão para os separadores do Actions e decidir o que está vermelho) toma as vezes por semana e os minutos das suas notas (`productivity.watch_times_per_week`, `productivity.watch_minutes_before`). **Diagnóstico** (achar a causa de uma execução falhada) conta as execuções falhadas que o monitor tem à vista em `productivity.window_days` e toma os minutos das suas notas (`productivity.triage_minutes_before`).
+- O monitor não pode ver o que fazia antes de ser instalado. Uma tarefa sem essas notas diz **sem dados** e não se inventa nenhum número. O total também diz sem dados enquanto todas as tarefas não tiverem notas.
+- Se anotou também os minutos com o monitor (`productivity.watch_minutes_after`, `productivity.triage_minutes_after`), a poupança é medida com as suas notas: 1 - depois / antes. Caso contrário é a percentagem de `productivity.saving_percent` (90 por predefinição) e a tabela diz **assumido (sem medir)**.
+- Com `productivity.team_hours_per_week` a estimativa diz também que parte do tempo de trabalho são os minutos poupados.
+- Corrigir uma falha leva o mesmo tempo com ou sem o monitor e nunca se conta. Só se contam as execuções falhadas que o monitor tem: uma lista de execuções muito longa pode ter mais falhas do que as mostradas.
+- É local e só de leitura: nenhuma chamada ao GitHub, nada sai do computador. Está em `/api/analytics` (`time_saved`), no resumo do painel A12 e no brief do separador Resumo para as ferramentas de IA.

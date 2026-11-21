@@ -7,7 +7,7 @@
 
 Generated from the code. It reads what the running monitor says (and never writes to GitHub). `--json` prints one JSON document; the exit codes are stable.
 
-Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `briefs`, `api`, `install-skill`, `gh-token`, `ai`, `backup`, `update`, `compare`, `screens`, `toolbox`, `watch`, `completions`, `kiosk`, `metrics`.
+Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `briefs`, `api`, `install-skill`, `gh-token`, `ai`, `backup`, `update`, `compare`, `screens`, `docs`, `toolbox`, `watch`, `completions`, `kiosk`, `metrics`, `proposals`.
 
 | flag | what |
 | --- | --- |
@@ -33,6 +33,7 @@ Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `
 | `--sentinel` | alerts: only this sentinel |
 | `--level` | alerts: only this level |
 | `--muted` | alerts: show, hide (default) or list only the silenced ones |
+| `--since` | alerts: the alerts that were open at some moment of this time, closed ones too (90m, 24h, 7d, 2w; at most 90 days) |
 | `--fail-on` | alerts: exit with 5 when an alert of this level or worse is open |
 | `--strict` | doctor: a warning also makes the exit code 3 (without it, warnings still exit 0) |
 | `--force` | backup restore: write over accounts and files that already exist (without it a storage that holds accounts is refused) |
@@ -63,6 +64,7 @@ Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `
 | `--if-problem` | metrics: write nothing and exit 0 when there is no red workflow and no alert at --fail-on (error by default) or worse; otherwise write the figures and exit 5 (for cron, which mails any output) |
 | `--color` | Colour of the answer: auto (only on a terminal, never with NO_COLOR), always or never (no escape sequence at all) |
 | `--egress` | doctor: list every host this configuration can call, why, and what fails if it is blocked (nothing is called) |
+| `--latency` | doctor: measure how late the events of the account learn of a push compared with its run (reads only; nothing is created on GitHub) |
 | `--version` | print the version |
 
 Other entry points: `bin/mcp_server.py` (MCP over standard input and output; `--allow-ack`, `--allow-lessons`), `bin/ai_hook.py` (gate script of an AI tool), `bin/read_report.py`, `bin/actions_monitor.py --doctor`.

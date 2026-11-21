@@ -14,7 +14,7 @@
 :root[data-theme=light]{--bg:#eef3f8;--bg2:#e3ebf3;--card:#ffffff;--card2:#f6f9fc;--line:#c9d6e3;--tx:#0b1b2b;--mut:#4d6580;--cy:#0891b2;--cy2:#155e75;--ok:#047857;--warn:#a16207;--bad:#c81e1e;--info:#1d4ed8;--glow:rgba(8,145,178,.14);--halo:rgba(200,30,30,.45)}
 /* the sixteen themes of the main page (read from the page itself by the server) and the names the wall screens give to their colours */
 /*THEME_CSS*/
-:root[data-studio]{--bg2:var(--panel2);--card:var(--panel);--card2:var(--panel2);--tx:var(--text);--cy:var(--acc);--cy2:var(--acc2);--info:var(--run);--glow:color-mix(in srgb,var(--acc) 22%,transparent);--halo:color-mix(in srgb,var(--bad) 55%,transparent)}
+:root[data-studio]{--bg2:var(--panel2);--card:var(--panel);--card2:var(--panel2);--tx:var(--text);--mut:color-mix(in srgb,var(--text) 90%,var(--panel2));--cy:var(--acc);--cy2:var(--acc2);--info:var(--run);--glow:color-mix(in srgb,var(--acc) 22%,transparent);--halo:color-mix(in srgb,var(--bad) 55%,transparent)}
 :root[data-theme=contrast]{--bg:#000;--bg2:#000;--card:#000;--card2:#000;--line:#ffffff;--tx:#fff;--mut:#e0e0e0;--cy:#00e5ff;--cy2:#00e5ff;--ok:#00ff7f;--warn:#ffd700;--bad:#ff4040;--info:#7ab8ff;--glow:rgba(255,255,255,.12);--halo:rgba(255,64,64,.8)}
 *{box-sizing:border-box;margin:0;padding:0}
 [hidden]{display:none!important}
@@ -43,9 +43,9 @@ header{display:flex;align-items:center;justify-content:space-between;gap:1rem;fl
 .dots{display:flex;gap:.45rem;align-items:center}
 .dots i{width:.55rem;height:.55rem;border-radius:50%;background:var(--line);display:block}
 .dots i.on{background:var(--cy)}
-#banner{flex:0 0 auto;border:1px solid var(--bad);color:var(--bad);border-radius:.5rem;padding:.35rem .8rem;font-weight:600;font-size:1.05rem;background:color-mix(in srgb,var(--bad) 12%,transparent)}
+#banner{flex:0 0 auto;border:1px solid var(--bad);color:var(--tx);border-radius:.5rem;padding:.35rem .8rem;font-weight:600;font-size:1.05rem;background:color-mix(in srgb,var(--bad) 12%,transparent)}
 #banner[hidden]{display:none}
-#banner.warn{border-color:var(--warn);color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent)}
+#banner.warn{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent)}
 .screen{flex:1 1 0;min-height:0;display:grid;gap:.8rem;transition:opacity .6s,transform .6s}
 .screen[hidden]{display:none}
 .screen.out{opacity:0}
@@ -194,7 +194,7 @@ header>.orglogo:first-child{margin-right:1rem}header>.orglogo:last-child{margin-
 /* the glance: what changed in the last look, for a few seconds, in the middle of the header */
 #glance{display:flex;flex-wrap:wrap;gap:.2rem .4rem;min-width:0;justify-content:center;align-items:center}
 #glance span{border:1px solid var(--line);border-radius:.4rem;padding:0 .45rem;font-size:.85rem;line-height:1.3;white-space:nowrap;color:var(--tx)}
-#glance span.up{border-color:var(--bad);color:var(--bad)}#glance span.down{border-color:var(--ok);color:var(--ok)}
+#glance span.up{border-color:var(--bad)}#glance span.down{border-color:var(--ok)}
 /* now */
 #s-now{grid-template-columns:1.5fr 1fr 1fr;grid-template-rows:1fr 1fr .62fr;grid-template-areas:"run queue fail" "run appr merge" "tl tl tl"}
 #n-run{grid-area:run}#n-queue{grid-area:queue}#n-fail{grid-area:fail}#n-appr{grid-area:appr}#n-merge{grid-area:merge}#n-tl{grid-area:tl}

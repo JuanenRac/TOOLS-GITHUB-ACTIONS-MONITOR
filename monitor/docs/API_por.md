@@ -63,13 +63,14 @@ Estas rotas servem a página e as ferramentas deste computador. Não fazem parte
 | `/api/act/status` | O estado da execução local em curso. |
 | `/api/act/stop` | POST, este computador. Para a execução local. |
 | `/api/advanced` | O estado das funções que se ativam por escolha: a rede, o armazém do token do GitHub, as ações no GitHub, a execução local e o modo de demonstração; nunca um token. |
-| `/api/ai/actions` | O estado das ações da IA (bloqueadas ou não), o seu registo e o estado da IA. |
+| `/api/ai/actions` | O estado das ações da IA (bloqueadas ou não), o seu registo, as propostas à espera (`proposals`) e o estado da IA. |
 | `/api/ai/actions/confirm` | POST, este computador. Executa uma ação proposta pela IA, depois de a confirmar; fica registada. |
+| `/api/ai/actions/review` | POST, este computador. Aprova ou rejeita uma proposta da IA (`id`, `decision`); fica registado. Nada é executado. |
 | `/api/ai/actions/unlock` | POST, este computador. Desbloqueia as ações da IA durante um tempo limitado; fica registado. |
 | `/api/ai/budget` | As chamadas e o custo estimado de hoje de cada modelo de IA, os limites e as últimas falhas; não consulta nenhum fornecedor. |
 | `/api/ai/test` | POST, este computador. Testa a ligação da IA configurada; não altera nada. |
 | `/api/alerts/unmute` | POST. Retira o silêncio de um alerta; fica registado. |
-| `/api/analytics` | O resumo da análise das execuções: durações, fila, passos, testes instáveis e execuções mais lentas. |
+| `/api/analytics` | O resumo da análise das execuções: durações, fila, passos, testes instáveis e execuções mais lentas, e a estimativa do tempo poupado quando está ligada. |
 | `/api/discovery` | O que a descoberta encontrou: o quadro com a conta e os repositórios mostrados e ocultos, os últimos eventos, os grupos sugeridos, as suas definições, os forks e as organizações. |
 | `/api/discovery/group` | POST. Junta um grupo sugerido ao ficheiro de ecossistemas, guardando uma cópia do ficheiro. |
 | `/api/gh-action/plan` | POST, este computador. Prepara o que seria enviado ao GitHub (uma repetição, um cancelamento, um dispatch ou um merge); ainda não se envia nada. |

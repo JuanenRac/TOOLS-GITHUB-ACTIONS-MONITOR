@@ -25,6 +25,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import check_overflow as co  # noqa: E402
 
+os.environ.setdefault("MONITOR_VT_BUDGET", "45000")      # the walk through every tab, every sub-tab of Settings and the live checks takes virtual time
 ROOT = Path(__file__).resolve().parent.parent
 REPORT = "smoke-report"
 #: the least fields a sub-tab of Settings must draw (the demo draws about twice as many; a sub-tab that loses half of its fields is broken). A sub-tab that is not listed needs at least one.
@@ -68,6 +69,15 @@ DRIVER = r"""<script>
         const x=document.querySelector(".dlg:not([hidden]) .ib");if(x)x.click();await wait(200)}
       catch(e){report.windows[name]={open:false,error:String(e).slice(0,160)}}
     }
+    showTab("now");await wait(1800);
+    const lives=[...document.querySelectorAll("[data-live]")],before=lives.map(e=>e.textContent);
+    await wait(2500);
+    report.live={n:lives.length,changed:lives.filter((e,i)=>e.isConnected&&e.textContent!==before[i]).length,gone:lives.filter(e=>!e.isConnected).length};
+    showTab("charts");await wait(300);
+    const host=document.getElementById("t-charts"),probe=document.createElement("span");probe.className="mut";probe.id="es-probe";probe.textContent=T("ui.no_data");host.appendChild(probe);
+    await wait(2600);
+    report.next={asked:true,added:!!probe.querySelector(".es-next button")};
+    probe.remove();
     await wait(500);
   }catch(e){report.ok=false;report.error=String(e).slice(0,300)}
   report.errors=window.__smoke.errors.slice(0,20);
@@ -99,6 +109,11 @@ def problems(report, min_text=MIN_TEXT):
     for name, info in sorted((report.get("windows") or {}).items()):
         if not info.get("open") or info.get("text", 0) < 20:
             found.append(f"the window {name} did not open or is empty" + (": " + info["error"] if info.get("error") else ""))
+    live = report.get("live") or {}
+    if live.get("n", 0) and not live.get("changed", 0) and not live.get("gone", 0):
+        found.append("the duration of the runs in progress does not count up on the page")
+    if report.get("next") and not report["next"].get("added"):
+        found.append("an empty list does not say what to do next (no button after \"No data.\")")
     found.extend(report.get("errors") or [])
     return found
 

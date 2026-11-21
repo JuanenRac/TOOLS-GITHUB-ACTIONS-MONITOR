@@ -21,11 +21,13 @@ AUDITED = {
     "/api/ops/backup": "backup_run",                    # a complete backup package is written now (the file, never its content)
     "/api/updates/check": "update_check",                # the published versions are read from GitHub on request
     "/api/updates/apply": "update_apply",                # an update of the monitor is started (the target, never a path)
+    "/api/updates/discard": "update_discard",            # one copy of the folder of copies is deleted (its name and the bytes freed)
     "/api/updates/rollback": "update_rollback",          # the way back to the version before the last update is started
     "/api/ops/purge": "purge_run",                      # the retention purge is run (or only planned) on demand
     "/api/ai/actions/confirm": "ai_action",             # an action proposed by the AI is run
     "/api/assistant/ask": "assistant_ask",              # a fixed question to the assistant (the action and the ids it read, never the text of the question or of the answer)
     "/api/ai/prompts/clear": "prompt_log_clear",        # the local record of prompts is emptied (how many lines, never their text)
+    "/api/ai/actions/review": "ai_action_review",       # a proposal of the AI is approved or rejected (the id and the decision, never the command text)
     "/api/ai/actions/unlock": "ai_unlock",              # the actions of the AI are unlocked for a while
     "/api/screens/logo": "screens_logo_upload",                # the logo of the organization is uploaded (its kind and size go in, never its content)
     "/api/webhook/redeliver": "webhook_redeliver",      # GitHub is asked to send again the deliveries that never arrived (how many, never a payload)

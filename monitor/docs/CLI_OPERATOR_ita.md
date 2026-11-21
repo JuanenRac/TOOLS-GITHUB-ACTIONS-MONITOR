@@ -52,6 +52,14 @@ python bin/monitor_cli.py watch branch --single-pass --format json
 - `--wait SECONDI`: quanto attendere la fine delle esecuzioni prima di arrendersi con 1 (da 10 a 86400). Senza, l'attesa è l'impostazione `cli.watch.branch_timeout_seconds` (900).
 - Un commit staccato non ha ramo: indica `--branch`. Una cartella senza un remote chiamato `origin` su GitHub richiede `--repo`.
 
+## `monitor N`: una schermata che si aggiorna
+
+`monitor_cli.py monitor [N]` è `watch status` che rilegge ogni N secondi (un numero da 1 a 9999, portato a `cli.watch.min_interval_seconds`; senza N, il valore predefinito di `cli.watch.default_interval_seconds`). Le altre opzioni funzionano come in `watch` (`--format`, `--no-clear`, `--url`, `--status-codes operator` ...) e Ctrl-C lo termina con 0.
+
+## `doctor --latency`: quanto sono in ritardo gli eventi
+
+`monitor_cli.py doctor --latency` aggiunge un controllo al doctor. Legge gli eventi dell'account (la stessa lista usata dal rilevatore gratuito di modifiche `events_feed`) e, per gli ultimi push, l'esecuzione di quello stesso commit, e indica il tempo di andata e ritorno, la mediana e il peggior ritardo tra l'inizio dell'esecuzione e l'evento, e quanto può attendere una modifica nel caso peggiore con il tuo `events_feed.interval_seconds` (nel campo `data` di `--json`). Legge soltanto: non si crea nulla su GitHub, né issue né esecuzioni di prova. Una lettura che fallisce dà un avviso «non valutabile» con la sua causa, mai un guasto del monitor. Oltre 120 secondi di ritardo il controllo avvisa.
+
 ## `completions`: completare i comandi
 
 ```
@@ -79,7 +87,7 @@ I codici da 0 a 5 sono quelli di [CLI_ita.md](CLI_ita.md); un test mantiene ques
 
 ### I codici di uscita di `status` per un operatore
 
-Per impostazione predefinita `status` mantiene i codici della tabella qui sopra, nessuno script cambia. Con `--status-codes operator` (o l'impostazione `cli.status_codes` su `operator`) il comando dice solo tre cose: **0** sano, **1** nulla serve (il monitor non è raggiungibile o rifiuta la credenziale) e **2** attivo ma richiede attenzione. Richiede attenzione significa: il monitor non raggiunge GitHub, ancora nessun dato, la credenziale è cieca, l'aggiornamento è in pausa perché la quota è sotto il minimo, la risposta porta un errore, una risposta che non è quella di un monitor, oppure **il codice sul disco è di un'altra versione rispetto al processo in esecuzione** (un aggiornamento è stato applicato senza riavviare il monitor; `/api/health` lo dice come `code_stale` e `--doctor` ha il controllo `running`). Un errore d'uso resta 1. I motivi sono nel campo `attention` di `--json`. I fallimenti dei workflow rossi non ne fanno parte: per quelli usa `alerts --fail-on`.
+Per impostazione predefinita `status` mantiene i codici della tabella qui sopra, nessuno script cambia. Con `--status-codes operator` (o l'impostazione `cli.status_codes` su `operator`) il comando dice solo tre cose: **0** sano, **1** nulla serve (il monitor non è raggiungibile o rifiuta la credenziale) e **2** attivo ma richiede attenzione. Richiede attenzione significa: il monitor non raggiunge GitHub, ancora nessun dato, la credenziale è cieca, l'aggiornamento è in pausa perché la quota è sotto il minimo, la risposta porta un errore, una risposta che non è quella di un monitor, oppure **il codice sul disco è di un'altra versione rispetto al processo in esecuzione** (un aggiornamento è stato applicato senza riavviare il monitor; `/api/health` lo dice come `code_stale` e `--doctor` ha il controllo `running`). Un errore d'uso resta 1. I motivi sono nel campo `attention` di `--json`. I fallimenti dei workflow rossi non ne fanno parte: per quelli usa `alerts --fail-on`. `watch status` segue gli stessi codici anche quando una lettura fallisce: un monitor irraggiungibile o che rifiuta la credenziale termina il ciclo con 1, una risposta illeggibile con 2.
 
 ## Esempi con `jq`
 

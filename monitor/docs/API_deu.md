@@ -63,13 +63,14 @@ Diese Routen bedienen die Seite und die Werkzeuge dieses Rechners. Sie gehören 
 | `/api/act/status` | Der Zustand des laufenden lokalen Laufs. |
 | `/api/act/stop` | POST, dieser Rechner. Stoppt den lokalen Lauf. |
 | `/api/advanced` | Der Zustand der Funktionen, die man bewusst einschaltet: Netzwerk, Speicher des GitHub-Tokens, Aktionen auf GitHub, lokaler Lauf und Demo-Modus; nie ein Token. |
-| `/api/ai/actions` | Der Zustand der Aktionen der KI (gesperrt oder nicht), ihr Protokoll und der Zustand der KI. |
+| `/api/ai/actions` | Der Zustand der Aktionen der KI (gesperrt oder nicht), ihr Protokoll, die wartenden Vorschläge (`proposals`) und der Zustand der KI. |
 | `/api/ai/actions/confirm` | POST, dieser Rechner. Führt eine von der KI vorgeschlagene Aktion nach Ihrer Bestätigung aus; wird protokolliert. |
+| `/api/ai/actions/review` | POST, dieser Rechner. Gibt einen Vorschlag der KI frei oder lehnt ihn ab (`id`, `decision`); wird protokolliert. Nichts wird ausgeführt. |
 | `/api/ai/actions/unlock` | POST, dieser Rechner. Schaltet die Aktionen der KI für begrenzte Zeit frei; wird protokolliert. |
 | `/api/ai/budget` | Die Aufrufe und die geschätzten Kosten von heute je KI-Modell, die Grenzen und die letzten Fehler; fragt keinen Anbieter. |
 | `/api/ai/test` | POST, dieser Rechner. Prüft die Verbindung der eingerichteten KI; ändert nichts. |
 | `/api/alerts/unmute` | POST. Hebt die Stummschaltung einer Meldung auf; wird protokolliert. |
-| `/api/analytics` | Die Zusammenfassung der Auswertung der Läufe: Dauern, Warteschlange, Schritte, instabile Tests und langsamere Läufe. |
+| `/api/analytics` | Die Zusammenfassung der Auswertung der Läufe: Dauern, Warteschlange, Schritte, instabile Tests und langsamere Läufe sowie die Schätzung der gesparten Zeit, wenn sie eingeschaltet ist. |
 | `/api/discovery` | Was die Entdeckung fand: der Kasten mit Konto sowie angezeigten und ausgeblendeten Repositories, die letzten Ereignisse, die vorgeschlagenen Gruppen, ihre Einstellungen, die Forks und die Organisationen. |
 | `/api/discovery/group` | POST. Fügt eine vorgeschlagene Gruppe der Ökosystem-Datei hinzu und behält eine Kopie der Datei. |
 | `/api/gh-action/plan` | POST, dieser Rechner. Bereitet vor, was an GitHub gesendet würde (Wiederholung, Abbruch, Dispatch oder Merge); noch wird nichts gesendet. |

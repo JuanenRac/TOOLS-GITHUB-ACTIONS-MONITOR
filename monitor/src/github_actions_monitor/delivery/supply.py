@@ -65,14 +65,20 @@ def left_out(detail, patterns):
     return len(spec) >= 2 and any(fnmatch.fnmatchcase(name, str(p).lower()) for p in patterns or ())
 
 
-def findings(repo, texts, config=None, owner="", ignore=(), ignore_uses=(), skipped=None):
+def findings(repo, texts, config=None, owner="", ignore=(), ignore_uses=(), skipped=None, unlintable=None):
     """[{"signal", "file", "line", "detail", "severity"}] of every workflow file of `repo` (`texts` = {file name: text}), already filtered by `ignore` (patterns `repo:file:rule`), by the comment
     `# monitor-lint: ignore RULE` of the file and by `ignore_uses` (`owner/repo` of the actions that cannot be judged: the ones left out are appended to the list `skipped`, when given, so they are counted and
-    never silent). Order: by file and line, so the answer is the same for the same texts."""
+    never silent). A file the linter cannot process is skipped on its own (its name goes to `unlintable`, when given) and the other files are still judged. Order: by file and line, so the answer is the same for the same texts."""
     rules, out = lint_rules(config), []
     for name in sorted(texts):
         label = ".github/workflows/" + name
-        for item in lint_workflows.lint_text(texts[name], label, rules):
+        try:
+            items = list(lint_workflows.lint_text(texts[name], label, rules))
+        except Exception:   # noqa: BLE001 - one file that cannot be linted never takes the repository with it
+            if unlintable is not None:
+                unlintable.append(name)
+            continue
+        for item in items:
             if lint_workflows.ignored(repo, item, ignore):
                 continue
             signal = signal_of(item, repo, owner)

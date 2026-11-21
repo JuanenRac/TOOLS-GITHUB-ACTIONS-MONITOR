@@ -24,6 +24,7 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/ai/ack` | POST | maintainer | acknowledge an alert of the feed: changes only the local state, never GitHub (this computer only) |
 | `/api/ai/actions` | GET | viewer | the log of the actions that the AI proposed and a person confirmed |
 | `/api/ai/actions/confirm` | POST | admin | a person confirms one action proposed by the AI (this computer only) |
+| `/api/ai/actions/review` | POST | admin | a person approves or rejects one action proposed by the AI; nothing runs (this computer only) |
 | `/api/ai/actions/unlock` | POST | admin | a person unlocks the actions of the AI for a short time (this computer only) |
 | `/api/ai/alerts` | GET | viewer | the feed of alerts since a moment (`?since=SECONDS`), each alert with `first_failed`, `last_failed`, `last_checked` (epoch seconds) and a `status` (failed, suppressed or passed) |
 | `/api/ai/brief` | GET | viewer | the short brief of the real open alerts (Markdown, or `?fmt=json`) |
@@ -46,7 +47,7 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/alerts` | GET | viewer | the alerts of every sentinel in one list, with silences and history |
 | `/api/alerts/mute` | POST | maintainer | silence an alert, a code or a sentinel for some hours (local only) (this computer only) |
 | `/api/alerts/unmute` | POST | maintainer | end a silence (this computer only) |
-| `/api/analytics` | GET | viewer | history, trends and the numbers behind the charts |
+| `/api/analytics` | GET | viewer | history, trends, the numbers behind the charts and, when `productivity.enabled` is on, the ESTIMATE of the time saved (`time_saved`: a task without notes is `no_data`, a percentage that was not timed is `assumed`) |
 | `/api/assistant` | GET | viewer | whether the optional assistant is on (404 while it is off), its three fixed questions, its closed list of read-only tools and its limits (it spends nothing) |
 | `/api/assistant/ask` | POST | viewer | one fixed question to the assistant ({action: explain_alert | summarize_week | why_slow | explain_repo | prioritize, alert?, repo?}); answered by the AI of the monitor from the data it holds, with sources, the size sent and the one daily budget; a viewer may ask; 404 while it is off |
 | `/api/audit-log` | GET | maintainer | the log of actions of the account (who changed what, when): the last 200 lines and whether the chain of hashes holds; an administrator, or a maintainer when `audit_log.maintainers_can_read` is on; names only, never values or secrets (Complete only) |
@@ -147,7 +148,10 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/updates` | GET | viewer | the prefix of the routes of the Updates menu (see /api/updates/status, /api/updates/progress, /api/updates/history, /api/updates/check, /api/updates/plan, /api/updates/apply and /api/updates/rollback); Complete only |
 | `/api/updates/apply` | POST | admin | starts the update to `target` in a process of its own and stops the monitor so that it can be replaced; needs `confirm: true`; one update at a time; not from a container, a service manager, the Lite edition or the demo (administrator, from this computer only; Complete only) |
 | `/api/updates/check` | POST | admin | lists the published versions with their notes: ONE request to GitHub, only on explicit action, refused while `updates.check` is off or the monitor is offline (administrator, from this computer only; Complete only) |
+| `/api/updates/copies` | GET | viewer | the copies in the folder of copies: name, state, versions, size, whether it is the one the way back needs and whether it can be discarded (Complete only) |
+| `/api/updates/discard` | POST | admin | deletes ONE copy of the folder of copies; needs `confirm: true`, and `force: true` for the copy the way back needs (administrator, from this computer only; Complete only) |
 | `/api/updates/history` | GET | viewer | the updates done on this installation, newest first: when, from, to, the result and the copy (Complete only) |
+| `/api/updates/log` | GET | viewer | the last lines of the log of the process of the last update (`lines` up to 2000); the values after token, secret or password are hidden (Complete only) |
 | `/api/updates/plan` | POST | admin | what an update to `target` would do (the checks, the copy, the SHA256SUMS verification, the migration of the configuration, the restart); it changes nothing (administrator, from this computer only; Complete only) |
 | `/api/updates/progress` | GET | viewer | the progress file of the process that applies an update or a return (`running`, the steps, the result); it survives the restart of the monitor (Complete only) |
 | `/api/updates/rollback` | POST | admin | goes back to the version before the last update with the copy made first; needs `confirm: true` (administrator, from this computer only; Complete only) |

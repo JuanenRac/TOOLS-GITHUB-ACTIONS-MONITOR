@@ -46,7 +46,7 @@ from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from github_actions_monitor.data_pipeline import analytics
+from github_actions_monitor.data_pipeline import analytics, timesaved
 from github_actions_monitor.data_pipeline import backpressure, quota_buckets, tickstats
 from github_actions_monitor.integrations import notify_dedupe  # noqa: F401 - its ledger file is one of the state files an account child redirects
 from github_actions_monitor.data_pipeline import activity
@@ -66,6 +66,7 @@ from github_actions_monitor.app import orglogo, screenmenu, screens
 from github_actions_monitor.util import exclusive
 from github_actions_monitor.util import platform_compat
 from github_actions_monitor.util import ports
+from github_actions_monitor.app import qaprofile
 from github_actions_monitor.data_pipeline import causes
 from github_actions_monitor.data_pipeline import alertflow
 from github_actions_monitor.data_pipeline import paging
@@ -103,7 +104,7 @@ DEFAULTS = {
     "stuck_minutes": 120,
     "workspace_root": "", "audit_dir": "", "signed_dir": "",      # "" = look for them (the environment, then the folder that holds the repositories): workspace.py
     "alerts": {"silences_expire_days": 0, "silences": [], "service": {"enabled": False, "failures": 3, "rate_percent": 0, "workflows": []}, "group": {"by_commit": False, "min": 3}, "digest": {"minutes": 0, "threshold": 10}},      # what reaches the channels when there are many alerts (alertflow.py): all off or empty
-    "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group", "workflow_run", "repository_dispatch"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "dormant_repos": True, "forks_need_own_ci": True, "fork_own_ci_days": 90, "red_ages": True, "red_age_days": 30, "disabled_apart": True, "dependabot_alerts": True, "copilot_alerts": False, "extra_branches": [], "rerun_timing": False, "group": {"reusable": False, "min": 2}, "failed_jobs": {"enabled": False, "max_per_cycle": 4, "group_by": "auto"},
+    "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group", "workflow_run", "repository_dispatch"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "dormant_repos": True, "forks_need_own_ci": True, "fork_own_ci_days": 90, "red_ages": True, "red_age_days": 30, "disabled_apart": True, "dependabot_alerts": True, "copilot_alerts": False, "extra_branches": [], "branches_by_repo": [], "rerun_timing": False, "group": {"reusable": False, "min": 2}, "failed_jobs": {"enabled": False, "max_per_cycle": 4, "group_by": "auto"},
            "stuck": {"learned": False, "percentile": 95, "margin": 2.0, "min_samples": 3, "min_minutes": 30, "max_minutes": 720, "queue_minutes": 0, "workflow_minutes": [], "runner_minutes": [], "awaiting_stuck": True, "ghost_enabled": True, "ghost_days": 7, "no_runner_check": False}},      # which runs may make a branch red (redrule.py)
     "watchdog_minutes": 10,      # a refresh cycle that runs longer than this is dumped to the log and restarted in a new thread (0 = off)
     "watchdog_max_abandoned": 8,      # calls to GitHub that gave up waiting but never returned: with this many still alive no new call is started and the health check says so (0 = no limit)
@@ -118,12 +119,12 @@ DEFAULTS = {
     "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30, "max_bad_per_minute": 120, "max_verified_per_minute": 120, "reject_stale": False, "persist_deliveries": True, "clock_skew_s": 300, "max_body_kb": 1024, "queue_max": 500, "stale_after_h": 6,
                 "transport": "http", "ws_targets": [], "ws_max_targets": 10, "ws_cleanup": False, "redeliver": {"enabled": False, "hooks": [], "max_per_run": 20, "max_age_hours": 24, "interval_minutes": 60}},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
     "events_feed": {"enabled": False, "interval_seconds": 60, "owner_kind": "auto", "max_per_tick": 20},      # optional: the events of the account read with an ETag, to read only the repository that changed (eventfeed.py)
-    "github_status": {"enabled": False, "interval_seconds": 300, "mark_reds": True},      # optional: the state of GitHub (githubstatus.com) in the bar, and the reds that appear during an incident of Actions (githubstatus.py)
+    "github_status": {"enabled": False, "interval_seconds": 300, "mark_reds": True, "quiet_notices": False},      # optional: the state of GitHub (githubstatus.com) in the bar, and the reds that appear during an incident of Actions (githubstatus.py)
     "heartbeat": {"enabled": False, "url_env": "MONITOR_HEARTBEAT_URL", "interval_seconds": 300, "send_state": True, "fail_suffix": ""},      # optional: a ping to an outside service that raises the alarm when the monitor stops (heartbeat.py)
     "chatops": {"enabled": False, "slack": {"enabled": False, "signing_secret_env": "MONITOR_SLACK_SIGNING_SECRET"}, "discord": {"enabled": False, "public_key_env": "MONITOR_DISCORD_PUBLIC_KEY"}, "allowed_teams": [], "allowed_channels": [], "allowed_users": [],
                 "allowed_words": ["help", "status", "alerts", "red", "queue", "score"], "max_rows": 8, "show_repo_names": "all", "links": True, "max_age_seconds": 300, "rate_per_user_per_minute": 6, "rate_per_channel_per_minute": 20, "rate_per_minute": 60},   # read only commands from Slack and Discord, see chatops/inbound.py (off by default; the proofs are only in the environment)
     "config_check": {"strict": False},      # OFF: a key nobody reads, a wrong type or a number out of range is named at the start; ON: the monitor refuses to start (configcheck.py)
-    "cache": {"etag": {"enabled": True, "ttl_hours": 24, "skip_stateful": True, "revalidate_active": True}, "negative_ttl_s": 300},   # conditional reads: a 304 answer costs no quota; a refusal is remembered for negative_ttl_s seconds (etagcache.py)
+    "cache": {"etag": {"enabled": True, "ttl_hours": 24, "skip_stateful": True, "revalidate_active": True}, "negative_ttl_s": 300, "heavy_fresh_s": 5, "stale_serve_h": 1},   # conditional reads: a 304 answer costs no quota; a refusal is remembered for negative_ttl_s seconds (etagcache.py)
     "cli": {"prefer_v1": True, "default_format": "text", "status_codes": "classic", "watch": {"min_interval_seconds": 2, "default_interval_seconds": 5, "branch_timeout_seconds": 900}},      # the command line (cli/formats.py, cli/watch.py): the format of the answers when no --format is given, and the interval of `watch`
     "kiosk": {"enabled": False, "font_scale_percent": 150, "high_contrast": False, "rotate_views": False, "rotate_seconds": 30, "safe_margin_percent": 0, "scale_with_window": False},      # the profile for a TV or a wall (surfaces/kiosk.py): ?kiosk=1 only counts when enabled
     "expected_red": {"enabled": False, "max_days": 30},      # a workflow known to be red for a while, marked with a reason, an owner and an end (data_pipeline/expected_red.py): listed apart, not alerted until the mark runs out
@@ -396,7 +397,8 @@ def savings_report(config):
     figures = savings.stats(config)
     graphql = graphql_checks.stats(config) or {}
     etag = ETAG["cache"].stats() if ETAG["cache"] else None
-    return {"ways": [{"id": "etag", "on": bool(config.get("network", {}).get("etag", True)), "spared": (etag or {}).get("saved", 0)},
+    return {"ways": [{"id": "etag", "on": bool(config.get("network", {}).get("etag", True)), "spared": (etag or {}).get("saved", 0), "saved": (etag or {}).get("saved", 0), "calls": (etag or {}).get("calls", 0),
+                      "no_etag": (etag or {}).get("no_etag", 0), "invalid": (etag or {}).get("invalid", 0), "hit_pct": (etag or {}).get("hit_pct")},
                      {"id": "graphql", "on": graphql_checks.settings(config)["enabled"], "spared": max(0, graphql.get("repos", 0) - graphql.get("calls", 0))},
                      {"id": "webhook", "on": cfg["webhook_first"], "spared": figures["webhook"]},
                      {"id": "feed", "on": cfg["feeds"]["enabled"] and cfg["feeds"]["method"] in ("atom", "auto"), "spared": figures["feed"]},
@@ -1390,7 +1392,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
     ghost_rows = [{"repo": r["repo"], "name": r.get("name"), "id": r.get("id"), "url": r.get("url"), "branch": r.get("branch"), "event": r.get("event"), "since": r.get("started")} for r in ghosts[:200]]
     activity_view = None
     idle_forks = []
-    aged_rows, quiet_rows, expected_rows = [], [], []
+    aged_rows, quiet_rows, expected_rows, ignored_rows = [], [], [], []
     meta = repo_meta(repos, config)
     try:
         held = redrule.states({r: [x for x in runs if x["repo"] == r] for r in repos}, {r: m.get("branch") for r, m in repo_meta(repos).items() if m.get("branch")}, True)
@@ -1398,6 +1400,8 @@ def build(config, repos, started, refreshed, loading, progress_text):
         expected_rows = [{k: row.get(k) for k in ("repo", "workflow", "since", "url", "streak", "conclusion", "reason", "owner", "until", "class")} for row in held["expected"]]      # red on purpose for a while (expected_red.py): listed apart
         figures["expected"] = len(expected_rows)
         figures["services_failing"] = len(held["services"])
+        ignored_rows = [{"repo": row["repo"], "workflow": "%s (%s)" % (row["workflow"], row["branch"]), "since": row.get("since"), "url": row.get("url"), "branch": row["branch"]} for row in held["ignored"]]      # failures on branches nobody asked to watch: counted, not alerted
+        figures["ignored"] = len(ignored_rows)
         aged_rows = [{k: row.get(k) for k in ("repo", "workflow", "since", "url", "streak", "conclusion")} for row in held["inactive"] if row.get("aged")]      # the reds that aged into "inactive" (ci.red_age_days) do not vanish without a trace
         figures["aged"], figures["aged_days"] = len(aged_rows), redrule.POLICY.get("red_age_days") or 0
         quiet_rows = [{k: row.get(k) for k in ("repo", "workflow", "since", "url", "streak", "conclusion")} for row in held["inactive"] if not row.get("aged")]      # abandoned workflows (ci.inactive_days) that failed: not red, but not hidden either
@@ -1426,7 +1430,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
         "refresh_seconds": config["refresh_seconds"], "hot_only": hot_only_state(),
         "offline": LINK.state(), "etag": ETAG["cache"].stats() if ETAG["cache"] else None, "graphql": graphql_checks.stats(config),
         "listing": dict(LISTING), "drift": knownstates.drift(), "hidden": HIDDEN["hidden"], "discovered": HIDDEN["discovered"], "hidden_names": HIDDEN["names"],
-        "figures": figures, "repo_meta": meta, "sampling": sampling_summary(config, repos, meta), "activity": activity_view, "forks_idle": idle_forks[:200], "forks_idle_all": idle_forks, "aged_reds": aged_rows[:100], "quiet_reds": quiet_rows[:100], "expected_reds": expected_rows[:100],
+        "figures": figures, "repo_meta": meta, "sampling": sampling_summary(config, repos, meta), "activity": activity_view, "forks_idle": idle_forks[:200], "forks_idle_all": idle_forks, "aged_reds": aged_rows[:100], "ignored_reds": ignored_rows[:100], "quiet_reds": quiet_rows[:100], "expected_reds": expected_rows[:100],
     }
 
 
@@ -1594,6 +1598,13 @@ def announce_github_status(transition, config):
     name = (info["incidents"][0]["name"] if info["incidents"] else "") or info["description"] or "Actions"
     event = {"kind": kind, "code": kind, "level": "warn" if transition == "start" else "ok", "repo": "", "owner": "main", "url": None, "args": {"name": name},
              "text": i18n.t("evt." + kind, name=name)}
+    if transition == "over":      # the notices held during the incident (github_status.quiet_notices) are told once, with how many are still red
+        sentinel_now = SENTINEL["obj"]
+        reds = ((getattr(getattr(sentinel_now, "feed", None), "state", None) or {}).get("reds")) if sentinel_now is not None else None
+        held = githubstatus.STATUS.take_held((lambda repo, workflow: f"{repo}|{workflow}" in reds) if isinstance(reds, dict) else None)
+        if held["held"]:
+            event["args"].update({"held": held["held"], "still_red": held["still_red"] if held["still_red"] is not None else held["held"]})
+            event["text"] = i18n.t("evt.github_incident_over_held", held=event["args"]["held"], still=event["args"]["still_red"])
     print(event["text"], flush=True)
     sentinel = SENTINEL["obj"]
     try:
@@ -2022,10 +2033,10 @@ def panel_list(lang=None):
 # The POST routes that the monitor accepts only from the computer it runs on (guard + this_computer): from the network they answer 403 `local_only`. The handler reads these two lists and the generated
 # references of the skills for the AIs (tools/make_skill_refs.py) read the same ones, so the table an AI reads cannot disagree with the code.
 AI_MODEL_POST = ("/api/ai/models/refresh", "/api/ai/models/test", "/api/ai/models/data", "/api/ai/doctor")      # the list of models of the provider, the test of one model, the table of data, the doctor
-THIS_COMPUTER_ACTIONS = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test") + AI_MODEL_POST
+THIS_COMPUTER_ACTIONS = ("/api/ai/actions/confirm", "/api/ai/actions/review", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test") + AI_MODEL_POST
 THIS_COMPUTER_ADVANCED = ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures", "/api/ai/prompts/clear",
                           "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run", "/api/report-files/summary", "/api/ops/backup", "/api/ops/purge",
-                          "/api/updates/check", "/api/updates/plan", "/api/updates/apply", "/api/updates/rollback", "/api/webhook/redeliver", "/api/credential/probe")
+                          "/api/updates/check", "/api/updates/plan", "/api/updates/apply", "/api/updates/rollback", "/api/updates/discard", "/api/webhook/redeliver", "/api/credential/probe")
 THIS_COMPUTER_POST = THIS_COMPUTER_ACTIONS + THIS_COMPUTER_ADVANCED
 
 
@@ -2642,6 +2653,7 @@ def maintain(config, data):
                 continue
             store.add_jobs(run["repo"], run["name"], run["id"], (body or {}).get("jobs") or [], cfg["steps"])
         ANALYTICS["summary"] = analytics.summary(source_runs(config, data), store, cfg)
+        ANALYTICS["summary"]["time_saved"] = timesaved.estimate(source_runs(config, data), timesaved.settings(config))
         ANALYTICS["at"] = time.time()
         store.save()
     except Exception as error:   # noqa: BLE001 - analytics never stop the monitor, but a problem is said once
@@ -3207,7 +3219,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Connection", "close")
             self.end_headers()
             self.close_connection = True
-            for frame in updates.stream_frames():
+            for frame in updates.stream_frames(stop=self.stream_guard()):      # ends with the session that opened it (auth.stream_revalidate_min)
                 self.wfile.write(frame.encode("utf-8"))
                 self.wfile.flush()
         except (ConnectionError, OSError):
@@ -4224,11 +4236,22 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             from github_actions_monitor.integrations import reports
-            snapshot = None
-            sentinel = SENTINEL.get("obj")
-            if sentinel is not None and reports.settings(LIVE_CONFIG or toolconfig.raw_config())["release_view"]:
-                snapshot = sentinel.snapshot()
-            self.json_reply(reports.payload(LIVE_CONFIG or toolconfig.raw_config(), snapshot))
+            from github_actions_monitor.data_pipeline import freshness
+            config = LIVE_CONFIG or toolconfig.raw_config()
+
+            def build_reports():
+                snapshot = None
+                sentinel = SENTINEL.get("obj")
+                if sentinel is not None and reports.settings(config)["release_view"]:
+                    snapshot = sentinel.snapshot()
+                return reports.payload(config, snapshot)
+            state, value, age = freshness.serve(("reports", CHILD["account"] or ""), build_reports, freshness.settings(config))
+            if state == "error":
+                raise value
+            if state == "timeout":
+                self.json_reply({"error": "the query took too long", "code": "query_timeout"}, 504)
+                return
+            self.json_reply(value, headers=freshness.headers(state, age))
         elif path == "/api/run-log":      # read only, off by default (logs.failed_step.enabled): the failing step of one run and its last relevant lines, cleaned (steplog.py)
             if not self.guard():
                 return
@@ -4388,13 +4411,20 @@ class Handler(BaseHTTPRequestHandler):
                 self.json_reply(compare_service.off_answer(CHILD["account"] or ""))
                 return
             storage, account = runtime.process_storage(CHILD["account"] or None)
-            try:
-                answer = compare_service.build(storage, account, toolconfig.raw_config(), ask)
-            except compare_windows.WindowError as error:
-                self.json_reply({"error": "bad request", "code": error.code}, 400)
+            from github_actions_monitor.data_pipeline import freshness
+            config = toolconfig.raw_config()
+            state, value, age = freshness.serve(("compare", account, tuple(sorted(ask.items())), repr((config.get("compare"), config.get("score")))), lambda: compare_service.build(storage, account, config, ask), freshness.settings(config))
+            if state == "error":      # a bad request is answered as before; anything else was a failure of the computation itself
+                if isinstance(value, compare_windows.WindowError):
+                    self.json_reply({"error": "bad request", "code": value.code}, 400)
+                    return
+                raise value
+            if state == "timeout":      # past analytics.query_timeout_s: the answer says so instead of waiting for ever (no copy young enough to serve exists)
+                self.json_reply({"error": "the query took too long", "code": "query_timeout"}, 504)
                 return
+            answer, marks = value, freshness.headers(state, age)      # a stale copy is served at once and says so in two headers; the body is the same shape either way
             if fmt == "json":
-                self.json_reply(answer)
+                self.json_reply(answer, headers=marks)
             else:
                 kind, text = compare_service.render(answer, fmt)
                 body = text.encode("utf-8")
@@ -4402,6 +4432,8 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_header("Content-Type", kind + "; charset=utf-8")
                 self.send_header("Content-Length", str(len(body)))
                 self.send_header("Cache-Control", "no-store")
+                for name, mark in marks.items():
+                    self.send_header(name, mark)
                 self.end_headers()
                 self.wfile.write(body)
         elif path == "/api/audit-log":      # the log of actions of this account: an administrator, or a maintainer when the setting says so (Complete only)
@@ -4419,7 +4451,7 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             self.updates_stream()
-        elif path in ("/api/updates/status", "/api/updates/progress", "/api/updates/history"):      # the Updates menu: what is installed, what is new, the progress of an update, the updates done (Complete only; no path, no secret)
+        elif path in ("/api/updates/status", "/api/updates/progress", "/api/updates/history", "/api/updates/log", "/api/updates/copies"):      # the Updates menu: what is installed, what is new, the progress of an update, the updates done (Complete only; no path, no secret)
             if not self.guard():
                 return
             from github_actions_monitor.ops import updates
@@ -4427,6 +4459,12 @@ class Handler(BaseHTTPRequestHandler):
                 self.json_reply(updates.progress())
             elif path.endswith("history"):
                 self.json_reply({"entries": updates.history()})
+            elif path.endswith("/log"):      # the last lines of the log of the process of the last update (the values after token, secret, password are hidden); Complete only
+                from urllib.parse import parse_qs
+                ask = {k: v[0] for k, v in parse_qs(self.path.partition("?")[2]).items() if v}
+                self.json_reply(updates.process_log(whole(ask.get("lines"), 200)))
+            elif path.endswith("/copies"):      # the copies in the folder of copies: name, status, versions, size, whether one can be discarded; Complete only
+                self.json_reply({"copies": updates.copies()})
             else:
                 self.json_reply(updates.status(toolconfig.raw_config(), TOOL_VERSION, update_info(read=False), lite=LITE["on"], demo=DEMO["on"]))
         elif path == "/api/ops/status":      # the operation of the installation: the last copy, the schedule, the purge switch and the retention in force (Complete only; no path, no secret)
@@ -4463,7 +4501,7 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/analytics":
             if not self.guard():
                 return
-            self.json_reply(ANALYTICS["summary"] or {"enabled": ANALYTICS["store"] is not None, "duration": [], "queue": [], "steps": [], "flaky": [], "slower": []})
+            self.json_reply(ANALYTICS["summary"] or {"enabled": ANALYTICS["store"] is not None, "duration": [], "queue": [], "steps": [], "flaky": [], "slower": [], "time_saved": timesaved.off()})
         elif path == "/api/statusbar":      # what the bar at the foot of the page shows about this monitor: edition, address, account, sentinels (no secret, no GitHub call)
             if not self.guard():
                 return
@@ -4499,7 +4537,7 @@ class Handler(BaseHTTPRequestHandler):
             from github_actions_monitor.integrations import ai_actions
             from github_actions_monitor.sentinels import sentinel_ai
             sentinel = SENTINEL["obj"]
-            self.json_reply({"state": ai_actions.ACTIONS.state(toolconfig.raw_config()), "log": ai_actions.ACTIONS.log(),
+            self.json_reply({"state": ai_actions.ACTIONS.state(toolconfig.raw_config()), "log": ai_actions.ACTIONS.log(), "proposals": ai_actions.ACTIONS.listing(toolconfig.raw_config()),
                              "ai": sentinel_ai.status(sentinel.ai_cfg, sentinel.ai_store) if sentinel is not None and sentinel.ai_cfg["provider"] != "none" else None})
         elif path.startswith("/api/data"):
             if not self.guard():
@@ -4571,8 +4609,12 @@ def alerts_payload(ask):
     extra = credential_alerts() + score_alerts() + runner_alerts() + mark_alerts()
     everything = alert_center.collect(registry, extra=extra)
     chosen = alert_center.select(everything, ask.get("sentinel", ""), ask.get("level", ""), ask.get("muted", "show") if ask.get("muted") in ("show", "hide", "only") else "show")
-    return {"schema": 1, "account": CHILD["account"] or None, "alerts": chosen, "summary": alert_center.summary(everything), "mutes": alert_center.active(), "history": alert_center.history(20),
-            "mute_hours": alert_center.hours_setting(LIVE_CONFIG or toolconfig.raw_config()), "sentinels": (registry.names() if registry else []) + (["system"] if extra else [])}
+    out = {"schema": 1, "account": CHILD["account"] or None, "alerts": chosen, "summary": alert_center.summary(everything), "mutes": alert_center.active(), "history": alert_center.history(20),
+           "mute_hours": alert_center.hours_setting(LIVE_CONFIG or toolconfig.raw_config()), "sentinels": (registry.names() if registry else []) + (["system"] if extra else [])}
+    if ask.get("since"):      # ?since=24h: the alerts that were open at some moment of that time, closed ones too (the ledger of what was seen)
+        seconds = alert_center.parse_since(ask["since"])
+        out["since"] = {"seconds": seconds, "error": None if seconds else "bad_since", "alerts": alert_center.recent(seconds, ask.get("sentinel", ""), ask.get("level", "")) if seconds else []}
+    return out
 
 
 def service_mode():
@@ -5091,6 +5133,10 @@ def handle_updates_post(path, request, who, config):
             answer = updates.apply(target, policy, request.get("confirm"), edition, lang, lite=LITE["on"], demo=DEMO["on"], helper=updates.helper_on(toolconfig.raw_config()))
             _audit_plain("update_apply", who, target, {"from": answer.get("from")}, "ok")
             return {"ok": True, **answer}
+        if path.endswith("/discard"):
+            answer = updates.discard(str(request.get("name") or "")[:120], request.get("confirm"), request.get("force"), lite=LITE["on"], demo=DEMO["on"])
+            _audit_plain("update_discard", who, answer["discarded"], {"freed": answer["freed"]}, "ok")
+            return {"ok": True, **answer}
         if path.endswith("/rollback"):
             answer = updates.rollback(request.get("confirm"), edition, lang, lite=LITE["on"], demo=DEMO["on"], helper=updates.helper_on(toolconfig.raw_config()))
             _audit_plain("update_rollback", who, "previous", None, "ok")
@@ -5511,6 +5557,7 @@ def main():
     parser = argparse.ArgumentParser(description=i18n.t("mon.description"), formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--port", type=int, default=None, help=i18n.t("mon.help_port"))      # none = the port of the edition: ports.complete / ports.lite of the configuration file
     parser.add_argument("--lite", action="store_true", help=i18n.t("mon.help_lite"))
+    parser.add_argument("--profile", choices=qaprofile.PROFILES, default=None, help=i18n.t("mon.help_profile"))
     parser.add_argument("--no-browser", action="store_true", help=i18n.t("mon.help_no_browser"))
     parser.add_argument("--discover", action="store_true", help=i18n.t("mon.help_discover"))
     parser.add_argument("--lang", metavar="CODE", help=i18n.t("cli.help_lang"))
@@ -5529,6 +5576,8 @@ def main():
         parser.add_argument("--migrate-accounts", action="store_true", help=i18n.t("mon.help_migrate_accounts"))
         parser.add_argument("--apply", action="store_true", help=i18n.t("mon.help_apply"))
     args = parser.parse_args()
+    if args.profile:
+        os.environ[qaprofile.ENV] = args.profile      # the rest of the monitor (the port, the writer lock, the command line) reads it from here
     args.port = ports.resolve("lite" if LITE["on"] else "complete", flag=args.port)
     platform_compat.console_utf8()
     if args.about:
@@ -5599,7 +5648,12 @@ def main():
     etag_cfg = ((config.get("cache") or {}).get("etag") or {}) if isinstance(config.get("cache"), dict) else {}
     cache_cfg = config.get("cache") if isinstance(config.get("cache"), dict) else {}
     negative = cache_cfg.get("negative_ttl_s", 300)
-    ETAG["cache"] = etagcache.EtagCache(ttl_hours=etag_cfg.get("ttl_hours", 24) if isinstance(etag_cfg.get("ttl_hours"), int) else 24, enabled=etag_cfg.get("enabled", True) is True and (config.get("network") or {}).get("etag", True) is not False,      # network.etag is the switch of the Quota tab; cache.etag.enabled stays as it was
+    qa_cache = qaprofile.etag_file() if qaprofile.active() else None      # the profile qa keeps its ETags in a temporary file that is deleted at the end
+    if qa_cache is not None:
+        import atexit
+        atexit.register(qaprofile.forget, qa_cache)
+        print(i18n.t("mon.profile_qa", port=args.port), flush=True)
+    ETAG["cache"] = etagcache.EtagCache(**({"path": qa_cache} if qa_cache is not None else {}), ttl_hours=etag_cfg.get("ttl_hours", 24) if isinstance(etag_cfg.get("ttl_hours"), int) else 24, enabled=etag_cfg.get("enabled", True) is True and (config.get("network") or {}).get("etag", True) is not False,      # network.etag is the switch of the Quota tab; cache.etag.enabled stays as it was
                                         negative_ttl=negative if isinstance(negative, int) and not isinstance(negative, bool) else 300, skip_stateful=etag_cfg.get("skip_stateful", True) is not False,
                                         revalidate_active=etag_cfg.get("revalidate_active", True) is not False, identity=credential_fingerprint)
     acfg = analytics.settings(config)

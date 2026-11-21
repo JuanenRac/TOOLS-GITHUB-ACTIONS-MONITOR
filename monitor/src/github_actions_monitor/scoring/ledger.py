@@ -175,7 +175,7 @@ def activity_counts(activity):
     return {key: int(counts.get(key) or 0) for key in ("active", "dormant", "inactive", "unknown")}
 
 
-def make_snapshot(ledger, cfg, now, account=None, security=None, activity=None, source="recent600", seen=None):
+def make_snapshot(ledger, cfg, now, account=None, security=None, activity=None, source="ledger", seen=None):
     """The snapshot of the account for the window that ends at `now`. `security` is {"penalty", "repos"} from the Security sentinel, or None while it is off or has seen too little."""
     runs, collab = ledger_runs(ledger), ledger_collab(ledger)
     watched_hours = max(0.0, (now - ledger["first_seen"]) / 3600.0)
@@ -185,7 +185,7 @@ def make_snapshot(ledger, cfg, now, account=None, security=None, activity=None, 
         answer["data_quality"]["truncated"] = True
         answer["data_quality"]["reasons"] = [*answer["data_quality"]["reasons"], "truncated"]
     quality = answer["data_quality"]
-    quality["source"] = source if source in SOURCES else "recent600"
+    quality["source"] = source if source in SOURCES else "ledger"
     if isinstance(seen, int) and not isinstance(seen, bool) and quality["source"] == "recent600" and seen > RECENT:      # the cycle read more runs than the page lists: this score saw only the newest ones
         quality["cut"], quality["runs_read"] = True, seen
         quality["reasons"] = [*quality["reasons"], "recent_cut"]

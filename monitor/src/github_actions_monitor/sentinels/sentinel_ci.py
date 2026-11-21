@@ -62,7 +62,8 @@ class SentinelCI(sentinel_base.BaseSentinel):
     def get_status(self):
         snap = self._picture()
         return {"enabled": self.enabled, "loading": snap.get("loading", "") if snap.get("enabled", True) else "", "level": snap.get("level", "unknown") if snap.get("enabled", True) else "off",
-                "errors": [{"section": e["section"], "at": e["at"]} for e in snap.get("errors", [])], "refresh_seconds": self.refresh_seconds}
+                "errors": [{"section": e["section"], "at": e["at"]} for e in snap.get("errors", [])], "refresh_seconds": self.refresh_seconds,
+                "unchecked": sorted({r for part in (snap.get("not_checked") or {}).values() for r in part})[:20] if snap.get("enabled", True) else []}
 
     def get_alerts(self):
         snap = self._picture()

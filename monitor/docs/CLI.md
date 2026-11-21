@@ -18,7 +18,8 @@
 | `doctor` | the checks of `--doctor` for this installation (the monitor need not be running) | yes |
 | `backup` | the complete backup of the installation (the monitor need not be running): `backup create [FILE] [--account ID]`, `verify FILE [--deep]`, `restore FILE [--account ID] [--to-dir DIR] [--force]`, `status`, `list`; `--encrypt` with `--key-env NAME` seals it (optional library); see [OPS.md](OPS.md) | no |
 | `accounts` | the accounts of the supervisor (several accounts only) | no |
-| `alerts` | the alerts of every sentinel in one list: `--sentinel ci\|collab\|security\|supply\|delivery`, `--level info\|warning\|error`, `--muted show\|hide\|only` | no |
+| `alerts` | the alerts of every sentinel in one list: `--sentinel ci\|collab\|security\|supply\|delivery`, `--level info\|warning\|error`, `--muted show\|hide\|only`; `--since 90m|24h|7d|2w` lists the ones that were open at some moment of that time, the closed ones too (from the history the monitor keeps while it runs; an alert counts as closed after ten minutes of absence) | no |
+| `proposals` | the actions the AI proposed (`ai.actions.enabled`): `proposals list`, `show ID`, `approve ID`, `reject ID`, `execute ID` (an id may be shortened). `approve` and `reject` only record the decision; `execute` runs it through the same door as the page and needs `ai.actions.execute`, and with `ai.actions.require_approval` an approval first. Approve, reject and execute are for this computer only | no |
 | `score` | the score of the account: number, letter, trend, parts, coverage and the breakdown by repository; `--compare` sets it against the history of the window | no |
 | `compare` | this period against the one before: the figures with their change and direction, who got worse or better; `--window 7\|30d`, `--days all\|workdays\|weekend`, `--baseline previous\|year_ago`, `--format table\|json\|ndjson\|csv`; exit 4 when a figure has too little data, 5 with `--fail-on` when one got worse | no |
 | `api` | the read API for clients: `api openapi` prints the OpenAPI document of every frozen route (redirect it to a file), `api me` says who the monitor takes this client for (mode, user, role, what the session may do, version of the contract); a monitor whose `api.v1_enabled` is closed says so; `api contract-check` runs the contract suite for clients against it (exit 4 when a check fails) | no |
@@ -27,6 +28,7 @@
 | `ai` | `ai models [--refresh]` lists the models of the AI provider with the data of each one; `ai test --provider NAME --model NAME` tries one with a synthetic text (latency, tokens, estimated cost); `ai doctor` says why an AI does not answer, without printing a key | no |
 | `lessons` | what the failures of this CI have taught: `lessons list`, `lessons brief --repo NAME` (read it before a push), `lessons failures`, `lessons close` | no |
 | `briefs` | the briefs of the tabs that AI tools read: `briefs index`, `briefs show TAB`, `briefs all` | yes |
+| `docs` | the guides of this version, read from the installation (no monitor needed): `docs list` names them with their title, `docs show NAME` prints one in the language of `--lang` | no |
 | `screens` | the Screens menu of the page: `screens list` (every kind of screen and whether it can be opened) and `screens urls` (the full addresses, ready for a kiosk command) | no |
 | `toolbox` | the small tools of the operator that work on this computer, with no monitor running: `toolbox limits [N]` (the setup against its ceilings), `toolbox workspaces` (the workspaces and the one in use), `toolbox ledger [--force]` (the ledger of notifications already sent; `--force` forgets it), `toolbox summary` (the events by kind, repository and day) and `toolbox export-events FILE` (the events as jsonl, csv, parquet or duckdb by the end of the name; parquet and duckdb need their package, the file must be new) | no |
 | `credential` | another GitHub login for one account while everything runs: `credential replace\|reload [--account ID] [--new-token-file FILE\|-]`; it never prints a token | no |
@@ -56,6 +58,8 @@ Times written for people (the `Last read` line, the silences, the log, the repor
 | 4 | the monitor answers but is degraded: offline, allowance exhausted, no data yet, an endpoint it does not have, or an answer that is not JSON |
 | 5 | `alerts --fail-on LEVEL` found an open alert of that level or worse (a silenced alert does not count) |
 | 6 | `watch --exit-on-change` saw a change (only when that flag is given); see [CLI_OPERATOR.md](CLI_OPERATOR.md) |
+
+Every error carries a `help`: one sentence with the next step, often naming the guide to read (`docs show FIRST_STEPS`). In the text format it is the last line, which starts with `help:`; with `--json` it is the field `help` next to `error`: `{"ok": false, "exit": 2, "error": "...", "help": "..."}`.
 
 ## Examples
 
@@ -90,4 +94,4 @@ In the network mode the token is read from `MONITOR_ACCESS_TOKEN`, then `MONITOR
 
 ## Backup and the doctor
 
-`backup` and `doctor` work on the folders of the installation, so they need no running monitor. `doctor` exits `0` when all is well (warnings too), `1` when a check failed, `3` when there are only warnings and `--strict` (or `ops.doctor.strict_exit`) is on, and `4` when the doctor itself could not run; these are the codes of the doctor, the other commands keep the exit codes above. `backup` exits `0` when it is done and `1` when it is refused or the package does not verify. The guide [OPS.md](OPS.md) has the checks, the restore and the scheduled copy.
+`backup` and `doctor` work on the folders of the installation, so they need no running monitor. `doctor` exits `0` when all is well (warnings too), `1` when a check failed, `3` when there are only warnings and `--strict` (or `ops.doctor.strict_exit`) is on, and `4` when the doctor itself could not run; these are the codes of the doctor, the other commands keep the exit codes above. `backup` exits `0` when it is done and `1` when it is refused or the package does not verify. The guide [OPS.md](OPS.md) has the checks, the restore and the scheduled copy. The doctor also has `compare_window` (can the comparison of two periods look back two windows with the history it asks for and keeps) and `etag` (the share of conditional reads answered with 304 in the monitor that runs here, and whether GitHub answers come back without an ETag).

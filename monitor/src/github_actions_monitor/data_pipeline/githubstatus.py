@@ -25,6 +25,8 @@ INDICATORS = ("none", "minor", "major", "critical")
 LEVELS = ("operational", "degraded_performance", "partial_outage", "major_outage", "under_maintenance")
 TRACKED = ("Actions", "API Requests", "Git Operations", "Issues", "Pull Requests", "Webhooks", "Packages", "Pages")      # the parts of GitHub the monitor depends on, as githubstatus.com names them
 ACTIONS = "Actions"
+HELD_MAX = 200      # at most this many held notices are remembered; the rest are only counted
+HOLD_MAX_SECONDS = 6 * 3600      # a notice is never held longer than this, whatever the incident says
 
 
 def _int(value, low, high, default):
@@ -91,6 +93,8 @@ class Status:
         self.since = 0.0      # when the incident of Actions was first seen (0 = none)
         self.next_at = 0.0
         self.mark = True      # `github_status.mark_reds` as of the last turn
+        self.held = []        # the notices of the reds that appeared during the incident, kept while `github_status.quiet_notices` is on
+        self.held_total = 0   # how many notices were held in all (the ones beyond HELD_MAX are only counted)
 
     def update(self, summary, now=None):
         """Takes a read (None = it failed). Returns "start" when an incident of Actions began, "over" when it ended, else ""."""
@@ -121,6 +125,36 @@ class Status:
             self.next_at = now + cfg["interval_seconds"]
         return self.update(fetch(opener), now)
 
+    def hold(self, event, config=None, now=None):
+        """True when the notice of `event` must wait: `github_status.quiet_notices` is on, GitHub Actions has an incident that was read recently (twice the interval, at least 15 minutes) and has lasted less than
+        HOLD_MAX_SECONDS, and the event is a red marked "possible cause: an incident of GitHub". Only the notice waits: the event is already in the feed and on the page. Never raises."""
+        now = time.time() if now is None else now
+        cfg = settings(config)
+        if not (cfg["enabled"] and cfg["quiet_notices"] and isinstance(event, dict) and event.get("kind") == "red_new" and event.get("possible_cause") == "github_incident"):
+            return False
+        with self.lock:
+            if not (self.since > 0 and self.at and now - self.at <= max(900, 2 * cfg["interval_seconds"]) and now - self.since < HOLD_MAX_SECONDS):
+                return False
+            self.held_total += 1
+            if len(self.held) < HELD_MAX:
+                args = event.get("args") if isinstance(event.get("args"), dict) else {}
+                self.held.append({"repo": str(event.get("repo") or ""), "workflow": str(args.get("workflow") or ""), "text": _text(event.get("text"), 300), "url": event.get("url")})
+            return True
+
+    def take_held(self, still_red=None):
+        """The held notices are given back once and forgotten: {"held": how many were held, "still_red": how many of them are still red (None when it cannot be told), "items": [...]}. `still_red(repo, workflow)` says
+        whether a red is still there."""
+        with self.lock:
+            items, total = self.held, self.held_total
+            self.held, self.held_total = [], 0
+        left = None
+        if callable(still_red):
+            try:
+                left = sum(1 for i in items if still_red(i["repo"], i["workflow"]))
+            except Exception:   # noqa: BLE001 - a count that cannot be made is simply not told
+                left = None
+        return {"held": total, "still_red": left, "items": items}
+
     def incident(self):
         """True while GitHub Actions has an incident and the marking of reds is on."""
         with self.lock:
@@ -133,7 +167,7 @@ class Status:
             summary = self.summary
             return {"enabled": cfg["enabled"], "ok": summary is not None and self.failed == 0, "indicator": summary["indicator"] if summary else "", "description": summary["description"] if summary else "",
                     "components": dict(summary["components"]) if summary else {}, "incidents": list(summary["incidents"]) if summary else [], "actions_incident": self.since > 0,
-                    "incident_seconds": int(now - self.since) if self.since > 0 else 0, "age_seconds": int(now - self.at) if self.at else None, "failed_reads": self.failed}
+                    "incident_seconds": int(now - self.since) if self.since > 0 else 0, "age_seconds": int(now - self.at) if self.at else None, "failed_reads": self.failed, "held_notices": self.held_total}
 
 
 STATUS = Status()

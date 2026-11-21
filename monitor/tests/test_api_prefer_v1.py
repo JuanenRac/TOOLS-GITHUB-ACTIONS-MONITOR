@@ -26,7 +26,7 @@ NOT_FROZEN = {
 }
 
 #: routes the clients POST to (the prefix is read only, so they keep the old routes): these are not reads.
-WRITES = ("/api/auth/login", "/api/ai/ack", "/api/ai/lessons/close", "/api/ai/doctor", "/api/ai/models/refresh", "/api/ai/models/test", "/api/credential")
+WRITES = ("/api/auth/login", "/api/ai/ack", "/api/ai/lessons/close", "/api/ai/doctor", "/api/ai/models/refresh", "/api/ai/models/test", "/api/credential", "/api/ai/actions/confirm", "/api/ai/actions/review")
 
 
 def served_monitor(case, service=True):

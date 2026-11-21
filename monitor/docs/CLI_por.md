@@ -18,7 +18,8 @@
 | `doctor` | as verificações de `--doctor` para esta instalação (o monitor não tem de estar em execução) | sim |
 | `backup` | a cópia de segurança completa da instalação (o monitor não tem de estar em execução): `backup create [FICHEIRO] [--account ID]`, `verify FICHEIRO [--deep]`, `restore FICHEIRO [--account ID] [--to-dir PASTA] [--force]`, `status`, `list`; `--encrypt` com `--key-env NOME` cifra-a (biblioteca opcional); veja [OPS_por.md](OPS_por.md) | não |
 | `accounts` | as contas do supervisor (só com várias contas) | não |
-| `alerts` | os alertas de todas as sentinelas numa lista: `--sentinel ci\|collab\|security\|supply\|delivery`, `--level info\|warning\|error`, `--muted show\|hide\|only` | não |
+| `alerts` | os alertas de todas as sentinelas numa lista: `--sentinel ci\|collab\|security\|supply\|delivery`, `--level info\|warning\|error`, `--muted show\|hide\|only`; `--since 90m|24h|7d|2w` lista os que estiveram abertos em algum momento desse tempo, também os fechados (do histórico que o monitor guarda enquanto funciona; um alerta conta como fechado após dez minutos de ausência) | não |
+| `proposals` | as ações que a IA propôs (`ai.actions.enabled`): `proposals list`, `show ID`, `approve ID`, `reject ID`, `execute ID` (um id pode ser abreviado). `approve` e `reject` só registam a decisão; `execute` executa-a pela mesma porta da página e precisa de `ai.actions.execute`, e com `ai.actions.require_approval` de uma aprovação antes. Aprovar, rejeitar e executar só se faz neste computador | não |
 | `score` | a pontuação da conta: número, letra, tendência, partes, cobertura e a decomposição por repositório; `--compare` compara-a com o histórico da janela | não |
 | `compare` | este período face ao anterior: os números com a sua variação e sentido, quem piora ou melhora; `--window 7\|30d`, `--days all\|workdays\|weekend`, `--baseline previous\|year_ago`, `--format table\|json\|ndjson\|csv`; saída 4 se um número tem poucos dados, 5 com `--fail-on` se algum piora | não |
 | `api` | a API de leitura para clientes: `api openapi` imprime o documento OpenAPI de cada rota congelada (redirecione-o para um ficheiro), `api me` diz quem o monitor julga que este cliente é (modo, utilizador, papel, o que a sessão pode fazer, versão do contrato); um monitor com `api.v1_enabled` fechado di-lo; `api contract-check` lança contra ele a suite de contrato para clientes (saída 4 se uma verificação falhar) | não |
@@ -27,6 +28,7 @@
 | `ai` | `ai models [--refresh]` lista os modelos do fornecedor de IA com os dados de cada um; `ai test --provider NOME --model NOME` experimenta um com um texto sintético (latência, tokens, custo estimado); `ai doctor` diz porque é que uma IA não responde, sem imprimir uma chave | não |
 | `lessons` | o que as falhas desta CI ensinaram: `lessons list`, `lessons brief --repo NOME` (ler antes de um push), `lessons failures`, `lessons close` | não |
 | `briefs` | os briefs dos separadores que as ferramentas de IA leem: `briefs index`, `briefs show SEPARADOR`, `briefs all` | sim |
+| `docs` | os guias desta versão, lidos da instalação (sem monitor): `docs list` nomeia-os com o título, `docs show NOME` imprime um no idioma de `--lang` | não |
 | `screens` | o menu Ecrãs da página: `screens list` (cada tipo de ecrã e se pode ser aberto) e `screens urls` (os endereços completos, prontos para um comando de quiosque) | não |
 | `toolbox` | as pequenas ferramentas do operador que funcionam neste computador, sem monitor em execução: `toolbox limits [N]` (a configuração face aos seus tetos), `toolbox workspaces` (os espaços de trabalho e o que está em uso), `toolbox ledger [--force]` (o registo de notificações já enviadas; `--force` esquece-o), `toolbox summary` (os eventos por tipo, repositório e dia) e `toolbox export-events FILE` (os eventos como jsonl, csv, parquet ou duckdb conforme o fim do nome; parquet e duckdb precisam do seu pacote, o ficheiro tem de ser novo) | não |
 | `credential` | outro acesso ao GitHub para uma conta enquanto tudo corre: `credential replace\|reload [--account ID] [--new-token-file FICHEIRO\|-]`; nunca imprime um token | não |
@@ -56,6 +58,8 @@ As horas escritas para as pessoas (a linha `Last read`, os silêncios, o registo
 | 4 | o monitor responde mas está degradado: sem ligação, quota esgotada, ainda sem dados, um endpoint que não tem, ou uma resposta que não é JSON |
 | 5 | `alerts --fail-on NÍVEL` encontrou um alerta aberto desse nível ou pior (um silenciado não conta) |
 | 6 | `watch --exit-on-change` viu uma alteração (só quando essa opção é dada); veja [CLI_OPERATOR_por.md](CLI_OPERATOR_por.md) |
+
+Todo erro traz um `help`: uma frase com o passo seguinte, que muitas vezes nomeia o guia a ler (`docs show FIRST_STEPS`). No formato de texto é a última linha, que começa por `ajuda:`; com `--json` é o campo `help` junto a `error`: `{"ok": false, "exit": 2, "error": "...", "help": "..."}`.
 
 ## Exemplos
 
@@ -90,4 +94,4 @@ No modo de rede o token é lido de `MONITOR_ACCESS_TOKEN`, depois de `MONITOR_TO
 
 ## Cópia de segurança e o doctor
 
-`backup` e `doctor` trabalham sobre as pastas da instalação, por isso não precisam de um monitor em execução. `doctor` sai com `0` quando tudo está bem (também com avisos), `1` quando uma verificação falhou, `3` quando só há avisos e `--strict` (ou `ops.doctor.strict_exit`) está ativo, e `4` quando o próprio doctor não conseguiu executar-se; são os códigos do doctor, os outros comandos mantêm os códigos de saída acima. `backup` sai com `0` quando termina e `1` quando é recusado ou o pacote não passa a verificação. O guia [OPS_por.md](OPS_por.md) tem as verificações, o restauro e a cópia agendada.
+`backup` e `doctor` trabalham sobre as pastas da instalação, por isso não precisam de um monitor em execução. `doctor` sai com `0` quando tudo está bem (também com avisos), `1` quando uma verificação falhou, `3` quando só há avisos e `--strict` (ou `ops.doctor.strict_exit`) está ativo, e `4` quando o próprio doctor não conseguiu executar-se; são os códigos do doctor, os outros comandos mantêm os códigos de saída acima. `backup` sai com `0` quando termina e `1` quando é recusado ou o pacote não passa a verificação. O guia [OPS_por.md](OPS_por.md) tem as verificações, o restauro e a cópia agendada. O doctor tem ainda `compare_window` (a comparação de dois períodos consegue olhar para trás duas janelas com o histórico que pede e guarda) e `etag` (a parte das leituras condicionais respondidas com 304 no monitor que corre aqui, e se as respostas do GitHub chegam sem ETag).

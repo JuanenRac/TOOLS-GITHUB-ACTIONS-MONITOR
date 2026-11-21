@@ -35,3 +35,15 @@ Si toutes les lectures d'un cycle échouent pour un problème de connexion (pas 
 ## Combien de temps l'historique est conservé
 
 En plus de `keep_days` du bloc d'analyses, le passage de conservation supprime les jours de l'historique plus anciens que `retention.analytics_days` (180 par défaut) ; les échantillons eux-mêmes sont limités par `max_samples`. Voir [STORAGE_fra.md](STORAGE_fra.md).
+
+
+## Temps gagné (une estimation)
+
+Désactivé par défaut (`productivity.enabled`). Activée, la section montre, tâche par tâche, combien de minutes par semaine le moniteur fait gagner, avec la formule de [PRODUCTIVITY_fra.md](PRODUCTIVITY_fra.md) : fois par semaine x minutes à chaque fois sans le moniteur x gain de la tâche.
+
+- Deux tâches sont chiffrées. **Surveiller** (regarder les onglets Actions à la main et décider ce qui est rouge) prend le nombre de fois par semaine et les minutes dans vos notes (`productivity.watch_times_per_week`, `productivity.watch_minutes_before`). **Diagnostic** (trouver la cause d'une exécution échouée) compte les exécutions échouées que le moniteur a en vue sur `productivity.window_days` et prend les minutes dans vos notes (`productivity.triage_minutes_before`).
+- Le moniteur ne peut pas voir ce que vous faisiez avant son installation. Une tâche sans ces notes indique **pas de données** et aucun chiffre n'est inventé. Le total indique aussi pas de données tant qu'aucune tâche n'a ses notes.
+- Si vous avez aussi noté les minutes avec le moniteur (`productivity.watch_minutes_after`, `productivity.triage_minutes_after`), le gain est mesuré d'après vos notes : 1 - après / avant. Sinon c'est le pourcentage de `productivity.saving_percent` (90 par défaut) et le tableau indique **supposé (non mesuré)**.
+- Avec `productivity.team_hours_per_week`, l'estimation dit aussi quelle part du temps de travail représentent les minutes gagnées.
+- Corriger un échec prend le même temps avec ou sans le moniteur et n'est jamais compté. Seules les exécutions échouées que le moniteur détient sont comptées : une très longue liste d'exécutions peut contenir plus d'échecs que ceux affichés.
+- Local et en lecture seule : aucun appel à GitHub, rien ne quitte l'ordinateur. C'est dans `/api/analytics` (`time_saved`), dans le résumé du panneau A12 et dans le brief de l'onglet Résumé pour les outils d'IA.

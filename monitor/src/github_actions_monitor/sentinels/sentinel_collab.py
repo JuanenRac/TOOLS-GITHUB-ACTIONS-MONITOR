@@ -330,6 +330,7 @@ class SentinelCollab(sentinel_base.BaseSentinel):
                 self.state["per_repo"].pop(gone, None)
             for key in [k for k, a in self.state["alerts"].items() if a["repo"] not in repos]:
                 self.state["alerts"].pop(key, None)
+            sentinel_base.forget_errors(self.errors, repos)
             if repos and all((self.state["per_repo"].get(r) or {}).get("scanned") for r in repos):
                 self.state["last_full_scan"] = stamp(now)
         self.persist()
@@ -345,20 +346,38 @@ class SentinelCollab(sentinel_base.BaseSentinel):
             raw = found.get(repo) or {"issues": [], "prs": []}
             before = {p["number"]: p for p in prs}
             team = set(self.cfg["rules"]["team_members"])
-            issues, prs = [slim_issue(i, team) for i in raw["issues"]], [slim_pull(p, before.get(p.get("number")), team) for p in raw["prs"]]
+            issues = self._slim_each(repo, "issues", raw["issues"], lambda i: slim_issue(i, team))
+            prs = self._slim_each(repo, "prs", raw["prs"], lambda p: slim_pull(p, before.get(p.get("number")), team))
             self.details(owner, repo, prs, budget, now)
             self._commit(repo, issues, prs, etag, now)
             return
         cut = dict(mine.get("cut") or {})
         status, data, tag, cut_now = self.fetch_pages(f"repos/{owner}/{repo}/issues?state=open&sort=updated&direction=desc", etag.get("issues", "") if mine.get("issues") is not None else "")
         if status == 200:
-            issues, etag["issues"], cut["issues"] = [slim_issue(i, set(self.cfg["rules"]["team_members"])) for i in data if isinstance(i, dict) and "pull_request" not in i], tag, cut_now      # the issues list also holds the pull requests: they are the other list
+            team = set(self.cfg["rules"]["team_members"])
+            issues, etag["issues"], cut["issues"] = self._slim_each(repo, "issues", [i for i in data if isinstance(i, dict) and "pull_request" not in i], lambda i: slim_issue(i, team)), tag, cut_now      # the issues list also holds the pull requests: they are the other list
         status, data, tag, cut_now = self.fetch_pages(f"repos/{owner}/{repo}/pulls?state=open&sort=updated&direction=desc", etag.get("pulls", "") if mine.get("prs") is not None else "")
         if status == 200:
             before = {p["number"]: p for p in prs}
-            prs, etag["pulls"], cut["prs"] = [slim_pull(p, before.get(p.get("number")), set(self.cfg["rules"]["team_members"])) for p in data if isinstance(p, dict)], tag, cut_now
+            team = set(self.cfg["rules"]["team_members"])
+            prs, etag["pulls"], cut["prs"] = self._slim_each(repo, "prs", [p for p in data if isinstance(p, dict)], lambda p: slim_pull(p, before.get(p.get("number")), team)), tag, cut_now
         self.details(owner, repo, prs, budget, now)
         self._commit(repo, issues, prs, etag, now, cut)
+
+    def _slim_each(self, repo, kind, raw, make):
+        """The slim form of each item of a list, one item at a time: an item that cannot be read (a malformed answer) is skipped and the repository says so (`errors`), it never takes the other items or the repository with it."""
+        out, bad = [], 0
+        for item in raw:
+            try:
+                out.append(make(item))
+            except Exception:   # noqa: BLE001 - one bad item never aborts the repository
+                bad += 1
+        key = f"{repo}:{kind}"
+        if bad:
+            self.errors[key] = {"message": f"{bad} {kind} skipped: unreadable", "at": stamp(time.time())}
+        else:
+            self.errors.pop(key, None)
+        return out
 
     def details(self, owner, repo, prs, budget, now):
         """The conflicts of the pull requests that changed (the only calls beyond the lists), at most `budget` in one round."""
@@ -368,7 +387,11 @@ class SentinelCollab(sentinel_base.BaseSentinel):
             due = pull.get("seen") != pull["updated"] or now - pull.get("checked", 0) >= DETAIL_EVERY
             if due and budget[0] > 0:
                 budget[0] -= 1
-                dirty = self.read_one(f"repos/{owner}/{repo}/pulls/{pull['number']}").get("mergeable_state") == "dirty"
+                try:
+                    dirty = self.read_one(f"repos/{owner}/{repo}/pulls/{pull['number']}").get("mergeable_state") == "dirty"
+                except Exception:   # noqa: BLE001 - one pull request that cannot be read is asked again next time, the others go on
+                    budget[0] += 1
+                    continue
                 pull["dirty_since"] = (pull.get("dirty_since") or now) if dirty else None
                 pull["checked"], pull["seen"] = now, pull["updated"]
 

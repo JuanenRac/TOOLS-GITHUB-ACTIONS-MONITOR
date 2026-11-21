@@ -89,6 +89,9 @@ def main():
         print(i18n.t("lp.a7_budget", eco=row.get("ecosystem"), used=row.get("used"), limit=row.get("limit"), pct=row.get("pct"), period=row.get("period"), level=row.get("level")))
     if a2.get("unchecked"):
         print(i18n.t("lp.a2_unchecked", list=", ".join(a2["unchecked"])))
+    for part, names in sorted((s.get("not_checked") or {}).items()):      # the repositories whose alerts or settings were never read: named, never shown as zero
+        if names:
+            print(i18n.t("lp.not_checked", part=part, list=", ".join(names)))
     for sec in (s.get("a10") or {}).get("sections") or []:
         if sec.get("count") and sec.get("level") in ("bad", "warn", "info"):
             print(i18n.t("lp.a10", title=sec["title"], n=sec["count"], level=sec["level"]))

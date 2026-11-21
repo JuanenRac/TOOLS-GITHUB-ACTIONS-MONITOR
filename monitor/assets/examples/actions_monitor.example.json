@@ -31,6 +31,7 @@
     "forks_need_own_ci": true,
     "fork_own_ci_days": 90,
     "extra_branches": [],
+    "branches_by_repo": [],
     "stuck": {
       "learned": false,
       "percentile": 95,
@@ -73,6 +74,7 @@
     "max_calls_per_tick": 70,
     "budget_per_hour": 600,
     "workers": 8,
+    "deadline_s": 30,
     "hot_hours": 3,
     "min_rate_remaining": 800,
     "candidate_days": 2,
@@ -156,7 +158,9 @@
         "commit_state": {
           "enabled": false,
           "include_other_apps": true,
-          "include_statuses": false
+          "include_statuses": false,
+          "include_pr_heads": false,
+          "pr_heads_max": 5
         },
         "release_assets": {
           "enabled": true,
@@ -435,6 +439,7 @@
     "actions": {
       "enabled": false,
       "execute": false,
+      "require_approval": false,
       "allowed": ["rerun_failed", "close_issue"],
       "max_per_hour": 5,
       "ttl_seconds": 600
@@ -547,7 +552,8 @@
   "github_status": {
     "enabled": false,
     "interval_seconds": 300,
-    "mark_reds": true
+    "mark_reds": true,
+    "quiet_notices": false
   },
   "heartbeat": {
     "enabled": false,
@@ -650,7 +656,9 @@
       "skip_stateful": true,
       "revalidate_active": true
     },
-    "negative_ttl_s": 300
+    "negative_ttl_s": 300,
+    "heavy_fresh_s": 5,
+    "stale_serve_h": 1
   },
   "analytics": {
     "enabled": true,
@@ -660,7 +668,19 @@
     "slow_factor": 1.5,
     "jobs_per_cycle": 3,
     "steps": true,
-    "flaky": true
+    "flaky": true,
+    "query_timeout_s": 120
+  },
+  "productivity": {
+    "enabled": false,
+    "window_days": 7,
+    "watch_times_per_week": 0,
+    "watch_minutes_before": 0,
+    "watch_minutes_after": -1,
+    "triage_minutes_before": 0,
+    "triage_minutes_after": -1,
+    "saving_percent": 90,
+    "team_hours_per_week": 0
   },
   "lint": {
     "enabled": true,
@@ -1126,7 +1146,7 @@
   },
   "score": {
     "enabled": true,
-    "source": "recent600",
+    "source": "ledger",
     "window_days": 7,
     "calibrating_hours": 24,
     "min_runs": 20,

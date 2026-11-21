@@ -34,6 +34,35 @@ def unchecked(repos, per_repo, limit=20):
     return [r for r in repos if not (per_repo.get(r) or {}).get("scanned")][:limit]
 
 
+def guarded(errors, key, fn, *args, now=None, default=None, **kwargs):
+    """Runs one element of a round (a repository, a file, a stage, a channel) inside its own try: whatever it raises is written down in `errors[key]` with its cause and `default` comes back, so
+    one bad element never knocks down the rest of the round and is never left without a record. The caller keeps what it knew about the element (it is not closed as fixed by not looking: see
+    `HOLD_WHEN_UNREAD`). A success clears the record of the key."""
+    try:
+        value = fn(*args, **kwargs)
+    except Exception as error:   # noqa: BLE001 - this is the point of the function
+        stamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() if now is None else now))
+        errors[key] = {"message": str(error)[:80], "at": stamp}
+        return default
+    errors.pop(key, None)
+    return value
+
+
+def forget_errors(errors, repos, keep=("search",)):
+    """Drops the records of the repositories that left the scope (`errors` is keyed by `repo` or `repo:part`; `keep` names the keys that belong to no repository)."""
+    scope = set(repos)
+    for key in [k for k in errors if k not in keep and str(k).split(":", 1)[0] not in scope]:
+        errors.pop(key, None)
+
+
+# What every sentinel with a loop over repositories owes (a test of contract, test_216_sentinel_contract, fails for one that does not keep it):
+#   1. ISOLATION: each repository, file, item and stage of a round has its own try; a bad one is recorded in `errors` and the rest of the round goes on;
+#   2. HOLD_WHEN_UNREAD: what was known about an element that could not be read now is kept (marked unread), not closed as fixed and not counted as checked; a repository that never
+#      was read is listed as not checked (`unchecked`), never as zero alerts;
+#   3. SCOPE: an element that left the scope (a repository that is no longer listed) is dropped, with its alerts, at the end of the round.
+HOLD_WHEN_UNREAD = True
+
+
 def lifecycle(status):
     """Where a sentinel stands, from its status: `off` (not switched on), `paused` (waiting for allowance), `error` (it fails and has read nothing yet), `degraded` (some reads fail, a source
     cannot be read, or it has not finished its first look) or `healthy`. "No alerts" only means something when this is `healthy`: a sentinel that could not look has no alerts either."""

@@ -60,6 +60,10 @@ The comparison reads the ledger of the score. While `compare.enabled` is on, the
 
 The Charts tab shows the section "Compare periods" when the comparison is on: a selector of period, days and baseline, one line per figure with its change, the alerts and the lists of changes.
 
+## Fresh, stale and slow answers
+
+The comparison and the optional reports are heavy queries, so their answer is kept in memory and each request finds it in one of three states. **Fresh** (younger than `cache.heavy_fresh_s`, 5 seconds): served as it is, without computing it again. **Stale** (older than that and younger than `cache.stale_serve_h` hours, 1 hour): served at once and marked with `X-Monitor-Freshness: stale` / `X-Monitor-Age: N` while one computation refreshes it in the background; a fresh answer carries no such header. **Expired** (older than that, or never made): computed now, and a copy that old is never served. A computation has a ceiling, `analytics.query_timeout_s` (120 seconds): past it the answer is `504` with the code `query_timeout` instead of waiting for ever; a computation cannot be killed, so it ends on its own, its answer is kept for the next request and no second one is started for the same query meanwhile. Nothing here calls GitHub.
+
 ## The settings
 
 Settings, Sentinel tab, block Comparison of periods: `compare.enabled`, `compare.default_window_days`, `compare.default_days_filter`, `compare.workdays`, `compare.min_runs_per_window`, `compare.min_days_of_history`, `compare.min_resolved`, `compare.min_snapshots`, `compare.min_repo_runs`, `compare.top_changes`, `compare.include_in_report` and `compare.cache_seconds`. An answer is kept for `compare.cache_seconds` seconds and then computed again.

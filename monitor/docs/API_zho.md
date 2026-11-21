@@ -63,13 +63,14 @@ curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/re
 | `/api/act/status` | 正在进行的本地运行的状态。 |
 | `/api/act/stop` | POST，本机。停止本地运行。 |
 | `/api/advanced` | 您主动开启的功能的状态：网络、GitHub 令牌的存放、GitHub 上的操作、本地运行和演示模式；绝不含令牌。 |
-| `/api/ai/actions` | AI 操作的状态（是否锁定）、其日志以及 AI 的状态。 |
+| `/api/ai/actions` | AI 操作的状态（是否锁定）、其日志、等待中的提案（`proposals`）以及 AI 的状态。 |
 | `/api/ai/actions/confirm` | POST，本机。在您确认后执行 AI 提出的一项操作；会被记录。 |
+| `/api/ai/actions/review` | POST，本机。批准或拒绝一条 AI 提案（`id`、`decision`）；会被记录。不会执行任何操作。 |
 | `/api/ai/actions/unlock` | POST，本机。在限定时间内解锁 AI 的操作；会被记录。 |
 | `/api/ai/budget` | 每个 AI 模型今天的调用次数和估算成本、限额以及最近的失败；不会询问任何提供商。 |
 | `/api/ai/test` | POST，本机。测试已配置 AI 的连接；不会改变任何内容。 |
 | `/api/alerts/unmute` | POST。解除某条警报的静音；会被记录。 |
-| `/api/analytics` | 运行分析的摘要：耗时、队列、步骤、不稳定测试和较慢的运行。 |
+| `/api/analytics` | 运行分析的摘要：耗时、队列、步骤、不稳定测试和较慢的运行,以及开启时节省时间的估算。 |
 | `/api/discovery` | 发现功能找到的内容：含账户及已显示和已隐藏仓库的面板、最近的事件、建议的分组、其设置、复刻和组织。 |
 | `/api/discovery/group` | POST。把建议的分组加入生态系统文件，并保留该文件的副本。 |
 | `/api/gh-action/plan` | POST，本机。准备将发送给 GitHub 的内容（重新运行、取消、派发或合并）；此时尚未发送。 |

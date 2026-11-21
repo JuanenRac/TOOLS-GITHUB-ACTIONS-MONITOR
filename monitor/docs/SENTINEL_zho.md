@@ -54,7 +54,7 @@
 | **A9** | **路线图。** 各生态系统的 GitHub Projects 看板是否*有活力*：最近 8 天内已对账，且不早于其定义。需要 `gh` 的 `read:project` 权限；没有时标签页仅按定义工作，并说明缺什么。定义从远程默认分支读取；无法读取播种工作流的运行记录时（配额、网络），该标签页显示错误，而不会说它从未运行。 | (fixed: 8 days) | 看板过期或从未对账为 **warn**；未配置为 **unknown**。 |
 | **A10** | **Actions 与发布的表面。** 对克隆仓库进行的二十五项只读检查和少量冷调用，列在下表中。每项都有开关，必要时还有阈值。 | `sentinel.surface.*` | 按检查项，见下文。配额不足时暂停（报告会说明）。 |
 | **A11** | **发布就绪度、生态系统健康度与固定版本。** 每个仓库的就绪度（条目、CI、版本、构建、签名、下一步）；每个生态系统 0-100 的健康分，按权重扣除红、卡住、密钥、高危警报、警报、陈旧 PR、未签名构建和卫生的扣分；以及落后的依赖固定版本。只有当 `min_coverage` 比例的仓库有数据时才显示分数。 完全没有工作流的仓库（克隆中没有工作流文件且没有运行）不适用：它不会拉低覆盖率，并单独列出；低于最低值的组会显示“数据不足”，并说明有数据的仓库数量以及缺少数据的仓库。 | `sentinel.readiness.*` (`warn_below` 70, `min_coverage` 0.5) | 分数低于 `warn_below` 为 **warn**；有落后仓库为 **info**；数据不足为 **unknown**。 |
-| **A12** | **分析。** 每个工作流、其作业排队时间和每个步骤的 p50 / p95；比平时变慢的工作流（`analytics.slow_factor`）；*不稳定（flaky）*的工作流（失败后在同一提交上通过）。只是标签，绝不改变什么算红。 时间按 run 的最新一次尝试计算：重新运行绝不使用第一次尝试（不会出现数天的排队或数百天的时长；未知的等待留空），批准后的重试不算 flaky（`ci.rerun_timing` 还会向 GitHub 查询已完成的重新运行的实际时长）。 | `analytics.*` | 没有自己的信号灯。先看变慢的和 flaky 的。 |
+| **A12** | **分析。** 每个工作流、其作业排队时间和每个步骤的 p50 / p95；比平时变慢的工作流（`analytics.slow_factor`）；*不稳定（flaky）*的工作流（失败后在同一提交上通过）。只是标签，绝不改变什么算红。 时间按 run 的最新一次尝试计算：重新运行绝不使用第一次尝试（不会出现数天的排队或数百天的时长；未知的等待留空），批准后的重试不算 flaky（`ci.rerun_timing` 还会向 GitHub 查询已完成的重新运行的实际时长）。 开启 `productivity.enabled` 后,还会根据本人的记录逐项任务显示节省时间的估算(没有记录则为 `no_data`)。 | `analytics.*`, `productivity.*` | 没有自己的信号灯。先看变慢的和 flaky 的。 |
 | **A13** | **工作流 linter。** 对本地克隆的静态规则(将 `lint.source` 设为 `auto` 或 `sparse` 时,也检查没有克隆的仓库,文件从 GitHub 读取:每个周期在预算内只用少量调用,SHA 未变的文件不会再次读取;读不到或无法检查的内容会显示为*无法评估*并给出原因,例如 SSO 未授权、缺少权限范围或没有克隆)：`unpinned_uses`、`permissions`、`secrets_in_clear`、`injection`、`pr_target`。每个发现都有级别（信息/警告/错误）；注释 `# monitor-lint: ignore 规则 原因` 或 `lint.ignore` 可将其静音。 | `lint.*` | 取最严重发现的颜色。先修复错误；页面可按级别过滤。 |
 
 ## A10 的各项检查
@@ -72,7 +72,7 @@
 | `matrix_os` | 仅在矩阵中的一个系统上失败 | on · max_per_tick=4 |
 | `artifacts` | 构建产物（artifact）开销 | on · max_mb=500, retention_days=30 |
 | `required_checks` | 为红色或缺失的必需检查 | on |
-| `commit_state` | 最新提交的状态:所有应用的所有检查和状态 | off · include_other_apps, include_statuses |
+| `commit_state` | 最新提交的状态:所有应用的所有检查和状态 | off · include_other_apps, include_statuses, include_pr_heads (`sentinel.surface.checks.commit_state.include_pr_heads`), pr_heads_max |
 | `release_assets` | 已发布但不完整的 release | on · recent_days=30, required, require_sha256, require_signature, allow_empty（允许没有文件的发布） |
 | `tag_vs_version` | 标签与清单版本对比 | on · prefixes (`sentinel.surface.checks.tag_vs_version.prefixes`), prerelease_ok |
 | `tag_vs_version` | 发布标签与清单/CHANGELOG 版本对比 | on |
@@ -94,6 +94,10 @@
 ## 所有配置在哪里
 
 上面的每个阈值都是设置页中**哨兵**、**表面检查（A10）**、**就绪度（A11）**、**文件夹与文件**、**分析**和**工作流 linter** 标签页的设置项，也是 `actions_monitor.json` 的键。带范围的完整列表见 `SETTINGS_zho.md`。帮助面板和 `--help-topics sentinel` 可离线显示本页。
+
+## 哨兵不会隐瞒的事
+
+一轮不会因为一个坏元素而放弃整个账户:每个仓库、文件、条目和阶段都在各自的保护中读取,失败会连同原因记录下来(状态的 `errors`),其他部分继续。没能读到的会被**保留而不是关闭**:现在读不到的仓库的已知告警会留下(标为未读),而不是算作已修复;该仓库按名称列为“未检查”(状态的 `unchecked`,`read_report.py` 的“尚未检查”一行),绝不算作零告警。离开范围的仓库连同其告警和错误一起移除。CI 哨兵的读取(代码扫描和密钥的告警、每个仓库的设置)也有时间上限 `sentinel.deadline_s`(30 秒;0 = 无):超过后不再开始新的仓库,没轮到的留到下一个周期并被点名。运行器列表会点出它没有读取的仓库(`/api/runners` 的 `unchecked`)。一个契约测试对注册表中的每个哨兵执行相同的检查。
 
 ## 第二个哨兵与警报列表
 

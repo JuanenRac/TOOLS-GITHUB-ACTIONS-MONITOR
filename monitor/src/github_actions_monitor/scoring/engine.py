@@ -20,7 +20,7 @@ from github_actions_monitor.scoring import collector
 
 DEFAULTS = {
     "enabled": True,
-    "source": "recent600",        # which runs the score reads: "recent600" = the newest 600 of the page (the default until 2.1.6), "ledger" = every run the cycle read, counted once in the ledger
+    "source": "ledger",           # which runs the score reads: "ledger" = every run the cycle read, counted once in the ledger (the default since 2.1.6), "recent600" = the newest 600 of the page (what it was until 2.1.5)
     "window_days": 7,             # the window the user chooses (per account); the previous window of the same length gives the trend
     "calibrating_hours": 24,      # watched for less than this: no score yet
     "min_runs": 20,               # fewer finished runs in the window: not enough data

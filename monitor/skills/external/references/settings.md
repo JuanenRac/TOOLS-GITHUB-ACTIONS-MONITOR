@@ -18,6 +18,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.actions.enabled` (secure) | `-` | ai | Proposals on |
 | `ai.actions.execute` (secure) | `-` | ai | Run with confirmation |
 | `ai.actions.max_per_hour` | `-` | ai | Actions per hour |
+| `ai.actions.require_approval` (secure) | `-` | ai | Approve before it runs |
 | `ai.actions.ttl_seconds` | `-` | ai | Proposal lifetime |
 | `ai.airgap_hosts` (secure) | `-` | ai | Private addresses allowed |
 | `ai.airgapped` (secure) | `-` | ai | Air-gapped mode of the AI |
@@ -131,6 +132,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `analytics.keep_days` | `-` | analytics | History |
 | `analytics.max_samples` | `-` | analytics | Most samples |
 | `analytics.min_samples` | `-` | analytics | Least samples |
+| `analytics.query_timeout_s` | `-` | analytics | Time ceiling of a heavy query |
 | `analytics.slow_factor` | `-` | analytics | Slower than usual |
 | `analytics.steps` | `-` | analytics | Time per step |
 | `api.cursor_ttl_seconds` | `900` | advanced | Seconds a page cursor lives |
@@ -166,7 +168,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `cache.etag.revalidate_active` | `true` | cache | Read lists with running work in full |
 | `cache.etag.skip_stateful` | `true` | cache | Always read live state in full |
 | `cache.etag.ttl_hours` | `24` | cache | Entry lifetime |
+| `cache.heavy_fresh_s` | `5` | cache | Fresh for |
 | `cache.negative_ttl_s` | `300` | cache | Remember a refusal for |
+| `cache.stale_serve_h` | `1` | cache | Serve a stale copy for |
 | `central.max_age_minutes` | `120` | quota | Minutes before the central panel is behind |
 | `central.source` (secure) | `"off"` | quota | Central panel as a base line |
 | `chatops.allowed_channels` (secure) | `[]` | webhook | Allowed channels |
@@ -188,6 +192,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `chatops.slack.signing_secret_env` (secure) | `"MONITOR_SLACK_SIGNING_SECRET"` | webhook | Environment variable with the Slack signing secret |
 | `chatops.slack.state` | `-` | webhook | Slack signing secret |
 | `ci.automation_counts` | `false` | sentinel | Count automation workflows |
+| `ci.branches_by_repo` | `[]` | sentinel | Branches to watch, by repository |
 | `ci.copilot_alerts` | `false` | sentinel | Notice when Copilot workflows fail |
 | `ci.count_fork_runs` | `false` | sentinel | Count runs of forks |
 | `ci.dependabot_alerts` | `true` | sentinel | Alert when the Dependabot updates fail |
@@ -305,6 +310,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `github_status.enabled` (secure) | `false` | polling | Show the state of GitHub |
 | `github_status.interval_seconds` | `300` | polling | Seconds between reads of the state |
 | `github_status.mark_reds` | `true` | polling | Mark the reds of an incident |
+| `github_status.quiet_notices` | `false` | polling | Hold the notices of an incident |
 | `github_token.enabled` (secure) | `false` | advanced | Keep a GitHub token in the monitor |
 | `github_token.store` (secure) | `"auto"` | advanced | Where the token is kept |
 | `heartbeat.enabled` (secure) | `false` | outputs | Send the outside heartbeat |
@@ -487,6 +493,15 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `pairing.max_devices` | `10` | general | Most paired devices |
 | `ports.complete` | `8765` | general | Port of the complete edition |
 | `ports.lite` | `8766` | general | Port of the lite edition |
+| `productivity.enabled` | `-` | analytics | Time saved (estimate) |
+| `productivity.saving_percent` | `-` | analytics | Assumed saving when nothing was timed |
+| `productivity.team_hours_per_week` | `-` | analytics | Hours worked in a week (team) |
+| `productivity.triage_minutes_after` | `-` | analytics | Minutes to find the cause with the monitor |
+| `productivity.triage_minutes_before` | `-` | analytics | Minutes to find the cause without the monitor |
+| `productivity.watch_minutes_after` | `-` | analytics | Minutes each time with the monitor (watching) |
+| `productivity.watch_minutes_before` | `-` | analytics | Minutes each time without the monitor (watching) |
+| `productivity.watch_times_per_week` | `-` | analytics | Times a week you looked at CI by hand |
+| `productivity.window_days` | `-` | analytics | Days of failures counted |
 | `profiles_file` | `-` | paths | Batch profiles file |
 | `pwa.enabled` | `false` | general | Installable app (PWA) |
 | `pwa.refresh_on_return` | `true` | general | Refresh when the app returns |
@@ -642,6 +657,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinel.candidate_min_entries` | `-` | sentinel | Entries to be a candidate |
 | `sentinel.ci_red_audit_copy` | `-` | paths | Copy ci_red.json to the audit folder |
 | `sentinel.ci_red_file` | `-` | paths | File for ci_red.json |
+| `sentinel.deadline_s` | `-` | sentinel | Time ceiling per reading pass |
 | `sentinel.dependency_bots` | `-` | sentinel | Accounts that update dependencies |
 | `sentinel.enabled` | `true` | sentinel | Sentinel on |
 | `sentinel.hot_hours` | `-` | sentinel | Hot period |
@@ -683,7 +699,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinel.surface.checks.broad_permissions.enabled` | `-` | surface | sentinel.surface.checks.broad_permissions.enabled |
 | `sentinel.surface.checks.commit_state.enabled` | `-` | surface | sentinel.surface.checks.commit_state.enabled |
 | `sentinel.surface.checks.commit_state.include_other_apps` | `-` | surface | Count the checks of other apps |
+| `sentinel.surface.checks.commit_state.include_pr_heads` | `-` | surface | Read the open pull requests |
 | `sentinel.surface.checks.commit_state.include_statuses` | `-` | surface | Count the commit statuses |
+| `sentinel.surface.checks.commit_state.pr_heads_max` | `-` | surface | Pull requests to look at |
 | `sentinel.surface.checks.coverage.enabled` | `-` | surface | sentinel.surface.checks.coverage.enabled |
 | `sentinel.surface.checks.dead_schedule.days` | `-` | surface | sentinel.surface.checks.dead_schedule.days |
 | `sentinel.surface.checks.dead_schedule.enabled` | `-` | surface | sentinel.surface.checks.dead_schedule.enabled |

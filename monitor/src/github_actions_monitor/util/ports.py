@@ -59,13 +59,20 @@ def resolve(edition, flag=None, env=None, configs=None):
     if isinstance(flag, int) and not isinstance(flag, bool) and 0 <= flag <= HIGH:      # what a person types is not second-guessed
         return flag
     env = os.environ if env is None else env
+    port = _resolve(edition, env, configs)
+    if str(env.get("MONITOR_PROFILE", "")).strip().lower() == "qa":      # the profile qa never takes the port of the real monitor (app/qaprofile.py)
+        return port + 100 if port + 100 <= HIGH else port - 100
+    return port
+
+
+def _resolve(edition, env, configs):
     text = str(env.get("MONITOR_PORT", "")).strip() if edition == "complete" else ""
     if text.isdigit() and valid(int(text)):
         return int(text)
     if configs is None:
         configs = {name: read_file(path) for name, path in files().items()}
     port = _pick(edition, configs)
-    if edition == "lite" and port == resolve("complete", env=env, configs=configs):      # two editions on one port cannot both listen: the lite one goes back to its own
+    if edition == "lite" and port == _resolve("complete", env, configs):      # two editions on one port cannot both listen: the lite one goes back to its own
         return DEFAULTS["lite"] if DEFAULTS["lite"] != port else DEFAULTS["lite"] + 1
     return port
 

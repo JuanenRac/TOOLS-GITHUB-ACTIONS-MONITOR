@@ -373,7 +373,7 @@ nav .dot{display:inline-block;min-width:18px;padding:0 5px;margin-left:auto;bord
 .tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 @media (max-width:800px){.shell{flex-direction:column;overflow:auto}.sidebar{width:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 10px;border-right:0;border-bottom:1px solid var(--line)}
 .side-toggle,.side-foot .nl,.nav-group-title{display:none}.sidebar nav{flex:1 1 100%;order:3;flex-direction:row;overflow-x:auto;overflow-y:hidden;gap:6px}.nav-group,.nav-items,.nav-group.folded .nav-items{display:flex;gap:4px;align-items:center}
-.sidebar nav button[role=tab]{width:auto;padding:6px 10px}.side-foot{order:2;margin-left:auto}.side-foot button{width:auto}#accbar{order:4;flex:1 1 100%}.stage{min-height:70vh}}
+.sidebar nav button[role=tab]{width:auto;padding:6px 10px}.side-foot{order:2;margin-left:auto}.side-foot button{width:auto;min-width:44px}#accbar{order:4;flex:1 1 100%}.stage{min-height:70vh}}
 @media (prefers-reduced-motion:no-preference){.lg-pulse{stroke-dasharray:60;animation:lg-run 3.4s ease-in-out infinite}.lg-led{animation:lg-led 2.4s ease-in-out infinite}
 @keyframes lg-run{0%{stroke-dashoffset:60}45%,100%{stroke-dashoffset:0}}@keyframes lg-led{0%,100%{opacity:1}50%{opacity:.35}}}
 /* the themes: the page, the side panel, the panels, the lines, the text, the accent, the corners and the letters come from the variables of each one; the status colours (green, red, amber) stay the same in all */
@@ -466,7 +466,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 :root.compact .shell{flex-direction:column;overflow:auto}:root.compact .sidebar{width:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:6px 8px;border-right:0;border-bottom:1px solid var(--line)}
 :root.compact .side-toggle,:root.compact .side-foot .nl,:root.compact .nav-group-title{display:none}:root.compact .sidebar nav{flex:1 1 100%;order:3;flex-direction:row;overflow-x:auto;overflow-y:hidden;gap:6px}
 :root.compact .nav-group,:root.compact .nav-items,:root.compact .nav-group.folded .nav-items{display:flex;gap:4px;align-items:center}:root.compact .sidebar nav button[role=tab]{width:auto;padding:6px 10px;white-space:nowrap}
-:root.compact .side-foot{order:2;margin-left:auto}:root.compact .side-foot button{width:auto}:root.compact #accbar{order:4;flex:1 1 100%}:root.compact .stage{min-height:70vh}
+:root.compact .side-foot{order:2;margin-left:auto}:root.compact .side-foot button{width:auto;min-width:44px}:root.compact #accbar{order:4;flex:1 1 100%}:root.compact .stage{min-height:70vh}
 :root.compact main{padding:6px 8px}:root.compact header{padding:6px 8px}:root.compact .tile{min-width:calc(50% - 4px);flex:1 1 calc(50% - 4px);padding:4px 8px}:root.compact .tile b{font-size:17px}
 :root.compact .tab{overflow-x:auto}:root.compact table{display:block;max-width:100%;overflow-x:auto}:root.compact #statusbar .sb-opt{display:none}:root.compact .card{min-width:0}
 .dlg-box{max-height:calc(var(--vvh,100vh) - 28px)}
@@ -631,7 +631,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 </section>
 </div>
 <div class="tab" id="t-upd" role="tabpanel" aria-labelledby="n-upd">
-<section><h2 data-i18n="ui.upd_title"></h2><div class="body" id="upd-body"><div id="upd-top"><span class="mut" data-i18n="ui.loading"></span></div><div id="upd-vers"></div><div id="upd-prog" aria-live="polite"></div><div id="upd-hist"></div></div></section></div>
+<section><h2 data-i18n="ui.upd_title"></h2><div class="body" id="upd-body"><div id="upd-top"><span class="mut" data-i18n="ui.loading"></span></div><div id="upd-vers"></div><div id="upd-prog" aria-live="polite"></div><div id="upd-hist"></div><div id="upd-copies"></div><div id="upd-log"></div></div></section></div>
 <div class="tab" id="t-cfg" role="tabpanel" aria-labelledby="n-cfg">
 <section><h2><span data-i18n="ui.cfg_title"></span></h2><div class="body">
 <div id="cfg-restart" role="status"></div>
@@ -1179,11 +1179,11 @@ function stuckWhy(k){return k&&k!=="build"?" · "+T("ui.stuck_why_"+k):""}      
 function runCounts(d){
   const F=d.figures||{},run=r=>r.status==="in_progress",vis=d.active.filter(r=>runVisible(r,d)&&r.status!=="waiting");      // a run that waits for an approval is neither running nor queued: it has its own line (ui.n_awaiting)
   const tr=F.active!=null?F.active:d.active.filter(run).length,tq=F.queued!=null?F.queued:d.active.filter(r=>!run(r)&&r.status!=="waiting").length,sr=vis.filter(run).length,sq=vis.length-sr;
-  return {tr:tr,tq:tq,sr:sr,sq:sq,shown:vis.length,total:tr+tq,awaiting:+F.awaiting||0,ghost:+F.ghost||0,ghostDays:+F.ghost_days||0,aged:+F.aged||0,agedDays:+F.aged_days||0,agedRows:d.aged_reds||[],quiet:+F.quiet||0,quietDays:+F.quiet_days||0,quietRows:d.quiet_reds||[],inactive:+F.inactive||0,dormant:+F.dormant||0,inactiveRepos:+F.inactive_repos||0,filters:filtersOn(),differs:sr!==tr||sq!==tq};
+  return {tr:tr,tq:tq,sr:sr,sq:sq,shown:vis.length,total:tr+tq,awaiting:+F.awaiting||0,ghost:+F.ghost||0,ghostDays:+F.ghost_days||0,aged:+F.aged||0,agedDays:+F.aged_days||0,agedRows:d.aged_reds||[],ignored:+F.ignored||0,ignoredRows:d.ignored_reds||[],quiet:+F.quiet||0,quietDays:+F.quiet_days||0,quietRows:d.quiet_reds||[],inactive:+F.inactive||0,dormant:+F.dormant||0,inactiveRepos:+F.inactive_repos||0,filters:filtersOn(),differs:sr!==tr||sq!==tq};
 }
 const runFig=(shown,total)=>shown!==total?T("ui.k_of",{n:shown,total:total}):total;
 function runTitle(id,titleKey,shown,total){const el=$(id),t=el&&el.closest(".tile");if(t)t.title=T(titleKey)+(shown!==total?" - "+T("ui.k_filtered_title",{n:shown,total:total}):"")}
-function showingLine(c){const g=c.ghost?'<div class="mut" id="now-ghost" role="status">'+esc(T("ui.n_ghost",{n:c.ghost,days:c.ghostDays}))+"</div>":"";const lst=(id,key,n,days,rows)=>n?'<details class="mut" id="'+id+'"'+FOLD.attr(id,false)+'><summary>'+esc(T(key,{n:n,days:days}))+"</summary>"+rows.map(r=>'<div>'+esc(r.repo+" / "+r.workflow+" - "+String(r.since||"").slice(0,10))+"</div>").join("")+"</details>":"";const ag=lst("now-aged","ui.n_aged",c.aged,c.agedDays,c.agedRows)+lst("now-quiet","ui.n_quiet",c.quiet,c.quietDays,c.quietRows);const w=ag+(c.awaiting?'<div class="mut" id="now-awaiting" role="status">'+esc(T("ui.n_awaiting",{n:c.awaiting}))+"</div>":"")+g;const ia=!c.aged&&!c.quiet&&c.inactive?'<div class="mut" id="now-inactive" role="status">'+esc(T("ui.n_inactive",{n:c.inactive}))+"</div>":"";const dm=c.dormant||c.inactiveRepos?'<div class="mut" id="now-dormant" role="status">'+esc(T("ui.n_dormant",{n:c.dormant,m:c.inactiveRepos}))+"</div>":"";return w+ia+dm+(c.filters||c.differs?'<div class="mut" id="now-count" role="status">'+esc(T(c.filters?"ui.n_showing_filters":"ui.n_showing",{n:c.shown,total:c.total}))+"</div>":"")}
+function showingLine(c){const g=c.ghost?'<div class="mut" id="now-ghost" role="status">'+esc(T("ui.n_ghost",{n:c.ghost,days:c.ghostDays}))+"</div>":"";const lst=(id,key,n,days,rows)=>n?'<details class="mut" id="'+id+'"'+FOLD.attr(id,false)+'><summary>'+esc(T(key,{n:n,days:days}))+"</summary>"+rows.map(r=>'<div>'+esc(r.repo+" / "+r.workflow+" - "+String(r.since||"").slice(0,10))+"</div>").join("")+"</details>":"";const ag=lst("now-ignored","ui.n_ignored",c.ignored,0,c.ignoredRows)+lst("now-aged","ui.n_aged",c.aged,c.agedDays,c.agedRows)+lst("now-quiet","ui.n_quiet",c.quiet,c.quietDays,c.quietRows);const w=ag+(c.awaiting?'<div class="mut" id="now-awaiting" role="status">'+esc(T("ui.n_awaiting",{n:c.awaiting}))+"</div>":"")+g;const ia=!c.aged&&!c.quiet&&c.inactive?'<div class="mut" id="now-inactive" role="status">'+esc(T("ui.n_inactive",{n:c.inactive}))+"</div>":"";const dm=c.dormant||c.inactiveRepos?'<div class="mut" id="now-dormant" role="status">'+esc(T("ui.n_dormant",{n:c.dormant,m:c.inactiveRepos}))+"</div>":"";return w+ia+dm+(c.filters||c.differs?'<div class="mut" id="now-count" role="status">'+esc(T(c.filters?"ui.n_showing_filters":"ui.n_showing",{n:c.shown,total:c.total}))+"</div>":"")}
 function render(d){
   try{soundWatch(d)}catch(e){}
   DATA=d;const day=Date.now()-864e5;
@@ -1232,9 +1232,9 @@ function nowGroups(act){      // one entry per repository, in the order of the r
 function nowRun(r,wrap){      // the line of one run with its jobs; `wrap` = false inside the unfolded list of a repository
   const jobs=(r.jobs||[]).map(j=>{const pct=j.steps_total?Math.round(100*j.steps_done/j.steps_total):(j.status==="completed"?100:0);
     const cls=j.conclusion==="failure"?"fail":(j.conclusion==="skipped"?"skip":(j.status==="completed"?"done":""));
-    return `<div class="job"><span>${esc(j.name)}</span><div><div class="bar"><i class="${cls}" style="width:${pct}%"></i></div><span class="mut">${j.status==="in_progress"?esc(j.step||T("ui.preparing")):esc(concl_(j.conclusion)||j.status)}</span></div><span class="mut">${j.steps_done}/${j.steps_total} · ${fmt(j.seconds)}</span></div>`}).join("");
+    return `<div class="job"><span>${esc(j.name)}</span><div><div class="bar"><i class="${cls}" style="width:${pct}%"></i></div><span class="mut">${j.status==="in_progress"?esc(j.step||T("ui.preparing")):esc(concl_(j.conclusion)||j.status)}</span></div><span class="mut">${j.steps_done}/${j.steps_total} · <span${j.status==="in_progress"?` data-live="${Math.round(Date.now()-j.seconds*1000)}"`:""}>${fmt(j.seconds)}</span></span></div>`}).join("");
   const cutJobs=r.jobs_total?`<div class="mut">${esc(T("ui.jobs_cut",{seen:r.jobs_seen,total:r.jobs_total}))}</div>`:"";
-  const row=`<div class="row">${badge(r)} ${wrap?`<b class="rl" data-repo-open="${esc(r.repo)}">${esc(r.repo)}</b> `:""}<span>${esc(r.name)}</span> <span class="mut">${esc(r.event)} · ${esc(r.branch)} · ${esc(r.sha)} · ${esc(r.actor)}</span> <span>${esc(T("ui.took",{dur:fmt(r.seconds)}))}</span>${r.stuck?`<span class="badge b-failure">${esc(T("ui.badge_stuck"))}</span>`:""} <a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">${esc(T("ui.open_gh"))}</a></div>${jobs}${cutJobs}`;
+  const row=`<div class="row">${badge(r)} ${wrap?`<b class="rl" data-repo-open="${esc(r.repo)}">${esc(r.repo)}</b> `:""}<span>${esc(r.name)}</span> <span class="mut">${esc(r.event)} · ${esc(r.branch)} · ${esc(r.sha)} · ${esc(r.actor)}</span> <span${r.status==="in_progress"?` data-live="${Math.round(Date.now()-r.seconds*1000)}" data-live-t="took"`:""}>${esc(T("ui.took",{dur:fmt(r.seconds)}))}</span>${r.stuck?`<span class="badge b-failure">${esc(T("ui.badge_stuck"))}</span>`:""} <a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">${esc(T("ui.open_gh"))}</a></div>${jobs}${cutJobs}`;
   return wrap?`<div class="card ${r.stuck?"stuck":""} ${r.status!=="in_progress"?"queued":""}" data-now-repo="${esc(r.repo)}" data-now-n="1">${row}</div>`:`<div class="subrun ${r.stuck?"stuck":""} ${r.status!=="in_progress"?"queued":""}">${row}</div>`
 }
 function nowCard(g){
@@ -1808,7 +1808,17 @@ function analyticsBox(){
    +tbl(T("ui.a12_h_queue"),["ui.th_repo","ui.th_workflow","ui.th_samples","ui.th_p50","ui.th_p95"],(A.queue||[]).map(r=>[r.repo,r.workflow,r.n,fmtS(r.p50),fmtS(r.p95)]))
    +tbl(T("ui.a12_h_steps"),["ui.th_repo","ui.th_workflow","ui.th_step","ui.th_p50","ui.th_p95"],(A.steps||[]).map(r=>[r.repo,r.workflow,r.step,fmtS(r.p50),fmtS(r.p95)]))
    +tbl(T("ui.a12_h_flaky"),["ui.th_repo","ui.th_workflow","ui.th_flaky","ui.th_runs","ui.th_rate"],(A.flaky||[]).map(r=>[r.repo,r.workflow,r.flaky,r.total,Math.round(r.rate*100)+" %"]))
-   +tbl(T("ui.a12_h_slower"),["ui.th_repo","ui.th_workflow","ui.th_p50","ui.th_usual","ui.th_factor"],(A.slower||[]).map(r=>[r.repo,r.workflow,fmtS(r.p50),fmtS(r.usual),"×"+r.factor]));
+   +tbl(T("ui.a12_h_slower"),["ui.th_repo","ui.th_workflow","ui.th_p50","ui.th_usual","ui.th_factor"],(A.slower||[]).map(r=>[r.repo,r.workflow,fmtS(r.p50),fmtS(r.usual),"×"+r.factor]))
+   +timeSavedBox(A.time_saved);
+}
+/* time saved: an estimate from the notes of the person, never a measurement of the "before"; a task without the minutes it took without the monitor says "no data" */
+function timeSavedBox(S){
+  if(!S||!S.enabled)return `<h3 style="font-size:13px;margin:10px 0 4px">${esc(T("ui.a12_h_saved"))}</h3>`+mut_(T("ui.ts_off"));
+  const n=v=>v===null||v===undefined?"–":String(v);
+  const rows=(S.tasks||[]).map(r=>`<tr><td>${esc(T("ui.ts_task_"+r.task))}</td><td>${esc(n(r.times_per_week))}</td><td>${esc(n(r.minutes_before))}</td><td>${esc(n(r.minutes_after))}</td><td>${esc(r.saving_percent===null?"–":r.saving_percent+" %")}</td><td>${esc(n(r.saved_minutes))}</td><td>${esc(T("ui.ts_basis_"+r.basis))}</td></tr>`).join("");
+  const total=S.saved_minutes_week===null?T("ui.ts_no_total"):T("ui.ts_total",{m:S.saved_minutes_week})+(S.share_percent===null?"":" · "+T("ui.ts_share",{p:S.share_percent}));
+  return `<h3 style="font-size:13px;margin:10px 0 4px">${esc(T("ui.a12_h_saved"))}</h3><table>${thk(["ui.ts_th_task","ui.ts_th_times","ui.ts_th_before","ui.ts_th_after","ui.ts_th_saving","ui.ts_th_saved","ui.ts_th_basis"])}<tbody>${rows}</tbody></table>`
+   +`<div style="margin-top:6px"><b>${esc(total)}</b></div><div class="mut" style="margin-top:4px">${esc(T("ui.ts_failed_seen",{n:S.failed_seen,d:S.window_days}))} ${esc(T("ui.ts_note"))}</div>`;
 }
 function lintMaint(L){
   const m=L.maintenance;if(!m)return"";const p=[];
@@ -2946,9 +2956,31 @@ async function updHist(){
   const box=$("upd-hist");if(!box)return;const j=await updJ("history");const e=(j&&j.entries)||[];
   box.innerHTML=`<h3 style="font-size:13px;margin:10px 0 4px">${esc(T("ui.upd_history"))}</h3>`+(e.length?`<table><tbody>${e.map(x=>{const k="ui.upd_r_"+x.result,t=T(k);return `<tr><td>${esc(String(x.at||"").slice(0,16).replace("T"," "))}</td><td>${esc(x.from||"")} → ${esc(x.to||"")}</td><td>${esc(t===k?(x.result||""):t)}</td></tr>`}).join("")}</tbody></table>`:`<span class="mut">${esc(T("ui.upd_none"))}</span>`)
 }
+async function updCopies(){
+  const box=$("upd-copies");if(!box)return;const j=await updJ("copies");const c=(j&&j.copies)||[];
+  box.innerHTML=`<h3 style="font-size:13px;margin:10px 0 4px">${esc(T("ui.upd_copies"))}</h3>`+(c.length?`<table><tbody>${c.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.from||"?")} → ${esc(x.to||"?")}</td><td>${esc(Math.round((x.bytes||0)/1024))} KB${x.way_back?` <span class="chip">${esc(T("ui.upd_copy_way_back"))}</span>`:""}</td><td>${x.can_discard&&UPD.st&&UPD.st.can_apply?`<button type="button" data-upd-discard="${esc(x.name)}" data-upd-way="${x.way_back?"1":""}" data-upd-from="${esc(x.from||"?")}" data-upd-kb="${esc(Math.round((x.bytes||0)/1024))}">${esc(T("ui.upd_discard"))}</button>`:""}</td></tr>`).join("")}</tbody></table>`:`<span class="mut">${esc(T("ui.upd_copies_none"))}</span>`)
+}
+async function updDiscard(t){
+  UPD.note="";const name=t.dataset.updDiscard,way=!!t.dataset.updWay;
+  if(!await askConfirm(T("ui.upd_discard_confirm",{name:name,kb:t.dataset.updKb}),{danger:true}))return;
+  if(way&&!await askConfirm(T("ui.upd_discard_way_confirm",{from:t.dataset.updFrom}),{danger:true}))return;
+  const r=await updJ("discard",{name:name,confirm:true,force:way});
+  UPD.note=r&&r.ok?T("ui.upd_discarded"):updErr(r&&r.status||"network");updTop();updCopies();updHist()
+}
+async function updLogToggle(){
+  const box=$("upd-log");if(!box)return;
+  if(UPD.logOpen){UPD.logOpen=false;updLogDraw(null);return}
+  const j=await updJ("log?lines=400");UPD.logOpen=true;updLogDraw(j||{lines:[]})
+}
+function updLogDraw(j){
+  const box=$("upd-log");if(!box)return;
+  const head=`<h3 style="font-size:13px;margin:10px 0 4px">${esc(T("ui.upd_log"))}</h3><button type="button" id="upd-log-btn">${esc(T(j?"ui.upd_log_hide":"ui.upd_log_show"))}</button>`;
+  if(!j){box.innerHTML=head;return}
+  const l=j.lines||[];box.innerHTML=head+(l.length?`<pre style="white-space:pre-wrap;max-height:260px;overflow:auto">${esc(l.join("\n"))}</pre>${j.truncated?`<p class="mut">${esc(T("ui.upd_log_cut",{bytes:Math.round((j.bytes||0)/1024)}))}</p>`:""}`:`<p class="mut">${esc(T("ui.upd_log_none"))}</p>`)
+}
 async function updLoad(){
   const s=await updJ("status");if(s&&s.installed!==undefined){UPD.st=s;if(s.progress&&s.progress.running&&!UPD.poll)updPoll()}else if(!UPD.expect)UPD.st=null;
-  updTop();updVers();updProg();updHist()
+  updTop();updVers();updProg();updHist();updCopies();if(!UPD.logOpen)updLogDraw(null)
 }
 function updStreamClose(){if(UPD.es){try{UPD.es.close()}catch(e){}UPD.es=null}}
 function updStream(){
@@ -2994,6 +3026,8 @@ document.addEventListener("click",async e=>{
   const t=e.target.closest&&e.target.closest("#upd-body button");if(!t)return;
   if(t.id==="upd-check"){UPD.note=T("ui.upd_checking");updTop();const j=await updJ("check",{});if(j&&j.ok){UPD.vers=j.versions;UPD.note=""}else UPD.note=updErr(j&&j.status||"network");updTop();updVers();return}
   if(t.id==="upd-back"){updBack();return}
+  if(t.id==="upd-log-btn"){updLogToggle();return}
+  if(t.dataset.updDiscard){updDiscard(t);return}
   if(t.dataset.upd){e.preventDefault();e.stopPropagation();updApply(t.dataset.upd)}
 });
 sentTick();setInterval(sentTick,15000);scoreTick();setInterval(scoreTick,60000);if(!LITE){teamLoad();setInterval(()=>{if(["team","fleet","trep"].includes(CURTAB))teamLoad()},30000);if(VIEW==="repo"&&QS.get("repo"))repoHealthOpen(QS.get("repo"))}

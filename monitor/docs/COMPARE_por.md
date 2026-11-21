@@ -60,6 +60,10 @@ A comparação lê o registo da pontuação. Enquanto `compare.enabled` estiver 
 
 O separador Gráficos mostra a secção «Comparar períodos» quando a comparação está ativa: um seletor de período, dias e referência, uma linha por número com a sua variação, os alertas e as listas de alterações.
 
+## Respostas frescas, obsoletas e lentas
+
+A comparação e os relatórios opcionais são consultas pesadas, por isso a sua resposta guarda-se em memória e cada pedido encontra-a num de três estados. **Fresca** (mais nova do que `cache.heavy_fresh_s`, 5 segundos): serve-se tal como está, sem a calcular outra vez. **Obsoleta** (mais velha do que isso e mais nova do que `cache.stale_serve_h` horas, 1 hora): serve-se de imediato e marca-se com `X-Monitor-Freshness: stale` / `X-Monitor-Age: N` enquanto um cálculo a renova em segundo plano; uma resposta fresca não leva esse cabeçalho. **Caducada** (mais velha ou nunca feita): calcula-se agora, e uma cópia tão velha nunca se serve. Um cálculo tem um teto, `analytics.query_timeout_s` (120 segundos): passado esse tempo a resposta é `504` com o código `query_timeout` em vez de esperar para sempre; um cálculo não se pode matar, por isso termina sozinho, a sua resposta guarda-se para o pedido seguinte e entretanto não se começa um segundo cálculo da mesma consulta. Nada disto chama o GitHub.
+
 ## As definições
 
 Definições, separador Sentinela, bloco Comparação de períodos: `compare.enabled`, `compare.default_window_days`, `compare.default_days_filter`, `compare.workdays`, `compare.min_runs_per_window`, `compare.min_days_of_history`, `compare.min_resolved`, `compare.min_snapshots`, `compare.min_repo_runs`, `compare.top_changes`, `compare.include_in_report` e `compare.cache_seconds`. Uma resposta é guardada `compare.cache_seconds` segundos e depois calculada de novo.

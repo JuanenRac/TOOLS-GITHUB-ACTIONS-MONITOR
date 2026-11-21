@@ -41,3 +41,8 @@ Os dois números só concordam se vigiar e triar ocuparem entre 16 e 29 % do tem
 ### Exemplo com números inventados
 
 Alguém gasta 20 minutos por dia a olhar para os separadores Actions (100 minutos numa semana de cinco dias) e tria 4 execuções falhadas por semana a 30 minutos cada (120 minutos): 220 minutos ao todo. Com 85-95 % de poupança, ficam livres entre 187 e 209 minutos. Estes números são inventados para mostrar o cálculo; use os seus.
+
+
+## Medi-lo no monitor
+
+A página pode fazer por si a aritmética deste guia com as suas próprias notas: ligue `productivity.enabled` (Definições, Análises) e escreva aí as notas do «antes» e do «depois». A secção Análise mostra então uma estimativa dos minutos poupados por semana em cada tarefa. Diz **sem dados** numa tarefa cujo «antes» não anotou, rotula como **assumido (sem medir)** toda a poupança que vem da percentagem deste guia em vez das suas próprias notas do «depois», e nunca apresenta 85-95 % ou 15-25 % como uma medição. Veja [ANALYTICS_por.md](ANALYTICS_por.md).

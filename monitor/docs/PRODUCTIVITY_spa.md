@@ -41,3 +41,8 @@ Las dos cifras solo concuerdan si vigilar y clasificar ocupan entre el 16 y el 2
 ### Ejemplo con números inventados
 
 Alguien dedica 20 minutos al día a mirar las pestañas Actions (100 minutos en una semana de cinco días) y clasifica 4 ejecuciones fallidas a la semana a 30 minutos cada una (120 minutos): 220 minutos en total. Con un ahorro del 85-95 %, quedan libres entre 187 y 209 minutos. Estos números son inventados para mostrar el cálculo; usa los tuyos.
+
+
+## Medirlo en el monitor
+
+La página puede hacer por usted la aritmética de esta guía con sus propias notas: encienda `productivity.enabled` (Configuración, Analítica) y escriba allí las notas del «antes» y del «después». La sección Analítica muestra entonces una estimación de los minutos ahorrados a la semana por tarea. Dice **sin datos** en una tarea cuyo «antes» no anotó, rotula como **supuesto (sin medir)** todo ahorro que sale del porcentaje de esta guía en lugar de sus propias notas del «después», y nunca presenta el 85-95 % ni el 15-25 % como una medición. Véase [ANALYTICS_spa.md](ANALYTICS_spa.md).

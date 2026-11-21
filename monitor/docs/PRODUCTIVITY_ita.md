@@ -41,3 +41,8 @@ Le due cifre concordano solo se sorveglianza e smistamento occupano circa il 16-
 ### Esempio con numeri inventati
 
 Qualcuno dedica 20 minuti al giorno a guardare le schede Actions (100 minuti in una settimana di cinque giorni) e smista 4 esecuzioni fallite a settimana da 30 minuti ciascuna (120 minuti): 220 minuti in tutto. Con un risparmio dell'85-95 %, restano liberi tra 187 e 209 minuti. Questi numeri sono inventati per mostrare il calcolo; usa i tuoi.
+
+
+## Misurarlo nel monitor
+
+La pagina può fare per te l'aritmetica di questa guida con le tue note: attiva `productivity.enabled` (Impostazioni, Analisi) e scrivi lì le note del «prima» e del «dopo». La sezione Analitica mostra allora una stima dei minuti risparmiati a settimana per ogni attività. Dice **nessun dato** per un'attività di cui non hai annotato il «prima», etichetta come **supposto (non misurato)** ogni risparmio che viene dalla percentuale di questa guida invece che dalle tue note del «dopo», e non presenta mai l'85-95 % o il 15-25 % come una misura. Vedi [ANALYTICS_ita.md](ANALYTICS_ita.md).

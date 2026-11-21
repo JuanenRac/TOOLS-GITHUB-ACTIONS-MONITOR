@@ -35,3 +35,15 @@ Se tutte le letture di un ciclo falliscono per un problema di connessione (non d
 ## Per quanto tempo si conserva lo storico
 
 Oltre a `keep_days` del blocco delle analisi, il passaggio di conservazione rimuove i giorni dello storico più vecchi di `retention.analytics_days` (180 per impostazione predefinita); i campioni stessi sono limitati da `max_samples`. Vedi [STORAGE_ita.md](STORAGE_ita.md).
+
+
+## Tempo risparmiato (una stima)
+
+Disattivato per impostazione predefinita (`productivity.enabled`). Attivo, la sezione mostra, attività per attività, quanti minuti a settimana il monitor fa risparmiare, con la formula di [PRODUCTIVITY_ita.md](PRODUCTIVITY_ita.md): volte a settimana x minuti ogni volta senza il monitor x risparmio dell'attività.
+
+- Si quantificano due attività. **Sorveglianza** (guardare a mano le schede Actions e decidere cosa è rosso) prende le volte a settimana e i minuti dalle tue note (`productivity.watch_times_per_week`, `productivity.watch_minutes_before`). **Diagnosi** (trovare la causa di un'esecuzione fallita) conta le esecuzioni fallite che il monitor ha in vista in `productivity.window_days` e prende i minuti dalle tue note (`productivity.triage_minutes_before`).
+- Il monitor non può vedere cosa facevi prima di essere installato. Un'attività senza queste note dice **nessun dato** e nessun numero viene inventato. Anche il totale dice nessun dato finché a ogni attività mancano le note.
+- Se hai annotato anche i minuti con il monitor (`productivity.watch_minutes_after`, `productivity.triage_minutes_after`), il risparmio è misurato dalle tue note: 1 - dopo / prima. Altrimenti è la percentuale di `productivity.saving_percent` (90 per impostazione predefinita) e la tabella dice **supposto (non misurato)**.
+- Con `productivity.team_hours_per_week` la stima dice anche quale parte del tempo di lavoro sono i minuti risparmiati.
+- Correggere un errore richiede lo stesso tempo con o senza il monitor e non viene mai contato. Si contano solo le esecuzioni fallite che il monitor possiede: un elenco di esecuzioni molto lungo può contenere più errori di quelli mostrati.
+- Locale e di sola lettura: nessuna chiamata a GitHub, nulla lascia il computer. Si trova in `/api/analytics` (`time_saved`), nel riepilogo del pannello A12 e nel brief della scheda Riepilogo per gli strumenti di IA.
