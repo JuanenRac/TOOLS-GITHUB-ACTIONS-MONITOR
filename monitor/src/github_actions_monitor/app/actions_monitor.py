@@ -3176,6 +3176,8 @@ class Handler(BaseHTTPRequestHandler):
 
         def stop():
             from github_actions_monitor.security import auth
+            if localguard.STATE["network"] and not localguard.access_ok(self.headers, ""):      # the token of a paired device that was revoked (or expired, or whose pairing was switched off) ends the stream at once, not at the next revalidation
+                return True
             config = toolconfig.raw_config()
             every = auth.settings(config)["stream_revalidate_min"] * 60
             if time.time() - last[0] < every:
