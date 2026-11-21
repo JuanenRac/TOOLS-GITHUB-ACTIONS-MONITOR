@@ -50,6 +50,7 @@ NOTES = {
     "/api/ai/ack": ("POST", "acknowledge an alert of the feed: changes only the local state, never GitHub"),
     "/api/ai/actions": ("GET", "the log of the actions that the AI proposed and a person confirmed"),
     "/api/ai/actions/confirm": ("POST", "a person confirms one action proposed by the AI (this computer only)"),
+    "/api/ai/actions/review": ("POST", "a person approves or rejects one action proposed by the AI; nothing runs (this computer only)"),
     "/api/ai/actions/unlock": ("POST", "a person unlocks the actions of the AI for a short time (this computer only)"),
     "/api/ai/alerts": ("GET", "the feed of alerts since a moment (`?since=SECONDS`), each alert with `first_failed`, `last_failed`, `last_checked` (epoch seconds) and a `status` (failed, suppressed or passed)"),
     "/api/ai/brief": ("GET", "the short brief of the real open alerts (Markdown, or `?fmt=json`)"),
