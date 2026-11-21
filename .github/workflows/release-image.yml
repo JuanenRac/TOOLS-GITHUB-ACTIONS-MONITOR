@@ -35,6 +35,7 @@ jobs:
       PUBLISH: ${{ github.event_name == 'push' || inputs.push }}
       EVENT: ${{ github.event_name }}
       TAG: ${{ github.ref_name }}
+      REF_TYPE: ${{ github.ref_type }}
       REPOSITORY: ${{ github.repository }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -47,6 +48,10 @@ jobs:
           version="$(python3 -c "import re; print(re.search(r'TOOL_VERSION = \"([0-9.]+)\"', open('monitor/src/github_actions_monitor/tool_version.py', encoding='utf-8').read()).group(1))")"
           if [ "$EVENT" = "push" ] && [ "$TAG" != "v${version}" ]; then
             echo "the tag ${TAG} is not the version of the code (v${version})"; exit 1
+          fi
+          # a push to the registry only from the tag of the version: started by hand from a branch (or a tag that is not this version) with `push` on, the workflow stops here and publishes nothing
+          if [ "$PUBLISH" = "true" ] && { [ "$REF_TYPE" != "tag" ] || [ "$TAG" != "v${version}" ]; }; then
+            echo "push is on but ${TAG} is not the tag v${version}: images are published only from that tag (run it on the tag, or leave push off to try the build)"; exit 1
           fi
           image="ghcr.io/${REPOSITORY,,}"
           {

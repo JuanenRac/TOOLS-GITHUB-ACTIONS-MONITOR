@@ -46,7 +46,7 @@ class Dockerfile(unittest.TestCase):
 
     def test_it_installs_nothing_it_does_not_need(self):
         for name in ("curl", "gnupg"):
-            final = self.text.split("FROM python:${PYTHON_VERSION}-slim\n")[1]
+            final = self.text.split("FROM python:${PYTHON_VERSION}-slim@${PYTHON_DIGEST}\nARG VERSION")[1]
             self.assertNotIn(name, final, name + " belongs to the stage that fetches gh, not to the final image")
 
     def test_every_variable_of_the_image_is_documented_in_the_eight_languages(self):

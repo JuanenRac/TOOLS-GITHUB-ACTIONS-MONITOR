@@ -113,6 +113,7 @@ launchd（macOS）：`ProgramArguments` = `/usr/bin/python3`、`-m`、`github_ac
 | `MONITOR_TEAM_MODE` | `1` = 团队模式（`auth.enabled`）：用户、角色和会话。 |
 | `MONITOR_ADMIN_USER` | 与 `MONITOR_ADMIN_PASSWORD_FILE` 一起使用:团队模式开启且还没有用户时,服务创建的第一个管理员。 |
 | `MONITOR_ADMIN_PASSWORD_FILE` | 文件(例如 Docker 机密),第一行是 `MONITOR_ADMIN_USER` 的密码。 |
+| `MONITOR_WEBHOOK_SECRET_FILE` | 文件(例如 Docker 机密),第一行是传入 webhook 的共享密钥,用来代替 `MONITOR_WEBHOOK_SECRET`。使用 Docker Compose 时,添加 `deploy/compose.webhook.yaml`,并把密钥放在 `deploy/webhook_secret.txt`。 |
 | `MONITOR_SERVICE` | `1` = 以服务方式运行：登录无效时不放弃，doctor 会检查保留策略。镜像和服务单元已设置。 |
 | `MONITOR_URL` | 供 `bin/monitor_cli.py` 和健康检查使用：监视器的地址（镜像中为第二个端口）。 |
 | `MONITOR_CA_FILE` | 供 `bin/monitor_cli.py` 使用：签发监视器 HTTPS 证书的颁发机构的 PEM 文件。 |

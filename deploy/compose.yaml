@@ -7,6 +7,8 @@
 #   printf '%s' "ghp_..." > deploy/gh_token.txt && sudo chown 10001:10001 deploy/gh_token.txt && chmod 600 deploy/gh_token.txt
 # The monitor runs as the user 10001 and the file is mounted as it is (a bind mount): a file that belongs to you with mode 600 cannot be read in the container and the account stays blind
 # (reason: missing). Give the file to 10001 as above; where you cannot, use mode 644 and keep the folder closed to other users.
+# The secret of the incoming webhook can be a file too (a Docker secret): put it in deploy/webhook_secret.txt (same owner and mode as the file above) and add deploy/compose.webhook.yaml with -f.
+#   docker compose -f deploy/compose.yaml -f deploy/compose.webhook.yaml up -d
 # To replace it later without restarting: `docker compose exec monitor python bin/monitor_cli.py credential replace --account default --new-token-file -` (token on the standard input).
 name: github-actions-monitor
 
@@ -55,7 +57,7 @@ services:
 
   caddy:
     profiles: ["proxy"]
-    image: caddy:2.10-alpine
+    image: caddy:2.10.2-alpine@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d      # pinned by digest, like the base of the image of the monitor
     restart: unless-stopped
     depends_on:
       monitor:

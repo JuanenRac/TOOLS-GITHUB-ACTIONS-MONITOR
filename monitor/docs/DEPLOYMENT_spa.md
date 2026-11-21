@@ -113,6 +113,7 @@ Solo se leen los nombres de esta tabla. En el servicio un valor que no se puede 
 | `MONITOR_TEAM_MODE` | `1` = el modo de equipo (`auth.enabled`): usuarios, roles y sesiones. |
 | `MONITOR_ADMIN_USER` | Junto con `MONITOR_ADMIN_PASSWORD_FILE`: el primer administrador que crea el servicio cuando el modo de equipo está activo y aún no hay usuarios. |
 | `MONITOR_ADMIN_PASSWORD_FILE` | El fichero (por ejemplo un secreto de Docker) con la contraseña de `MONITOR_ADMIN_USER` en su primera línea. |
+| `MONITOR_WEBHOOK_SECRET_FILE` | El fichero (por ejemplo un secreto de Docker) con el secreto compartido del webhook de entrada en su primera línea, en lugar de `MONITOR_WEBHOOK_SECRET`. Con Docker Compose añade `deploy/compose.webhook.yaml` y pon el secreto en `deploy/webhook_secret.txt`. |
 | `MONITOR_SERVICE` | `1` = funciona como servicio: no se rinde ante un acceso que no sirve y el doctor revisa la retención. La imagen y el servicio lo activan. |
 | `MONITOR_URL` | Para `bin/monitor_cli.py` y la comprobación de salud: la dirección del monitor (la imagen: el segundo puerto). |
 | `MONITOR_CA_FILE` | Para `bin/monitor_cli.py`: un archivo PEM con la autoridad que firmó el certificado HTTPS del monitor. |
