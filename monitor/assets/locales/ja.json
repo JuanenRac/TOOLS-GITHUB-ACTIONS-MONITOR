@@ -1311,6 +1311,8 @@
  "egress.use.telegram": "Telegram への通知。",
  "egress.fail.ntfy": "ブロックされると：そのチャンネルは失敗して記録されます。ほかのチャンネルとページには影響しません。",
  "egress.use.ntfy": "ntfy への通知（チャンネルのサーバーは自前でも構いません）。",
+ "egress.use.github_status": "バーに表示する GitHub の状態 (githubstatus.com)。",
+ "egress.fail.github_status": "ブロックされた場合: バーに GitHub の状態が表示されず、赤はインシデントとして印付けされません。他には影響しません。",
  "egress.fail.github_raw": "ブロックされると：それらのリポジトリは「未読」と報告され、問題なしとは扱われません。",
  "egress.use.github_raw": "認証情報なしで読み取る公開リポジトリのワークフローファイル。",
  "egress.fail.github_download": "ブロックされると：新バージョンの通知は出ず、アップデーターはリリースをダウンロードできません（zip を手動で渡すことはできます）。",
