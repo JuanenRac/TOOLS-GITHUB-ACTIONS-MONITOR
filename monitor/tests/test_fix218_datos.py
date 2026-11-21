@@ -54,5 +54,53 @@ class A2FullSampleByMode(unittest.TestCase):
         self.assertTrue(rows["big"]["partial24"])
 
 
+class FinopsOverTheWholeRead(unittest.TestCase):
+    def setUp(self):
+        from datetime import datetime, timedelta, timezone
+        from github_actions_monitor.app import actions_monitor as am
+        self.am = am
+        now = datetime.now(timezone.utc)
+        self.runs = [{"repo": f"r{i % 300}", "id": i, "name": "CI", "path": "ci.yml", "event": "push", "status": "completed", "conclusion": "success", "seconds": 600, "title": "feat: x",
+                      "started": (now - timedelta(minutes=i)).strftime("%Y-%m-%dT%H:%M:%SZ")} for i in range(1200)]
+        self.saved = (am.STATE.get("data"), list(am.ALL_RUNS["runs"]), set(am.PRIVATE), set(am.VISIBILITY["known"]))
+        am.STATE["data"] = {"runs": self.runs[:600], "runs_total": 1200}
+        am.ALL_RUNS["runs"] = self.runs
+        am.PRIVATE.clear()
+        am.PRIVATE.update(f"r{i}" for i in range(300))
+        am.VISIBILITY["known"] = {f"r{i}" for i in range(300)}
+        self.addCleanup(self.restore)
+
+    def restore(self):
+        am = self.am
+        am.STATE["data"], am.ALL_RUNS["runs"] = self.saved[0], self.saved[1]
+        am.PRIVATE.clear()
+        am.PRIVATE.update(self.saved[2])
+        am.VISIBILITY["known"] = self.saved[3]
+
+    def test_counts_every_run_the_cycle_read(self):
+        report = self.am.change_cost_report({"finops": {"by_change": True, "co2": True}})
+        self.assertEqual(report["total_minutes"], 12000)
+        self.assertEqual(sum(r["runs"] for r in report["rows"]), 1200)
+        self.assertFalse(report["partial"])
+
+    def test_marks_partial_when_only_the_cut_is_held(self):
+        self.am.ALL_RUNS["runs"] = []
+        report = self.am.change_cost_report({"finops": {"by_change": True}})
+        self.assertEqual(report["total_minutes"], 6000)
+        self.assertTrue(report["partial"])
+        self.assertEqual(report["runs_read"], 600)
+
+    def test_unknown_visibility_is_private_not_free(self):
+        self.am.PRIVATE.clear()
+        self.am.VISIBILITY["known"] = set()
+        report = self.am.change_cost_report({"finops": {"by_change": True}})
+        self.assertGreater(sum(r["estimated_usd"] for r in report["rows"]), 0)
+
+    def test_public_repositories_read_from_github_stay_free(self):
+        self.am.PRIVATE.clear()
+        report = self.am.change_cost_report({"finops": {"by_change": True}})
+        self.assertEqual(sum(r["estimated_usd"] for r in report["rows"]), 0)
+
+
 if __name__ == "__main__":
     unittest.main()

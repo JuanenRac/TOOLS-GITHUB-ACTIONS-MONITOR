@@ -4849,16 +4849,26 @@ def mode_payload():
             "estimate": modes.estimate(config, len(data.get("repos") or []), data.get("hot") or 0, remaining, saved), "presets": modes.presets(config), "saved_share": round(saved, 2)}
 
 
+def cost_inputs(data):
+    """(every run the last cycle read, those completed in the last 24 hours, the repositories counted as private) for the cost figures: the whole read and not the cut of 600 of the page when the cycle
+    kept it, and a repository whose visibility was never read counts as private (an upper bound), never as free."""
+    since = time.time() - 86400
+    listed = data.get("runs") or []
+    full = ALL_RUNS["runs"]
+    every = full if full and data.get("runs_total") == len(full) and len(full) >= len(listed) else listed
+    done = [r for r in every if r.get("status") == "completed" and (parse_time(r.get("started")) or datetime.fromtimestamp(0, timezone.utc)).timestamp() > since]
+    return every, done, set(PRIVATE) | {r.get("repo") for r in done if r.get("repo") not in VISIBILITY["known"]}
+
+
 def quota_payload():
     from github_actions_monitor.data_pipeline import quota
     config = LIVE_CONFIG or toolconfig.raw_config()
     with LOCK:
         data = STATE.get("data") or {}
-    since = time.time() - 86400
-    done = [r for r in (data.get("runs") or []) if r.get("status") == "completed" and (parse_time(r.get("started")) or datetime.fromtimestamp(0, timezone.utc)).timestamp() > since]
+    _every, done, private = cost_inputs(data)
     rate = data.get("rate") or {}
     reader = None if DEMO["on"] else (lambda endpoint: gh_read(endpoint, retries=0))
-    info = quota.summary(config, done, data.get("active") or [], set(PRIVATE), reader, toolconfig.github_owner(config), rate.get("limit"), costs={k: v for k, v in RUN_COSTS.items() if v})
+    info = quota.summary(config, done, data.get("active") or [], private, reader, toolconfig.github_owner(config), rate.get("limit"), costs={k: v for k, v in RUN_COSTS.items() if v})
     from github_actions_monitor.data_pipeline import quotawatch
     info["accounts"] = quota_buckets.view(trend=quotawatch.trend())      # the allowance by account (source) and bucket, with the tightest one (the chip of the header)
     report = change_cost_report(config)
@@ -4977,10 +4987,14 @@ def change_cost_report(config):
         return {"enabled": False}
     with LOCK:
         data = STATE.get("data") or {}
-    since = time.time() - 86400
-    done = [r for r in (data.get("runs") or []) if r.get("status") == "completed" and (parse_time(r.get("started")) or datetime.fromtimestamp(0, timezone.utc)).timestamp() > since]
+    every, done, private = cost_inputs(data)
     rate = ((quota.load().get("rates_usd_per_minute") or {}).get("linux")) or None
-    return change_cost.build(config, done, set(PRIVATE), local_reusable_files(), rate)
+    report = change_cost.build(config, done, private, local_reusable_files(), rate)
+    if report.get("enabled"):
+        total = data.get("runs_total")
+        report["partial"] = bool(isinstance(total, int) and total > len(every))      # the cycle read more runs than these: the figures are a minimum
+        report["runs_read"] = len(every)
+    return report
 
 
 def limits_live_figures(config):
