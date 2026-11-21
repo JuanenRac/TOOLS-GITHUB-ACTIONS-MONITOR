@@ -128,7 +128,7 @@ class Actions:
                 return {"ok": False, "reason": "mismatch"}
             if proposal.get("status") == "rejected":
                 return {"ok": False, "reason": "rejected"}
-            if cfg["require_approval"] and proposal.get("status") != "approved":
+            if cfg.get("require_approval") and proposal.get("status") != "approved":
                 return {"ok": False, "reason": "not_approved"}
             if self.locked:
                 return {"ok": False, "reason": "locked"}

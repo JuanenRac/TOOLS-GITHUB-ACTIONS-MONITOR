@@ -1302,7 +1302,7 @@
  "cli.help_assistant": "ai-hook: the default assistant tool (default)",
  "cli.help_baseline": "compare: what to compare against (previous or year_ago)",
  "cli.help_ca_file": "HTTPS: trust this certificate authority (a PEM file), for a monitor with a certificate of your own",
- "cli.help_command": "status, accounts, alerts, live, doctor, health (or check), score, team, compare, ai-hook, credential, lessons, briefs, screens, api, install-skill, gh-token, backup (create | verify | restore | status | list), update, toolbox, watch, completions, kiosk, metrics",
+ "cli.help_command": "status, accounts, alerts, live, doctor, health (or check), score, team, compare, ai-hook, credential, lessons, briefs, screens, api, install-skill, gh-token, backup (create | verify | restore | status | list), proposals (list | show | approve | reject | execute), update, toolbox, watch, completions, kiosk, metrics",
  "cli.help_compare": "score: also compare with the history of the window",
  "cli.help_cursor": "ai-hook: Cursor (best effort)",
  "cli.help_days": "compare: which days count (all, workdays or weekend)",
