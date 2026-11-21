@@ -1557,10 +1557,14 @@ def outside_tick(config, now=None):
             out["feed"].append(repo)
     if redeliver.settings(config)["enabled"] and not (rate_block_state()["blocked"] or data.get("paused_quota")):
         out["redelivered"] = redeliver.RECOVERY.run(config, run_gh, now)      # GitHub is asked to send again what never arrived (off by default: it writes to GitHub)
+    githubstatus.STATUS.attach(githubstatus.HELD_FILE)
     if githubstatus.settings(config)["enabled"]:
         out["status"] = githubstatus.STATUS.tick(netguard.opener_for(False), config, now)
         if out["status"]:
             announce_github_status(out["status"], config)
+    if not out["status"] and githubstatus.STATUS.release_due(config, now):      # held notices are never kept for ever: after 6 hours, with a site that cannot be read, switched off or after a restart they are told
+        out["status"] = "over"
+        announce_github_status("over", config)
     if heartbeat.settings(config)["enabled"]:
         healthy = LITE["on"] or health_payload(deep=True)["ok"]
         out["heartbeat"] = heartbeat.HEARTBEAT.tick(config, healthy, TOOL_VERSION, notifiers.settings(config)["allow_private_targets"], now=now)
