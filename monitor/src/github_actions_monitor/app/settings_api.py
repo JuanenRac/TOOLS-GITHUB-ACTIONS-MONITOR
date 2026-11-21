@@ -738,6 +738,7 @@ _f(_T_POLL, "events_feed", "events_feed.max_per_tick", "int", (1, 200), unit="",
 _f(_T_POLL, "github_status", "github_status.enabled", "bool", restart=False, secure=True)
 _f(_T_POLL, "github_status", "github_status.interval_seconds", "int", (60, 3600), unit="s", restart=False)
 _f(_T_POLL, "github_status", "github_status.mark_reds", "bool", restart=False)
+_f(_T_POLL, "github_status", "github_status.quiet_notices", "bool", restart=False)
 _f(_T_OUT, "heartbeat", "heartbeat.enabled", "bool", restart=False, secure=True)
 _f(_T_OUT, "heartbeat", "heartbeat.url_env", "text", HEARTBEAT_ENV_RE, secure=True)
 _f(_T_OUT, "heartbeat", "heartbeat.interval_seconds", "int", (30, 86400), unit="s", restart=False)

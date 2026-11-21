@@ -118,7 +118,7 @@ DEFAULTS = {
     "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30, "max_bad_per_minute": 120, "max_verified_per_minute": 120, "reject_stale": False, "persist_deliveries": True, "clock_skew_s": 300, "max_body_kb": 1024, "queue_max": 500, "stale_after_h": 6,
                 "transport": "http", "ws_targets": [], "ws_max_targets": 10, "ws_cleanup": False, "redeliver": {"enabled": False, "hooks": [], "max_per_run": 20, "max_age_hours": 24, "interval_minutes": 60}},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
     "events_feed": {"enabled": False, "interval_seconds": 60, "owner_kind": "auto", "max_per_tick": 20},      # optional: the events of the account read with an ETag, to read only the repository that changed (eventfeed.py)
-    "github_status": {"enabled": False, "interval_seconds": 300, "mark_reds": True},      # optional: the state of GitHub (githubstatus.com) in the bar, and the reds that appear during an incident of Actions (githubstatus.py)
+    "github_status": {"enabled": False, "interval_seconds": 300, "mark_reds": True, "quiet_notices": False},      # optional: the state of GitHub (githubstatus.com) in the bar, and the reds that appear during an incident of Actions (githubstatus.py)
     "heartbeat": {"enabled": False, "url_env": "MONITOR_HEARTBEAT_URL", "interval_seconds": 300, "send_state": True, "fail_suffix": ""},      # optional: a ping to an outside service that raises the alarm when the monitor stops (heartbeat.py)
     "chatops": {"enabled": False, "slack": {"enabled": False, "signing_secret_env": "MONITOR_SLACK_SIGNING_SECRET"}, "discord": {"enabled": False, "public_key_env": "MONITOR_DISCORD_PUBLIC_KEY"}, "allowed_teams": [], "allowed_channels": [], "allowed_users": [],
                 "allowed_words": ["help", "status", "alerts", "red", "queue", "score"], "max_rows": 8, "show_repo_names": "all", "links": True, "max_age_seconds": 300, "rate_per_user_per_minute": 6, "rate_per_channel_per_minute": 20, "rate_per_minute": 60},   # read only commands from Slack and Discord, see chatops/inbound.py (off by default; the proofs are only in the environment)
@@ -1594,6 +1594,13 @@ def announce_github_status(transition, config):
     name = (info["incidents"][0]["name"] if info["incidents"] else "") or info["description"] or "Actions"
     event = {"kind": kind, "code": kind, "level": "warn" if transition == "start" else "ok", "repo": "", "owner": "main", "url": None, "args": {"name": name},
              "text": i18n.t("evt." + kind, name=name)}
+    if transition == "over":      # the notices held during the incident (github_status.quiet_notices) are told once, with how many are still red
+        sentinel_now = SENTINEL["obj"]
+        reds = ((getattr(getattr(sentinel_now, "feed", None), "state", None) or {}).get("reds")) if sentinel_now is not None else None
+        held = githubstatus.STATUS.take_held((lambda repo, workflow: f"{repo}|{workflow}" in reds) if isinstance(reds, dict) else None)
+        if held["held"]:
+            event["args"].update({"held": held["held"], "still_red": held["still_red"] if held["still_red"] is not None else held["held"]})
+            event["text"] = i18n.t("evt.github_incident_over_held", held=event["args"]["held"], still=event["args"]["still_red"])
     print(event["text"], flush=True)
     sentinel = SENTINEL["obj"]
     try:

@@ -35,7 +35,7 @@
 
 ## GitHub の状態(既定ではオフ)
 
-`github_status.enabled` をオンにすると、モニターは `github_status.interval_seconds`(既定 300)ごとに githubstatus.com の公開サマリーを読みます。小さな JSON 1 つで、アカウントは不要、あなたに関する情報は送られません。ページ下部のバーに GitHub の状態が表示されます。GitHub Actions に障害があるとモニターは 1 回だけ知らせ(種類 `github_incident` と `github_incident_over`。`notify.events` に追加した場合のみ通知されます)、`github_status.mark_reds`(オン)では、障害中に出た赤に、本文とフィールド `possible_cause` で「考えられる原因: GitHub の障害」と付きます。赤そのものは隠されません。
+`github_status.enabled` をオンにすると、モニターは `github_status.interval_seconds`(既定 300)ごとに githubstatus.com の公開サマリーを読みます。小さな JSON 1 つで、アカウントは不要、あなたに関する情報は送られません。ページ下部のバーに GitHub の状態が表示されます。GitHub Actions に障害があるとモニターは 1 回だけ知らせ(種類 `github_incident` と `github_incident_over`。`notify.events` に追加した場合のみ通知されます)、`github_status.mark_reds`(オン)では、障害中に出た赤に、本文とフィールド `possible_cause` で「考えられる原因: GitHub の障害」と付きます。赤そのものは隠されません。 `github_status.quiet_notices`（既定ではオフ）をオンにすると、それらの赤の通知は障害が終わるまで保留され、その後、まだ赤のものの数とともに一度だけ知らされます。通知が 6 時間を超えて保留されることはなく、赤はフィードとページに残ります。
 
 ## 1 時間あたりの上限はメッセージ数を数えます
 

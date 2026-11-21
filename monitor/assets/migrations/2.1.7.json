@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.7",
  "previous": "2.1.6",
- "digest": "fbafd7ae2cf9bab7da5bb2d89507ebd0d05e38f03d335693e1c8f4272b4cc5d4",
+ "digest": "964092e86d8ed1d09bb0f8858cc6c05df859e103e85856d6780314b681013e27",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -308,6 +308,11 @@
     "key": "github_status.mark_reds",
     "kind": "bool",
     "default": true
+   },
+   {
+    "key": "github_status.quiet_notices",
+    "kind": "bool",
+    "default": false
    },
    {
     "key": "heartbeat.enabled",

@@ -305,6 +305,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `github_status.enabled` (secure) | `false` | polling | Show the state of GitHub |
 | `github_status.interval_seconds` | `300` | polling | Seconds between reads of the state |
 | `github_status.mark_reds` | `true` | polling | Mark the reds of an incident |
+| `github_status.quiet_notices` | `false` | polling | Hold the notices of an incident |
 | `github_token.enabled` (secure) | `false` | advanced | Keep a GitHub token in the monitor |
 | `github_token.store` (secure) | `"auto"` | advanced | Where the token is kept |
 | `heartbeat.enabled` (secure) | `false` | outputs | Send the outside heartbeat |

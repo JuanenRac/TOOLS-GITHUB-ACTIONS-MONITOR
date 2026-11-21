@@ -35,7 +35,7 @@ O canal `apprise` entrega a mensagem ao comando `apprise` (instale-o você, por 
 
 ## O estado do GitHub (desativado por omissão)
 
-Com `github_status.enabled` ativo, o monitor lê o resumo público de githubstatus.com a cada `github_status.interval_seconds` (300 por omissão): um JSON pequeno, sem conta, e nada sobre ti é enviado. A barra de baixo da página mostra o estado do GitHub. Quando o GitHub Actions tem um incidente o monitor avisa uma vez (os tipos `github_incident` e `github_incident_over`, que só são notificados se os adicionares a `notify.events`), e com `github_status.mark_reds` (ativo) um vermelho que aparece durante o incidente diz «causa possível: um incidente do GitHub» no texto e no campo `possible_cause`. O vermelho em si nunca é escondido.
+Com `github_status.enabled` ativo, o monitor lê o resumo público de githubstatus.com a cada `github_status.interval_seconds` (300 por omissão): um JSON pequeno, sem conta, e nada sobre ti é enviado. A barra de baixo da página mostra o estado do GitHub. Quando o GitHub Actions tem um incidente o monitor avisa uma vez (os tipos `github_incident` e `github_incident_over`, que só são notificados se os adicionares a `notify.events`), e com `github_status.mark_reds` (ativo) um vermelho que aparece durante o incidente diz «causa possível: um incidente do GitHub» no texto e no campo `possible_cause`. O vermelho em si nunca é escondido. Com `github_status.quiet_notices` (desativado por predefinição) os avisos desses vermelhos ficam retidos até ao fim do incidente e são comunicados uma só vez, com quantos continuam vermelhos; um aviso nunca fica retido mais de seis horas e os vermelhos ficam no registo e na página.
 
 ## O limite por hora conta mensagens
 
