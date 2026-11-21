@@ -41,3 +41,8 @@ The two figures agree only if watching and triage take about 16-29 % of the work
 ### Example with invented numbers
 
 Someone spends 20 minutes a day looking at the Actions tabs (100 minutes in a five-day week) and triages 4 failed runs a week at 30 minutes each (120 minutes): 220 minutes in all. At 85-95 % saved, between 187 and 209 minutes are left free. These numbers are made up to show the calculation; use your own.
+
+
+## Measuring it in the monitor
+
+The page can do the arithmetic of this guide for you, with your own notes: switch on `productivity.enabled` (Settings, Analytics) and write the notes of the "before" and the "after" there. The Analytics section then shows an estimate of the minutes saved a week for each task. It says **no data** for a task whose "before" you did not note, labels as **assumed (not measured)** every saving that comes from the percentage of this guide instead of from your own "after" notes, and never shows 85-95 % or 15-25 % as a measurement. See [ANALYTICS.md](ANALYTICS.md).

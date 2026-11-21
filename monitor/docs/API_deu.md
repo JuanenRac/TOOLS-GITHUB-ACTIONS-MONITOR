@@ -69,7 +69,7 @@ Diese Routen bedienen die Seite und die Werkzeuge dieses Rechners. Sie gehören 
 | `/api/ai/budget` | Die Aufrufe und die geschätzten Kosten von heute je KI-Modell, die Grenzen und die letzten Fehler; fragt keinen Anbieter. |
 | `/api/ai/test` | POST, dieser Rechner. Prüft die Verbindung der eingerichteten KI; ändert nichts. |
 | `/api/alerts/unmute` | POST. Hebt die Stummschaltung einer Meldung auf; wird protokolliert. |
-| `/api/analytics` | Die Zusammenfassung der Auswertung der Läufe: Dauern, Warteschlange, Schritte, instabile Tests und langsamere Läufe. |
+| `/api/analytics` | Die Zusammenfassung der Auswertung der Läufe: Dauern, Warteschlange, Schritte, instabile Tests und langsamere Läufe sowie die Schätzung der gesparten Zeit, wenn sie eingeschaltet ist. |
 | `/api/discovery` | Was die Entdeckung fand: der Kasten mit Konto sowie angezeigten und ausgeblendeten Repositories, die letzten Ereignisse, die vorgeschlagenen Gruppen, ihre Einstellungen, die Forks und die Organisationen. |
 | `/api/discovery/group` | POST. Fügt eine vorgeschlagene Gruppe der Ökosystem-Datei hinzu und behält eine Kopie der Datei. |
 | `/api/gh-action/plan` | POST, dieser Rechner. Bereitet vor, was an GitHub gesendet würde (Wiederholung, Abbruch, Dispatch oder Merge); noch wird nichts gesendet. |

@@ -110,7 +110,11 @@ def _a11(s, owner, t):
 
 def _a12(s, owner, t):
     rows = [_row(r.get("repo"), f"{r.get('workflow') or r.get('name')} is slower than usual", "", "warn", f"slow:{r.get('workflow') or r.get('name')}") for r in (s or {}).get("slower") or []]
-    return rows, t("ui.sc_a12", n=len((s or {}).get("duration") or []), m=len((s or {}).get("flaky") or []))
+    summary = t("ui.sc_a12", n=len((s or {}).get("duration") or []), m=len((s or {}).get("flaky") or []))
+    saved = (s or {}).get("time_saved") or {}
+    if saved.get("enabled"):      # an estimate, said as one: the minutes only when the person noted how long the tasks took without the monitor
+        summary += " · " + (t("ui.sc_ts", m=saved["saved_minutes_week"]) if saved.get("saved_minutes_week") is not None else t("ui.sc_ts_none"))
+    return rows, summary
 
 
 def _a13(s, owner, t):

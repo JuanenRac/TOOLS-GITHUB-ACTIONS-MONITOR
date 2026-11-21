@@ -35,3 +35,15 @@ Scheitern alle Lesungen eines Zyklus an einem Verbindungsproblem (nicht an Login
 ## Wie lange der Verlauf aufbewahrt wird
 
 Neben `keep_days` des Analyseblocks entfernt der Aufbewahrungsdurchlauf die Tage des Verlaufs, die älter als `retention.analytics_days` sind (standardmäßig 180); die Messwerte selbst begrenzt `max_samples`. Siehe [STORAGE_deu.md](STORAGE_deu.md).
+
+
+## Gesparte Zeit (eine Schätzung)
+
+Standardmäßig aus (`productivity.enabled`). Eingeschaltet zeigt der Abschnitt Aufgabe für Aufgabe, wie viele Minuten pro Woche der Monitor spart, mit der Formel aus [PRODUCTIVITY_deu.md](PRODUCTIVITY_deu.md): Mal pro Woche x Minuten pro Mal ohne den Monitor x Ersparnis der Aufgabe.
+
+- Zwei Aufgaben werden beziffert. **Beobachten** (die Actions-Tabs von Hand ansehen und entscheiden, was rot ist) nimmt Häufigkeit und Minuten aus Ihren Notizen (`productivity.watch_times_per_week`, `productivity.watch_minutes_before`). **Diagnose** (die Ursache eines fehlgeschlagenen Laufs finden) zählt die fehlgeschlagenen Läufe, die der Monitor in `productivity.window_days` im Blick hat, und nimmt die Minuten aus Ihren Notizen (`productivity.triage_minutes_before`).
+- Der Monitor kann nicht sehen, was Sie vor seiner Installation getan haben. Eine Aufgabe ohne diese Notizen sagt **keine Daten**, und es wird keine Zahl erfunden. Auch die Summe sagt keine Daten, solange jeder Aufgabe die Notizen fehlen.
+- Haben Sie zusätzlich die Minuten mit dem Monitor notiert (`productivity.watch_minutes_after`, `productivity.triage_minutes_after`), wird die Ersparnis aus Ihren Notizen gemessen: 1 - nachher / vorher. Sonst gilt der Prozentsatz aus `productivity.saving_percent` (standardmäßig 90), und die Tabelle sagt **angenommen (nicht gemessen)**.
+- Mit `productivity.team_hours_per_week` sagt die Schätzung auch, welcher Anteil der Arbeitszeit die gesparten Minuten sind.
+- Das Beheben eines Fehlers dauert mit oder ohne Monitor gleich lang und wird nie gezählt. Gezählt werden nur fehlgeschlagene Läufe, die der Monitor hält: Eine sehr lange Laufliste kann mehr Fehler enthalten als angezeigt.
+- Lokal und nur lesend: kein Aufruf an GitHub, nichts verlässt den Rechner. Es steht in `/api/analytics` (`time_saved`), in der Zusammenfassung des Panels A12 und im Brief des Tabs Übersicht für die KI-Werkzeuge.

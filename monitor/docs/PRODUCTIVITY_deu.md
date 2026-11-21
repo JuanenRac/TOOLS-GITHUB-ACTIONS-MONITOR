@@ -41,3 +41,8 @@ Die beiden Zahlen passen nur zusammen, wenn Beobachten und Sichten etwa 16-29 % 
 ### Beispiel mit erfundenen Zahlen
 
 Jemand verbringt täglich 20 Minuten mit den Actions-Tabs (100 Minuten in einer Fünftagewoche) und sichtet 4 fehlgeschlagene Läufe pro Woche zu je 30 Minuten (120 Minuten): zusammen 220 Minuten. Bei 85-95 % Ersparnis werden zwischen 187 und 209 Minuten frei. Diese Zahlen sind erfunden, um die Rechnung zu zeigen; nehmen Sie Ihre eigenen.
+
+
+## Im Monitor messen
+
+Die Seite kann die Rechnung dieser Anleitung mit Ihren eigenen Notizen für Sie ausführen: Schalten Sie `productivity.enabled` ein (Einstellungen, Analytik) und tragen Sie dort die Notizen für das „Vorher“ und das „Nachher“ ein. Der Abschnitt Analytik zeigt dann je Aufgabe eine Schätzung der pro Woche gesparten Minuten. Bei einer Aufgabe, deren „Vorher“ Sie nicht notiert haben, steht **keine Daten**; jede Ersparnis, die aus dem Prozentsatz dieser Anleitung statt aus Ihren eigenen „Nachher“-Notizen stammt, ist als **angenommen (nicht gemessen)** beschriftet, und 85-95 % oder 15-25 % werden nie als Messung gezeigt. Siehe [ANALYTICS_deu.md](ANALYTICS_deu.md).

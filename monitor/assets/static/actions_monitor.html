@@ -1808,7 +1808,17 @@ function analyticsBox(){
    +tbl(T("ui.a12_h_queue"),["ui.th_repo","ui.th_workflow","ui.th_samples","ui.th_p50","ui.th_p95"],(A.queue||[]).map(r=>[r.repo,r.workflow,r.n,fmtS(r.p50),fmtS(r.p95)]))
    +tbl(T("ui.a12_h_steps"),["ui.th_repo","ui.th_workflow","ui.th_step","ui.th_p50","ui.th_p95"],(A.steps||[]).map(r=>[r.repo,r.workflow,r.step,fmtS(r.p50),fmtS(r.p95)]))
    +tbl(T("ui.a12_h_flaky"),["ui.th_repo","ui.th_workflow","ui.th_flaky","ui.th_runs","ui.th_rate"],(A.flaky||[]).map(r=>[r.repo,r.workflow,r.flaky,r.total,Math.round(r.rate*100)+" %"]))
-   +tbl(T("ui.a12_h_slower"),["ui.th_repo","ui.th_workflow","ui.th_p50","ui.th_usual","ui.th_factor"],(A.slower||[]).map(r=>[r.repo,r.workflow,fmtS(r.p50),fmtS(r.usual),"×"+r.factor]));
+   +tbl(T("ui.a12_h_slower"),["ui.th_repo","ui.th_workflow","ui.th_p50","ui.th_usual","ui.th_factor"],(A.slower||[]).map(r=>[r.repo,r.workflow,fmtS(r.p50),fmtS(r.usual),"×"+r.factor]))
+   +timeSavedBox(A.time_saved);
+}
+/* time saved: an estimate from the notes of the person, never a measurement of the "before"; a task without the minutes it took without the monitor says "no data" */
+function timeSavedBox(S){
+  if(!S||!S.enabled)return `<h3 style="font-size:13px;margin:10px 0 4px">${esc(T("ui.a12_h_saved"))}</h3>`+mut_(T("ui.ts_off"));
+  const n=v=>v===null||v===undefined?"–":String(v);
+  const rows=(S.tasks||[]).map(r=>`<tr><td>${esc(T("ui.ts_task_"+r.task))}</td><td>${esc(n(r.times_per_week))}</td><td>${esc(n(r.minutes_before))}</td><td>${esc(n(r.minutes_after))}</td><td>${esc(r.saving_percent===null?"–":r.saving_percent+" %")}</td><td>${esc(n(r.saved_minutes))}</td><td>${esc(T("ui.ts_basis_"+r.basis))}</td></tr>`).join("");
+  const total=S.saved_minutes_week===null?T("ui.ts_no_total"):T("ui.ts_total",{m:S.saved_minutes_week})+(S.share_percent===null?"":" · "+T("ui.ts_share",{p:S.share_percent}));
+  return `<h3 style="font-size:13px;margin:10px 0 4px">${esc(T("ui.a12_h_saved"))}</h3><table>${thk(["ui.ts_th_task","ui.ts_th_times","ui.ts_th_before","ui.ts_th_after","ui.ts_th_saving","ui.ts_th_saved","ui.ts_th_basis"])}<tbody>${rows}</tbody></table>`
+   +`<div style="margin-top:6px"><b>${esc(total)}</b></div><div class="mut" style="margin-top:4px">${esc(T("ui.ts_failed_seen",{n:S.failed_seen,d:S.window_days}))} ${esc(T("ui.ts_note"))}</div>`;
 }
 function lintMaint(L){
   const m=L.maintenance;if(!m)return"";const p=[];

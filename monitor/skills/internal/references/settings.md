@@ -488,6 +488,15 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `pairing.max_devices` | `10` | general | Most paired devices |
 | `ports.complete` | `8765` | general | Port of the complete edition |
 | `ports.lite` | `8766` | general | Port of the lite edition |
+| `productivity.enabled` | `-` | analytics | Time saved (estimate) |
+| `productivity.saving_percent` | `-` | analytics | Assumed saving when nothing was timed |
+| `productivity.team_hours_per_week` | `-` | analytics | Hours worked in a week (team) |
+| `productivity.triage_minutes_after` | `-` | analytics | Minutes to find the cause with the monitor |
+| `productivity.triage_minutes_before` | `-` | analytics | Minutes to find the cause without the monitor |
+| `productivity.watch_minutes_after` | `-` | analytics | Minutes each time with the monitor (watching) |
+| `productivity.watch_minutes_before` | `-` | analytics | Minutes each time without the monitor (watching) |
+| `productivity.watch_times_per_week` | `-` | analytics | Times a week you looked at CI by hand |
+| `productivity.window_days` | `-` | analytics | Days of failures counted |
 | `profiles_file` | `-` | paths | Batch profiles file |
 | `pwa.enabled` | `false` | general | Installable app (PWA) |
 | `pwa.refresh_on_return` | `true` | general | Refresh when the app returns |

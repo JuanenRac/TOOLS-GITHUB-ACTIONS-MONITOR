@@ -69,7 +69,7 @@ Estas rutas sirven la página y las herramientas de este equipo. No forman parte
 | `/api/ai/budget` | Las llamadas y el coste estimado de hoy de cada modelo de IA, los límites y los últimos fallos; no consulta a ningún proveedor. |
 | `/api/ai/test` | POST, este equipo. Prueba la conexión de la IA configurada; no cambia nada. |
 | `/api/alerts/unmute` | POST. Quita el silencio de una alerta; queda registrado. |
-| `/api/analytics` | El resumen de la analítica de las ejecuciones: duraciones, cola, pasos, tests inestables y ejecuciones más lentas. |
+| `/api/analytics` | El resumen de la analítica de las ejecuciones: duraciones, cola, pasos, tests inestables y ejecuciones más lentas, y la estimación del tiempo ahorrado si está encendida. |
 | `/api/discovery` | Lo que encontró el descubrimiento: el cuadro con la cuenta y los repositorios mostrados y ocultos, los últimos eventos, los grupos sugeridos, sus ajustes, los forks y las organizaciones. |
 | `/api/discovery/group` | POST. Añade un grupo sugerido al fichero de ecosistemas, guardando una copia del fichero. |
 | `/api/gh-action/plan` | POST, este equipo. Prepara lo que se enviaría a GitHub (un reintento, una cancelación, un dispatch o una fusión); todavía no se envía nada. |

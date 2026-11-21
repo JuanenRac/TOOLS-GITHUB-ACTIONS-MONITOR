@@ -69,7 +69,7 @@ Estas rotas servem a página e as ferramentas deste computador. Não fazem parte
 | `/api/ai/budget` | As chamadas e o custo estimado de hoje de cada modelo de IA, os limites e as últimas falhas; não consulta nenhum fornecedor. |
 | `/api/ai/test` | POST, este computador. Testa a ligação da IA configurada; não altera nada. |
 | `/api/alerts/unmute` | POST. Retira o silêncio de um alerta; fica registado. |
-| `/api/analytics` | O resumo da análise das execuções: durações, fila, passos, testes instáveis e execuções mais lentas. |
+| `/api/analytics` | O resumo da análise das execuções: durações, fila, passos, testes instáveis e execuções mais lentas, e a estimativa do tempo poupado quando está ligada. |
 | `/api/discovery` | O que a descoberta encontrou: o quadro com a conta e os repositórios mostrados e ocultos, os últimos eventos, os grupos sugeridos, as suas definições, os forks e as organizações. |
 | `/api/discovery/group` | POST. Junta um grupo sugerido ao ficheiro de ecossistemas, guardando uma cópia do ficheiro. |
 | `/api/gh-action/plan` | POST, este computador. Prepara o que seria enviado ao GitHub (uma repetição, um cancelamento, um dispatch ou um merge); ainda não se envia nada. |

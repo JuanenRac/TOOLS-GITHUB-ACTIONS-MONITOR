@@ -69,7 +69,7 @@ These routes serve the page and the tools of this computer. They are not part of
 | `/api/ai/budget` | The calls and the estimated cost of today for each AI model, the limits and the last failures; it asks no provider. |
 | `/api/ai/test` | POST, this computer. Tests the connection of the AI that is set up; it changes nothing. |
 | `/api/alerts/unmute` | POST. Lifts the silence of an alert; recorded. |
-| `/api/analytics` | The summary of the analytics of the runs: durations, queue, steps, flaky tests and slower runs. |
+| `/api/analytics` | The summary of the analytics of the runs: durations, queue, steps, flaky tests and slower runs, and the estimate of the time saved when it is switched on. |
 | `/api/discovery` | What the discovery found: the box with the account and the repositories shown and hidden, the last events, the suggested groups, its settings, the forks and the organizations. |
 | `/api/discovery/group` | POST. Adds a suggested group to the ecosystems file, keeping a copy of the file. |
 | `/api/gh-action/plan` | POST, this computer. Prepares what would be sent to GitHub (a rerun, a cancel, a dispatch or a merge); nothing is sent yet. |

@@ -37,7 +37,7 @@ Reading is the default. Writing a lesson needs `lessons.allow_write` on, an admi
 
 ## When to stay silent
 
-No alert is open and nothing repeats: say "nothing to act on". The monitor is degraded or the data is old (`age_seconds`, `stale`): say that the picture is old before anything else. A question the data cannot answer: say so. Never repeat an answer that has not changed.
+No alert is open and nothing repeats: say "nothing to act on". The monitor is degraded or the data is old (`age_seconds`, `stale`): say that the picture is old before anything else. A question the data cannot answer: say so. Never repeat an answer that has not changed. If you quote the time saved (`time_saved` of `/api/analytics`), say it is an estimate, say which tasks have `no_data`, and never give the saving as a measurement of the time before the monitor.
 
 ## When a person asks through the assistant
 
