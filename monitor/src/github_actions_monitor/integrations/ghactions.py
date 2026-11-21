@@ -87,6 +87,54 @@ def pid_alive(pid):
     return True
 
 
+def process_started(pid):
+    """A text that says WHEN the process `pid` started ("" when it cannot be told): a pid that Windows or Linux gave to another program later has another one."""
+    try:
+        if os.name == "nt":
+            import ctypes
+            from ctypes import wintypes
+            kernel = ctypes.windll.kernel32
+            kernel.OpenProcess.restype = wintypes.HANDLE
+            handle = kernel.OpenProcess(0x1000, False, pid)      # PROCESS_QUERY_LIMITED_INFORMATION
+            if not handle:
+                return ""
+            try:
+                created, other = wintypes.FILETIME(), wintypes.FILETIME()
+                if not kernel.GetProcessTimes(handle, ctypes.byref(created), ctypes.byref(other), ctypes.byref(other), ctypes.byref(other)):
+                    return ""
+                return str((created.dwHighDateTime << 32) | created.dwLowDateTime)
+            finally:
+                kernel.CloseHandle(handle)
+        stat = Path(f"/proc/{pid}/stat")
+        if stat.exists():
+            return stat.read_text(encoding="ascii", errors="replace").rsplit(")", 1)[1].split()[19]      # field 22: the start in clock ticks after the boot
+        import subprocess
+        done = subprocess.run(["ps", "-o", "lstart=", "-p", str(pid)], capture_output=True, text=True, timeout=5)
+        return " ".join(done.stdout.split()) if done.returncode == 0 else ""
+    except Exception:   # noqa: BLE001 - not knowing is allowed
+        return ""
+
+
+def _read_lock(path):
+    """(pid, started) written in the lock file: the old files hold the pid only."""
+    try:
+        parts = Path(path).read_text(encoding="ascii", errors="replace").split(None, 1)
+        return (int(parts[0]) if parts else 0), (parts[1].strip() if len(parts) > 1 else "")
+    except (OSError, ValueError):
+        return 0, ""
+
+
+def release_writer(lock_path=None):
+    """Deletes the lock file when it is this process's: it runs when the monitor ends, so the pid it wrote is not left behind for another program to inherit."""
+    path = Path(lock_path) if lock_path else paths.place(LOCK_NAME)
+    if _read_lock(path)[0] == os.getpid():
+        try:
+            os.remove(str(path))
+        except OSError:
+            pass
+    WRITER["owner"] = False
+
+
 def writer_state(config, env=None, lock_path=None):
     """("writer" | "observer", why). A monitor started with MONITOR_PROFILE=qa (`--profile qa`) is always an observer; otherwise, with `github_actions.writer_lock` on, the first monitor of this computer
     that asks takes the lock (a file with its PID) and the others are observers until it ends. Two monitors on one account would do every action twice."""
@@ -100,20 +148,24 @@ def writer_state(config, env=None, lock_path=None):
         try:
             fd = os.open(str(path), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
             try:
-                os.write(fd, str(os.getpid()).encode("ascii"))
+                started = process_started(os.getpid())
+                os.write(fd, (f"{os.getpid()} {started}" if started else str(os.getpid())).encode("ascii", errors="replace"))
             finally:
                 os.close(fd)
             WRITER["owner"] = True
+            if not WRITER.get("exit_registered"):
+                import atexit
+                atexit.register(release_writer, lock_path)
+                WRITER["exit_registered"] = True
             return "writer", ""
         except FileExistsError:
-            try:
-                other = int(Path(path).read_text(encoding="ascii", errors="replace").strip() or 0)
-            except (OSError, ValueError):
-                other = 0
-            if other == os.getpid() or (WRITER["owner"] and other == os.getpid()):
+            other, started = _read_lock(path)
+            if other == os.getpid() and not (started and process_started(other) not in ("", started)):      # a lock of this very process (not one a dead monitor left with the same pid)
                 return "writer", ""
-            if pid_alive(other):
-                return "observer", "lock"
+            if other != os.getpid() and pid_alive(other):
+                now_started = process_started(other) if started else ""
+                if not (started and now_started and now_started != started):      # the same process still lives; if its start differs the pid was given to another program and the lock is old
+                    return "observer", "lock"
             try:
                 os.remove(str(path))      # the monitor that held it is gone
             except OSError:

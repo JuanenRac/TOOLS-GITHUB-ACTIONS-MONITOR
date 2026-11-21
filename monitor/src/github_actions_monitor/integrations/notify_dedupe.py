@@ -12,6 +12,7 @@ workflow is a new notification). The ledger remembers the labels that already le
 `notify.max_event_age_hours` (0 = off) also drops an event whose own evidence is older than that: the news of something that happened days ago is not news. Nothing here reads GitHub; the file holds
 only hashes and times (no repository name, no text).
 """
+import calendar
 import hashlib
 import json
 import threading
@@ -38,8 +39,10 @@ def settings(config):
 
 
 def label(event):
-    """The label of an event: a hash of kind, repository, workflow and link (never the text, which may carry a time or a count)."""
-    parts = [str(event.get("kind") or event.get("code") or ""), str(event.get("repo") or ""), str(event.get("workflow") or ""), str(event.get("url") or "")]
+    """The label of an event: a hash of kind, repository, workflow and link, plus what names the thing in its arguments (ecosystem, name, workflow); never the text or the counts, which change."""
+    args = event.get("args") if isinstance(event.get("args"), dict) else {}
+    named = "|".join(f"{key}={args[key]}" for key in ("eco", "name", "workflow") if args.get(key) not in (None, ""))
+    parts = [str(event.get("kind") or event.get("code") or ""), str(event.get("repo") or ""), str(event.get("workflow") or args.get("workflow") or ""), str(event.get("url") or ""), named]
     return hashlib.sha256("\x1f".join(parts).encode("utf-8")).hexdigest()[:24]
 
 
@@ -83,7 +86,7 @@ def _event_age_hours(event, now):
     if not isinstance(stamp, str):
         return None
     try:
-        t = time.mktime(time.strptime(stamp[:19], "%Y-%m-%dT%H:%M:%S")) - time.timezone
+        t = calendar.timegm(time.strptime(stamp[:19], "%Y-%m-%dT%H:%M:%S"))      # the mark is UTC: no zone and no summer time in the way
     except (ValueError, OverflowError):
         return None
     return max(0.0, (now - t) / 3600)
