@@ -94,7 +94,7 @@ class Running(unittest.TestCase):
     handler = sup.Handler
 
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
+        self.tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
         self.addCleanup(self.tmp.cleanup)
         self.base = Path(self.tmp.name)
         patcher = mock.patch.dict(os.environ, {"MONITOR_ACCOUNTS_DIR": str(self.base / "accounts")})
