@@ -24,7 +24,7 @@
 
 **信任.** 该检查将 zip 与 SHA256SUMS 进行比对，二者来自同一个 GitHub 发布：它能发现损坏或不完整的下载，但发现不了在源头被替换的发布。对发布的信任取决于 GitHub 以及您在那里的账户。
 
-## 逐步说明 支撑它的路由是 `/api/updates/status`、`/api/updates/progress`、`/api/updates/history`（只读）以及 `/api/updates/check`、`/api/updates/plan`、`/api/updates/apply`、`/api/updates/rollback`（管理员，仅限本机）。 进度也会通过 `/api/updates/stream` 以服务器发送事件的方式推送（更新期间页面使用它；当浏览器或连接不支持时，回退为每 1.5 秒查询一次）。
+## 逐步说明 支撑它的路由是 `/api/updates/status`、`/api/updates/progress`、`/api/updates/history`、`/api/updates/log`（进程日志的最后几行，token 或 secret 之后的值已隐藏）、`/api/updates/copies`（只读）以及 `/api/updates/check`、`/api/updates/plan`、`/api/updates/apply`、`/api/updates/rollback`、`/api/updates/discard`（管理员，仅限本机）。 进度也会通过 `/api/updates/stream` 以服务器发送事件的方式推送（更新期间页面使用它；当浏览器或连接不支持时，回退为每 1.5 秒查询一次）。
 
 1. 检测安装：文件夹、版本、版本类型（完整版或 Lite）、配置、数据、端口、监视器是否在运行、是容器还是服务。
 2. 列出 GitHub 上已发布的所有版本（无需令牌），附日期和说明，并标出已安装的和最新的。没有网络时，用 `--zip` 提供一个 zip。
@@ -46,6 +46,9 @@
 | `migrate` | 只迁移一个配置文件，见下文 |
 | `rollback` | 回到最近一次更新之前的版本 |
 | `history` | 此安装上进行过的更新 |
+| `copies` | 副本文件夹中的副本：名称、状态、版本、大小，以及回退所需的那一个 |
+| `discard` | `discard --name 副本名` 在确认后删除一个副本（`--yes` 跳过询问）；回退所需的副本需要 `--force`；正在运行的更新的副本永远不会被删除 |
+| `log` | 上一次更新进程日志的最后几行（`--lines N`，最多 2000），token、secret 或 password 之后的值已隐藏 |
 
 ## 选项
 
@@ -94,6 +97,7 @@
 - 它只在 127.0.0.1 上监听并使用临时令牌，拒绝来自其他站点的请求，不执行 zip 中的任何内容，不使用 shell，只在安装目录和备份文件夹内写入。
 - 更改任何内容之前，它会备份程序包、配置和数据；某一步失败时会恢复备份并写出报告。若连回滚也失败，备份保持完好，报告会说明如何手动恢复。
 - 离线：`--zip 文件` 加 `--sha256`（或旁边放一个 SHA256SUMS）。Docker：更新的是数据卷，不会从内部替换镜像（可用 `--allow-container` 强制）。
+- 页面显示这些副本，并在每个副本旁提供 **丢弃副本** 按钮（会先询问；回退所需的副本要询问两次），还有一个按钮可以读取上一次更新进程的完整日志。丢弃只删除该副本，不会动安装或数据，并记录在历史中。
 
 ## 退出码
 

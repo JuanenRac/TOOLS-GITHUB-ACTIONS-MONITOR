@@ -24,7 +24,7 @@ Sous un gestionnaire de services, la page n'applique pas les mises à jour par d
 
 **Confiance.** La vérification compare le zip à SHA256SUMS, et les deux viennent de la même version GitHub : elle détecte un téléchargement abîmé ou incomplet, pas une version remplacée à la source. La confiance dans la version repose sur GitHub et sur votre propre compte là-bas.
 
-## Ce qu'il fait, étape par étape Les routes qui le soutiennent sont `/api/updates/status`, `/api/updates/progress`, `/api/updates/history` (lecture seule) et `/api/updates/check`, `/api/updates/plan`, `/api/updates/apply`, `/api/updates/rollback` (administrateur, depuis cet ordinateur seulement). La progression passe aussi en évènements envoyés par le serveur sur `/api/updates/stream` (la page l'utilise pendant une mise à jour et interroge toutes les secondes et demie si le navigateur ou la connexion ne le permettent pas).
+## Ce qu'il fait, étape par étape Les routes qui le soutiennent sont `/api/updates/status`, `/api/updates/progress`, `/api/updates/history`, `/api/updates/log` (les dernières lignes du journal du processus, valeurs après token ou secret masquées), `/api/updates/copies` (lecture seule) et `/api/updates/check`, `/api/updates/plan`, `/api/updates/apply`, `/api/updates/rollback`, `/api/updates/discard` (administrateur, depuis cet ordinateur seulement). La progression passe aussi en évènements envoyés par le serveur sur `/api/updates/stream` (la page l'utilise pendant une mise à jour et interroge toutes les secondes et demie si le navigateur ou la connexion ne le permettent pas).
 
 1. Détecte l'installation : dossier, version, édition (Complète ou Lite), configuration, données, ports, moniteur en marche ou non, conteneur ou service.
 2. Liste toutes les versions publiées sur GitHub (sans jeton) avec leur date et leurs notes, et repère l'installée et la dernière. Sans connexion, donnez-lui un zip avec `--zip`.
@@ -46,6 +46,9 @@ Sans commande, la page s'ouvre. Les commandes répondent une fois (ajoutez `--js
 | `migrate` | migrer seulement un fichier de configuration, voir plus bas |
 | `rollback` | revenir à la version d'avant la dernière mise à jour |
 | `history` | les mises à jour faites sur cette installation |
+| `copies` | les copies du dossier des copies : nom, état, versions, taille, et celle dont le retour en arrière a besoin |
+| `discard` | `discard --name COPIE` supprime UNE copie après confirmation (`--yes` saute la question) ; la copie du retour en arrière seulement avec `--force` ; celle d'une mise à jour en cours, jamais |
+| `log` | les dernières lignes (`--lines N`, 2000 au plus) du journal du processus de la dernière mise à jour, valeurs après token, secret ou password masquées |
 
 ## Options
 
@@ -94,6 +97,7 @@ Sans commande, la page s'ouvre. Les commandes répondent une fois (ajoutez `--js
 - Il n'écoute que sur 127.0.0.1 avec un jeton éphémère, refuse les requêtes venues d'autres sites, n'exécute rien du zip, n'utilise pas de shell et n'écrit que dans l'installation et le dossier des copies.
 - Avant de modifier quoi que ce soit, il copie le paquet, la configuration et les données ; si une étape échoue la copie est restaurée et un rapport écrit. Si même le retour échoue, la copie reste intacte et le rapport explique comment la restaurer à la main.
 - Hors ligne : `--zip FICHIER` avec `--sha256` (ou un SHA256SUMS à côté). Docker : le volume est mis à jour, l'image n'est pas remplacée de l'intérieur (`--allow-container` pour forcer).
+- La page montre les copies et un bouton **Écarter la copie** pour chacune (il demande d'abord, et deux fois pour la copie du retour en arrière), et un bouton pour lire tout le journal du processus de la dernière mise à jour. Écarter supprime seulement cette copie, jamais l'installation ni les données, et c'est noté dans l'historique.
 
 ## Codes de sortie
 

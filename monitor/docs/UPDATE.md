@@ -24,7 +24,7 @@ Under a service manager the page does not apply updates by default. If the monit
 
 **Trust.** The check compares the zip with SHA256SUMS, and both come from the same GitHub release: it detects a damaged or incomplete download, not a release that was replaced at its source. Trust in the release rests on GitHub and on your own account there.
 
-## What it does, step by step The routes behind it are `/api/updates/status`, `/api/updates/progress`, `/api/updates/history` (read only) and `/api/updates/check`, `/api/updates/plan`, `/api/updates/apply`, `/api/updates/rollback` (administrator, this computer only). The progress also travels as server-sent events on `/api/updates/stream` (the page uses it while an update runs and falls back to asking every second and a half when the browser or the connection does not allow it).
+## What it does, step by step The routes behind it are `/api/updates/status`, `/api/updates/progress`, `/api/updates/history`, `/api/updates/log` (the last lines of the log of the process, values after token or secret hidden), `/api/updates/copies` (read only) and `/api/updates/check`, `/api/updates/plan`, `/api/updates/apply`, `/api/updates/rollback`, `/api/updates/discard` (administrator, this computer only). The progress also travels as server-sent events on `/api/updates/stream` (the page uses it while an update runs and falls back to asking every second and a half when the browser or the connection does not allow it).
 
 1. Detects the installation: folder, version, edition (Complete or Lite), configuration, data, ports, whether the monitor is running, container or service.
 2. Lists every version published on GitHub (no token needed) with its date and notes, and marks the installed one and the latest. Without a connection, give it a zip with `--zip`.
@@ -46,6 +46,9 @@ Without a command the page opens. The commands answer once (add `--json` for a d
 | `migrate` | only migrate a configuration file, see below |
 | `rollback` | go back to the version before the last update |
 | `history` | the updates made on this installation |
+| `copies` | the copies in the folder of copies: name, state, versions, size, and which one the way back needs |
+| `discard` | `discard --name COPY` deletes ONE copy after you confirm (`--yes` skips the question); the copy the way back needs only with `--force`; a copy of a running update never |
+| `log` | the last lines (`--lines N`, at most 2000) of the log of the process of the last update, with the values after token, secret or password hidden |
 
 ## Options
 
@@ -94,6 +97,7 @@ Without a command the page opens. The commands answer once (add `--json` for a d
 - It listens only on 127.0.0.1 with an ephemeral token, refuses cross-site requests, runs nothing from the zip, uses no shell and writes only inside the installation and the folder of copies.
 - Before changing anything it makes a copy of the package, the configuration and the data; if a step fails the copy is restored and a report written. If even the return fails, the copy is intact and the report says how to restore it by hand.
 - Offline: `--zip FILE` with `--sha256` (or a SHA256SUMS next to it). Docker: the volume is updated, the image is not replaced from inside (`--allow-container` to force).
+- The page shows the copies and a button **Discard copy** for each one (it asks first, and twice for the copy the way back needs), and a button to read the whole log of the process of the last update. Discarding deletes only that copy, never the installation or the data, and is written in the history.
 
 ## Exit codes
 

@@ -29,6 +29,7 @@
   <img src="https://img.shields.io/badge/Tests-5570_passing-brightgreen.svg" alt="5570 tests">
   <img src="https://img.shields.io/badge/Tests-5576_passing-brightgreen.svg" alt="5576 tests">
   <img src="https://img.shields.io/badge/Tests-5597_passing-brightgreen.svg" alt="5597 tests">
+  <img src="https://img.shields.io/badge/Tests-5580_passing-brightgreen.svg" alt="5580 tests">
 </p>
 
 > Watches the workflows of every repository you own and tells you, on one local page, what is red, what is stuck and what is waiting for you.
@@ -110,6 +111,7 @@ Method, assumptions and how to measure it in your own use: [`monitor/docs/PRODUC
 | **Tests** | 5575 test methods (`python -m unittest discover -s monitor/tests`) |
 | **Tests** | 5565 test methods (`python -m unittest discover -s monitor/tests`) |
 | **Tests** | 5571 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 5580 test methods (`python -m unittest discover -s monitor/tests`) |
 | **Settings** | 888 settings, all with help |
 | **Tests** | 5574 test methods (`python -m unittest discover -s monitor/tests`) |
 | **Settings** | 897 settings, all with help |

@@ -2036,7 +2036,7 @@ AI_MODEL_POST = ("/api/ai/models/refresh", "/api/ai/models/test", "/api/ai/model
 THIS_COMPUTER_ACTIONS = ("/api/ai/actions/confirm", "/api/ai/actions/review", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test") + AI_MODEL_POST
 THIS_COMPUTER_ADVANCED = ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures", "/api/ai/prompts/clear",
                           "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run", "/api/report-files/summary", "/api/ops/backup", "/api/ops/purge",
-                          "/api/updates/check", "/api/updates/plan", "/api/updates/apply", "/api/updates/rollback", "/api/webhook/redeliver", "/api/credential/probe")
+                          "/api/updates/check", "/api/updates/plan", "/api/updates/apply", "/api/updates/rollback", "/api/updates/discard", "/api/webhook/redeliver", "/api/credential/probe")
 THIS_COMPUTER_POST = THIS_COMPUTER_ACTIONS + THIS_COMPUTER_ADVANCED
 
 
@@ -4431,7 +4431,7 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             self.updates_stream()
-        elif path in ("/api/updates/status", "/api/updates/progress", "/api/updates/history"):      # the Updates menu: what is installed, what is new, the progress of an update, the updates done (Complete only; no path, no secret)
+        elif path in ("/api/updates/status", "/api/updates/progress", "/api/updates/history", "/api/updates/log", "/api/updates/copies"):      # the Updates menu: what is installed, what is new, the progress of an update, the updates done (Complete only; no path, no secret)
             if not self.guard():
                 return
             from github_actions_monitor.ops import updates
@@ -4439,6 +4439,12 @@ class Handler(BaseHTTPRequestHandler):
                 self.json_reply(updates.progress())
             elif path.endswith("history"):
                 self.json_reply({"entries": updates.history()})
+            elif path.endswith("/log"):      # the last lines of the log of the process of the last update (the values after token, secret, password are hidden); Complete only
+                from urllib.parse import parse_qs
+                ask = {k: v[0] for k, v in parse_qs(self.path.partition("?")[2]).items() if v}
+                self.json_reply(updates.process_log(whole(ask.get("lines"), 200)))
+            elif path.endswith("/copies"):      # the copies in the folder of copies: name, status, versions, size, whether one can be discarded; Complete only
+                self.json_reply({"copies": updates.copies()})
             else:
                 self.json_reply(updates.status(toolconfig.raw_config(), TOOL_VERSION, update_info(read=False), lite=LITE["on"], demo=DEMO["on"]))
         elif path == "/api/ops/status":      # the operation of the installation: the last copy, the schedule, the purge switch and the retention in force (Complete only; no path, no secret)
@@ -5106,6 +5112,10 @@ def handle_updates_post(path, request, who, config):
         if path.endswith("/apply"):
             answer = updates.apply(target, policy, request.get("confirm"), edition, lang, lite=LITE["on"], demo=DEMO["on"], helper=updates.helper_on(toolconfig.raw_config()))
             _audit_plain("update_apply", who, target, {"from": answer.get("from")}, "ok")
+            return {"ok": True, **answer}
+        if path.endswith("/discard"):
+            answer = updates.discard(str(request.get("name") or "")[:120], request.get("confirm"), request.get("force"), lite=LITE["on"], demo=DEMO["on"])
+            _audit_plain("update_discard", who, answer["discarded"], {"freed": answer["freed"]}, "ok")
             return {"ok": True, **answer}
         if path.endswith("/rollback"):
             answer = updates.rollback(request.get("confirm"), edition, lang, lite=LITE["on"], demo=DEMO["on"], helper=updates.helper_on(toolconfig.raw_config()))
