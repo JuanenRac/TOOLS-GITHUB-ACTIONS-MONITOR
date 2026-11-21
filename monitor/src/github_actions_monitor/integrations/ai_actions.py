@@ -29,7 +29,7 @@ FILE_RE = re.compile(r"^[A-Za-z0-9._-]{1,80}\.ya?ml\Z")
 JOB_RE = re.compile(r"^[A-Za-z0-9_-]{1,60}\Z")
 CLOSED_LIST = ("rerun_failed", "rerun", "close_issue", "act_local")
 RUNNABLE = ("rerun_failed", "rerun", "close_issue")        # act_local is only a suggestion
-DEFAULTS = {"enabled": False, "execute": False, "allowed": ["rerun_failed", "close_issue"], "max_per_hour": 5, "ttl_seconds": 600}
+DEFAULTS = {"enabled": False, "execute": False, "require_approval": False, "allowed": ["rerun_failed", "close_issue"], "max_per_hour": 5, "ttl_seconds": 600}
 LOCK_AFTER = 2
 # the shapes the module recognises in a text (owner/repo is optional in the text: the repository comes from the context, never from here)
 _PATTERNS = [
@@ -45,7 +45,7 @@ def settings(config):
     out = {**DEFAULTS, "allowed": list(DEFAULTS["allowed"])}
     user = ((config or {}).get("ai") or {}).get("actions") if isinstance((config or {}).get("ai"), dict) else None
     if isinstance(user, dict):
-        for key in ("enabled", "execute"):
+        for key in ("enabled", "execute", "require_approval"):
             if isinstance(user.get(key), bool):
                 out[key] = user[key]
         if isinstance(user.get("allowed"), list):
@@ -103,7 +103,7 @@ class Actions:
                     argv = ["gh", "run", "rerun", str(number), "-R", f"{owner}/{repo}"] + (["--failed"] if action == "rerun_failed" else [])
                 command = " ".join(argv)
             ident = secrets.token_hex(8)
-            proposal = {"id": ident, "action": action, "command": command, "runnable": action in RUNNABLE and cfg["execute"], "argv": argv, "repo": repo, "at": self.clock(), "ttl": cfg["ttl_seconds"]}
+            proposal = {"id": ident, "action": action, "command": command, "runnable": action in RUNNABLE and cfg["execute"], "argv": argv, "repo": repo, "at": self.clock(), "ttl": cfg["ttl_seconds"], "status": "pending", "by": ""}
             with self.lock:
                 self.pending[ident] = proposal
                 for key in [k for k, v in self.pending.items() if self.clock() - v["at"] > v["ttl"]]:
@@ -113,7 +113,7 @@ class Actions:
 
     # ---- level 4
     def run(self, ident, command, config, runner=None):
-        """Runs the proposal `ident` when `command` is exactly its text. Returns {"ok", "reason", ...}; reasons: off, unknown, expired, mismatch, locked, rate, failed, ok."""
+        """Runs the proposal `ident` when `command` is exactly its text. Returns {"ok", "reason", ...}; reasons: off, unknown, expired, mismatch, rejected, not_approved, locked, rate, failed, ok."""
         cfg = settings(config)
         if not cfg["enabled"] or not cfg["execute"]:
             return {"ok": False, "reason": "off"}
@@ -126,6 +126,10 @@ class Actions:
                 return {"ok": False, "reason": "expired"}
             if command != proposal["command"] or not proposal["argv"] or proposal["action"] not in RUNNABLE or proposal["action"] not in cfg["allowed"]:
                 return {"ok": False, "reason": "mismatch"}
+            if proposal.get("status") == "rejected":
+                return {"ok": False, "reason": "rejected"}
+            if cfg["require_approval"] and proposal.get("status") != "approved":
+                return {"ok": False, "reason": "not_approved"}
             if self.locked:
                 return {"ok": False, "reason": "locked"}
             self.recent = [t for t in self.recent if self.clock() - t < 3600]
@@ -147,6 +151,37 @@ class Actions:
                 self.locked = True
         self._log({"action": proposal["action"], "repo": proposal["repo"], "command": proposal["command"], "code": code, "output": tail})
         return {"ok": code == 0, "reason": "ok" if code == 0 else "failed", "code": code, "locked": self.locked}
+
+    # ---- review (approve or reject a proposal before it is run)
+    def listing(self, config):
+        """The proposals that wait (not expired), oldest first, WITHOUT the argument list: {"id", "action", "command", "repo", "runnable", "status", "by", "age_s", "expires_in_s"}.
+        `status` is pending, approved or rejected; with `ai.actions.require_approval` a proposal runs only when it is approved."""
+        now, out = self.clock(), []
+        with self.lock:
+            for key in [k for k, v in self.pending.items() if now - v["at"] > v["ttl"]]:
+                del self.pending[key]
+            for proposal in sorted(self.pending.values(), key=lambda v: v["at"]):
+                out.append({"id": proposal["id"], "action": proposal["action"], "command": proposal["command"], "repo": proposal["repo"], "runnable": proposal["runnable"],
+                            "status": proposal.get("status", "pending"), "by": proposal.get("by", ""), "age_s": int(now - proposal["at"]), "expires_in_s": max(0, int(proposal["ttl"] - (now - proposal["at"])))})
+        return out
+
+    def review(self, ident, decision, who=""):
+        """Approves or rejects the proposal `ident` (decision "approve" or "reject"), recording who did it. Returns {"ok", "reason", "status"}; reasons: bad_decision, unknown, expired, decided, ok.
+        A decision is final: a proposal that was approved or rejected is not changed again. Nothing is run here."""
+        if decision not in ("approve", "reject"):
+            return {"ok": False, "reason": "bad_decision"}
+        with self.lock:
+            proposal = self.pending.get(str(ident))
+            if proposal is None:
+                return {"ok": False, "reason": "unknown"}
+            if self.clock() - proposal["at"] > proposal["ttl"]:
+                del self.pending[str(ident)]
+                return {"ok": False, "reason": "expired"}
+            if proposal.get("status", "pending") != "pending":
+                return {"ok": False, "reason": "decided", "status": proposal["status"]}
+            proposal["status"], proposal["by"] = ("approved" if decision == "approve" else "rejected"), str(who or "")[:60]
+        self._log({"action": proposal["action"], "repo": proposal["repo"], "command": proposal["command"], "review": proposal["status"], "by": proposal["by"]})
+        return {"ok": True, "reason": "ok", "status": proposal["status"]}
 
     def unlock(self):
         with self.lock:
@@ -179,7 +214,7 @@ class Actions:
 
     def state(self, config):
         cfg = settings(config)
-        return {"enabled": cfg["enabled"], "execute": cfg["execute"], "locked": self.locked, "pending": len(self.pending), "allowed": cfg["allowed"],
+        return {"enabled": cfg["enabled"], "execute": cfg["execute"], "locked": self.locked, "pending": len(self.pending), "require_approval": cfg["require_approval"], "allowed": cfg["allowed"],
                 "ran_last_hour": len([t for t in self.recent if self.clock() - t < 3600]), "max_per_hour": cfg["max_per_hour"]}
 
 

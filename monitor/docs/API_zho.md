@@ -63,8 +63,9 @@ curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/re
 | `/api/act/status` | 正在进行的本地运行的状态。 |
 | `/api/act/stop` | POST，本机。停止本地运行。 |
 | `/api/advanced` | 您主动开启的功能的状态：网络、GitHub 令牌的存放、GitHub 上的操作、本地运行和演示模式；绝不含令牌。 |
-| `/api/ai/actions` | AI 操作的状态（是否锁定）、其日志以及 AI 的状态。 |
+| `/api/ai/actions` | AI 操作的状态（是否锁定）、其日志、等待中的提案（`proposals`）以及 AI 的状态。 |
 | `/api/ai/actions/confirm` | POST，本机。在您确认后执行 AI 提出的一项操作；会被记录。 |
+| `/api/ai/actions/review` | POST，本机。批准或拒绝一条 AI 提案（`id`、`decision`）；会被记录。不会执行任何操作。 |
 | `/api/ai/actions/unlock` | POST，本机。在限定时间内解锁 AI 的操作；会被记录。 |
 | `/api/ai/budget` | 每个 AI 模型今天的调用次数和估算成本、限额以及最近的失败；不会询问任何提供商。 |
 | `/api/ai/test` | POST，本机。测试已配置 AI 的连接；不会改变任何内容。 |

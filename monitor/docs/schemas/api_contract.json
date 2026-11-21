@@ -49,7 +49,7 @@
   {"path": "/api/runners", "complete": {"enabled": "bool", "runners": "list", "counts": {"idle": "number", "busy": "number", "offline": "number"}, "errors": "int"}, "lite": 404},
   {"path": "/api/mirror", "complete": {"enabled": "bool", "folder_set": "bool", "max_mb": "int", "keep_days": "int", "count": "int", "mb": "number"}, "lite": 404},
   {"path": "/api/act/status", "complete": {"running": "bool", "exit": "any", "plan": "any", "lines": "list", "total": "int"}, "lite": 404},
-  {"path": "/api/ai/actions", "complete": {"state": {"enabled": "bool", "execute": "bool", "locked": "bool", "pending": "number", "allowed": "list", "ran_last_hour": "number", "max_per_hour": "number"}, "log": "list", "ai": "any"}, "lite": 404}
+  {"path": "/api/ai/actions", "complete": {"state": {"enabled": "bool", "execute": "bool", "locked": "bool", "pending": "number", "require_approval": "bool", "allowed": "list", "ran_last_hour": "number", "max_per_hour": "number"}, "log": "list", "proposals": "list", "ai": "any"}, "lite": 404}
  ],
  "errors": [
   {"method": "GET", "path": "/api/nope", "status": 404, "editions": ["complete", "lite"]},

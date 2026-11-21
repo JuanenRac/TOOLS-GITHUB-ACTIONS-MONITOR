@@ -396,7 +396,8 @@ def savings_report(config):
     figures = savings.stats(config)
     graphql = graphql_checks.stats(config) or {}
     etag = ETAG["cache"].stats() if ETAG["cache"] else None
-    return {"ways": [{"id": "etag", "on": bool(config.get("network", {}).get("etag", True)), "spared": (etag or {}).get("saved", 0)},
+    return {"ways": [{"id": "etag", "on": bool(config.get("network", {}).get("etag", True)), "spared": (etag or {}).get("saved", 0), "saved": (etag or {}).get("saved", 0), "calls": (etag or {}).get("calls", 0),
+                      "no_etag": (etag or {}).get("no_etag", 0), "invalid": (etag or {}).get("invalid", 0), "hit_pct": (etag or {}).get("hit_pct")},
                      {"id": "graphql", "on": graphql_checks.settings(config)["enabled"], "spared": max(0, graphql.get("repos", 0) - graphql.get("calls", 0))},
                      {"id": "webhook", "on": cfg["webhook_first"], "spared": figures["webhook"]},
                      {"id": "feed", "on": cfg["feeds"]["enabled"] and cfg["feeds"]["method"] in ("atom", "auto"), "spared": figures["feed"]},
@@ -2022,7 +2023,7 @@ def panel_list(lang=None):
 # The POST routes that the monitor accepts only from the computer it runs on (guard + this_computer): from the network they answer 403 `local_only`. The handler reads these two lists and the generated
 # references of the skills for the AIs (tools/make_skill_refs.py) read the same ones, so the table an AI reads cannot disagree with the code.
 AI_MODEL_POST = ("/api/ai/models/refresh", "/api/ai/models/test", "/api/ai/models/data", "/api/ai/doctor")      # the list of models of the provider, the test of one model, the table of data, the doctor
-THIS_COMPUTER_ACTIONS = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test") + AI_MODEL_POST
+THIS_COMPUTER_ACTIONS = ("/api/ai/actions/confirm", "/api/ai/actions/review", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test") + AI_MODEL_POST
 THIS_COMPUTER_ADVANCED = ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures", "/api/ai/prompts/clear",
                           "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run", "/api/report-files/summary", "/api/ops/backup", "/api/ops/purge",
                           "/api/updates/check", "/api/updates/plan", "/api/updates/apply", "/api/updates/rollback", "/api/webhook/redeliver", "/api/credential/probe")
@@ -4499,7 +4500,7 @@ class Handler(BaseHTTPRequestHandler):
             from github_actions_monitor.integrations import ai_actions
             from github_actions_monitor.sentinels import sentinel_ai
             sentinel = SENTINEL["obj"]
-            self.json_reply({"state": ai_actions.ACTIONS.state(toolconfig.raw_config()), "log": ai_actions.ACTIONS.log(),
+            self.json_reply({"state": ai_actions.ACTIONS.state(toolconfig.raw_config()), "log": ai_actions.ACTIONS.log(), "proposals": ai_actions.ACTIONS.listing(toolconfig.raw_config()),
                              "ai": sentinel_ai.status(sentinel.ai_cfg, sentinel.ai_store) if sentinel is not None and sentinel.ai_cfg["provider"] != "none" else None})
         elif path.startswith("/api/data"):
             if not self.guard():
@@ -4571,8 +4572,12 @@ def alerts_payload(ask):
     extra = credential_alerts() + score_alerts() + runner_alerts() + mark_alerts()
     everything = alert_center.collect(registry, extra=extra)
     chosen = alert_center.select(everything, ask.get("sentinel", ""), ask.get("level", ""), ask.get("muted", "show") if ask.get("muted") in ("show", "hide", "only") else "show")
-    return {"schema": 1, "account": CHILD["account"] or None, "alerts": chosen, "summary": alert_center.summary(everything), "mutes": alert_center.active(), "history": alert_center.history(20),
-            "mute_hours": alert_center.hours_setting(LIVE_CONFIG or toolconfig.raw_config()), "sentinels": (registry.names() if registry else []) + (["system"] if extra else [])}
+    out = {"schema": 1, "account": CHILD["account"] or None, "alerts": chosen, "summary": alert_center.summary(everything), "mutes": alert_center.active(), "history": alert_center.history(20),
+           "mute_hours": alert_center.hours_setting(LIVE_CONFIG or toolconfig.raw_config()), "sentinels": (registry.names() if registry else []) + (["system"] if extra else [])}
+    if ask.get("since"):      # ?since=24h: the alerts that were open at some moment of that time, closed ones too (the ledger of what was seen)
+        seconds = alert_center.parse_since(ask["since"])
+        out["since"] = {"seconds": seconds, "error": None if seconds else "bad_since", "alerts": alert_center.recent(seconds, ask.get("sentinel", ""), ask.get("level", "")) if seconds else []}
+    return out
 
 
 def service_mode():

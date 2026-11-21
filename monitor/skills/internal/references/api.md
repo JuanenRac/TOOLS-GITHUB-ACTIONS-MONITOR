@@ -24,6 +24,7 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/ai/ack` | POST | maintainer | acknowledge an alert of the feed: changes only the local state, never GitHub (this computer only) |
 | `/api/ai/actions` | GET | viewer | the log of the actions that the AI proposed and a person confirmed |
 | `/api/ai/actions/confirm` | POST | admin | a person confirms one action proposed by the AI (this computer only) |
+| `/api/ai/actions/review` | POST | admin | a person approves or rejects one action proposed by the AI; nothing runs (this computer only) |
 | `/api/ai/actions/unlock` | POST | admin | a person unlocks the actions of the AI for a short time (this computer only) |
 | `/api/ai/alerts` | GET | viewer | the feed of alerts since a moment (`?since=SECONDS`), each alert with `first_failed`, `last_failed`, `last_checked` (epoch seconds) and a `status` (failed, suppressed or passed) |
 | `/api/ai/brief` | GET | viewer | the short brief of the real open alerts (Markdown, or `?fmt=json`) |

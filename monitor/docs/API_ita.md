@@ -63,8 +63,9 @@ Queste route servono la pagina e gli strumenti di questo computer. Non fanno par
 | `/api/act/status` | Lo stato dell'esecuzione locale in corso. |
 | `/api/act/stop` | POST, questo computer. Ferma l'esecuzione locale. |
 | `/api/advanced` | Lo stato delle funzioni che si attivano per scelta: la rete, l'archivio del token di GitHub, le azioni su GitHub, l'esecuzione locale e la modalità demo; mai un token. |
-| `/api/ai/actions` | Lo stato delle azioni dell'IA (bloccate o no), il loro registro e lo stato dell'IA. |
+| `/api/ai/actions` | Lo stato delle azioni dell'IA (bloccate o no), il loro registro, le proposte in attesa (`proposals`) e lo stato dell'IA. |
 | `/api/ai/actions/confirm` | POST, questo computer. Esegue un'azione proposta dall'IA, dopo la tua conferma; viene registrata. |
+| `/api/ai/actions/review` | POST, questo computer. Approva o rifiuta una proposta dell'IA (`id`, `decision`); viene registrato. Non viene eseguito nulla. |
 | `/api/ai/actions/unlock` | POST, questo computer. Sblocca le azioni dell'IA per un tempo limitato; viene registrato. |
 | `/api/ai/budget` | Le chiamate e il costo stimato di oggi per ogni modello di IA, i limiti e gli ultimi guasti; non interroga alcun fornitore. |
 | `/api/ai/test` | POST, questo computer. Verifica la connessione dell'IA configurata; non cambia nulla. |

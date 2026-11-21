@@ -7,7 +7,7 @@
 
 Generated from the code. It reads what the running monitor says (and never writes to GitHub). `--json` prints one JSON document; the exit codes are stable.
 
-Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `briefs`, `api`, `install-skill`, `gh-token`, `ai`, `backup`, `update`, `compare`, `screens`, `toolbox`, `watch`, `completions`, `kiosk`, `metrics`.
+Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `briefs`, `api`, `install-skill`, `gh-token`, `ai`, `backup`, `update`, `compare`, `screens`, `toolbox`, `watch`, `completions`, `kiosk`, `metrics`, `proposals`.
 
 | flag | what |
 | --- | --- |
@@ -33,6 +33,7 @@ Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `
 | `--sentinel` | alerts: only this sentinel |
 | `--level` | alerts: only this level |
 | `--muted` | alerts: show, hide (default) or list only the silenced ones |
+| `--since` | alerts: the alerts that were open at some moment of this time, closed ones too (90m, 24h, 7d, 2w; at most 90 days) |
 | `--fail-on` | alerts: exit with 5 when an alert of this level or worse is open |
 | `--strict` | doctor: a warning also makes the exit code 3 (without it, warnings still exit 0) |
 | `--force` | backup restore: write over accounts and files that already exist (without it a storage that holds accounts is refused) |

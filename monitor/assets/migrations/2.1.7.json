@@ -4,10 +4,14 @@
  "format": 1,
  "version": "2.1.7",
  "previous": "2.1.6",
- "digest": "fbafd7ae2cf9bab7da5bb2d89507ebd0d05e38f03d335693e1c8f4272b4cc5d4",
+ "digest": "655f1168fcccc783fdb9e1e464df727ab6bd7781cff4250a03dfef3e5c53e89f",
  "data_schema": 2,
  "settings": {
   "added": [
+   {
+    "key": "ai.actions.require_approval",
+    "kind": "bool"
+   },
    {
     "key": "audit_feed.clone_alert.bot_patterns",
     "kind": "names",

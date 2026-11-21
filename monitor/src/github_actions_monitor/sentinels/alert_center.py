@@ -25,6 +25,10 @@ SCOPES = ("alert", "code", "sentinel")
 DEFAULT_HOURS = 24
 MAX_HOURS = 720
 HISTORY = 100
+SEEN_MAX = 500               # alerts followed in the ledger of what was open (the oldest closed ones go first)
+SEEN_KEEP_DAYS = 90          # a closed alert stays this long in the ledger
+RESOLVE_GRACE = 600          # seconds an alert must be missing before it counts as resolved (a restart or a cycle that has not run yet is not a resolution)
+TOUCH_EVERY = 300            # seconds between two writes of "still open"
 LOCK = threading.RLock()
 
 
@@ -38,10 +42,27 @@ def _load():
     try:
         data = state_io.load_json(STATE_FILE)
         if isinstance(data, dict) and isinstance(data.get("active"), list) and isinstance(data.get("history"), list):
-            return {"active": [e for e in data["active"] if _valid_entry(e)], "history": [e for e in data["history"] if isinstance(e, dict) and isinstance(e.get("value"), str)]}
+            return {"active": [e for e in data["active"] if _valid_entry(e)], "history": [e for e in data["history"] if isinstance(e, dict) and isinstance(e.get("value"), str)],
+                    "seen": _clean_seen(data.get("seen"))}
     except (OSError, ValueError):
         pass
-    return {"active": [], "history": []}
+    return {"active": [], "history": [], "seen": {}}
+
+
+def _number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def _clean_seen(raw):
+    """The ledger of the alerts seen, read back: only rows with the two moments and the right types (a file edited by hand never breaks the Alerts tab)."""
+    out = {}
+    for key, row in (raw.items() if isinstance(raw, dict) else []):
+        if isinstance(key, str) and isinstance(row, dict) and _number(row.get("first_seen")) and _number(row.get("last_seen")):
+            out[key] = {"code": str(row.get("code") or "")[:80], "sentinel": str(row.get("sentinel") or "")[:30], "repo": str(row.get("repo") or "")[:140], "level": str(row.get("level") or "")[:12],
+                        "title": str(row.get("title") or "")[:160], "first_seen": float(row["first_seen"]), "last_seen": float(row["last_seen"]),
+                        "resolved_at": float(row["resolved_at"]) if _number(row.get("resolved_at")) else None,
+                        "missing_since": float(row["missing_since"]) if _number(row.get("missing_since")) else None}
+    return out
 
 
 def _valid_entry(entry):
@@ -148,16 +169,78 @@ def changed(entry, alert):
     return bool(now) and str(now) != kept
 
 
+def track(alerts, now=None, complete=True):
+    """The ledger of what was open (`alerts --since`): every alert present keeps its first and last moment; one that is missing is closed only after it has been missing for RESOLVE_GRACE seconds
+    (and only when the list is `complete`: a sentinel that failed to answer closes nothing, because not looking is not fixing). An alert that comes back after it was closed starts a new row.
+    Returns True when something was written. Nothing here reads GitHub."""
+    now = time.time() if now is None else now
+    present = {a["id"]: a for a in alerts if isinstance(a, dict) and isinstance(a.get("id"), str) and a["id"]}
+    with LOCK:
+        data = _load()
+        seen, changed = data["seen"], False
+        for key, alert in present.items():
+            row = seen.get(key)
+            fresh = {"code": str(alert.get("code") or "")[:80], "sentinel": str(alert.get("sentinel") or "")[:30], "repo": str(alert.get("repo") or "")[:140], "level": str(alert.get("level") or "")[:12],
+                     "title": str(alert.get("title") or "")[:160], "first_seen": now, "last_seen": now, "resolved_at": None, "missing_since": None}
+            if row is None or row["resolved_at"] is not None:
+                seen[key], changed = fresh, True
+            elif row["missing_since"] is not None or now - row["last_seen"] >= TOUCH_EVERY or row["level"] != fresh["level"]:
+                row.update(level=fresh["level"], title=fresh["title"], last_seen=now, missing_since=None)
+                changed = True
+        if complete:
+            for key, row in seen.items():
+                if key in present or row["resolved_at"] is not None:
+                    continue
+                if row["missing_since"] is None:
+                    row["missing_since"], changed = now, True
+                elif now - row["missing_since"] >= RESOLVE_GRACE:
+                    row["resolved_at"], changed = row["missing_since"], True
+        old = [k for k, r in seen.items() if r["resolved_at"] is not None and now - r["resolved_at"] > SEEN_KEEP_DAYS * 86400]
+        if len(seen) - len(old) > SEEN_MAX:
+            old += sorted((k for k in seen if k not in old), key=lambda k: (seen[k]["resolved_at"] is None, seen[k]["last_seen"]))[:len(seen) - len(old) - SEEN_MAX]
+        for key in old:
+            del seen[key]
+            changed = True
+        return bool(changed and _save(data))
+
+
+def parse_since(text):
+    """Seconds of a length like 90m, 24h, 7d or 2w (a bare number is seconds), at most SEEN_KEEP_DAYS days; None when it is not one."""
+    import re
+    match = re.fullmatch(r"\s*(\d{1,6})\s*([smhdw]?)\s*", str(text or "").lower())
+    if not match:
+        return None
+    seconds = int(match.group(1)) * {"": 1, "s": 1, "m": 60, "h": 3600, "d": 86400, "w": 604800}[match.group(2)]
+    return seconds if 0 < seconds <= SEEN_KEEP_DAYS * 86400 else None
+
+
+def recent(seconds, sentinel="", level="", now=None):
+    """The ledger rows that were open at some moment of the last `seconds`, newest first: {"id", "code", "sentinel", "repo", "level", "title", "first_seen", "last_seen", "resolved_at", "state"}
+    with the moments as ISO text and `state` "open" or "resolved"."""
+    now = time.time() if now is None else now
+    cutoff, rows = now - seconds, []
+    with LOCK:
+        seen = _load()["seen"]
+    for key, row in seen.items():
+        end = row["resolved_at"] if row["resolved_at"] is not None else now
+        if end < cutoff or (sentinel and row["sentinel"] != sentinel) or (level and row["level"] != level):
+            continue
+        rows.append({"id": key, "code": row["code"], "sentinel": row["sentinel"], "repo": row["repo"] or None, "level": row["level"], "title": row["title"], "first_seen": _iso(row["first_seen"]),
+                     "last_seen": _iso(row["last_seen"]), "resolved_at": _iso(row["resolved_at"]) if row["resolved_at"] is not None else None,
+                     "state": "resolved" if row["resolved_at"] is not None else "open"})
+    return sorted(rows, key=lambda r: r["first_seen"], reverse=True)
+
+
 def collect(registry, now=None, extra=()):
     """Every alert of every sentinel of the registry, each with `muted_until` (None when it is not silenced). A sentinel that fails leaves its alerts out and the others still answer. `extra` are the
     alerts of the system itself (a login of GitHub that no longer works): they belong to no sentinel, carry `sentinel: "system"` and are listed even when there is no registry."""
     live, out = active(now), []
-    alerts = []
+    alerts, complete = [], registry is not None
     if registry is not None:
         try:
             alerts = list(registry.alerts())
         except Exception:       # noqa: BLE001 - the list is for reading; one broken sentinel must not blank the tab
-            alerts = []
+            alerts, complete = [], False
     alerts = list(extra or ()) + alerts
     for alert in alerts:
         if isinstance(alert, dict) and alert.get("id"):
@@ -166,6 +249,10 @@ def collect(registry, now=None, extra=()):
             if hit:      # a permanent silence by pattern (alerts.silences): it has no end, and says why
                 row.update(muted_until=row["muted_until"] or alertflow.FOREVER, muted_permanent=True, muted_reason=hit["reason"], muted_review_by=hit["review_by"])
             out.append(row)
+    try:
+        track(out, now, complete)      # what was open and when (alerts --since); a failure to write it never costs the list
+    except Exception:       # noqa: BLE001
+        pass
     return out
 
 

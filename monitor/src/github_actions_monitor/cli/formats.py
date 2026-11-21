@@ -20,6 +20,7 @@ DEFAULT_FORMAT = "text"
 # command -> (key of the list in the answer, columns). A column is a key of the record or a tuple of alternatives (the first one that has a value).
 LISTS = {
     "alerts": ("alerts", ("sentinel", "level", "code", "repo", "title", "muted_until")),
+    "proposals": ("proposals", ("id", "status", "action", "repo", "command", "expires_in_s")),
     "accounts": ("accounts", ("id", "state", "repos", "running", "failing")),
     "team": ("ranking", ("state", "risk", "repo", "alerts", "red_workflows")),
     "live": ("events", ("at", "repo", ("name", "workflow", "event"), "status", "conclusion")),

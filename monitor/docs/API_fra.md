@@ -63,8 +63,9 @@ Ces routes servent la page et les outils de cet ordinateur. Elles ne font pas pa
 | `/api/act/status` | L'état de l'exécution locale en cours. |
 | `/api/act/stop` | POST, cet ordinateur. Arrête l'exécution locale. |
 | `/api/advanced` | L'état des fonctions que l'on active par choix : le réseau, le coffre du jeton GitHub, les actions sur GitHub, l'exécution locale et le mode démo ; jamais un jeton. |
-| `/api/ai/actions` | L'état des actions de l'IA (verrouillées ou non), leur journal et l'état de l'IA. |
+| `/api/ai/actions` | L'état des actions de l'IA (verrouillées ou non), leur journal, les propositions en attente (`proposals`) et l'état de l'IA. |
 | `/api/ai/actions/confirm` | POST, cet ordinateur. Exécute une action proposée par l'IA, après votre confirmation ; consignée. |
+| `/api/ai/actions/review` | POST, cet ordinateur. Approuve ou rejette une proposition de l'IA (`id`, `decision`) ; consigné. Rien n'est exécuté. |
 | `/api/ai/actions/unlock` | POST, cet ordinateur. Déverrouille les actions de l'IA pour une durée limitée ; consigné. |
 | `/api/ai/budget` | Les appels et le coût estimé d'aujourd'hui pour chaque modèle d'IA, les limites et les dernières pannes ; n'interroge aucun fournisseur. |
 | `/api/ai/test` | POST, cet ordinateur. Teste la connexion de l'IA configurée ; ne change rien. |
