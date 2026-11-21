@@ -52,6 +52,14 @@ python bin/monitor_cli.py watch branch --single-pass --format json
 - `--wait SECONDS`: 実行の完了を待つ時間で、超えると 1 で諦めます（10～86400）。指定しない場合は設定 `cli.watch.branch_timeout_seconds`（900）です。
 - デタッチされたコミットにはブランチがないので `--branch` を指定してください。GitHub 上の `origin` というリモートがないフォルダーには `--repo` が必要です。
 
+## `monitor N`：更新され続ける画面
+
+`monitor_cli.py monitor [N]` は N 秒ごとに読み直す `watch status` です（1 から 9999 までの数。`cli.watch.min_interval_seconds` まで引き上げられます。N を省くと `cli.watch.default_interval_seconds` の既定値）。その他のオプションは `watch` と同じ（`--format`、`--no-clear`、`--url`、`--status-codes operator` など）で、Ctrl-C で終了コード 0 で終わります。
+
+## `doctor --latency`：イベントの遅れ
+
+`monitor_cli.py doctor --latency` はドクターにチェックを 1 つ加えます。アカウントのイベント（無料の変更検出 `events_feed` が使うのと同じ一覧）と、直近の push について同じコミットの実行を読み、往復時間、実行開始からイベントまでの遅れの中央値と最悪値、そしてあなたの `events_feed.interval_seconds` での最悪の待ち時間を示します（`--json` の `data` フィールド）。読み取りのみで、GitHub にはテスト用のイシューも実行も作りません。読み取りに失敗すると、原因付きの「評価不能」の警告になり、モニターの障害にはなりません。遅れが 120 秒を超えると警告します。
+
 ## `completions`：コマンドの補完
 
 ```
@@ -79,7 +87,7 @@ python bin/monitor_cli.py completions powershell | Out-String | Invoke-Expressio
 
 ### オペレーター向け `status` の終了コード
 
-既定では `status` は上の表のコードのままで、スクリプトは変わりません。`--status-codes operator`（または設定 `cli.status_codes` を `operator` に）にすると、コマンドは 3 つだけを返します。**0** 正常、**1** 何も応答しない（モニターに届かない、または資格情報が拒否される）、**2** 稼働中だが要注意。要注意とは、モニターが GitHub に届かない、まだデータがない、資格情報が盲目、残り枠が下限を下回って更新が一時停止している、答えにエラーがある、モニターのものではない答え、または **ディスク上のコードが実行中のプロセスと別のバージョン**（更新後にモニターを再起動していない。`/api/health` は `code_stale` で伝え、`--doctor` には `running` の確認があります）のいずれかです。使い方の誤りは引き続き 1 です。理由は `--json` の `attention` フィールドにあります。赤いワークフローの失敗は含まれません。それには `alerts --fail-on` を使ってください。
+既定では `status` は上の表のコードのままで、スクリプトは変わりません。`--status-codes operator`（または設定 `cli.status_codes` を `operator` に）にすると、コマンドは 3 つだけを返します。**0** 正常、**1** 何も応答しない（モニターに届かない、または資格情報が拒否される）、**2** 稼働中だが要注意。要注意とは、モニターが GitHub に届かない、まだデータがない、資格情報が盲目、残り枠が下限を下回って更新が一時停止している、答えにエラーがある、モニターのものではない答え、または **ディスク上のコードが実行中のプロセスと別のバージョン**（更新後にモニターを再起動していない。`/api/health` は `code_stale` で伝え、`--doctor` には `running` の確認があります）のいずれかです。使い方の誤りは引き続き 1 です。理由は `--json` の `attention` フィールドにあります。赤いワークフローの失敗は含まれません。それには `alerts --fail-on` を使ってください。 `watch status` は読み取りに失敗したときも同じコードに従います。到達できない、または認証情報を拒否するモニターではループが 1 で、読み取れない応答では 2 で終了します。
 
 ## `jq` の例
 

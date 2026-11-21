@@ -52,6 +52,14 @@ python bin/monitor_cli.py watch branch --single-pass --format json
 - `--wait SEKUNDEN`: wie lange auf das Ende der Läufe gewartet wird, bevor mit 1 aufgegeben wird (10 bis 86400). Ohne sie gilt die Einstellung `cli.watch.branch_timeout_seconds` (900).
 - Ein losgelöster Commit hat keinen Branch: gib `--branch` an. Ein Ordner ohne Remote namens `origin` auf GitHub braucht `--repo`.
 
+## `monitor N`: ein Bildschirm, der sich aktualisiert
+
+`monitor_cli.py monitor [N]` ist `watch status`, das alle N Sekunden neu liest (eine Zahl von 1 bis 9999, auf `cli.watch.min_interval_seconds` angehoben; ohne N der Standard von `cli.watch.default_interval_seconds`). Die übrigen Optionen funktionieren wie bei `watch` (`--format`, `--no-clear`, `--url`, `--status-codes operator` ...), und Strg-C beendet es mit 0.
+
+## `doctor --latency`: wie spät die Ereignisse sind
+
+`monitor_cli.py doctor --latency` fügt dem Doctor eine Prüfung hinzu. Sie liest die Ereignisse des Kontos (dieselbe Liste wie der kostenlose Änderungsdetektor `events_feed`) und für die letzten Pushes den Lauf desselben Commits und nennt die Antwortzeit, den Median und die größte Verzögerung zwischen Laufbeginn und Ereignis sowie die längste Wartezeit einer Änderung mit Ihrem `events_feed.interval_seconds` (im Feld `data` von `--json`). Sie liest nur: Auf GitHub wird nichts angelegt, weder Test-Issues noch Testläufe. Ein fehlgeschlagener Lesezugriff ergibt die Warnung „nicht auswertbar“ mit der Ursache, nie einen Fehler des Monitors. Ab 120 Sekunden Verzögerung warnt die Prüfung.
+
 ## `completions`: Befehle vervollständigen
 
 ```
@@ -79,7 +87,7 @@ Die Codes 0 bis 5 sind die aus [CLI_deu.md](CLI_deu.md); ein Test hält diese Ta
 
 ### Die Exit-Codes von `status` für einen Betreiber
 
-Standardmäßig behält `status` die Codes der Tabelle oben, kein Skript ändert sich. Mit `--status-codes operator` (oder der Einstellung `cli.status_codes` auf `operator`) sagt der Befehl nur drei Dinge: **0** gesund, **1** nichts liefert (der Monitor ist nicht erreichbar oder lehnt die Zugangsdaten ab) und **2** läuft, braucht aber Aufmerksamkeit. Aufmerksamkeit heißt: der Monitor erreicht GitHub nicht, es gibt noch keine Daten, die Zugangsdaten sind blind, die Aktualisierung ist pausiert, weil das Kontingent unter seiner Untergrenze liegt, die Antwort enthält einen Fehler, eine Antwort, die nicht die eines Monitors ist, oder **der Code auf der Platte hat eine andere Version als der laufende Prozess** (ein Update wurde eingespielt und der Monitor nicht neu gestartet; `/api/health` meldet es als `code_stale`, und `--doctor` hat die Prüfung `running`). Ein Aufruffehler bleibt 1. Die Gründe stehen im Feld `attention` von `--json`. Fehler roter Workflows gehören nicht dazu: dafür `alerts --fail-on`.
+Standardmäßig behält `status` die Codes der Tabelle oben, kein Skript ändert sich. Mit `--status-codes operator` (oder der Einstellung `cli.status_codes` auf `operator`) sagt der Befehl nur drei Dinge: **0** gesund, **1** nichts liefert (der Monitor ist nicht erreichbar oder lehnt die Zugangsdaten ab) und **2** läuft, braucht aber Aufmerksamkeit. Aufmerksamkeit heißt: der Monitor erreicht GitHub nicht, es gibt noch keine Daten, die Zugangsdaten sind blind, die Aktualisierung ist pausiert, weil das Kontingent unter seiner Untergrenze liegt, die Antwort enthält einen Fehler, eine Antwort, die nicht die eines Monitors ist, oder **der Code auf der Platte hat eine andere Version als der laufende Prozess** (ein Update wurde eingespielt und der Monitor nicht neu gestartet; `/api/health` meldet es als `code_stale`, und `--doctor` hat die Prüfung `running`). Ein Aufruffehler bleibt 1. Die Gründe stehen im Feld `attention` von `--json`. Fehler roter Workflows gehören nicht dazu: dafür `alerts --fail-on`. `watch status` folgt denselben Codes auch bei einem Lesefehler: Ein nicht erreichbarer Monitor oder eine abgelehnte Anmeldung beendet die Schleife mit 1, eine nicht lesbare Antwort mit 2.
 
 ## Beispiele mit `jq`
 

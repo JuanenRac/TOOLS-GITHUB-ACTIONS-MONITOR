@@ -52,6 +52,14 @@ python bin/monitor_cli.py watch branch --single-pass --format json
 - `--wait SECONDS`: how long to wait for the runs to finish before giving up with 1 (10 to 86400). Without it the wait is the setting `cli.watch.branch_timeout_seconds` (900).
 - A detached commit has no branch: give `--branch`. A folder without a remote called `origin` on GitHub needs `--repo`.
 
+## `monitor N`: a screen that refreshes
+
+`monitor_cli.py monitor [N]` is `watch status` that reads again every N seconds (a number from 1 to 9999, raised to `cli.watch.min_interval_seconds`; without N the default of `cli.watch.default_interval_seconds`). The other options work as in `watch` (`--format`, `--no-clear`, `--url`, `--status-codes operator` ...), and Ctrl-C ends it with 0.
+
+## `doctor --latency`: how late the events are
+
+`monitor_cli.py doctor --latency` adds one check to the doctor. It reads the events of the account (the same list the free change detector `events_feed` uses) and, for the latest pushes, the run of that very commit, and tells the round trip, the median and the worst delay between the start of the run and the event, and how long a change can wait in the worst case with your `events_feed.interval_seconds` (in the field `data` of `--json`). It only reads: nothing is created on GitHub, no test issue or run. A read that fails gives a warning "not evaluable" with its cause, never a failure of the monitor. Over 120 seconds of delay the check warns.
+
 ## `completions`: complete the commands
 
 ```
@@ -79,7 +87,7 @@ The codes 0 to 5 are the ones of [CLI.md](CLI.md); a test keeps this table and t
 
 ### The exit codes of `status` for an operator
 
-By default `status` keeps the codes of the table above, so no script changes. With `--status-codes operator` (or the setting `cli.status_codes` set to `operator`) the command says only three things: **0** healthy, **1** nothing is serving (the monitor cannot be reached or refuses the credential) and **2** it is up but needs attention. Needs attention means: GitHub cannot be reached from the monitor, there is no data yet, the credential is blind, the refresh is paused because the allowance is under its floor, the answer carries an error, an answer that is not the one of a monitor, or **the code on the disk is of another version than the running process** (an update was applied and the monitor was not restarted; `/api/health` says it as `code_stale` and `--doctor` has the check `running`). A usage error is still 1. The reasons are in the field `attention` of `--json`. The failures of red workflows are not part of it: for those use `alerts --fail-on`.
+By default `status` keeps the codes of the table above, so no script changes. With `--status-codes operator` (or the setting `cli.status_codes` set to `operator`) the command says only three things: **0** healthy, **1** nothing is serving (the monitor cannot be reached or refuses the credential) and **2** it is up but needs attention. Needs attention means: GitHub cannot be reached from the monitor, there is no data yet, the credential is blind, the refresh is paused because the allowance is under its floor, the answer carries an error, an answer that is not the one of a monitor, or **the code on the disk is of another version than the running process** (an update was applied and the monitor was not restarted; `/api/health` says it as `code_stale` and `--doctor` has the check `running`). A usage error is still 1. The reasons are in the field `attention` of `--json`. The failures of red workflows are not part of it: for those use `alerts --fail-on`. `watch status` follows the same codes also when a read fails: a monitor that cannot be reached or refuses the credential ends the loop with 1, an answer that cannot be read with 2.
 
 ## Examples with `jq`
 

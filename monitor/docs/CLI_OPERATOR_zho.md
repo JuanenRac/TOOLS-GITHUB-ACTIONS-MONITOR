@@ -52,6 +52,14 @@ python bin/monitor_cli.py watch branch --single-pass --format json
 - `--wait 秒数`：等待运行结束的时间，超时则以 1 放弃（10 到 86400）。不使用它时，等待时间为设置 `cli.watch.branch_timeout_seconds`（900）。
 - 游离提交没有分支：请提供 `--branch`。没有指向 GitHub 的 `origin` 远程的文件夹需要 `--repo`。
 
+## `monitor N`：自动刷新的屏幕
+
+`monitor_cli.py monitor [N]` 即每 N 秒重新读取一次的 `watch status`（1 到 9999 之间的数字，会提高到 `cli.watch.min_interval_seconds`；省略 N 时使用 `cli.watch.default_interval_seconds` 的默认值）。其他选项与 `watch` 相同（`--format`、`--no-clear`、`--url`、`--status-codes operator` 等），Ctrl-C 以 0 结束。
+
+## `doctor --latency`：事件有多晚
+
+`monitor_cli.py doctor --latency` 为 doctor 增加一项检查。它读取账户的事件（与免费变更检测器 `events_feed` 使用的同一份列表），并针对最近的推送读取同一提交的运行，给出往返时间、运行开始与事件之间延迟的中位数和最差值，以及按你的 `events_feed.interval_seconds` 一次变更最坏要等多久（在 `--json` 的 `data` 字段中）。它只读取：不会在 GitHub 上创建任何内容，既没有测试议题也没有测试运行。读取失败会给出带原因的“无法评估”警告，绝不是监控器的故障。延迟超过 120 秒时检查会发出警告。
+
 ## `completions`：补全命令
 
 ```
@@ -79,7 +87,7 @@ python bin/monitor_cli.py completions powershell | Out-String | Invoke-Expressio
 
 ### 面向运维人员的 `status` 退出码
 
-默认情况下，`status` 保持上表的退出码，因此任何脚本都不会改变。使用 `--status-codes operator`（或把设置 `cli.status_codes` 设为 `operator`）后，命令只表达三件事：**0** 正常，**1** 无服务（无法连接监视器或凭据被拒），**2** 在运行但需要关注。需要关注指：监视器无法连接 GitHub、还没有数据、凭据失明、因配额低于下限而暂停刷新、回答中带有错误、回答不是监视器的回答，或者 **磁盘上的代码与正在运行的进程版本不同**（更新后没有重启监视器；`/api/health` 用 `code_stale` 表示，`--doctor` 有 `running` 检查）。使用错误仍为 1。原因在 `--json` 的 `attention` 字段中。红色工作流的失败不在其内：那类情况请用 `alerts --fail-on`。
+默认情况下，`status` 保持上表的退出码，因此任何脚本都不会改变。使用 `--status-codes operator`（或把设置 `cli.status_codes` 设为 `operator`）后，命令只表达三件事：**0** 正常，**1** 无服务（无法连接监视器或凭据被拒），**2** 在运行但需要关注。需要关注指：监视器无法连接 GitHub、还没有数据、凭据失明、因配额低于下限而暂停刷新、回答中带有错误、回答不是监视器的回答，或者 **磁盘上的代码与正在运行的进程版本不同**（更新后没有重启监视器；`/api/health` 用 `code_stale` 表示，`--doctor` 有 `running` 检查）。使用错误仍为 1。原因在 `--json` 的 `attention` 字段中。红色工作流的失败不在其内：那类情况请用 `alerts --fail-on`。 `watch status` 在读取失败时同样遵循这些退出码：无法连接或拒绝凭据的监控器使循环以 1 结束，无法读取的响应以 2 结束。
 
 ## 使用 `jq` 的示例
 

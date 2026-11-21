@@ -65,6 +65,8 @@
 - **一项测试证明哨兵不需要界面**：在一个从不加载页面、Web 服务器或任何界面模块的全新进程中，每个开启的哨兵都会启动自己的线程，通过所给的读取器读取并完成一个周期；关闭的哨兵则从不运行。
 
 - **面向运维人员的 `status` 退出码**（`--status-codes operator` 或设置 `cli.status_codes`；默认 `classic`，任何脚本都不变）：0 正常，1 无服务（无法连接监视器或凭据被拒），2 在运行但需要关注（离线、尚无数据、凭据失明、因配额暂停刷新、出错，或磁盘上的代码与运行进程版本不同）。`/api/health` 现在会给出 `code_stale`，`status` 会打印原因（`--json` 中的 `attention`），`--doctor` 新增 `running` 检查，用于发现更新后没有重启的监视器。
+- **`doctor --latency`**：仅通过读取，测量账户事件比同一提交的运行晚多久通报推送（最近推送的中位数与最差值，以及往返时间），以及按你的 `events_feed.interval_seconds`，免费变更检测器最长要等多久。不会在 GitHub 上写入任何内容，也不会创建测试运行；读取失败会被报告为带原因的“无法评估”，绝不会当作缺陷。
+- **`monitor N` 与 `watch status` 的运维退出码**：`monitor_cli.py monitor [N]` 即每 N 秒刷新一次的 `watch status`（沿用 `cli.watch` 的下限和默认值），适合一直开着的终端。`watch status` 现在在读取失败时同样遵循运维退出码（`--status-codes operator`）：无法连接或拒绝凭据的监控器为 1，无法读取的响应为 2。
 
 - **`monitor_cli.py watch branch`**：`git push && monitor_cli.py watch branch` 跟踪当前文件夹所在提交的工作流（仓库、分支和提交来自 git；`--repo`、`--branch`、`--single-pass`、`--wait`），等待它们出现并结束，全部通过时以 0 结束，有失败或未按时结束时以 1 结束（`cli.watch.branch_timeout_seconds`，默认 900）。它读取监视器已有的运行记录，不消耗配额，也从不输出远程地址。
 
