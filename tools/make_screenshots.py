@@ -44,10 +44,11 @@ WEB = [("about", "tab=now&dlg=about", V), ("help", "tab=cfg&dlg=help&topic=senti
 
 FOLD = 'NAV_CLOSED=["watch","sentinels","team","learn"];applyGroups()'      # the menu with only the System group open (Updates, Settings): at 1080p the long menu hides it
 SCROLL_CMP = ('document.querySelectorAll("#t-charts>section").forEach(function(s){if(s.id!=="cmp-sec")s.hidden=true})')      # the section is at the foot of Charts, below the first screen: the other charts step aside so that it fills the picture
+TOP = 'window.scrollTo(0,0);document.querySelectorAll("*").forEach(function(e){if(e.scrollTop>0)e.scrollTop=0})'      # the compact view scrolls inside its shell: the picture starts at the top of the page
 PALETTE = 'document.dispatchEvent(new KeyboardEvent("keydown",{key:"k",ctrlKey:true,bubbles:true}))'      # the palette of Ctrl+K, open on its first screen
 SAVE_DIALOG = 'document.getElementById("bar-save").click()'      # the window of the report of a tab: TXT, PDF and JSON
 SAVED = ('var t=[].slice.call(document.querySelectorAll("#t-sci h3,#t-sci h4,#t-sci strong,#t-sci b")).filter(function(e){return /^Time saved/.test(e.textContent.trim())})[0];if(t){t.scrollIntoView({block:"start"})}')      # the estimate of the time saved, at the foot of the analytics layer
-RICH_WEB = [("size_phone", "tab=now&compact=1", (390, 844), ""), ("sentinel_analytics", "tab=sci&open=a12,a13", V, ""), ("sentinel_saved", "tab=sci&open=a12", V, SAVED), ("palette", "tab=now", V, PALETTE), ("report_dialog", "tab=al", V, SAVE_DIALOG), ("sentinel_delivery", "tab=sdel&open=delivery", V, ""), ("sentinel_supply", "tab=ssup&open=supply", V, ""), ("sentinel_trend", "tab=strend", V, ""),
+RICH_WEB = [("size_phone", "tab=now&compact=1", (390, 844), TOP), ("sentinel_analytics", "tab=sci&open=a12,a13", V, ""), ("sentinel_saved", "tab=sci&open=a12", V, SAVED), ("palette", "tab=now", V, PALETTE), ("report_dialog", "tab=al", V, SAVE_DIALOG), ("sentinel_delivery", "tab=sdel&open=delivery", V, ""), ("sentinel_supply", "tab=ssup&open=supply", V, ""), ("sentinel_trend", "tab=strend", V, ""),
             ("compare", "tab=charts", V, SCROLL_CMP), ("updates", "tab=upd", V, FOLD)]      # the newest tabs, against tools/demo_monitor.py --rich; a little script scrolls or folds the page
 
 
