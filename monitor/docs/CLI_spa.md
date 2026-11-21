@@ -27,6 +27,7 @@
 | `ai` | `ai models [--refresh]` lista los modelos del proveedor de IA con los datos de cada uno; `ai test --provider NOMBRE --model NOMBRE` prueba uno con un texto sintético (latencia, tokens, coste estimado); `ai doctor` dice por qué una IA no responde, sin imprimir una clave | no |
 | `lessons` | lo que han enseñado los fallos de esta CI: `lessons list`, `lessons brief --repo NOMBRE` (léelo antes de un push), `lessons failures`, `lessons close` | no |
 | `briefs` | los briefs de las pestañas que leen las herramientas de IA: `briefs index`, `briefs show PESTAÑA`, `briefs all` | sí |
+| `docs` | las guías de esta versión, leídas de la instalación (sin monitor): `docs list` las nombra con su título, `docs show NOMBRE` imprime una en el idioma de `--lang` | no |
 | `screens` | el menú Pantallas de la página: `screens list` (cada tipo de pantalla y si se puede abrir) y `screens urls` (las direcciones completas, listas para un comando de quiosco) | no |
 | `toolbox` | las pequeñas herramientas del operador que funcionan en este ordenador, sin monitor en marcha: `toolbox limits [N]` (la configuración frente a sus techos), `toolbox workspaces` (los espacios de trabajo y el que se usa), `toolbox ledger [--force]` (el registro de notificaciones ya enviadas; `--force` lo olvida), `toolbox summary` (los eventos por tipo, repositorio y día) y `toolbox export-events FILE` (los eventos como jsonl, csv, parquet o duckdb según el final del nombre; parquet y duckdb necesitan su paquete, el fichero debe ser nuevo) | no |
 | `credential` | otro acceso a GitHub para una cuenta mientras todo funciona: `credential replace\|reload [--account ID] [--new-token-file FICHERO\|-]`; nunca imprime un token | no |
@@ -56,6 +57,8 @@ Las horas escritas para las personas (la línea `Last read`, los silencios, el r
 | 4 | el monitor responde pero está degradado: sin conexión, cuota agotada, aún sin datos, un endpoint que no tiene, o una respuesta que no es JSON |
 | 5 | `alerts --fail-on NIVEL` encontró una alerta abierta de ese nivel o peor (una alerta silenciada no cuenta) |
 | 6 | `watch --exit-on-change` vio un cambio (solo cuando se da esa opción); véase [CLI_OPERATOR_spa.md](CLI_OPERATOR_spa.md) |
+
+Todo error lleva un `help`: una frase con el siguiente paso, que a menudo nombra la guía que conviene leer (`docs show FIRST_STEPS`). En el formato de texto es la última línea, que empieza por `ayuda:`; con `--json` es el campo `help` junto a `error`: `{"ok": false, "exit": 2, "error": "...", "help": "..."}`.
 
 ## Ejemplos
 

@@ -17,6 +17,8 @@ when this file and `tool_version.py` disagree.
 
 - **A contrast gate** (`tools/check_contrast.py`, run by the CI): every text on every surface of the dark and light modes and of the sixteen themes reaches 4.5:1, the colour of a state reaches 3:1, the colour-blind palette is checked with a simulation of the three kinds of colour blindness, and a new dimming of text with `opacity` fails the build.
 
+- **The guides and the next step on the command line**: `monitor_cli docs list` names the guides of the installed version with their title and `docs show NAME` prints one in the language of `--lang` (the English text when a guide is not translated); it reads the installation, so it needs no running monitor. Every error of the command now carries a `help`: one sentence with the next step, often naming the guide to read; in text it is the last line (`help: ...`), with `--json` it is the field `help` next to `error`.
+
 - **The page does not jump while you read** (`display.live_throttle_s`, 30 by default, 0 turns it off): while the pointer or the keyboard focus is inside the tab you are reading, the periodic refresh of the data waits and is applied when you leave, never more often than that many seconds; a refresh you ask for is applied at once.
 
 - **What is new after an update** (`display.whats_new`, on): a notice that never interrupts offers the entries of the changelog of the versions you skipped, in your language, read from the installed version (`GET /api/whats-new`); what you have seen is kept in the browser before anything is shown, and the palette opens it at any time.

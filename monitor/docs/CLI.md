@@ -27,6 +27,7 @@
 | `ai` | `ai models [--refresh]` lists the models of the AI provider with the data of each one; `ai test --provider NAME --model NAME` tries one with a synthetic text (latency, tokens, estimated cost); `ai doctor` says why an AI does not answer, without printing a key | no |
 | `lessons` | what the failures of this CI have taught: `lessons list`, `lessons brief --repo NAME` (read it before a push), `lessons failures`, `lessons close` | no |
 | `briefs` | the briefs of the tabs that AI tools read: `briefs index`, `briefs show TAB`, `briefs all` | yes |
+| `docs` | the guides of this version, read from the installation (no monitor needed): `docs list` names them with their title, `docs show NAME` prints one in the language of `--lang` | no |
 | `screens` | the Screens menu of the page: `screens list` (every kind of screen and whether it can be opened) and `screens urls` (the full addresses, ready for a kiosk command) | no |
 | `toolbox` | the small tools of the operator that work on this computer, with no monitor running: `toolbox limits [N]` (the setup against its ceilings), `toolbox workspaces` (the workspaces and the one in use), `toolbox ledger [--force]` (the ledger of notifications already sent; `--force` forgets it), `toolbox summary` (the events by kind, repository and day) and `toolbox export-events FILE` (the events as jsonl, csv, parquet or duckdb by the end of the name; parquet and duckdb need their package, the file must be new) | no |
 | `credential` | another GitHub login for one account while everything runs: `credential replace\|reload [--account ID] [--new-token-file FILE\|-]`; it never prints a token | no |
@@ -56,6 +57,8 @@ Times written for people (the `Last read` line, the silences, the log, the repor
 | 4 | the monitor answers but is degraded: offline, allowance exhausted, no data yet, an endpoint it does not have, or an answer that is not JSON |
 | 5 | `alerts --fail-on LEVEL` found an open alert of that level or worse (a silenced alert does not count) |
 | 6 | `watch --exit-on-change` saw a change (only when that flag is given); see [CLI_OPERATOR.md](CLI_OPERATOR.md) |
+
+Every error carries a `help`: one sentence with the next step, often naming the guide to read (`docs show FIRST_STEPS`). In the text format it is the last line, which starts with `help:`; with `--json` it is the field `help` next to `error`: `{"ok": false, "exit": 2, "error": "...", "help": "..."}`.
 
 ## Examples
 

@@ -27,6 +27,7 @@
 | `ai` | `ai models [--refresh]` listet die Modelle des KI-Anbieters mit den Daten jedes Modells; `ai test --provider NAME --model NAME` testet eines mit einem synthetischen Text (Latenz, Tokens, geschätzte Kosten); `ai doctor` sagt, warum eine KI nicht antwortet, ohne einen Schlüssel auszugeben | nein |
 | `lessons` | was die Fehler dieser CI gelehrt haben: `lessons list`, `lessons brief --repo NAME` (vor einem Push lesen), `lessons failures`, `lessons close` | nein |
 | `briefs` | die Briefs der Tabs, die KI-Werkzeuge lesen: `briefs index`, `briefs show TAB`, `briefs all` | ja |
+| `docs` | die Anleitungen dieser Version, aus der Installation gelesen (ohne Monitor): `docs list` nennt sie mit Titel, `docs show NAME` gibt eine in der Sprache von `--lang` aus | nein |
 | `screens` | das Menü Bildschirme der Seite: `screens list` (jede Art von Bildschirm und ob er geöffnet werden kann) und `screens urls` (die vollständigen Adressen, bereit für einen Kiosk-Befehl) | nein |
 | `toolbox` | die kleinen Werkzeuge des Betreibers, die auf diesem Rechner ohne laufenden Monitor arbeiten: `toolbox limits [N]` (die Einrichtung gegen ihre Obergrenzen), `toolbox workspaces` (die Arbeitsbereiche und der verwendete), `toolbox ledger [--force]` (das Verzeichnis der bereits gesendeten Benachrichtigungen; `--force` vergisst es), `toolbox summary` (die Ereignisse nach Art, Repository und Tag) und `toolbox export-events FILE` (die Ereignisse als jsonl, csv, parquet oder duckdb nach der Endung des Namens; parquet und duckdb brauchen ihr Paket, die Datei muss neu sein) | nein |
 | `credential` | ein anderer GitHub-Zugang für ein Konto, während alles läuft: `credential replace\|reload [--account ID] [--new-token-file DATEI\|-]`; gibt nie ein Token aus | nein |
@@ -56,6 +57,8 @@ Für Menschen geschriebene Zeiten (die Zeile `Last read`, die Stummschaltungen, 
 | 4 | der Monitor antwortet, ist aber eingeschränkt: offline, Kontingent erschöpft, noch keine Daten, ein Endpunkt, den er nicht hat, oder eine Antwort, die kein JSON ist |
 | 5 | `alerts --fail-on STUFE` hat einen offenen Alarm dieser Stufe oder schlimmer gefunden (ein stummgeschalteter zählt nicht) |
 | 6 | `watch --exit-on-change` hat eine Änderung gesehen (nur wenn diese Option gegeben ist); siehe [CLI_OPERATOR_deu.md](CLI_OPERATOR_deu.md) |
+
+Jeder Fehler trägt ein `help`: einen Satz mit dem nächsten Schritt, der oft die zu lesende Anleitung nennt (`docs show FIRST_STEPS`). Im Textformat ist es die letzte Zeile, die mit `Hilfe:` beginnt; mit `--json` ist es das Feld `help` neben `error`: `{"ok": false, "exit": 2, "error": "...", "help": "..."}`.
 
 ## Beispiele
 

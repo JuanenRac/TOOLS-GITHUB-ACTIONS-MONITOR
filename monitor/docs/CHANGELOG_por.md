@@ -15,6 +15,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **Uma porta de contraste** (`tools/check_contrast.py`, executada pela CI): todo o texto sobre toda a superfície dos modos escuro e claro e dos dezasseis temas chega a 4,5:1, a cor de um estado chega a 3:1, a paleta para daltonismo verifica-se com uma simulação das três formas, e um novo esbatimento de texto com `opacity` faz falhar a compilação.
 
+- **Os guias e o passo seguinte na linha de comandos**: `monitor_cli docs list` nomeia os guias da versão instalada com o título e `docs show NOME` imprime um no idioma de `--lang` (o texto em inglês quando um guia não está traduzido); lê a instalação, por isso não precisa de um monitor em execução. Todo erro do comando traz agora um `help`: uma frase com o passo seguinte, que muitas vezes nomeia o guia a ler; em texto é a última linha (`ajuda: ...`), com `--json` é o campo `help` junto a `error`.
+
 - **A página não salta enquanto lê** (`display.live_throttle_s`, 30 por defeito, 0 desliga): enquanto o ponteiro ou o foco do teclado estão dentro do separador que lê, a atualização periódica dos dados espera e aplica-se quando sair, nunca com mais frequência do que esses segundos; uma atualização que pede é aplicada de imediato.
 
 - **Novidades após atualizar** (`display.whats_new`, ligado): um aviso que nunca interrompe oferece as entradas do histórico de alterações das versões que saltou, na sua língua, lidas da versão instalada (`GET /api/whats-new`); o que já viu guarda-se no navegador antes de mostrar o que quer que seja, e a paleta abre-o a qualquer momento.
