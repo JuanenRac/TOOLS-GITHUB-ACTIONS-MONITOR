@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-5569_passing-brightgreen.svg" alt="5569 tests">
+  <img src="https://img.shields.io/badge/Tests-5736_passing-brightgreen.svg" alt="5736 tests">
   <img src="https://img.shields.io/badge/Tests-5575_passing-brightgreen.svg" alt="5575 tests">
   <img src="https://img.shields.io/badge/Tests-5565_passing-brightgreen.svg" alt="5565 tests">
   <img src="https://img.shields.io/badge/Tests-5571_passing-brightgreen.svg" alt="5571 tests">
@@ -108,22 +108,8 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **テスト** | テストメソッド 5569 件(`python -m unittest discover -s monitor/tests`) |
-| **設定** | 設定 889 件、すべてヘルプ付き |
-| **テスト** | テストメソッド 5575 件(`python -m unittest discover -s monitor/tests`) |
-| **テスト** | テストメソッド 5565 件(`python -m unittest discover -s monitor/tests`) |
-| **テスト** | テストメソッド 5571 件(`python -m unittest discover -s monitor/tests`) |
-| **テスト** | テストメソッド 5580 件(`python -m unittest discover -s monitor/tests`) |
-| **テスト** | テストメソッド 5566 件(`python -m unittest discover -s monitor/tests`) |
-| **設定** | 設定 888 件、すべてヘルプ付き |
-| **テスト** | テストメソッド 5574 件(`python -m unittest discover -s monitor/tests`) |
-| **設定** | 設定 897 件、すべてヘルプ付き |
-| **テスト** | テストメソッド 5570 件(`python -m unittest discover -s monitor/tests`) |
-| **テスト** | テストメソッド 5576 件(`python -m unittest discover -s monitor/tests`) |
-| **テスト** | テストメソッド 5597 件(`python -m unittest discover -s monitor/tests`) |
-| **設定** | 設定 890 件、すべてヘルプ付き |
-| **テスト** | テストメソッド 5573 件(`python -m unittest discover -s monitor/tests`) |
-| **設定** | 設定 891 件、すべてヘルプ付き |
+| **テスト** | テストメソッド 5736 件(`python -m unittest discover -s monitor/tests`) |
+| **設定** | 設定 906 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows、Python 3.11, 3.13 |
 

@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-5569_passing-brightgreen.svg" alt="5569 tests">
+  <img src="https://img.shields.io/badge/Tests-5736_passing-brightgreen.svg" alt="5736 tests">
   <img src="https://img.shields.io/badge/Tests-5575_passing-brightgreen.svg" alt="5575 tests">
   <img src="https://img.shields.io/badge/Tests-5565_passing-brightgreen.svg" alt="5565 tests">
   <img src="https://img.shields.io/badge/Tests-5571_passing-brightgreen.svg" alt="5571 tests">
@@ -108,22 +108,8 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 5569 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **设置** | 889 个设置,均有帮助 |
-| **测试** | 5575 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **测试** | 5565 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **测试** | 5571 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **测试** | 5580 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **测试** | 5566 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **设置** | 888 个设置,均有帮助 |
-| **测试** | 5574 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **设置** | 897 个设置,均有帮助 |
-| **测试** | 5570 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **测试** | 5576 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **测试** | 5597 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **设置** | 890 个设置,均有帮助 |
-| **测试** | 5573 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **设置** | 891 个设置,均有帮助 |
+| **测试** | 5736 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **设置** | 906 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
 

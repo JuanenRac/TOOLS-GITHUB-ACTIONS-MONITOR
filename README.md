@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-5569_passing-brightgreen.svg" alt="5569 tests">
+  <img src="https://img.shields.io/badge/Tests-5736_passing-brightgreen.svg" alt="5736 tests">
   <img src="https://img.shields.io/badge/Tests-5575_passing-brightgreen.svg" alt="5575 tests">
   <img src="https://img.shields.io/badge/Tests-5565_passing-brightgreen.svg" alt="5565 tests">
   <img src="https://img.shields.io/badge/Tests-5571_passing-brightgreen.svg" alt="5571 tests">
@@ -108,22 +108,8 @@ Method, assumptions and how to measure it in your own use: [`monitor/docs/PRODUC
 | | |
 |---|---|
 | **Maturity** | functional |
-| **Tests** | 5569 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Settings** | 889 settings, all with help |
-| **Tests** | 5575 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Tests** | 5565 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Tests** | 5571 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Tests** | 5580 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Tests** | 5566 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Settings** | 888 settings, all with help |
-| **Tests** | 5574 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Settings** | 897 settings, all with help |
-| **Tests** | 5570 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Tests** | 5576 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Tests** | 5597 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Settings** | 890 settings, all with help |
-| **Tests** | 5573 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Settings** | 891 settings, all with help |
+| **Tests** | 5736 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Settings** | 906 settings, all with help |
 | **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
 | **Tested in the CI on** | ubuntu, windows, Python 3.11, 3.13 |
 

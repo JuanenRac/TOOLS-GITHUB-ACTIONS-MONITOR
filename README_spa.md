@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-5569_passing-brightgreen.svg" alt="5569 tests">
+  <img src="https://img.shields.io/badge/Tests-5736_passing-brightgreen.svg" alt="5736 tests">
   <img src="https://img.shields.io/badge/Tests-5575_passing-brightgreen.svg" alt="5575 tests">
   <img src="https://img.shields.io/badge/Tests-5565_passing-brightgreen.svg" alt="5565 tests">
   <img src="https://img.shields.io/badge/Tests-5571_passing-brightgreen.svg" alt="5571 tests">
@@ -108,22 +108,8 @@ Método, supuestos y cómo medirlo en tu propio uso: [`monitor/docs/PRODUCTIVITY
 | | |
 |---|---|
 | **Madurez** | functional |
-| **Tests** | 5569 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Ajustes** | 889 ajustes, todos con ayuda |
-| **Tests** | 5575 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Tests** | 5565 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Tests** | 5571 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Tests** | 5580 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Tests** | 5566 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Ajustes** | 888 ajustes, todos con ayuda |
-| **Tests** | 5574 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Ajustes** | 897 ajustes, todos con ayuda |
-| **Tests** | 5570 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Tests** | 5576 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Tests** | 5597 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Ajustes** | 890 ajustes, todos con ayuda |
-| **Tests** | 5573 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Ajustes** | 891 ajustes, todos con ayuda |
+| **Tests** | 5736 métodos de test (`python -m unittest discover -s monitor/tests`) |
+| **Ajustes** | 906 ajustes, todos con ayuda |
 | **Idiomas** | 8 (inglés, español, alemán, francés, italiano, japonés, chino y portugués) |
 | **Probado en el CI en** | ubuntu, windows, Python 3.11, 3.13 |
 
