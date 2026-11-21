@@ -407,6 +407,7 @@ PASS_BACK = ("content-type", "set-cookie", "cache-control", "location", "referre
 class Handler(BaseHTTPRequestHandler):
     server_version = "GhaMonitorSupervisor"
     door = False      # True only on the second port that listens on loopback (listen.local_port): the way in of the person at this computer when a reverse proxy is declared
+    timeout = exclusive.REQUEST_TIMEOUT      # a connection that sends nothing for this long is closed
 
     def log_message(self, *args):
         pass
@@ -754,7 +755,7 @@ class DoorHandler(Handler):
     door = True
 
 
-class Server(exclusive.ExclusiveBind, ThreadingHTTPServer):
+class Server(exclusive.BoundedThreads, exclusive.ExclusiveBind, ThreadingHTTPServer):
     """The server of the supervisor: with a certificate (`listen.tls_cert_file`) every connection is wrapped in TLS in the thread of its own, and a client that goes away is not worth a traceback."""
 
     tls_context = None

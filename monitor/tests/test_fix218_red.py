@@ -4,6 +4,7 @@
 counts only bad signatures against an address, the paths of this computer are not given to a client of the network, the webhook has a freshness window and keeps only the links of GitHub, and the
 supervisor lets the chat through, takes the largest body of its accounts and answers the 413 after reading the body."""
 import json
+import socket
 import sys
 import tempfile
 import threading
@@ -78,6 +79,82 @@ class StreamOfARevokedDevice(Network):
         self.assertFalse(am.Handler.stream_guard(handler)())
         localguard.configure(False, "127.0.0.1", "")
         self.assertFalse(am.Handler.stream_guard(types.SimpleNamespace(headers={}, path="/api/updates/stream"))())
+
+
+class IdleConnections(unittest.TestCase):
+    """A connection that never completes its request is let go, and the number of open ones has a ceiling (plain HTTP, no credentials)."""
+
+    def serve(self, server_class, handler_class):
+        server = server_class(("127.0.0.1", 0), handler_class)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+
+        def stop():
+            server.shutdown()
+            server.server_close()
+        self.addCleanup(stop)
+        return server
+
+    def idle(self, server):
+        sock = socket.create_connection(("127.0.0.1", server.server_address[1]), timeout=6)
+        self.addCleanup(sock.close)
+        sock.sendall(b"GET / HTTP/1.1\r\n")      # the request is never completed
+        return sock
+
+    def closed_by_the_server(self, sock):
+        try:
+            return sock.recv(100) in (b"",) or sock.recv(100) == b""
+        except socket.timeout:
+            return False
+        except OSError:
+            return True
+
+    def test_the_handlers_have_a_deadline(self):
+        from github_actions_monitor.accounts import accounts_supervisor as sup
+        self.assertEqual(am.Handler.timeout, 30)
+        self.assertEqual(sup.Handler.timeout, 30)
+
+    def test_the_monitor_closes_a_connection_that_sends_nothing(self):
+        saved = am.Handler.timeout
+        am.Handler.timeout = 1
+        self.addCleanup(setattr, am.Handler, "timeout", saved)
+        server = self.serve(am.QuietServer, am.Handler)
+        sock = self.idle(server)
+        time.sleep(2.5)
+        self.assertTrue(self.closed_by_the_server(sock), "the thread of a half-sent request must not be kept for ever")
+
+    def test_the_supervisor_closes_a_connection_that_sends_nothing(self):
+        from github_actions_monitor.accounts import accounts_supervisor as sup
+        saved = sup.Handler.timeout
+        sup.Handler.timeout = 1
+        self.addCleanup(setattr, sup.Handler, "timeout", saved)
+        server = self.serve(sup.Server, sup.Handler)
+        sock = self.idle(server)
+        time.sleep(2.5)
+        self.assertTrue(self.closed_by_the_server(sock))
+
+    def test_the_ceiling_of_connections_answers_503(self):
+        from github_actions_monitor.accounts import accounts_supervisor as sup
+        for server_class, handler_class in ((am.QuietServer, am.Handler), (sup.Server, sup.Handler)):
+            with self.subTest(server=server_class.__module__):
+                server = self.serve(server_class, handler_class)
+                server.max_connections = 3
+                held = [self.idle(server) for _ in range(3)]
+                time.sleep(0.5)
+                extra = socket.create_connection(("127.0.0.1", server.server_address[1]), timeout=6)
+                self.addCleanup(extra.close)
+                self.assertTrue(extra.recv(200).startswith(b"HTTP/1.1 503"), "the connection over the ceiling is refused at once")
+                held[0].close()
+                time.sleep(1.0)
+                again = socket.create_connection(("127.0.0.1", server.server_address[1]), timeout=6)
+                self.addCleanup(again.close)
+                again.sendall(b"GET /nothing HTTP/1.0\r\nHost: 127.0.0.1\r\n\r\n")
+                self.assertFalse(again.recv(200).startswith(b"HTTP/1.1 503"), "a place that is given back can be used again")
+
+    def test_one_address_that_is_not_this_computer_has_its_own_ceiling(self):
+        from github_actions_monitor.util import exclusive
+        server = types.SimpleNamespace(max_connections=100, max_per_address=2)
+        self.assertTrue(exclusive.BoundedThreads._counted_for(server, "192.168.1.20"))
+        self.assertFalse(exclusive.BoundedThreads._counted_for(server, "127.0.0.1"))
 
 
 if __name__ == "__main__":

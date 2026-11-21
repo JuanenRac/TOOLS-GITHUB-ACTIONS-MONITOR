@@ -2902,7 +2902,7 @@ def watchdog_loop(config, every=30):
 HOST_RE = re.compile(r"^[A-Za-z0-9.-]{1,100}\Z")
 
 
-class QuietServer(exclusive.ExclusiveBind, ThreadingHTTPServer):
+class QuietServer(exclusive.BoundedThreads, exclusive.ExclusiveBind, ThreadingHTTPServer):
     """The server of the monitor: a client that disconnects is not an error worth a traceback; any other error is still shown."""
 
     tls_context = None
@@ -3086,6 +3086,8 @@ STORE_RETRY_SECONDS = 5
 
 
 class Handler(BaseHTTPRequestHandler):
+    timeout = exclusive.REQUEST_TIMEOUT      # a connection that sends nothing for this long is closed (plain HTTP too: only the handshake of TLS had a limit); a stream only writes, so it is not affected
+
     def log_message(self, *args):
         pass
 
