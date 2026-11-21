@@ -1346,6 +1346,8 @@
  "egress.use.telegram": "Notifiche a Telegram.",
  "egress.fail.ntfy": "Se bloccato: quel canale fallisce e viene annotato; gli altri canali e la pagina non sono toccati.",
  "egress.use.ntfy": "Notifiche a ntfy (il server del canale può essere il tuo).",
+ "egress.use.github_status": "Lo stato di GitHub nella barra (githubstatus.com).",
+ "egress.fail.github_status": "Se bloccato: la barra non mostra lo stato di GitHub e un rosso non viene segnato come incidente; nient'altro viene toccato.",
  "egress.fail.github_raw": "Se bloccato: quei repository sono indicati come non letti, mai come puliti.",
  "egress.use.github_raw": "File di workflow di repository pubblici letti senza credenziale.",
  "egress.fail.github_download": "Se bloccato: nessun avviso di nuova versione e l'aggiornatore non può scaricare una release (uno zip si può dare a mano).",
