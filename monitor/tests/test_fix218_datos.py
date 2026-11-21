@@ -102,5 +102,24 @@ class FinopsOverTheWholeRead(unittest.TestCase):
         self.assertEqual(sum(r["estimated_usd"] for r in report["rows"]), 0)
 
 
+class LinearGrouping(unittest.TestCase):
+    def test_same_answer_as_filtering_once_per_repository(self):
+        from github_actions_monitor.app import actions_monitor as am
+        repos = [f"r{i}" for i in range(40)] + ["empty"]
+        runs = [{"repo": f"r{(i * 7) % 45}", "id": i} for i in range(900)]      # r40..r44 are not watched: they must not appear
+        self.assertEqual(am.group_runs_by_repo(runs, repos), {r: [x for x in runs if x["repo"] == r] for r in repos})
+        self.assertEqual(am.group_runs_by_repo(runs, repos)["empty"], [])
+
+    def test_big_account_does_not_take_seconds(self):
+        import time
+        from github_actions_monitor.app import actions_monitor as am
+        repos = [f"r{i}" for i in range(727)]
+        runs = [{"repo": repos[i % 727], "id": i} for i in range(14540)]
+        started = time.perf_counter()
+        for _ in range(4):
+            am.group_runs_by_repo(runs, repos)
+        self.assertLess(time.perf_counter() - started, 0.5)      # four passes; the quadratic form took about 2.3 s for three
+
+
 if __name__ == "__main__":
     unittest.main()

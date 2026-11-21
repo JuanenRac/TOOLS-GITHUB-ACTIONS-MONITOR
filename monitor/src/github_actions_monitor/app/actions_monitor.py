@@ -820,6 +820,16 @@ def is_fork_run(run):
     return bool(head and base and str(head).lower() != str(base).lower())
 
 
+def group_runs_by_repo(runs, repos):
+    """{repo: [its runs, in the order they come]} for every repo of `repos` (an empty list when it has none): one pass over the runs, the same answer as filtering the whole list once per repository."""
+    grouped = {r: [] for r in repos}
+    for run in runs:
+        bucket = grouped.get(run["repo"])
+        if bucket is not None:
+            bucket.append(run)
+    return grouped
+
+
 def fetch_runs(repo, per_page):
     try:
         data = gh_read(f"repos/{toolconfig.github_owner()}/{repo}/actions/runs?per_page={per_page}")
@@ -1382,7 +1392,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
     hot = sum(1 for repo in repos if is_hot(repo, config, time.time()))
     red, approx = None, False
     if LITE["on"]:      # the lite edition has no sentinel: it counts the red workflows with the same small rule, guessing the default branch
-        red, approx = redrule.red_workflows({r: [x for x in runs if x["repo"] == r] for r in repos}, None, True, config.get("runs_per_repo"))
+        red, approx = redrule.red_workflows(group_runs_by_repo(runs, repos), None, True, config.get("runs_per_repo"))
     else:      # the complete edition knows the real figure (the sentinel); without it the same small rule: both editions report the same keys
         try:
             red = red_rows({"runs": runs, "repos": repos})
@@ -1396,7 +1406,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
     aged_rows, quiet_rows, expected_rows, ignored_rows = [], [], [], []
     meta = repo_meta(repos, config)
     try:
-        held = redrule.states({r: [x for x in runs if x["repo"] == r] for r in repos}, {r: m.get("branch") for r, m in repo_meta(repos).items() if m.get("branch")}, True)
+        held = redrule.states(group_runs_by_repo(runs, repos), {r: m.get("branch") for r, m in repo_meta(repos).items() if m.get("branch")}, True)
         figures["awaiting"], figures["inactive"] = len(held["awaiting"]), len(held["inactive"])
         expected_rows = [{k: row.get(k) for k in ("repo", "workflow", "since", "url", "streak", "conclusion", "reason", "owner", "until", "class")} for row in held["expected"]]      # red on purpose for a while (expected_red.py): listed apart
         figures["expected"] = len(expected_rows)
@@ -1409,9 +1419,9 @@ def build(config, repos, started, refreshed, loading, progress_text):
         figures["quiet"], figures["quiet_days"] = len(quiet_rows), redrule.POLICY.get("inactive_days") or 0
         for listed in (expected_rows, ignored_rows, aged_rows, quiet_rows):      # ci.stale_result_hours: a result older than that is said so (information only; a repository that could not be read is not marked)
             redrule.mark_stale(listed, errors)
-        activity_view = activity.summarize(repos, {r: [x for x in runs if x["repo"] == r] for r in repos}, {r: (SAMPLE_INFO.get(r) or {}).get("total") for r in repos}, errors, time.time(), activity.settings(config))
+        activity_view = activity.summarize(repos, group_runs_by_repo(runs, repos), {r: (SAMPLE_INFO.get(r) or {}).get("total") for r in repos}, errors, time.time(), activity.settings(config))
         figures["dormant"], figures["inactive_repos"] = len(activity_view["dormant"]), len(activity_view["inactive"])
-        by_repo_runs = {r: [x for x in runs if x["repo"] == r] for r in repos}
+        by_repo_runs = group_runs_by_repo(runs, repos)
         full = {r for r in repos if (SAMPLE_INFO.get(r) or {}).get("asked") and len(by_repo_runs[r]) >= SAMPLE_INFO[r]["asked"]}
         idle_forks = fork_ci.idle_forks([r for r in repos if (meta.get(r) or {}).get("fork")], by_repo_runs, full, time.time(), dict(fork_ci.POLICY))
         figures["forks_idle"] = len(idle_forks)
@@ -2026,7 +2036,7 @@ def red_rows(data):
             degraded.note("loop.extra", error)
             pass
     runs = data.get("runs") or []
-    return redrule.red_workflows({r: [x for x in runs if x["repo"] == r] for r in (data.get("repos") or [])}, None, True)[0]
+    return redrule.red_workflows(group_runs_by_repo(runs, data.get("repos") or []), None, True)[0]
 
 
 FEED_SYNC = {"at": 0.0}
