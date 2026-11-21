@@ -1868,6 +1868,7 @@
  "mon.no_owner": "監視する GitHub アカウントを特定できません。actions_monitor.json の \"github_owner\" を設定してください。",
  "mon.no_port": "{port} 以降に空きポートがありません",
  "mon.port_busy": "ポート {port} は使用中のため {used} を使います",
+ "mon.profile_qa": "プロファイル qa：観察のみ（GitHub への操作なし）、ポート {port}、ETag キャッシュは一時ファイル",
  "mon.reduced_mode": "縮小モード: ローカルのワークスペースが見つからないため、センチネルは GitHub API が返す情報だけを表示します（署名キュー、監査レポート、CHANGELOG の読み取りなし）。有効にするには actions_monitor.json に workspace_root を設定してください。",
  "mon.sentinel_failed": "センチネルのエラー: {error}",
  "mon.sentinel_not_loaded": "センチネルのモジュールが読み込まれていません",

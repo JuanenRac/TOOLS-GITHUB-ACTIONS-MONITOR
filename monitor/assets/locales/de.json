@@ -1868,6 +1868,7 @@
  "mon.no_owner": "Das zu überwachende GitHub-Konto konnte nicht ermittelt werden: Setze \"github_owner\" in actions_monitor.json.",
  "mon.no_port": "Kein freier Port ab {port}",
  "mon.port_busy": "Port {port} ist belegt, es wird {used} verwendet",
+ "mon.profile_qa": "Profil qa: nur Beobachter (keine Aktion auf GitHub), Port {port}, ETag-Cache in einer temporären Datei",
  "mon.reduced_mode": "Reduzierter Modus: Es wurde kein lokaler Workspace gefunden, daher zeigt der Wächter nur, was die GitHub-API liefert (keine Signatur-Warteschlange, kein Audit-Bericht, kein Einlesen des CHANGELOG). Setze workspace_root in actions_monitor.json, um sie zu aktivieren.",
  "mon.sentinel_failed": "Fehler des Wächters: {error}",
  "mon.sentinel_not_loaded": "Das Wächter-Modul ist nicht geladen",

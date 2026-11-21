@@ -1868,6 +1868,7 @@
  "mon.no_owner": "Impossibile determinare l'account GitHub da monitorare: imposta \"github_owner\" in actions_monitor.json.",
  "mon.no_port": "Nessuna porta libera a partire da {port}",
  "mon.port_busy": "La porta {port} è occupata, si usa la {used}",
+ "mon.profile_qa": "Profilo qa: solo osservatore (nessuna azione su GitHub), porta {port}, cache ETag in un file temporaneo",
  "mon.reduced_mode": "Modalità ridotta: non è stato trovato nessun workspace locale, quindi la sentinella mostra solo ciò che fornisce l'API di GitHub (niente coda di firma, niente rapporto di audit, niente lettura del CHANGELOG). Imposta workspace_root in actions_monitor.json per attivarli.",
  "mon.sentinel_failed": "Errore della sentinella: {error}",
  "mon.sentinel_not_loaded": "Il modulo Sentinella non è caricato",

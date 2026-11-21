@@ -1868,6 +1868,7 @@
  "mon.no_owner": "No se pudo determinar la cuenta de GitHub a vigilar: indica \"github_owner\" en actions_monitor.json.",
  "mon.no_port": "No hay ningún puerto libre desde el {port}",
  "mon.port_busy": "El puerto {port} está ocupado, se usa el {used}",
+ "mon.profile_qa": "Perfil qa: solo observador (ninguna acción en GitHub), puerto {port}, caché ETag en un fichero temporal",
  "mon.reduced_mode": "Modo reducido: no se encontró un workspace local, así que el Centinela muestra solo lo que da la API de GitHub (sin cola de firma, sin parte de auditoría, sin lectura de CHANGELOG). Indica workspace_root en actions_monitor.json para activarlos.",
  "mon.sentinel_failed": "Fallo del Centinela: {error}",
  "mon.sentinel_not_loaded": "El módulo Centinela no está cargado",
