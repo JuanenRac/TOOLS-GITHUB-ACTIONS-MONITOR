@@ -15,6 +15,7 @@ network mode is on, exactly like a single monitor. The lite edition never runs t
 import json
 import os
 import secrets
+import socket
 import subprocess
 import sys
 import threading
@@ -45,6 +46,9 @@ MAX_BODY = 1_048_576
 DRAIN_MAX = 32 * 1_048_576      # a refused body up to this size is read and thrown away before the 413, so the sender sees the answer and not a cut connection
 CHAT_HEADERS = ("content-type", "user-agent", "x-slack-request-timestamp", "x-slack-signature", "x-signature-ed25519", "x-signature-timestamp")
 CHAT_ROUTES = ("/api/chatops/slack", "/api/chatops/discord")
+STREAM_ROUTES = ("/api/live-events/stream", "/api/ai/stream", "/api/updates/stream")      # the streams of events of an account: they are passed on as they are written, not read whole
+STREAM_LOOK = 5.0      # seconds a stream waits for a byte before it looks again at the session of the client
+STREAM_IDLE = 90.0      # seconds without a single byte (the account sends a keep-alive every 15) after which the stream is let go
 
 
 def webhook_names(account_id=None, others=False):
@@ -782,12 +786,69 @@ class Handler(BaseHTTPRequestHandler):
             headers[REMOTE_HEADER] = "1"          # the account then treats the request like a remote one: the keys that decide exposure and the actions on GitHub stay with the computer of the monitor
         if "Origin" in headers:
             headers["Origin"] = f"http://127.0.0.1:{child.port}"
+        if method == "GET" and route in STREAM_ROUTES:
+            self.stream(child, route, headers)
+            return
         status, data, back = fetch(child.url(strip_account(self.path)), timeout=FORWARD_TIMEOUT, data=body, headers=headers, method=method)
         if status == 0:
             self.json({"error": "account not answering", "account": account_id}, 502)
             return
         extra = {k: v for k, v in back.items() if k.lower() in PASS_BACK and k.lower() not in ("content-type", "cache-control")}
         self.reply(status, data, back.get("Content-Type", "application/json"), extra)
+
+    def stream(self, child, route, headers):
+        """GET of a stream of events of an account (`text/event-stream`): what the account writes goes to the client as it is written. It used to be read whole (up to the end of the stream, cut at 30 seconds with a
+        502), which held one of the few places for streams of the account for nothing. While it is open it makes the two checks a single monitor makes: the access token or the token of a device, on every turn, and
+        the session of the team mode every `auth.stream_revalidate_min` minutes; it ends with the account, with the client, or after STREAM_IDLE seconds of silence."""
+        from github_actions_monitor.security import auth
+        key = CHILD_KEYS.get(child.port)
+        if key:
+            headers = {**headers, SUPERVISOR_KEY_HEADER: key}
+        request = urllib.request.Request(child.url(strip_account(self.path)), headers=headers, method="GET")
+        try:
+            answer = netguard.local_open(request, timeout=STREAM_LOOK)
+        except urllib.error.HTTPError as error:
+            try:
+                data = error.read(MAX_BODY)
+            except OSError:
+                data = b""
+            self.reply(error.code, data, error.headers.get("Content-Type", "application/json"))
+            return
+        except (urllib.error.URLError, OSError, ValueError):
+            self.json({"error": "account not answering"}, 502)
+            return
+        config = self.team_config()
+        every = auth.settings(config)["stream_revalidate_min"] * 60
+        last, quiet = time.time(), 0.0
+        try:
+            self.send_response(answer.status)
+            self.send_header("Content-Type", answer.headers.get("Content-Type", "text/event-stream"))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Accel-Buffering", "no")
+            self.send_header("Connection", "close")
+            self.end_headers()
+            self.close_connection = True
+            while quiet < STREAM_IDLE:
+                if localguard.STATE["network"] and not localguard.access_ok(self.headers, ""):      # a revoked device or a switched-off pairing ends what it was listening to
+                    break
+                if time.time() - last >= every:
+                    last = time.time()
+                    if not auth_http.revalidate(self, config, route):
+                        break
+                try:
+                    chunk = answer.read1(8192)
+                except (TimeoutError, socket.timeout):
+                    quiet += STREAM_LOOK
+                    continue
+                if not chunk:
+                    break
+                quiet = 0.0
+                self.wfile.write(chunk)
+                self.wfile.flush()
+        except (OSError, ValueError):
+            pass      # the client went away, or the account did: nothing more to say
+        finally:
+            answer.close()
 
 
 class DoorHandler(Handler):

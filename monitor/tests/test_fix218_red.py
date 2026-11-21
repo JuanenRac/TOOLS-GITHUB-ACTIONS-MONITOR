@@ -449,5 +449,61 @@ class SupervisorDeliveries(Supervised):
         self.assertEqual(status, 413, "4 MiB is the most any account admits")
 
 
+class SupervisorStream(Supervised):
+    def open_stream(self, headers=None):
+        import http.client
+        connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=15)
+        self.addCleanup(connection.close)
+        started = time.time()
+        connection.request("GET", "/api/live-events/stream?account=alpha", headers=headers or {})
+        answer = connection.getresponse()
+        return connection, answer, started
+
+    def test_a_stream_of_an_account_reaches_the_client_as_it_is_written(self):
+        _connection, answer, started = self.open_stream()
+        self.assertEqual(answer.status, 200)
+        self.assertIn("text/event-stream", answer.getheader("Content-Type"))
+        first = answer.fp.readline()
+        self.assertEqual(first, b"event: hello\n", "the first frame arrives while the account still holds the stream")
+        self.assertLess(time.time() - started, 4, "the supervisor did not wait for the account to close the stream")
+
+    def test_closing_the_client_lets_the_supervisor_go_of_the_account(self):
+        connection, answer, _started = self.open_stream()
+        answer.fp.readline()
+        connection.close()
+        time.sleep(1.5)
+        self.assertEqual(self.request("/api/health")[0], 200, "the supervisor keeps answering")
+
+    def test_revoking_a_device_ends_the_stream_the_supervisor_passes_on(self):
+        saved = (dict(am.LIVE_CONFIG), dict(localguard.DEVICE_CHECK))
+
+        def put_back():
+            am.LIVE_CONFIG.clear()
+            am.LIVE_CONFIG.update(saved[0])
+            localguard.DEVICE_CHECK.clear()
+            localguard.DEVICE_CHECK.update(saved[1])
+            for device in devices.list_devices():
+                devices.revoke(device["id"])
+        self.addCleanup(put_back)
+        am.LIVE_CONFIG.clear()
+        am.LIVE_CONFIG.update({**am.DEFAULTS, "pairing": {"enabled": True}})
+        localguard.DEVICE_CHECK["fn"] = am._device_token_ok
+        self.network()
+        cfg = devices.settings(am.LIVE_CONFIG)
+        token, device = devices.redeem(cfg, devices.start(cfg)["code"], "Android")
+        connection, answer, started = self.open_stream({"Authorization": "Bearer " + token})
+        self.assertEqual(answer.status, 200)
+        self.assertEqual(answer.fp.readline(), b"event: hello" + bytes([10]))
+        self.assertTrue(devices.revoke(device["id"]))
+        deadline = time.time() + 8
+        ended = False
+        while time.time() < deadline:
+            if not answer.fp.readline():
+                ended = True
+                break
+        self.assertTrue(ended, "the stream ended at once, not when the account closed it")
+        self.assertLess(time.time() - started, 9)
+
+
 if __name__ == "__main__":
     unittest.main()
