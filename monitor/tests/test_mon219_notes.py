@@ -373,7 +373,7 @@ class Server(unittest.TestCase):
         status, answer = self.call("/api/meta-columns")
         self.assertEqual(status, 200)
         self.assertEqual(answer["columns"], [{"id": "template", "name": "Template"}])
-        self.assertEqual(answer["rows"], {})
+        self.assertTrue(all(row == {"template": ""} for row in answer["rows"].values()), answer["rows"])      # no value is invented for a repository (a repository left in memory by another test has an empty cell)
 
 
 if __name__ == "__main__":
