@@ -188,6 +188,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `chatops.slack.signing_secret_env` (secure) | `"MONITOR_SLACK_SIGNING_SECRET"` | webhook | Environment variable with the Slack signing secret |
 | `chatops.slack.state` | `-` | webhook | Slack signing secret |
 | `ci.automation_counts` | `false` | sentinel | Count automation workflows |
+| `ci.branches_by_repo` | `[]` | sentinel | Branches to watch, by repository |
 | `ci.copilot_alerts` | `false` | sentinel | Notice when Copilot workflows fail |
 | `ci.count_fork_runs` | `false` | sentinel | Count runs of forks |
 | `ci.dependabot_alerts` | `true` | sentinel | Alert when the Dependabot updates fail |
