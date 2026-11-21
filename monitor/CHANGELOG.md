@@ -54,6 +54,8 @@ when this file and `tool_version.py` disagree.
 
 - **Notices, heartbeat and AI calls now work through a proxy (`network.use_proxy`)**: with the proxy of the environment on, the HTTPS destinations (ntfy, Teams, Slack, SIEM, heartbeat, providers of AI) failed because the monitor spoke TLS straight to the proxy without asking it for a tunnel. It now sends `CONNECT host:port` first and the TLS goes over that tunnel; the destination is still judged before the proxy gets the request, and a proxy that refuses the tunnel is an error.
 
+- **Going back to the previous version no longer restores while an update is running**: the independent updater's `rollback` (and the button of its page, `POST /api/rollback`) did not take the lock that `apply` takes and did not look at the journal of an update in progress, so it could put an old copy over a tree that another update was changing. It now takes the same lock, refuses with a clear message when an update is in progress, and releases the lock afterwards.
+
 ## [2.1.7]
 
 Version 2.1.7 brings together everything planned for 2.1.6 and 2.1.7. By theme: screens and kiosks (reload on a new version, a Fleet screen, density, palette, contrast, overscan, print and save of a report); phone and PWA (install as an app, compact view, QR pairing, palette and shortcuts); real-time and recovery (webhook queue, WebSocket without a public address, GitHub status, heartbeat); scale and observability (histograms, allowance by bucket, OpenTelemetry, workspaces, cost and carbon); the command line and the AI (formats, watch, doctor, proposals with approval, alerts history); the Sentinels, with honest reads and no false findings; and the release chain (immutable releases, a zizmor job, an updater that keeps copies and a log).

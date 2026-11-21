@@ -180,6 +180,7 @@ _add("c.container", "This is a container: the image cannot be replaced from insi
 _add("c.launcher", "Your launcher {name} has changes of your own: they are kept ({how}).", "Tu lanzador {name} tiene cambios tuyos: se conservan ({how}).", "Dein Starter {name} enthält eigene Änderungen: sie bleiben erhalten ({how}).", "Votre lanceur {name} contient vos modifications : elles sont conservées ({how}).", "Il tuo avviatore {name} ha modifiche tue: vengono conservate ({how}).", "起動スクリプト {name} に独自の変更があります。保持されます（{how}）。", "你的启动脚本 {name} 含有你自己的修改：将被保留（{how}）。", "O seu lançador {name} tem alterações suas: são mantidas ({how}).")
 _add("c.registry_gap", "The registry of migrations has no entry for {versions}: the configuration is only checked, not converted, for those versions.", "El registro de migraciones no tiene entrada para {versions}: para esas versiones la configuración solo se comprueba, no se convierte.", "Das Migrationsregister hat keinen Eintrag für {versions}: für diese Versionen wird die Konfiguration nur geprüft, nicht umgewandelt.", "Le registre de migrations n'a pas d'entrée pour {versions} : pour ces versions la configuration est seulement vérifiée, pas convertie.", "Il registro delle migrazioni non ha voci per {versions}: per quelle versioni la configurazione è solo controllata, non convertita.", "移行レジストリに {versions} の項目がありません。それらのバージョンでは設定は確認のみで変換されません。", "迁移注册表中没有 {versions} 的条目：这些版本的配置只检查，不转换。", "O registo de migrações não tem entrada para {versions}: para essas versões a configuração só é verificada, não convertida.")
 _add("c.pending", "A previous update did not finish ({backup}). Resume it or go back before starting another one.", "Una actualización anterior no terminó ({backup}). Reanúdala o vuelve atrás antes de empezar otra.", "Ein früheres Update wurde nicht beendet ({backup}). Setze es fort oder gehe zurück, bevor du ein neues beginnst.", "Une mise à jour précédente n'est pas terminée ({backup}). Reprenez-la ou revenez en arrière avant d'en lancer une autre.", "Un aggiornamento precedente non è terminato ({backup}). Riprendilo o torna indietro prima di iniziarne un altro.", "前回の更新が完了していません（{backup}）。再開するか元に戻してから新しい更新を始めてください。", "上一次更新尚未完成（{backup}）：请先继续或回退，再开始新的更新。", "Uma atualização anterior não terminou ({backup}). Retome-a ou volte atrás antes de iniciar outra.")
+_add("c.applying", "An update is in progress ({backup}). Wait for it to finish before going back.", "Hay una actualización en curso ({backup}). Espera a que termine antes de volver atrás.", "Ein Update läuft gerade ({backup}). Warte, bis es fertig ist, bevor du zurückgehst.", "Une mise à jour est en cours ({backup}). Attendez qu'elle se termine avant de revenir en arrière.", "È in corso un aggiornamento ({backup}). Attendi che finisca prima di tornare indietro.", "更新の実行中です（{backup}）。終わるまで待ってから元に戻してください。", "正在进行更新（{backup}）：请等它完成后再回退。", "Há uma atualização em curso ({backup}). Espere que termine antes de voltar atrás.")
 _add("c.locked", "Another updater is working on this folder.", "Otro actualizador está trabajando en esta carpeta.", "Ein anderer Updater arbeitet in diesem Ordner.", "Un autre outil de mise à jour travaille dans ce dossier.", "Un altro aggiornatore sta lavorando in questa cartella.", "別のアップデーターがこのフォルダーで作業中です。", "另一个更新程序正在处理此文件夹。", "Outro atualizador está a trabalhar nesta pasta.")
 _add("c.required", "Version {need} must be installed first (or update from a version at least {need}).", "Hay que instalar antes la versión {need} (o actualizar desde una versión de al menos {need}).", "Zuerst muss Version {need} installiert werden (oder von mindestens {need} aktualisieren).", "Il faut d'abord installer la version {need} (ou mettre à jour depuis au moins {need}).", "Occorre prima installare la versione {need} (o aggiornare da almeno {need}).", "先にバージョン {need} をインストールしてください（または {need} 以上から更新）。", "需要先安装版本 {need}（或从至少 {need} 的版本更新）。", "É preciso instalar antes a versão {need} (ou atualizar a partir de pelo menos {need}).")
 _add("c.same_vm", "Nothing to do: version {version} is already installed.", "Nada que hacer: la versión {version} ya está instalada.", "Nichts zu tun: Version {version} ist bereits installiert.", "Rien à faire : la version {version} est déjà installée.", "Niente da fare: la versione {version} è già installata.", "何もする必要はありません。バージョン {version} は導入済みです。", "无需操作：已安装版本 {version}。", "Nada a fazer: a versão {version} já está instalada.")
@@ -1979,11 +1980,29 @@ class Updater:
         return None
 
     def go_back(self, restore_data=None, confirm=None, handover=False, systemd_unit=None):
+        """Puts the previous version back. It takes the same lock as `apply`, so it never restores while an update is in progress (a live lock, or a journal that says `applying` under one)."""
         report = {"ok": False, "code": OK, "error": None}
         entry = self.previous()
         if not entry:
             report.update(code=USAGE, error=tr("r.no_previous"))
             return report
+        lock = self.backups / ".lock"
+        working = self.pending()
+        if working is not None and self.lock_state():
+            report.update(code=BLOCKED, error=tr("c.applying", backup=working.name))
+            return report
+        try:
+            self._take_lock(lock)
+        except UpdaterError as error:
+            report.update(code=BLOCKED, error=tr("c.applying", backup=(working.name if working is not None else "-")) if working is not None else str(error))
+            return report
+        try:
+            return self._go_back_locked(report, entry, restore_data, confirm, handover, systemd_unit)
+        finally:
+            with contextlib.suppress(OSError):
+                lock.unlink()
+
+    def _go_back_locked(self, report, entry, restore_data, confirm, handover, systemd_unit):
         if systemd_unit:
             code, why = systemctl_user("stop", systemd_unit)
             if code != 0:
