@@ -142,7 +142,7 @@ class TheRotatingScreen(unittest.TestCase):
         self.assertTrue(log["logo"] and all(hidden for _, hidden in log["logo"]), "no logo uploaded: every box stays hidden")
         self.assertEqual(log["errors"], [])
         for url in log["reqs"]:
-            self.assertTrue(url.startswith("/api/screens/data?screen="), url)
+            self.assertTrue(url.startswith("/api/screens/data?screen=") or url == "/api/version", url)
 
 
 if __name__ == "__main__":
