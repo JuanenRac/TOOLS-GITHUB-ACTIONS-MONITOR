@@ -48,6 +48,8 @@
       "runner_minutes": []
     },
     "rerun_timing": false,
+    "reusable_out_of_rankings": false,
+    "orphan_workflows": false,
     "failed_jobs": {
       "enabled": false,
       "group_by": "auto",
@@ -997,6 +999,7 @@
   "runners": {
     "enabled": false,
     "scope": "owner",
+    "group_by": "none",
     "model": {
       "enabled": false,
       "jobs_per_cycle": 10,
@@ -1063,7 +1066,9 @@
     "saved_filters": [],
     "meta_columns": [],
     "meta_per_call": 20,
-    "meta_ttl_hours": 6
+    "meta_ttl_hours": 6,
+    "fork_behind": false,
+    "fork_behind_per_call": 5
   },
   "lessons": {
     "enabled": true,

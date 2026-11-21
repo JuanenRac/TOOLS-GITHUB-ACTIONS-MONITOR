@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.7",
  "previous": "2.1.6",
- "digest": "2bbd057d0e151d25859a929bba365f8bf9a7d304f47e334c278c3281677ad037",
+ "digest": "56fb696297e1d425fa99b80288d2cad3beabf8b43593013761af60b2e6fdfce9",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -125,6 +125,16 @@
     "key": "ci.branches_by_repo",
     "kind": "names",
     "default": []
+   },
+   {
+    "key": "ci.orphan_workflows",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ci.reusable_out_of_rankings",
+    "kind": "bool",
+    "default": false
    },
    {
     "key": "cli.status_codes",
@@ -273,6 +283,20 @@
      2000
     ],
     "default": 40
+   },
+   {
+    "key": "fleet.fork_behind",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "fleet.fork_behind_per_call",
+    "kind": "int",
+    "bounds": [
+     1,
+     50
+    ],
+    "default": 5
    },
    {
     "key": "fleet.meta_columns",
@@ -618,6 +642,16 @@
     "key": "report_export.limits",
     "kind": "bool",
     "default": true
+   },
+   {
+    "key": "runners.group_by",
+    "kind": "enum",
+    "bounds": [
+     "none",
+     "group",
+     "label"
+    ],
+    "default": "none"
    },
    {
     "key": "screens.glance_seconds",
