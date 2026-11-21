@@ -173,6 +173,7 @@ jobs:
           python -m unittest discover -s monitor/tests -p "test_188_notify_page.py" -v
           python -m unittest discover -s monitor/tests -p "test_194_ai_preset_page.py" -v
           python -m unittest discover -s monitor/tests -p "test_screens_rotation_browser.py" -v
+          python -m unittest discover -s monitor/tests -p "test_mon218_wall_life_browser.py" -v
 
   screens:
     name: The wall screens fit (every language, every kind of data, one size at a time)
