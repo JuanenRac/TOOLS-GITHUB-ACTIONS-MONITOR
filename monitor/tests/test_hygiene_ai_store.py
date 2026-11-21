@@ -110,6 +110,16 @@ class ReleaseRules(unittest.TestCase):
 
 
 class RedCriterion(unittest.TestCase):
+    def test_a_run_that_waits_for_an_approval_is_not_red(self):
+        """The rule of red, the same on every screen and in every edition: failure, timed_out and startup_failure; action_required only warns (it is its own state)."""
+        from github_actions_monitor.data_pipeline import redrule
+        self.assertEqual(set(redrule.BAD), {"failure", "timed_out", "startup_failure"})
+        self.assertEqual(set(sentinel_local.BAD), set(redrule.BAD))
+        self.assertNotIn("action_required", sentinel_local.BAD)
+        self.assertFalse(set(sentinel_local.BAD) & set(sentinel_local.IGNORED))
+        run = {"repo": "r", "id": 1, "name": "CI", "path": "ci.yml", "branch": "main", "event": "push", "status": "completed", "conclusion": "action_required", "started": "2026-11-21T10:00:00Z"}
+        self.assertEqual(redrule.red_workflows({"r": [run]}, {"r": "main"})[0], [])
+
     def test_same_red_set_as_the_public_dashboard(self):
         import re
         from github_actions_monitor.app import workspace
@@ -126,8 +136,8 @@ class RedCriterion(unittest.TestCase):
         if match is None:
             self.skipTest("the profile repository keeps its definition of red in a form this test does not read")
         dashboard = set(re.findall(r'"([a-z_]+)"', match.group(1)))
-        self.assertEqual(dashboard, set(sentinel_local.BAD))
-        self.assertFalse(set(sentinel_local.BAD) & set(sentinel_local.IGNORED))
+        self.assertTrue(set(sentinel_local.BAD) <= dashboard)      # every red of the monitor is red on the dashboard
+        self.assertFalse((dashboard - set(sentinel_local.BAD)) - {"action_required"})      # the dashboard may still list the approval until its own rule is aligned; nothing else may differ
 
 
 class ByEcosystem(unittest.TestCase):
