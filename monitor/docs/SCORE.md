@@ -51,10 +51,10 @@ Each account has its own score. Its detail breaks it down by repository (the CI 
 
 The page lists the newest 600 runs, but an account with many repositories can read thousands in one cycle. `score.source` chooses what the score, the reports, the mirror and the analytics are made from:
 
-- `recent600` (the default in this version): the newest 600 runs of the page, as before. When the cycle read more than that, the snapshot says so: `data_quality.cut` is true, `data_quality.runs_read` is the number read and `recent_cut` is among the reasons, and the page shows the line "The cycle read N runs but the score saw only the newest 600". Nothing is hidden: a figure that sees only a recent part of the window is never presented as the whole.
-- `ledger`: every run the cycle read, counted once in the ledger of the account. The ledger also keeps hourly totals (successes and failures per hour) that outlive its ceiling of 20000 runs: when the ceiling had to drop runs of the window, `data_quality.truncated` is true and `data_quality.aggregate` gives the runs and the success rate those totals hold for the window.
+- `recent600`: the newest 600 runs of the page, as before. When the cycle read more than that, the snapshot says so: `data_quality.cut` is true, `data_quality.runs_read` is the number read and `recent_cut` is among the reasons, and the page shows the line "The cycle read N runs but the score saw only the newest 600". Nothing is hidden: a figure that sees only a recent part of the window is never presented as the whole.
+- `ledger` (the default since this version): every run the cycle read, counted once in the ledger of the account. The ledger also keeps hourly totals (successes and failures per hour) that outlive its ceiling of 20000 runs: when the ceiling had to drop runs of the window, `data_quality.truncated` is true and `data_quality.aggregate` gives the runs and the success rate those totals hold for the window.
 
-The default of `score.source` becomes `ledger` in the next version, with its entry in the migration record. Whoever sets it by hand keeps the value. A ledger written before this version builds its hourly totals from the runs it holds; the snapshots of earlier versions are read as they are, without the new fields. No call to GitHub is added.
+The default of `score.source` is `ledger` since this version, with its entry in the migration record: the updater gives it to whoever never set it and keeps the value of whoever set it by hand (`recent600` included). Setting `recent600` gives back the previous behaviour. A ledger written before this version builds its hourly totals from the runs it holds; the snapshots of earlier versions are read as they are, without the new fields. No call to GitHub is added.
 
 ## On the page
 

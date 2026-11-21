@@ -33,11 +33,11 @@ def account(total):
 
 
 class Source(unittest.TestCase):
-    def test_the_source_is_recent600_until_chosen_and_nonsense_is_ignored(self):
-        self.assertEqual(engine.settings({})["source"], "recent600")
-        self.assertEqual(engine.settings({"score": {"source": "everything"}})["source"], "recent600")
-        self.assertEqual(engine.settings({"score": {"source": True}})["source"], "recent600")
-        self.assertEqual(engine.settings({"score": {"source": "ledger"}})["source"], "ledger")
+    def test_the_source_is_the_ledger_until_chosen_and_nonsense_is_ignored(self):
+        self.assertEqual(engine.settings({})["source"], "ledger")
+        self.assertEqual(engine.settings({"score": {"source": "everything"}})["source"], "ledger")
+        self.assertEqual(engine.settings({"score": {"source": True}})["source"], "ledger")
+        self.assertEqual(engine.settings({"score": {"source": "recent600"}})["source"], "recent600")      # a value set by hand is kept
         self.assertTrue(settings_api.check_value("score.source", "ledger")[0])
         self.assertFalse(settings_api.check_value("score.source", "all")[0])
 
@@ -49,11 +49,52 @@ class Source(unittest.TestCase):
         try:
             self.assertEqual(len(am.source_runs({"score": {"source": "ledger"}}, data)), 1000)
             self.assertEqual(len(am.source_runs({"score": {"source": "recent600"}}, data)), 600)
-            self.assertEqual(len(am.source_runs({"score": {}}, data)), 600)
+            self.assertEqual(len(am.source_runs({"score": {}}, data)), 1000)      # the default is the ledger since 2.1.6
             self.assertEqual(len(am.source_runs({"score": {"source": "ledger"}}, {"runs": full[:600], "runs_total": 999})), 600)      # the full list belongs to another picture
             self.assertEqual(am.source_runs({"score": {"source": "ledger"}}, {}), [])
         finally:
             am.ALL_RUNS["runs"] = old
+
+
+class MigrationOfTheDefault(unittest.TestCase):
+    """The default passes from recent600 to ledger through the registry of migrations: who never set it gets the new one, who set it by hand keeps the value."""
+
+    def doc(self):
+        import json
+        return json.loads((HERE / "assets" / "migrations" / "2.1.7.json").read_text(encoding="utf-8"))
+
+    def migrate(self, cfg, policy="conservative"):
+        sys.path.insert(0, str(HERE / "tools"))
+        import monitor_updater as mu
+        return mu.migrate_config(cfg, [self.doc()], policy)
+
+    def test_the_registry_announces_the_new_default_in_the_eight_languages(self):
+        notices = [n for n in self.doc()["manual"]["notices"] if n["id"] == "score_source_ledger"]
+        self.assertEqual(len(notices), 1)
+        self.assertEqual((notices[0]["old_value"], notices[0]["new_value"]), ("recent600", "ledger"))
+        self.assertEqual(sorted(notices[0]["text"]), sorted(["en", "es", "de", "fr", "it", "ja", "zh", "pt"]))
+
+    def test_nothing_set_takes_the_new_default_and_the_value_is_not_written(self):
+        out, changes, notices = self.migrate({})
+        self.assertNotIn("score", out)
+        self.assertEqual([c["type"] for c in changes if c["key"] == "score.source"], ["new_default"])
+        self.assertEqual(engine.settings(out)["source"], "ledger")
+        self.assertEqual([n["id"] for n in notices], ["score_source_ledger"])
+
+    def test_a_value_set_by_hand_is_kept_even_when_it_is_the_old_default(self):
+        out, changes, _n = self.migrate({"score": {"source": "recent600"}})
+        self.assertEqual(out["score"]["source"], "recent600")
+        self.assertEqual([c["type"] for c in changes if c["key"] == "score.source"], ["kept"])
+        self.assertEqual(engine.settings(out)["source"], "recent600")
+        out, changes, _n = self.migrate({"score": {"source": "ledger"}})
+        self.assertEqual(out["score"]["source"], "ledger")
+        self.assertEqual([c for c in changes if c["key"] == "score.source"], [])
+
+    def test_the_old_default_can_be_pinned_or_adopted_on_request(self):
+        out, _c, _n = self.migrate({}, "keep_old")
+        self.assertEqual(out["score"]["source"], "recent600")
+        out, _c, _n = self.migrate({"score": {"source": "recent600"}}, "adopt_new")
+        self.assertEqual(out["score"]["source"], "ledger")
 
 
 class Totals(unittest.TestCase):

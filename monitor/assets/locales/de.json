@@ -951,7 +951,7 @@
  "cfg.h.score.alert.notify_external": "Sendet die Punktzahl-Warnung zusätzlich über die externen Benachrichtigungskanäle. Standardmäßig aus.",
  "cfg.h.score.calibrating_hours": "Ein Konto, das kürzer als diese Zeit beobachtet wurde, zeigt noch keine Punktzahl.",
  "cfg.h.score.enabled": "Schaltet die Punktzahl des Kontos (Zahl, Buchstabe und Trend) ein oder aus.",
- "cfg.h.score.source": "Aus welchen Läufen Bewertung, Berichte, Spiegel und Analytik entstehen: recent600 (Standard) sind die neuesten 600 Läufe der Seite; ledger sind alle Läufe, die der Zyklus gelesen hat, einmal im Hauptbuch gezählt, mit Stundensummen, die dessen Obergrenze überdauern. Bei einem Konto mit mehr als 600 Läufen sieht recent600 nur einen jüngeren Teil des Fensters, und die Bewertung sagt das.",
+ "cfg.h.score.source": "Aus welchen Läufen Bewertung, Berichte, Spiegel und Analytik entstehen: recent600 sind die neuesten 600 Läufe der Seite; ledger (Standard) sind alle Läufe, die der Zyklus gelesen hat, einmal im Hauptbuch gezählt, mit Stundensummen, die dessen Obergrenze überdauern. Bei einem Konto mit mehr als 600 Läufen sieht recent600 nur einen jüngeren Teil des Fensters, und die Bewertung sagt das.",
  "cfg.h.score.grades.A": "Ab dieser Punktzahl lautet der Buchstabe A; sie muss höher sein als die für B.",
  "cfg.h.score.grades.B": "Ab dieser Punktzahl lautet der Buchstabe B; sie muss höher sein als die für C.",
  "cfg.h.score.grades.C": "Ab dieser Punktzahl lautet der Buchstabe C; sie muss höher sein als die für D.",

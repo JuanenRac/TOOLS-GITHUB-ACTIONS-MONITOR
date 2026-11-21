@@ -951,7 +951,7 @@
  "cfg.h.score.alert.notify_external": "Envoie aussi l'alerte du score par les canaux de notification externes. Désactivé par défaut.",
  "cfg.h.score.calibrating_hours": "Un compte surveillé depuis moins longtemps que cette durée n'affiche pas encore de score.",
  "cfg.h.score.enabled": "Active ou désactive le score du compte (nombre, lettre et tendance).",
- "cfg.h.score.source": "D'où viennent le score, les rapports, le miroir et l'analytique : recent600 (par défaut) sont les 600 exécutions les plus récentes de la page ; ledger sont toutes celles que le cycle a lues, comptées une fois dans le registre, avec des totaux horaires qui survivent à son plafond. Sur un compte de plus de 600 exécutions, recent600 ne voit qu'une partie récente de la fenêtre, et le score le dit.",
+ "cfg.h.score.source": "D'où viennent le score, les rapports, le miroir et l'analytique : recent600 sont les 600 exécutions les plus récentes de la page ; ledger (par défaut) sont toutes celles que le cycle a lues, comptées une fois dans le registre, avec des totaux horaires qui survivent à son plafond. Sur un compte de plus de 600 exécutions, recent600 ne voit qu'une partie récente de la fenêtre, et le score le dit.",
  "cfg.h.score.grades.A": "À partir de ce score, la lettre est A ; il doit être supérieur à celui de B.",
  "cfg.h.score.grades.B": "À partir de ce score, la lettre est B ; il doit être supérieur à celui de C.",
  "cfg.h.score.grades.C": "À partir de ce score, la lettre est C ; il doit être supérieur à celui de D.",

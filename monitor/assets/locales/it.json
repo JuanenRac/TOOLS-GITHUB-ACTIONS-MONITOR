@@ -951,7 +951,7 @@
  "cfg.h.score.alert.notify_external": "Invia l'avviso del punteggio anche attraverso i canali di notifica esterni. Disattivato per impostazione predefinita.",
  "cfg.h.score.calibrating_hours": "Un account osservato per meno tempo di questo non mostra ancora un punteggio.",
  "cfg.h.score.enabled": "Attiva o disattiva il punteggio dell'account (numero, lettera e tendenza).",
- "cfg.h.score.source": "Da quali esecuzioni derivano punteggio, rapporti, specchio e analitica: recent600 (predefinito) sono le 600 più recenti della pagina; ledger sono tutte quelle lette dal ciclo, contate una volta nel registro, con totali orari che sopravvivono al suo tetto. In un account con più di 600 esecuzioni recent600 vede solo una parte recente della finestra, e il punteggio lo dice.",
+ "cfg.h.score.source": "Da quali esecuzioni derivano punteggio, rapporti, specchio e analitica: recent600 sono le 600 più recenti della pagina; ledger (predefinito) sono tutte quelle lette dal ciclo, contate una volta nel registro, con totali orari che sopravvivono al suo tetto. In un account con più di 600 esecuzioni recent600 vede solo una parte recente della finestra, e il punteggio lo dice.",
  "cfg.h.score.grades.A": "Da questo punteggio la lettera è A; deve essere maggiore di quello di B.",
  "cfg.h.score.grades.B": "Da questo punteggio la lettera è B; deve essere maggiore di quello di C.",
  "cfg.h.score.grades.C": "Da questo punteggio la lettera è C; deve essere maggiore di quello di D.",
