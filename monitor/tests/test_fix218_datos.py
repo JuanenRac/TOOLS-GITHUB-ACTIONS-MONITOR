@@ -155,5 +155,57 @@ class ReadDoesNotUndoTheWebhook(unittest.TestCase):
         self.assertEqual(am.RUN_CACHE["demo"]["runs"][0]["conclusion"], "success")
 
 
+class OtlpReRunsAndMemory(unittest.TestCase):
+    CFG = {"otlp": {"enabled": True, "endpoint": "http://127.0.0.1:4318", "interval_seconds": 60}}
+
+    def setUp(self):
+        from github_actions_monitor.integrations import otlp
+        self.otlp = otlp
+        otlp.STATE.update({"sent": set(), "total": 0, "last_ok": None, "last_error": "", "next": 0.0})
+        self.addCleanup(otlp.STATE.update, {"sent": set(), "total": 0, "last_ok": None, "last_error": "", "next": 0.0})
+        self.posted = []
+
+    def _post(self, request):
+        import json
+        self.posted.append(json.loads(request.data))
+
+    @staticmethod
+    def _run(i, attempt=1, conclusion="failure"):
+        return {"repo": "demo", "id": i, "name": "CI", "status": "completed", "conclusion": conclusion, "attempt": attempt, "started": "2026-11-21T10:00:00Z", "seconds": 60}
+
+    def _spans(self):
+        return [sp for doc in self.posted if "resourceSpans" in doc for sp in doc["resourceSpans"][0]["scopeSpans"][0]["spans"]]
+
+    def test_a_rerun_is_exported_with_its_own_span(self):
+        self.otlp.export(self.CFG, {"runs": [self._run(777, 1)]}, "2.1.8", now=1000.0, post=self._post)
+        result = self.otlp.export(self.CFG, {"runs": [self._run(777, 2, "success")]}, "2.1.8", now=1200.0, post=self._post)
+        self.assertEqual(result["sent_spans"], 1)
+        first, second = self._spans()
+        self.assertEqual(first["traceId"], second["traceId"])
+        self.assertNotEqual(first["spanId"], second["spanId"])
+
+    def test_the_first_attempt_keeps_the_id_it_always_had(self):
+        self.assertEqual(self.otlp.ids("demo", 5), self.otlp.ids("demo", 5, 1))
+
+    def test_the_memory_forgets_the_oldest_and_resends_nothing_of_the_current_list(self):
+        otlp = self.otlp
+        otlp.STATE["sent"] = dict.fromkeys(("old", n, 1) for n in range(4900))
+        current = [self._run(10000 + n) for n in range(200)]
+        otlp.export(self.CFG, {"runs": current}, "2.1.8", now=1000.0, post=self._post)
+        self.assertLessEqual(len(otlp.STATE["sent"]), 5000)
+        again = otlp.export(self.CFG, {"runs": current}, "2.1.8", now=1200.0, post=self._post)
+        self.assertEqual(again["sent_spans"], 0)
+
+    def test_5200_sends_in_a_row_resend_none_of_the_list_in_hand(self):
+        otlp = self.otlp
+        now = 1000.0
+        for block in range(26):
+            runs = [self._run(block * 200 + n) for n in range(200)]
+            otlp.export(self.CFG, {"runs": runs}, "2.1.8", now=now, post=self._post)
+            now += 120
+        last = [self._run(25 * 200 + n) for n in range(200)]
+        self.assertEqual(otlp.export(self.CFG, {"runs": last}, "2.1.8", now=now, post=self._post)["sent_spans"], 0)
+
+
 if __name__ == "__main__":
     unittest.main()
