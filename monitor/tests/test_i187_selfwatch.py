@@ -4,6 +4,7 @@
 of /api/health carries it, and a job of the CI runs the monitor in a container with one processor and 512 MB with a simulated account of 120 workflows."""
 import json
 import sys
+import time
 import unittest
 from pathlib import Path
 
@@ -37,6 +38,7 @@ class Numbers(unittest.TestCase):
         blob = mmap.mmap(-1, 40 * 1024 * 1024)      # 40 MB of fresh pages (a block of the heap could reuse pages already counted) that are touched really show in the next reading
         for i in range(0, len(blob), 4096):
             blob[i] = 1
+        time.sleep(0.05)      # on Windows the clock moves every ~16 ms: two samples in a row can share a tick and the cpu percent would be None
         second = selfwatch.sample(first)
         if first["rss_mb"] is not None and sys.platform.startswith(("linux", "win")):
             self.assertGreater(second["rss_mb"], first["rss_mb"] + 20)

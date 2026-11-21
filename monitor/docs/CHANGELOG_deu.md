@@ -9,6 +9,12 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+### Behoben
+
+- **Die Webhook-Prüfung des Container-Audits (E8) sendet jetzt wirklich einen Body über dem Limit und gibt jeder Zustellung eine eigene ID**: Der Body von „ein Body über dem Limit“ war 300 KB groß, unter dem Standard von 1 MiB für `webhook.max_body_kb`, und teilte die Zustellungs-ID des ersten Pings; der Empfänger (der die Größe schon zuerst prüft) beantwortete ihn daher als Duplikat. Der Body liegt jetzt über dem Limit, und die Prüfungen, die ein ignoriertes Ereignis erwarten, verstecken sich nicht hinter einer wiederholten ID.
+- **Der Sicherheits-Sentinel behält die Warnungen „kein Branch-Schutz“ nicht mehr, die er vor dem Lesen der Rulesets erzeugt hat**: Ein von einer älteren Version gespeicherter Zustand behielt seine Warnungen und Daten stundenlang (fünf Repositories pro Runde), sodass durch ein Ruleset geschützte Repositories weiter gemeldet wurden. Ein nach der alten Logik beurteiltes Repository wird jetzt zuerst geprüft und sein alter Branch-Befund nicht übernommen; und wenn weder das Feld `protected` des Branches noch `rules/branches/<branch>` gelesen werden kann, gilt der Branch nicht mehr als ungeschützt.
+- **Der Test der Selbstüberwachung schlägt unter Windows nicht mehr fehl**: Dort läuft die Uhr alle ~16 ms weiter, zwei Messungen hintereinander konnten sich einen Tick teilen und der CPU-Prozentwert blieb leer; der Test wartet jetzt kurz dazwischen.
+
 ## [2.1.7]
 
 Version 2.1.7 fasst alles zusammen, was für 2.1.6 und 2.1.7 geplant war. Nach Themen: Bildschirme und Kioske (Neuladen bei neuer Version, Flottenbildschirm, Dichte, Palette, Kontrast, Overscan, Drucken und Speichern eines Berichts); Telefon und PWA (als App installieren, kompakte Ansicht, Kopplung per QR, Palette und Tastenkürzel); Echtzeit und Wiederherstellung (Webhook-Warteschlange, WebSocket ohne öffentliche Adresse, GitHub-Status, Herzschlag); Skalierung und Beobachtbarkeit (Histogramme, Kontingent je Bucket, OpenTelemetry, Arbeitsbereiche, Kosten und CO2); Kommandozeile und KI (Formate, watch, doctor, Vorschläge mit Freigabe, Alarmverlauf); die Wächter mit ehrlichen Lesungen und ohne falsche Befunde; und die Release-Kette (unveränderliche Releases, ein zizmor-Job, ein Updater mit Kopien und Protokoll).

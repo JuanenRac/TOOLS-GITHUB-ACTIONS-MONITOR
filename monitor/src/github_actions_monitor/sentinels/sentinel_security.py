@@ -42,6 +42,7 @@ STATE_FILE = paths.place("security_state.json")
 PER_PAGE = 100
 WEIGHTY = ("dependabot", "code_scanning", "secret")      # the sources that carry the penalty: the ones whose silence must never pass for a clean bill of health
 RETRY_AFTER = (300, 1800, 21600)                         # seconds a repository whose read fails waits before it is tried again: after the 1st, 2nd, 3rd and later failure in a row
+BRANCH_LOGIC = 2                                         # how the protection of the branch is judged: 1 = classic endpoint only, 2 = also the `protected` flag and the rules of the branch; a state written by an older logic is not trusted for it
 UNREAD_KEEP = 7 * 24 * 3600                              # an alert whose source cannot be read any more is kept (marked unread) this long before it is dropped without an event
 CODEOWNERS_EVERY = 24 * 3600          # a repository without a CODEOWNERS file is looked at again this often (three reads)
 CODEOWNERS_PATHS = (".github/CODEOWNERS", "CODEOWNERS", "docs/CODEOWNERS")
@@ -114,6 +115,11 @@ def load_state(path):
         if isinstance(data, dict) and isinstance(data.get("alerts"), dict) and isinstance(data.get("per_repo"), dict):
             data["alerts"] = {str(k): v for k, v in data["alerts"].items() if isinstance(v, dict) and isinstance(v.get("repo"), str) and v.get("code") in TITLE_KEYS}
             data["per_repo"] = {str(k): v for k, v in data["per_repo"].items() if isinstance(v, dict)}
+            for name, record in data["per_repo"].items():
+                if record.get("logic") != BRANCH_LOGIC and isinstance(record.get("facts"), dict):      # judged before the rulesets were read: its "unprotected" is not a finding, and the repository is looked at again first
+                    record["facts"].pop("branch_protected", None)
+                    record["facts"].pop("branch_rules", None)
+                    data["alerts"] = {k: a for k, a in data["alerts"].items() if not (a["repo"] == name and a["code"] == "security.branch_unprotected")}
             return data
     except (OSError, ValueError, AttributeError):
         pass
@@ -325,7 +331,7 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
 
         def key(r):
             record = self.state["per_repo"].get(r) or {}
-            return (record.get("retry", 0) > now, max(record.get("scanned", 0), record.get("tried", 0)) - (self.refresh_seconds * 3 if r in open_in else 0), r)
+            return (record.get("retry", 0) > now, record.get("logic") == BRANCH_LOGIC, max(record.get("scanned", 0), record.get("tried", 0)) - (self.refresh_seconds * 3 if r in open_in else 0), r)
         return sorted(repos, key=key)
 
     # -- one round
@@ -440,11 +446,14 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
                     elif rules_status == 304:
                         types = facts.get("branch_rules")
                         protected = protected or bool(types)
-                    facts["branch_protected"] = protected
-                    if types is not None and protected:
-                        facts["branch_rules"] = types
+                    if meta_status == 0 and rules_status == 0:
+                        pass      # neither side read answered (a refusal, a timeout): that is not "no rule", so what was known stays and nothing is called unprotected
                     else:
-                        facts.pop("branch_rules", None)
+                        facts["branch_protected"] = protected
+                        if types is not None and protected:
+                            facts["branch_rules"] = types
+                        else:
+                            facts.pop("branch_rules", None)
                 elif status != 304:
                     facts.pop("branch_protected", None)
             if rules["workflow"]["enabled"]:
@@ -485,7 +494,7 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
             for key in before:
                 self.state["alerts"].pop(key, None)
             self.state["alerts"].update(found)
-            self.state["per_repo"][repo] = {"scanned": now, "etag": etag, "facts": facts, "unavailable": unavailable, "unavailable_why": dict(why or {}), "codeowners_at": codeowners_at, "unread_since": dict(unread or {})}
+            self.state["per_repo"][repo] = {"scanned": now, "etag": etag, "facts": facts, "unavailable": unavailable, "unavailable_why": dict(why or {}), "codeowners_at": codeowners_at, "unread_since": dict(unread or {}), "logic": BRANCH_LOGIC}
         if first:
             return
         # an alert that disappears because its source stopped answering (silent) was not fixed: no "fixed" event

@@ -9,6 +9,12 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+### Corretto
+
+- **Il controllo del webhook dell'audit in container (E8) ora invia davvero un corpo oltre il limite e dà a ogni consegna un id proprio**: il corpo di «un corpo oltre il limite» era di 300 KB, sotto il valore predefinito di 1 MiB di `webhook.max_body_kb`, e condivideva l'id di consegna del primo ping; il ricevitore (che già giudica prima la dimensione) lo risolveva come duplicato. Ora il corpo supera il limite e i controlli che attendono un evento ignorato non si nascondono dietro un id ripetuto.
+- **La sentinella di sicurezza non conserva più gli avvisi «nessuna protezione del ramo» sollevati prima di leggere i ruleset**: uno stato salvato da una versione precedente teneva i suoi avvisi e i suoi dati per ore (cinque repository per giro), quindi i repository protetti da un ruleset venivano ancora segnalati. Un repository giudicato con la vecchia logica viene guardato per primo e il suo vecchio rilievo sul ramo non è considerato; e quando né l'indicatore `protected` del ramo né `rules/branches/<ramo>` si possono leggere, il ramo non viene più dichiarato non protetto.
+- **Il test dell'autosorveglianza non fallisce più su Windows**: lì l'orologio avanza ogni ~16 ms, quindi due campioni consecutivi potevano condividere un tick e la percentuale di CPU restava vuota; il test attende un attimo tra i due.
+
 ## [2.1.7]
 
 La versione 2.1.7 riunisce tutto ciò che era previsto per la 2.1.6 e la 2.1.7. Per tema: schermi e chioschi (ricarica a ogni nuova versione, schermo Flotta, densità, tavolozza, contrasto, overscan, stampa e salvataggio di un rapporto); telefono e PWA (installazione come app, vista compatta, abbinamento con QR, tavolozza e scorciatoie); tempo reale e recupero (coda del webhook, WebSocket senza indirizzo pubblico, stato di GitHub, battito); scala e osservabilità (istogrammi, quota per bucket, OpenTelemetry, spazi di lavoro, costo e carbonio); la riga di comando e l'IA (formati, watch, doctor, proposte con approvazione, storico degli avvisi); le sentinelle, con letture oneste e senza falsi rilievi; e la catena di rilascio (release immutabili, un job zizmor, un aggiornatore che conserva copie e un registro).

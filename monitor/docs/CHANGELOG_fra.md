@@ -9,6 +9,12 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+### Corrigé
+
+- **Le contrôle du webhook de l'audit en conteneur (E8) envoie désormais vraiment un corps au-dessus de la limite et donne à chaque livraison son propre id** : le corps de « un corps au-dessus de la limite » faisait 300 Ko, sous la valeur par défaut de 1 Mio de `webhook.max_body_kb`, et partageait l'id de livraison du premier ping ; le récepteur (qui juge déjà la taille en premier) le traitait donc comme un doublon. Le corps dépasse maintenant la limite, et les contrôles qui attendent un événement ignoré ne se cachent plus derrière un id répété.
+- **La sentinelle de sécurité ne garde plus les alertes « aucune protection de branche » levées avant la lecture des rulesets** : un état enregistré par une version plus ancienne gardait ses alertes et ses données pendant des heures (cinq dépôts par tour), si bien que des dépôts protégés par un ruleset étaient encore signalés. Un dépôt jugé avec l'ancienne logique est regardé en premier et son ancien constat de branche n'est pas retenu ; et quand ni l'indicateur `protected` de la branche ni `rules/branches/<branche>` ne peuvent être lus, la branche n'est plus déclarée non protégée.
+- **Le test de l'autosurveillance n'échoue plus sous Windows** : l'horloge y avance toutes les ~16 ms, deux mesures consécutives pouvaient donc partager un tick et le pourcentage de CPU restait vide ; le test attend un instant entre les deux.
+
 ## [2.1.7]
 
 La version 2.1.7 réunit tout ce qui était prévu pour la 2.1.6 et la 2.1.7. Par thème : écrans et bornes (rechargement à chaque nouvelle version, écran Flotte, densité, palette, contraste, overscan, impression et enregistrement d'un rapport) ; téléphone et PWA (installation comme application, vue compacte, appairage par QR, palette et raccourcis) ; temps réel et reprise (file du webhook, WebSocket sans adresse publique, état de GitHub, battement de cœur) ; échelle et observabilité (histogrammes, quota par seau, OpenTelemetry, espaces de travail, coût et carbone) ; la ligne de commande et l'IA (formats, watch, doctor, propositions avec approbation, historique des alertes) ; les sentinelles, avec des lectures honnêtes et sans faux constats ; et la chaîne de publication (releases immuables, une tâche zizmor, un programme de mise à jour qui garde des copies et un journal).
