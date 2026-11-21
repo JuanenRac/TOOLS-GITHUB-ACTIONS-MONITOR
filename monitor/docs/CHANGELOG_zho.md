@@ -145,6 +145,8 @@
 - **监视器监视自身的内存和线程**（`selfwatch.enabled`、`selfwatch.rss_warn_mb` 1024、`selfwatch.threads_warn` 400、`selfwatch.interval_seconds` 60）：`/api/health` 带有 `selfwatch`，超过限制时会带着数值在被吞掉失败的计数器中记录一次并尽可能释放；CI 在一个处理器、512 MB 的容器中用 120 个工作流的账户运行监视器（`tools/limits_check.py`）。
 
 - **GitHub 上的操作需要理由和操作人，并由服务器把关**（`github_actions.require_reason`、`github_actions.operator`、`github_actions.comment_on_target`、`github_actions.preflight`、`github_actions.writer_lock`）：没有理由（3 到 200 个字符）和操作人的计划会被服务器拒绝，无论页面发送什么，两者都会写入日志；操作前会再次查看目标（变化则返回 `stale`），以无副作用的方式询问凭据能否执行（权限诊断还会读取可推送名单），本机只有一个监视器可以写入，用 `--profile qa` 启动的监视器是观察者。开启 `github_actions.comment_on_target` 后，被关闭的议题或拉取请求还会收到带有这些信息的评论。
+- **更新进度流也随会话结束**：`GET /api/updates/stream` 现在像另外两个流一样，每隔 `auth.stream_revalidate_min` 分钟检查一次会话，因此没有任何实时流会保留已不存在的权限。如果新增的事件流没有该守卫，或新增的 WebSocket 服务器没有同样的重新验证，测试就会失败。
+- **用于测试监控器的 `qa` 配置**（`--profile qa` 或 `MONITOR_PROFILE=qa`）：监控器以拒绝对 GitHub 执行任何操作的观察者身份启动，监听另一个端口（常规端口加 100，除非给出 `--port`；设置了该变量时，命令行遵循同样的规则），并把 ETag 缓存放在结束时删除的临时文件中，因此测试实例绝不会对同一账户重复操作，也不会与真实缓存混用。
 
 - **实时流随其会话结束**（`auth.stream_revalidate_min`，10）：实时流每隔几分钟重新检查开启它的会话，会话被撤销或过期、用户被删除或角色不再允许时即关闭，因此没有连接会保留已失效的权限。
 

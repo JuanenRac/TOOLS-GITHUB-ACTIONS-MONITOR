@@ -88,7 +88,7 @@ class Revalidate(unittest.TestCase):
 
     def test_a_stream_is_given_the_guard(self):
         source = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
-        self.assertEqual(source.count("stop=self.stream_guard()"), 2, "the live events and the AI stream both revalidate")
+        self.assertEqual(source.count("stop=self.stream_guard()"), 3, "the live events, the AI stream and the progress of an update all revalidate")
 
 
 class NoIndex(unittest.TestCase):

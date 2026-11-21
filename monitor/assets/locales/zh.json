@@ -1862,6 +1862,7 @@
  "mon.no_owner": "无法确定要监视的 GitHub 账户：请在 actions_monitor.json 中设置 \"github_owner\"。",
  "mon.no_port": "从 {port} 起没有可用端口",
  "mon.port_busy": "端口 {port} 已被占用，改用 {used}",
+ "mon.profile_qa": "配置 qa：仅观察（不对 GitHub 执行任何操作），端口 {port}，ETag 缓存在临时文件中",
  "mon.reduced_mode": "精简模式：未找到本地工作区，哨兵只显示 GitHub API 提供的内容（没有签名队列、审计报告，也不读取 CHANGELOG）。在 actions_monitor.json 中设置 workspace_root 即可启用。",
  "mon.sentinel_failed": "哨兵故障：{error}",
  "mon.sentinel_not_loaded": "哨兵模块未加载",

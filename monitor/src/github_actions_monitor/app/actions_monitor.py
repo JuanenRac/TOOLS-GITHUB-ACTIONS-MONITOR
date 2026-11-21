@@ -66,6 +66,7 @@ from github_actions_monitor.app import orglogo, screenmenu, screens
 from github_actions_monitor.util import exclusive
 from github_actions_monitor.util import platform_compat
 from github_actions_monitor.util import ports
+from github_actions_monitor.app import qaprofile
 from github_actions_monitor.data_pipeline import causes
 from github_actions_monitor.data_pipeline import alertflow
 from github_actions_monitor.data_pipeline import paging
@@ -3207,7 +3208,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Connection", "close")
             self.end_headers()
             self.close_connection = True
-            for frame in updates.stream_frames():
+            for frame in updates.stream_frames(stop=self.stream_guard()):      # ends with the session that opened it (auth.stream_revalidate_min)
                 self.wfile.write(frame.encode("utf-8"))
                 self.wfile.flush()
         except (ConnectionError, OSError):
@@ -5511,6 +5512,7 @@ def main():
     parser = argparse.ArgumentParser(description=i18n.t("mon.description"), formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--port", type=int, default=None, help=i18n.t("mon.help_port"))      # none = the port of the edition: ports.complete / ports.lite of the configuration file
     parser.add_argument("--lite", action="store_true", help=i18n.t("mon.help_lite"))
+    parser.add_argument("--profile", choices=qaprofile.PROFILES, default=None, help=i18n.t("mon.help_profile"))
     parser.add_argument("--no-browser", action="store_true", help=i18n.t("mon.help_no_browser"))
     parser.add_argument("--discover", action="store_true", help=i18n.t("mon.help_discover"))
     parser.add_argument("--lang", metavar="CODE", help=i18n.t("cli.help_lang"))
@@ -5529,6 +5531,8 @@ def main():
         parser.add_argument("--migrate-accounts", action="store_true", help=i18n.t("mon.help_migrate_accounts"))
         parser.add_argument("--apply", action="store_true", help=i18n.t("mon.help_apply"))
     args = parser.parse_args()
+    if args.profile:
+        os.environ[qaprofile.ENV] = args.profile      # the rest of the monitor (the port, the writer lock, the command line) reads it from here
     args.port = ports.resolve("lite" if LITE["on"] else "complete", flag=args.port)
     platform_compat.console_utf8()
     if args.about:
@@ -5599,7 +5603,12 @@ def main():
     etag_cfg = ((config.get("cache") or {}).get("etag") or {}) if isinstance(config.get("cache"), dict) else {}
     cache_cfg = config.get("cache") if isinstance(config.get("cache"), dict) else {}
     negative = cache_cfg.get("negative_ttl_s", 300)
-    ETAG["cache"] = etagcache.EtagCache(ttl_hours=etag_cfg.get("ttl_hours", 24) if isinstance(etag_cfg.get("ttl_hours"), int) else 24, enabled=etag_cfg.get("enabled", True) is True and (config.get("network") or {}).get("etag", True) is not False,      # network.etag is the switch of the Quota tab; cache.etag.enabled stays as it was
+    qa_cache = qaprofile.etag_file() if qaprofile.active() else None      # the profile qa keeps its ETags in a temporary file that is deleted at the end
+    if qa_cache is not None:
+        import atexit
+        atexit.register(qaprofile.forget, qa_cache)
+        print(i18n.t("mon.profile_qa", port=args.port), flush=True)
+    ETAG["cache"] = etagcache.EtagCache(**({"path": qa_cache} if qa_cache is not None else {}), ttl_hours=etag_cfg.get("ttl_hours", 24) if isinstance(etag_cfg.get("ttl_hours"), int) else 24, enabled=etag_cfg.get("enabled", True) is True and (config.get("network") or {}).get("etag", True) is not False,      # network.etag is the switch of the Quota tab; cache.etag.enabled stays as it was
                                         negative_ttl=negative if isinstance(negative, int) and not isinstance(negative, bool) else 300, skip_stateful=etag_cfg.get("skip_stateful", True) is not False,
                                         revalidate_active=etag_cfg.get("revalidate_active", True) is not False, identity=credential_fingerprint)
     acfg = analytics.settings(config)

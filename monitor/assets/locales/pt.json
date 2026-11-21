@@ -1862,6 +1862,7 @@
  "mon.no_owner": "Não foi possível determinar a conta do GitHub a vigiar: defina \"github_owner\" em actions_monitor.json.",
  "mon.no_port": "Nenhuma porta livre a partir da {port}",
  "mon.port_busy": "A porta {port} está ocupada, a usar a {used}",
+ "mon.profile_qa": "Perfil qa: apenas observador (nenhuma ação no GitHub), porta {port}, cache ETag num ficheiro temporário",
  "mon.reduced_mode": "Modo reduzido: não foi encontrado nenhum espaço de trabalho local, por isso a Sentinela mostra apenas o que a API do GitHub fornece (sem fila de assinatura, sem relatório de auditoria, sem leitura do CHANGELOG). Defina workspace_root em actions_monitor.json para os ativar.",
  "mon.sentinel_failed": "Falha da Sentinela: {error}",
  "mon.sentinel_not_loaded": "O módulo Sentinela não está carregado",

@@ -1862,6 +1862,7 @@
  "mon.no_owner": "The GitHub account to watch could not be determined: set \"github_owner\" in actions_monitor.json.",
  "mon.no_port": "No free port from {port}",
  "mon.port_busy": "Port {port} is busy, using {used}",
+ "mon.profile_qa": "Profile qa: observer only (no action on GitHub), port {port}, ETag cache in a temporary file",
  "mon.reduced_mode": "Reduced mode: no local workspace was found, so the sentinel shows only what the GitHub API gives (no signing queue, no audit report, no CHANGELOG scan). Set workspace_root in actions_monitor.json to enable them.",
  "mon.sentinel_failed": "Sentinel failure: {error}",
  "mon.sentinel_not_loaded": "The Sentinel module is not loaded",
