@@ -34,7 +34,7 @@ curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/ale
 
 ## 4. エラー
 
-独自ルートのエラーは3つのキーを持つ JSON オブジェクトです。`error` と `code` は安定していてプログラム向け、`message` は `?lang=` の言語に従い人間向けです。コードは api.bad_cursor、api.bad_limit、api.unknown_field、api.bad_profile、api.server_error です。エラーを含むプレフィックスのすべての応答に、ヘッダー `X-API-Version: 1` が付きます。
+独自ルートのエラーは3つのキーを持つ JSON オブジェクトです。`error` と `code` は安定していてプログラム向け、`message` は `?lang=` の言語に従い人間向けです。コードは api.bad_cursor、api.bad_limit、api.unknown_field、api.bad_profile、api.server_error です。エラーを含むプレフィックスのすべての応答に、ヘッダー `X-API-Version: 1` が付きます。 すべてのエラーには `help` も付きます。次の手順と読むべきガイドを同じ言語で一文にしたものです (コードによっては無く、無視するプログラムも何も失いません)。
 
 ```
 curl -s -i -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?limit=0"

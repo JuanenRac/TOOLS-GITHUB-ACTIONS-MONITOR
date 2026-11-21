@@ -98,6 +98,7 @@ Sans commande, la page s'ouvre. Les commandes répondent une fois (ajoutez `--js
 - Avant de modifier quoi que ce soit, il copie le paquet, la configuration et les données ; si une étape échoue la copie est restaurée et un rapport écrit. Si même le retour échoue, la copie reste intacte et le rapport explique comment la restaurer à la main.
 - Hors ligne : `--zip FICHIER` avec `--sha256` (ou un SHA256SUMS à côté). Docker : le volume est mis à jour, l'image n'est pas remplacée de l'intérieur (`--allow-container` pour forcer).
 - La page montre les copies et un bouton **Écarter la copie** pour chacune (il demande d'abord, et deux fois pour la copie du retour en arrière), et un bouton pour lire tout le journal du processus de la dernière mise à jour. Écarter supprime seulement cette copie, jamais l'installation ni les données, et c'est noté dans l'historique.
+- La mise à jour indépendante, qui fonctionne sans le moniteur, offre la même chose : sa page dans le navigateur (boutons **Copies** et **Journal du processus**, et **Écarter la copie** sur chaque copie, avec les mêmes questions), son menu texte (options 7 à 9) et sa fenêtre (Tkinter).
 
 ## Codes de sortie
 

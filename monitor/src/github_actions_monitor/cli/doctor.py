@@ -420,6 +420,9 @@ def etag_check(config, busy, reader=None):
             return "ok", "%d reads, few reads yet" % calls
         share = way.get("hit_pct")
         detail = "%s %% of %d reads were 304 (%d spared)" % (share if share is not None else "?", calls, saved if isinstance(saved, int) else 0)
+        cycles = [c for c in (way.get("recent_cycles") or []) if isinstance(c, dict) and c.get("calls")]
+        if cycles:      # I-155: the last cycle with reads, as the log of the cycle writes it (etag=spared/reads)
+            detail += "; last cycle %s/%s" % (cycles[-1].get("saved", 0), cycles[-1].get("calls"))
         if missing and missing * 5 > calls:
             return "warn", detail + ", %d answers without ETag" % missing
         return "ok", detail

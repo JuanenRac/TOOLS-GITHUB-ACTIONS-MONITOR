@@ -398,7 +398,7 @@ def savings_report(config):
     graphql = graphql_checks.stats(config) or {}
     etag = ETAG["cache"].stats() if ETAG["cache"] else None
     return {"ways": [{"id": "etag", "on": bool(config.get("network", {}).get("etag", True)), "spared": (etag or {}).get("saved", 0), "saved": (etag or {}).get("saved", 0), "calls": (etag or {}).get("calls", 0),
-                      "no_etag": (etag or {}).get("no_etag", 0), "invalid": (etag or {}).get("invalid", 0), "hit_pct": (etag or {}).get("hit_pct")},
+                      "no_etag": (etag or {}).get("no_etag", 0), "invalid": (etag or {}).get("invalid", 0), "hit_pct": (etag or {}).get("hit_pct"), "recent_cycles": (etag or {}).get("recent_cycles", [])[-10:]},
                      {"id": "graphql", "on": graphql_checks.settings(config)["enabled"], "spared": max(0, graphql.get("repos", 0) - graphql.get("calls", 0))},
                      {"id": "webhook", "on": cfg["webhook_first"], "spared": figures["webhook"]},
                      {"id": "feed", "on": cfg["feeds"]["enabled"] and cfg["feeds"]["method"] in ("atom", "auto"), "spared": figures["feed"]},
@@ -2687,8 +2687,10 @@ def degraded_line(text):
 def write_cycle_log(data):
     """One line of counts per cycle (never titles). A failure is not swallowed: the heartbeat keeps it and the page and the doctor show it."""
     try:
+        row = ETAG["cache"].end_cycle() if ETAG["cache"] else None      # I-155: how the conditional reads did in THIS cycle (a few figures, never a title)
+        etag_part = f" etag={row['saved']}/{row['calls']} no_etag={row['no_etag']}" if row and row["calls"] else ""
         with private_io.open_append(LOG_FILE) as log:
-            log.write(tzdisplay.localize(f"{data['updated']} repos={len(data['repos'])} hot={data['hot']} refreshed={data['refreshed']} active={len(data['active'])} issues={len(data['issues'])} rate={data['rate']}\n"))
+            log.write(tzdisplay.localize(f"{data['updated']} repos={len(data['repos'])} hot={data['hot']} refreshed={data['refreshed']} active={len(data['active'])} issues={len(data['issues'])} rate={data['rate']}{etag_part}\n"))
         WATCH.log_ok()
     except Exception as error:   # noqa: BLE001 - a log that cannot be written never stops the monitor, but it is said
         WATCH.log_failed(error)

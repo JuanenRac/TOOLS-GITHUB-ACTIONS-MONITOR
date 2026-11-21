@@ -98,6 +98,7 @@ Ohne Befehl öffnet sich die Seite. Die Befehle antworten einmal (mit `--json` a
 - Vor jeder Änderung kopiert er Paket, Konfiguration und Daten; schlägt ein Schritt fehl, wird die Kopie zurückgespielt und ein Bericht geschrieben. Scheitert sogar der Rückweg, bleibt die Kopie unversehrt und der Bericht erklärt, wie man sie von Hand wiederherstellt.
 - Offline: `--zip DATEI` mit `--sha256` (oder einer SHA256SUMS daneben). Docker: das Volume wird aktualisiert, das Image von innen nicht ersetzt (`--allow-container` erzwingt es).
 - Die Seite zeigt die Kopien und bei jeder eine Schaltfläche **Kopie verwerfen** (sie fragt zuerst, bei der Kopie des Rückwegs zweimal) sowie eine Schaltfläche, um das ganze Protokoll des Prozesses des letzten Updates zu lesen. Verwerfen löscht nur diese Kopie, nie die Installation oder die Daten, und wird im Verlauf festgehalten.
+- Der Updater, der ohne den Monitor läuft, kann dasselbe: seine Seite im Browser (Schaltflächen **Kopien** und **Prozessprotokoll** und **Kopie verwerfen** bei jeder Kopie, mit denselben Rückfragen), sein Textmenü (Punkte 7 bis 9) und sein Fenster (Tkinter).
 
 ## Exit-Codes
 

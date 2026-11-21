@@ -98,6 +98,7 @@ Without a command the page opens. The commands answer once (add `--json` for a d
 - Before changing anything it makes a copy of the package, the configuration and the data; if a step fails the copy is restored and a report written. If even the return fails, the copy is intact and the report says how to restore it by hand.
 - Offline: `--zip FILE` with `--sha256` (or a SHA256SUMS next to it). Docker: the volume is updated, the image is not replaced from inside (`--allow-container` to force).
 - The page shows the copies and a button **Discard copy** for each one (it asks first, and twice for the copy the way back needs), and a button to read the whole log of the process of the last update. Discarding deletes only that copy, never the installation or the data, and is written in the history.
+- The updater that runs without the monitor has the same: its page in the browser (buttons **Copies** and **Process log**, and **Discard copy** on each copy, with the same questions), its text menu (options 7 to 9) and its window (Tkinter).
 
 ## Exit codes
 

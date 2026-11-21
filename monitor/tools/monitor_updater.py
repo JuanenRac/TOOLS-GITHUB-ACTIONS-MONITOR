@@ -223,11 +223,15 @@ _add("lbl.way_back", "way back", "vuelta atrás", "Rückweg", "retour en arrièr
 _add("lbl.no_copies", "There are no copies.", "No hay copias.", "Es gibt keine Kopien.", "Il n'y a aucune copie.", "Non ci sono copie.", "コピーはありません。", "没有副本。", "Não há cópias.")
 _add("lbl.no_log", "The process has not written a log yet.", "El proceso aún no ha escrito ningún registro.", "Der Prozess hat noch kein Protokoll geschrieben.", "Le processus n'a pas encore écrit de journal.", "Il processo non ha ancora scritto alcun registro.", "プロセスはまだログを書いていません。", "该进程尚未写入日志。", "O processo ainda não escreveu nenhum registo.")
 _add("btn.discard", "Discard copy", "Descartar copia", "Kopie verwerfen", "Écarter la copie", "Scarta la copia", "コピーを破棄", "丢弃副本", "Descartar cópia")
+_add("btn.copies", "Copies", "Copias", "Kopien", "Copies", "Copie", "コピー", "副本", "Cópias")
+_add("btn.log", "Process log", "Registro del proceso", "Prozessprotokoll", "Journal du processus", "Registro del processo", "プロセスのログ", "进程日志", "Registo do processo")
+_add("web.confirm_discard", "Delete this copy? Only that copy is deleted, never the installation or the data.", "¿Borrar esta copia? Solo se borra esa copia, nunca la instalación ni los datos.", "Diese Kopie löschen? Es wird nur diese Kopie gelöscht, nie die Installation oder die Daten.", "Supprimer cette copie ? Seule cette copie est supprimée, jamais l'installation ni les données.", "Eliminare questa copia? Viene eliminata solo quella copia, mai l'installazione né i dati.", "このコピーを削除しますか？ 削除されるのはそのコピーだけで、インストールやデータには触れません。", "删除这个副本吗？只删除该副本，绝不会动安装和数据。", "Apagar esta cópia? Só essa cópia é apagada, nunca a instalação nem os dados.")
 _add("r.no_previous", "There is no earlier update to go back to.", "No hay ninguna actualización anterior a la que volver.", "Es gibt kein früheres Update, zu dem man zurückkehren könnte.", "Il n'y a aucune mise à jour antérieure à laquelle revenir.", "Non c'è alcun aggiornamento precedente a cui tornare.", "戻れる以前の更新がありません。", "没有可回到的更早更新。", "Não há nenhuma atualização anterior a que voltar.")
 _add("r.no_network", "No connection to GitHub and no zip was given: use a zip you already have.", "Sin conexión con GitHub y sin zip indicado: usa un zip que ya tengas.", "Keine Verbindung zu GitHub und kein Zip angegeben: nutze ein vorhandenes Zip.", "Pas de connexion à GitHub et aucun zip indiqué : utilisez un zip que vous avez déjà.", "Nessuna connessione a GitHub e nessuno zip indicato: usa uno zip che hai già.", "GitHub に接続できず、zip も指定されていません。手元の zip を使ってください。", "无法连接 GitHub 且未指定 zip：请使用你已有的 zip。", "Sem ligação ao GitHub e sem zip indicado: use um zip que já tenha.")
 _add("p.confirm", "Apply this update? Type yes: ", "¿Aplicar esta actualización? Escribe sí: ", "Dieses Update anwenden? Gib ja ein: ", "Appliquer cette mise à jour ? Tapez oui : ", "Applicare questo aggiornamento? Scrivi sì: ", "この更新を適用しますか？ yes と入力: ", "应用此更新？请输入 yes：", "Aplicar esta atualização? Escreva sim: ")
 _add("p.choose", "Choose: ", "Elige: ", "Wähle: ", "Choisissez : ", "Scegli: ", "選択: ", "请选择：", "Escolha: ")
 _add("p.version", "Version to update to (empty = latest): ", "Versión de destino (vacío = la última): ", "Zielversion (leer = neueste): ", "Version cible (vide = la dernière) : ", "Versione di destinazione (vuoto = l'ultima): ", "対象バージョン（空 = 最新）: ", "目标版本（留空 = 最新）：", "Versão de destino (vazio = a última): ")
+_add("p.copy", "Name of the copy: ", "Nombre de la copia: ", "Name der Kopie: ", "Nom de la copie : ", "Nome della copia: ", "コピーの名前: ", "副本名称：", "Nome da cópia: ")
 _add("p.zip", "Path of the zip: ", "Ruta del zip: ", "Pfad des Zips: ", "Chemin du zip : ", "Percorso dello zip: ", "zipのパス: ", "zip 路径：", "Caminho do zip: ")
 _add("menu.1", "Show the installation", "Ver la instalación", "Installation anzeigen", "Voir l'installation", "Mostra l'installazione", "インストールを表示", "查看安装情况", "Ver a instalação")
 _add("menu.2", "List the versions on GitHub", "Listar las versiones de GitHub", "Versionen auf GitHub auflisten", "Lister les versions de GitHub", "Elenca le versioni di GitHub", "GitHub のバージョン一覧", "列出 GitHub 上的版本", "Listar as versões do GitHub")
@@ -235,6 +239,9 @@ _add("menu.3", "Plan an update (dry run)", "Planificar una actualización (ensay
 _add("menu.4", "Update now", "Actualizar ahora", "Jetzt aktualisieren", "Mettre à jour maintenant", "Aggiorna ora", "今すぐ更新", "立即更新", "Atualizar agora")
 _add("menu.5", "Go back to the previous version", "Volver a la versión anterior", "Zur vorherigen Version zurück", "Revenir à la version précédente", "Torna alla versione precedente", "前のバージョンに戻す", "回到上一个版本", "Voltar à versão anterior")
 _add("menu.6", "History of updates", "Historial de actualizaciones", "Update-Verlauf", "Historique des mises à jour", "Cronologia degli aggiornamenti", "更新履歴", "更新历史", "Histórico de atualizações")
+_add("menu.7", "Show the copies", "Ver las copias", "Kopien anzeigen", "Voir les copies", "Mostra le copie", "コピーを表示", "查看副本", "Ver as cópias")
+_add("menu.8", "Show the log of the update process", "Ver el registro del proceso de actualización", "Protokoll des Update-Prozesses anzeigen", "Voir le journal du processus de mise à jour", "Mostra il registro del processo di aggiornamento", "更新プロセスのログを表示", "查看更新进程的日志", "Ver o registo do processo de atualização")
+_add("menu.9", "Discard a copy", "Descartar una copia", "Eine Kopie verwerfen", "Écarter une copie", "Scarta una copia", "コピーを破棄", "丢弃一个副本", "Descartar uma cópia")
 _add("menu.0", "Quit", "Salir", "Beenden", "Quitter", "Esci", "終了", "退出", "Sair")
 _add("web.listening", "The updater page is at (keep this address private): {url}", "La página del actualizador está en (mantén esta dirección privada): {url}", "Die Updater-Seite ist unter (Adresse privat halten): {url}", "La page de l'outil est à (gardez cette adresse privée) : {url}", "La pagina dell'aggiornatore è su (tieni privato questo indirizzo): {url}", "アップデーターのページ（このアドレスは非公開に）: {url}", "更新程序页面地址（请勿泄露）：{url}", "A página do atualizador está em (mantenha este endereço privado): {url}")
 _add("web.stop", "Press Ctrl+C to close the updater.", "Pulsa Ctrl+C para cerrar el actualizador.", "Drücke Strg+C, um den Updater zu schließen.", "Appuyez sur Ctrl+C pour fermer l'outil.", "Premi Ctrl+C per chiudere l'aggiornatore.", "Ctrl+C でアップデーターを閉じます。", "按 Ctrl+C 关闭更新程序。", "Prima Ctrl+C para fechar o atualizador.")
@@ -2137,7 +2144,7 @@ ul{margin:4px 0;padding-left:20px}pre{white-space:pre-wrap;margin:0}.muted{color
 </style></head><body>
 <header><h1 id="title">Monitor updater</h1><div class="row"><select id="lang" aria-label="language"></select><button id="quit"></button></div></header>
 <main>
-<section class="card"><h2 id="h_inst"></h2><dl id="inst"></dl><div class="row" style="margin-top:10px"><button id="refresh"></button><button id="history"></button></div></section>
+<section class="card"><h2 id="h_inst"></h2><dl id="inst"></dl><div class="row" style="margin-top:10px"><button id="refresh"></button><button id="history"></button><button id="copiesbtn"></button><button id="logbtn"></button></div></section>
 <section class="card"><h2 id="h_rel"></h2><div id="relmsg" class="muted"></div><table><tbody id="rels"></tbody></table>
 <div class="row" style="margin-top:10px"><button id="zipbtn"></button><input id="zippath" size="40" placeholder="/path/github_actions_monitor.zip"><input id="zipsha" size="22" placeholder="SHA-256"></div></section>
 <section class="card"><h2 id="h_opt"></h2><label><input type="radio" name="pol" value="conservative" checked> <span id="o_cons"></span></label>
@@ -2147,6 +2154,8 @@ ul{margin:4px 0;padding-left:20px}pre{white-space:pre-wrap;margin:0}.muted{color
 <section class="card" id="plancard" hidden><h2 id="h_plan"></h2><div id="planbox"></div></section>
 <section class="card" id="progcard" hidden><h2 id="h_prog"></h2><ul id="prog"></ul><pre id="result"></pre></section>
 <section class="card" id="histcard" hidden><h2 id="h_hist"></h2><pre id="histbox"></pre></section>
+<section class="card" id="copiescard" hidden><h2 id="h_copies"></h2><div id="copymsg" class="muted"></div><table><tbody id="copies"></tbody></table></section>
+<section class="card" id="logcard" hidden><h2 id="h_log"></h2><pre id="logbox"></pre></section>
 </main>
 <script nonce="@@NONCE@@">
 "use strict";
@@ -2157,7 +2166,7 @@ async function api(path,body){const o={headers:{"X-Updater-Token":TOKEN}};if(bod
 function el(tag,text,cls){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e}
 function tt(k,v){let s=T[k]||k;if(v)for(const a in v)s=s.split("{"+a+"}").join(v[a]);return s}
 function setTexts(){document.documentElement.lang=$("lang").value;document.title=T["app.title"];$("title").textContent=T["app.title"];
- const m={h_inst:"lbl.installed",h_rel:"sec.releases",h_opt:"lbl.target",h_plan:"sec.plan",h_prog:"sec.progress",h_hist:"btn.history",refresh:"btn.refresh",history:"btn.history",zipbtn:"btn.zip",plan:"btn.plan",apply:"btn.apply",rollback:"btn.rollback",quit:"btn.quit",o_cons:"opt.policy_note",o_keep:"opt.keep_old",o_adopt:"opt.adopt_new",o_start:"opt.start"};
+ const m={h_inst:"lbl.installed",h_rel:"sec.releases",h_opt:"lbl.target",h_plan:"sec.plan",h_prog:"sec.progress",h_hist:"btn.history",h_copies:"btn.copies",h_log:"btn.log",copiesbtn:"btn.copies",logbtn:"btn.log",refresh:"btn.refresh",history:"btn.history",zipbtn:"btn.zip",plan:"btn.plan",apply:"btn.apply",rollback:"btn.rollback",quit:"btn.quit",o_cons:"opt.policy_note",o_keep:"opt.keep_old",o_adopt:"opt.adopt_new",o_start:"opt.start"};
  for(const id in m)$(id).textContent=T[m[id]];$("h_opt").textContent=T["sec.steps"]}
 async function loadCatalog(){const c=await api("/api/catalog?lang="+$("lang").value);T=c.catalog;setTexts()}
 function row(dl,k,v){dl.appendChild(el("dt",k));dl.appendChild(el("dd",v))}
@@ -2189,12 +2198,20 @@ async function doApply(){if(!planned||!confirm(T["web.confirm_apply"]))return;$(
  if(r.error){$("progcard").hidden=false;$("result").textContent=r.error;return}poll()}
 async function doRollback(){if(!confirm(T["btn.rollback"]+"?"))return;const r=await api("/api/rollback",{});$("progcard").hidden=false;$("result").textContent=r.text||r.error||"";loadState()}
 async function doHistory(){const h=await api("/api/history");$("histcard").hidden=false;$("histbox").textContent=h.text||""}
+async function doLog(){const l=await api("/api/log");$("logcard").hidden=false;$("logbox").textContent=(l.lines||[]).join("\n")||T["lbl.no_log"]}
+async function doDiscard(x){if(!confirm(T["web.confirm_discard"]))return;if(x.way_back&&!confirm(T["r.copy_way_back"]))return;
+ const r=await api("/api/discard",{name:x.name,force:!!x.way_back});$("copymsg").textContent=r.text||r.error||"";await loadCopies(true)}
+async function loadCopies(keep){const r=await api("/api/copies");$("copiescard").hidden=false;const tb=$("copies");tb.textContent="";if(!keep)$("copymsg").textContent="";
+ if(!r.copies.length){$("copymsg").textContent=($("copymsg").textContent?$("copymsg").textContent+" ":"")+T["lbl.no_copies"];return}
+ for(const x of r.copies){const tr=el("tr");tr.appendChild(el("td",x.name));tr.appendChild(el("td",(x.from||"?")+" → "+(x.to||"?")));tr.appendChild(el("td",Math.round(x.bytes/1024)+" KB"));
+  const tg=el("td");if(x.way_back)tg.appendChild(el("span",T["lbl.way_back"],"tag"));tr.appendChild(tg);
+  const td=el("td");const b=el("button",T["btn.discard"]);b.disabled=!x.can_discard;b.addEventListener("click",()=>doDiscard(x));td.appendChild(b);tr.appendChild(td);tb.appendChild(tr)}}
 async function doZip(){const r=await api("/api/zip",{path:$("zippath").value,sha256:$("zipsha").value});if(r.error){$("relmsg").textContent=r.error;return}selected=null;loadReleases()}
 async function init(){const langs=["en","es","de","fr","it","ja","zh","pt"];const names={en:"English",es:"Español",de:"Deutsch",fr:"Français",it:"Italiano",ja:"日本語",zh:"中文",pt:"Português"};
  for(const l of langs){const o=el("option",names[l]);o.value=l;$("lang").appendChild(o)}const first=await api("/api/catalog");$("lang").value=first.lang;T=first.catalog;setTexts();
  $("lang").addEventListener("change",async()=>{await loadCatalog();await loadState();await loadReleases();if(planned)renderPlan(planned)});
  $("refresh").addEventListener("click",()=>{loadState();loadReleases()});$("plan").addEventListener("click",doPlan);$("apply").addEventListener("click",doApply);$("rollback").addEventListener("click",doRollback);
- $("history").addEventListener("click",doHistory);$("zipbtn").addEventListener("click",doZip);$("quit").addEventListener("click",async()=>{await api("/api/quit",{});document.body.textContent="OK"});
+ $("history").addEventListener("click",doHistory);$("copiesbtn").addEventListener("click",()=>loadCopies(false));$("logbtn").addEventListener("click",doLog);$("zipbtn").addEventListener("click",doZip);$("quit").addEventListener("click",async()=>{await api("/api/quit",{});document.body.textContent="OK"});
  await loadState();await loadReleases()}
 init();
 </script></body></html>"""
@@ -2243,6 +2260,15 @@ class WebApp:
                 return 200, dict(self.job)
             if method == "GET" and path == "/api/history":
                 return 200, {"text": "\n".join(f"{e.get('at', '')}  {e.get('result')}  {e.get('from')} -> {e.get('to')}  {e.get('backup', '')}" for e in up.history()) or tr("lbl.none")}
+            if method == "GET" and path == "/api/copies":
+                return 200, {"copies": up.copies()}
+            if method == "GET" and path == "/api/log":
+                return 200, up.process_log(200)
+            if method == "POST" and path == "/api/discard":
+                report = up.discard(str(body.get("name") or ""), bool(body.get("force")), None)      # the page asked the person first (twice for the copy of the way back)
+                if report["ok"]:
+                    return 200, {"ok": True, "text": tr("r.discarded", name=report["name"], kb=report.get("freed", 0) // 1024)}
+                return 200, {"ok": False, "error": str(report["error"])}
             if method == "POST" and path == "/api/plan":
                 options = {"policy": _policy(body.get("policy")), "start": bool(body.get("start")), "allow_downgrade": True}
                 return 200, self.json_plan(up.plan(body.get("target"), options))
@@ -2414,7 +2440,7 @@ def console_menu(updater, inp=input, out=None):
     running = True
     while running:
         say()
-        for key in "1234560":
+        for key in "1234567890":
             say(f"  {key}) {tr('menu.' + key)}")
         try:
             choice = inp(tr("p.choose")).strip()
@@ -2442,6 +2468,19 @@ def console_menu(updater, inp=input, out=None):
             elif choice == "6":
                 for entry in updater.history():
                     say(f"  {entry.get('at', '')}  {entry.get('result')}  {entry.get('from')} -> {entry.get('to')}")
+            elif choice == "7":
+                rows = updater.copies()
+                for c in rows:
+                    say(f"  {c['name']}  {c['status']}  {c.get('from') or '?'} -> {c.get('to') or '?'}  {c['bytes'] // 1024} KB" + ("  [" + tr("lbl.way_back") + "]" if c["way_back"] else ""))
+                if not rows:
+                    say(tr("lbl.no_copies"))
+            elif choice == "8":
+                say("\n".join(updater.process_log(200)["lines"]) or tr("lbl.no_log"))
+            elif choice == "9":
+                name = inp(tr("p.copy")).strip()
+                found = next((c for c in updater.copies() if c["name"] == name), None)
+                report = updater.discard(name, bool(found and found["way_back"]), lambda c: inp(tr("btn.discard") + f" ({c['name']})? " + tr("p.confirm")).strip().lower() in ("yes", "y", "si", "sí", "ja", "oui", "sì", "sim", "是", "はい"))
+                say(tr("r.discarded", name=report["name"], kb=report.get("freed", 0) // 1024) if report["ok"] else str(report["error"]))
             elif choice in ("0", "q", "Q"):
                 return OK
         except UpdaterError as error:
@@ -2465,6 +2504,7 @@ def run_tk(updater):
     root.geometry("900x640")
     state = tk.StringVar()
     versions = ttk.Combobox(root, state="readonly", width=24)
+    copies = ttk.Combobox(root, state="readonly", width=30)
     box = tk.Text(root, wrap="word", height=26)
     queue = []
 
@@ -2510,6 +2550,26 @@ def run_tk(updater):
         report = updater.go_back()
         show(tr("r.back_ok", to=report.get("to"), backup=report.get("backup")) if report.get("ok") else report.get("error"))
 
+    def show_copies():
+        rows = updater.copies()
+        copies["values"] = [c["name"] for c in rows]
+        if rows and not copies.get():
+            copies.current(0)
+        show("\n".join(f"{c['name']}  {c['status']}  {c.get('from') or '?'} -> {c.get('to') or '?'}  {c['bytes'] // 1024} KB" + ("  [" + tr("lbl.way_back") + "]" if c["way_back"] else "") for c in rows) or tr("lbl.no_copies"))
+
+    def show_log():
+        show("\n".join(updater.process_log(200)["lines"]) or tr("lbl.no_log"))
+
+    def do_discard():
+        found = next((c for c in updater.copies() if c["name"] == copies.get()), None)
+        if found is None or not messagebox.askyesno(tr("app.title"), tr("web.confirm_discard")):
+            return
+        if found["way_back"] and not messagebox.askyesno(tr("app.title"), tr("r.copy_way_back")):
+            return
+        report = updater.discard(found["name"], bool(found["way_back"]), None)
+        show(tr("r.discarded", name=report["name"], kb=report.get("freed", 0) // 1024) if report["ok"] else str(report["error"]))
+        show_copies()
+
     def pump():
         while queue:
             box.insert("end", queue.pop(0) + "\n")
@@ -2520,8 +2580,12 @@ def run_tk(updater):
     bar = tk.Frame(root)
     bar.pack(fill="x", padx=8)
     versions.pack(in_=bar, side="left")
-    for label, func in ((tr("btn.refresh"), refresh), (tr("btn.plan"), do_plan), (tr("btn.apply"), do_apply), (tr("btn.rollback"), do_back), (tr("btn.quit"), root.destroy)):
+    for label, func in ((tr("btn.refresh"), refresh), (tr("btn.plan"), do_plan), (tr("btn.apply"), do_apply), (tr("btn.rollback"), do_back), (tr("btn.copies"), show_copies), (tr("btn.log"), show_log), (tr("btn.quit"), root.destroy)):
         tk.Button(bar, text=label, command=func).pack(side="left", padx=4)
+    bar2 = tk.Frame(root)
+    bar2.pack(fill="x", padx=8, pady=4)
+    copies.pack(in_=bar2, side="left")
+    tk.Button(bar2, text=tr("btn.discard"), command=do_discard).pack(side="left", padx=4)
     box.pack(fill="both", expand=True, padx=8, pady=8)
     refresh()
     pump()

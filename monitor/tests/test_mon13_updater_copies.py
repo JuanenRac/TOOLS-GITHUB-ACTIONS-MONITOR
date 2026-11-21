@@ -194,5 +194,70 @@ class Page(unittest.TestCase):
         self.assertIn("confirm:true", body)
 
 
+class TheStandaloneUpdater(Base):
+    """The updater that runs without the monitor (page in the browser, text menu, window) has the same copies, log and discard as the Updates menu of the monitor."""
+
+    def setUp(self):
+        super().setUp()
+        self.root = make_install(self.tmp / "i", "2.0.1", config_from_defaults("2.0.1"))
+        self.up = self.updater(self.root)
+        folder = self.up.backups / "old_one"
+        (folder / "files").mkdir(parents=True)
+        (folder / "files" / "x.bin").write_bytes(b"x" * 2048)
+        (folder / "journal.json").write_text(json.dumps({"status": "ok", "from": "2.0.1", "to": "2.0.8"}), encoding="utf-8")
+        (folder / "manifest.json").write_text("{}", encoding="utf-8")
+        self.web = mu.WebApp(lambda local=None: self.up)
+
+    def test_the_page_lists_the_copies_and_discards_one(self):
+        status, body = self.web.handle("GET", "/api/copies", {}, {})
+        self.assertEqual((status, [c["name"] for c in body["copies"]]), (200, ["old_one"]))
+        status, body = self.web.handle("POST", "/api/discard", {}, {"name": "old_one"})
+        self.assertTrue(body["ok"], body)
+        self.assertIn("old_one", body["text"])
+        self.assertEqual(self.web.handle("GET", "/api/copies", {}, {})[1]["copies"], [])
+
+    def test_the_page_refuses_what_is_not_a_copy_and_says_why(self):
+        status, body = self.web.handle("POST", "/api/discard", {}, {"name": "../i"})
+        self.assertEqual((status, body["ok"]), (200, False))
+        self.assertTrue(body["error"])
+        self.assertTrue((self.root / "LICENSE").exists() or self.root.exists())
+
+    def test_the_page_reads_the_log(self):
+        logs = self.up.folders()["logs"]
+        logs.mkdir(parents=True, exist_ok=True)
+        (logs / "updater_handover.log").write_text("one\npassword: hunter2\nthree\n", encoding="utf-8")
+        status, body = self.web.handle("GET", "/api/log", {}, {})
+        self.assertEqual(status, 200)
+        self.assertEqual(body["lines"][0], "one")
+        self.assertNotIn("hunter2", "\n".join(body["lines"]))
+
+    def test_the_page_has_the_buttons_and_their_texts_in_the_eight_languages(self):
+        for needle in ('id="copiesbtn"', 'id="logbtn"', 'id="copiescard"', 'id="logcard"', "/api/discard", "/api/copies", "/api/log"):
+            self.assertIn(needle, mu.PAGE)
+        for lang in LANGS:
+            for key in ("btn.copies", "btn.log", "btn.discard", "web.confirm_discard", "lbl.no_copies", "lbl.no_log", "menu.7", "menu.8", "menu.9", "p.copy"):
+                self.assertTrue(mu._CAT[lang].get(key), (lang, key))
+        body = mu.PAGE[mu.PAGE.index("async function doDiscard"):mu.PAGE.index("async function loadCopies")]
+        self.assertEqual(body.count("confirm("), 2)      # one question, a second for the copy of the way back
+        self.assertLess(body.index("confirm("), body.index('"/api/discard"'))
+
+    def test_the_text_menu_lists_discards_and_reads_the_log(self):
+        import io
+        answers = iter(["7", "8", "9", "old_one", "yes", "7", "0"])
+        out = io.StringIO()
+        self.assertEqual(mu.console_menu(self.up, lambda prompt="": next(answers), out), mu.OK)
+        text = out.getvalue()
+        self.assertIn("old_one", text)
+        self.assertIn(mu.tr("lbl.no_log"), text)
+        self.assertIn(mu.tr("lbl.no_copies"), text)
+        self.assertFalse((self.up.backups / "old_one").exists())
+
+    def test_the_text_menu_does_not_discard_without_the_answer_yes(self):
+        import io
+        answers = iter(["9", "old_one", "no", "0"])
+        mu.console_menu(self.up, lambda prompt="": next(answers), io.StringIO())
+        self.assertTrue((self.up.backups / "old_one").exists())
+
+
 if __name__ == "__main__":
     unittest.main()
