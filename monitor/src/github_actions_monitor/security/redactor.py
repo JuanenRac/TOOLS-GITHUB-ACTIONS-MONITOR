@@ -52,7 +52,7 @@ def _ipv4(match):
 
 _SECRETS = [
     (re.compile(r"(?s)[-\u2010-\u2015\u2212]{2,80}BEGIN [A-Z ]*PRIVATE KEY(?: BLOCK)?[-\u2010-\u2015\u2212]{2,80}.*?(?:[-\u2010-\u2015\u2212]{2,80}END [A-Z ]*PRIVATE KEY(?: BLOCK)?[-\u2010-\u2015\u2212]{2,80}|$)"), "[pem]"),
-    (re.compile(r"(?i)\b([a-z][a-z0-9+.-]{0,30}://)[^/\s:@]{1,300}:[^/\s?#]{1,300}@"), r"\1[credentials]@"),      # user:password@host in an address
+    (re.compile(r"(?i)\b([a-z][a-z0-9+.-]{0,30}://)[^/\s:@]{1,300}:[^\s?#]{1,300}@"), r"\1[credentials]@"),      # user:password@host in an address
     (re.compile(r"(?i)\bhooks\.slack\.com/services/[A-Za-z0-9/_-]+"), "hooks.slack.com/services/[webhook]"),
     (re.compile(r"(?i)\bdiscord(?:app)?\.com/api/webhooks/\d+/[A-Za-z0-9._-]+"), "discord.com/api/webhooks/[webhook]"),
     (re.compile(r"\bbot\d{6,}:[A-Za-z0-9_-]{20,}"), "bot[token]"),
@@ -72,9 +72,9 @@ _SECRETS = [
     (re.compile(r"(?i)[A-Za-z0-9._%+-]{1,100}\s?[\[(]at[\])]\s?[A-Za-z0-9-]{1,63}(?:\.[A-Za-z0-9-]{1,63}){0,10}\.[A-Za-z]{2,}"), "[email]"),      # victima [at] corp.com
     (re.compile(r"""(?i)(x-monitor-access|monitor_access)(["']?\s*[:=]\s*)(?:"(?:[^"\\\n]|\\.){0,300}"|'(?:[^'\\\n]|\\.){0,300}'|["']?[^\s"',;]+)"""), r"\1\2[secret]"),
     (re.compile(r"(?<![A-Za-z0-9])(?:glpat-[A-Za-z0-9_-]{10,}|npm_[A-Za-z0-9]{16,}|pypi-[A-Za-z0-9_-]{16,}|hf_[A-Za-z0-9]{20,}|dckr_pat_[A-Za-z0-9_-]{16,}|whsec_[A-Za-z0-9]{16,}|GOCSPX-[A-Za-z0-9_-]{16,})"), "[token]"),
-    (re.compile(r"\b(gh[pousr]_[A-Za-z0-9]*)[ \t]*\r?\n[ \t]*[A-Za-z0-9]{6,}"), "[token]"),      # a token cut by a line break: the second half goes with the first
+    (re.compile(r"\b(gh[pousr]_[A-Za-z0-9]*|github_pat_[A-Za-z0-9_]*)[ \t]*\r?\n[ \t]*[A-Za-z0-9_]{6,}"), "[token]"),      # a token cut by a line break: the second half goes with the first
     (re.compile(r"\b(?:gh[pousr]_[A-Za-z0-9]{8,}|github_pat_[A-Za-z0-9_]{8,})"), "[token]"),
-    (re.compile(r"\b(?:sk-[A-Za-z0-9_-]{16,}|AKIA[0-9A-Z]{12,}|xox[abprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{20,})"), "[key]"),
+    (re.compile(r"\b(?:sk-[A-Za-z0-9_-]{16,}|(?:AKIA|ASIA)[0-9A-Z]{12,}|xox[abprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{20,})"), "[key]"),
     (re.compile(r"\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}"), "[jwt]"),
     (re.compile(r"""(?i)\b((?:proxy-)?authorization)(["']?\s*[:=]\s*)(?:(?:bearer|basic|token|digest|negotiate)\s+)?[^\r\n"']+"""), r"\1\2[secret]"),      # the whole credential, "Basic" or "Bearer" word included
     (re.compile(r"(?i)\b(set-cookie|cookie)(\s*:\s*)[^\r\n]+"), r"\1\2[secret]"),
@@ -152,7 +152,7 @@ def _clean(text, limit=None):
 
 
 _MARK = re.compile(r"\[(?:secret|token|key|jwt|email|ip|credentials|pem|hex|blob|webhook|path|host)\]")
-_INVISIBLE = re.compile("[\u200b-\u200d\u2060\ufeff]")
+_INVISIBLE = re.compile("[\u00ad\u034f\u061c\u115f\u1160\u17b4\u17b5\u180b-\u180e\u200b-\u200d\u2060-\u2064\u3164\ufeff]")
 
 
 def redact(text, limit=None):

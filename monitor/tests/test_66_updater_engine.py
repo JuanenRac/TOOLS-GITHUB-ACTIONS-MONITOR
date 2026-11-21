@@ -202,6 +202,19 @@ class SafeZip(Base):
         self.assertRejected(self.make(["C:/evil.txt"]))
         self.assertRejected(self.make(["github_actions_monitor\\..\\..\\evil.txt"]))
 
+    def test_windows_stream_and_reserved_names_are_refused(self):
+        for name in ("github_actions_monitor/src/a.py:stream", "github_actions_monitor/NUL", "github_actions_monitor/con.txt", "github_actions_monitor/Aux.tar.gz",
+                     "github_actions_monitor/COM1", "github_actions_monitor/lpt9.log", "github_actions_monitor/PRN ", "github_actions_monitor/nul.",
+                     "github_actions_monitor/com5/readme.txt", "github_actions_monitor/CON .txt"):
+            with self.subTest(name=name):
+                with zipfile.ZipFile(self.make([name])) as zf, self.assertRaises(mu.UpdaterError) as ctx:
+                    mu.check_zip_members(zf)
+                self.assertEqual(ctx.exception.code, mu.FETCH_FAILED)
+        for name in ("github_actions_monitor/console.py", "github_actions_monitor/com10.txt", "github_actions_monitor/lpt0", "github_actions_monitor/auxiliary/x.py"):
+            with self.subTest(name=name):
+                with zipfile.ZipFile(self.make([name])) as zf:
+                    mu.check_zip_members(zf)
+
     def test_a_symbolic_link_is_refused(self):
         info = zipfile.ZipInfo("github_actions_monitor/link")
         info.external_attr = (stat.S_IFLNK | 0o777) << 16

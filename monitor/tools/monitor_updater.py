@@ -790,6 +790,14 @@ class LocalZipSource:
 # ---------------------------------------------------------------------------------------------------------------------------------------------
 # The zip: checked before anything is unpacked, unpacked into a new folder, never executed
 # ---------------------------------------------------------------------------------------------------------------------------------------------
+WINDOWS_RESERVED = frozenset(["CON", "PRN", "AUX", "NUL"] + ["COM%d" % n for n in range(1, 10)] + ["LPT%d" % n for n in range(1, 10)])
+
+
+def windows_unsafe_part(part):
+    """True for a name Windows treats as a device or writes as a hidden stream: a ':' in it, or a reserved device name with or without an extension."""
+    return ":" in part or part.split(".")[0].strip().upper() in WINDOWS_RESERVED
+
+
 def check_zip_members(zf):
     """Raises UpdaterError for an unsafe zip. Returns (top folder name, [infos of files])."""
     infos = zf.infolist()
@@ -802,7 +810,7 @@ def check_zip_members(zf):
         name = info.filename
         norm = name.replace("\\", "/")
         parts = [p for p in norm.split("/") if p]
-        if (not parts or norm.startswith("/") or re.match(r"^[A-Za-z]:", norm) or ".." in parts or "\x00" in name or any(p.strip() != p or p.endswith(".") for p in parts)):
+        if (not parts or norm.startswith("/") or re.match(r"^[A-Za-z]:", norm) or ".." in parts or "\x00" in name or any(p.strip() != p or p.endswith(".") or windows_unsafe_part(p) for p in parts)):
             raise UpdaterError(FETCH_FAILED, "unsafe path in the zip: " + repr(name)[:80])
         mode = (info.external_attr >> 16) & 0xFFFF
         if mode and stat.S_ISLNK(mode):

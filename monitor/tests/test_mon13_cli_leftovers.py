@@ -224,7 +224,7 @@ class Cli(unittest.TestCase):
 
 
 class Proposals(unittest.TestCase):
-    CFG = {"ai": {"actions": {"enabled": True, "execute": True}}}
+    CFG = {"ai": {"actions": {"enabled": True, "execute": True, "require_approval": False}}}
 
     def make(self, config=None, now=[1000.0]):
         self.tmp = tempfile.TemporaryDirectory()
@@ -277,10 +277,11 @@ class Proposals(unittest.TestCase):
         actions.review(ident, "approve", "ana")
         self.assertEqual(actions.log()[0]["review"], "approved")
 
-    def test_the_setting_is_off_by_default_and_read_as_a_bool(self):
-        self.assertIs(ai_actions.settings({})["require_approval"], False)
+    def test_the_setting_is_on_by_default_and_read_as_a_bool(self):
+        self.assertIs(ai_actions.settings({})["require_approval"], True)
         self.assertIs(ai_actions.settings({"ai": {"actions": {"require_approval": True}}})["require_approval"], True)
-        self.assertIs(ai_actions.settings({"ai": {"actions": {"require_approval": "yes"}}})["require_approval"], False)
+        self.assertIs(ai_actions.settings({"ai": {"actions": {"require_approval": "yes"}}})["require_approval"], True)
+        self.assertIs(ai_actions.settings({"ai": {"actions": {"require_approval": False}}})["require_approval"], False)
 
     def test_the_route_is_for_this_computer_and_audited(self):
         from github_actions_monitor.app import actions_monitor
