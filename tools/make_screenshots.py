@@ -36,15 +36,18 @@ EDGES = (r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", r"C:\P
 VIEWPORT = [1920, 1080]      # the window of every picture of a page that is not a device size (1080p; --viewport WxH changes it): the size entries below keep their own
 V = None      # in the lists: "the viewport"
 TABS = ("interface", "basic", "general", "polling", "cache", "quota", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook", "notify", "analytics", "lint", "advanced", "console")
-WEB = [("about", "tab=now&dlg=about", V), ("help", "tab=cfg&dlg=help&topic=sentinel", V), ("now", "tab=now", V), ("alerts", "tab=al", V), ("sentinel", "tab=sci&open=a2", V), ("sentinel_queue", "tab=sci&open=a5", V), ("sentinel_analytics", "tab=sci&open=a12,a13", V),
-       ("size_4k", "tab=now", (3840, 2160)), ("size_ultrawide", "tab=now", (3440, 1440)), ("size_portrait", "tab=now", (1080, 1920)), ("size_phone", "tab=now", (390, 844)),
+WEB = [("about", "tab=now&dlg=about", V), ("help", "tab=cfg&dlg=help&topic=sentinel", V), ("now", "tab=now", V), ("alerts", "tab=al", V), ("sentinel", "tab=sci&open=a2", V), ("sentinel_queue", "tab=sci&open=a5", V),
+       ("size_4k", "tab=now", (3840, 2160)), ("size_ultrawide", "tab=now", (3440, 1440)), ("size_portrait", "tab=now", (1080, 1920)),
        ("charts", "tab=charts", V), ("repositories", "tab=repos", V), ("team", "tab=team", V), ("history", "tab=hist", V),
        ("menu_groups", "tab=sent", V), ("sentinel_ci", "tab=sci", V), ("sentinel_collab", "tab=scol", V), ("fleet", "tab=fleet", V), ("reports", "tab=rep", V)] + [(f"settings_{t}", f"tab=cfg&cfgtab={t}", V) for t in TABS]
 
 
 FOLD = 'NAV_CLOSED=["watch","sentinels","team","learn"];applyGroups()'      # the menu with only the System group open (Updates, Settings): at 1080p the long menu hides it
 SCROLL_CMP = ('document.querySelectorAll("#t-charts>section").forEach(function(s){if(s.id!=="cmp-sec")s.hidden=true})')      # the section is at the foot of Charts, below the first screen: the other charts step aside so that it fills the picture
-RICH_WEB = [("sentinel_delivery", "tab=sdel&open=delivery", V, ""), ("sentinel_supply", "tab=ssup&open=supply", V, ""), ("sentinel_trend", "tab=strend", V, ""),
+PALETTE = 'document.dispatchEvent(new KeyboardEvent("keydown",{key:"k",ctrlKey:true,bubbles:true}))'      # the palette of Ctrl+K, open on its first screen
+SAVE_DIALOG = 'document.getElementById("bar-save").click()'      # the window of the report of a tab: TXT, PDF and JSON
+SAVED = ('var t=[].slice.call(document.querySelectorAll("#t-sci h3,#t-sci h4,#t-sci strong,#t-sci b")).filter(function(e){return /^Time saved/.test(e.textContent.trim())})[0];if(t){t.scrollIntoView({block:"start"})}')      # the estimate of the time saved, at the foot of the analytics layer
+RICH_WEB = [("size_phone", "tab=now&compact=1", (390, 844), ""), ("sentinel_analytics", "tab=sci&open=a12,a13", V, ""), ("sentinel_saved", "tab=sci&open=a12", V, SAVED), ("palette", "tab=now", V, PALETTE), ("report_dialog", "tab=al", V, SAVE_DIALOG), ("sentinel_delivery", "tab=sdel&open=delivery", V, ""), ("sentinel_supply", "tab=ssup&open=supply", V, ""), ("sentinel_trend", "tab=strend", V, ""),
             ("compare", "tab=charts", V, SCROLL_CMP), ("updates", "tab=upd", V, FOLD)]      # the newest tabs, against tools/demo_monitor.py --rich; a little script scrolls or folds the page
 
 
@@ -131,11 +134,15 @@ def shot(url, target, size, tries=3, flags=()):
             # subprocess.run waited for ever (or raised after the time limit, which ended the whole script without a word).
             child = subprocess.Popen([edge(), "--headless=new", f"--user-data-dir={profile}", "--disable-gpu", "--hide-scrollbars", "--autoplay-policy=no-user-gesture-required", *flags, "--virtual-time-budget=9000", f"--window-size={size[0]},{size[1]}",
                                       f"--screenshot={target}", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
-            try:
-                child.wait(timeout=60)
-            except subprocess.TimeoutExpired:
+            deadline, last = time.time() + 60, -1
+            while time.time() < deadline and child.poll() is None:      # Edge often leaves its helpers alive after the file is complete: once the file stops growing the browser is ended, so it does not wait the whole minute
+                time.sleep(1)
+                size_now = Path(target).stat().st_size if Path(target).is_file() else 0
+                if size_now > 2000 and size_now == last:
+                    break
+                last = size_now
+            if child.poll() is None:
                 child.kill()
-                print("(the browser took more than 60 s: ended; the picture is looked for anyway)", flush=True)
         finally:
             shutil.rmtree(profile, ignore_errors=True)
         for _ in range(30):      # Edge may return before the file is complete: wait until it is there and stops growing
