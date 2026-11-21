@@ -43,6 +43,12 @@ def health_views():
     return [repo_view.repo_view(name, runs(), failing, [], [], None, {"ci": "healthy"}, "alpha", NOW) for name in sorted(by_repo())]
 
 
+def setUpModule():
+    from github_actions_monitor import i18n
+    i18n.set_language("en")      # the sentences are judged in English whatever language an earlier test left in force
+    unittest.addModuleCleanup(i18n.set_language, None)
+
+
 class Health(unittest.TestCase):
     def test_only_the_repository_with_a_red_queue_is_bad_and_it_says_merge_queue(self):
         states = {v["repo"]: v["state"] for v in health_views()}

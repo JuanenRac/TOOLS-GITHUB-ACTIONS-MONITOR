@@ -18,7 +18,6 @@ import secrets
 import threading
 import time
 
-from github_actions_monitor.storage import file_storage
 from github_actions_monitor.util import paths
 
 FILE = "devices.json"
@@ -57,6 +56,7 @@ def _read():
 
 
 def _write(data):
+    from github_actions_monitor.storage import file_storage      # here and not at the top: the lite edition never loads the modules of the accounts
     file_storage.atomic_write(_path(), json.dumps(data, indent=1, sort_keys=True) + "\n")
 
 

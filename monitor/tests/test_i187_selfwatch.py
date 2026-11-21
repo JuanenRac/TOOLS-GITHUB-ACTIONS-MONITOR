@@ -33,14 +33,15 @@ class Numbers(unittest.TestCase):
         self.assertIsNone(first["cpu_percent"])      # the first reading has nothing to compare with
         if first["rss_mb"] is not None:
             self.assertGreater(first["rss_mb"], 5)
-        blob = bytearray(40 * 1024 * 1024)      # 40 MB that are touched really show in the next reading
+        import mmap
+        blob = mmap.mmap(-1, 40 * 1024 * 1024)      # 40 MB of fresh pages (a block of the heap could reuse pages already counted) that are touched really show in the next reading
         for i in range(0, len(blob), 4096):
             blob[i] = 1
         second = selfwatch.sample(first)
         if first["rss_mb"] is not None and sys.platform.startswith(("linux", "win")):
             self.assertGreater(second["rss_mb"], first["rss_mb"] + 20)
         self.assertIsNotNone(second["cpu_percent"])
-        del blob
+        blob.close()
 
     def test_the_settings_keep_to_their_ranges(self):
         self.assertEqual(selfwatch.settings({}), selfwatch.DEFAULTS)

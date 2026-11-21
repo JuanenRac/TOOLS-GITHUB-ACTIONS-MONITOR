@@ -1315,6 +1315,8 @@
  "egress.use.telegram": "发送到 Telegram 的通知。",
  "egress.fail.ntfy": "被阻止时：该渠道失败并被记录；其他渠道和页面不受影响。",
  "egress.use.ntfy": "发送到 ntfy 的通知（该渠道的服务器可以是你自己的）。",
+ "egress.use.github_status": "状态栏中显示的 GitHub 状态 (githubstatus.com)。",
+ "egress.fail.github_status": "如果被阻止：状态栏不显示 GitHub 的状态，红色也不会被标记为故障；其他功能不受影响。",
  "egress.fail.github_raw": "被阻止时：这些仓库会被报告为未读取，绝不会当作干净。",
  "egress.use.github_raw": "不使用凭据读取的公开仓库工作流文件。",
  "egress.fail.github_download": "被阻止时：没有新版本提示，更新程序无法下载发布包（仍可手动提供 zip）。",

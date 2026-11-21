@@ -1315,6 +1315,8 @@
  "egress.use.telegram": "Benachrichtigungen an Telegram.",
  "egress.fail.ntfy": "Bei Sperre: Dieser Kanal scheitert und wird vermerkt; die anderen Kanäle und die Seite bleiben unberührt.",
  "egress.use.ntfy": "Benachrichtigungen an ntfy (der Server des Kanals kann Ihr eigener sein).",
+ "egress.use.github_status": "Der Zustand von GitHub in der Leiste (githubstatus.com).",
+ "egress.fail.github_status": "Wenn blockiert: Die Leiste zeigt den Zustand von GitHub nicht an und ein Rot wird nicht als Störung markiert; alles andere bleibt unberührt.",
  "egress.fail.github_raw": "Bei Sperre: Diese Repositories gelten als nicht gelesen, nie als sauber.",
  "egress.use.github_raw": "Workflow-Dateien öffentlicher Repositories, ohne Zugangsdaten gelesen.",
  "egress.fail.github_download": "Bei Sperre: kein Hinweis auf neue Versionen, und der Updater kann kein Release laden (ein Zip lässt sich von Hand übergeben).",
