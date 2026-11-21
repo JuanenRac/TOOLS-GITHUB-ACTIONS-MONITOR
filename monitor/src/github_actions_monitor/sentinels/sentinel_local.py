@@ -45,6 +45,7 @@ from github_actions_monitor.data_pipeline import redrule
 from github_actions_monitor.data_pipeline import fork_ci
 from github_actions_monitor.data_pipeline import trend_day
 from github_actions_monitor.data_pipeline import upstream
+from github_actions_monitor.data_pipeline import workflow_scope
 from github_actions_monitor.sentinels import roadmap_a9
 from github_actions_monitor.sentinels import sentinel_ai
 from github_actions_monitor.sentinels import sentinel_base
@@ -138,6 +139,7 @@ def sentinel_config(config):
     merged["hygiene"] = hygiene_settings(config)
     merged["readiness"] = readiness.settings(config)
     merged["upstream"] = upstream.settings(config)      # follow the original repository of each fork (off by default)
+    merged["ci_scope"] = workflow_scope.settings(config)      # reusable workflows out of the failure lists and the list of orphans (both off by default)
     return merged
 
 
@@ -916,7 +918,12 @@ def compute_snapshot(inp):
     ttl = float(cfg.get("a2_resolve_ttl_seconds") or 0)
     resolved = inp.get("a2_resolved") or {}
     extra = a2_resolved_runs(resolved, branches, now.timestamp(), ttl)
-    red = red_workflows({r: runs + extra.get(r, []) for r, runs in runs_by_repo.items()}, branches)
+    scope = cfg.get("ci_scope") or {}
+    reusable_out = []
+    red_input = {r: runs + extra.get(r, []) for r, runs in runs_by_repo.items()}
+    if scope.get("reusable_out"):      # ci.reusable_out_of_rankings: the old runs of a workflow that only others call do not make the repository red
+        red_input, reusable_out = workflow_scope.drop_all(red_input, workflow_scope.reusable_files(inp.get("scans")))
+    red = red_workflows(red_input, branches)
     red, disabled_apart = redrule.split_disabled(red, perms)      # a workflow switched off by hand is not red (ci.disabled_apart)
     redrule.mark_stale(red, set(data.get("errors") or ()), now.timestamp())      # ci.stale_result_hours: information only, never red or green by itself
     jobs_known = inp.get("failed_jobs") or {}
@@ -1007,6 +1014,7 @@ def compute_snapshot(inp):
         "a2": {"red": red, "disabled_by_hand": [{"repo": r["repo"], "workflow": r["workflow"]} for r in disabled_apart][:200], "groups": causes.groups(red), "workflows_checked": sum(1 for r in repos for _ in {workflow_key(x) for x in runs_by_repo.get(r, []) if not redrule.is_dynamic(x)}),
                "services": redrule.service_rows([x for r in repos for x in runs_by_repo.get(r, [])])[:200],
                "unchecked": a2_unchecked(runs_by_repo), "full_sample": a2_full_sample(runs_by_repo, caps),
+               "reusable_out": reusable_out[:200], "orphans": workflow_scope.orphans(perms, inp.get("scans"), scope.get("orphans") is True),
                "inconclusive": a2_repos, "inconclusive_workflows": a2_labels(a2_details), "inconclusive_details": a2_details},
         "a3": {"rows": rows, "codeql_total": sum(t["codeql"] or 0 for t in totals.values()), "dependabot_total": sum(t["dependabot"] or 0 for t in totals.values()),
                "dependency_alerts_off": sorted(r for r, i in info.items() if i.get("vuln_enabled") is False),
@@ -1438,6 +1446,8 @@ class Sentinel:
                                          paging.settings(self.config)["workflow_pages"])      # a repository can have hundreds of workflows: the next pages are read, and a cut is said
                 wfs = page["items"]
                 res["wf_seen"], res["wf_total"] = page["seen"], (page["total"] if page["cut"] else None)
+                if workflow_scope.settings(self.config)["orphans"]:      # ci.orphan_workflows: the list that was just read is kept (name and path), no call is added
+                    res["wf_listed"] = workflow_scope.listed_entries(wfs)
                 own = [w for w in wfs if not str(w.get("path") or "").startswith("dynamic/") and not redrule.is_orphan_workflow(w)]      # the workflows GitHub makes for itself (Dependabot, the dependency graph, Copilot, the default CodeQL) have no file: they are not the owner's to enable
                 res["wf_disabled"] = [w.get("name") for w in own if w.get("state") == "disabled_inactivity"]
                 res["wf_manual"] = [w.get("name") for w in own if w.get("state") == "disabled_manually"]   # same call: no extra request

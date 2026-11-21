@@ -73,6 +73,7 @@ from github_actions_monitor.data_pipeline import paging
 from github_actions_monitor.data_pipeline import redrule
 from github_actions_monitor.data_pipeline import stuckrule
 from github_actions_monitor.integrations import remote_workflows, runner_model
+from github_actions_monitor.data_pipeline import workflow_scope
 from github_actions_monitor.data_pipeline import sampling
 from github_actions_monitor.util import resilience
 from github_actions_monitor.security import secretstore
@@ -105,7 +106,7 @@ DEFAULTS = {
     "workspace_root": "", "audit_dir": "", "signed_dir": "",      # "" = look for them (the environment, then the folder that holds the repositories): workspace.py
     "alerts": {"silences_expire_days": 0, "silences": [], "service": {"enabled": False, "failures": 3, "rate_percent": 0, "workflows": []}, "group": {"by_commit": False, "min": 3}, "digest": {"minutes": 0, "threshold": 10}},      # what reaches the channels when there are many alerts (alertflow.py): all off or empty
     "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group", "workflow_run", "repository_dispatch"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "dormant_repos": True, "forks_need_own_ci": True, "fork_own_ci_days": 90, "red_ages": True, "red_age_days": 30, "stale_result_hours": 0, "disabled_apart": True, "dependabot_alerts": True, "copilot_alerts": False, "extra_branches": [], "branches_by_repo": [], "rerun_timing": False, "group": {"reusable": False, "min": 2}, "failed_jobs": {"enabled": False, "max_per_cycle": 4, "group_by": "auto"},
-           "stuck": {"learned": False, "percentile": 95, "margin": 2.0, "min_samples": 3, "min_minutes": 30, "max_minutes": 720, "queue_minutes": 0, "workflow_minutes": [], "runner_minutes": [], "awaiting_stuck": True, "ghost_enabled": True, "ghost_days": 7, "no_runner_check": False}},      # which runs may make a branch red (redrule.py)
+           "reusable_out_of_rankings": False, "orphan_workflows": False, "stuck": {"learned": False, "percentile": 95, "margin": 2.0, "min_samples": 3, "min_minutes": 30, "max_minutes": 720, "queue_minutes": 0, "workflow_minutes": [], "runner_minutes": [], "awaiting_stuck": True, "ghost_enabled": True, "ghost_days": 7, "no_runner_check": False}},      # which runs may make a branch red (redrule.py)
     "watchdog_minutes": 10,      # a refresh cycle that runs longer than this is dumped to the log and restarted in a new thread (0 = off)
     "watchdog_max_abandoned": 8,      # calls to GitHub that gave up waiting but never returned: with this many still alive no new call is started and the health check says so (0 = no limit)
     "runs_per_repo": 20,
@@ -164,7 +165,7 @@ DEFAULTS = {
     "act": {"enabled": False, "allowed": [], "timeout_seconds": 900, "allow_symlinks": False},
     "dispatch": {"required_ci": ["ci.yml"]},                                 # the workflow files that must have passed on a commit before a batch is fired (gha_dispatch_all.py)         # OFF: run a workflow here with `act`, each run confirmed on its own (actlocal.py)
     "mirror": {"enabled": False, "folder": "", "max_mb": 500, "keep_days": 14, "max_per_cycle": 3},     # OFF: a local copy of the artifacts of the runs (mirror.py)
-    "runners": {"enabled": False, "scope": "owner",                         # OFF: the self-hosted runners of the account (runners.py)
+    "runners": {"enabled": False, "scope": "owner", "group_by": "none",                         # OFF: the self-hosted runners of the account (runners.py)
                 "model": {"enabled": False, "jobs_per_cycle": 10, "thirdparty_labels": ["blacksmith", "buildjet", "namespace-profile", "depot", "warpbuild", "ubicloud", "runs-on", "actuated", "cirrus-runners", "codspeed"],
                           "large_labels": [], "self_labels": [], "queue_warn_minutes": 20, "runaway_runs_per_hour": 20, "runaway_ignore_events": ["pull_request", "pull_request_target"], "observed_reads_per_cycle": 0,
                           "thirdparty_usd_per_minute": 0.0, "alerts": True, "alert_level": "warning"}},      # OFF: kinds of runner, queue and cost by kind, runaway workflows, self-hosted queues (runner_model.py)
@@ -176,7 +177,7 @@ DEFAULTS = {
     "finops": {"jobs_per_cycle": 0, "by_change": False, "co2": False, "co2_watts": 40, "co2_grams_per_kwh": 400},      # the cost of the minutes; by_change and co2 are estimates from the runs already held (data_pipeline/change_cost.py)
     "limits": {"warn_percent": 80, "memory_mb": 512},      # the ceilings the doctor and /metrics compare the setup with (data_pipeline/limits.py)
     "refresh": {"share_by_workflow": False, "share_seconds": 20},      # OFF: one read of a workflow for every caller that asks at the same time (data_pipeline/sharedread.py)
-    "fleet": {"page_size": 50, "group_by": "ecosystem", "sort": "risk", "show_all_active": True, "labels": [], "saved_filters": [], "meta_columns": [], "meta_per_call": 20, "meta_ttl_hours": 6},      # the fleet view of the Team tab (health/fleet.py)
+    "fleet": {"page_size": 50, "group_by": "ecosystem", "sort": "risk", "show_all_active": True, "labels": [], "saved_filters": [], "meta_columns": [], "meta_per_call": 20, "meta_ttl_hours": 6, "fork_behind": False, "fork_behind_per_call": 5},      # the fleet view of the Team tab (health/fleet.py)
     "network": {"use_proxy": False, "etag": True, "graphql_checks": True, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
     "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
     "pagination": {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3, "cursor_pages": 3},      # pages of 100 followed when a list is full, and said when something is cut (paging.py)
@@ -1924,7 +1925,7 @@ def clone_tick(config):
         degraded.note("clones", error)
 
 
-META = {"reader": None, "running": False}
+META = {"reader": None, "running": False, "fork_reader": None, "fork_running": False}
 
 
 def meta_columns_payload():
@@ -1952,7 +1953,45 @@ def meta_columns_payload():
                 finally:
                     META["running"] = False
             threading.Thread(target=work, name="meta-columns", daemon=True).start()
-    return {"columns": [{"id": c["id"], "name": c["name"]} for c in cfg["columns"]], "rows": reader.rows(repos, cfg["columns"]), "pending": due, "running": META["running"]}
+    answer = {"columns": [{"id": c["id"], "name": c["name"]} for c in cfg["columns"]], "rows": reader.rows(repos, cfg["columns"]), "pending": due, "running": META["running"]}
+    behind = fork_behind_part(config, repos)
+    if behind is not None:      # fleet.fork_behind (off: the key is not there)
+        answer["fork_behind"] = behind
+        answer["pending"] += behind["pending"]
+    return answer
+
+
+def fork_behind_part(config, repos):
+    """The `fork_behind` part of GET /api/meta-columns while fleet.fork_behind is on, else None: {"enabled", "rows": {fork: {"state", "behind"}}, "pending"}. Only the forks of the listing the monitor already
+    reads are asked about (two reads each, `fleet.fork_behind_per_call` forks a round, by a thread of its own); an answer lives `fleet.meta_ttl_hours`. Never raises."""
+    from github_actions_monitor.data_pipeline import fork_behind
+    cfg = fork_behind.settings(config)
+    if not cfg["enabled"]:
+        return None
+    if META["fork_reader"] is None:
+        META["fork_reader"] = fork_behind.Reader()
+    reader = META["fork_reader"]
+    try:
+        forks = sorted(r for r, m in repo_meta(repos, config).items() if m.get("fork")) if not LITE["on"] else []
+    except Exception as error:   # noqa: BLE001 - an extra column never stops the page
+        degraded.note("fork_behind", error)
+        forks = []
+    waiting = 0
+    if forks and not DEMO["on"]:
+        waiting = reader.pending(forks, cfg["ttl_hours"])
+        if waiting and not META["fork_running"]:
+            META["fork_running"] = True
+            owner = toolconfig.github_owner(config)
+
+            def work():
+                try:
+                    reader.fill(forks, lambda endpoint: gh_read(endpoint, retries=0), cfg["per_call"], cfg["ttl_hours"], owner)
+                except Exception as error:   # noqa: BLE001
+                    degraded.note("fork_behind", error)
+                finally:
+                    META["fork_running"] = False
+            threading.Thread(target=work, name="fork-behind", daemon=True).start()
+    return {"enabled": True, "rows": reader.rows(forks), "pending": waiting}
 
 
 def runner_alerts():
@@ -2654,7 +2693,10 @@ def maintain(config, data):
                 store.add_jobs(run["repo"], run["name"], run["id"], [], cfg["steps"])
                 continue
             store.add_jobs(run["repo"], run["name"], run["id"], (body or {}).get("jobs") or [], cfg["steps"])
-        ANALYTICS["summary"] = analytics.summary(source_runs(config, data), store, cfg)
+        ranked = source_runs(config, data)
+        if workflow_scope.settings(config)["reusable_out"]:      # ci.reusable_out_of_rankings: the runs of a workflow that only others call stay out of the rankings
+            ranked = workflow_scope.drop_flat(ranked, local_reusable_files())
+        ANALYTICS["summary"] = analytics.summary(ranked, store, cfg)
         ANALYTICS["summary"]["time_saved"] = timesaved.estimate(source_runs(config, data), timesaved.settings(config))
         ANALYTICS["at"] = time.time()
         store.save()

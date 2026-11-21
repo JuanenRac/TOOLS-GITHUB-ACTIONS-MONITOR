@@ -187,13 +187,18 @@
   let known="",tries=0;
   async function metaLoad(){
     if(typeof REPO_TABLE==="undefined")return;
-    const j=await jget("/api/meta-columns");if(!j||!j.columns||!j.columns.length)return;
-    window.META_ROWS=j.rows||{};
-    const ids=j.columns.map(c=>"meta_"+c.id).join(",");
+    const j=await jget("/api/meta-columns");const fb=j&&j.fork_behind&&j.fork_behind.enabled?j.fork_behind:null;
+    if(!j||((!j.columns||!j.columns.length)&&!fb))return;
+    window.META_ROWS=j.rows||{};window.FORK_BEHIND=fb?(fb.rows||{}):{};
+    const ids=(j.columns||[]).map(c=>"meta_"+c.id).concat(fb?["meta_fork_behind"]:[]).join(",");
     if(ids!==known){
       REPO_TABLE.cols.splice(0,REPO_TABLE.cols.length,...REPO_TABLE.cols.filter(c=>!String(c.id).startsWith("meta_")));
       REPO_TABLE.show=REPO_TABLE.show.filter(i=>!String(i).startsWith("meta_"));
-      j.columns.forEach(c=>{const id="meta_"+c.id;REPO_TABLE.cols.push({id:id,label:c.name,sort:r=>(window.META_ROWS[r.repo]||{})[c.id]||"",cell:r=>{const v=(window.META_ROWS[r.repo]||{})[c.id];return v?h(v):dash_}});REPO_TABLE.show.push(id)});
+      (j.columns||[]).forEach(c=>{const id="meta_"+c.id;REPO_TABLE.cols.push({id:id,label:c.name,sort:r=>(window.META_ROWS[r.repo]||{})[c.id]||"",cell:r=>{const v=(window.META_ROWS[r.repo]||{})[c.id];return v?h(v):dash_}});REPO_TABLE.show.push(id)});
+      if(fb){/* fleet.fork_behind: only the forks have a value; a fork that could not be read says "not evaluable", it is not marked */
+        REPO_TABLE.cols.push({id:"meta_fork_behind",label:T("ui.fork_behind_col"),sort:r=>{const v=(window.FORK_BEHIND||{})[r.repo];return v&&v.state!=="unknown"?v.behind:-1},
+          cell:r=>{const v=(window.FORK_BEHIND||{})[r.repo];if(!v)return dash_;if(v.state==="behind")return h(T("ui.fork_behind_n",{n:v.behind}));if(v.state==="current")return h(T("ui.fork_behind_zero"));return '<span class="mut">'+h(T("ui.fork_behind_unknown"))+'</span>'}});
+        REPO_TABLE.show.push("meta_fork_behind")}
       known=ids;REPO_TABLE.made="";
     }
     if(typeof DATA!=="undefined"&&DATA&&typeof render==="function")render(DATA);
