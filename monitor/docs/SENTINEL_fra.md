@@ -72,7 +72,7 @@ Ce sont toutes des suggestions en lecture seule pour une personne ; le moniteur 
 | `matrix_os` | Échecs sur un seul système de la matrice | on · max_per_tick=4 |
 | `artifacts` | Coût des artifacts | on · max_mb=500, retention_days=30 |
 | `required_checks` | Checks obligatoires rouges ou absents | on |
-| `commit_state` | État du dernier commit : toutes les vérifications et tous les statuts, de toutes les applications | off · include_other_apps, include_statuses |
+| `commit_state` | État du dernier commit : toutes les vérifications et tous les statuts, de toutes les applications | off · include_other_apps, include_statuses, include_pr_heads, pr_heads_max |
 | `release_assets` | Releases publiées incomplètes | on · recent_days=30, required, require_sha256, require_signature, allow_empty (une release sans fichiers est acceptée) |
 | `tag_vs_version` | Étiquette face à la version du manifeste | on · prefixes (`sentinel.surface.checks.tag_vs_version.prefixes`), prerelease_ok |
 | `tag_vs_version` | Étiquette de release vs version du manifeste/CHANGELOG | on |

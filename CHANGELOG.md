@@ -161,6 +161,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **A release is suggested only from five entries under [Unreleased]**: `sentinel.candidate_min_entries` now starts at 5 (it was 1), so the release candidates of the CI sentinel and the release readiness no longer appear for one or two small changes. A value you chose yourself is kept; the number can be set from 1 to 100 in Settings.
 
+- **The combined state of a commit also counts the open pull requests** (`sentinel.surface.checks.commit_state.include_pr_heads`, off by default, and `pr_heads_max`, 5): with it on, the head commit of each open pull request (the newest ones, drafts left out) is looked at with its checks from every app, and a row `repository#number` shows the red or pending ones; a red pull request is a row, not a failure of the branch, and a head or a list that cannot be read is listed as not evaluable, never as green. It costs one call for the list and one for each pull request; it is in the guide of the sentinel and in the settings help.
+
 ### Fixed
 
 - **The signing queue of A5 no longer offers what does not have to be signed**: a run enters it only when it is not a dry run (the step "Prepare the draft" ran), a draft release is waiting or the repository has no published release, and the version is not already published with its signature. The five false rows (four manual builds whose version was already published and signed, and one dry run whose `--sign --publish --bench` command would have been wrong) are gone. Each run of the queue is looked at once every six hours (the jobs of the run and the releases of its repository, two reads, at most three runs a cycle) and what leaves is listed under the queue as "checked: already published vX" or "dry run" instead of "not checked".
@@ -184,6 +186,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 - **In the kiosk the column chooser of the tables is no longer shown**: nobody can click it on a wall, and when its box was open it covered the table of repositories.
 
 - **The Teams channel always sends its `Content-Length` and uses an Adaptive Card for the Workflows of Teams**: a Teams endpoint that refuses a body sent in pieces no longer fails, and the address of a Workflows flow (`logic.azure.com`, `powerplatform.com`) gets the message as a card, which that kind of flow reads; the older connector of a channel still gets plain text. A test with a fake server that refuses bodies sent in pieces checks it.
+
+- **A target that could not be read is never a clean bill of health or a defect, outside the score too**: the health of an ecosystem (readiness) no longer takes a failed read of the alerts of a repository for "no alerts" (that repository is listed under `unread`, lowers the coverage and, below the minimum, leaves the ecosystem without a number instead of 100), and the list of release candidates tells a repository without a release from a release it could not read: the second one is named as not evaluated with its cause, is not listed as a candidate and the command ends with an error. No call to GitHub is added.
 
 ## [2.1.5]
 

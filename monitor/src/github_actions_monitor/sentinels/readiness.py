@@ -272,6 +272,12 @@ def has_no_workflow(repo, runs_by_repo, scans):
     return isinstance(scan, dict) and not scan.get("workflows") and not runs_by_repo.get(repo)
 
 
+def alerts_read(entry):
+    """True when the alerts of a repository were really read: an entry written by a failed read (its `note` starts with "error") says nothing, and is never taken for "no alerts" (a repository
+    whose alerts could not be read does not make its ecosystem look healthy)."""
+    return bool(isinstance(entry, dict) and entry.get("at") and not str(entry.get("note") or "").startswith("error"))
+
+
 def health(s, eco, alerts, runs_by_repo, info, cfg, scans=None):
     """One row per ecosystem from the finished snapshot `s` (A1-A6). Score = 100 - sum(weight x count), at least 0, shown only when the share of the
     ecosystem's APPLICABLE repositories that have run data AND alerts read is at least `min_coverage`; otherwise None (unknown). A repository with no workflow at all is not applicable: it does
@@ -299,13 +305,14 @@ def health(s, eco, alerts, runs_by_repo, info, cfg, scans=None):
         counts["alert"] = max(0, total_alerts - counts["high_alert"])   # serious ones are counted once, in their own line
         no_ci = [r for r in repos if has_no_workflow(r, runs_by_repo, scans)]
         applicable = [r for r in repos if r not in no_ci]
-        have = [r for r in applicable if runs_by_repo.get(r) and (alerts.get(r) or {}).get("at") and r in info]
+        unread = [r for r in applicable if (alerts.get(r) or {}).get("at") and not alerts_read(alerts.get(r))]      # their alerts were asked for and the answer was an error: not "no alerts"
+        have = [r for r in applicable if runs_by_repo.get(r) and alerts_read(alerts.get(r)) and r in info]
         covered = len(have)
         coverage = covered / len(applicable) if applicable else 0.0
         parts = [(name, counts[name], round(weights[name] * counts[name], 2)) for name in ("red", "stuck", "secret", "high_alert", "alert", "stale_pr", "unsigned", "hygiene") if counts[name]]
         score = None if coverage < cfg["min_coverage"] else max(0, round(100 - sum(p for _, _, p in parts)))
         rows.append({"ecosystem": key, "score": score, "coverage": round(coverage, 2), "repos": len(repos), "applicable": len(applicable), "covered": covered, "min_coverage": cfg["min_coverage"],
-                     "no_ci": no_ci, "missing": [r for r in applicable if r not in have], "parts": [{"name": n, "count": c, "penalty": p} for n, c, p in parts],
+                     "no_ci": no_ci, "missing": [r for r in applicable if r not in have], "unread": unread, "parts": [{"name": n, "count": c, "penalty": p} for n, c, p in parts],
                      "external": toolconfig.is_external(key)})
     return rows
 

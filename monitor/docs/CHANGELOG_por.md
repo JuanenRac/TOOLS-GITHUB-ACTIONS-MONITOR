@@ -159,6 +159,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **Uma versão só é sugerida a partir de cinco entradas em [Unreleased]**: `sentinel.candidate_min_entries` começa agora em 5 (era 1), pelo que os candidatos a versão do sentinela de CI e a prontidão da versão já não aparecem por uma ou duas alterações pequenas. Um valor que escolheu é mantido; o número pode ser definido de 1 a 100 nas Definições.
 
+- **O estado combinado de um commit conta também os pull requests abertos** (`sentinel.surface.checks.commit_state.include_pr_heads`, desligado por predefinição, e `pr_heads_max`, 5): com ele ligado vê-se o commit de topo de cada pull request aberto (os mais recentes, sem rascunhos) com as suas verificações de qualquer app, e uma linha `repositório#número` mostra os vermelhos ou pendentes; um pull request vermelho é uma linha, não uma falha do ramo, e um topo ou uma lista que não se consegue ler é listado como não avaliável, nunca como verde. Custa uma chamada para a lista e uma por cada pull request; está no guia do sentinela e na ajuda das definições.
+
 ### Corrigido
 
 - **A fila de assinatura de A5 já não oferece o que não tem de ser assinado**: uma execução só entra se não for um ensaio (o passo «Prepare the draft» correu), houver um rascunho de release à espera ou o repositório não tiver release publicada, e a versão não estiver já publicada com a sua assinatura. As cinco linhas falsas (quatro builds manuais cuja versão já estava publicada e assinada, e um ensaio cujo comando `--sign --publish --bench` seria errado) desaparecem. Cada execução da fila é vista uma vez de seis em seis horas (os jobs da execução e as releases do seu repositório, duas leituras, no máximo três execuções por ciclo) e o que sai é listado por baixo da fila como «verificado: já publicada vX» ou «ensaio» em vez de «não verificado».
@@ -182,6 +184,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 - **No quiosque já não se mostra o seletor de colunas das tabelas**: ninguém o consegue clicar numa parede e, quando a sua caixa estava aberta, tapava a tabela de repositórios.
 
 - **O canal Teams envia sempre o seu `Content-Length` e usa um cartão adaptável para os Workflows do Teams**: um destino do Teams que recusa um corpo enviado em pedaços já não falha, e o endereço de um fluxo de Workflows (`logic.azure.com`, `powerplatform.com`) recebe a mensagem como cartão, que é o que esse tipo de fluxo lê; o conector antigo de um canal continua a receber texto simples. Verifica-o um teste com um servidor falso que recusa corpos enviados em pedaços.
+
+- **Um alvo que não se conseguiu ler nunca é um atestado de saúde nem um defeito, também fora da pontuação**: a saúde de um ecossistema (prontidão) já não toma uma leitura falhada dos alertas de um repositório por «sem alertas» (esse repositório é listado em `unread`, baixa a cobertura e, abaixo do mínimo, deixa o ecossistema sem número em vez de 100), e a lista de candidatas a release distingue um repositório sem release de uma release que não se conseguiu ler: a segunda é nomeada como não avaliada com a sua causa, não é listada como candidata e o comando termina com erro. Não se acrescenta nenhuma chamada ao GitHub.
 
 ## [2.1.5]
 

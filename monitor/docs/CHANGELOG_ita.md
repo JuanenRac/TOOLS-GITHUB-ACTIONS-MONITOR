@@ -158,6 +158,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - **Una release viene suggerita solo da cinque voci sotto [Unreleased]**: `sentinel.candidate_min_entries` parte ora da 5 (era 1), così le candidate a una release della sentinella CI e la prontezza della release non compaiono più per una o due piccole modifiche. Un valore scelto da te viene mantenuto; il numero si imposta da 1 a 100 nelle Impostazioni.
 
+- **Lo stato combinato di un commit conta anche le pull request aperte** (`sentinel.surface.checks.commit_state.include_pr_heads`, spento per impostazione predefinita, e `pr_heads_max`, 5): se acceso, si guarda il commit di testa di ogni pull request aperta (le più recenti, bozze escluse) con i suoi controlli di ogni app, e una riga `repository#numero` mostra quelle rosse o in attesa; una pull request rossa è una riga, non un errore del ramo, e una testa o un elenco che non si può leggere è elencato come non valutabile, mai come verde. Costa una chiamata per l'elenco e una per ogni pull request; è nella guida della sentinella e nell'aiuto delle impostazioni.
+
 ### Corretto
 
 - **La coda di firma di A5 non propone più ciò che non va firmato**: un'esecuzione vi entra solo se non è una prova (il passaggio «Prepare the draft» è stato eseguito), se c'è una bozza di release in attesa o il repository non ha release pubblicate, e se la versione non è già pubblicata con la sua firma. Le cinque righe false (quattro build manuali la cui versione era già pubblicata e firmata, e una prova il cui comando `--sign --publish --bench` sarebbe stato errato) spariscono. Ogni esecuzione della coda viene guardata una volta ogni sei ore (i job dell'esecuzione e le release del suo repository, due letture, al massimo tre esecuzioni per ciclo) e ciò che esce è elencato sotto la coda come «verificato: già pubblicata vX» o «prova» invece di «non verificato».
@@ -181,6 +183,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 - **Nel chiosco il selettore delle colonne delle tabelle non viene più mostrato**: nessuno può cliccarlo su una parete e, quando la sua casella era aperta, copriva la tabella dei repository.
 
 - **Il canale Teams invia sempre il suo `Content-Length` e usa una scheda adattiva per i Workflows di Teams**: una destinazione Teams che rifiuta un corpo inviato a pezzi non fallisce più, e l'indirizzo di un flusso Workflows (`logic.azure.com`, `powerplatform.com`) riceve il messaggio come scheda, che è ciò che legge quel tipo di flusso; il vecchio connettore di un canale riceve ancora testo semplice. Lo verifica un test con un finto server che rifiuta i corpi inviati a pezzi.
+
+- **Un obiettivo che non si è potuto leggere non è mai un certificato di salute né un difetto, anche fuori dal punteggio**: la salute di un ecosistema (prontezza) non prende più una lettura fallita degli avvisi di un repository per «nessun avviso» (quel repository è elencato in `unread`, abbassa la copertura e, sotto il minimo, lascia l'ecosistema senza numero invece di 100), e l'elenco dei candidati alla release distingue un repository senza release da una release che non si è potuta leggere: la seconda è nominata come non valutata con la sua causa, non è elencata come candidata e il comando termina con un errore. Non si aggiunge alcuna chiamata a GitHub.
 
 ## [2.1.5]
 

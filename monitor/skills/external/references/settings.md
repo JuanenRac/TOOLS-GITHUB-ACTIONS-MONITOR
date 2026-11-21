@@ -683,7 +683,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinel.surface.checks.broad_permissions.enabled` | `-` | surface | sentinel.surface.checks.broad_permissions.enabled |
 | `sentinel.surface.checks.commit_state.enabled` | `-` | surface | sentinel.surface.checks.commit_state.enabled |
 | `sentinel.surface.checks.commit_state.include_other_apps` | `-` | surface | Count the checks of other apps |
+| `sentinel.surface.checks.commit_state.include_pr_heads` | `-` | surface | Read the open pull requests |
 | `sentinel.surface.checks.commit_state.include_statuses` | `-` | surface | Count the commit statuses |
+| `sentinel.surface.checks.commit_state.pr_heads_max` | `-` | surface | Pull requests to look at |
 | `sentinel.surface.checks.coverage.enabled` | `-` | surface | sentinel.surface.checks.coverage.enabled |
 | `sentinel.surface.checks.dead_schedule.days` | `-` | surface | sentinel.surface.checks.dead_schedule.days |
 | `sentinel.surface.checks.dead_schedule.enabled` | `-` | surface | sentinel.surface.checks.dead_schedule.enabled |

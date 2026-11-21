@@ -160,6 +160,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - **Une release n'est proposée qu'à partir de cinq entrées sous [Unreleased]** : `sentinel.candidate_min_entries` démarre maintenant à 5 (c'était 1), si bien que les candidates à une release de la sentinelle CI et la préparation de version n'apparaissent plus pour un ou deux petits changements. Une valeur choisie par vous est conservée ; le nombre se règle de 1 à 100 dans les Réglages.
 
+- **L'état combiné d'un commit compte aussi les pull requests ouvertes** (`sentinel.surface.checks.commit_state.include_pr_heads`, désactivé par défaut, et `pr_heads_max`, 5) : activé, le commit de tête de chaque pull request ouverte (les plus récentes, brouillons exclus) est examiné avec ses vérifications de toute application, et une ligne `dépôt#numéro` montre celles qui sont rouges ou en attente ; une pull request rouge est une ligne, pas un échec de la branche, et une tête ou une liste illisible est listée comme non évaluable, jamais comme verte. Cela coûte un appel pour la liste et un par pull request ; c'est dans le guide de la sentinelle et dans l'aide des réglages.
+
 ### Corrigé
 
 - **La file de signature de A5 ne propose plus ce qu'il n'y a pas à signer** : une exécution n'y entre que si ce n'est pas une simulation (l'étape « Prepare the draft » a tourné), si un brouillon de release attend ou si le dépôt n'a aucune release publiée, et si la version n'est pas déjà publiée avec sa signature. Les cinq fausses lignes (quatre builds manuels dont la version était déjà publiée et signée, et une simulation dont la commande `--sign --publish --bench` aurait été erronée) disparaissent. Chaque exécution de la file est regardée une fois toutes les six heures (les jobs de l'exécution et les releases de son dépôt, deux lectures, trois exécutions au plus par cycle) et ce qui sort est listé sous la file comme « vérifié : déjà publiée vX » ou « simulation » au lieu de « non vérifié ».
@@ -183,6 +185,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 - **Dans le kiosque, le sélecteur de colonnes des tableaux n'est plus affiché** : personne ne peut cliquer dessus sur un mur, et quand sa boîte était ouverte elle recouvrait le tableau des dépôts.
 
 - **Le canal Teams envoie toujours son `Content-Length` et utilise une carte adaptative pour les Workflows de Teams** : une destination Teams qui refuse un corps envoyé en morceaux n'échoue plus, et l'adresse d'un flux Workflows (`logic.azure.com`, `powerplatform.com`) reçoit le message sous forme de carte, ce que lit ce type de flux ; l'ancien connecteur d'un canal reçoit toujours du texte brut. Un test avec un faux serveur qui refuse les corps envoyés en morceaux le vérifie.
+
+- **Une cible qui n'a pas pu être lue n'est jamais un certificat de bonne santé ni un défaut, hors du score aussi** : la santé d'un écosystème (préparation) ne prend plus une lecture ratée des alertes d'un dépôt pour « aucune alerte » (ce dépôt est listé sous `unread`, baisse la couverture et, sous le minimum, laisse l'écosystème sans chiffre au lieu de 100), et la liste des candidates à la release distingue un dépôt sans release d'une release illisible : la seconde est nommée comme non évaluée avec sa cause, n'est pas listée comme candidate et la commande se termine par une erreur. Aucun appel à GitHub n'est ajouté.
 
 ## [2.1.5]
 

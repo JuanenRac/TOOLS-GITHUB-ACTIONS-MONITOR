@@ -12,7 +12,7 @@ A test fails when something in the code is not named in these skills, so this ta
 | --- | --- | --- | --- |
 | endpoints | 149 | references/api.md | references/api.md |
 | commands | 26 | out of scope: the AI of the monitor does not run commands | references/cli.md |
-| settings | 888 | references/settings.md (the ai, lessons and alert ones matter) | references/settings.md |
+| settings | 890 | references/settings.md (the ai, lessons and alert ones matter) | references/settings.md |
 | files | 14 | references/files.md | references/files.md |
 | roles | 3 | references/roles.md | references/roles.md |
 | tabs | 21 | references/tabs.md | references/tabs.md |

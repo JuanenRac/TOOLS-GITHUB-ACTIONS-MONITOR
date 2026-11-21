@@ -160,6 +160,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - **Una release solo se sugiere a partir de cinco entradas bajo [Unreleased]**: `sentinel.candidate_min_entries` empieza ahora en 5 (era 1), así que los candidatos a release del centinela de CI y la preparación de versión ya no aparecen por uno o dos cambios pequeños. Un valor que elegiste tú se conserva; el número se puede fijar de 1 a 100 en Ajustes.
 
+- **El estado combinado de un commit cuenta también las pull requests abiertas** (`sentinel.surface.checks.commit_state.include_pr_heads`, apagado por defecto, y `pr_heads_max`, 5): con él encendido se mira el commit de cabeza de cada pull request abierta (las más recientes, sin borradores) con sus comprobaciones de cualquier app, y una fila `repositorio#número` muestra las que están en rojo o pendientes; una pull request en rojo es una fila, no un fallo de la rama, y una cabeza o una lista que no se puede leer se lista como no evaluable, nunca como verde. Cuesta una llamada para la lista y una por cada pull request; está en la guía del centinela y en la ayuda de los ajustes.
+
 ### Corregido
 
 - **La cola de firma de A5 ya no ofrece lo que no hay que firmar**: una ejecución entra solo si no es un simulacro (se ejecutó el paso «Prepare the draft»), hay un borrador de release esperando o el repositorio no tiene release publicada, y la versión no está ya publicada con su firma. Desaparecen las cinco filas falsas (cuatro builds manuales cuya versión ya estaba publicada y firmada, y un simulacro cuyo comando `--sign --publish --bench` habría sido erróneo). Cada ejecución de la cola se mira una vez cada seis horas (los jobs de la ejecución y las releases de su repositorio, dos lecturas, como mucho tres ejecuciones por ciclo) y lo que sale se lista bajo la cola como «comprobado: ya publicada vX» o «simulacro» en vez de «sin comprobar».
@@ -183,6 +185,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 - **En el kiosco ya no se muestra el selector de columnas de las tablas**: nadie puede pulsarlo en una pared, y cuando su caja estaba abierta tapaba la tabla de repositorios.
 
 - **El canal de Teams siempre envía su `Content-Length` y usa una tarjeta adaptable para los Workflows de Teams**: un destino de Teams que rechaza un cuerpo enviado en trozos ya no falla, y la dirección de un flujo de Workflows (`logic.azure.com`, `powerplatform.com`) recibe el mensaje como tarjeta, que es lo que lee ese tipo de flujo; el conector antiguo de un canal sigue recibiendo texto plano. Lo comprueba una prueba con un servidor falso que rechaza cuerpos enviados en trozos.
+
+- **Un objetivo que no se pudo leer nunca es un certificado de salud ni un defecto, tampoco fuera de la puntuación**: la salud de un ecosistema (preparación) ya no toma una lectura fallida de las alertas de un repositorio por «sin alertas» (ese repositorio se lista en `unread`, baja la cobertura y, por debajo del mínimo, deja al ecosistema sin número en vez de con 100), y la lista de candidatas a release distingue un repositorio sin release de una release que no se pudo leer: la segunda se nombra como no evaluada con su causa, no se lista como candidata y el comando termina con error. No se añade ninguna llamada a GitHub.
 
 ## [2.1.5]
 

@@ -159,6 +159,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Ein Release wird erst ab fünf Einträgen unter [Unreleased] vorgeschlagen**: `sentinel.candidate_min_entries` beginnt jetzt bei 5 (vorher 1), sodass Release-Kandidaten des CI-Wächters und die Release-Bereitschaft nicht mehr für ein oder zwei kleine Änderungen erscheinen. Ein selbst gewählter Wert bleibt erhalten; die Zahl lässt sich in den Einstellungen von 1 bis 100 setzen.
 
+- **Der kombinierte Zustand eines Commits zählt auch die offenen Pull Requests** (`sentinel.surface.checks.commit_state.include_pr_heads`, standardmäßig aus, und `pr_heads_max`, 5): Ist es an, wird der Head-Commit jedes offenen Pull Requests (die neuesten, Entwürfe ausgenommen) mit seinen Prüfungen von jeder App angesehen, und eine Zeile `Repository#Nummer` zeigt die roten oder ausstehenden; ein roter Pull Request ist eine Zeile, kein Fehler des Branches, und ein Head oder eine Liste, die nicht gelesen werden kann, wird als nicht auswertbar aufgeführt, nie als grün. Es kostet einen Aufruf für die Liste und einen je Pull Request; es steht in der Anleitung des Wächters und in der Einstellungshilfe.
+
 ### Behoben
 
 - **Die Signaturwarteschlange von A5 bietet nichts mehr an, was nicht signiert werden muss**: Ein Lauf kommt nur hinein, wenn er kein Probelauf ist (der Schritt „Prepare the draft“ lief), ein Release-Entwurf wartet oder das Repository kein veröffentlichtes Release hat und die Version nicht schon mit Signatur veröffentlicht ist. Die fünf falschen Zeilen (vier manuelle Builds, deren Version schon veröffentlicht und signiert war, und ein Probelauf, dessen Befehl `--sign --publish --bench` falsch gewesen wäre) sind weg. Jeder Lauf der Warteschlange wird alle sechs Stunden angesehen (die Jobs des Laufs und die Releases seines Repositorys, zwei Lesevorgänge, höchstens drei Läufe je Zyklus); was die Warteschlange verlässt, steht darunter als „geprüft: bereits veröffentlicht vX“ oder „Probelauf“ statt „ungeprüft“.
@@ -182,6 +184,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 - **Im Kiosk wird die Spaltenauswahl der Tabellen nicht mehr angezeigt**: An einer Wand kann sie niemand anklicken, und wenn ihr Kasten offen war, verdeckte er die Tabelle der Repositorys.
 
 - **Der Teams-Kanal sendet immer sein `Content-Length` und nutzt für die Workflows von Teams eine Adaptive Card**: Ein Teams-Ziel, das einen in Stücken gesendeten Body ablehnt, scheitert nicht mehr, und die Adresse eines Workflows-Flows (`logic.azure.com`, `powerplatform.com`) erhält die Nachricht als Karte, die diese Art Flow liest; der ältere Connector eines Kanals erhält weiterhin einfachen Text. Ein Test mit einem falschen Server, der in Stücken gesendete Bodies ablehnt, prüft es.
+
+- **Ein Ziel, das nicht gelesen werden konnte, ist nie ein Gesundheitszeugnis oder ein Mangel, auch außerhalb der Bewertung**: Die Gesundheit eines Ökosystems (Bereitschaft) hält einen fehlgeschlagenen Lesevorgang der Warnungen eines Repositorys nicht mehr für „keine Warnungen“ (das Repository erscheint unter `unread`, senkt die Abdeckung und lässt das Ökosystem unter dem Minimum ohne Zahl statt mit 100), und die Liste der Release-Kandidaten unterscheidet ein Repository ohne Release von einem Release, das nicht gelesen werden konnte: Letzteres wird mit seiner Ursache als nicht ausgewertet genannt, nicht als Kandidat geführt, und der Befehl endet mit einem Fehler. Es kommt kein Aufruf an GitHub hinzu.
 
 ## [2.1.5]
 

@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.7",
  "previous": "2.1.6",
- "digest": "fbafd7ae2cf9bab7da5bb2d89507ebd0d05e38f03d335693e1c8f4272b4cc5d4",
+ "digest": "ab835347c288fa5c7ce4ee4d7c767138ab13097827efced0bb35ca18394ed4fd",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -639,6 +639,18 @@
      100000
     ],
     "default": 400
+   },
+   {
+    "key": "sentinel.surface.checks.commit_state.include_pr_heads",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinel.surface.checks.commit_state.pr_heads_max",
+    "kind": "int",
+    "bounds": [
+     1,
+     20
+    ]
    },
    {
     "key": "sentinels.collab.rules.external_days",
