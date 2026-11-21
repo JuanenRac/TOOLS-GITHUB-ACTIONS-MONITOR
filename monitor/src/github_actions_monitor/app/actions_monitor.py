@@ -1170,11 +1170,24 @@ def graphql_cold(config, repos):
     return found
 
 
+def keep_newer_state(old_runs, runs):
+    """The runs of a read, except that one that the cache already holds in a LATER state (completed by a signed webhook while the read was on its way) is not taken back to queued or in progress: the state of a run only
+    moves forward (webhook.STATUS_RANK). Only the same attempt of the same run counts; a new attempt starts again."""
+    from github_actions_monitor.security import webhook
+    held = {(r.get("id"), r.get("attempt")): r for r in old_runs or [] if isinstance(r, dict)}
+    out = []
+    for run in runs:
+        before = held.get((run.get("id"), run.get("attempt"))) if isinstance(run, dict) else None
+        out.append(before if before is not None and webhook.STATUS_RANK.get(before.get("status"), -1) > webhook.STATUS_RANK.get(run.get("status"), -1) else run)
+    return out
+
+
 def note_read(repo, runs, error):
     """Stores the result of one read of a repository. A passing failure (a TLS hiccup, a 5xx, a cut) keeps the last runs, is read again in the next cycle and is shown as an error only
     after resilience.TRANSIENT_CYCLES cycles in a row; any other error is shown at once (the old runs stay)."""
     entry = RUN_CACHE.get(repo)
     if not error:
+        runs = keep_newer_state((entry or {}).get("runs"), runs)
         RUN_CACHE[repo] = {"runs": runs, "at": time.time(), "full_at": time.time(), "error": None, "fails": 0, "head": HEADS_PENDING.pop(repo, "") or (entry or {}).get("head", "")}
         return
     fails = (entry or {}).get("fails", 0) + 1

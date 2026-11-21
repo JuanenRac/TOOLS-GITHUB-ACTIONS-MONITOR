@@ -121,5 +121,39 @@ class LinearGrouping(unittest.TestCase):
         self.assertLess(time.perf_counter() - started, 0.5)      # four passes; the quadratic form took about 2.3 s for three
 
 
+class ReadDoesNotUndoTheWebhook(unittest.TestCase):
+    BASE = {"repo": "demo", "id": 777, "name": "CI", "path": "ci.yml", "branch": "main", "event": "push", "status": "in_progress", "conclusion": None, "started": "2026-11-21T10:00:00Z", "attempt": 1}
+
+    def setUp(self):
+        from github_actions_monitor.app import actions_monitor as am
+        self.am = am
+        self.saved = am.RUN_CACHE.get("demo")
+        self.addCleanup(lambda: am.RUN_CACHE.pop("demo", None) if self.saved is None else am.RUN_CACHE.__setitem__("demo", self.saved))
+
+    def _delivery(self):
+        import json
+        from github_actions_monitor.security import webhook
+        body = json.dumps({"repository": {"name": "demo", "full_name": "owner/demo"}, "workflow_run": {"id": 777, "status": "completed", "conclusion": "failure", "event": "push", "name": "CI",
+                           "path": ".github/workflows/ci.yml", "head_branch": "main", "head_sha": "abcdef1", "run_attempt": 1, "run_started_at": "2026-11-21T10:00:00Z", "updated_at": "2026-11-21T10:05:00Z"}}).encode()
+        return webhook.parse_event("workflow_run", body)
+
+    def test_a_read_that_started_before_the_delivery_keeps_completed(self):
+        am = self.am
+        am.RUN_CACHE["demo"] = {"runs": [dict(self.BASE)], "at": 1.0, "error": None, "fails": 0}
+        in_flight = [dict(self.BASE)]      # GitHub still said in_progress when the read began
+        am.apply_live_event(self._delivery(), {"runs_per_repo": 20})
+        am.note_read("demo", in_flight, None)
+        run = am.RUN_CACHE["demo"]["runs"][0]
+        self.assertEqual((run["status"], run["conclusion"]), ("completed", "failure"))
+
+    def test_a_new_attempt_and_a_later_state_are_taken(self):
+        am = self.am
+        am.RUN_CACHE["demo"] = {"runs": [dict(self.BASE, status="completed", conclusion="failure")], "at": 1.0, "error": None, "fails": 0}
+        am.note_read("demo", [dict(self.BASE, attempt=2, status="queued")], None)
+        self.assertEqual(am.RUN_CACHE["demo"]["runs"][0]["attempt"], 2)
+        am.note_read("demo", [dict(self.BASE, attempt=2, status="completed", conclusion="success")], None)
+        self.assertEqual(am.RUN_CACHE["demo"]["runs"][0]["conclusion"], "success")
+
+
 if __name__ == "__main__":
     unittest.main()
