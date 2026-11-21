@@ -5310,7 +5310,7 @@ def handle_advanced_post(path, request, who=""):
         from github_actions_monitor.integrations import ghactions
         if path.endswith("plan"):
             item, why = ghactions.plan(config, toolconfig.github_owner(config), request.get("action"), request.get("repo"), request.get("number"), reason=request.get("reason"),
-                                       operator=request.get("operator") or who, run_gh=run_gh_checked)
+                                       operator=who or request.get("operator"), run_gh=run_gh_checked)      # in the team mode the person with a session is the operator: the request cannot name another one
             return {"ok": item is not None, "status": why, "plan": item}
         return ghactions.execute(config, request.get("plan"), run_gh_checked)
     from github_actions_monitor.integrations import actlocal
