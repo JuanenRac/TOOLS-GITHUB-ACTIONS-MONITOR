@@ -159,6 +159,8 @@ def demo_analytics(runs):
     if "--rich" in sys.argv:      # the estimate of the time saved, from invented notes (the plain demo leaves it off, as the monitor does)
         notes = {"productivity": {"enabled": True, "watch_times_per_week": 10, "watch_minutes_before": 8, "watch_minutes_after": 1, "triage_minutes_before": 25, "team_hours_per_week": 40}}
         summary["time_saved"] = timesaved.estimate(runs, timesaved.settings(notes))
+    else:
+        summary["time_saved"] = timesaved.off()      # the key is always there, as the contract freezes it; off, as the monitor has it by default
     return summary
 
 
