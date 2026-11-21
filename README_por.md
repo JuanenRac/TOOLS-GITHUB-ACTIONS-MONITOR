@@ -22,16 +22,6 @@
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
   <img src="https://img.shields.io/badge/Tests-5736_passing-brightgreen.svg" alt="5736 tests">
-  <img src="https://img.shields.io/badge/Tests-5575_passing-brightgreen.svg" alt="5575 tests">
-  <img src="https://img.shields.io/badge/Tests-5565_passing-brightgreen.svg" alt="5565 tests">
-  <img src="https://img.shields.io/badge/Tests-5571_passing-brightgreen.svg" alt="5571 tests">
-  <img src="https://img.shields.io/badge/Tests-5574_passing-brightgreen.svg" alt="5574 tests">
-  <img src="https://img.shields.io/badge/Tests-5570_passing-brightgreen.svg" alt="5570 tests">
-  <img src="https://img.shields.io/badge/Tests-5576_passing-brightgreen.svg" alt="5576 tests">
-  <img src="https://img.shields.io/badge/Tests-5597_passing-brightgreen.svg" alt="5597 tests">
-  <img src="https://img.shields.io/badge/Tests-5580_passing-brightgreen.svg" alt="5580 tests">
-  <img src="https://img.shields.io/badge/Tests-5573_passing-brightgreen.svg" alt="5573 tests">
-  <img src="https://img.shields.io/badge/Tests-5566_passing-brightgreen.svg" alt="5566 tests">
 </p>
 
 > Vigia os workflows de todos os seus repositórios e diz-lhe, numa página local, o que está a vermelho, o que está encravado e o que o espera.
