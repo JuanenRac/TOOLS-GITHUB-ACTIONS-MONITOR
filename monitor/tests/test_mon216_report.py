@@ -164,7 +164,7 @@ class TheBuilder(unittest.TestCase):
         bad = {"report_export": {"txt": "yes", "pdf": 1, "json": None, "name": "../x y", "paper": "a3", "pdf_path": "cloud"}}
         self.assertEqual(tab_report.settings(bad), tab_report.settings({}))
         good = {"report_export": {"txt": False, "json": True, "name": "informe_{tab}", "paper": "letter", "pdf_path": "browser"}}
-        self.assertEqual(tab_report.settings(good), {"txt": False, "pdf": True, "json": True, "name": "informe_{tab}", "paper": "letter", "pdf_path": "browser"})
+        self.assertEqual(tab_report.settings(good), {"txt": False, "pdf": True, "json": True, "name": "informe_{tab}", "paper": "letter", "pdf_path": "browser", "limits": True})
 
     def test_the_file_name_is_safe(self):
         self.assertEqual(tab_report.file_name("monitor-{tab}-{date}", "now", "2030-01-02"), "monitor-now-2030-01-02")

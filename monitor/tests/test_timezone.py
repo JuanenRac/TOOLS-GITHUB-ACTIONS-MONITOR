@@ -156,7 +156,7 @@ class Setting(unittest.TestCase):
 
     def test_the_default_and_the_template_say_local(self):
         from github_actions_monitor.app import actions_monitor as am
-        self.assertEqual(am.DEFAULTS["display"], {"timezone": "local", "blink_red_tiles": True})
+        self.assertEqual(am.DEFAULTS["display"], {"timezone": "local", "blink_red_tiles": True, "live_throttle_s": 30, "whats_new": True, "density": "normal", "reduce_motion": "auto", "palette": "default"})
         template = json.loads((HERE / "assets" / "examples" / "actions_monitor.example.json").read_text(encoding="utf-8"))
         self.assertEqual(template["display"]["timezone"], "local")
 
