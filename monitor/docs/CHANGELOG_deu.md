@@ -15,6 +15,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Ein Kontrast-Tor** (`tools/check_contrast.py`, von der CI ausgeführt): Jeder Text auf jeder Fläche des dunklen und hellen Modus und der sechzehn Themes erreicht 4,5:1, die Farbe eines Zustands 3:1, die Palette für Farbenblindheit wird mit einer Simulation der drei Formen geprüft, und eine neue Abdunklung von Text mit `opacity` lässt den Build scheitern.
 
+- **Die Anleitungen und der nächste Schritt auf der Kommandozeile**: `monitor_cli docs list` nennt die Anleitungen der installierten Version mit Titel und `docs show NAME` gibt eine in der Sprache von `--lang` aus (der englische Text, wenn eine Anleitung nicht übersetzt ist); es liest die Installation und braucht daher keinen laufenden Monitor. Jeder Fehler des Befehls trägt nun ein `help`: einen Satz mit dem nächsten Schritt, der oft die zu lesende Anleitung nennt; als Text ist es die letzte Zeile (`Hilfe: ...`), mit `--json` das Feld `help` neben `error`.
+
 - **Die Seite springt nicht, während Sie lesen** (`display.live_throttle_s`, standardmäßig 30, 0 schaltet es aus): Solange Zeiger oder Tastaturfokus im gelesenen Tab sind, wartet die periodische Aktualisierung der Daten und wird beim Verlassen angewandt, nie öfter als in dieser Zahl von Sekunden; eine von Ihnen angeforderte Aktualisierung wird sofort angewandt.
 
 - **Neuigkeiten nach einem Update** (`display.whats_new`, an): Ein Hinweis, der nie unterbricht, bietet die Einträge des Änderungsverlaufs der übersprungenen Versionen in Ihrer Sprache, gelesen aus der installierten Version (`GET /api/whats-new`); was Sie gesehen haben, wird im Browser gespeichert, bevor etwas angezeigt wird, und die Palette öffnet es jederzeit.

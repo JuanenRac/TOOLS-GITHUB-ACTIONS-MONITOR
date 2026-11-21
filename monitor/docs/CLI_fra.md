@@ -27,6 +27,7 @@
 | `ai` | `ai models [--refresh]` liste les modèles du fournisseur d'IA avec les données de chacun ; `ai test --provider NOM --model NOM` en essaie un avec un texte synthétique (latence, jetons, coût estimé) ; `ai doctor` dit pourquoi une IA ne répond pas, sans afficher de clé | non |
 | `lessons` | ce que les échecs de cette CI ont appris : `lessons list`, `lessons brief --repo NOM` (à lire avant un push), `lessons failures`, `lessons close` | non |
 | `briefs` | les briefs des onglets que lisent les outils d'IA : `briefs index`, `briefs show ONGLET`, `briefs all` | oui |
+| `docs` | les guides de cette version, lus dans l'installation (sans moniteur) : `docs list` les nomme avec leur titre, `docs show NOM` en affiche un dans la langue de `--lang` | non |
 | `screens` | le menu Écrans de la page : `screens list` (chaque type d'écran et s'il peut être ouvert) et `screens urls` (les adresses complètes, prêtes pour une commande de borne) | non |
 | `toolbox` | les petits outils de l'opérateur qui fonctionnent sur cet ordinateur, sans moniteur lancé : `toolbox limits [N]` (la configuration face à ses plafonds), `toolbox workspaces` (les espaces de travail et celui utilisé), `toolbox ledger [--force]` (le registre des notifications déjà envoyées ; `--force` l'oublie), `toolbox summary` (les événements par type, dépôt et jour) et `toolbox export-events FILE` (les événements en jsonl, csv, parquet ou duckdb selon la fin du nom ; parquet et duckdb demandent leur paquet, le fichier doit être nouveau) | non |
 | `credential` | une autre connexion GitHub pour un compte pendant que tout tourne : `credential replace\|reload [--account ID] [--new-token-file FICHIER\|-]` ; n'affiche jamais de jeton | non |
@@ -56,6 +57,8 @@ Les heures écrites pour les personnes (la ligne `Last read`, les sourdines, le 
 | 4 | le moniteur répond mais est dégradé : hors ligne, quota épuisé, pas encore de données, un point d'accès qu'il n'a pas, ou une réponse qui n'est pas du JSON |
 | 5 | `alerts --fail-on NIVEAU` a trouvé une alerte ouverte de ce niveau ou pire (une alerte en sourdine ne compte pas) |
 | 6 | `watch --exit-on-change` a vu un changement (seulement quand cette option est donnée) ; voir [CLI_OPERATOR_fra.md](CLI_OPERATOR_fra.md) |
+
+Chaque erreur porte un `help` : une phrase avec l'étape suivante, qui nomme souvent le guide à lire (`docs show FIRST_STEPS`). En format texte, c'est la dernière ligne, qui commence par `aide :` ; avec `--json`, c'est le champ `help` à côté de `error` : `{"ok": false, "exit": 2, "error": "...", "help": "..."}`.
 
 ## Exemples
 

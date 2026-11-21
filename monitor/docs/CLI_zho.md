@@ -27,6 +27,7 @@
 | `ai` | `ai models [--refresh]` 列出 AI 提供方的模型及各模型的数据；`ai test --provider 名称 --model 名称` 用合成文本试用一个模型（延迟、令牌、估算成本）；`ai doctor` 说明 AI 为何没有响应，且不输出密钥 | 不支持 |
 | `lessons` | 这个 CI 的失败教会了什么:`lessons list`、`lessons brief --repo NAME`(推送前阅读)、`lessons failures`、`lessons close` | 不支持 |
 | `briefs` | AI 工具读取的各标签页摘要:`briefs index`、`briefs show TAB`、`briefs all` | 支持 |
+| `docs` | 此版本的指南，直接从安装目录读取（无需监视器）：`docs list` 列出名称和标题，`docs show NAME` 按 `--lang` 的语言显示其中一份 | 否 |
 | `screens` | 页面的“屏幕”菜单:`screens list`(每种屏幕及其能否打开)和 `screens urls`(可直接用于展台命令的完整地址) | 不支持 |
 | `toolbox` | 无需运行监视器、在本机上工作的运维小工具：`toolbox limits [N]`（配置与其上限的对比）、`toolbox workspaces`（工作区及正在使用的工作区）、`toolbox ledger [--force]`（已发送通知的台账；`--force` 将其清除）、`toolbox summary`（按类型、仓库和日期统计事件）以及 `toolbox export-events FILE`（按文件名结尾把事件写成 jsonl、csv、parquet 或 duckdb；parquet 和 duckdb 需要各自的包，文件必须是新的） | 否 |
 | `credential` | 在一切运行时为某个账户更换 GitHub 登录:`credential replace\|reload [--account ID] [--new-token-file FILE\|-]`;从不打印令牌 | 不支持 |
@@ -56,6 +57,8 @@
 | 4 | 监视器有响应但处于降级状态：离线、配额耗尽、尚无数据、没有该端点，或响应不是 JSON |
 | 5 | `alerts --fail-on 级别` 发现了该级别或更严重的未处理警报（已静音的不计） |
 | 6 | `watch --exit-on-change` 发现了变化（仅在给出该选项时）；参见 [CLI_OPERATOR_zho.md](CLI_OPERATOR_zho.md) |
+
+每个错误都带有 `help`：一句说明下一步的话，通常会指出应阅读的指南（`docs show FIRST_STEPS`）。文本格式中它是以 `帮助：` 开头的最后一行；使用 `--json` 时它是 `error` 旁边的 `help` 字段：`{"ok": false, "exit": 2, "error": "...", "help": "..."}`。
 
 ## 示例
 

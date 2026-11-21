@@ -15,6 +15,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - **Una barriera di contrasto** (`tools/check_contrast.py`, eseguita dalla CI): ogni testo su ogni superficie dei modi scuro e chiaro e dei sedici temi raggiunge 4,5:1, il colore di uno stato raggiunge 3:1, la tavolozza per il daltonismo si verifica con una simulazione delle tre forme, e un nuovo attenuamento del testo con `opacity` fa fallire la build.
 
+- **Le guide e il passo successivo da riga di comando**: `monitor_cli docs list` nomina le guide della versione installata con il titolo e `docs show NOME` ne stampa una nella lingua di `--lang` (il testo inglese quando una guida non è tradotta); legge l'installazione, quindi non serve un monitor in esecuzione. Ogni errore del comando porta ora un `help`: una frase con il passo successivo, che spesso nomina la guida da leggere; in testo è l'ultima riga (`aiuto: ...`), con `--json` è il campo `help` accanto a `error`.
+
 - **La pagina non salta mentre leggi** (`display.live_throttle_s`, 30 per impostazione predefinita, 0 lo spegne): finché il puntatore o il focus della tastiera sono dentro la scheda che leggi, l'aggiornamento periodico dei dati attende e si applica quando esci, mai più spesso di quei secondi; un aggiornamento che chiedi tu si applica subito.
 
 - **Le novità dopo un aggiornamento** (`display.whats_new`, acceso): un avviso che non interrompe mai offre le voci del registro delle modifiche delle versioni saltate, nella tua lingua, lette dalla versione installata (`GET /api/whats-new`); ciò che hai visto viene conservato nel browser prima di mostrare qualsiasi cosa, e la tavolozza lo apre in qualsiasi momento.

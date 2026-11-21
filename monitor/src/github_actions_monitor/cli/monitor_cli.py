@@ -51,12 +51,14 @@ from github_actions_monitor.tool_version import TOOL_VERSION
 from github_actions_monitor.security import netguard
 
 EXIT_OK, EXIT_USAGE, EXIT_DOWN, EXIT_AUTH, EXIT_DEGRADED, EXIT_ALERTS = 0, 1, 2, 3, 4, 5
-COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "score", "team", "ai-hook", "credential", "lessons", "briefs", "api", "install-skill", "gh-token", "ai", "backup", "update", "compare", "screens")
+COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "score", "team", "ai-hook", "credential", "lessons", "briefs", "api", "install-skill", "gh-token", "ai", "backup", "update", "compare", "screens", "docs")
 BACKUP_ACTIONS = ("create", "verify", "restore", "status", "list")
 SKILL_ACTIONS = ("internal", "external")
 AI_ACTIONS = ("models", "doctor", "test")
 LESSONS_ACTIONS = ("list", "brief", "failures", "close")
 BRIEFS_ACTIONS = ("index", "show", "all")
+DOCS_ACTIONS = ("list", "show")
+DOCS_TAIL = {"en": "", "es": "_spa", "de": "_deu", "fr": "_fra", "it": "_ita", "ja": "_jpn", "zh": "_zho", "pt": "_por"}      # the suffix of the translated guides of docs/
 SCREENS_ACTIONS = ("list", "urls")
 TOOLBOX_ACTIONS = ("limits", "workspaces", "ledger", "summary", "export-events")
 API_ACTIONS = ("openapi", "me", "contract-check")
@@ -80,9 +82,12 @@ TOKEN_VARIABLES = ("MONITOR_ACCESS_TOKEN", "MONITOR_TOKEN")      # the first is 
 
 
 class CliError(Exception):
-    def __init__(self, code, text):
+    """An error of the command: the exit code, what happened and `help`, the next step (a sentence that names the guide to read: `docs show NAME`). Without its own help the code gives a general one."""
+
+    def __init__(self, code, text, help=""):      # noqa: A002 - the field is called `help` in the answers
         super().__init__(text)
         self.code, self.text = code, text
+        self.help = help or (i18n.t("cli.fix_%d" % code) if code in (EXIT_USAGE, EXIT_DOWN, EXIT_AUTH, EXIT_DEGRADED) else "")
 
 
 def read_token_file(path):
@@ -592,6 +597,53 @@ def cmd_briefs(ctx):
     return answer, lines, EXIT_OK
 
 
+def _guide_names():
+    """The guides of docs/ that travel with this version (the English file names, without the suffix of a language), sorted."""
+    from github_actions_monitor.util import paths
+    tails = tuple(t for t in DOCS_TAIL.values() if t)
+    return sorted(f.stem for f in paths.DOCS.glob("*.md") if not f.stem.endswith(tails))
+
+
+def _guide_title(path):
+    try:
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if line.startswith("#"):
+                return line.lstrip("# ").strip()
+    except OSError:
+        pass
+    return ""
+
+
+def cmd_docs(ctx):
+    """docs [list | show NAME]: the guides of docs/ that come with THIS version, read from the installation (no monitor running, nothing from the network), in the language of the command (the English
+    text when a guide is not translated). `list` names them with their title, `show NAME` prints one (the name is the file without .md, in any case). A mistake in any command points here with its `help`."""
+    from github_actions_monitor.tool_version import TOOL_VERSION as version
+    from github_actions_monitor.util import paths
+    action = ctx["action"] or "list"
+    if action not in DOCS_ACTIONS:
+        raise CliError(EXIT_USAGE, i18n.t("cli.docs_action"))
+    lang = i18n.language()
+    names = _guide_names()
+    if action == "list":
+        rows = [{"name": n, "title": _guide_title(paths.DOCS / (n + DOCS_TAIL.get(lang, "") + ".md")) or _guide_title(paths.DOCS / (n + ".md"))} for n in names]
+        return {"ok": True, "version": version, "lang": lang, "count": len(rows), "docs": rows}, [i18n.t("cli.docs_head", n=len(rows), version=version)] + [f"  {r['name']:<22} {r['title']}" for r in rows], EXIT_OK
+    wanted = (ctx.get("file") or "").strip()
+    if not re.fullmatch(r"[A-Za-z0-9_]{1,40}", wanted):
+        raise CliError(EXIT_USAGE, i18n.t("cli.docs_name_needed"), i18n.t("cli.docs_help_list"))
+    found = next((n for n in names if n.lower() == wanted.lower()), "")
+    if not found:
+        raise CliError(EXIT_USAGE, i18n.t("cli.docs_unknown", name=wanted), i18n.t("cli.docs_help_list"))
+    path = paths.DOCS / (found + DOCS_TAIL.get(lang, "") + ".md")
+    shown = lang if path.is_file() else "en"
+    if shown == "en":
+        path = paths.DOCS / (found + ".md")
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        raise CliError(EXIT_DEGRADED, i18n.t("cli.docs_unreadable", name=found), i18n.t("cli.docs_help_list")) from None
+    return {"ok": True, "version": version, "lang": shown, "name": found, "title": _guide_title(path), "text": text}, text.rstrip("\n").split("\n"), EXIT_OK
+
+
 def _contract_check(ctx):
     """api contract-check: the contract suite for clients (tools/api_contract_suite.py, only reads) against the monitor of this command line. Exit 0 when every check passes, 4 when one fails."""
     from github_actions_monitor.app import api_spec
@@ -1065,7 +1117,7 @@ def cmd_watch(ctx):
     return None, None, code
 
 
-HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "compare": cmd_compare, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "briefs": cmd_briefs, "screens": cmd_screens, "toolbox": cmd_toolbox, "api": cmd_api, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai, "watch": cmd_watch, "completions": cmd_completions, "kiosk": cmd_kiosk, "metrics": cmd_metrics}
+HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "compare": cmd_compare, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "briefs": cmd_briefs, "docs": cmd_docs, "screens": cmd_screens, "toolbox": cmd_toolbox, "api": cmd_api, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai, "watch": cmd_watch, "completions": cmd_completions, "kiosk": cmd_kiosk, "metrics": cmd_metrics}
 
 
 def cmd_update(rest):
@@ -1086,7 +1138,7 @@ def cmd_update(rest):
 def build_parser():
     ap = argparse.ArgumentParser(prog="monitor_cli.py", description=i18n.t("cli.description"), epilog=i18n.t("cli.epilog"), formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", choices=COMMANDS, help=i18n.t("cli.help_command"))
-    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + BRIEFS_ACTIONS + API_ACTIONS + SKILL_ACTIONS + AI_ACTIONS + BACKUP_ACTIONS + SCREENS_ACTIONS + TOOLBOX_ACTIONS + tuple(w for words in OPERATOR_WORDS.values() for w in words), default=None, help=i18n.t("cli.help_ai_action"))
+    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + BRIEFS_ACTIONS + DOCS_ACTIONS + API_ACTIONS + SKILL_ACTIONS + AI_ACTIONS + BACKUP_ACTIONS + SCREENS_ACTIONS + TOOLBOX_ACTIONS + tuple(w for words in OPERATOR_WORDS.values() for w in words), default=None, help=i18n.t("cli.help_ai_action"))
     ap.add_argument("file", nargs="?", default="", help=i18n.t("cli.help_file"))
     ap.add_argument("--json", action="store_true", help=i18n.t("cli.help_json"))
     for name in ("assistant", "cursor", "generic"):
@@ -1194,9 +1246,11 @@ def main(argv=None):
     except CliError as error:
         code = operator_status_code(error.code) if scheme["operator"] and error.code != EXIT_USAGE else error.code
         if args.json or args.format in ("json", "ndjson"):
-            print(json.dumps({"ok": False, "exit": code, "error": error.text}, ensure_ascii=False))
+            print(json.dumps({"ok": False, "exit": code, "error": error.text, "help": error.help}, ensure_ascii=False))
         else:
             print(error.text, file=sys.stderr)
+            if error.help:
+                print(i18n.t("cli.help_line", help=error.help), file=sys.stderr)
         return code
     if lines is None:      # `watch` wrote its own results while it ran
         return code
