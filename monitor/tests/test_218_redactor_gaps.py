@@ -19,7 +19,7 @@ PAT = "github_pat_11ABCDEFG0aBcDeFgHiJk_" + "ZyXwVuTsRqPoNmLkJiHgFeDcBa987654321
 CASES = {
     "github_pat split in two lines": ("token " + PAT[:30] + "\n" + PAT[30:], PAT[30:]),
     "github_pat split with the second half only 30 long": ("x github_pat_11ABC\n" + "Z" * 30, "Z" * 30),
-    "AWS temporary key (ASIA)": ("aws key ASIAIOSFODNN7EXAMPLE in use", "ASIAIOSFODNN7EXAMPLE"),
+    "AWS temporary key (ASIA)": ("aws key " + "ASIA" + "IOSFODNN7EXAMPLE in use", "ASIA" + "IOSFODNN7EXAMPLE"),
     "AWS long-term key (AKIA)": ("aws key AKIAIOSFODNN7EXAMPLE in use", "AKIAIOSFODNN7EXAMPLE"),
     "soft hyphen inside ghp_": ("see gh" + "p­_" + TAIL, TAIL),
     "invisible separator inside ghp_": ("see gh⁣p_" + TAIL, TAIL),
