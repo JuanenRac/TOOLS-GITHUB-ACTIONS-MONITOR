@@ -9,6 +9,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+## [2.1.7]
+
+La versione 2.1.7 riunisce tutto ciò che era previsto per la 2.1.6 e la 2.1.7. Per tema: schermi e chioschi (ricarica a ogni nuova versione, schermo Flotta, densità, tavolozza, contrasto, overscan, stampa e salvataggio di un rapporto); telefono e PWA (installazione come app, vista compatta, abbinamento con QR, tavolozza e scorciatoie); tempo reale e recupero (coda del webhook, WebSocket senza indirizzo pubblico, stato di GitHub, battito); scala e osservabilità (istogrammi, quota per bucket, OpenTelemetry, spazi di lavoro, costo e carbonio); la riga di comando e l'IA (formati, watch, doctor, proposte con approvazione, storico degli avvisi); le sentinelle, con letture oneste e senza falsi rilievi; e la catena di rilascio (release immutabili, un job zizmor, un aggiornatore che conserva copie e un registro).
+
 ### Aggiunto
 
 - **Uno schermo da parete o un chiosco acceso per giorni si ricarica da solo quando il monitor viene aggiornato o riavviato**: la nuova rotta `/api/version` (mai in cache, con lo stesso accesso delle altre letture) risponde `{"version", "started"}`, e gli schermi da parete e il profilo chiosco la consultano ogni `screens.version_check_seconds` secondi (300 per impostazione predefinita; 0 = mai; il minimo è 30). Quando la versione o l'ora di avvio non sono quelle che la pagina ha caricato, si ricarica da sola, così un televisore non resta mai con una pagina vecchia. Si ricarica solo dopo una risposta valida e diversa: un monitor che non risponde non provoca mai un ciclo di ricaricamenti. Le guide degli schermi, del chiosco e dell'API lo dicono nelle otto lingue.

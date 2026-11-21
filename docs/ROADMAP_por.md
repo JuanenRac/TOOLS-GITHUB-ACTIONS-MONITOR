@@ -16,7 +16,11 @@ O que só aparece com uso real prolongado: a migração desde a 1.8 e a 1.9, o c
 
 Os workflows do próprio monitor cumprem o que a sentinela de higiene pedirá aos outros: ações fixadas a um commit, as permissões mínimas e um limite de tempo em cada job.
 
-## Feito da 1.8.2 à 2.1.5
+## Feito da 1.8.2 à 2.1.7
+
+### 2.1.7 - Ecrãs e quiosques sempre atuais, uma vista de telemóvel, entrega em tempo real e recuperação, escala e observabilidade, sentinelas honestos e uma cadeia de publicação com releases imutáveis
+
+A versão 2.1.7 reúne tudo o que estava previsto para a 2.1.6 e a 2.1.7. Por tema: ecrãs e quiosques (recarregamento com uma versão nova, ecrã da Frota, densidade, paleta, contraste, overscan, impressão e gravação de um relatório); telemóvel e PWA (instalar como aplicação, vista compacta, emparelhamento por QR, paleta e atalhos); tempo real e recuperação (fila do webhook, WebSocket sem endereço público, estado do GitHub, pulsação); escala e observabilidade (histogramas, quota por balde, OpenTelemetry, espaços de trabalho, custo e carbono); a linha de comandos e a IA (formatos, watch, doctor, propostas com aprovação, histórico de alertas); os sentinelas, com leituras honestas e sem falsos achados; e a cadeia de publicação (releases imutáveis, uma tarefa zizmor, um atualizador que guarda cópias e um registo).
 
 ### 2.1.5 - Uma configuração completa, registos e caches que não se deixam enganar, um assistente de perguntas fixas, uma API de leitura com contrato e uma tendência diária mais rica
 

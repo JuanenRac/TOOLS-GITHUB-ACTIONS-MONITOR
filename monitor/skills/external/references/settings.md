@@ -207,10 +207,12 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ci.group.min` | `2` | sentinel | Workflows needed for a shared cause |
 | `ci.group.reusable` | `false` | sentinel | Group reds by shared workflow |
 | `ci.inactive_days` | `90` | sentinel | Days until a workflow is inactive |
+| `ci.orphan_workflows` | `false` | sentinel | List orphan workflows |
 | `ci.red_age_days` | `30` | sentinel | Days until a red ages |
 | `ci.red_ages` | `true` | sentinel | A red nobody attends to ages |
 | `ci.red_events` | `["push", "schedule", "workflow_dispatch", "merge_group", "workflow_run", "repository_dispatch"]` | sentinel | Events that can make a branch red |
 | `ci.rerun_timing` | `false` | sentinel | Ask GitHub for the duration of re-runs |
+| `ci.reusable_out_of_rankings` | `false` | sentinel | Keep reusable workflows out of the failure lists |
 | `ci.stale_result_hours` | `0` | sentinel | Hours until a result is called stale |
 | `ci.stuck.awaiting_stuck` | `true` | sentinel | A run waiting for approval can be stuck |
 | `ci.stuck.ghost_days` | `7` | sentinel | Days in the queue until a run is a ghost |
@@ -284,6 +286,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `finops.co2_grams_per_kwh` | `400` | advanced | Grams of CO2 per kWh of the grid (for the carbon estimate) |
 | `finops.co2_watts` | `40` | advanced | Watts of a runner (for the carbon estimate) |
 | `finops.jobs_per_cycle` | `0` | advanced | Jobs read per cycle for their system |
+| `fleet.fork_behind` | `false` | general | Show how far a fork is behind its original |
+| `fleet.fork_behind_per_call` | `5` | general | Forks read per round for the column behind the original |
 | `fleet.group_by` | `"ecosystem"` | general | Group the fleet by |
 | `fleet.labels` | `[]` | general | Labels by repository name |
 | `fleet.meta_columns` | `[]` | general | Metadata columns of the repositories |
@@ -552,6 +556,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `retention.mode` (secure) | `-` | paths | What to do with old events |
 | `retention.warn_events_mb` | `-` | paths | Warn when the events are bigger than |
 | `runners.enabled` | `false` | advanced | Watch self-hosted runners |
+| `runners.group_by` | `"none"` | advanced | Group the runners by |
 | `runners.model.alert_level` | `"warning"` | advanced | Level of those alerts |
 | `runners.model.alerts` | `true` | advanced | Alerts of the runner model |
 | `runners.model.enabled` | `false` | advanced | Model the runners |

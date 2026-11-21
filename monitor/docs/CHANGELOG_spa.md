@@ -9,6 +9,10 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+## [2.1.7]
+
+La versión 2.1.7 reúne todo lo planificado para la 2.1.6 y la 2.1.7. Por temas: pantallas y quioscos (recarga con una versión nueva, pantalla de Flota, densidad, paleta, contraste, overscan, imprimir y guardar un informe); teléfono y PWA (instalar como aplicación, vista compacta, emparejado por QR, paleta y atajos); tiempo real y recuperación (cola del webhook, WebSocket sin dirección pública, estado de GitHub, latido); escala y observabilidad (histogramas, cuota por cubo, OpenTelemetry, espacios de trabajo, coste y carbono); la línea de comandos y la IA (formatos, watch, doctor, propuestas con aprobación, historial de alertas); los centinelas, con lecturas honestas y sin falsos hallazgos; y la cadena de publicación (releases inmutables, un trabajo de zizmor, un actualizador que guarda copias y un registro).
+
 ### Añadido
 
 - **Una pantalla de pared o un quiosco que lleva días encendido se recarga solo cuando el monitor se actualiza o se reinicia**: la ruta nueva `/api/version` (nunca en caché y con el mismo acceso que las demás lecturas) responde `{"version", "started"}`, y las pantallas de pared y el perfil de quiosco la consultan cada `screens.version_check_seconds` segundos (300 por defecto; 0 = nunca; el mínimo es 30). Cuando la versión o la hora de arranque no son las que cargó la página, se recarga sola, así que un televisor nunca se queda con una página vieja. Solo se recarga tras una respuesta válida y distinta: un monitor que no responde nunca provoca un bucle de recargas. Las guías de las pantallas, del quiosco y de la API lo dicen en los ocho idiomas.

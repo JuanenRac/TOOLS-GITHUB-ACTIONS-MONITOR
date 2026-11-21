@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.7",
  "previous": "2.1.6",
- "digest": "80f818f1c1ca10affbdea5ebd9cb01cf7c7cc176bd61bb5a4e87fa8ae07c8c29",
+ "digest": "ee3e8a483fe7fdd721f8c5c8ba0c6edcc7887b8ff3a1ca6bcc8c9a917dc38191",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -125,6 +125,16 @@
     "key": "ci.branches_by_repo",
     "kind": "names",
     "default": []
+   },
+   {
+    "key": "ci.orphan_workflows",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ci.reusable_out_of_rankings",
+    "kind": "bool",
+    "default": false
    },
    {
     "key": "ci.stale_result_hours",
@@ -282,6 +292,20 @@
      2000
     ],
     "default": 40
+   },
+   {
+    "key": "fleet.fork_behind",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "fleet.fork_behind_per_call",
+    "kind": "int",
+    "bounds": [
+     1,
+     50
+    ],
+    "default": 5
    },
    {
     "key": "fleet.meta_columns",
@@ -627,6 +651,16 @@
     "key": "report_export.limits",
     "kind": "bool",
     "default": true
+   },
+   {
+    "key": "runners.group_by",
+    "kind": "enum",
+    "bounds": [
+     "none",
+     "group",
+     "label"
+    ],
+    "default": "none"
    },
    {
     "key": "screens.glance_seconds",

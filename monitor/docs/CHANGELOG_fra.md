@@ -9,6 +9,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+## [2.1.7]
+
+La version 2.1.7 réunit tout ce qui était prévu pour la 2.1.6 et la 2.1.7. Par thème : écrans et bornes (rechargement à chaque nouvelle version, écran Flotte, densité, palette, contraste, overscan, impression et enregistrement d'un rapport) ; téléphone et PWA (installation comme application, vue compacte, appairage par QR, palette et raccourcis) ; temps réel et reprise (file du webhook, WebSocket sans adresse publique, état de GitHub, battement de cœur) ; échelle et observabilité (histogrammes, quota par seau, OpenTelemetry, espaces de travail, coût et carbone) ; la ligne de commande et l'IA (formats, watch, doctor, propositions avec approbation, historique des alertes) ; les sentinelles, avec des lectures honnêtes et sans faux constats ; et la chaîne de publication (releases immuables, une tâche zizmor, un programme de mise à jour qui garde des copies et un journal).
+
 ### Ajouté
 
 - **Un écran mural ou un kiosque allumé pendant des jours se recharge tout seul quand le moniteur est mis à jour ou redémarré** : la nouvelle route `/api/version` (jamais mise en cache, avec le même accès que les autres lectures) répond `{"version", "started"}`, et les écrans muraux et le profil kiosque la consultent toutes les `screens.version_check_seconds` secondes (300 par défaut ; 0 = jamais ; le minimum est 30). Quand la version ou l'heure de démarrage n'est plus celle que la page a chargée, elle se recharge toute seule, si bien qu'un téléviseur ne garde jamais une page périmée. Elle ne se recharge qu'après une réponse valide et différente : un moniteur qui ne répond pas ne provoque jamais de boucle de rechargements. Les guides des écrans, du kiosque et de l'API le disent dans les huit langues.

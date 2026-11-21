@@ -16,7 +16,11 @@ Lo que solo aparece con un uso real prolongado: la migración desde la 1.8 y la 
 
 Los workflows del propio monitor cumplen lo que el centinela de higiene pedirá a los demás: acciones fijadas a un commit, los permisos mínimos y un límite de tiempo en cada trabajo.
 
-## Hecho en la 1.8.2 a la 2.1.5
+## Hecho en la 1.8.2 a la 2.1.7
+
+### 2.1.7 - Pantallas y quioscos al día, vista de teléfono, entrega en tiempo real y recuperación, escala y observabilidad, centinelas honestos y una cadena de publicación con releases inmutables
+
+La versión 2.1.7 reúne todo lo planificado para la 2.1.6 y la 2.1.7. Por temas: pantallas y quioscos (recarga con una versión nueva, pantalla de Flota, densidad, paleta, contraste, overscan, imprimir y guardar un informe); teléfono y PWA (instalar como aplicación, vista compacta, emparejado por QR, paleta y atajos); tiempo real y recuperación (cola del webhook, WebSocket sin dirección pública, estado de GitHub, latido); escala y observabilidad (histogramas, cuota por cubo, OpenTelemetry, espacios de trabajo, coste y carbono); la línea de comandos y la IA (formatos, watch, doctor, propuestas con aprobación, historial de alertas); los centinelas, con lecturas honestas y sin falsos hallazgos; y la cadena de publicación (releases inmutables, un trabajo de zizmor, un actualizador que guarda copias y un registro).
 
 ### 2.1.5 - Una configuración completa, registros y cachés que no se dejan engañar, un asistente de preguntas fijas, una API de lectura con contrato y una tendencia diaria más rica
 

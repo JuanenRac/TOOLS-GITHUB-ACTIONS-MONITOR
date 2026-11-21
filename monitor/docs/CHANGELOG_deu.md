@@ -9,6 +9,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+## [2.1.7]
+
+Version 2.1.7 fasst alles zusammen, was für 2.1.6 und 2.1.7 geplant war. Nach Themen: Bildschirme und Kioske (Neuladen bei neuer Version, Flottenbildschirm, Dichte, Palette, Kontrast, Overscan, Drucken und Speichern eines Berichts); Telefon und PWA (als App installieren, kompakte Ansicht, Kopplung per QR, Palette und Tastenkürzel); Echtzeit und Wiederherstellung (Webhook-Warteschlange, WebSocket ohne öffentliche Adresse, GitHub-Status, Herzschlag); Skalierung und Beobachtbarkeit (Histogramme, Kontingent je Bucket, OpenTelemetry, Arbeitsbereiche, Kosten und CO2); Kommandozeile und KI (Formate, watch, doctor, Vorschläge mit Freigabe, Alarmverlauf); die Wächter mit ehrlichen Lesungen und ohne falsche Befunde; und die Release-Kette (unveränderliche Releases, ein zizmor-Job, ein Updater mit Kopien und Protokoll).
+
 ### Hinzugefügt
 
 - **Eine Wandanzeige oder ein Kiosk, die tagelang laufen, laden sich selbst neu, wenn der Monitor aktualisiert oder neu gestartet wird**: Die neue Route `/api/version` (nie im Cache, mit demselben Zugang wie die anderen Lesungen) antwortet `{"version", "started"}`, und die Wandanzeigen und das Kiosk-Profil fragen sie alle `screens.version_check_seconds` Sekunden ab (standardmäßig 300; 0 = nie; mindestens 30). Sind Version oder Startzeit nicht die, mit denen die Seite geladen wurde, lädt sie sich selbst neu, sodass ein Fernseher nie eine alte Seite behält. Sie lädt nur nach einer gültigen, abweichenden Antwort neu: Ein Monitor, der nicht antwortet, löst nie eine Neulade-Schleife aus. Die Anleitungen der Anzeigen, des Kiosks und der API sagen es in den acht Sprachen.

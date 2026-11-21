@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-5764_passing-brightgreen.svg" alt="5764 tests">
+  <img src="https://img.shields.io/badge/Tests-5808_passing-brightgreen.svg" alt="5808 tests">
 </p>
 
 > Surveille les workflows de tous vos dépôts et vous dit, sur une page locale, ce qui est rouge, ce qui est bloqué et ce qui vous attend.
@@ -85,7 +85,7 @@ Méthode, hypothèses et comment le mesurer dans votre propre usage: [`monitor/d
 
 | | |
 |---|---|
-| **Version** | **2.1.5** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **2.1.7** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Prérequis** | Python 3.11+ et la CLI GitHub (`gh auth login`) ; rien d'autre (la vue console utilise le paquet optionnel `rich`) |
 | **S'ouvre** | sur une page `127.0.0.1` uniquement, en huit langues |
 | **Écrit sur GitHub** | jamais seul : seulement les commandes par lots que vous lancez avec un `--go` explicite |
@@ -93,13 +93,13 @@ Méthode, hypothèses et comment le mesurer dans votre propre usage: [`monitor/d
 
 <!-- glance:begin -->
 
-**Mesuré aujourd'hui** (v2.1.5)
+**Mesuré aujourd'hui** (v2.1.7)
 
 | | |
 |---|---|
 | **Maturité** | functional |
-| **Tests** | 5764 méthodes de test (`python -m unittest discover -s monitor/tests`) |
-| **Réglages** | 909 réglages, tous avec aide |
+| **Tests** | 5808 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Réglages** | 914 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, Python 3.11, 3.13 |
 

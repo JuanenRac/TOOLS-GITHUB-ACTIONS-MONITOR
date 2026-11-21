@@ -9,6 +9,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+## [2.1.7]
+
+A versão 2.1.7 reúne tudo o que estava previsto para a 2.1.6 e a 2.1.7. Por tema: ecrãs e quiosques (recarregamento com uma versão nova, ecrã da Frota, densidade, paleta, contraste, overscan, impressão e gravação de um relatório); telemóvel e PWA (instalar como aplicação, vista compacta, emparelhamento por QR, paleta e atalhos); tempo real e recuperação (fila do webhook, WebSocket sem endereço público, estado do GitHub, pulsação); escala e observabilidade (histogramas, quota por balde, OpenTelemetry, espaços de trabalho, custo e carbono); a linha de comandos e a IA (formatos, watch, doctor, propostas com aprovação, histórico de alertas); os sentinelas, com leituras honestas e sem falsos achados; e a cadeia de publicação (releases imutáveis, uma tarefa zizmor, um atualizador que guarda cópias e um registo).
+
 ### Adicionado
 
 - **Um ecrã de parede ou um quiosque ligado durante dias recarrega-se sozinho quando o monitor é atualizado ou reiniciado**: a nova rota `/api/version` (nunca em cache e com o mesmo acesso das outras leituras) responde `{"version", "started"}`, e os ecrãs de parede e o perfil de quiosque consultam-na a cada `screens.version_check_seconds` segundos (300 por predefinição; 0 = nunca; o mínimo é 30). Quando a versão ou a hora de arranque não são as que a página carregou, recarrega-se sozinha, pelo que uma televisão nunca fica com uma página velha. Só se recarrega após uma resposta válida e diferente: um monitor que não responde nunca provoca um ciclo de recarregamentos. Os guias dos ecrãs, do quiosque e da API di-lo nos oito idiomas.

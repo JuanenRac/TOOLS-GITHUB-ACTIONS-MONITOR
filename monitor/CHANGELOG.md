@@ -11,6 +11,10 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+## [2.1.7]
+
+Version 2.1.7 brings together everything planned for 2.1.6 and 2.1.7. By theme: screens and kiosks (reload on a new version, a Fleet screen, density, palette, contrast, overscan, print and save of a report); phone and PWA (install as an app, compact view, QR pairing, palette and shortcuts); real-time and recovery (webhook queue, WebSocket without a public address, GitHub status, heartbeat); scale and observability (histograms, allowance by bucket, OpenTelemetry, workspaces, cost and carbon); the command line and the AI (formats, watch, doctor, proposals with approval, alerts history); the Sentinels, with honest reads and no false findings; and the release chain (immutable releases, a zizmor job, an updater that keeps copies and a log).
+
 ### Added
 
 - **A wall screen or a kiosk that stays on for days reloads itself when the monitor is updated or restarted**: the new route `/api/version` (never cached, with the same access as the other reads) answers `{"version", "started"}`, and the wall screens and the kiosk profile ask it every `screens.version_check_seconds` seconds (300 by default; 0 = never; the least is 30). When the version or the start time is not the one the page loaded, it reloads itself, so a TV never keeps an old page. It reloads only after a valid answer that differs: a monitor that does not answer never makes it reload in a loop. The guides of the screens, the kiosk and the API say so in the eight languages.
