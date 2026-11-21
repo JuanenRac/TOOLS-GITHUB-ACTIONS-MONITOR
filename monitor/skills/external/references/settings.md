@@ -911,7 +911,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `webhook.redeliver.interval_minutes` | `60` | webhook | Minutes between looks |
 | `webhook.redeliver.max_age_hours` | `24` | webhook | Oldest delivery to ask for (hours) |
 | `webhook.redeliver.max_per_run` | `20` | webhook | Most deliveries asked for per look |
-| `webhook.reject_stale` | `false` | webhook | Refuse old events |
+| `webhook.reject_stale` | `true` | webhook | Refuse old events |
 | `webhook.replay_seconds` | `3600` | webhook | Delivery ids remembered |
 | `webhook.secret_env` (secure) | `"MONITOR_WEBHOOK_SECRET"` | webhook | Environment variable with the shared secret |
 | `webhook.signing_state` | `-` | webhook | Shared secret |
