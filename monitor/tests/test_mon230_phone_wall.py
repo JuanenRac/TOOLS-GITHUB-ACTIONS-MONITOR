@@ -36,7 +36,7 @@ class TheScreensAreMeasuredForContrast(unittest.TestCase):
         self.assertIn(r"color\(srgb", check_screens.LIB)      # the colours that color-mix() gives are read too
         self.assertIn("could be measured", check_screens.LIB)      # a gate that sees almost nothing fails instead of passing
         self.assertNotIn("span.up{border-color:var(--bad);color:var(--bad)}", SCREENS)
-        self.assertIn("--wmut:color-mix(in srgb,var(--mut) 55%,var(--text))", SCREENS)
+        self.assertIn("--mut:color-mix(in srgb,var(--text) 90%,var(--panel2))", SCREENS)
 
     @LOCAL_ONLY
     def test_no_text_of_a_wall_screen_is_under_the_contrast_in_any_theme(self):
