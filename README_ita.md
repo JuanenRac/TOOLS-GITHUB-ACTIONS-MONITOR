@@ -116,6 +116,7 @@ Metodo, ipotesi e come misurarlo nel proprio uso: [`monitor/docs/PRODUCTIVITY_it
 | **Test** | 5570 metodi di test (`python -m unittest discover -s monitor/tests`) |
 | **Test** | 5576 metodi di test (`python -m unittest discover -s monitor/tests`) |
 | **Test** | 5597 metodi di test (`python -m unittest discover -s monitor/tests`) |
+| **Impostazioni** | 890 impostazioni, tutte con aiuto |
 | **Lingue** | 8 (inglese, spagnolo, tedesco, francese, italiano, giapponese, cinese e portoghese) |
 | **Provato nel CI su** | ubuntu, windows, Python 3.11, 3.13 |
 

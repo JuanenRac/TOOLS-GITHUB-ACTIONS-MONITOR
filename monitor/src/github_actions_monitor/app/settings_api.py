@@ -545,6 +545,8 @@ _f(_T_SURF, "chk_release_assets", "sentinel.surface.checks.release_assets.requir
 _f(_T_SURF, "chk_release_assets", "sentinel.surface.checks.release_assets.allow_empty", "bool")
 _f(_T_SURF, "chk_commit_state", "sentinel.surface.checks.commit_state.include_other_apps", "bool")
 _f(_T_SURF, "chk_commit_state", "sentinel.surface.checks.commit_state.include_statuses", "bool")
+_f(_T_SURF, "chk_commit_state", "sentinel.surface.checks.commit_state.include_pr_heads", "bool")
+_f(_T_SURF, "chk_commit_state", "sentinel.surface.checks.commit_state.pr_heads_max", "int", (1, 20), unit="")
 _f(_T_SURF, "chk_tag_vs_version", "sentinel.surface.checks.tag_vs_version.prefixes", "names")
 _f(_T_SURF, "chk_tag_vs_version", "sentinel.surface.checks.tag_vs_version.prerelease_ok", "bool")
 # --- Release readiness (A11)

@@ -116,6 +116,7 @@ Methode, Annahmen und wie Sie es in Ihrer eigenen Nutzung messen: [`monitor/docs
 | **Tests** | 5570 Testmethoden (`python -m unittest discover -s monitor/tests`) |
 | **Tests** | 5576 Testmethoden (`python -m unittest discover -s monitor/tests`) |
 | **Tests** | 5597 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Einstellungen** | 890 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, Python 3.11, 3.13 |
 

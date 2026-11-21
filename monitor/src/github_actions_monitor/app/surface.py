@@ -50,7 +50,7 @@ DEFAULTS = {
         "matrix_os": {"enabled": True, "max_per_tick": 4},
         "artifacts": {"enabled": True, "max_mb": 500, "retention_days": 30},
         "required_checks": {"enabled": True},
-        "commit_state": {"enabled": False, "include_other_apps": True, "include_statuses": False},
+        "commit_state": {"enabled": False, "include_other_apps": True, "include_statuses": False, "include_pr_heads": False, "pr_heads_max": 5},
         "release_assets": {"enabled": True, "recent_days": 30, "required": {"default": ["sha256", "sig"], "apk-build.yml": ["sha256"]}, "require_sha256": True, "require_signature": True, "allow_empty": False},
         "tag_vs_version": {"enabled": True, "prefixes": [], "prerelease_ok": False},
         "packages": {"enabled": True},
@@ -141,6 +141,9 @@ def settings(config):
         for key, default in base.items():
             if key in mine and isinstance(mine[key], type(default)) and isinstance(mine[key], bool) == isinstance(default, bool):
                 merged["checks"][name][key] = mine[key]
+    heads = merged["checks"]["commit_state"]
+    if not 1 <= heads["pr_heads_max"] <= 20:
+        heads["pr_heads_max"] = DEFAULTS["checks"]["commit_state"]["pr_heads_max"]      # how many open pull requests are looked at in a repository
     return merged
 
 
@@ -492,8 +495,15 @@ def commit_state(check_runs, statuses=(), include_other_apps=True, include_statu
             "pending": sorted(k for k, v in verdicts.items() if v == "pending"), "superseded": superseded}
 
 
+def _state_row(label, state):
+    parts = ([t("surf.cs_failed", list=", ".join(state["failed"][:6]))] if state["failed"] else []) + ([t("surf.cs_pending", list=", ".join(state["pending"][:6]))] if state["pending"] else [])
+    return [label, t("surf.cs_summary", passed=state["passed"], total=state["total"]), "; ".join(parts)]
+
+
 def commit_state_rows(raw, repos, cfg):
-    """([[repo, 'N of M passed', 'failed: ...; pending: ...']], any_failed) for the repositories whose last commit of the default branch is not all green."""
+    """([[repo, 'N of M passed', 'failed: ...; pending: ...']], any_failed) for the repositories whose last commit of the default branch is not all green, and, with `include_pr_heads`, for the
+    head of each open pull request that was read (`repo#number`; a red pull request is a row, not a failure of the branch: it never makes the check "bad"). A head that could not be read is
+    listed as such, never as green."""
     options = cfg["checks"]["commit_state"]
     rows, bad = [], False
     for repo in sorted(repos):
@@ -501,11 +511,20 @@ def commit_state_rows(raw, repos, cfg):
         if "check_runs_full" not in data:
             continue
         state = commit_state(data.get("check_runs_full"), data.get("commit_statuses"), options["include_other_apps"], options["include_statuses"])
-        if not state["total"] or (not state["failed"] and not state["pending"]):
-            continue
-        parts = ([t("surf.cs_failed", list=", ".join(state["failed"][:6]))] if state["failed"] else []) + ([t("surf.cs_pending", list=", ".join(state["pending"][:6]))] if state["pending"] else [])
-        rows.append([repo, t("surf.cs_summary", passed=state["passed"], total=state["total"]), "; ".join(parts)])
-        bad = bad or bool(state["failed"])
+        if state["total"] and (state["failed"] or state["pending"]):
+            rows.append(_state_row(repo, state))
+            bad = bad or bool(state["failed"])
+        if options.get("include_pr_heads"):
+            if data.get("pr_heads_error"):
+                rows.append([repo + "#", t("surf.cs_unreadable"), data["pr_heads_error"]])
+            for head in data.get("pr_heads") or []:
+                label = f"{repo}#{head.get('number')}"
+                if head.get("error"):
+                    rows.append([label, t("surf.cs_unreadable"), head["error"]])
+                    continue
+                pr_state = commit_state(head.get("check_runs_full"), (), options["include_other_apps"], False)
+                if pr_state["total"] and (pr_state["failed"] or pr_state["pending"]):
+                    rows.append(_state_row(label, pr_state))
     return rows, bad
 
 
@@ -1016,6 +1035,8 @@ class Collector:
                 out["check_runs"] = [{"name": c["name"], "status": c["status"], "conclusion": c["conclusion"]} for c in out["check_runs_full"]]
             except Exception as error:
                 out["check_error"] = str(error)[:80]
+        if on(self.cfg, "commit_state") and self.cfg["checks"]["commit_state"]["include_pr_heads"] and "check_runs_full" in out:
+            calls += self.fetch_pr_heads(repo, out)
         if on(self.cfg, "commit_state") and self.cfg["checks"]["commit_state"]["include_statuses"] and "check_runs_full" in out:
             try:
                 calls += 1      # one more call per commit, only with include_statuses on
@@ -1024,6 +1045,33 @@ class Collector:
             except Exception as error:
                 out["check_error"] = str(error)[:80]
         return out, calls
+
+    def fetch_pr_heads(self, repo, out):
+        """`include_pr_heads`: the check runs of the head commit of each open pull request (the newest `pr_heads_max`, drafts left out), one call for the list and one for each head. Each head is read inside its
+        own try: one that fails is kept as an error (not evaluable) and the others go on. Returns the calls made."""
+        limit, calls = self.cfg["checks"]["commit_state"]["pr_heads_max"], 0
+        out.pop("pr_heads_error", None)
+        try:
+            calls += 1
+            pulls = self.gh("api", f"repos/{owner()}/{repo}/pulls?state=open&sort=updated&direction=desc&per_page={limit}", retries=1) or []
+        except Exception as error:
+            out["pr_heads_error"] = str(error)[:80]
+            out["pr_heads"] = []
+            return calls
+        heads = []
+        for pull in [p for p in pulls if isinstance(p, dict) and not p.get("draft")][:limit]:
+            number, sha = pull.get("number"), str((pull.get("head") or {}).get("sha") or "")
+            if not isinstance(number, int) or not re.fullmatch(r"[0-9a-f]{7,64}", sha):
+                continue
+            try:
+                calls += 1
+                data = self.gh("api", f"repos/{owner()}/{repo}/commits/{sha}/check-runs?per_page=100", retries=1) or {}
+                heads.append({"number": number, "sha": sha[:12], "check_runs_full": [{"name": c.get("name"), "status": c.get("status"), "conclusion": c.get("conclusion"), "id": c.get("id"),
+                                                                                    "started_at": c.get("started_at"), "app": (c.get("app") or {}).get("slug")} for c in data.get("check_runs") or []]})
+            except Exception as error:
+                heads.append({"number": number, "sha": sha[:12], "error": str(error)[:80]})
+        out["pr_heads"] = heads
+        return calls
 
     def confirm_manifests(self, repos, branches, budget):
         """When the tag of the latest release is ahead of the manifest read from the clone, reads the manifest from the default branch on GitHub once for that tag (the clone may be

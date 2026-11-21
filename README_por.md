@@ -116,6 +116,7 @@ Método, pressupostos e como medi-lo na sua própria utilização: [`monitor/doc
 | **Testes** | 5570 métodos de teste (`python -m unittest discover -s monitor/tests`) |
 | **Testes** | 5576 métodos de teste (`python -m unittest discover -s monitor/tests`) |
 | **Testes** | 5597 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Definições** | 890 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, Python 3.11, 3.13 |
 

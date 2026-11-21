@@ -158,7 +158,9 @@
         "commit_state": {
           "enabled": false,
           "include_other_apps": true,
-          "include_statuses": false
+          "include_statuses": false,
+          "include_pr_heads": false,
+          "pr_heads_max": 5
         },
         "release_assets": {
           "enabled": true,

@@ -72,7 +72,7 @@ Todas são sugestões só de leitura para uma pessoa; o monitor nunca fecha um p
 | `matrix_os` | Falhas apenas num sistema da matriz | on · max_per_tick=4 |
 | `artifacts` | Custo dos artifacts | on · max_mb=500, retention_days=30 |
 | `required_checks` | Checks obrigatórios vermelhos ou em falta | on |
-| `commit_state` | Estado do último commit: todas as verificações e estados, de todas as apps | off · include_other_apps, include_statuses |
+| `commit_state` | Estado do último commit: todas as verificações e estados, de todas as apps | off · include_other_apps, include_statuses, include_pr_heads (`sentinel.surface.checks.commit_state.include_pr_heads`), pr_heads_max |
 | `release_assets` | Releases publicadas incompletas | on · recent_days=30, required, require_sha256, require_signature, allow_empty (uma release sem ficheiros é aceite) |
 | `tag_vs_version` | Etiqueta face à versão do manifesto | on · prefixes (`sentinel.surface.checks.tag_vs_version.prefixes`), prerelease_ok |
 | `tag_vs_version` | Etiqueta de release vs versão do manifesto/CHANGELOG | on |
