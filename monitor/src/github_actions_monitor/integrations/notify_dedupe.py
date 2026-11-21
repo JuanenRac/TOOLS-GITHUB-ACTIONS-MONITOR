@@ -14,7 +14,6 @@ only hashes and times (no repository name, no text).
 """
 import hashlib
 import json
-import os
 import threading
 import time
 
@@ -73,10 +72,8 @@ def _save():
     if not _path():
         return
     try:
-        tmp = _path() + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as handle:
-            json.dump({"format": 1, "labels": _state["labels"]}, handle, separators=(",", ":"))
-        os.replace(tmp, _path())
+        from github_actions_monitor.security import private_io
+        private_io.write_private(_path(), json.dumps({"format": 1, "labels": _state["labels"]}, separators=(",", ":")))
     except OSError:
         pass      # a folder that cannot be written still has the memory
 

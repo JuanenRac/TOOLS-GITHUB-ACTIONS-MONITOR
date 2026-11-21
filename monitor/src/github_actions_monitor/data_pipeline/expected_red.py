@@ -19,7 +19,6 @@ import threading
 import time
 
 from github_actions_monitor import i18n
-from github_actions_monitor.storage import file_storage
 from github_actions_monitor.util import paths
 
 FILE = "expected_red.json"
@@ -66,6 +65,7 @@ def _load():
 
 
 def _save(rows):
+    from github_actions_monitor.storage import file_storage      # here and not at the top: the lite edition never loads the modules of the accounts
     file_storage.atomic_write(_path(), json.dumps({"entries": rows}, indent=1, sort_keys=True) + "\n")
     _SEEN["mtime"] = None
 
