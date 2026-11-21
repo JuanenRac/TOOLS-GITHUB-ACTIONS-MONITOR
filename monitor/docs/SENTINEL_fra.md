@@ -95,6 +95,10 @@ Ce sont toutes des suggestions en lecture seule pour une personne ; le moniteur 
 
 Chaque seuil ci-dessus est un réglage des onglets **Sentinelle**, **Contrôles de surface (A10)**, **Préparation (A11)**, **Dossiers et fichiers**, **Analytique** et **Linter de workflows** de la page Réglages, et une clé de `actions_monitor.json`. La liste complète avec ses plages est dans `SETTINGS_fra.md`. Le panneau d'Aide et `--help-topics sentinel` affichent cette page hors ligne.
 
+## Ce qu'aucune sentinelle ne cache
+
+Un tour n'abandonne jamais tout le compte à cause d'un seul élément défectueux : chaque dépôt, fichier, élément et étape est lu sous sa propre protection, et un échec est consigné avec sa cause (`errors` de l'état) pendant que les autres continuent. Ce qui n'a pas pu être lu est **retenu, pas clos** : les alertes connues d'un dépôt qui n'est pas lisible maintenant restent (marquées non lues) au lieu d'être comptées comme corrigées, le dépôt est listé par nom comme non vérifié (`unchecked` de l'état, la ligne « Pas encore vérifiés » de `read_report.py`) et ne compte jamais pour zéro alerte. Un dépôt qui sort du périmètre part avec ses alertes et ses erreurs. Les passes de lecture de la sentinelle CI (les alertes de code scanning et de secrets, les réglages de chaque dépôt) ont aussi un plafond de temps, `sentinel.deadline_s` (30 secondes ; 0 = aucun) : au-delà, aucun nouveau dépôt n'est commencé, ceux qui n'ont pas été atteints restent dus pour le cycle suivant et sont nommés. La liste des runners nomme les dépôts qu'elle n'a pas lus (`unchecked` de `/api/runners`). Un test de contrat exécute les mêmes contrôles sur chaque sentinelle du registre.
+
 ## La seconde sentinelle et la liste des alertes
 
 En plus de cette sentinelle (CI), l'édition complète a la **sentinelle Collab**, qui surveille les issues et pull requests ouvertes sur une horloge propre et n'écrit jamais sur GitHub : [COLLAB_fra.md](COLLAB_fra.md). L'onglet **Alertes** réunit les alertes des deux dans une liste, avec un filtre par origine et niveau et des mises en sourdine locales qui se terminent seules (`alerts.mute_hours`) ; `GET /api/alerts` sert la même liste.

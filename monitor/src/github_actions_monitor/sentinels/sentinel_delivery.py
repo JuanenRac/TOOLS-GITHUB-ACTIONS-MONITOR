@@ -182,12 +182,13 @@ class SentinelDelivery(sentinel_base.BaseSentinel):
                         record["retry"] = now + RETRY_AFTER[min(record["fails"], len(RETRY_AFTER)) - 1]
                 if self.paused:
                     break
-        self._drift(repos, now, budget)
+        sentinel_base.guarded(self.errors, "drift", self._drift, repos, now, budget, now=now)      # a pin table that breaks never stops the reconciliation below
         with self.lock:
             for gone in [r for r in self.state["per_repo"] if r not in repos]:
                 self.state["per_repo"].pop(gone, None)
             for key in [k for k, a in self.state["alerts"].items() if a["repo"] not in repos]:
                 self.state["alerts"].pop(key, None)
+            sentinel_base.forget_errors(self.errors, repos)
             if repos and reader.minimum_calls(need) and all((self.state["per_repo"].get(r) or {}).get("scanned") for r in repos):
                 self.state["last_full_scan"] = stamp(now)
         self.persist()

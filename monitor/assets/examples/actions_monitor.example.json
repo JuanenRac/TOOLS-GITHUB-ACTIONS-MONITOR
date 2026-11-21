@@ -73,6 +73,7 @@
     "max_calls_per_tick": 70,
     "budget_per_hour": 600,
     "workers": 8,
+    "deadline_s": 30,
     "hot_hours": 3,
     "min_rate_remaining": 800,
     "candidate_days": 2,

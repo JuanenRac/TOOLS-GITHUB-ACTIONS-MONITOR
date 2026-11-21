@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.7",
  "previous": "2.1.6",
- "digest": "fbafd7ae2cf9bab7da5bb2d89507ebd0d05e38f03d335693e1c8f4272b4cc5d4",
+ "digest": "38d3084f0352d403afa1e96a3446a4a2180009a6b7c96197771d338629ae6403",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -639,6 +639,14 @@
      100000
     ],
     "default": 400
+   },
+   {
+    "key": "sentinel.deadline_s",
+    "kind": "int",
+    "bounds": [
+     0,
+     600
+    ]
    },
    {
     "key": "sentinels.collab.rules.external_days",
