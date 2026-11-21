@@ -842,6 +842,14 @@
     "queue_max": 500,
     "sinks": []
   },
+  "mcp": {
+    "prompts": true,
+    "write_tools": false
+  },
+  "siem": {
+    "queue_max": 500,
+    "sinks": []
+  },
   "selfwatch": {
     "enabled": true,
     "rss_warn_mb": 1024,
