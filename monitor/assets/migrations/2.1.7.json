@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.7",
  "previous": "2.1.6",
- "digest": "fbafd7ae2cf9bab7da5bb2d89507ebd0d05e38f03d335693e1c8f4272b4cc5d4",
+ "digest": "99e199f15ff8b1e3d9d555c60b2475c5e9f809034224c8800f66521439466b99",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -476,6 +476,74 @@
      50
     ],
     "default": 10
+   },
+   {
+    "key": "productivity.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "productivity.saving_percent",
+    "kind": "int",
+    "bounds": [
+     0,
+     100
+    ]
+   },
+   {
+    "key": "productivity.team_hours_per_week",
+    "kind": "int",
+    "bounds": [
+     0,
+     10000
+    ]
+   },
+   {
+    "key": "productivity.triage_minutes_after",
+    "kind": "int",
+    "bounds": [
+     -1,
+     600
+    ]
+   },
+   {
+    "key": "productivity.triage_minutes_before",
+    "kind": "int",
+    "bounds": [
+     0,
+     600
+    ]
+   },
+   {
+    "key": "productivity.watch_minutes_after",
+    "kind": "int",
+    "bounds": [
+     -1,
+     600
+    ]
+   },
+   {
+    "key": "productivity.watch_minutes_before",
+    "kind": "int",
+    "bounds": [
+     0,
+     600
+    ]
+   },
+   {
+    "key": "productivity.watch_times_per_week",
+    "kind": "int",
+    "bounds": [
+     0,
+     1000
+    ]
+   },
+   {
+    "key": "productivity.window_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     90
+    ]
    },
    {
     "key": "pwa.enabled",
