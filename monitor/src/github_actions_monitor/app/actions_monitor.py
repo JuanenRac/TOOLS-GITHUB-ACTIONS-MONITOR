@@ -3800,7 +3800,7 @@ class Handler(BaseHTTPRequestHandler):
                 size = int(self.headers.get("Content-Length") or 0)
                 request = json.loads(self.rfile.read(size) if 0 < size <= 4096 else b"{}")
                 request = request if isinstance(request, dict) else {}
-                self.json_reply(handle_action_post(path, request), 200)
+                self.json_reply(handle_action_post(path, request, auth_http.acting_user(self)), 200)
             except Exception as error:   # noqa: BLE001
                 self.json_reply({"ok": False, "error": str(error)[:200]}, 400)
             return
@@ -5059,7 +5059,7 @@ def _register_cloud_hook():
 _register_cloud_hook()
 
 
-def handle_action_post(path, request):
+def handle_action_post(path, request, who=""):
     """The endpoints that DO something on request of the page: confirm an action of the AI, unlock the actions, test the AI connection, send a test notification."""
     config = toolconfig.raw_config()
     if path in AI_MODEL_POST:
@@ -5068,6 +5068,9 @@ def handle_action_post(path, request):
     if path == "/api/ai/actions/confirm":
         from github_actions_monitor.integrations import ai_actions
         return ai_actions.ACTIONS.run(request.get("id"), request.get("command"), config)
+    if path == "/api/ai/actions/review":     # approve or reject a proposal; the person with a session counts, never the name the request claims
+        from github_actions_monitor.integrations import ai_actions
+        return ai_actions.ACTIONS.review(request.get("id"), request.get("decision"), who or str(request.get("by") or "")[:60])
     if path == "/api/ai/actions/unlock":
         from github_actions_monitor.integrations import ai_actions
         ai_actions.ACTIONS.unlock()
@@ -5078,6 +5081,8 @@ def handle_action_post(path, request):
         if sentinel is None or sentinel.ai_cfg["provider"] == "none":
             return {"ok": False, "error": i18n.t("ai.is_off")}
         return sentinel_ai.test_connection(sentinel.ai_cfg, sentinel.ai_store)
+    if path != "/api/notify/test":      # a route that was forgotten above must not fall into the notification test
+        return {"ok": False, "reason": "unknown_route"}
     from github_actions_monitor.integrations import notifiers
     cfg = notifiers.settings(config)
     name = request.get("channel")

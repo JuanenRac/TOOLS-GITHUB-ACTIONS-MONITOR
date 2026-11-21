@@ -536,7 +536,7 @@ class AiProviders(unittest.TestCase):
 
 
 class ClosedListOfActions(unittest.TestCase):
-    CONFIG = {"ai": {"actions": {"enabled": True, "execute": True, "allowed": ["rerun_failed", "rerun", "close_issue"]}}}
+    CONFIG = {"ai": {"actions": {"enabled": True, "execute": True, "require_approval": False, "allowed": ["rerun_failed", "rerun", "close_issue"]}}}
 
     def actions(self):
         return ai_actions.Actions(Path(tempfile.mkdtemp()) / "log.jsonl")
@@ -604,7 +604,7 @@ class ClosedListOfActions(unittest.TestCase):
         self.assertTrue(acts.state(self.CONFIG)["locked"])
         acts.unlock()
         self.assertFalse(acts.state(self.CONFIG)["locked"])
-        cfg = {"ai": {"actions": {"enabled": True, "execute": True, "max_per_hour": 1, "allowed": ["rerun"]}}}
+        cfg = {"ai": {"actions": {"enabled": True, "execute": True, "require_approval": False, "max_per_hour": 1, "allowed": ["rerun"]}}}
         ok = lambda argv, **kw: subprocess.CompletedProcess(argv, 0, stdout="", stderr="")   # noqa: E731
         acts2 = self.actions()
         first = acts2.propose("gh run rerun 77", "demo", cfg, ["demo"], lambda r, n: True, lambda r, n: True, "demo-owner")

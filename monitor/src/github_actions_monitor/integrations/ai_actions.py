@@ -29,7 +29,7 @@ FILE_RE = re.compile(r"^[A-Za-z0-9._-]{1,80}\.ya?ml\Z")
 JOB_RE = re.compile(r"^[A-Za-z0-9_-]{1,60}\Z")
 CLOSED_LIST = ("rerun_failed", "rerun", "close_issue", "act_local")
 RUNNABLE = ("rerun_failed", "rerun", "close_issue")        # act_local is only a suggestion
-DEFAULTS = {"enabled": False, "execute": False, "require_approval": False, "allowed": ["rerun_failed", "close_issue"], "max_per_hour": 5, "ttl_seconds": 600}
+DEFAULTS = {"enabled": False, "execute": False, "require_approval": True, "allowed": ["rerun_failed", "close_issue"], "max_per_hour": 5, "ttl_seconds": 600}
 LOCK_AFTER = 2
 # the shapes the module recognises in a text (owner/repo is optional in the text: the repository comes from the context, never from here)
 _PATTERNS = [
