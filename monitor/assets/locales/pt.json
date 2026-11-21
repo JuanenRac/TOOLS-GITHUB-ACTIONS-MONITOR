@@ -3791,7 +3791,7 @@
  "cfg.h.chatops.rate_per_channel_per_minute": "Mais comandos do que isto num canal num minuto recebem uma recusa breve.",
  "cfg.h.chatops.rate_per_minute": "Limite de todos os comandos de uma plataforma num minuto.",
  "cfg.h.chatops.rate_per_user_per_minute": "Mais comandos do que isto de uma pessoa num minuto recebem uma recusa breve.",
- "cfg.h.chatops.show_repo_names": "all = todos os nomes, também os repositórios privados (os seus nomes chegam a todos os canais e utilizadores das listas, por isso as listas são obrigatórias e têm de coincidir todas); public = um repositório privado aparece como private-N e os seus workflows não são nomeados; none = repo-N para todos. Os textos que vêm do GitHub são sempre limpos e cortados.",
+ "cfg.h.chatops.show_repo_names": "all = todos os nomes, também os repositórios privados (os seus nomes chegam a todos os canais e utilizadores das listas, por isso as listas são obrigatórias e têm de coincidir todas); public (por defeito) = um repositório privado aparece como private-N e os seus workflows não são nomeados; none = repo-N para todos. Os textos que vêm do GitHub são sempre limpos e cortados.",
  "cfg.f.chatops.links": "Ligação ao repositório",
  "cfg.h.chatops.links": "Acrescenta o endereço do repositório (https://<host>/<proprietário>/<repositório>) às linhas dos alertas e dos workflows a vermelho, só quando o seu nome é mostrado tal como é. É a única ligação que uma resposta leva.",
  "cfg.h.chatops.slack.enabled": "Aceita o comando de barra da sua aplicação Slack em POST /api/chatops/slack. Precisa do segredo de assinatura na variável de ambiente abaixo.",

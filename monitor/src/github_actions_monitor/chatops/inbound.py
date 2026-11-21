@@ -46,7 +46,7 @@ DEFAULT_ENV = {"slack": "MONITOR_SLACK_SIGNING_SECRET", "discord": "MONITOR_DISC
 NAMES = ("all", "public", "none")
 
 DEFAULTS = {"enabled": False, "slack": {"enabled": False, "signing_secret_env": DEFAULT_ENV["slack"]}, "discord": {"enabled": False, "public_key_env": DEFAULT_ENV["discord"]},
-            "allowed_teams": [], "allowed_channels": [], "allowed_users": [], "allowed_words": list(commands.COMMANDS), "max_rows": 8, "show_repo_names": "all", "links": True, "max_age_seconds": MAX_AGE,
+            "allowed_teams": [], "allowed_channels": [], "allowed_users": [], "allowed_words": list(commands.COMMANDS), "max_rows": 8, "show_repo_names": "public", "links": True, "max_age_seconds": MAX_AGE,
             "rate_per_user_per_minute": 6, "rate_per_channel_per_minute": 20, "rate_per_minute": 60}
 
 _lock = threading.Lock()

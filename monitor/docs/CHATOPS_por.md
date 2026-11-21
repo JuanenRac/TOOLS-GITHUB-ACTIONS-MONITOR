@@ -37,7 +37,7 @@ Opcional, **desligado por defeito**. Permite perguntar ao monitor, a partir de u
 | `queue` | em execução, em fila, a aguardar aprovação e minutos usados em 24 horas |
 | `score` | a pontuação, a sua letra e a sua variação |
 
-`chatops.show_repo_names` decide os nomes: `all` (por defeito: todos os nomes, também dos repositórios privados), `public` (um repositório privado passa a `private-N` e os seus workflows não são nomeados) ou `none`. **Risco de `all`:** os nomes de repositórios e workflows privados chegam a todos os canais e utilizadores que as suas listas permitam. Por isso as listas são obrigatórias e cada lista com entradas tem de coincidir (equipa, canal e utilizador em conjunto). Escolha `public` ou `none` se o canal for mais amplo do que as pessoas que podem conhecer esses nomes.
+`chatops.show_repo_names` decide os nomes: `all` (todos os nomes, também dos repositórios privados), `public` (por defeito: um repositório privado passa a `private-N` e os seus workflows não são nomeados) ou `none`. **Risco de `all`:** os nomes de repositórios e workflows privados chegam a todos os canais e utilizadores que as suas listas permitam. Por isso as listas são obrigatórias e cada lista com entradas tem de coincidir (equipa, canal e utilizador em conjunto). Mantenha `public` ou escolha `none` se o canal for mais amplo do que as pessoas que podem conhecer esses nomes.
 
 ## Slack, passo a passo
 

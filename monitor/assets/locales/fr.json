@@ -3791,7 +3791,7 @@
  "cfg.h.chatops.rate_per_channel_per_minute": "Au-delà de ce nombre de commandes dans un canal en une minute, la réponse est un bref refus.",
  "cfg.h.chatops.rate_per_minute": "Plafond de toutes les commandes d'une plateforme en une minute.",
  "cfg.h.chatops.rate_per_user_per_minute": "Au-delà de ce nombre de commandes d'une personne en une minute, la réponse est un bref refus.",
- "cfg.h.chatops.show_repo_names": "all = tous les noms, y compris les dépôts privés (leurs noms arrivent à tous les canaux et utilisateurs des listes, c'est pourquoi les listes sont obligatoires et doivent toutes correspondre) ; public = un dépôt privé apparaît comme private-N et ses workflows ne sont pas nommés ; none = repo-N pour tous. Les textes venant de GitHub sont toujours nettoyés et tronqués.",
+ "cfg.h.chatops.show_repo_names": "all = tous les noms, y compris les dépôts privés (leurs noms arrivent à tous les canaux et utilisateurs des listes, c'est pourquoi les listes sont obligatoires et doivent toutes correspondre) ; public (par défaut) = un dépôt privé apparaît comme private-N et ses workflows ne sont pas nommés ; none = repo-N pour tous. Les textes venant de GitHub sont toujours nettoyés et tronqués.",
  "cfg.f.chatops.links": "Lien vers le dépôt",
  "cfg.h.chatops.links": "Ajoute l'adresse du dépôt (https://<hôte>/<propriétaire>/<dépôt>) aux lignes des alertes et des workflows en rouge, seulement quand son nom est affiché tel quel. C'est le seul lien qu'une réponse porte.",
  "cfg.h.chatops.slack.enabled": "Accepte la commande slash de votre application Slack sur POST /api/chatops/slack. Exige le secret de signature dans la variable d'environnement ci-dessous.",

@@ -1465,7 +1465,7 @@ async function tick(force){
   if(FRESH.ctl){try{FRESH.ctl.abort()}catch(e){}}
   const ctl=typeof AbortController==="function"?new AbortController():null,to=ctl?setTimeout(()=>ctl.abort(),15000):0;
   FRESH.ctl=ctl;FRESH.busy=true;FRESH.start=nowMs();
-  try{const r=await fetch("/api/data",{cache:"no-store",signal:ctl?ctl.signal:undefined});const j=await r.json();
+  try{const r=await fetch("/api/data"+((I18N.kiosk||{}).enabled===true&&QS.get("kiosk")==="1"?"?kiosk=1":""),{cache:"no-store",signal:ctl?ctl.signal:undefined});const j=await r.json();
     if(FRESH.ctl!==ctl)return;
     FRESH.loop=j.loop||null;
     const was=freshOk(nowMs(),j.data);

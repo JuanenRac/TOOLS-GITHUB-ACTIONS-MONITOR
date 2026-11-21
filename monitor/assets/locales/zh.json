@@ -3791,7 +3791,7 @@
  "cfg.h.chatops.rate_per_channel_per_minute": "一个频道在一分钟内超过此数量的命令会收到简短的拒绝。",
  "cfg.h.chatops.rate_per_minute": "一个平台一分钟内所有命令的上限。",
  "cfg.h.chatops.rate_per_user_per_minute": "一个人在一分钟内超过此数量的命令会收到简短的拒绝。",
- "cfg.h.chatops.show_repo_names": "all = 所有名称,包括私有仓库(它们的名称会到达名单中的所有频道和用户,因此名单是必需的,并且必须全部匹配);public = 私有仓库显示为 private-N,且不显示其工作流名称;none = 全部显示为 repo-N。来自 GitHub 的文本始终会被清理并截断。",
+ "cfg.h.chatops.show_repo_names": "all = 所有名称,包括私有仓库(它们的名称会到达名单中的所有频道和用户,因此名单是必需的,并且必须全部匹配);public(默认)= 私有仓库显示为 private-N,且不显示其工作流名称;none = 全部显示为 repo-N。来自 GitHub 的文本始终会被清理并截断。",
  "cfg.f.chatops.links": "仓库链接",
  "cfg.h.chatops.links": "仅当名称按原样显示时,在警报和红色工作流的行中加入仓库地址(https://<主机>/<所有者>/<仓库>)。这是回复所带的唯一链接。",
  "cfg.h.chatops.slack.enabled": "在 POST /api/chatops/slack 接受你的 Slack 应用的斜杠命令。需要下面环境变量中的签名密钥。",

@@ -3791,7 +3791,7 @@
  "cfg.h.chatops.rate_per_channel_per_minute": "Mehr Befehle als dies in einem Kanal in einer Minute erhalten eine kurze Absage.",
  "cfg.h.chatops.rate_per_minute": "Obergrenze für alle Befehle einer Plattform in einer Minute.",
  "cfg.h.chatops.rate_per_user_per_minute": "Mehr Befehle als dies von einer Person in einer Minute erhalten eine kurze Absage.",
- "cfg.h.chatops.show_repo_names": "all = jeder Name, auch private Repositories (ihre Namen erreichen jeden Kanal und Benutzer der Listen, deshalb sind die Listen Pflicht und müssen alle passen); public = ein privates Repository erscheint als private-N und seine Workflows werden nicht genannt; none = repo-N für alle. Texte von GitHub werden immer bereinigt und gekürzt.",
+ "cfg.h.chatops.show_repo_names": "all = jeder Name, auch private Repositories (ihre Namen erreichen jeden Kanal und Benutzer der Listen, deshalb sind die Listen Pflicht und müssen alle passen); public (Standard) = ein privates Repository erscheint als private-N und seine Workflows werden nicht genannt; none = repo-N für alle. Texte von GitHub werden immer bereinigt und gekürzt.",
  "cfg.f.chatops.links": "Link zum Repository",
  "cfg.h.chatops.links": "Fügt die Adresse des Repositorys (https://<Host>/<Eigentümer>/<Repository>) den Zeilen der Warnungen und roten Workflows hinzu, nur wenn sein Name unverändert angezeigt wird. Es ist der einzige Link, den eine Antwort trägt.",
  "cfg.h.chatops.slack.enabled": "Nimmt den Slash-Befehl Ihrer Slack-App unter POST /api/chatops/slack an. Braucht das Signing Secret in der Umgebungsvariablen unten.",

@@ -60,6 +60,8 @@ when this file and `tool_version.py` disagree.
 
 - **The Fleet screen now says how many repositories it leaves out of a group**: a group with more than 60 repositories reached the page with its first 60 tiles and the number of the others, but the page only counted what did not fit in the box, so the rest vanished without the line "+N more"; the line now adds what the server left out and follows the smallest type of the wall screens.
 
+- **The kiosk now names the repositories the way the wall screens do**: with `screens.show_repo_names` set to `public`, the page of a kiosk (`kiosk=1`, needs `kiosk.enabled`) still showed the real name of a private repository and the titles, branches and workflows of its runs; it now shows `private-N` and leaves that text out, and `none` names every repository `repo-N`. `chatops.show_repo_names` is now `public` by default too (it was `all`), so the chat receiver no longer names a private repository unless you set `all`; a value you set yourself is kept.
+
 ## [2.1.7]
 
 Version 2.1.7 brings together everything planned for 2.1.6 and 2.1.7. By theme: screens and kiosks (reload on a new version, a Fleet screen, density, palette, contrast, overscan, print and save of a report); phone and PWA (install as an app, compact view, QR pairing, palette and shortcuts); real-time and recovery (webhook queue, WebSocket without a public address, GitHub status, heartbeat); scale and observability (histograms, allowance by bucket, OpenTelemetry, workspaces, cost and carbon); the command line and the AI (formats, watch, doctor, proposals with approval, alerts history); the Sentinels, with honest reads and no false findings; and the release chain (immutable releases, a zizmor job, an updater that keeps copies and a log).

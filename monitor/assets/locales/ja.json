@@ -3791,7 +3791,7 @@
  "cfg.h.chatops.rate_per_channel_per_minute": "1 つのチャンネルで 1 分間にこの数を超えると、短い拒否が返ります。",
  "cfg.h.chatops.rate_per_minute": "1 つのプラットフォームの 1 分あたりの全コマンドの上限。",
  "cfg.h.chatops.rate_per_user_per_minute": "1 人が 1 分間にこの数を超えると、短い拒否が返ります。",
- "cfg.h.chatops.show_repo_names": "all = すべての名前(非公開リポジトリも含む。その名前はリストにあるすべてのチャンネルとユーザーに届くため、リストは必須で、すべてが一致する必要があります)。public = 非公開リポジトリは private-N と表示され、そのワークフロー名は出ません。none = すべて repo-N。GitHub 由来のテキストは常に整形・短縮されます。",
+ "cfg.h.chatops.show_repo_names": "all = すべての名前(非公開リポジトリも含む。その名前はリストにあるすべてのチャンネルとユーザーに届くため、リストは必須で、すべてが一致する必要があります)。public(既定)= 非公開リポジトリは private-N と表示され、そのワークフロー名は出ません。none = すべて repo-N。GitHub 由来のテキストは常に整形・短縮されます。",
  "cfg.f.chatops.links": "リポジトリへのリンク",
  "cfg.h.chatops.links": "名前がそのまま表示されている場合に限り、アラートと赤のワークフローの行にリポジトリのアドレス(https://<ホスト>/<オーナー>/<リポジトリ>)を付けます。返信が含む唯一のリンクです。",
  "cfg.h.chatops.slack.enabled": "Slack アプリのスラッシュコマンドを POST /api/chatops/slack で受け付けます。下の環境変数に署名シークレットが必要です。",

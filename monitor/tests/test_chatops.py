@@ -310,8 +310,12 @@ class Snapshot(unittest.TestCase):
                 mock.patch.object(am.toolconfig, "github_owner", lambda config=None: "me"), mock.patch.dict(am.os.environ, {"GH_HOST": ""}):
             return am.chatops_snapshot({"chatops": chat})
 
-    def test_all_names_and_links_by_default_including_private_repositories(self):
+    def test_the_default_hides_the_name_of_a_private_repository(self):
         snap = self.snapshot()
+        self.assertEqual([r["repo"] for r in snap["red"]], ["pub", "private-1"])
+
+    def test_all_names_and_links_including_private_repositories_when_asked(self):
+        snap = self.snapshot(show_repo_names="all")
         self.assertEqual([r["repo"] for r in snap["red"]], ["pub", "priv"])
         self.assertEqual([r["link"] for r in snap["red"]], ["https://github.com/me/pub", "https://github.com/me/priv"])
         self.assertEqual([r["link"] for r in snap["alerts"]["rows"]], ["https://github.com/me/pub", "https://github.com/me/priv", None])
@@ -398,11 +402,11 @@ class Schema(unittest.TestCase):
     def test_a_value_that_is_not_valid_falls_back_to_the_conservative_default(self):
         cfg = inbound.settings({"chatops": {"enabled": "yes", "max_rows": 999, "show_repo_names": "x", "allowed_users": "U1", "slack": {"enabled": 1, "signing_secret_env": "lower case"}}})
         self.assertEqual((cfg["enabled"], cfg["max_rows"], cfg["show_repo_names"], cfg["allowed_users"], cfg["slack"]["enabled"], cfg["slack"]["env"]),
-                         (False, 8, "all", [], False, "MONITOR_SLACK_SIGNING_SECRET"))
+                         (False, 8, "public", [], False, "MONITOR_SLACK_SIGNING_SECRET"))
         self.assertIs(inbound.settings({})["links"], True)
         self.assertIs(inbound.settings({"chatops": {"links": False}})["links"], False)
         self.assertIs(am.DEFAULTS["chatops"]["links"], True)
-        self.assertEqual(am.DEFAULTS["chatops"]["show_repo_names"], "all")
+        self.assertEqual(am.DEFAULTS["chatops"]["show_repo_names"], "public")
 
 
 class Route(unittest.TestCase):

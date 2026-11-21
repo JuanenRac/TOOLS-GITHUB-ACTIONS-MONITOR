@@ -50,5 +50,6 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `screens.version_check_seconds` | 300 | de quanto em quanto tempo a página consulta `/api/version` e se recarrega sozinha quando o monitor foi atualizado ou reiniciado (0 = nunca; o mínimo é 30) |
 | `kiosk.safe_margin_percent` | 0 | a parte de cada borda, em percentagem, que a página deixa livre para uma televisão que corta a borda (overscan); de 0 a 10 |
 | `kiosk.scale_with_window` | desligado | o tamanho da letra acima é o de uma janela de 1080 px no seu lado curto; ligado, cresce com a janela, pelo que uma televisão 4K se vê como uma Full HD |
+| `screens.show_repo_names` | public | os nomes dos repositórios no quiosque, como nos ecrãs de parede: `public` mostra um repositório privado como `private-N` e omite os títulos, ramos e workflows das suas execuções, `none` chama `repo-N` a todos, `all` mostra tudo (aplica-se aos dados da página, `/api/data`) |
 
 O tamanho aplica-se com o zoom da página, pelo que cada número e cada tabela crescem juntos. Um valor fora do seu intervalo não é um erro: é substituído pela predefinição.

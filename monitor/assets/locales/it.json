@@ -3791,7 +3791,7 @@
  "cfg.h.chatops.rate_per_channel_per_minute": "Più comandi di questo in un canale in un minuto ricevono un breve rifiuto.",
  "cfg.h.chatops.rate_per_minute": "Tetto di tutti i comandi di una piattaforma in un minuto.",
  "cfg.h.chatops.rate_per_user_per_minute": "Più comandi di questo da una persona in un minuto ricevono un breve rifiuto.",
- "cfg.h.chatops.show_repo_names": "all = tutti i nomi, anche i repository privati (i loro nomi arrivano a tutti i canali e utenti delle liste, per questo le liste sono obbligatorie e devono corrispondere tutte); public = un repository privato appare come private-N e i suoi workflow non sono nominati; none = repo-N per tutti. I testi che arrivano da GitHub sono sempre ripuliti e accorciati.",
+ "cfg.h.chatops.show_repo_names": "all = tutti i nomi, anche i repository privati (i loro nomi arrivano a tutti i canali e utenti delle liste, per questo le liste sono obbligatorie e devono corrispondere tutte); public (predefinito) = un repository privato appare come private-N e i suoi workflow non sono nominati; none = repo-N per tutti. I testi che arrivano da GitHub sono sempre ripuliti e accorciati.",
  "cfg.f.chatops.links": "Link al repository",
  "cfg.h.chatops.links": "Aggiunge l'indirizzo del repository (https://<host>/<proprietario>/<repository>) alle righe degli avvisi e dei workflow in rosso, solo quando il suo nome è mostrato così com'è. È l'unico link che una risposta porta.",
  "cfg.h.chatops.slack.enabled": "Accetta il comando slash della tua app Slack su POST /api/chatops/slack. Richiede il segreto di firma nella variabile d'ambiente qui sotto.",

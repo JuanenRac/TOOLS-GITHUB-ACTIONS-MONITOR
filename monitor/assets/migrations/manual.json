@@ -251,5 +251,28 @@
     "new_value": "ledger"
    }
   ]
+ },
+ "2.1.8": {
+  "notices": [
+   {
+    "id": "chatops_names_public",
+    "level": "behavior",
+    "keys": [
+     "chatops.show_repo_names"
+    ],
+    "text": {
+     "en": "The chat receiver now names a private repository private-N by default (chatops.show_repo_names is public, it was all), like the wall screens and the kiosk. Set chatops.show_repo_names to all to bring every name back; a value you set yourself is kept.",
+     "es": "El receptor del chat nombra ahora a un repositorio privado private-N por defecto (chatops.show_repo_names es public, antes all), como las pantallas de pared y el quiosco. Fija chatops.show_repo_names en all para recuperar todos los nombres; un valor que fijaste tú se conserva.",
+     "de": "Der Chat-Empfänger nennt ein privates Repository jetzt standardmäßig private-N (chatops.show_repo_names ist public, vorher all), wie die Wandbildschirme und der Kiosk. Setze chatops.show_repo_names auf all, um alle Namen zurückzuholen; ein von dir gesetzter Wert bleibt erhalten.",
+     "fr": "Le récepteur de chat nomme désormais un dépôt privé private-N par défaut (chatops.show_repo_names vaut public, c'était all), comme les écrans muraux et le kiosque. Fixez chatops.show_repo_names à all pour retrouver tous les noms ; une valeur que vous avez fixée est conservée.",
+     "it": "Il ricevitore della chat ora chiama un repository privato private-N per impostazione predefinita (chatops.show_repo_names è public, prima all), come le schermate a parete e il chiosco. Imposta chatops.show_repo_names su all per riavere tutti i nomi; un valore impostato da te viene conservato.",
+     "ja": "チャット受信機能は、壁面画面やキオスクと同じく、既定でプライベートリポジトリを private-N と呼ぶようになりました(chatops.show_repo_names の既定は public で、以前は all)。すべての名前を戻すには chatops.show_repo_names を all にしてください。自分で設定した値はそのまま残ります。",
+     "zh": "聊天接收器现在默认把私有仓库称为 private-N(chatops.show_repo_names 默认为 public,之前是 all),与墙面屏幕和展示模式一致。将 chatops.show_repo_names 设为 all 即可恢复全部名称;您自己设置的值会保留。",
+     "pt": "O recetor do chat passa a chamar private-N a um repositório privado por predefinição (chatops.show_repo_names é public, antes all), como os ecrãs de parede e o quiosque. Defina chatops.show_repo_names como all para recuperar todos os nomes; um valor que definiu é mantido."
+    },
+    "old_value": "all",
+    "new_value": "public"
+   }
+  ]
  }
 }

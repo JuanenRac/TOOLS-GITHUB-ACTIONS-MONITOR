@@ -37,7 +37,7 @@ Optional, **off by default**. It lets people ask the monitor, from a Slack or Di
 | `queue` | running, queued, waiting for approval and minutes used in 24 hours |
 | `score` | the score, its letter and its change |
 
-`chatops.show_repo_names` decides the names: `all` (the default: every name, private repositories included), `public` (a private repository is `private-N` and its workflows are not named) or `none`. **Risk of `all`:** the names of private repositories and workflows reach every channel and user your lists allow. That is why the lists are required and every list with entries must match (team, channel and user together). Choose `public` or `none` if the channel is wider than the people who may know those names.
+`chatops.show_repo_names` decides the names: `all` (every name, private repositories included), `public` (the default: a private repository is `private-N` and its workflows are not named) or `none`. **Risk of `all`:** the names of private repositories and workflows reach every channel and user your lists allow. That is why the lists are required and every list with entries must match (team, channel and user together). Keep `public` or choose `none` if the channel is wider than the people who may know those names.
 
 ## Slack, step by step
 
