@@ -38,7 +38,7 @@ STALE_AFTER_H = 6                # the default of `webhook.stale_after_h`
 CLOCK_SKEW_S = 300               # the default of `webhook.clock_skew_s`: seconds two clocks (the one of the delivery and the one of this computer) may differ before an event looks stale or a mark looks like it is in the future
 MAX_VERIFIED_PER_MINUTE = 120    # the default of `webhook.max_verified_per_minute`: requests that carry a good signature one address (a tunnel is ONE address) may send per minute
 SEEN_SAVE_EVERY = 2.0            # seconds: the memory of deliveries is written at most this often
-MAX_DELIVERIES = 2000        # the replay memory is bounded: the oldest delivery ids fall out first
+MAX_DELIVERIES = 20000       # the replay memory is bounded, but the bound is a safety net and not the window: an entry leaves with the time (`webhook.replay_seconds` plus the clock skew) long before this number is reached; the oldest fall out first
 EVENTS = ("workflow_run", "workflow_job", "check_run", "push", "release", "check_suite", "ping")      # the closed list: any other event is answered 202 and dropped
 
 TEXT = {key: "wh." + key for key in ("off", "bad_secret", "too_big", "bad_signature", "bad_event", "bad_payload", "unknown_repo", "on", "bad_delivery")}   # keys of the messages (locales/*.json); use text(key)
@@ -120,7 +120,7 @@ def guard_settings(config):
         return value if isinstance(value, int) and not isinstance(value, bool) and low <= value <= high else default
     owners = [o for o in (cfg.get("allowed_owners") or []) if isinstance(o, str) and re.match(r"^[A-Za-z0-9-]{1,39}$", o)] if isinstance(cfg.get("allowed_owners"), list) else []
     return {"replay_seconds": number("replay_seconds", 3600, 60, 86400), "max_per_minute": number("max_per_minute", 30, 1, 600), "max_bad_per_minute": number("max_bad_per_minute", 120, 1, 6000),
-            "max_verified_per_minute": number("max_verified_per_minute", MAX_VERIFIED_PER_MINUTE, 1, 6000), "reject_stale": cfg.get("reject_stale") is True, "persist_deliveries": cfg.get("persist_deliveries", True) is True,
+            "max_verified_per_minute": number("max_verified_per_minute", MAX_VERIFIED_PER_MINUTE, 1, 6000), "reject_stale": cfg.get("reject_stale", True) is True, "persist_deliveries": cfg.get("persist_deliveries", True) is True,
             "clock_skew_s": number("clock_skew_s", CLOCK_SKEW_S, 0, 3600), "allowed_owners": owners,
             "max_body": number("max_body_kb", MAX_BODY // 1024, 1, MAX_BODY_KB_LIMIT) * 1024, "queue_max": number("queue_max", QUEUE_MAX, 1, 10000), "stale_after_h": number("stale_after_h", STALE_AFTER_H, 1, 168)}
 
@@ -320,8 +320,9 @@ def handle(config, body, headers, watched, address=None, size=None):
     delivery = headers.get("X-GitHub-Delivery")
     if not isinstance(delivery, str) or not DELIVERY_RE.match(delivery):
         return 400, {"ok": False, "error": text("bad_delivery")}, None
-    seen_id = replay(delivery, guard["replay_seconds"])
-    seen_body = replay("body:" + hashlib.sha256(body).hexdigest(), guard["replay_seconds"])      # the delivery id travels outside the signature: what is signed (the body) is remembered too
+    remembered = guard["replay_seconds"] + guard["clock_skew_s"]      # a delivery is remembered as long as an event can still look fresh (the window of the freshness check plus its skew): no gap between the two
+    seen_id = replay(delivery, remembered)
+    seen_body = replay("body:" + hashlib.sha256(body).hexdigest(), remembered)      # the delivery id travels outside the signature: what is signed (the body) is remembered too
     if guard["persist_deliveries"]:
         save_memory()      # the memory survives a restart (once load_memory was told where)
     if seen_id or seen_body:     # a valid request captured and sent again: answered, never acted on
@@ -357,7 +358,14 @@ LIVE_FIELDS = ("event", "repo", "run_id", "status", "conclusion", "branch", "sha
 
 
 RUN_EVENT_RE = re.compile(r"^[a-z_]{1,30}\Z")
-GITHUB_URL = re.compile(r"^https://[A-Za-z0-9.-]+/[A-Za-z0-9._/-]{1,200}\Z")   # a link to the run on github.com or on a GitHub Enterprise Server host
+GITHUB_URL = re.compile(r"^https://([A-Za-z0-9.-]+)/[A-Za-z0-9._/-]{1,200}\Z")   # a link to the run on github.com or on the GitHub Enterprise Server host of the environment (GH_HOST)
+GH_HOST_RE = re.compile(r"^[A-Za-z0-9.-]{1,100}\Z")
+
+
+def github_hosts():
+    """The hosts a link of a delivery may point to: github.com and, when GH_HOST names a plain host (GitHub Enterprise Server), that one: the same host the links of the page use."""
+    host = os.environ.get("GH_HOST", "")
+    return {"github.com"} | ({host.lower()} if GH_HOST_RE.match(host) else set())
 
 
 def _time(text):
@@ -406,7 +414,8 @@ def parse_event(event, body):
     if not isinstance(repo, str) or not NAME_RE.match(repo) or not isinstance(obj, dict) or not isinstance(obj.get("id"), int):
         return None
     full = payload["repository"].get("full_name") if isinstance(payload.get("repository"), dict) else None
-    url = obj.get("html_url") if isinstance(obj.get("html_url"), str) and GITHUB_URL.match(obj["html_url"]) else None
+    found_url = GITHUB_URL.match(obj["html_url"]) if isinstance(obj.get("html_url"), str) else None
+    url = obj["html_url"] if found_url and found_url.group(1).lower() in github_hosts() else None      # only a link to GitHub itself reaches the notices and the live list, whoever signed the delivery
     if url is not None:      # the link goes to the notices and the live list: it must point to the repository the payload names (owner and name), not to any address
         path = "/" + url.split("/", 3)[3] if url.count("/") >= 3 else ""
         if not (isinstance(full, str) and FULL_NAME_RE.match(full) and path.lower().startswith(f"/{full}/".lower())):

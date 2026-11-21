@@ -341,5 +341,70 @@ class SupervisorPaths(Supervised):
         self.assertTrue(os.path.isabs(here["config_file"]))
 
 
+class WebhookWindow(unittest.TestCase):
+    """The memory of the deliveries and the freshness window leave no gap, and a link of a delivery only points to GitHub."""
+    SECRET = "m" * 40
+    CONFIG = {"webhook": {"enabled": True}}
+
+    def setUp(self):
+        from github_actions_monitor.security import webhook
+        self.webhook = webhook
+        webhook.reset()
+        localguard.reset_limits()
+        self.addCleanup(localguard.reset_limits)
+        self.addCleanup(webhook.reset)
+        patch = mock.patch.dict(os.environ, {webhook.SECRET_ENV: self.SECRET})
+        patch.start()
+        self.addCleanup(patch.stop)
+
+    def stamp(self, seconds_ago):
+        from datetime import datetime, timezone
+        return datetime.fromtimestamp(time.time() - seconds_ago, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    def raw(self, n, ago=0):
+        return json.dumps({"repository": {"name": "R", "full_name": "JuanenRac/R"}, "workflow_run": {"id": n + 1, "updated_at": self.stamp(ago), "status": "completed", "name": "CI"}}).encode()
+
+    def deliver(self, raw, n, config=None):
+        headers = {"X-GitHub-Event": "workflow_run", "X-Hub-Signature-256": self.webhook.sign(self.SECRET, raw), "X-GitHub-Delivery": f"{n:08d}-aaaa-bbbb"}
+        return self.webhook.handle(config or self.CONFIG, raw, headers, ["R"])
+
+    def at(self, seconds_later):
+        return mock.patch.object(self.webhook, "time", types.SimpleNamespace(time=lambda: time.time() + seconds_later))
+
+    def test_a_captured_delivery_is_a_duplicate_until_it_is_stale_and_stale_after_with_the_defaults(self):
+        raw = self.raw(1)
+        self.assertEqual(self.deliver(raw, 1)[0], 200)
+        with self.at(3700):      # past replay_seconds (3600) but inside the skew: the memory still has it
+            code, answer, _ = self.deliver(raw, 1)
+            self.assertEqual((code, answer.get("duplicate")), (202, True))
+        with self.at(4000):      # the memory may have let it go: the event itself is older than the window
+            code, answer, _ = self.deliver(raw, 1)
+            self.assertEqual((code, answer.get("stale")), (202, True))
+        self.assertTrue(self.webhook.guard_settings({})["reject_stale"])
+        self.assertFalse(self.webhook.guard_settings({"webhook": {"reject_stale": False}})["reject_stale"], "the owner can still turn it off")
+
+    def test_a_thousand_other_deliveries_do_not_make_the_memory_forget_one(self):
+        raw = self.raw(0)
+        self.assertEqual(self.deliver(raw, 0)[0], 200)
+        for n in range(1, 1100):
+            self.deliver(self.raw(n), n)
+        code, answer, _ = self.deliver(raw, 0)
+        self.assertEqual((code, answer.get("duplicate")), (202, True), "the window is the time, not a count of a thousand")
+        self.assertGreaterEqual(self.webhook.MAX_DELIVERIES, 10000)
+
+    def event(self, url):
+        body = json.dumps({"repository": {"name": "R", "full_name": "JuanenRac/R"}, "workflow_run": {"id": 5, "html_url": url, "status": "completed", "conclusion": "failure"}}).encode()
+        return self.webhook.parse_event("workflow_run", body)
+
+    def test_only_a_link_to_github_is_kept(self):
+        self.assertEqual(self.event("https://github.com/JuanenRac/R/actions/runs/5")["url"], "https://github.com/JuanenRac/R/actions/runs/5")
+        self.assertIsNone(self.event("https://evil.example/JuanenRac/R/actions/runs/5")["url"])
+        self.assertIsNone(self.event("https://github.com.evil.example/JuanenRac/R/actions/runs/5")["url"])
+        with mock.patch.dict(os.environ, {"GH_HOST": "ghe.corp.example"}):
+            self.assertEqual(self.event("https://ghe.corp.example/JuanenRac/R/actions/runs/5")["url"], "https://ghe.corp.example/JuanenRac/R/actions/runs/5")
+            self.assertIsNone(self.event("https://evil.example/JuanenRac/R/actions/runs/5")["url"])
+        self.assertIsNone(self.event("https://ghe.corp.example/JuanenRac/R/actions/runs/5")["url"], "without GH_HOST that host is not GitHub")
+
+
 if __name__ == "__main__":
     unittest.main()
