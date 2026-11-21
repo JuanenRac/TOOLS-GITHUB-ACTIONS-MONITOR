@@ -34,7 +34,7 @@ curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/ale
 
 ## 4. Fehler
 
-Ein Fehler der eigenen Routen ist ein JSON-Objekt mit drei Schlüsseln: `error` und `code` sind stabil und für Programme gedacht, `message` folgt der Sprache von `?lang=` und ist für Menschen gedacht. Die Codes sind api.bad_cursor, api.bad_limit, api.unknown_field, api.bad_profile und api.server_error. Jede Antwort des Präfixes, Fehler eingeschlossen, trägt den Header `X-API-Version: 1`.
+Ein Fehler der eigenen Routen ist ein JSON-Objekt mit drei Schlüsseln: `error` und `code` sind stabil und für Programme gedacht, `message` folgt der Sprache von `?lang=` und ist für Menschen gedacht. Die Codes sind api.bad_cursor, api.bad_limit, api.unknown_field, api.bad_profile und api.server_error. Jede Antwort des Präfixes, Fehler eingeschlossen, trägt den Header `X-API-Version: 1`. Jeder Fehler trägt außerdem `help`, einen Satz mit dem nächsten Schritt und der Anleitung dazu, in derselben Sprache (das Feld fehlt, wenn ein Code keinen hat; ein Programm, das es ignoriert, verliert nichts).
 
 ```
 curl -s -i -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?limit=0"

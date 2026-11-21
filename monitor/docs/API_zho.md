@@ -93,4 +93,5 @@ curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/re
 | `/api/sentinel/security` | GitHub 报告的安全方面未解决或缺失的内容（安全哨兵；默认关闭；只读）。 |
 | `/api/session-token` | 用于下一次修改设置的一次性令牌；页面在写入之前才会请求它。 |
 | `/api/statusbar` | 页面底部栏显示的内容：版本、地址、账户和哨兵；不含机密，也不调用 GitHub。 |
+| `/api/version` | 代码的版本和进程的启动时间(`version`、`started`),从不缓存。墙面屏幕和信息亭每隔 `screens.version_check_seconds` 秒查询一次,其中任何一项变化时都会自动重新加载。 |
 | `/api/welcome` | GET：首次启动向导是否已完成。POST，本机：将其标记为已完成或未完成。 |

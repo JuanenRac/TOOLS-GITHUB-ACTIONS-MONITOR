@@ -98,6 +98,7 @@ Sem comando abre-se a página. Os comandos respondem uma vez (acrescente `--json
 - Antes de alterar seja o que for copia o pacote, a configuração e os dados; se um passo falhar, a cópia é restaurada e é escrito um relatório. Se até o regresso falhar, a cópia fica intacta e o relatório explica como a restaurar à mão.
 - Sem Internet: `--zip FICHEIRO` com `--sha256` (ou um SHA256SUMS ao lado). Docker: atualiza-se o volume, a imagem não é substituída por dentro (`--allow-container` para forçar).
 - A página mostra as cópias e um botão **Descartar cópia** em cada uma (pergunta antes, e duas vezes pela cópia da volta atrás), e um botão para ler o registo completo do processo da última atualização. Descartar apaga só essa cópia, nunca a instalação nem os dados, e fica anotado no histórico.
+- O atualizador independente, que corre sem o monitor, tem o mesmo: a sua página no navegador (botões **Cópias** e **Registo do processo**, e **Descartar cópia** em cada cópia, com as mesmas perguntas), o seu menu de texto (opções 7 a 9) e a sua janela (Tkinter).
 
 ## Códigos de saída
 

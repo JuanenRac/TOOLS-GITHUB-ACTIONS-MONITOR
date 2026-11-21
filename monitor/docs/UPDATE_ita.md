@@ -98,6 +98,7 @@ Senza comando si apre la pagina. I comandi rispondono una volta (aggiungi `--jso
 - Prima di cambiare qualcosa copia il pacchetto, la configurazione e i dati; se un passo fallisce la copia viene ripristinata e viene scritto un rapporto. Se fallisce anche il ritorno, la copia resta intatta e il rapporto spiega come ripristinarla a mano.
 - Offline: `--zip FILE` con `--sha256` (o un SHA256SUMS accanto). Docker: si aggiorna il volume, l'immagine non viene sostituita dall'interno (`--allow-container` per forzare).
 - La pagina mostra le copie e un pulsante **Scarta la copia** per ognuna (chiede prima, e due volte per la copia del ritorno indietro), e un pulsante per leggere tutto il registro del processo dell'ultimo aggiornamento. Scartare elimina solo quella copia, mai l'installazione né i dati, e viene annotato nella cronologia.
+- L'aggiornatore indipendente, che funziona senza il monitor, offre lo stesso: la sua pagina nel browser (pulsanti **Copie** e **Registro del processo**, e **Scarta la copia** su ogni copia, con le stesse domande), il suo menu di testo (voci da 7 a 9) e la sua finestra (Tkinter).
 
 ## Codici di uscita
 

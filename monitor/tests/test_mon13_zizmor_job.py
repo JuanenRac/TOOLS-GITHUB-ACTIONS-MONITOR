@@ -10,6 +10,8 @@ WORKFLOW = Path(__file__).resolve().parents[2] / ".github" / "workflows" / "zizm
 
 class ZizmorJob(unittest.TestCase):
     def setUp(self):
+        if not WORKFLOW.is_file():
+            raise unittest.SkipTest("the workflows live in the repository, not in the zip of the monitor")
         self.text = WORKFLOW.read_text(encoding="utf-8")
 
     def test_calls_the_shared_workflow_by_full_sha(self):

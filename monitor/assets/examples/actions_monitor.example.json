@@ -25,6 +25,7 @@
     "dormant_repos": true,
     "red_ages": true,
     "red_age_days": 30,
+    "stale_result_hours": 0,
     "disabled_apart": true,
     "dependabot_alerts": true,
     "copilot_alerts": false,
@@ -48,6 +49,8 @@
       "runner_minutes": []
     },
     "rerun_timing": false,
+    "reusable_out_of_rankings": false,
+    "orphan_workflows": false,
     "failed_jobs": {
       "enabled": false,
       "group_by": "auto",
@@ -81,6 +84,7 @@
     "candidate_min_entries": 5,
     "skip_candidate_prefixes": [],
     "stale_pr_days": 7,
+    "schedule_countdown_after_days": 45,
     "trend_green_pct": 90,
     "trend_health": 70,
     "trend_quota_pct": 80,
@@ -997,6 +1001,7 @@
   "runners": {
     "enabled": false,
     "scope": "owner",
+    "group_by": "none",
     "model": {
       "enabled": false,
       "jobs_per_cycle": 10,
@@ -1063,7 +1068,9 @@
     "saved_filters": [],
     "meta_columns": [],
     "meta_per_call": 20,
-    "meta_ttl_hours": 6
+    "meta_ttl_hours": 6,
+    "fork_behind": false,
+    "fork_behind_per_call": 5
   },
   "lessons": {
     "enabled": true,
@@ -1362,6 +1369,7 @@
     "logo_overview": true,
     "logo_sentinels": false,
     "min_font_px": 12,
+    "version_check_seconds": 300,
     "mode": "three",
     "night_dim": false,
     "night_dim_from_hour": 22,

@@ -14,6 +14,37 @@ import urllib.parse
 import urllib.request
 
 NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\Z")
+GROUP_MODES = ("none", "group", "label")
+GENERIC_LABELS = frozenset({"self-hosted", "linux", "windows", "macos", "x64", "x86", "arm", "arm64"})      # the labels GitHub adds to every self-hosted runner: they tell nothing about which group it is
+NO_GROUP = "(none)"
+
+
+def group_mode(config):
+    """`runners.group_by`: none (default), group (the runner group of the jobs) or label (the first label that is not a generic one)."""
+    cfg = config.get("runners") if isinstance(config, dict) and isinstance(config.get("runners"), dict) else {}
+    return cfg.get("group_by") if cfg.get("group_by") in GROUP_MODES else "none"
+
+
+def custom_label(labels):
+    """The first label of a runner or a job that is not one of the generic ones (case does not matter), else NO_GROUP."""
+    for label in labels or []:
+        text = str(label).strip().lower()
+        if text and text not in GENERIC_LABELS:
+            return text[:60]
+    return NO_GROUP
+
+
+def group_runners(runners, mode):
+    """The runners of the list grouped by their custom label (`runners.group_by` = label): {"by", "available", "rows": [{"key", "runners", "idle", "busy", "offline"}]}. The list of GitHub does not say the
+    runner group of a runner (only the jobs do), so with `group` the grouping is not available here and says so (`available` false), it is not guessed."""
+    if mode == "group":
+        return {"by": "group", "available": False, "rows": []}
+    rows = {}
+    for runner in runners:
+        e = rows.setdefault(custom_label(runner.get("labels")), {"key": custom_label(runner.get("labels")), "runners": 0, "idle": 0, "busy": 0, "offline": 0})
+        e["runners"] += 1
+        e[runner.get("state") if runner.get("state") in ("idle", "busy", "offline") else "offline"] += 1
+    return {"by": "label", "available": True, "rows": sorted(rows.values(), key=lambda r: r["key"])}
 
 
 def settings(config):
@@ -129,7 +160,11 @@ def collect(config, reader, owner, repos=(), opener=None):
                     row.update(read_metrics(url, opener))
                 found.append(row)
     counts = {k: sum(1 for r in found if r["state"] == k) for k in ("idle", "busy", "offline")}
-    return {"runners": found, "counts": counts, "errors": errors, "unchecked": sorted(unchecked)[:50]}
+    out = {"runners": found, "counts": counts, "errors": errors, "unchecked": sorted(unchecked)[:50]}
+    mode = group_mode(config)
+    if mode != "none":      # runners.group_by: only what was read is grouped, no call is added
+        out["groups"] = group_runners(found, mode)
+    return out
 
 
 def payload(config, reader, owner, demo=False, repos=()):

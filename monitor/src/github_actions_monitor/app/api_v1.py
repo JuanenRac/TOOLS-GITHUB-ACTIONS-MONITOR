@@ -81,7 +81,11 @@ class ApiError(Exception):
     def envelope(self):
         """(status, body) with the message in the language in use; a status that is not in the table becomes a 500."""
         status = self.status if self.status in ERROR_SLUGS else 500
-        return status, {"error": ERROR_SLUGS[status], "code": self.code, "message": i18n.t(self.code, **self.values)}
+        body = {"error": ERROR_SLUGS[status], "code": self.code, "message": i18n.t(self.code, **self.values)}
+        help_text = i18n.t(self.code + ".help")
+        if help_text and help_text != self.code + ".help":      # the next step in one sentence, in the language asked (a code without one simply has no `help`)
+            body["help"] = help_text
+        return status, body
 
 
 def route_of(path):
@@ -256,4 +260,4 @@ def openapi(version="1.0.0"):
     }
     return {"openapi": "3.0.3", "info": {"title": "GitHub Actions Monitor read API", "version": version}, "paths": paths,
             "components": {"securitySchemes": {"cookie": {"type": "apiKey", "in": "cookie", "name": "session"}, "access": {"type": "apiKey", "in": "header", "name": "X-Monitor-Access"}},
-                           "schemas": {"Error": {"type": "object", "required": ["error", "code", "message"], "properties": {"error": {"type": "string"}, "code": {"type": "string"}, "message": {"type": "string"}}}}}}
+                           "schemas": {"Error": {"type": "object", "required": ["error", "code", "message"], "properties": {"error": {"type": "string"}, "code": {"type": "string"}, "message": {"type": "string"}, "help": {"type": "string"}}}}}}

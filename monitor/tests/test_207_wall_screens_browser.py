@@ -112,7 +112,7 @@ class TheScreensInABrowser(unittest.TestCase):
         self.assertLessEqual(report["scroll"]["w"][0], report["scroll"]["w"][1] + 1, (label, "sideways scroll"))
         self.assertLessEqual(report["scroll"]["h"][0], report["scroll"]["h"][1] + 1, (label, "vertical scroll"))
         for url in report["reqs"]:
-            self.assertTrue(url.startswith("/api/screens/data?screen="), (label, "the page asked for something else", url))
+            self.assertTrue(url.startswith("/api/screens/data?screen=") or url == "/api/version", (label, "the page asked for something else", url))      # the data, and the version of the monitor (screens.version_check_seconds)
         self.assertTrue(report["reqs"], label)
         self.assertGreater(report["cards"], 1, label)
 
@@ -215,7 +215,7 @@ class TheScreensInABrowser(unittest.TestCase):
         self.assertEqual(report["errors"], [])
         self.assertEqual(report["seq"][:3], ["overview", "fleet", "now"], report["seq"])
         for url in report["reqs"]:
-            self.assertTrue(url.startswith("/api/screens/data?screen="), url)
+            self.assertTrue(url.startswith("/api/screens/data?screen=") or url == "/api/version", url)
         self.assertEqual(set(still["seq"]), {"now"}, "a turn faster than five seconds is no turn")
 
 

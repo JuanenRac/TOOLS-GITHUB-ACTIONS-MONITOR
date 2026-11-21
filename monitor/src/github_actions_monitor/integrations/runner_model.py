@@ -19,6 +19,7 @@ import time
 from datetime import datetime, timezone
 
 from github_actions_monitor import i18n
+from github_actions_monitor.integrations import runners as runner_list_module
 
 KINDS = ("hosted", "large", "thirdparty", "selfhosted", "unknown")
 DEFAULT_THIRDPARTY = ["blacksmith", "buildjet", "namespace-profile", "depot", "warpbuild", "ubicloud", "runs-on", "actuated", "cirrus-runners", "codspeed"]
@@ -51,7 +52,8 @@ def settings(config):
             "runaway_runs_per_hour": _int(cfg.get("runaway_runs_per_hour"), 0, 1000, DEFAULTS["runaway_runs_per_hour"]),
             "runaway_ignore_events": [x for x in cfg.get("runaway_ignore_events", DEFAULTS["runaway_ignore_events"]) if isinstance(x, str) and re.match(r"^[a-z_]{1,40}\Z", x)] if isinstance(cfg.get("runaway_ignore_events", []), list) else list(DEFAULTS["runaway_ignore_events"]),
             "thirdparty_usd_per_minute": float(rate) if isinstance(rate, (int, float)) and not isinstance(rate, bool) and 0 <= rate <= 10 else 0.0,
-            "alerts": cfg.get("alerts") is not False, "alert_level": cfg.get("alert_level") if cfg.get("alert_level") in LEVELS else DEFAULTS["alert_level"]}
+            "alerts": cfg.get("alerts") is not False, "alert_level": cfg.get("alert_level") if cfg.get("alert_level") in LEVELS else DEFAULTS["alert_level"],
+            "group_by": runner_list_module.group_mode(config)}
 
 
 def kind_of(labels, cfg):
@@ -102,6 +104,21 @@ def queue_by_kind(rows, now, cfg):
         entry["jobs"] += 1
         entry["oldest_wait_seconds"] = max(entry["oldest_wait_seconds"], int(wait))
     return out
+
+
+def grouped(rows, now, mode):
+    """The jobs the monitor holds grouped by runner group (`runners.group_by` = group, the name GitHub gives the job) or by their custom label (`label`): {"by", "rows": [{"key", "jobs", "queued",
+    "oldest_wait_seconds"}]}, the biggest first. No call is added: it groups what `compact` already kept. A job whose group is not known goes to "(none)", it is not guessed."""
+    out = {}
+    for row in rows:
+        key = (row.get("group") or runner_list_module.NO_GROUP) if mode == "group" else runner_list_module.custom_label(row.get("labels"))
+        e = out.setdefault(key, {"key": key, "jobs": 0, "queued": 0, "oldest_wait_seconds": 0})
+        e["jobs"] += 1
+        if row.get("status") in ("queued", "waiting"):
+            e["queued"] += 1
+            created = _ts(row.get("created"))
+            e["oldest_wait_seconds"] = max(e["oldest_wait_seconds"], int(max(0.0, now - created)) if created is not None else 0)
+    return {"by": mode, "rows": sorted(out.values(), key=lambda r: (-r["jobs"], r["key"]))}
 
 
 def tally(jobs, rates, default_runner, cfg):
@@ -273,10 +290,13 @@ def build(config, job_rows, runs, tallies, rates, runners, now, sample_cap=0, de
     cfg = settings(config)
     if not cfg["enabled"]:
         return {"schema": 1, "enabled": False}
-    return {"schema": 1, "enabled": True, "queue": queue_by_kind(job_rows, now, cfg), "usage": usage(tallies, rates, cfg), "runaway": runaway(runs, now, cfg, sample_cap),
-            "selfhosted": selfhosted_down(job_rows, runners, now, cfg), "jobs_seen": len(job_rows), "runners_known": runners is not None,
-            "observed": {"enabled": cfg["observed_reads_per_cycle"] > 0, "rows": observed(job_rows, declared, cfg, private, known) if cfg["observed_reads_per_cycle"] > 0 else []},
-            "limits": {"queue_warn_minutes": cfg["queue_warn_minutes"], "runaway_runs_per_hour": cfg["runaway_runs_per_hour"]}}
+    model = {"schema": 1, "enabled": True, "queue": queue_by_kind(job_rows, now, cfg), "usage": usage(tallies, rates, cfg), "runaway": runaway(runs, now, cfg, sample_cap),
+             "selfhosted": selfhosted_down(job_rows, runners, now, cfg), "jobs_seen": len(job_rows), "runners_known": runners is not None,
+             "observed": {"enabled": cfg["observed_reads_per_cycle"] > 0, "rows": observed(job_rows, declared, cfg, private, known) if cfg["observed_reads_per_cycle"] > 0 else []},
+             "limits": {"queue_warn_minutes": cfg["queue_warn_minutes"], "runaway_runs_per_hour": cfg["runaway_runs_per_hour"]}}
+    if cfg["group_by"] != "none":      # runners.group_by (off): the jobs held, by runner group or by label
+        model["grouped"] = grouped(job_rows, now, cfg["group_by"])
+    return model
 
 
 def alerts(model, config, account="", now=None):

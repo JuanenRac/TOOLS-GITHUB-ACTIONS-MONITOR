@@ -30,8 +30,9 @@ def settings(raw):
 
 
 def public(raw):
-    """What the page is given (the same values, nothing else)."""
-    return settings(raw)
+    """What the page is given: the same values, and the pace at which it asks /api/version to reload itself when the monitor was updated (`screens.version_check_seconds`, shared with the wall screens; 0 = never)."""
+    from github_actions_monitor.app import screens
+    return {**settings(raw), "version_check_seconds": screens.settings(raw)["version_check_seconds"]}
 
 
 def clamp_scale(value, fallback=100):

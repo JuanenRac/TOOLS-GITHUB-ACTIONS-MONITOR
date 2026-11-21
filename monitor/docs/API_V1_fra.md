@@ -34,7 +34,7 @@ curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/ale
 
 ## 4. Erreurs
 
-Une erreur des routes propres est un objet JSON à trois clés : `error` et `code` sont stables et destinés aux programmes, `message` suit la langue de `?lang=` et est destiné aux personnes. Les codes sont api.bad_cursor, api.bad_limit, api.unknown_field, api.bad_profile et api.server_error. Toute réponse du préfixe, erreurs comprises, porte l'en-tête `X-API-Version: 1`.
+Une erreur des routes propres est un objet JSON à trois clés : `error` et `code` sont stables et destinés aux programmes, `message` suit la langue de `?lang=` et est destiné aux personnes. Les codes sont api.bad_cursor, api.bad_limit, api.unknown_field, api.bad_profile et api.server_error. Toute réponse du préfixe, erreurs comprises, porte l'en-tête `X-API-Version: 1`. Chaque erreur porte aussi `help`, une phrase avec la prochaine étape et le guide à lire, dans la même langue (le champ manque quand un code n'en a pas ; un programme qui l'ignore ne perd rien).
 
 ```
 curl -s -i -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?limit=0"

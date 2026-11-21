@@ -47,6 +47,7 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk.high_contrast` | disattivato | sfondo nero e linee bianche |
 | `kiosk.rotate_views` | disattivato | un preset con più schede cambia scheda da solo; disattivato, lo schermo mostra la prima scheda del preset |
 | `kiosk.rotate_seconds` | 30 | quanto resta ogni scheda (da 5 a 600) |
+| `screens.version_check_seconds` | 300 | ogni quanto la pagina consulta `/api/version` e si ricarica da sola quando il monitor è stato aggiornato o riavviato (0 = mai; il minimo è 30) |
 | `kiosk.safe_margin_percent` | 0 | la parte di ogni bordo, in percentuale, che la pagina lascia libera per un televisore che taglia il bordo (overscan); da 0 a 10 |
 | `kiosk.scale_with_window` | disattivato | la dimensione del testo qui sopra è quella di una finestra di 1080 px sul lato corto; attivato, cresce con la finestra, così un televisore 4K appare come uno Full HD |
 

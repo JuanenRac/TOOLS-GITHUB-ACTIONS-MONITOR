@@ -47,6 +47,7 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk.high_contrast` | desligado | fundo preto e linhas brancas |
 | `kiosk.rotate_views` | desligado | uma predefinição com vários separadores muda de separador sozinha; desligado, o ecrã mostra o primeiro separador da predefinição |
 | `kiosk.rotate_seconds` | 30 | quanto tempo fica cada separador (de 5 a 600) |
+| `screens.version_check_seconds` | 300 | de quanto em quanto tempo a página consulta `/api/version` e se recarrega sozinha quando o monitor foi atualizado ou reiniciado (0 = nunca; o mínimo é 30) |
 | `kiosk.safe_margin_percent` | 0 | a parte de cada borda, em percentagem, que a página deixa livre para uma televisão que corta a borda (overscan); de 0 a 10 |
 | `kiosk.scale_with_window` | desligado | o tamanho da letra acima é o de uma janela de 1080 px no seu lado curto; ligado, cresce com a janela, pelo que uma televisão 4K se vê como uma Full HD |
 

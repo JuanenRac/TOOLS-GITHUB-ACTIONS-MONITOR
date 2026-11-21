@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.7",
  "previous": "2.1.6",
- "digest": "2bbd057d0e151d25859a929bba365f8bf9a7d304f47e334c278c3281677ad037",
+ "digest": "ee3e8a483fe7fdd721f8c5c8ba0c6edcc7887b8ff3a1ca6bcc8c9a917dc38191",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -125,6 +125,25 @@
     "key": "ci.branches_by_repo",
     "kind": "names",
     "default": []
+   },
+   {
+    "key": "ci.orphan_workflows",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ci.reusable_out_of_rankings",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ci.stale_result_hours",
+    "kind": "int",
+    "bounds": [
+     0,
+     8760
+    ],
+    "default": 0
    },
    {
     "key": "cli.status_codes",
@@ -273,6 +292,20 @@
      2000
     ],
     "default": 40
+   },
+   {
+    "key": "fleet.fork_behind",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "fleet.fork_behind_per_call",
+    "kind": "int",
+    "bounds": [
+     1,
+     50
+    ],
+    "default": 5
    },
    {
     "key": "fleet.meta_columns",
@@ -620,6 +653,16 @@
     "default": true
    },
    {
+    "key": "runners.group_by",
+    "kind": "enum",
+    "bounds": [
+     "none",
+     "group",
+     "label"
+    ],
+    "default": "none"
+   },
+   {
     "key": "screens.glance_seconds",
     "kind": "int",
     "bounds": [
@@ -717,6 +760,15 @@
     "default": "fade"
    },
    {
+    "key": "screens.version_check_seconds",
+    "kind": "int",
+    "bounds": [
+     0,
+     86400
+    ],
+    "default": 300
+   },
+   {
     "key": "selfwatch.enabled",
     "kind": "bool",
     "default": true
@@ -754,6 +806,14 @@
     "bounds": [
      0,
      600
+    ]
+   },
+   {
+    "key": "sentinel.schedule_countdown_after_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     59
     ]
    },
    {

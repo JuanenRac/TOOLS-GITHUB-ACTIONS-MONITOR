@@ -126,6 +126,7 @@ Die Sprache einer Anzeige wird in dieser Reihenfolge bestimmt: `?lang=xx` in der
 | `screens.hide_healthy` | Standardmäßig aus. Die Flottenanzeige lässt die Quadrate der gesunden Repositories weg; die Übersicht lässt Gruppen ohne Rot oder Gelb und die Zeilen der Wärmekarte ohne Fehler weg. Die Summen bleiben. |
 | `screens.idle_dim_minutes` | 0 = aus (Standard). Hat sich so viele Minuten nichts geändert und ist nichts rot, wird die Anzeige gedimmt, um das Panel zu schonen; die nächste Änderung weckt sie (1 bis 1440). |
 | `screens.min_font_px` | Die kleinste Schrift der Anzeigen in Pixeln, egal wie groß das Fenster ist (Standard 12; 8 bis 32). |
+| `screens.version_check_seconds` | Wie oft eine Wandanzeige `/api/version` abfragt, um zu wissen, ob der Monitor aktualisiert oder neu gestartet wurde (Standard 300; 0 = nie; mindestens 30). |
 | `screens.menu` | Standardmäßig an. Die Schaltfläche Bildschirme in der oberen Leiste. Aus: Die Schaltfläche verschwindet; die Bildschirme laufen weiter unter ihren eigenen Adressen. |
 | `screens.menu_target` | new (Standard): Ein Bildschirm öffnet sich in einem neuen Fenster oder Tab; same: im aktuellen Tab. |
 | `screens.menu_max_windows` | Höchstzahl Fenster, die ein Mehrbildschirm-Satz auf einmal öffnet (Standard 4; 1 bis 9). |
@@ -174,6 +175,7 @@ Die drei Seiten werden in Einheiten gezeichnet, die der kurzen Seite des Fenster
 - Hat eine Liste mehr Zeilen, als in ihren Kasten passen, stehen die wichtigsten zuerst (Rot vor Grün, das Neueste zuerst), und die letzte Zeile sagt, wie viele weggelassen wurden ("+3 weitere"); ohne diese Zeile wird nichts verborgen.
 - Sicherer Rand (Overscan): Viele Fernseher schneiden einige Prozent jedes Rands ab, sofern ihr Bildmodus nicht "Just Scan" oder "Pixel für Pixel" ist. `screens.safe_margin_percent` (standardmäßig 0, 0 bis 10; `?safe=4` für ein Fenster) hält den Inhalt so weit von jedem Rand entfernt, indem alles kleiner gezeichnet wird, und `kiosk.safe_margin_percent` tut dasselbe für den Kiosk. 3 bis 5 versuchen, wenn die ersten Buchstaben der Uhr oder der Rand der Karten abgeschnitten werden.
 - Die kleinste Schrift ist `screens.min_font_px` (standardmäßig 12 Pixel): In einem so kleinen Fenster, dass das Layout eine kleinere Schrift bräuchte, behalten die Anzeigen die Schrift und zeigen weniger Zeilen, wobei sie sagen, wie viele sie weggelassen haben, statt den Text zu verkleinern.
+- Eine Anzeige, die tagelang läuft, folgt dem Monitor: Alle `screens.version_check_seconds` Sekunden (standardmäßig 300) fragt sie `/api/version` ab und lädt sich selbst neu, wenn Version oder Startzeit nicht die sind, mit denen sie geladen wurde; so behält ein Fernseher nach einem Update oder Neustart nie eine alte Seite. Sie lädt nur nach einer gültigen, abweichenden Antwort neu: Ein Monitor, der nicht antwortet, löst nie ein Neuladen aus, und mit 0 fragt sie nie.
 
 ### Wie sie sich verhalten
 

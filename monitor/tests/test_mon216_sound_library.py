@@ -32,6 +32,8 @@ class Library(unittest.TestCase):
         self.assertEqual(len(soundlib.free_names()), len(soundlib.LIBRARY) - len(soundlib.PAGE_KEY))
 
     def test_the_page_and_the_wall_carry_the_generated_copy(self):
+        if not (HERE.parent / "tools" / "make_sound_library.py").is_file():
+            raise unittest.SkipTest("the tools live in the repository, not in the zip of the monitor")
         import make_sound_library
         self.assertEqual(make_sound_library.main(["--check"]), 0, "run: python tools/make_sound_library.py")
         for text in (base.PAGE, base.WALL):

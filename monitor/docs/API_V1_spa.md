@@ -34,7 +34,7 @@ curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/ale
 
 ## 4. Errores
 
-Un error de las rutas propias es un objeto JSON con tres claves: `error` y `code` son estables y están pensados para programas, `message` sigue el idioma de `?lang=` y está pensado para personas. Los códigos son api.bad_cursor, api.bad_limit, api.unknown_field, api.bad_profile y api.server_error. Toda respuesta del prefijo, errores incluidos, lleva la cabecera `X-API-Version: 1`.
+Un error de las rutas propias es un objeto JSON con tres claves: `error` y `code` son estables y están pensados para programas, `message` sigue el idioma de `?lang=` y está pensado para personas. Los códigos son api.bad_cursor, api.bad_limit, api.unknown_field, api.bad_profile y api.server_error. Toda respuesta del prefijo, errores incluidos, lleva la cabecera `X-API-Version: 1`. Cada error lleva también `help`, una frase con el siguiente paso y la guía que leer, en el mismo idioma (el campo falta cuando un código no lo tiene; un programa que lo ignore no pierde nada).
 
 ```
 curl -s -i -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?limit=0"

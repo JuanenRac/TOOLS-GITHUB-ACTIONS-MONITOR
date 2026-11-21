@@ -47,6 +47,7 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `kiosk.high_contrast` | apagado | fondo negro y líneas blancas |
 | `kiosk.rotate_views` | apagado | un preset con varias pestañas cambia de pestaña solo; apagado, la pantalla enseña la primera pestaña del preset |
 | `kiosk.rotate_seconds` | 30 | cuánto se queda cada pestaña (de 5 a 600) |
+| `screens.version_check_seconds` | 300 | cada cuánto la página consulta `/api/version` y se recarga sola si el monitor se actualizó o se reinició (0 = nunca; el mínimo es 30) |
 | `kiosk.safe_margin_percent` | 0 | la parte de cada borde, en porcentaje, que la página deja libre para un televisor que recorta el borde (overscan); de 0 a 10 |
 | `kiosk.scale_with_window` | apagado | el tamaño de letra de arriba es el de una ventana de 1080 px en su lado corto; encendido, crece con la ventana, así que un televisor 4K se ve como uno Full HD |
 

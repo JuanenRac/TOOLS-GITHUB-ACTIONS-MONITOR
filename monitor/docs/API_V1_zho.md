@@ -34,7 +34,7 @@ curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/ale
 
 ## 4. 错误
 
-自有路由的错误是带三个键的 JSON 对象:`error` 和 `code` 稳定,供程序使用;`message` 跟随 `?lang=` 的语言,供人阅读。代码有 api.bad_cursor、api.bad_limit、api.unknown_field、api.bad_profile 和 api.server_error。前缀下的每个响应(包括错误)都带有请求头 `X-API-Version: 1`。
+自有路由的错误是带三个键的 JSON 对象:`error` 和 `code` 稳定,供程序使用;`message` 跟随 `?lang=` 的语言,供人阅读。代码有 api.bad_cursor、api.bad_limit、api.unknown_field、api.bad_profile 和 api.server_error。前缀下的每个响应(包括错误)都带有请求头 `X-API-Version: 1`。每个错误还带有 `help`:一句话,说明下一步和应阅读的指南,语言相同(某个代码没有时该字段不存在;忽略它的程序不会损失任何东西)。
 
 ```
 curl -s -i -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?limit=0"

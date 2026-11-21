@@ -16,7 +16,11 @@ Was sich nur im langen echten Einsatz zeigt: die Migration von 1.8 und 1.9, das 
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 2.1.5
+## Erledigt in 1.8.2 bis 2.1.7
+
+### 2.1.7 - Bildschirme und Kioske auf dem neuesten Stand, eine Telefonansicht, Echtzeit-Zustellung und Wiederherstellung, Skalierung und Beobachtbarkeit, ehrliche Wächter und eine Release-Kette mit unveränderlichen Releases
+
+Version 2.1.7 fasst alles zusammen, was für 2.1.6 und 2.1.7 geplant war. Nach Themen: Bildschirme und Kioske (Neuladen bei neuer Version, Flottenbildschirm, Dichte, Palette, Kontrast, Overscan, Drucken und Speichern eines Berichts); Telefon und PWA (als App installieren, kompakte Ansicht, Kopplung per QR, Palette und Tastenkürzel); Echtzeit und Wiederherstellung (Webhook-Warteschlange, WebSocket ohne öffentliche Adresse, GitHub-Status, Herzschlag); Skalierung und Beobachtbarkeit (Histogramme, Kontingent je Bucket, OpenTelemetry, Arbeitsbereiche, Kosten und CO2); Kommandozeile und KI (Formate, watch, doctor, Vorschläge mit Freigabe, Alarmverlauf); die Wächter mit ehrlichen Lesungen und ohne falsche Befunde; und die Release-Kette (unveränderliche Releases, ein zizmor-Job, ein Updater mit Kopien und Protokoll).
 
 ### 2.1.5 - Eine vollständige Konfiguration, Aufzeichnungen und Caches, die sich nicht täuschen lassen, ein Assistent mit festen Fragen, eine Lese-API mit Vertrag und ein reichhaltigerer Tagestrend
 
