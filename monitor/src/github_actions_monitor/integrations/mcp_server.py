@@ -197,7 +197,7 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
     if name == "whoami":
         return json.dumps(mcp_extras.whoami(config), indent=1)
     if name == "gh_action":
-        return ai_alerts.redact(mcp_extras.governed_write(config, arguments, runner), 4000)
+        return mcp_extras.governed_write(config, arguments, runner)      # the preview is built from validated fields and its reason is cleaned there
     raise ValueError("unknown tool")
 
 

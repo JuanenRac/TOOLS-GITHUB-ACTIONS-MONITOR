@@ -7,7 +7,7 @@
   * `describe_capabilities`, `ping` and `whoami`: what the server can do and with which switches, that it answers, and which account and mode it works for. Read only.
   * `dashboard_url` in the answers about alerts, quota and diagnoses: the address of the page of the monitor that shows the same thing.
   * Writes (`mcp.write_tools`, OFF): the single tool `gh_action` plans an action on GitHub and shows what it would send (the preview: method, endpoint, repository, number, reason); nothing is sent
-    until the same call comes back with `confirm: true` and the `plan_id` of the preview. It goes through the same module as the page (`integrations/ghactions`), so it needs `github_actions.enabled`,
+    from here: a person confirms in the monitor (the page or the local command line), never over this channel. It goes through the same module as the page (`integrations/ghactions`), so it needs `github_actions.enabled`,
     a reason, an operator (here `mcp`), the permission of the credential and the single writer; every attempt is written in the log of actions. With `mcp.write_tools` off the tool does not even exist."""
 import json
 
@@ -98,8 +98,8 @@ def whoami(config):
     return {"account": toolconfig.github_owner(config) or "", "mode": "mcp over standard input and output (this computer)", "dashboard_url": dashboard_url()}
 
 
-WRITE_TOOL = {"name": "gh_action", "write": True, "description": "Plan an action on GitHub (rerun_failed, cancel, close_issue, close_pr, merge_pr) and see what it would send; nothing is sent until the same call comes back with confirm true and the plan_id. Needs mcp.write_tools and github_actions.enabled; a reason is required.",
-              "inputSchema": {"type": "object", "properties": {"action": {"type": "string"}, "repo": {"type": "string"}, "number": {"type": "integer"}, "reason": {"type": "string"}, "confirm": {"type": "boolean"}, "plan_id": {"type": "string"}},
+WRITE_TOOL = {"name": "gh_action", "write": True, "description": "Plan an action on GitHub (rerun_failed, cancel, close_issue, close_pr, merge_pr) and see what it would send; nothing is sent from here. A person must confirm the action in the monitor (its page or the local command line). Needs mcp.write_tools and github_actions.enabled; a reason is required.",
+              "inputSchema": {"type": "object", "properties": {"action": {"type": "string"}, "repo": {"type": "string"}, "number": {"type": "integer"}, "reason": {"type": "string"}},
                               "required": ["action", "repo", "number", "reason"]}}
 EXTRA_TOOLS = [{"name": "describe_capabilities", "description": "What this server can do, with which switches on, and the address of the dashboard.", "inputSchema": {"type": "object", "properties": {}}},
                {"name": "ping", "description": "Answers pong: the server is alive.", "inputSchema": {"type": "object", "properties": {}}},
@@ -112,13 +112,13 @@ def governed_write(config, arguments, runner):
     from github_actions_monitor.integrations import ghactions
     if not settings(config)["write_tools"]:
         raise ValueError("writing is off: turn on mcp.write_tools")
-    if arguments.get("confirm") is True:
-        plan_id = str(arguments.get("plan_id") or "")
-        if not plan_id:
-            raise ValueError("confirm needs the plan_id of the preview")
-        return json.dumps(ghactions.execute(config, plan_id, runner), ensure_ascii=False)
+    if arguments.get("confirm") is True or arguments.get("plan_id"):      # the confirmation is a person's, in the monitor: never the channel that planned it
+        raise ValueError("needs a person: confirm this action in the monitor (the page or the local command line); nothing was sent")
     item, why = ghactions.plan(config, toolconfig.github_owner(config), arguments.get("action"), arguments.get("repo"), arguments.get("number"), reason=arguments.get("reason") or "", operator="mcp", run_gh=runner)
     if item is None:
         raise ValueError("refused: " + why)
-    preview = {k: item[k] for k in ("action", "method", "endpoint", "repo", "number", "reason", "operator")}
-    return json.dumps({"preview": preview, "touches": 1, "plan_id": item["id"], "to_confirm": "call gh_action again with confirm true and this plan_id", "dashboard_url": dashboard_url()}, ensure_ascii=False)
+    from github_actions_monitor.security import redactor
+    preview = {k: item[k] for k in ("action", "method", "endpoint", "repo", "number", "operator")}      # these were validated one by one: the endpoint stays readable
+    preview["reason"] = redactor.redact(item["reason"], 300)
+    ghactions.PENDING.take(item["id"], "ghaction")      # a plan nobody can confirm over this channel is not kept
+    return json.dumps({"preview": preview, "touches": 1, "to_confirm": "a person must confirm this action in the monitor (the page or the local command line); nothing was sent", "dashboard_url": dashboard_url()}, ensure_ascii=False)
