@@ -17,6 +17,7 @@ the server can send, figures of six and seven digits, no data at all, a single d
     clipped       a box whose content is bigger than the box (cut without a trace)
     cut           a label that ends in "..." (only the names of repositories and workflows may, and they carry their full text in `title`)
     overlap       two texts that cover each other
+    contrast      a text under 4.5:1 (3:1 when large) against what is behind it, measured in the browser with the computed colours
     small         a type below the smallest that can be read from a few metres (a part of the short side of the window)
     silent        rows of a list hidden without the "+N more" line that says so
     scroll        a panel that scrolls inside (nobody can scroll a wall; the wall screens have none, the page of the kiosk has several)
@@ -30,6 +31,7 @@ import socket
 import subprocess
 import sys
 import time
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -62,6 +64,29 @@ LIB = r"""
   const css=e=>getComputedStyle(e);
   const where=e=>{const p=[];for(let n=e;n&&n!==document.body&&p.length<3;n=n.parentElement){p.push(n.tagName.toLowerCase()+(n.id?"#"+n.id:"")+(n.classList.length&&!n.id?"."+[...n.classList].slice(0,2).join("."):""))}return p.join("<")};
   const shown=e=>{if(e.closest(".vh,.sr-only"))return false;for(let n=e;n&&n!==document.documentElement;n=n.parentElement){const s=css(n);if(s.display==="none"||s.visibility==="hidden")return false}const r=e.getBoundingClientRect();return r.width>0&&r.height>0};
+  /* ---- contrast of a text with what is behind it (WCAG 2: 4.5:1, 3:1 for large text); a background that is an image or a gradient cannot be measured here and is skipped ---- */
+  const rgba=c=>{const k=/^color\(srgb ([^)]+)\)/.exec(c||"");if(k){const q=k[1].split(/[ \/]+/).filter(Boolean).map(parseFloat);return q.length<3||q.slice(0,3).some(isNaN)?null:{r:q[0]*255,g:q[1]*255,b:q[2]*255,a:q.length>3&&!isNaN(q[3])?q[3]:1}}const m=/rgba?\(([^)]+)\)/.exec(c||"");if(!m)return null;const p=m[1].split(/[ ,\/]+/).filter(Boolean).map(parseFloat);return p.length<3||p.slice(0,3).some(isNaN)?null:{r:p[0],g:p[1],b:p[2],a:p.length>3&&!isNaN(p[3])?p[3]:1}};
+  const mix=(f,b,a)=>({r:f.r*a+b.r*(1-a),g:f.g*a+b.g*(1-a),b:f.b*a+b.b*(1-a),a:1});
+  const lum=c=>{const l=v=>{v/=255;return v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4)};return 0.2126*l(c.r)+0.7152*l(c.g)+0.0722*l(c.b)};
+  function backdrop(el){      /* the colours that can be behind a text: one, or the stops of a gradient (the worst of them decides); null when an image is in the way */
+    const stack=[];let spread=null;
+    for(let n=el;n;n=n.parentElement){
+      const s=css(n),img=s.backgroundImage;
+      if(img&&img!=="none"){const stops=(img.match(/rgba?\([^)]*\)/g)||[]).map(rgba).filter(Boolean);if(!/gradient/.test(img)||!stops.length)return null;if(!spread)spread=stops}
+      const c=rgba(s.backgroundColor);if(c&&c.a>0){stack.push(c);if(c.a>=1)break}
+    }
+    let base=stack.length&&stack[stack.length-1].a>=1?stack.pop():rgba(css(document.documentElement).backgroundColor);
+    if(!base||base.a<1)base={r:255,g:255,b:255,a:1};
+    while(stack.length){const c=stack.pop();base=mix(c,base,c.a)}
+    return spread?spread.map(c=>mix(c,base,c.a)):[base];
+  }
+  function contrast(el){
+    const s=css(el),fg=rgba(s.color),list=backdrop(el);if(!fg||!list)return null;
+    let a=fg.a;for(let n=el;n&&n!==document.documentElement;n=n.parentElement){const o=parseFloat(css(n).opacity);if(!isNaN(o)&&o<1)a*=o}
+    let worst=99;for(const bg of list){const f=mix(fg,bg,a),hi=Math.max(lum(f),lum(bg)),lo=Math.min(lum(f),lum(bg));worst=Math.min(worst,(hi+0.05)/(lo+0.05))}
+    const fs=parseFloat(s.fontSize),bold=parseInt(s.fontWeight,10)>=700,large=fs>=24||(fs>=18.66&&bold);
+    return {ratio:worst,need:large?3:4.5};
+  }
   /* ---- the measure ---- */
   function add(ctx,kind,e,detail){const key=ctx.screen+"|"+ctx.data+"|"+kind+"|"+where(e)+"|"+detail.slice(0,24);if(seen.has(key))return;seen.add(key);found.push({kind,at:where(e),text:(e.textContent||"").trim().slice(0,60),detail,screen:ctx.screen,data:ctx.data})}
   const NAMES=".nm,.hn,.gn,.tn";
@@ -94,12 +119,14 @@ LIB = r"""
       if(e.matches(".card,.sen,.tile,header,.foot,#banner")){const q=e.getBoundingClientRect(),r=clipRect({left:q.left,right:q.right,top:q.top,bottom:q.bottom},e.parentElement||e);if(r.right>r.left&&r.bottom>r.top&&(r.left<ix-1.5||r.right>vw-ix+1.5||r.top<iy-1.5||r.bottom>vh-iy+1.5))add(ctx,"outside",e,"box "+[r.left,r.top,r.right,r.bottom].map(Math.round).join(","))}      /* a box inside a panel that scrolls is judged by the panel (kind scroll) */
     }
     /* texts: where they are, how big, whether two cover each other */
+    let cTexts=0,cSeen=0;
     const items=[],walker=document.createTreeWalker(stage,NodeFilter.SHOW_TEXT);
     for(let t=walker.nextNode();t;t=walker.nextNode()){
       if(!t.nodeValue.trim())continue;const el=t.parentElement;if(!el||el.closest("svg,script,style")||!shown(el))continue;
       const range=document.createRange();range.selectNodeContents(t);const rr=[...range.getClientRects()].filter(r=>r.width>0.5&&r.height>0.5);if(!rr.length)continue;
       const fs=parseFloat(css(el).fontSize);
       if(fs*zoom<minFont-0.01)add(ctx,"small",el,(fs*zoom).toFixed(1)+"px < "+minFont.toFixed(1)+"px");
+      const cr=contrast(el);cTexts++;if(cr)cSeen++;if(cr&&cr.ratio<cr.need-0.01)add(ctx,"contrast",el,cr.ratio.toFixed(2)+":1 < "+cr.need+":1");
       for(const line of rr){      /* one rectangle for each line of the text: the box around a text of several lines would cover its neighbours */
         const r=clipRect({left:line.left,right:line.right,top:line.top,bottom:line.bottom},el);      /* what can be seen of it: a box that clips cuts it, and the box tests above report that */
         if(r.right<=r.left||r.bottom<=r.top)continue;
@@ -114,6 +141,7 @@ LIB = r"""
       const w=Math.min(a.r.right,b.r.right)-Math.max(a.r.left,b.r.left),h=Math.min(a.r.bottom,b.r.bottom)-Math.max(a.r.top,b.r.top);
       if(w>2&&h>0.35*Math.min(a.r.bottom-a.r.top,b.r.bottom-b.r.top))add(ctx,"overlap",a.el,"with "+where(b.el)+" ("+Math.round(w)+"x"+Math.round(h)+")");
     }
+    if(cTexts&&cSeen*2<cTexts)found.push({kind:"contrast",at:"html",text:"",detail:"only "+cSeen+" of "+cTexts+" texts could be measured (a background that is not a colour or a gradient)",screen:ctx.screen,data:ctx.data});      /* a gate that sees nothing must not pass */
     /* lists that hid rows must say so */
     for(const l of stage.querySelectorAll(".list,.ticker,.gmap")){if(!shown(l))continue;const hid=[...l.children].filter(c=>c.hidden).length;if(hid&&!l.querySelector(":scope>.more"))add(ctx,"silent",l,hid+" rows hidden")}
   }
@@ -269,20 +297,22 @@ def start_demo():
     raise RuntimeError("the demo monitor did not start")
 
 
-def measure_one(browser, base, lang, size, data=DATA, kinds=KINDS, safe=0, inset=None):
+def measure_one(browser, base, lang, size, data=DATA, kinds=KINDS, safe=0, inset=None, theme=None):
     """One browser window: every kind of data on every screen, in one language and one size. Returns the report of the page ({found, done, errors, ...})."""
     query = f"lang={lang}&kinds={','.join(kinds)}&data={','.join(data)}&density=normal&blink=off"
     if safe:
         query += f"&safe={safe:g}"
     if inset is not None:
         query += f"&inset={inset:g}"
+    if theme:
+        query += "&theme=" + urllib.parse.quote(theme)
     report = check_overflow.measure(browser, f"{base}/screen/overview?{query}", SIZES[size] if isinstance(size, str) else size, report="screens-measure", flags=(REDUCED,))
     if len(report.get("done", [])) != len(data) * len(kinds):      # the budget of the browser ran out before every look was made: say it, do not pass in silence
         report.setdefault("found", []).append({"kind": "incomplete", "at": "page", "text": "", "detail": "%d of %d looks" % (len(report.get("done", [])), len(data) * len(kinds)), "screen": "-", "data": "-"})
     return report
 
 
-def run(langs=LANGS, sizes=tuple(SIZES), data=DATA, kinds=KINDS, safe=0, inset=None, quiet=False, surface="wall", presets=tuple(PRESETS), scale=150, fit=True):
+def run(langs=LANGS, sizes=tuple(SIZES), data=DATA, kinds=KINDS, safe=0, inset=None, quiet=False, surface="wall", presets=tuple(PRESETS), scale=150, fit=True, theme=None):
     """{(lang, size): report} for every combination (for the kiosk, {(lang, size, preset): report}); None when there is no browser. Each report also carries `found` with the findings."""
     browser = check_overflow.edge()
     if not browser:
@@ -295,7 +325,7 @@ def run(langs=LANGS, sizes=tuple(SIZES), data=DATA, kinds=KINDS, safe=0, inset=N
         for size in sizes:
             for lang in langs:
                 if surface == "wall":
-                    report = measure_one(browser, base, lang, size, data, kinds, safe, inset)
+                    report = measure_one(browser, base, lang, size, data, kinds, safe, inset, theme)
                     results[(lang, size)] = report
                     if not quiet:
                         print(f"{size:10} {lang}: {len(report.get('found', []))} finding(s)", flush=True)
@@ -343,6 +373,7 @@ def main(argv=None):
     ap.add_argument("--kind", nargs="*", default=list(KINDS), choices=list(KINDS))
     ap.add_argument("--safe", type=float, default=0, help="the safe margin of the window in percent (the setting screens.safe_margin_percent), and the margin the measure demands")
     ap.add_argument("--inset", type=float, default=None, help="only demand that the content stays this many percent inside the edge (without asking the page for a margin)")
+    ap.add_argument("--theme", nargs="*", default=[], help="measure with these themes (?theme=); without it, the theme the settings give each screen")
     ap.add_argument("--report", default="", help="write every finding as JSON to this file")
     ap.add_argument("--list", action="store_true", help="print the findings one by one")
     args = ap.parse_args(argv)
@@ -350,11 +381,13 @@ def main(argv=None):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     except (AttributeError, ValueError):
         pass
-    results = run(args.lang, args.size, args.data, args.kind, args.safe, args.inset, surface=args.surface, presets=args.preset, scale=args.scale, fit=not args.no_fit)
-    if results is None:
-        print("SCREENS=SKIP (no Edge, Chrome or Chromium on this computer)")
-        return 0
-    rows = flat(results)
+    rows = []
+    for theme in args.theme or [None]:
+        results = run(args.lang, args.size, args.data, args.kind, args.safe, args.inset, surface=args.surface, presets=args.preset, scale=args.scale, fit=not args.no_fit, theme=theme)
+        if results is None:
+            print("SCREENS=SKIP (no Edge, Chrome or Chromium on this computer)")
+            return 0
+        rows += [{**row, "theme": theme or "default"} for row in flat(results)]
     by_kind = {}
     for row in rows:
         by_kind[row["kind"]] = by_kind.get(row["kind"], 0) + 1
@@ -362,7 +395,7 @@ def main(argv=None):
         Path(args.report).write_text(json.dumps({"total": len(rows), "by_kind": by_kind, "findings": rows}, ensure_ascii=False, indent=1), encoding="utf-8")
     if args.list:
         for row in rows:
-            print(f'{row["size"]:10} {row["lang"]} {row["screen"]:9} {row["data"]:6} {row["kind"]:8} {row["at"]}  {row["detail"]}  | {row["text"][:40]}')
+            print(f'{row.get("theme", ""):13} {row["size"]:10} {row["lang"]} {row["screen"]:9} {row["data"]:6} {row["kind"]:8} {row["at"]}  {row["detail"]}  | {row["text"][:40]}')
     print("SCREENS=" + ("PASS" if not rows else "FAIL"), "findings=%d" % len(rows), json.dumps(by_kind, sort_keys=True))
     return 0 if not rows else 1
 

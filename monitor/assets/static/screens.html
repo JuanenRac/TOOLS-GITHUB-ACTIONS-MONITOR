@@ -15,6 +15,7 @@
 /* the sixteen themes of the main page (read from the page itself by the server) and the names the wall screens give to their colours */
 /*THEME_CSS*/
 :root[data-studio]{--bg2:var(--panel2);--card:var(--panel);--card2:var(--panel2);--tx:var(--text);--cy:var(--acc);--cy2:var(--acc2);--info:var(--run);--glow:color-mix(in srgb,var(--acc) 22%,transparent);--halo:color-mix(in srgb,var(--bad) 55%,transparent)}
+:root{--wmut:var(--mut)}:root[data-studio]{--wmut:color-mix(in srgb,var(--mut) 55%,var(--text))}      /* the muted text of the wall screens: a studio theme draws on gradients, so it leans toward the text colour until it reads from a distance */
 :root[data-theme=contrast]{--bg:#000;--bg2:#000;--card:#000;--card2:#000;--line:#ffffff;--tx:#fff;--mut:#e0e0e0;--cy:#00e5ff;--cy2:#00e5ff;--ok:#00ff7f;--warn:#ffd700;--bad:#ff4040;--info:#7ab8ff;--glow:rgba(255,255,255,.12);--halo:rgba(255,64,64,.8)}
 *{box-sizing:border-box;margin:0;padding:0}
 [hidden]{display:none!important}
@@ -35,11 +36,11 @@ body.offline #stage{opacity:.5;filter:grayscale(.7)}
 header{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex:0 0 auto}
 .brand{display:flex;align-items:center;gap:.7rem;min-width:0}
 .brand b{font-size:1.5rem;line-height:1.5;letter-spacing:.02em;white-space:nowrap;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
-.brand .tag{font-size:.95rem;line-height:1.4;color:var(--mut);border:1px solid var(--line);border-radius:.4rem;padding:.1rem .5rem;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.brand .tag{font-size:.95rem;line-height:1.4;color:var(--wmut);border:1px solid var(--line);border-radius:.4rem;padding:.1rem .5rem;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .pulse{width:.8rem;height:.8rem;border-radius:50%;background:var(--cy);box-shadow:0 0 .9rem var(--cy);flex:0 0 auto}
 .clock{font-variant-numeric:tabular-nums;font-size:1.7rem;font-weight:600;text-align:right;white-space:nowrap;flex:0 0 auto}
-.clock small{display:block;font-size:.8rem;color:var(--mut);font-weight:400}
-.mid{flex:1 1 0;min-width:0;display:flex;justify-content:center;gap:.5rem;font-size:.9rem;color:var(--mut)}
+.clock small{display:block;font-size:.8rem;color:var(--wmut);font-weight:400}
+.mid{flex:1 1 0;min-width:0;display:flex;justify-content:center;gap:.5rem;font-size:.9rem;color:var(--wmut)}
 .dots{display:flex;gap:.45rem;align-items:center}
 .dots i{width:.55rem;height:.55rem;border-radius:50%;background:var(--line);display:block}
 .dots i.on{background:var(--cy)}
@@ -52,20 +53,20 @@ header{display:flex;align-items:center;justify-content:space-between;gap:1rem;fl
 .screen.out.slide{transform:translateX(-4rem)}
 .wavehost{position:relative}
 .card{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:.8rem;padding:.8rem 1rem;min-width:0;min-height:0;display:flex;flex-direction:column;gap:.5rem;position:relative;overflow:hidden;box-shadow:0 0 1.4rem var(--glow)}
-.card h2{font-size:.95rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);line-height:1.15;overflow-wrap:anywhere;flex:0 0 auto}
+.card h2{font-size:.95rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--wmut);line-height:1.15;overflow-wrap:anywhere;flex:0 0 auto}
 .card .body{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;gap:.35rem}
 .big{font-size:3rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
-.mut{color:var(--mut)}
-.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}.info{color:var(--info)}.unknown{color:var(--mut)}
+.mut{color:var(--wmut)}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}.info{color:var(--info)}.unknown{color:var(--wmut)}
 .ico{display:inline-block;width:1.2em;text-align:center;font-weight:700}
 .lamp::before{content:"\25CF"}
 .l-ok::before{content:"\2713"}.l-warn::before{content:"!"}.l-bad::before{content:"\2715"}.l-info::before{content:"i"}.l-unknown::before{content:"?"}
 .row{display:flex;align-items:center;gap:.6rem;min-width:0}
 .row .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row .v{flex:0 0 auto;font-variant-numeric:tabular-nums;color:var(--mut);white-space:nowrap}
+.row .v{flex:0 0 auto;font-variant-numeric:tabular-nums;color:var(--wmut);white-space:nowrap}
 .list{display:flex;flex-direction:column;gap:.3rem;min-height:0;overflow:hidden;flex:1}
 .list>*{flex:0 0 auto}
-.empty{color:var(--mut);display:flex;align-items:center;gap:.5rem;font-size:1.05rem}
+.empty{color:var(--wmut);display:flex;align-items:center;gap:.5rem;font-size:1.05rem}
 svg{display:block}
 .ring{position:relative;aspect-ratio:1;height:100%;max-height:100%;min-height:0}
 .ring svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
@@ -73,7 +74,7 @@ svg{display:block}
 .ring .arc{fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset 1.4s cubic-bezier(.2,.8,.2,1),stroke .6s}
 .ring .mid2{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
 .ring .mid2 b{font-size:2.6rem;line-height:1.2;font-variant-numeric:tabular-nums}
-.ring .mid2 span{font-size:1rem;line-height:1.2;color:var(--mut)}
+.ring .mid2 span{font-size:1rem;line-height:1.2;color:var(--wmut)}
 .scorebox{display:flex;align-items:center;gap:1rem;flex:1;min-height:0;min-width:0}
 .scorebox>div:last-child{min-width:0;overflow-wrap:anywhere}
 .letter{font-size:5rem;font-weight:800;line-height:1.3}
@@ -81,7 +82,7 @@ svg{display:block}
 .fleet{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem;flex:1;min-height:0}
 .tile{border:1px solid var(--line);border-radius:.6rem;padding:.4rem .6rem;display:flex;flex-direction:column;justify-content:center;min-width:0;position:relative}
 .tile .big{font-size:2.6rem}
-.tile .lab{font-size:.9rem;color:var(--mut);display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;line-height:1.15}
+.tile .lab{font-size:.9rem;color:var(--wmut);display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;line-height:1.15}
 .tile .lab span{min-width:0;overflow-wrap:anywhere}
 .tile.t-ok .big{color:var(--ok)}.tile.t-bad .big{color:var(--bad)}.tile.t-warn .big{color:var(--warn)}.tile.t-info .big{color:var(--info)}
 /* the map of the fleet by groups (the grouping of the Fleet view): one bar per group, the bad ones first; it takes the rows that fit and no more */
@@ -89,20 +90,20 @@ svg{display:block}
 #a-fleet.hasmap .tile{padding:.15rem .5rem}#a-fleet.hasmap .tile .big{font-size:1.7rem;line-height:1.1}#a-fleet.hasmap .tile .lab{font-size:.8rem}
 .gmap{display:flex;flex-direction:column;gap:.22rem;min-height:0;overflow:hidden;flex:1}
 .gmap[hidden]{display:none}
-.gmap .gh{font-size:.8rem;color:var(--mut);line-height:1.15;overflow-wrap:anywhere;flex:0 0 auto}
+.gmap .gh{font-size:.8rem;color:var(--wmut);line-height:1.15;overflow-wrap:anywhere;flex:0 0 auto}
 .gmap>*{flex:0 0 auto}
 .gmap .g{display:grid;grid-template-columns:minmax(3rem,32%) 1fr minmax(2.4rem,auto);gap:.4rem;align-items:center;font-size:.85rem;min-height:0}
 .gmap .g .gn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gmap .g .gb{display:flex;height:.7rem;border-radius:.35rem;overflow:hidden;background:var(--line)}
-.gmap .g .gb i{display:block;height:100%}.gmap .g .gb .s-bad{background:var(--bad)}.gmap .g .gb .s-warn{background:var(--warn)}.gmap .g .gb .s-ok{background:var(--ok)}.gmap .g .gb .s-unknown{background:var(--mut);opacity:.5}
-.gmap .g .gv{text-align:right;font-variant-numeric:tabular-nums;color:var(--mut)}
+.gmap .g .gb i{display:block;height:100%}.gmap .g .gb .s-bad{background:var(--bad)}.gmap .g .gb .s-warn{background:var(--warn)}.gmap .g .gb .s-ok{background:var(--ok)}.gmap .g .gb .s-unknown{background:var(--wmut);opacity:.5}
+.gmap .g .gv{text-align:right;font-variant-numeric:tabular-nums;color:var(--wmut)}
 .flash-ok{animation:flashok 1.4s ease-out 1}
 .chart{flex:1;min-height:0;position:relative}
 .chart svg{position:absolute;inset:0;width:100%;height:100%}
-.chart .axis{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;gap:.5rem;font-size:.8rem;line-height:1.1;color:var(--mut)}
-.more{color:var(--mut);font-size:.9rem;font-weight:600;letter-spacing:.02em}
+.chart .axis{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;gap:.5rem;font-size:.8rem;line-height:1.1;color:var(--wmut)}
+.more{color:var(--wmut);font-size:.9rem;font-weight:600;letter-spacing:.02em}
 .heat .more{grid-column:1/-1;align-self:center}
-.legend{display:flex;flex-wrap:wrap;gap:.2rem 1rem;font-size:.85rem;color:var(--mut);flex:0 0 auto}
+.legend{display:flex;flex-wrap:wrap;gap:.2rem 1rem;font-size:.85rem;color:var(--wmut);flex:0 0 auto}
 .legend i{display:inline-block;width:.8rem;height:.8rem;border-radius:.2rem;margin-right:.35rem;vertical-align:-.1rem}
 .area{vector-effect:non-scaling-stroke}
 .heat{display:grid;gap:.18rem;flex:1;min-height:0;grid-auto-rows:minmax(1.1rem,1fr);overflow:hidden}
@@ -118,12 +119,12 @@ svg{display:block}
 .rowbar.stuck{border-color:var(--warn)}
 .rowbar .top{display:flex;gap:.6rem;align-items:baseline;min-width:0}
 .rowbar .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
-.rowbar .v{color:var(--mut);font-variant-numeric:tabular-nums;flex:0 0 auto;white-space:nowrap}
-.chip{display:inline-block;border:1px solid var(--line);border-radius:.4rem;padding:0 .4rem;font-size:.8rem;color:var(--mut);white-space:nowrap}
+.rowbar .v{color:var(--wmut);font-variant-numeric:tabular-nums;flex:0 0 auto;white-space:nowrap}
+.chip{display:inline-block;border:1px solid var(--line);border-radius:.4rem;padding:0 .4rem;font-size:.8rem;color:var(--wmut);white-space:nowrap}
 .chip.ok{border-color:var(--ok);color:var(--ok)}.chip.warn{border-color:var(--warn);color:var(--warn)}.chip.bad{border-color:var(--bad);color:var(--bad)}
 .failrow{display:flex;gap:.6rem;align-items:center;border:1px solid var(--bad);border-radius:.5rem;padding:.25rem .6rem;min-width:0;background:color-mix(in srgb,var(--bad) 9%,transparent)}
 .failrow .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.failrow .v{color:var(--mut);font-variant-numeric:tabular-nums;flex:0 0 auto;white-space:nowrap}
+.failrow .v{color:var(--wmut);font-variant-numeric:tabular-nums;flex:0 0 auto;white-space:nowrap}
 .gauge{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
 .gauge svg{width:100%;height:100%;max-height:100%}
 .gauge .mid2{position:absolute;left:0;right:0;bottom:8%;text-align:center}
@@ -133,14 +134,14 @@ svg{display:block}
 .ticker{display:flex;flex-direction:column;gap:.18rem;overflow:hidden;flex:1;min-height:0}
 .ticker .ev{display:flex;gap:.6rem;align-items:center;min-width:0;white-space:nowrap}
 .ticker .ev .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
-.ticker .ev .v{color:var(--mut);flex:0 0 auto;font-variant-numeric:tabular-nums}
+.ticker .ev .v{color:var(--wmut);flex:0 0 auto;font-variant-numeric:tabular-nums}
 .timeline{position:relative;flex:1;min-height:0}
 .timeline .track{position:absolute;left:0;right:0;top:50%;height:2px;background:var(--line)}
 .timeline .now{position:absolute;right:0;top:12%;bottom:12%;width:2px;background:var(--cy);box-shadow:0 0 .8rem var(--cy)}
-.timeline .tick{position:absolute;top:50%;transform:translate(-50%,0);font-size:.8rem;color:var(--mut);padding-top:.5rem;white-space:nowrap}
+.timeline .tick{position:absolute;top:50%;transform:translate(-50%,0);font-size:.8rem;color:var(--wmut);padding-top:.5rem;white-space:nowrap}
 .timeline .tick.last{transform:translate(-100%,0);padding-right:.5rem}
 .timeline .pt{position:absolute;width:1.1rem;height:1.1rem;border-radius:50%;transform:translate(-50%,-50%);border:2px solid var(--bg);transition:left 1s linear}
-.timeline .pt.ok{background:var(--ok)}.timeline .pt.bad{background:var(--bad)}.timeline .pt.run{background:var(--cy)}.timeline .pt.wait{background:var(--warn)}.timeline .pt.skip{background:var(--mut)}
+.timeline .pt.ok{background:var(--ok)}.timeline .pt.bad{background:var(--bad)}.timeline .pt.run{background:var(--cy)}.timeline .pt.wait{background:var(--warn)}.timeline .pt.skip{background:var(--wmut)}
 .sen-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:1fr;gap:.7rem;min-height:0}
 .sen{border:1px solid var(--line);border-radius:.7rem;padding:.5rem .7rem;display:flex;flex-direction:column;gap:.3rem;min-width:0;min-height:0;overflow:hidden;background:linear-gradient(180deg,var(--card),var(--card2))}
 .sen .hd{display:flex;gap:.5rem;align-items:center;min-width:0}
@@ -163,9 +164,9 @@ svg{display:block}
 .bars .br .bar{flex:1}
 .bars .br .v{flex:0 0 auto;min-width:2.6rem;text-align:right;font-variant-numeric:tabular-nums}
 .bars .br.critical i,.bars .br.error i{background:var(--bad)}.bars .br.warning i{background:var(--warn)}.bars .br.info i{background:var(--info)}
-.kiosk{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(.3rem + var(--safe)*1vh);opacity:.25;background:none;border:1px solid var(--line);color:var(--mut);border-radius:.4rem;padding:.1rem .5rem;font-size:.8rem;cursor:pointer}
+.kiosk{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(.3rem + var(--safe)*1vh);opacity:.25;background:none;border:1px solid var(--line);color:var(--wmut);border-radius:.4rem;padding:.1rem .5rem;font-size:.8rem;cursor:pointer}
 .kiosk:hover,.kiosk:focus{opacity:1}
-.foot{display:flex;justify-content:space-between;align-items:center;gap:1rem;color:var(--mut);font-size:.8rem;flex:0 0 auto}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:1rem;color:var(--wmut);font-size:.8rem;flex:0 0 auto}
 /* the logo of the organization: a box of its own in the header or the footer, so it never covers the content; its largest size is in pixels at 1920 x 1080 and grows with the screen; the picture keeps its shape */
 .orglogo{display:block;flex:0 0 auto;width:auto;height:auto;object-fit:contain;max-width:calc(var(--lw,160)*.0625rem);max-height:calc(var(--lh,64)*.0625rem)}
 .orglogo[hidden]{display:none}
@@ -182,19 +183,19 @@ header>.orglogo:first-child{margin-right:1rem}header>.orglogo:last-child{margin-
 .fg{border:1px solid var(--line);border-radius:.6rem;padding:.4rem .6rem;display:flex;flex-direction:column;gap:.3rem;min-height:0;min-width:0;overflow:hidden;position:relative}
 .fg .gh{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:0 .5rem;font-size:.9rem;line-height:1.15;flex:0 0 auto;min-width:0}
 .fg .gh b{min-width:0;overflow-wrap:anywhere}
-.fg .gh span{color:var(--mut);font-size:.85rem;min-width:0;overflow-wrap:anywhere}
+.fg .gh span{color:var(--wmut);font-size:.85rem;min-width:0;overflow-wrap:anywhere}
 .fg .tiles{flex:1 1 0;min-height:0;display:flex;flex-wrap:wrap;align-content:flex-start;gap:.25rem;overflow:hidden}
 .tiles .ft{width:.85rem;height:.85rem;border-radius:.2rem;background:var(--ok);opacity:.8}
 .tiles .tn{font-size:.8rem;line-height:1.25;padding:0 .4rem;border-radius:.3rem;border:1px solid var(--line);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tiles .tn.s-bad{color:var(--bad);border-color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,transparent)}
 .tiles .tn.s-warn{color:var(--warn);border-color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent)}
-.tiles .tn.s-unknown{color:var(--mut)}
+.tiles .tn.s-unknown{color:var(--wmut)}
 .tiles .more{flex:0 0 100%}
 .fgroups>.more{grid-column:1/-1}
 /* the glance: what changed in the last look, for a few seconds, in the middle of the header */
 #glance{display:flex;flex-wrap:wrap;gap:.2rem .4rem;min-width:0;justify-content:center;align-items:center}
 #glance span{border:1px solid var(--line);border-radius:.4rem;padding:0 .45rem;font-size:.85rem;line-height:1.3;white-space:nowrap;color:var(--tx)}
-#glance span.up{border-color:var(--bad);color:var(--bad)}#glance span.down{border-color:var(--ok);color:var(--ok)}
+#glance span.up{border-color:var(--bad)}#glance span.down{border-color:var(--ok)}
 /* now */
 #s-now{grid-template-columns:1.5fr 1fr 1fr;grid-template-rows:1fr 1fr .62fr;grid-template-areas:"run queue fail" "run appr merge" "tl tl tl"}
 #n-run{grid-area:run}#n-queue{grid-area:queue}#n-fail{grid-area:fail}#n-appr{grid-area:appr}#n-merge{grid-area:merge}#n-tl{grid-area:tl}
@@ -613,7 +614,7 @@ function renderOverview(d){
   $("a-top-h").textContent=T("ui.scr_top_red");$("a-queue-h").textContent=T("ui.scr_queue");$("a-events-h").textContent=T("ui.scr_events");$("a-api-h").textContent=T("ui.scr_api");
   const sc=d.score||{},f=d.fleet||{};
   const has=sc.state==="scored"&&sc.value!=null;
-  const col=!has?"var(--mut)":sc.value>=80?"var(--ok)":sc.value>=60?"var(--warn)":"var(--bad)";
+  const col=!has?"var(--wmut)":sc.value>=80?"var(--ok)":sc.value>=60?"var(--warn)":"var(--bad)";
   ring($("r-score"),has?sc.value/100:0,col,has?Math.round(sc.value):"–",has?"/ 100":T(sc.state==="off"?"ui.scr_score_off":"ui.scr_score_calibrating"));
   $("score-letter").textContent=has&&sc.letter?sc.letter:"";$("score-letter").style.color=col;
   $("score-trend").textContent=has&&sc.trend!=null?(sc.trend>0?"▲ +":sc.trend<0?"▼ ":"= ")+sc.trend:"";
