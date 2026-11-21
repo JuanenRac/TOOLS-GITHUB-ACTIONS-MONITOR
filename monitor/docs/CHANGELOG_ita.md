@@ -159,6 +159,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - **Una release viene suggerita solo da cinque voci sotto [Unreleased]**: `sentinel.candidate_min_entries` parte ora da 5 (era 1), così le candidate a una release della sentinella CI e la prontezza della release non compaiono più per una o due piccole modifiche. Un valore scelto da te viene mantenuto; il numero si imposta da 1 a 100 nelle Impostazioni.
 
+- **Le release sono pubblicate come release immutabili**: l'ordine di una release è prima una BOZZA, poi tutti i file (`github_actions_monitor.zip`, `SHA256SUMS`, `monitor_updater.py`) vengono caricati e verificati, e solo dopo la release è pubblicata oppure, nell'ordine immagine per prima, il tag viene inviato perché `release-image.yml` la pubblichi; una volta pubblica una release non accetta più file. `CONTRIBUTING` (otto lingue) descrive l'ordine. Attivare l'impostazione di GitHub spetta al maintainer e nulla qui la attiva.
+
 ### Corretto
 
 - **La coda di firma di A5 non propone più ciò che non va firmato**: un'esecuzione vi entra solo se non è una prova (il passaggio «Prepare the draft» è stato eseguito), se c'è una bozza di release in attesa o il repository non ha release pubblicate, e se la versione non è già pubblicata con la sua firma. Le cinque righe false (quattro build manuali la cui versione era già pubblicata e firmata, e una prova il cui comando `--sign --publish --bench` sarebbe stato errato) spariscono. Ogni esecuzione della coda viene guardata una volta ogni sei ore (i job dell'esecuzione e le release del suo repository, due letture, al massimo tre esecuzioni per ciclo) e ciò che esce è elencato sotto la coda come «verificato: già pubblicata vX» o «prova» invece di «non verificato».

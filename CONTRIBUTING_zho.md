@@ -27,4 +27,4 @@
 - **依赖审计**：`python tools/audit_dependencies.py` 对 CI 安装的包运行 `pip-audit`。`.github/audit-suppressions.json` 中的抑制项需要 `id`、`reason` 和 `expires`（最长 180 天后）；过期的会失败，已无用的（漏洞不再出现）也会失败。
 - **外部来源冒烟测试**：每周运行的工作流 `sources-smoke.yml` 用 `tools/smoke_sources.py` 访问真实的状态页、安全公告、REST API 描述和最新发布，任何一个改变格式都会失败。
 - **限制**：`tools/limits_check.py` 在一个处理器、512 MB 的容器中用 120 个工作流的账户运行监视器。
-- **发布顺序**：先把 GitHub 发布创建为草稿并推送标签 `vX.Y.Z`；`release-image.yml` 构建并发布镜像，只有当两个平台都能按标签响应时才发布草稿。
+- **发布顺序**：先把 GitHub 发布创建为草稿并推送标签 `vX.Y.Z`；`release-image.yml` 构建并发布镜像，只有当两个平台都能按标签响应时才发布草稿。 发布工具先把发布创建为草稿，上传 `github_actions_monitor.zip`、`SHA256SUMS` 和 `monitor_updater.py`，确认齐全后才公开（不可变发布之后不再接受文件）；镜像优先时则推送标签，由 `release-image.yml` 公开草稿。

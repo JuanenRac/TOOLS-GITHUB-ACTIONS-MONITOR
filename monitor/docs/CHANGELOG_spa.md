@@ -161,6 +161,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - **Una release solo se sugiere a partir de cinco entradas bajo [Unreleased]**: `sentinel.candidate_min_entries` empieza ahora en 5 (era 1), así que los candidatos a release del centinela de CI y la preparación de versión ya no aparecen por uno o dos cambios pequeños. Un valor que elegiste tú se conserva; el número se puede fijar de 1 a 100 en Ajustes.
 
+- **Las releases se publican como releases inmutables**: el orden de una release es primero un BORRADOR, luego se suben y se comprueban todos los ficheros (`github_actions_monitor.zip`, `SHA256SUMS`, `monitor_updater.py`) y solo entonces se publica o, en el orden imagen primero, se empuja la etiqueta para que `release-image.yml` la publique; una vez pública, una release no admite ficheros nuevos. `CONTRIBUTING` (ocho idiomas) describe el orden. Activar el ajuste de GitHub es decisión del mantenedor y nada de aquí lo activa.
+
 ### Corregido
 
 - **La cola de firma de A5 ya no ofrece lo que no hay que firmar**: una ejecución entra solo si no es un simulacro (se ejecutó el paso «Prepare the draft»), hay un borrador de release esperando o el repositorio no tiene release publicada, y la versión no está ya publicada con su firma. Desaparecen las cinco filas falsas (cuatro builds manuales cuya versión ya estaba publicada y firmada, y un simulacro cuyo comando `--sign --publish --bench` habría sido erróneo). Cada ejecución de la cola se mira una vez cada seis horas (los jobs de la ejecución y las releases de su repositorio, dos lecturas, como mucho tres ejecuciones por ciclo) y lo que sale se lista bajo la cola como «comprobado: ya publicada vX» o «simulacro» en vez de «sin comprobar».
