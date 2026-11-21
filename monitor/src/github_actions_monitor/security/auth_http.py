@@ -301,11 +301,11 @@ def _me(handler, config, cfg):
 
 
 def _endpoint(handler, config, cfg, method, path):
+    if not localguard.local_request_ok(handler.headers, handler.server.server_address[1]):
+        return fail(handler, "forbidden", 403)      # one check, before any answer: a page on another name learns nothing, not even that a monitor is here
     if path == "/login":
         if method != "GET":
             return fail(handler, "not_found", 404)
-        if not localguard.local_request_ok(handler.headers, handler.server.server_address[1]):
-            return fail(handler, "forbidden", 403)
         _send(handler, None, 200, {"Referrer-Policy": "no-referrer", "X-Frame-Options": "DENY"}, text=login_page(config), kind="text/html; charset=utf-8")
         return False
     if path == "/api/auth/me" and method == "GET":
@@ -313,8 +313,6 @@ def _endpoint(handler, config, cfg, method, path):
         return False
     if not cfg["enabled"]:
         return fail(handler, "auth_disabled", 404)
-    if not localguard.local_request_ok(handler.headers, handler.server.server_address[1]):
-        return fail(handler, "forbidden", 403)
     storage = auth.get_storage(config)
     address = _address(handler)
     if method == "GET":

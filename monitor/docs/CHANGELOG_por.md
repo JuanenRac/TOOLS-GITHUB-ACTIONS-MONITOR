@@ -19,6 +19,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **A guarda de rede bloqueia também o antigo intervalo IPv6 site-local** (`fec0::/10`): deixa de ser tratado como um endereço público, por isso um notificador, um destino de webhook ou um endereço de IA não o consegue alcançar se `allow_private_targets` não estiver ativo, como nos outros intervalos privados.
 
+- **O estado de início de sessão do modo equipa deixa de ser revelado a uma página com outro nome** (`GET /api/auth/me`): a verificação do `Host` passa a vir antes de qualquer resposta das rotas de início de sessão, por isso uma página que chegue ao monitor por DNS rebinding recebe o mesmo 403 de todas as outras rotas e não pode saber que há ali um monitor, se o modo equipa está ligado ou se ainda falta o primeiro administrador. A página do monitor em `127.0.0.1`, `localhost` e nos nomes configurados não é afetada.
+
 ## [2.1.7]
 
 A versão 2.1.7 reúne tudo o que estava previsto para a 2.1.6 e a 2.1.7. Por tema: ecrãs e quiosques (recarregamento com uma versão nova, ecrã da Frota, densidade, paleta, contraste, overscan, impressão e gravação de um relatório); telemóvel e PWA (instalar como aplicação, vista compacta, emparelhamento por QR, paleta e atalhos); tempo real e recuperação (fila do webhook, WebSocket sem endereço público, estado do GitHub, pulsação); escala e observabilidade (histogramas, quota por balde, OpenTelemetry, espaços de trabalho, custo e carbono); a linha de comandos e a IA (formatos, watch, doctor, propostas com aprovação, histórico de alertas); os sentinelas, com leituras honestas e sem falsos achados; e a cadeia de publicação (releases imutáveis, uma tarefa zizmor, um atualizador que guarda cópias e um registo).

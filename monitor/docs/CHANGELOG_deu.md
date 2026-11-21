@@ -19,6 +19,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Der Netzwächter sperrt jetzt auch den veralteten IPv6-Site-Local-Bereich** (`fec0::/10`): Er gilt nicht mehr als öffentliche Adresse, sodass ein Benachrichtiger, ein Webhook-Ziel oder eine KI-Adresse ihn nicht erreichen kann, solange `allow_private_targets` nicht aktiv ist, wie bei den anderen privaten Bereichen.
 
+- **Der Anmeldestatus des Teammodus wird einer Seite unter einem anderen Namen nicht mehr verraten** (`GET /api/auth/me`): Die Prüfung des `Host` kommt jetzt vor jeder Antwort der Anmelderouten, sodass eine Seite, die den Monitor per DNS-Rebinding erreicht, dasselbe 403 wie bei jeder anderen Route erhält und nicht erfahren kann, dass hier ein Monitor läuft, ob der Teammodus aktiv ist oder ob der erste Administrator noch fehlt. Die Seite des Monitors unter `127.0.0.1`, `localhost` und den konfigurierten Namen ist nicht betroffen.
+
 ## [2.1.7]
 
 Version 2.1.7 fasst alles zusammen, was für 2.1.6 und 2.1.7 geplant war. Nach Themen: Bildschirme und Kioske (Neuladen bei neuer Version, Flottenbildschirm, Dichte, Palette, Kontrast, Overscan, Drucken und Speichern eines Berichts); Telefon und PWA (als App installieren, kompakte Ansicht, Kopplung per QR, Palette und Tastenkürzel); Echtzeit und Wiederherstellung (Webhook-Warteschlange, WebSocket ohne öffentliche Adresse, GitHub-Status, Herzschlag); Skalierung und Beobachtbarkeit (Histogramme, Kontingent je Bucket, OpenTelemetry, Arbeitsbereiche, Kosten und CO2); Kommandozeile und KI (Formate, watch, doctor, Vorschläge mit Freigabe, Alarmverlauf); die Wächter mit ehrlichen Lesungen und ohne falsche Befunde; und die Release-Kette (unveränderliche Releases, ein zizmor-Job, ein Updater mit Kopien und Protokoll).

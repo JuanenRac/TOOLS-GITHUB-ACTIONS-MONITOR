@@ -21,6 +21,8 @@ when this file and `tool_version.py` disagree.
 
 - **The network guard also blocks the obsolete IPv6 site-local range** (`fec0::/10`): it is no longer treated as a public address, so a notifier, a webhook target or an AI address cannot reach it unless `allow_private_targets` is on, like the other private ranges.
 
+- **The login state of the team mode is no longer told to a page on another name** (`GET /api/auth/me`): the check of the `Host` now comes before every answer of the login routes, so a page that reaches the monitor through DNS rebinding gets the same 403 as for every other route and cannot learn that a monitor is there, whether the team mode is on or whether the first administrator is still missing. The page of the monitor on `127.0.0.1`, `localhost` and the configured names is not affected.
+
 ## [2.1.7]
 
 Version 2.1.7 brings together everything planned for 2.1.6 and 2.1.7. By theme: screens and kiosks (reload on a new version, a Fleet screen, density, palette, contrast, overscan, print and save of a report); phone and PWA (install as an app, compact view, QR pairing, palette and shortcuts); real-time and recovery (webhook queue, WebSocket without a public address, GitHub status, heartbeat); scale and observability (histograms, allowance by bucket, OpenTelemetry, workspaces, cost and carbon); the command line and the AI (formats, watch, doctor, proposals with approval, alerts history); the Sentinels, with honest reads and no false findings; and the release chain (immutable releases, a zizmor job, an updater that keeps copies and a log).
