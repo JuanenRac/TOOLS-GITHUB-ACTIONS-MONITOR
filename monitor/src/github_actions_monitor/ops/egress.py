@@ -14,6 +14,7 @@ ROWS = (
     ("github_api", ("api.github.com",), None),
     ("github_download", ("github.com", "objects.githubusercontent.com"), "updates.check"),
     ("github_raw", ("raw.githubusercontent.com",), "lint.anonymous_public"),
+    ("github_status", ("www.githubstatus.com",), "github_status.enabled"),
     ("ntfy", ("ntfy.sh",), "notify.channels.ntfy.enabled"),
     ("telegram", ("api.telegram.org",), "notify.channels.telegram.enabled"),
     ("chat_webhooks", ("discord.com", "hooks.slack.com", "webhook.office.com"), "notify.channels.discord.enabled|notify.channels.slack.enabled|notify.channels.teams.enabled"),
@@ -22,7 +23,7 @@ ROWS = (
     ("siem", (), "siem.sinks"),
 )
 LINK_ONLY = frozenset({"github.com", "www.python.org", "docs.anthropic.com", "platform.openai.com", "ollama.com", "localai.io", "lmstudio.ai", "jan.ai", "docs.x.ai", "docs.vllm.ai", "docs.together.ai",
-                       "docs.perplexity.ai", "docs.mistral.ai", "docs.fireworks.ai", "docs.cohere.com", "console.groq.com", "api-docs.deepseek.com", "ai.google.dev", "example.invalid", "openrouter.ai"})
+                       "docs.perplexity.ai", "docs.mistral.ai", "docs.fireworks.ai", "docs.cohere.com", "console.groq.com", "api-docs.deepseek.com", "ai.google.dev", "example.invalid", "openrouter.ai", "owasp.org", "scorecard.dev", "www.w3.org", "adaptivecards.io"})
 DYNAMIC_HOSTS = frozenset({"api.anthropic.com", "api.openai.com"})      # hosts of the AI provider rows that are named in the code as the default of a provider
 HOST_RE = re.compile(r"https?://([A-Za-z0-9.-]+\.[a-z]{2,})")
 
