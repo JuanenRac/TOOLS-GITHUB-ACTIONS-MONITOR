@@ -188,10 +188,10 @@ class Scanning(unittest.TestCase):
     def test_an_unprotected_default_branch_is_an_alert_but_a_403_is_not(self):
         sentinel, fake, _ = build(self)
         quiet_repo(fake)
-        fake.set("/branches/", 404)
+        fake.answers = {"/protection": (404, None, ""), "rules/branches/": (200, [], '"r1"'), "/branches/main": (200, {"protected": False}, '"m1"'), **fake.answers}
         sentinel.tick(NOW)
         self.assertEqual([a["code"] for a in sentinel.get_alerts()], ["security.branch_unprotected"])
-        fake.set("/branches/", 403)
+        fake.answers = {"/branches/": (403, None, ""), **{key: value for key, value in fake.answers.items() if key in ("dependabot/alerts", "code-scanning/alerts", "secret-scanning/alerts", "/actions/permissions/workflow", "repos/acme/r")}}
         sentinel.tick(NOW + 2000)
         self.assertEqual(sentinel.get_alerts(), [])
         self.assertEqual(sentinel.get_status()["unavailable"], {"branch": 1})
@@ -220,6 +220,26 @@ class Scanning(unittest.TestCase):
         fake.answers = {"/protection": (404, None, ""), "rules/branches/": (200, [], '"r1"'), "/branches/main": (200, {"protected": False}, '"m1"'), **fake.answers}
         sentinel.tick(NOW)
         self.assertEqual([a["code"] for a in sentinel.get_alerts()], ["security.branch_unprotected"])
+
+    def test_when_neither_side_read_answers_the_branch_is_not_called_unprotected(self):
+        sentinel, fake, _ = build(self)
+        quiet_repo(fake)
+        fake.answers = {"/protection": (404, None, ""), "rules/branches/": (403, None, ""), "/branches/main": (403, None, ""), **fake.answers}
+        sentinel.tick(NOW)
+        self.assertEqual(sentinel.get_alerts(), [])
+        self.assertNotIn("branch_protected", sentinel.state["per_repo"]["r"]["facts"])
+
+    def test_a_state_judged_before_the_rulesets_were_read_is_not_trusted(self):
+        sentinel, fake, folder = build(self, repos=("old", "new"))
+        stale = {"id": "security.branch_unprotected:old", "code": "security.branch_unprotected", "level": "warning", "repo": "old", "detail": {"branch": "main"}, "created_at": "x"}
+        record = {"scanned": NOW, "etag": {}, "facts": {"default_branch": "main", "branch_protected": False}, "unavailable": {}}
+        (folder / "security_state.json").write_text(json.dumps({"alerts": {stale["id"]: stale}, "per_repo": {"old": dict(record), "new": dict(record, logic=ss.BRANCH_LOGIC, scanned=NOW - 10 ** 6)}, "last_full_scan": None}), encoding="utf-8")
+        loaded = ss.load_state(folder / "security_state.json")
+        self.assertEqual(loaded["alerts"], {})
+        self.assertNotIn("branch_protected", loaded["per_repo"]["old"]["facts"])
+        self.assertEqual(loaded["per_repo"]["new"]["facts"]["branch_protected"], False)
+        sentinel.state = loaded
+        self.assertEqual(sentinel._order(["new", "old"], NOW), ["old", "new"])      # the one judged by the old logic goes first even if it was scanned more recently
 
     def test_a_failed_read_says_its_cause_and_is_not_a_finding(self):
         self.assertEqual([ss.error_kind(e) for e in ("timeout", "API rate limit exceeded", "connection reset", "boom")], ["timeout", "rate", "network", "error"])

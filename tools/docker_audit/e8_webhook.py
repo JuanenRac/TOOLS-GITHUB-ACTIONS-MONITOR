@@ -10,6 +10,7 @@ import sys
 import audit_lib as lib
 import proxy_stack as ps
 
+BIG_PAD = 1300000      # bytes of padding: over the default of `webhook.max_body_kb` (1 MiB), so the body is refused before anything else
 PAYLOAD = json.dumps({"zen": "audit", "repository": {"name": "audit-repo", "full_name": "audit-owner/audit-repo"}})
 PATCH = r'''
 import json
@@ -54,7 +55,7 @@ def body(s):
     if not s.check("the receiver is active (switched on and the secret is long enough)", info.get("enabled") is True and info.get("active") is True and info.get("secret_ok") is True, status["body"][:300]):
         return
 
-    big = json.dumps({"repository": {"name": "audit-repo", "full_name": "audit-owner/audit-repo"}, "pad": "x" * 300000})
+    big = json.dumps({"repository": {"name": "audit-repo", "full_name": "audit-owner/audit-repo"}, "pad": "x" * BIG_PAD})
     other = json.dumps({"repository": {"name": "x", "full_name": "nobody-watches-this/x"}})
     results = stack.request(ps.CLIENT_A, [
         hook(secret),                                                                                  # 0 valid ping
@@ -64,10 +65,10 @@ def body(s):
         hook(secret, event="push", delivery="replay-{rand}-same"),                                     # 4 valid push, first time
         hook(secret, event="push", delivery="replay-{rand}-same"),                                     # 5 the same delivery again (the run id is the same: {rand} is per client run)
         hook(secret, delivery=None),                                                                   # 6 valid signature, no delivery id
-        hook(secret, body=big),                                                                        # 7 a body over the limit
-        hook(secret, body=other),                                                                      # 8 a repository that no account watches
+        hook(secret, body=big, delivery="big-{rand}-{i}"),                                                                        # 7 a body over the limit
+        hook(secret, body=other, delivery="other-{rand}-{i}"),                                                                      # 8 a repository that no account watches
         {"method": "GET", "url": "https://%s/api/webhook" % ps.SITE, "ca": "/root.crt"},               # 9 GET
-        hook(secret, event="issues"),                                                                  # 10 an event that is not in the closed list
+        hook(secret, event="issues", delivery="issues-{rand}-{i}"),                                                                  # 10 an event that is not in the closed list
     ])
     first = [r["first"] for r in results]
     s.check("a valid signature is accepted (200)", first[0]["status"] == 200, "%s %s" % (first[0]["status"], first[0]["body"][:200]))

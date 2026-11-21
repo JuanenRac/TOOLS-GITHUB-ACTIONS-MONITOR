@@ -11,6 +11,12 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+### Fixed
+
+- **The webhook check of the container audit (E8) now really sends a body over the limit and gives every delivery its own id**: the body of "a body over the limit" was 300 KB, under the 1 MiB default of `webhook.max_body_kb`, and shared the delivery id of the first ping, so the receiver (which already judges the size first) answered it as a duplicate. The body is now over the limit, and the checks that expect an ignored event do not hide behind a repeated id.
+- **The Security sentinel no longer keeps the "no branch protection" alerts it raised before it read the rulesets**: a state saved by an older version kept its alerts and its facts for hours (five repositories per round), so repositories protected by a ruleset were still reported. A repository judged by the old logic is now looked at first and its old branch finding is not trusted; and when neither the `protected` flag of the branch nor `rules/branches/<branch>` can be read, the branch is no longer called unprotected.
+- **The test of the self-watch no longer fails on Windows**: the clock moves every ~16 ms there, so two samples in a row could share a tick and the CPU percent came out empty; the test waits a moment between them.
+
 ## [2.1.7]
 
 Version 2.1.7 brings together everything planned for 2.1.6 and 2.1.7. By theme: screens and kiosks (reload on a new version, a Fleet screen, density, palette, contrast, overscan, print and save of a report); phone and PWA (install as an app, compact view, QR pairing, palette and shortcuts); real-time and recovery (webhook queue, WebSocket without a public address, GitHub status, heartbeat); scale and observability (histograms, allowance by bucket, OpenTelemetry, workspaces, cost and carbon); the command line and the AI (formats, watch, doctor, proposals with approval, alerts history); the Sentinels, with honest reads and no false findings; and the release chain (immutable releases, a zizmor job, an updater that keeps copies and a log).

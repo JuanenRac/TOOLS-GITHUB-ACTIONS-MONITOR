@@ -9,6 +9,12 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+### Corrigido
+
+- **A verificação do webhook da auditoria em contentor (E8) envia agora mesmo um corpo acima do limite e dá a cada entrega o seu próprio id**: o corpo de «um corpo acima do limite» tinha 300 KB, abaixo do valor por defeito de 1 MiB de `webhook.max_body_kb`, e partilhava o id de entrega do primeiro ping; o recetor (que já avalia primeiro o tamanho) respondia-lhe como duplicado. O corpo passa agora o limite, e as verificações que esperam um evento ignorado já não se escondem atrás de um id repetido.
+- **O sentinela de segurança já não mantém os alertas de «sem proteção de ramo» levantados antes de ler os rulesets**: um estado guardado por uma versão anterior mantinha os seus alertas e dados durante horas (cinco repositórios por ronda), pelo que repositórios protegidos por um ruleset continuavam a ser assinalados. Um repositório avaliado com a lógica antiga é visto primeiro e a sua antiga conclusão sobre o ramo não é aceite; e quando nem o indicador `protected` do ramo nem `rules/branches/<ramo>` podem ser lidos, o ramo deixa de ser dado como desprotegido.
+- **O teste da autovigilância já não falha no Windows**: aí o relógio avança a cada ~16 ms, pelo que duas amostras seguidas podiam partilhar um tique e a percentagem de CPU ficava vazia; o teste espera um instante entre ambas.
+
 ## [2.1.7]
 
 A versão 2.1.7 reúne tudo o que estava previsto para a 2.1.6 e a 2.1.7. Por tema: ecrãs e quiosques (recarregamento com uma versão nova, ecrã da Frota, densidade, paleta, contraste, overscan, impressão e gravação de um relatório); telemóvel e PWA (instalar como aplicação, vista compacta, emparelhamento por QR, paleta e atalhos); tempo real e recuperação (fila do webhook, WebSocket sem endereço público, estado do GitHub, pulsação); escala e observabilidade (histogramas, quota por balde, OpenTelemetry, espaços de trabalho, custo e carbono); a linha de comandos e a IA (formatos, watch, doctor, propostas com aprovação, histórico de alertas); os sentinelas, com leituras honestas e sem falsos achados; e a cadeia de publicação (releases imutáveis, uma tarefa zizmor, um atualizador que guarda cópias e um registo).
