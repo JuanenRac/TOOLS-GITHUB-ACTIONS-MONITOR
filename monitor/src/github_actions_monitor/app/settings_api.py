@@ -58,6 +58,7 @@ HYGIENE_SKIP = ("ruleset", "label", "file", "sha", "allowed", "schedule")
 TZ_RE = re.compile(r"^(?:local|utc|UTC|[A-Za-z][A-Za-z0-9_+./-]{1,63})\Z")      # display.timezone: local, utc or an IANA name
 CRON_RE = re.compile(r"^[0-9*/,\- ]{9,60}\Z")      # report_schedule.cron: five fields of numbers, lists, ranges and steps (reporting/report_schedule.py reads it)
 PAIR_RE = re.compile(r"^[A-Za-z0-9._*/-]{1,100}=[0-9]{1,5}\Z")      # ci.stuck.workflow_minutes / ci.stuck.runner_minutes: "pattern=minutes"
+BYREPO_BRANCH_RE = re.compile(r"^[A-Za-z0-9-]{1,39}/[A-Za-z0-9._-]{1,100}=[A-Za-z0-9._*/-]{1,100}\Z")      # ci.branches_by_repo: `owner/repo=pattern`
 BRANCH_RE = re.compile(r"^[A-Za-z0-9._*/-]{1,100}\Z")      # a branch name or a pattern of branch names (ci.extra_branches)
 from github_actions_monitor.health import fleet as _fleet      # noqa: E402 - the two shapes of the lists of the fleet view are defined next to the code that reads them
 FLEET_LABEL_RE, FLEET_FILTER_RE = _fleet.LABEL_RE, _fleet.FILTER_RE
@@ -383,6 +384,7 @@ _f(_T_SENT, "origin", "ci.copilot_alerts", "bool", restart=False)
 _f(_T_SENT, "origin", "ci.forks_need_own_ci", "bool", restart=False)
 _f(_T_SENT, "origin", "ci.fork_own_ci_days", "int", (1, 365), restart=False)
 _f(_T_SENT, "origin", "ci.extra_branches", "names", restart=False)
+_f(_T_SENT, "origin", "ci.branches_by_repo", "names", restart=False)
 _f(_T_SENT, "causes", "ci.group.reusable", "bool", restart=False)
 _f(_T_SENT, "causes", "ci.group.min", "int", (2, 50), restart=False)
 _f(_T_SENT, "causes", "ci.failed_jobs.enabled", "bool", restart=False)
@@ -1080,7 +1082,7 @@ def check_value(path, value):
             return False, "path"      # the folder of the copies: never empty and a relative one never climbs out of the data folder
         return True, text
     if kind == "names":
-        pattern = WS_TARGET_RE if path == "webhook.ws_targets" else REDELIVER_HOOK_RE if path == "webhook.redeliver.hooks" else USES_RE if path == "sentinels.supply.ignore_uses" else WORKSPACE_RE if path == "workspaces.list" else WORKDAY_RE if path == "compare.workdays" else FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else RUNNER_LABEL_RE if path in RUNNER_LABEL_KEYS else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path in ("sentinel.hygiene.ruleset_names", "sentinels.delivery.expected_assets") else (PATH_RE if path in PATH_KEYS else (alertflow.SILENCE_RE if path == "alerts.silences" else (alertflow.PATTERN_RE if path == "alerts.service.workflows" else (PAIR_RE if path in PAIR_KEYS else NAME_RE)))))))
+        pattern = BYREPO_BRANCH_RE if path == "ci.branches_by_repo" else WS_TARGET_RE if path == "webhook.ws_targets" else REDELIVER_HOOK_RE if path == "webhook.redeliver.hooks" else USES_RE if path == "sentinels.supply.ignore_uses" else WORKSPACE_RE if path == "workspaces.list" else WORKDAY_RE if path == "compare.workdays" else FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else RUNNER_LABEL_RE if path in RUNNER_LABEL_KEYS else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path in ("sentinel.hygiene.ruleset_names", "sentinels.delivery.expected_assets") else (PATH_RE if path in PATH_KEYS else (alertflow.SILENCE_RE if path == "alerts.silences" else (alertflow.PATTERN_RE if path == "alerts.service.workflows" else (PAIR_RE if path in PAIR_KEYS else NAME_RE)))))))
         if not isinstance(value, list) or len(value) > 200 or not all(isinstance(v, str) and pattern.match(v) for v in value):
             return False, "names"
         if path == "sentinel.hygiene.ruleset_names" and not value:

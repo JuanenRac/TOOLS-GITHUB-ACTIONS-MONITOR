@@ -26,6 +26,7 @@
   <img src="https://img.shields.io/badge/Tests-5565_passing-brightgreen.svg" alt="5565 tests">
   <img src="https://img.shields.io/badge/Tests-5571_passing-brightgreen.svg" alt="5571 tests">
   <img src="https://img.shields.io/badge/Tests-5574_passing-brightgreen.svg" alt="5574 tests">
+  <img src="https://img.shields.io/badge/Tests-5570_passing-brightgreen.svg" alt="5570 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -110,6 +111,7 @@
 | **设置** | 888 个设置,均有帮助 |
 | **测试** | 5574 个测试方法(`python -m unittest discover -s monitor/tests`) |
 | **设置** | 897 个设置,均有帮助 |
+| **测试** | 5570 个测试方法(`python -m unittest discover -s monitor/tests`) |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
 
