@@ -373,7 +373,7 @@ nav .dot{display:inline-block;min-width:18px;padding:0 5px;margin-left:auto;bord
 .tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 @media (max-width:800px){.shell{flex-direction:column;overflow:auto}.sidebar{width:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 10px;border-right:0;border-bottom:1px solid var(--line)}
 .side-toggle,.side-foot .nl,.nav-group-title{display:none}.sidebar nav{flex:1 1 100%;order:3;flex-direction:row;overflow-x:auto;overflow-y:hidden;gap:6px}.nav-group,.nav-items,.nav-group.folded .nav-items{display:flex;gap:4px;align-items:center}
-.sidebar nav button[role=tab]{width:auto;padding:6px 10px}.side-foot{order:2;margin-left:auto}.side-foot button{width:auto}#accbar{order:4;flex:1 1 100%}.stage{min-height:70vh}}
+.sidebar nav button[role=tab]{width:auto;padding:6px 10px}.side-foot{order:2;margin-left:auto}.side-foot button{width:auto;min-width:44px}#accbar{order:4;flex:1 1 100%}.stage{min-height:70vh}}
 @media (prefers-reduced-motion:no-preference){.lg-pulse{stroke-dasharray:60;animation:lg-run 3.4s ease-in-out infinite}.lg-led{animation:lg-led 2.4s ease-in-out infinite}
 @keyframes lg-run{0%{stroke-dashoffset:60}45%,100%{stroke-dashoffset:0}}@keyframes lg-led{0%,100%{opacity:1}50%{opacity:.35}}}
 /* the themes: the page, the side panel, the panels, the lines, the text, the accent, the corners and the letters come from the variables of each one; the status colours (green, red, amber) stay the same in all */
@@ -466,7 +466,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 :root.compact .shell{flex-direction:column;overflow:auto}:root.compact .sidebar{width:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:6px 8px;border-right:0;border-bottom:1px solid var(--line)}
 :root.compact .side-toggle,:root.compact .side-foot .nl,:root.compact .nav-group-title{display:none}:root.compact .sidebar nav{flex:1 1 100%;order:3;flex-direction:row;overflow-x:auto;overflow-y:hidden;gap:6px}
 :root.compact .nav-group,:root.compact .nav-items,:root.compact .nav-group.folded .nav-items{display:flex;gap:4px;align-items:center}:root.compact .sidebar nav button[role=tab]{width:auto;padding:6px 10px;white-space:nowrap}
-:root.compact .side-foot{order:2;margin-left:auto}:root.compact .side-foot button{width:auto}:root.compact #accbar{order:4;flex:1 1 100%}:root.compact .stage{min-height:70vh}
+:root.compact .side-foot{order:2;margin-left:auto}:root.compact .side-foot button{width:auto;min-width:44px}:root.compact #accbar{order:4;flex:1 1 100%}:root.compact .stage{min-height:70vh}
 :root.compact main{padding:6px 8px}:root.compact header{padding:6px 8px}:root.compact .tile{min-width:calc(50% - 4px);flex:1 1 calc(50% - 4px);padding:4px 8px}:root.compact .tile b{font-size:17px}
 :root.compact .tab{overflow-x:auto}:root.compact table{display:block;max-width:100%;overflow-x:auto}:root.compact #statusbar .sb-opt{display:none}:root.compact .card{min-width:0}
 .dlg-box{max-height:calc(var(--vvh,100vh) - 28px)}
