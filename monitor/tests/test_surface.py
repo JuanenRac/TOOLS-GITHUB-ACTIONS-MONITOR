@@ -495,7 +495,7 @@ class Webhook(unittest.TestCase):
         from github_actions_monitor.security import localguard
         self.assertEqual(localguard.settings_from({}), {"network": False, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "proxy_public_host": "", "trusted_proxy": False, "local_port": 0, "trusted_proxies": []})
         self.assertEqual(localguard.settings_from({"listen": {"network": True, "host": "8.8.8.8"}})["host"], "127.0.0.1")        # a public address is never accepted
-        self.assertIn("class QuietServer(exclusive.ExclusiveBind, ThreadingHTTPServer)", source)
+        self.assertIn("class QuietServer(exclusive.BoundedThreads, exclusive.ExclusiveBind, ThreadingHTTPServer)", source)
 
 
 class MonitorLink(unittest.TestCase):

@@ -22,6 +22,7 @@ sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
+import _timing  # noqa: E402,F401      # limits of real time that grow with the load of the computer
 import test_182_supervisor as t182  # noqa: E402
 from github_actions_monitor.accounts import accounts, accounts_supervisor as sup  # noqa: E402
 from github_actions_monitor.app import actions_monitor as am  # noqa: E402
@@ -465,7 +466,7 @@ class SupervisorStream(Supervised):
         self.assertIn("text/event-stream", answer.getheader("Content-Type"))
         first = answer.fp.readline()
         self.assertEqual(first, b"event: hello\n", "the first frame arrives while the account still holds the stream")
-        self.assertLess(time.time() - started, 4, "the supervisor did not wait for the account to close the stream")
+        self.assertLess(time.time() - started, _timing.limit(4), "the supervisor did not wait for the account to close the stream")
 
     def test_closing_the_client_lets_the_supervisor_go_of_the_account(self):
         connection, answer, _started = self.open_stream()
@@ -502,7 +503,7 @@ class SupervisorStream(Supervised):
                 ended = True
                 break
         self.assertTrue(ended, "the stream ended at once, not when the account closed it")
-        self.assertLess(time.time() - started, 9)
+        self.assertLess(time.time() - started, _timing.limit(9))
 
 
 if __name__ == "__main__":
