@@ -1278,7 +1278,7 @@
  "cli.help_assistant": "ai-hook: 既定のアシスタントツール (既定)",
  "cli.help_baseline": "compare: 比較先（previous または year_ago）",
  "cli.help_ca_file": "HTTPS: この認証局を信頼する（PEM ファイル）。独自の証明書を使うモニター向け",
- "cli.help_command": "status, accounts, alerts, live, doctor, health（または check）, score, team, compare, ai-hook, credential, lessons, briefs, screens, api, install-skill, gh-token, backup (create | verify | restore | status | list), update, toolbox, watch, completions, kiosk, metrics",
+ "cli.help_command": "status, accounts, alerts, live, doctor, health（または check）, score, team, compare, ai-hook, credential, lessons, briefs, docs (list | show NAME), screens, api, install-skill, gh-token, backup (create | verify | restore | status | list), update, toolbox, watch, completions, kiosk, metrics",
  "cli.help_compare": "score：期間の履歴とも比較します",
  "cli.help_cursor": "ai-hook: Cursor (ベストエフォート)",
  "cli.help_days": "compare: 集計する曜日（all、workdays、weekend）",

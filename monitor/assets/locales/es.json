@@ -1278,7 +1278,7 @@
  "cli.help_assistant": "ai-hook: la herramienta de asistente por defecto (por defecto)",
  "cli.help_baseline": "compare: con qué comparar (previous o year_ago)",
  "cli.help_ca_file": "HTTPS: confiar en esta autoridad de certificación (un archivo PEM), para un monitor con certificado propio",
- "cli.help_command": "status, accounts, alerts, live, doctor, health (o check), score, team, compare, ai-hook, credential, lessons, briefs, screens, api, install-skill, gh-token, backup (create | verify | restore | status | list), update, toolbox, watch, completions, kiosk, metrics",
+ "cli.help_command": "status, accounts, alerts, live, doctor, health (o check), score, team, compare, ai-hook, credential, lessons, briefs, docs (list | show NAME), screens, api, install-skill, gh-token, backup (create | verify | restore | status | list), update, toolbox, watch, completions, kiosk, metrics",
  "cli.help_compare": "score: compara también con el histórico de la ventana",
  "cli.help_cursor": "ai-hook: Cursor (mejor esfuerzo)",
  "cli.help_days": "compare: qué días cuentan (all, workdays o weekend)",
