@@ -5,7 +5,7 @@
 A heavy query (the comparison of two periods, the optional reports) reads a lot of stored data. Its answer is kept in memory with the moment it was made and each request finds it in one of three states:
 
   fresh    younger than `cache.heavy_fresh_s`: served as it is, nothing is computed (a burst of requests costs one computation);
-  stale    older than that but younger than `cache.heavy_fresh_s` + `cache.stale_serve_h` hours: served AT ONCE and marked `freshness.state` = "stale" (with its age) while ONE computation
+  stale    older than that but younger than `cache.heavy_fresh_s` + `cache.stale_serve_h` hours: served AT ONCE and marked with the headers `X-Monitor-Freshness: stale` and `X-Monitor-Age` while ONE computation
            refreshes it in the background, so the person is never made to wait for a figure that is only a little old and is never shown an old figure as if it were new;
   expired  older than that, or never made: computed now, and a copy that old is never served.
 
@@ -122,8 +122,9 @@ def _compute_in_background(key, build, timeout, clock):
     threading.Thread(target=_compute, args=(key, build, timeout, clock), daemon=True, name="heavy-refresh").start()
 
 
-def mark(answer, state, age):
-    """The answer with `freshness` = {"state", "age_s"} added when it is not fresh (a fresh answer is left exactly as it is, so nothing changes for whoever reads it today)."""
-    if state == "fresh" or not isinstance(answer, dict):
-        return answer
-    return {**answer, "freshness": {"state": state, "age_s": int(age or 0)}}
+def headers(state, age):
+    """The headers that say an answer is not fresh: {"X-Monitor-Freshness": "stale", "X-Monitor-Age": "N"}, or {} for a fresh one. They are headers and not a key of the body so that the shape of the
+    answer is the same whether it is fresh or not (a reader of the body, the frozen contract of the API and the page see no difference)."""
+    if state == "fresh":
+        return {}
+    return {"X-Monitor-Freshness": state, "X-Monitor-Age": str(int(age or 0))}

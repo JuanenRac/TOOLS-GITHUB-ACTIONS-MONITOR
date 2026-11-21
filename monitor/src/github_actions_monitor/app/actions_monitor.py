@@ -4239,7 +4239,7 @@ class Handler(BaseHTTPRequestHandler):
             if state == "timeout":
                 self.json_reply({"error": "the query took too long", "code": "query_timeout"}, 504)
                 return
-            self.json_reply(freshness.mark(value, state, age))
+            self.json_reply(value, headers=freshness.headers(state, age))
         elif path == "/api/run-log":      # read only, off by default (logs.failed_step.enabled): the failing step of one run and its last relevant lines, cleaned (steplog.py)
             if not self.guard():
                 return
@@ -4410,9 +4410,9 @@ class Handler(BaseHTTPRequestHandler):
             if state == "timeout":      # past analytics.query_timeout_s: the answer says so instead of waiting for ever (no copy young enough to serve exists)
                 self.json_reply({"error": "the query took too long", "code": "query_timeout"}, 504)
                 return
-            answer = freshness.mark(value, state, age)      # a stale copy is served at once and says so; a fresh one is left exactly as it is
+            answer, marks = value, freshness.headers(state, age)      # a stale copy is served at once and says so in two headers; the body is the same shape either way
             if fmt == "json":
-                self.json_reply(answer)
+                self.json_reply(answer, headers=marks)
             else:
                 kind, text = compare_service.render(answer, fmt)
                 body = text.encode("utf-8")
@@ -4420,6 +4420,8 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_header("Content-Type", kind + "; charset=utf-8")
                 self.send_header("Content-Length", str(len(body)))
                 self.send_header("Cache-Control", "no-store")
+                for name, mark in marks.items():
+                    self.send_header(name, mark)
                 self.end_headers()
                 self.wfile.write(body)
         elif path == "/api/audit-log":      # the log of actions of this account: an administrator, or a maintainer when the setting says so (Complete only)

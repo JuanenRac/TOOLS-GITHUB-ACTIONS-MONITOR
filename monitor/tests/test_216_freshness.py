@@ -90,7 +90,7 @@ class TheStates(Base):
         state, value, age = freshness.serve("k", slow, CFG, self.clock)
         self.assertEqual((state, value["n"], age), ("stale", 1, 60.0))
         self.assertLess(time.time() - started, _timing.limit(1.0), "nobody waits for the refresh")
-        self.assertEqual(freshness.mark(value, state, age)["freshness"], {"state": "stale", "age_s": 60})
+        self.assertEqual(freshness.headers(state, age), {"X-Monitor-Freshness": "stale", "X-Monitor-Age": "60"})
         again = freshness.serve("k", slow, CFG, self.clock)
         self.assertEqual(again[0], "stale")
         self.assertTrue(wait_until(lambda: len(self.calls) == 2))
@@ -113,12 +113,11 @@ class TheStates(Base):
         state, value, _ = freshness.serve("k", self.build("new"), cfg, self.clock)
         self.assertEqual((state, value["value"]), ("fresh", "new"))
 
-    def test_a_fresh_answer_is_left_exactly_as_it_is(self):
-        answer = {"a": 1}
-        self.assertIs(freshness.mark(answer, "fresh", 3), answer)
-        self.assertEqual(freshness.mark(answer, "stale", 3)["a"], 1)
-        self.assertNotIn("freshness", answer)
-        self.assertEqual(freshness.mark([1], "stale", 3), [1])
+    def test_a_fresh_answer_has_no_marks_and_the_body_is_never_changed(self):
+        self.assertEqual(freshness.headers("fresh", 3), {})
+        self.assertEqual(freshness.headers("stale", 3.9), {"X-Monitor-Freshness": "stale", "X-Monitor-Age": "3"})
+        text = (HERE / "src" / "github_actions_monitor" / "data_pipeline" / "freshness.py").read_text(encoding="utf-8")
+        self.assertNotIn("def mark(", text, "the state travels in headers, so the shape of the answer does not depend on its age")
 
 
 class TheCeiling(Base):
