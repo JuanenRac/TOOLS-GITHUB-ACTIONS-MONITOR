@@ -3627,7 +3627,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             size = int(self.headers.get("Content-Length") or 0)
             body = self.rfile.read(size) if 0 <= size <= inbound.MAX_BODY else b"x" * (inbound.MAX_BODY + 1)
-            code, answer, record = inbound.handle(provider, config, body, self.headers, lambda: chatops_snapshot(config), address=localguard.client_key(self.client_address, self.headers))
+            code, answer, record = inbound.handle(provider, config, body, self.headers, lambda: chatops_snapshot(config), address=self.webhook_sender())      # behind the supervisor: the address it saw, not its own
             if record:
                 audit_log.record(toolconfig.raw_config(), "chatops_command", provider + ":" + record["user"], "chat", CHILD["account"] or "", provider + ":" + (record["command"] or "none"),
                                  record["result"], {"channel": record["channel"], "status": code})

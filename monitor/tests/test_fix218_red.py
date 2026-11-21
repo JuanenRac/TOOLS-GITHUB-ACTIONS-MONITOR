@@ -270,7 +270,7 @@ class H(BaseHTTPRequestHandler):
             got += len(chunk)
         route = self.path.split("?")[0]
         if route in ("/api/webhook", "/api/chatops/slack", "/api/chatops/discord"):
-            return self.send(200, {"account": account, "route": route, "bytes": got, "peer": self.headers.get("X-Monitor-Webhook-Peer"), "slack": self.headers.get("X-Slack-Signature"), "host": self.headers.get("Host")})
+            return self.send(200, {"account": account, "route": route, "bytes": got, "peer": self.headers.get("X-Monitor-Peer"), "slack": self.headers.get("X-Slack-Signature"), "host": self.headers.get("Host")})
         self.send(404, {})
 
 
@@ -404,6 +404,49 @@ class WebhookWindow(unittest.TestCase):
             self.assertEqual(self.event("https://ghe.corp.example/JuanenRac/R/actions/runs/5")["url"], "https://ghe.corp.example/JuanenRac/R/actions/runs/5")
             self.assertIsNone(self.event("https://evil.example/JuanenRac/R/actions/runs/5")["url"])
         self.assertIsNone(self.event("https://ghe.corp.example/JuanenRac/R/actions/runs/5")["url"], "without GH_HOST that host is not GitHub")
+
+
+class SupervisorDeliveries(Supervised):
+    account_config = {"alpha": {"webhook": {"max_body_kb": 4096}}}
+
+    def post(self, path, body, headers=None):
+        return self.request(path, headers={"Content-Type": "application/json", **(headers or {})}, data=body, method="POST")
+
+    def test_the_chat_gets_through_with_a_host_that_is_not_ours_and_without_the_access_token(self):
+        self.network()      # network mode: Slack has no access token and a tunnel changes the Host
+        status, answer, _ = self.post("/api/chatops/slack", b"command=%2Fmonitor&text=status", {"Host": "abc.trycloudflare.com", "X-Slack-Signature": "v0=00", "X-Slack-Request-Timestamp": "1"})
+        self.assertEqual(status, 200, answer)
+        self.assertEqual((answer["route"], answer["account"], answer["slack"]), ("/api/chatops/slack", "alpha", "v0=00"))
+        self.assertTrue(answer["peer"], "the account is told who sent it")
+        status, answer, _ = self.post("/api/chatops/discord?account=beta", b"{}", {"Host": "abc.trycloudflare.com"})
+        self.assertEqual((status, answer["account"], answer["route"]), (200, "beta", "/api/chatops/discord"))
+
+    def test_a_delivery_over_one_mib_reaches_the_account_that_admits_it(self):
+        status, answer, _ = self.post("/api/webhook?account=alpha", b"x" * (2 * 1024 * 1024), {"X-GitHub-Event": "push"})
+        self.assertEqual((status, answer.get("bytes")), (200, 2 * 1024 * 1024))
+
+    def test_a_body_over_every_limit_gets_its_413_after_being_read(self):
+        import http.client
+        size = 20 * 1024 * 1024
+        connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=30)
+        self.addCleanup(connection.close)
+        connection.putrequest("POST", "/api/webhook?account=alpha")
+        connection.putheader("Content-Length", str(size))
+        connection.endheaders()
+        sent = 0
+        try:
+            while sent < size:
+                connection.sock.sendall(b"y" * 65536)
+                sent += 65536
+        except OSError:
+            pass
+        self.assertEqual(connection.getresponse().status, 413, "the sender sees the answer and not a cut connection")
+        status, _answer, _ = self.post("/api/webhook?account=alpha", b"x" * (3 * 1024 * 1024), {})
+        self.assertEqual(status, 200)
+
+    def test_a_delivery_over_the_limit_of_every_account_is_refused(self):
+        status, _answer, _ = self.post("/api/webhook?account=beta", b"x" * (5 * 1024 * 1024), {})
+        self.assertEqual(status, 413, "4 MiB is the most any account admits")
 
 
 if __name__ == "__main__":
