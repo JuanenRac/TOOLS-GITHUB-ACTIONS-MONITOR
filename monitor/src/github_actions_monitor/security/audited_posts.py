@@ -21,6 +21,7 @@ AUDITED = {
     "/api/ops/backup": "backup_run",                    # a complete backup package is written now (the file, never its content)
     "/api/updates/check": "update_check",                # the published versions are read from GitHub on request
     "/api/updates/apply": "update_apply",                # an update of the monitor is started (the target, never a path)
+    "/api/updates/discard": "update_discard",            # one copy of the folder of copies is deleted (its name and the bytes freed)
     "/api/updates/rollback": "update_rollback",          # the way back to the version before the last update is started
     "/api/ops/purge": "purge_run",                      # the retention purge is run (or only planned) on demand
     "/api/ai/actions/confirm": "ai_action",             # an action proposed by the AI is run

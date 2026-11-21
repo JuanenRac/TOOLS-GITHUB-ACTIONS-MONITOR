@@ -631,7 +631,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 </section>
 </div>
 <div class="tab" id="t-upd" role="tabpanel" aria-labelledby="n-upd">
-<section><h2 data-i18n="ui.upd_title"></h2><div class="body" id="upd-body"><div id="upd-top"><span class="mut" data-i18n="ui.loading"></span></div><div id="upd-vers"></div><div id="upd-prog" aria-live="polite"></div><div id="upd-hist"></div></div></section></div>
+<section><h2 data-i18n="ui.upd_title"></h2><div class="body" id="upd-body"><div id="upd-top"><span class="mut" data-i18n="ui.loading"></span></div><div id="upd-vers"></div><div id="upd-prog" aria-live="polite"></div><div id="upd-hist"></div><div id="upd-copies"></div><div id="upd-log"></div></div></section></div>
 <div class="tab" id="t-cfg" role="tabpanel" aria-labelledby="n-cfg">
 <section><h2><span data-i18n="ui.cfg_title"></span></h2><div class="body">
 <div id="cfg-restart" role="status"></div>
@@ -2946,9 +2946,31 @@ async function updHist(){
   const box=$("upd-hist");if(!box)return;const j=await updJ("history");const e=(j&&j.entries)||[];
   box.innerHTML=`<h3 style="font-size:13px;margin:10px 0 4px">${esc(T("ui.upd_history"))}</h3>`+(e.length?`<table><tbody>${e.map(x=>{const k="ui.upd_r_"+x.result,t=T(k);return `<tr><td>${esc(String(x.at||"").slice(0,16).replace("T"," "))}</td><td>${esc(x.from||"")} → ${esc(x.to||"")}</td><td>${esc(t===k?(x.result||""):t)}</td></tr>`}).join("")}</tbody></table>`:`<span class="mut">${esc(T("ui.upd_none"))}</span>`)
 }
+async function updCopies(){
+  const box=$("upd-copies");if(!box)return;const j=await updJ("copies");const c=(j&&j.copies)||[];
+  box.innerHTML=`<h3 style="font-size:13px;margin:10px 0 4px">${esc(T("ui.upd_copies"))}</h3>`+(c.length?`<table><tbody>${c.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.from||"?")} → ${esc(x.to||"?")}</td><td>${esc(Math.round((x.bytes||0)/1024))} KB${x.way_back?` <span class="chip">${esc(T("ui.upd_copy_way_back"))}</span>`:""}</td><td>${x.can_discard&&UPD.st&&UPD.st.can_apply?`<button type="button" data-upd-discard="${esc(x.name)}" data-upd-way="${x.way_back?"1":""}" data-upd-from="${esc(x.from||"?")}" data-upd-kb="${esc(Math.round((x.bytes||0)/1024))}">${esc(T("ui.upd_discard"))}</button>`:""}</td></tr>`).join("")}</tbody></table>`:`<span class="mut">${esc(T("ui.upd_copies_none"))}</span>`)
+}
+async function updDiscard(t){
+  UPD.note="";const name=t.dataset.updDiscard,way=!!t.dataset.updWay;
+  if(!await askConfirm(T("ui.upd_discard_confirm",{name:name,kb:t.dataset.updKb}),{danger:true}))return;
+  if(way&&!await askConfirm(T("ui.upd_discard_way_confirm",{from:t.dataset.updFrom}),{danger:true}))return;
+  const r=await updJ("discard",{name:name,confirm:true,force:way});
+  UPD.note=r&&r.ok?T("ui.upd_discarded"):updErr(r&&r.status||"network");updTop();updCopies();updHist()
+}
+async function updLogToggle(){
+  const box=$("upd-log");if(!box)return;
+  if(UPD.logOpen){UPD.logOpen=false;updLogDraw(null);return}
+  const j=await updJ("log?lines=400");UPD.logOpen=true;updLogDraw(j||{lines:[]})
+}
+function updLogDraw(j){
+  const box=$("upd-log");if(!box)return;
+  const head=`<h3 style="font-size:13px;margin:10px 0 4px">${esc(T("ui.upd_log"))}</h3><button type="button" id="upd-log-btn">${esc(T(j?"ui.upd_log_hide":"ui.upd_log_show"))}</button>`;
+  if(!j){box.innerHTML=head;return}
+  const l=j.lines||[];box.innerHTML=head+(l.length?`<pre style="white-space:pre-wrap;max-height:260px;overflow:auto">${esc(l.join("\n"))}</pre>${j.truncated?`<p class="mut">${esc(T("ui.upd_log_cut",{bytes:Math.round((j.bytes||0)/1024)}))}</p>`:""}`:`<p class="mut">${esc(T("ui.upd_log_none"))}</p>`)
+}
 async function updLoad(){
   const s=await updJ("status");if(s&&s.installed!==undefined){UPD.st=s;if(s.progress&&s.progress.running&&!UPD.poll)updPoll()}else if(!UPD.expect)UPD.st=null;
-  updTop();updVers();updProg();updHist()
+  updTop();updVers();updProg();updHist();updCopies();if(!UPD.logOpen)updLogDraw(null)
 }
 function updStreamClose(){if(UPD.es){try{UPD.es.close()}catch(e){}UPD.es=null}}
 function updStream(){
@@ -2994,6 +3016,8 @@ document.addEventListener("click",async e=>{
   const t=e.target.closest&&e.target.closest("#upd-body button");if(!t)return;
   if(t.id==="upd-check"){UPD.note=T("ui.upd_checking");updTop();const j=await updJ("check",{});if(j&&j.ok){UPD.vers=j.versions;UPD.note=""}else UPD.note=updErr(j&&j.status||"network");updTop();updVers();return}
   if(t.id==="upd-back"){updBack();return}
+  if(t.id==="upd-log-btn"){updLogToggle();return}
+  if(t.dataset.updDiscard){updDiscard(t);return}
   if(t.dataset.upd){e.preventDefault();e.stopPropagation();updApply(t.dataset.upd)}
 });
 sentTick();setInterval(sentTick,15000);scoreTick();setInterval(scoreTick,60000);if(!LITE){teamLoad();setInterval(()=>{if(["team","fleet","trep"].includes(CURTAB))teamLoad()},30000);if(VIEW==="repo"&&QS.get("repo"))repoHealthOpen(QS.get("repo"))}

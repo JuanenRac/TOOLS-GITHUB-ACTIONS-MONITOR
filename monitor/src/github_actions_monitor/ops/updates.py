@@ -353,6 +353,40 @@ def history():
     return [{k: e.get(k) for k in ("at", "result", "from", "to", "backup", "error")} for e in reversed(up.history()[-50:])]
 
 
+def process_log(lines=200):
+    """The last lines of the log of the process that applied (or undid) the last update: {"lines", "bytes", "truncated"}. The updater hides the values after words like token or secret; nothing is read
+    from outside the logs folder. Empty when the updater is missing or no update ran yet."""
+    mod = module()
+    if mod is None:
+        return {"lines": [], "bytes": 0, "truncated": False}
+    return mod.Updater(ROOT, mod.GitHubSource(prefer_gh=False)).process_log(lines)
+
+
+def copies():
+    """The copies in the folder of copies: name, status, versions, size, whether it is the one the way back needs and whether it can be discarded. Names and sizes only."""
+    mod = module()
+    if mod is None:
+        return []
+    return mod.Updater(ROOT, mod.GitHubSource(prefer_gh=False)).copies()
+
+
+def discard(name, confirm, force=False, lite=False, demo=False):
+    """Deletes one copy of the folder of copies after the person confirmed. Refused (a short code) when it is not confirmed, while an update runs, for a copy that is not there, for the copy of an
+    update that is running, and for the copy of the way back unless `force` (the page asks twice for that one). Never touches the installation or the data."""
+    if confirm is not True:
+        raise UpdatesError("not_confirmed")
+    if lite or demo:
+        raise UpdatesError("lite" if lite else "demo")
+    with _lock:
+        if running():
+            raise UpdatesError("busy")
+        _mod, up = updater()
+        report = up.discard(name, force=force is True)
+        if report["ok"]:
+            return {"discarded": report["name"], "freed": report.get("freed", 0)}
+        raise UpdatesError(report.get("reason") or "failed")
+
+
 def stop_soon(server, seconds=1.5):
     """After the answer is sent: the monitor stops by itself so that the update can replace it (the process that applies it is waiting). A watchdog ends the process if the stop hangs."""
     def go():

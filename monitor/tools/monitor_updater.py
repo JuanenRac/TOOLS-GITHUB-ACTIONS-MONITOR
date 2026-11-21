@@ -212,6 +212,17 @@ _add("r.rolled", "It failed ({error}) and the previous state was restored automa
 _add("r.rollback_failed", "It failed ({error}) and the automatic return ALSO failed ({error2}). Your copy is intact in {backup}: restore it by hand.", "Falló ({error}) y la vuelta automática TAMBIÉN falló ({error2}). Tu copia está intacta en {backup}: restáurala a mano.", "Fehlgeschlagen ({error}) und die automatische Rückkehr schlug AUCH fehl ({error2}). Deine Kopie liegt unversehrt in {backup}: stelle sie von Hand wieder her.", "Échec ({error}) et le retour automatique a AUSSI échoué ({error2}). Votre copie est intacte dans {backup} : restaurez-la à la main.", "Fallito ({error}) e anche il ritorno automatico è FALLITO ({error2}). La tua copia è intatta in {backup}: ripristinala a mano.", "失敗し（{error}）、自動復元も失敗しました（{error2}）。コピーは {backup} に無傷で残っています。手動で復元してください。", "失败（{error}），自动回退也失败了（{error2}）。你的副本完好保存在 {backup}：请手动恢复。", "Falhou ({error}) e o regresso automático TAMBÉM falhou ({error2}). A sua cópia está intacta em {backup}: restaure-a à mão.")
 _add("r.rollback_ok", "Went back to {to}. What the failed state left is in {backup}.", "Se volvió a {to}. Lo que dejó el estado fallido está en {backup}.", "Zurück auf {to}. Was der fehlgeschlagene Zustand hinterließ, liegt in {backup}.", "Retour à {to}. Ce qu'a laissé l'état en échec est dans {backup}.", "Tornato a {to}. Ciò che ha lasciato lo stato fallito è in {backup}.", "{to} に戻しました。失敗した状態の残りは {backup} にあります。", "已回到 {to}。失败状态留下的内容在 {backup}。", "Voltou-se a {to}. O que o estado falhado deixou está em {backup}.")
 _add("r.back_ok", "Went back to {to}. What you leave behind is in {backup}.", "Se volvió a {to}. Lo que dejas atrás está en {backup}.", "Zurück auf {to}. Was du hinter dir lässt, liegt in {backup}.", "Retour à {to}. Ce que vous laissez derrière est dans {backup}.", "Tornato a {to}. Ciò che lasci è in {backup}.", "{to} に戻しました。残したものは {backup} にあります。", "已回到 {to}。你放下的内容在 {backup}。", "Voltou-se a {to}. O que deixa para trás está em {backup}.")
+_add("r.no_copy", "There is no copy called {name} in the folder of copies.", "No hay ninguna copia llamada {name} en la carpeta de copias.", "Im Ordner der Kopien gibt es keine Kopie namens {name}.", "Il n'y a aucune copie nommée {name} dans le dossier des copies.", "Non c'è nessuna copia di nome {name} nella cartella delle copie.", "コピーのフォルダーに {name} という名前のコピーはありません。", "副本文件夹中没有名为 {name} 的副本。", "Não há nenhuma cópia chamada {name} na pasta das cópias.")
+_add("r.copy_running", "That copy belongs to an update that is still running: it cannot be discarded.", "Esa copia es de una actualización que aún se está ejecutando: no se puede descartar.", "Diese Kopie gehört zu einem noch laufenden Update: sie kann nicht verworfen werden.", "Cette copie appartient à une mise à jour encore en cours : elle ne peut pas être écartée.", "Quella copia appartiene a un aggiornamento ancora in corso: non può essere scartata.", "そのコピーはまだ実行中の更新のものです。破棄できません。", "该副本属于仍在运行的更新：不能丢弃。", "Essa cópia pertence a uma atualização que ainda está a correr: não pode ser descartada.")
+_add("r.copy_way_back", "That copy is the one the way back (rollback) needs. Discard it only if you will not go back: use --force.", "Esa copia es la que necesita la vuelta atrás (rollback). Descártala solo si no vas a volver: usa --force.", "Das ist die Kopie, die der Rückweg (Rollback) braucht. Verwerfen Sie sie nur, wenn Sie nicht zurückgehen wollen: --force verwenden.", "C'est la copie dont le retour en arrière (rollback) a besoin. Ne l'écartez que si vous ne reviendrez pas : utilisez --force.", "È la copia di cui ha bisogno il ritorno indietro (rollback). Scartala solo se non tornerai indietro: usa --force.", "これはロールバックに必要なコピーです。戻らない場合にのみ破棄してください（--force）。", "这是回退（rollback）所需的副本。只有不打算回退时才丢弃：使用 --force。", "Essa é a cópia de que a volta atrás (rollback) precisa. Descarte-a só se não for voltar: use --force.")
+_add("r.copy_failed", "The copy could not be removed: {why}", "No se pudo quitar la copia: {why}", "Die Kopie konnte nicht entfernt werden: {why}", "La copie n'a pas pu être supprimée : {why}", "Non è stato possibile rimuovere la copia: {why}", "コピーを削除できませんでした: {why}", "无法删除该副本：{why}", "Não foi possível remover a cópia: {why}")
+_add("r.discarded", "Copy {name} discarded ({kb} KB freed).", "Copia {name} descartada ({kb} KB liberados).", "Kopie {name} verworfen ({kb} KB frei).", "Copie {name} écartée ({kb} Ko libérés).", "Copia {name} scartata ({kb} KB liberati).", "コピー {name} を破棄しました（{kb} KB 解放）。", "已丢弃副本 {name}（释放 {kb} KB）。", "Cópia {name} descartada ({kb} KB libertados).")
+_add("r.discard_usage", "discard needs --name COPY (see the command `copies`).", "discard necesita --name COPIA (mira el comando `copies`).", "discard braucht --name KOPIE (siehe den Befehl `copies`).", "discard demande --name COPIE (voir la commande `copies`).", "discard richiede --name COPIA (vedi il comando `copies`).", "discard には --name コピー名が必要です（`copies` コマンドを参照）。", "discard 需要 --name 副本名（见命令 `copies`）。", "discard precisa de --name CÓPIA (veja o comando `copies`).")
+_add("r.not_confirmed", "Not confirmed: nothing was discarded.", "No confirmado: no se descartó nada.", "Nicht bestätigt: nichts wurde verworfen.", "Non confirmé : rien n'a été écarté.", "Non confermato: non è stato scartato nulla.", "確認されなかったため、何も破棄していません。", "未确认：没有丢弃任何内容。", "Não confirmado: nada foi descartado.")
+_add("lbl.way_back", "way back", "vuelta atrás", "Rückweg", "retour en arrière", "ritorno indietro", "戻り先", "回退用", "volta atrás")
+_add("lbl.no_copies", "There are no copies.", "No hay copias.", "Es gibt keine Kopien.", "Il n'y a aucune copie.", "Non ci sono copie.", "コピーはありません。", "没有副本。", "Não há cópias.")
+_add("lbl.no_log", "The process has not written a log yet.", "El proceso aún no ha escrito ningún registro.", "Der Prozess hat noch kein Protokoll geschrieben.", "Le processus n'a pas encore écrit de journal.", "Il processo non ha ancora scritto alcun registro.", "プロセスはまだログを書いていません。", "该进程尚未写入日志。", "O processo ainda não escreveu nenhum registo.")
+_add("btn.discard", "Discard copy", "Descartar copia", "Kopie verwerfen", "Écarter la copie", "Scarta la copia", "コピーを破棄", "丢弃副本", "Descartar cópia")
 _add("r.no_previous", "There is no earlier update to go back to.", "No hay ninguna actualización anterior a la que volver.", "Es gibt kein früheres Update, zu dem man zurückkehren könnte.", "Il n'y a aucune mise à jour antérieure à laquelle revenir.", "Non c'è alcun aggiornamento precedente a cui tornare.", "戻れる以前の更新がありません。", "没有可回到的更早更新。", "Não há nenhuma atualização anterior a que voltar.")
 _add("r.no_network", "No connection to GitHub and no zip was given: use a zip you already have.", "Sin conexión con GitHub y sin zip indicado: usa un zip que ya tengas.", "Keine Verbindung zu GitHub und kein Zip angegeben: nutze ein vorhandenes Zip.", "Pas de connexion à GitHub et aucun zip indiqué : utilisez un zip que vous avez déjà.", "Nessuna connessione a GitHub e nessuno zip indicato: usa uno zip che hai già.", "GitHub に接続できず、zip も指定されていません。手元の zip を使ってください。", "无法连接 GitHub 且未指定 zip：请使用你已有的 zip。", "Sem ligação ao GitHub e sem zip indicado: use um zip que já tenha.")
 _add("p.confirm", "Apply this update? Type yes: ", "¿Aplicar esta actualización? Escribe sí: ", "Dieses Update anwenden? Gib ja ein: ", "Appliquer cette mise à jour ? Tapez oui : ", "Applicare questo aggiornamento? Scrivi sì: ", "この更新を適用しますか？ yes と入力: ", "应用此更新？请输入 yes：", "Aplicar esta atualização? Escreva sim: ")
@@ -1867,6 +1878,83 @@ class Updater:
         with open(folders["data"] / HISTORY_NAME, "a", encoding="utf-8") as handle:
             handle.write(json.dumps(entry) + "\n")
 
+    # --- the copies and the log of the process
+    def copies(self):
+        """The copies in the folder of copies, newest first: {"name", "status", "from", "to", "bytes", "files", "way_back", "can_discard", "reason"}. `way_back` is the copy that `rollback` would use;
+        a copy of an update that is still running cannot be discarded, and the one of the way back only with `force`. Reads names and sizes, never the content of a file."""
+        if not self.backups.is_dir():
+            return []
+        way_back = (self.previous() or {}).get("backup")
+        out = []
+        for folder in sorted(self.backups.iterdir(), reverse=True):
+            if not folder.is_dir() or folder.name in ("_staging", "downloads") or folder.is_symlink():
+                continue
+            try:
+                journal = json.loads((folder / "journal.json").read_text(encoding="utf-8")) if (folder / "journal.json").is_file() else {}
+            except (OSError, ValueError):
+                journal = {}
+            status = str(journal.get("status") or ("copy" if (folder / "manifest.json").is_file() else "unknown"))
+            size, files = 0, 0
+            for item in folder.rglob("*"):
+                if files >= 20000:
+                    break
+                with contextlib.suppress(OSError):
+                    if item.is_file() and not item.is_symlink():
+                        size += item.stat().st_size
+                        files += 1
+            busy = status in ("applying", "rolling_back") or (self.lock_state() or {}).get("backup") == folder.name
+            reason = "running" if busy else ("way_back" if folder.name == way_back else "")
+            out.append({"name": folder.name, "status": status, "from": journal.get("from"), "to": journal.get("to"), "bytes": size, "files": files, "way_back": folder.name == way_back,
+                        "can_discard": not busy, "reason": reason})
+        return out
+
+    def discard(self, name, force=False, confirm=None):
+        """Deletes ONE copy from the folder of copies, after the person confirmed (`confirm` returns True). It refuses a name that is not a copy of this folder, a copy of an update that is running, and
+        the copy the way back needs unless `force`. Nothing else is touched: not the installation, not the data. The act is written in the history of updates. Returns {"ok", "code", "error"}."""
+        report = {"ok": False, "code": OK, "error": None, "name": name}
+        found = next((c for c in self.copies() if c["name"] == str(name)), None)
+        folder = self.backups / str(name) if re.fullmatch(r"[A-Za-z0-9._-]{1,120}", str(name or "")) else None
+        if found is None or folder is None or not within(folder, self.backups) or folder.is_symlink():
+            report.update(code=USAGE, reason="unknown_copy", error=tr("r.no_copy", name=str(name)[:80]))
+            return report
+        if found["reason"] == "running":
+            report.update(code=BLOCKED, reason="running", error=tr("r.copy_running"))
+            return report
+        if found["reason"] == "way_back" and not force:
+            report.update(code=BLOCKED, reason="way_back", error=tr("r.copy_way_back"))
+            return report
+        if confirm is not None and not confirm(found):
+            report.update(code=NOT_CONFIRMED, reason="not_confirmed", error=tr("r.not_confirmed"))
+            return report
+        try:
+            shutil.rmtree(str(folder))
+        except OSError as error:
+            report.update(code=ROLLBACK_FAILED, reason="failed", error=tr("r.copy_failed", why=str(error)[:120]))
+            return report
+        self._history({"result": "discarded", "backup": str(name), "from": found.get("from"), "to": found.get("to")}, self.folders())
+        report.update(ok=True, freed=found["bytes"])
+        return report
+
+    def process_log(self, lines=200, limit_bytes=262144):
+        """The last lines of the log the process of an update (apply or rollback) wrote, as {"lines", "bytes", "truncated"}. Values after words like token, secret or password are hidden; a log that is
+        a link, or missing, is an empty one. The log is the file the monitor gave the process when it started it (`updater_handover.log` in the logs folder)."""
+        path = self.folders()["logs"] / "updater_handover.log"
+        lines = max(1, min(int(lines or 200), 2000))
+        try:
+            if path.is_symlink() or not path.is_file():
+                return {"lines": [], "bytes": 0, "truncated": False}
+            size = path.stat().st_size
+            with open(path, "rb") as handle:
+                handle.seek(max(0, size - limit_bytes))
+                raw = handle.read(limit_bytes)
+        except OSError:
+            return {"lines": [], "bytes": 0, "truncated": False}
+        text = raw.decode("utf-8", errors="replace")
+        rows = [_SECRET_VALUE.sub(lambda m: m.group(1) + "=***", re.sub(r"\x1b\[[0-9;]*[A-Za-z]", "", line)).rstrip() for line in text.splitlines()]
+        if size > limit_bytes and rows:
+            rows = rows[1:]      # the first line of a cut may be half of one
+        return {"lines": rows[-lines:], "bytes": size, "truncated": size > limit_bytes or len(rows) > lines}
+
     def previous(self):
         """The last successful update whose copy still exists and that has not been undone, or None."""
         undone = {e.get("undid") for e in self.history() if e.get("result") == "manual_rollback"}
@@ -1938,6 +2026,9 @@ class Updater:
 # ---------------------------------------------------------------------------------------------------------------------------------------------
 # Text for people
 # ---------------------------------------------------------------------------------------------------------------------------------------------
+_SECRET_VALUE = re.compile(r"(?i)([A-Za-z0-9_.-]*(?:token|secret|password|passwd|authorization|api[_-]?key|bearer))\s*[=:]\s*\S+")
+
+
 def _short(value):
     text = json.dumps(value, ensure_ascii=False)
     return text if len(text) <= 48 else text[:45] + "..."
@@ -2442,7 +2533,7 @@ def run_tk(updater):
 # ---------------------------------------------------------------------------------------------------------------------------------------------
 # The command line
 # ---------------------------------------------------------------------------------------------------------------------------------------------
-COMMANDS = ("status", "releases", "plan", "apply", "migrate", "rollback", "history", "web", "tk", "console")
+COMMANDS = ("status", "releases", "plan", "apply", "migrate", "rollback", "history", "copies", "discard", "log", "web", "tk", "console")
 
 
 class StatusFile:
@@ -2501,6 +2592,9 @@ def build_parser():
     parser.add_argument("--tk", action="store_true")
     parser.add_argument("--console", action="store_true")
     parser.add_argument("--lang")
+    parser.add_argument("--name", help="discard: the name of the copy (see `copies`)")
+    parser.add_argument("--force", action="store_true", help="discard: also the copy that the way back (rollback) needs")
+    parser.add_argument("--lines", type=int, default=200, help="log: how many of the last lines (at most 2000)")
     return parser
 
 
@@ -2579,6 +2673,21 @@ def main(argv=None, out=None, inp=input):
             entries = updater.history()
             say(json.dumps(entries, indent=1) if args.json else "\n".join(f"{e.get('at', '')}  {e.get('result')}  {e.get('from')} -> {e.get('to')}  {e.get('backup', '')}" for e in entries) or tr("lbl.none"))
             return OK
+        if command == "copies":
+            rows = updater.copies()
+            say(json.dumps(rows, indent=1) if args.json else "\n".join(f"{c['name']}  {c['status']}  {c.get('from') or '?'} -> {c.get('to') or '?'}  {c['bytes'] // 1024} KB" + ("  [" + tr("lbl.way_back") + "]" if c["way_back"] else "") for c in rows) or tr("lbl.no_copies"))
+            return OK
+        if command == "log":
+            result = updater.process_log(args.lines)
+            say(json.dumps(result, indent=1) if args.json else "\n".join(result["lines"]) or tr("lbl.no_log"))
+            return OK
+        if command == "discard":
+            if not args.name:
+                print(tr("r.discard_usage"), file=sys.stderr)
+                return USAGE
+            report = updater.discard(args.name, args.force, None if args.yes else (lambda c: inp(tr("btn.discard") + f" ({c['name']})? " + tr("p.confirm")).strip().lower() in ("yes", "y", "si", "sí", "ja", "oui", "sì", "sim", "是", "はい")))
+            say(json.dumps(report, indent=1, default=str) if args.json else (tr("r.discarded", name=report["name"], kb=report.get("freed", 0) // 1024) if report["ok"] else str(report["error"])))
+            return report["code"]
         if command == "plan":
             plan = updater.plan(args.to, options_of(args))
             say(json.dumps(plan, indent=1, default=str) if args.json else render_plan(plan))

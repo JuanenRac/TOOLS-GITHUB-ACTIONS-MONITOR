@@ -24,7 +24,7 @@ Bajo un gestor de servicios la página no aplica actualizaciones por defecto. Si
 
 **Confianza.** La comprobación compara el zip con SHA256SUMS y ambos salen de la misma release de GitHub: detecta una descarga dañada o incompleta, no una release sustituida en su origen. La confianza en la release descansa en GitHub y en tu propia cuenta allí.
 
-## Qué hace, paso a paso Las rutas que lo sostienen son `/api/updates/status`, `/api/updates/progress`, `/api/updates/history` (solo lectura) y `/api/updates/check`, `/api/updates/plan`, `/api/updates/apply`, `/api/updates/rollback` (administrador, solo desde este equipo). El progreso viaja además como eventos enviados por el servidor en `/api/updates/stream` (la página lo usa mientras corre una actualización y vuelve a preguntar cada segundo y medio si el navegador o la conexión no lo permiten).
+## Qué hace, paso a paso Las rutas que lo sostienen son `/api/updates/status`, `/api/updates/progress`, `/api/updates/history`, `/api/updates/log` (las últimas líneas del registro del proceso, con los valores tras token o secret ocultos), `/api/updates/copies` (solo lectura) y `/api/updates/check`, `/api/updates/plan`, `/api/updates/apply`, `/api/updates/rollback`, `/api/updates/discard` (administrador, solo desde este equipo). El progreso viaja además como eventos enviados por el servidor en `/api/updates/stream` (la página lo usa mientras corre una actualización y vuelve a preguntar cada segundo y medio si el navegador o la conexión no lo permiten).
 
 1. Detecta la instalación: carpeta, versión, edición (Completa o Lite), configuración, datos, puertos, si el monitor está en marcha, contenedor o servicio.
 2. Lista todas las versiones publicadas en GitHub (sin token) con su fecha y notas, y marca la instalada y la última. Sin conexión, dale un zip con `--zip`.
@@ -46,6 +46,9 @@ Sin comando se abre la página. Los comandos responden una vez (añade `--json` 
 | `migrate` | solo migrar un fichero de configuración, ver abajo |
 | `rollback` | volver a la versión anterior a la última actualización |
 | `history` | las actualizaciones hechas en esta instalación |
+| `copies` | las copias de la carpeta de copias: nombre, estado, versiones, tamaño y cuál necesita la vuelta atrás |
+| `discard` | `discard --name COPIA` borra UNA copia tras confirmarlo (`--yes` omite la pregunta); la copia que necesita la vuelta atrás solo con `--force`; la de una actualización en curso, nunca |
+| `log` | las últimas líneas (`--lines N`, como mucho 2000) del registro del proceso de la última actualización, con los valores tras token, secret o password ocultos |
 
 ## Opciones
 
@@ -94,6 +97,7 @@ Sin comando se abre la página. Los comandos responden una vez (añade `--json` 
 - Solo escucha en 127.0.0.1 con un token efímero, rechaza peticiones de otros sitios, no ejecuta nada del zip, no usa shell y solo escribe dentro de la instalación y de la carpeta de copias.
 - Antes de cambiar nada copia el paquete, la configuración y los datos; si un paso falla se restaura la copia y se escribe un informe. Si falla hasta la vuelta, la copia sigue intacta y el informe explica cómo restaurarla a mano.
 - Sin Internet: `--zip FICHERO` con `--sha256` (o un SHA256SUMS al lado). Docker: se actualiza el volumen, la imagen no se sustituye desde dentro (`--allow-container` para forzarlo).
+- La página muestra las copias y un botón **Descartar copia** en cada una (pregunta antes, y dos veces por la copia que necesita la vuelta atrás), y un botón para leer el registro completo del proceso de la última actualización. Descartar borra solo esa copia, nunca la instalación ni los datos, y queda anotado en el historial.
 
 ## Códigos de salida
 

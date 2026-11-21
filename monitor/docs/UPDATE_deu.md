@@ -24,7 +24,7 @@ Unter einem Dienstmanager spielt die Seite standardmäßig keine Updates ein. L�
 
 **Vertrauen.** Die Prüfung vergleicht das Zip mit SHA256SUMS, und beides stammt aus demselben GitHub-Release: Sie erkennt einen beschädigten oder unvollständigen Download, nicht ein an der Quelle ausgetauschtes Release. Das Vertrauen in das Release beruht auf GitHub und auf deinem eigenen Konto dort.
 
-## Was er tut, Schritt für Schritt Die Routen dahinter sind `/api/updates/status`, `/api/updates/progress`, `/api/updates/history` (nur lesend) und `/api/updates/check`, `/api/updates/plan`, `/api/updates/apply`, `/api/updates/rollback` (Administrator, nur von diesem Rechner). Der Fortschritt kommt außerdem als Server-Sent Events über `/api/updates/stream` (die Seite nutzt das während einer Aktualisierung und fragt alle anderthalb Sekunden nach, wenn Browser oder Verbindung es nicht erlauben).
+## Was er tut, Schritt für Schritt Die Routen dahinter sind `/api/updates/status`, `/api/updates/progress`, `/api/updates/history`, `/api/updates/log` (die letzten Zeilen des Prozessprotokolls, Werte nach token oder secret ausgeblendet), `/api/updates/copies` (nur lesend) und `/api/updates/check`, `/api/updates/plan`, `/api/updates/apply`, `/api/updates/rollback`, `/api/updates/discard` (Administrator, nur von diesem Rechner). Der Fortschritt kommt außerdem als Server-Sent Events über `/api/updates/stream` (die Seite nutzt das während einer Aktualisierung und fragt alle anderthalb Sekunden nach, wenn Browser oder Verbindung es nicht erlauben).
 
 1. Erkennt die Installation: Ordner, Version, Ausgabe (Vollständig oder Lite), Konfiguration, Daten, Ports, ob der Monitor läuft, Container oder Dienst.
 2. Listet alle auf GitHub veröffentlichten Versionen (ohne Token) mit Datum und Hinweisen auf und markiert die installierte und die neueste. Ohne Verbindung geben Sie ihm mit `--zip` ein Zip.
@@ -46,6 +46,9 @@ Ohne Befehl öffnet sich die Seite. Die Befehle antworten einmal (mit `--json` a
 | `migrate` | nur eine Konfigurationsdatei migrieren, siehe unten |
 | `rollback` | zur Version vor der letzten Aktualisierung zurück |
 | `history` | die auf dieser Installation gemachten Aktualisierungen |
+| `copies` | die Kopien im Kopienordner: Name, Zustand, Versionen, Größe und welche der Rückweg braucht |
+| `discard` | `discard --name KOPIE` löscht EINE Kopie nach Bestätigung (`--yes` überspringt die Frage); die Kopie, die der Rückweg braucht, nur mit `--force`; die eines laufenden Updates nie |
+| `log` | die letzten Zeilen (`--lines N`, höchstens 2000) des Protokolls des Prozesses des letzten Updates, Werte nach token, secret oder password ausgeblendet |
 
 ## Optionen
 
@@ -94,6 +97,7 @@ Ohne Befehl öffnet sich die Seite. Die Befehle antworten einmal (mit `--json` a
 - Er lauscht nur auf 127.0.0.1 mit einem flüchtigen Token, weist Anfragen von anderen Seiten ab, führt nichts aus dem Zip aus, nutzt keine Shell und schreibt nur in die Installation und den Ordner der Kopien.
 - Vor jeder Änderung kopiert er Paket, Konfiguration und Daten; schlägt ein Schritt fehl, wird die Kopie zurückgespielt und ein Bericht geschrieben. Scheitert sogar der Rückweg, bleibt die Kopie unversehrt und der Bericht erklärt, wie man sie von Hand wiederherstellt.
 - Offline: `--zip DATEI` mit `--sha256` (oder einer SHA256SUMS daneben). Docker: das Volume wird aktualisiert, das Image von innen nicht ersetzt (`--allow-container` erzwingt es).
+- Die Seite zeigt die Kopien und bei jeder eine Schaltfläche **Kopie verwerfen** (sie fragt zuerst, bei der Kopie des Rückwegs zweimal) sowie eine Schaltfläche, um das ganze Protokoll des Prozesses des letzten Updates zu lesen. Verwerfen löscht nur diese Kopie, nie die Installation oder die Daten, und wird im Verlauf festgehalten.
 
 ## Exit-Codes
 
