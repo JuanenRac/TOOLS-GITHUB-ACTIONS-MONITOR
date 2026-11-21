@@ -160,6 +160,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - **Une release n'est proposée qu'à partir de cinq entrées sous [Unreleased]** : `sentinel.candidate_min_entries` démarre maintenant à 5 (c'était 1), si bien que les candidates à une release de la sentinelle CI et la préparation de version n'apparaissent plus pour un ou deux petits changements. Une valeur choisie par vous est conservée ; le nombre se règle de 1 à 100 dans les Réglages.
 
+- **Un job de CI analyse les workflows avec zizmor** : `.github/workflows/zizmor.yml` appelle le workflow réutilisable partagé, fixé par son SHA complet, à chaque pull request, chaque push sur main et à la main ; seuls les constats de gravité haute le font échouer, le reste est listé dans le résumé et ceux déjà revus sont ignorés avec leur motif dans `.github/zizmor.yml`. Il n'a d'autre permission que lire et n'utilise aucun secret.
+
 ### Corrigé
 
 - **La file de signature de A5 ne propose plus ce qu'il n'y a pas à signer** : une exécution n'y entre que si ce n'est pas une simulation (l'étape « Prepare the draft » a tourné), si un brouillon de release attend ou si le dépôt n'a aucune release publiée, et si la version n'est pas déjà publiée avec sa signature. Les cinq fausses lignes (quatre builds manuels dont la version était déjà publiée et signée, et une simulation dont la commande `--sign --publish --bench` aurait été erronée) disparaissent. Chaque exécution de la file est regardée une fois toutes les six heures (les jobs de l'exécution et les releases de son dépôt, deux lectures, trois exécutions au plus par cycle) et ce qui sort est listé sous la file comme « vérifié : déjà publiée vX » ou « simulation » au lieu de « non vérifié ».

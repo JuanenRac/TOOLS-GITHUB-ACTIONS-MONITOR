@@ -1,0 +1,26 @@
+# Static analysis of the workflows of this repository. It calls the shared reusable workflow (zizmor), pinned by its full commit SHA, on every pull request and every push to main,
+# and by hand; only findings of high severity fail the job, the rest are listed in the summary of the run. What was reviewed and accepted is ignored in .github/zizmor.yml, each with its reason.
+
+name: zizmor
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: zizmor-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  zizmor:
+    name: zizmor
+    permissions:
+      contents: read
+    uses: JuanenRac/JuanenRac/.github/workflows/zizmor.yml@fe5fca0f22035148d35fa4eae45706de1ce556a1 # main
+    with:
+      min-severity: high
+      config: .github/zizmor.yml

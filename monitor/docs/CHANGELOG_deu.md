@@ -159,6 +159,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Ein Release wird erst ab fünf Einträgen unter [Unreleased] vorgeschlagen**: `sentinel.candidate_min_entries` beginnt jetzt bei 5 (vorher 1), sodass Release-Kandidaten des CI-Wächters und die Release-Bereitschaft nicht mehr für ein oder zwei kleine Änderungen erscheinen. Ein selbst gewählter Wert bleibt erhalten; die Zahl lässt sich in den Einstellungen von 1 bis 100 setzen.
 
+- **Ein CI-Job analysiert die Workflows mit zizmor**: `.github/workflows/zizmor.yml` ruft den gemeinsamen wiederverwendbaren Workflow, per vollständigem Commit-SHA festgelegt, bei jedem Pull Request, jedem Push auf main und von Hand auf; nur Funde hoher Schwere lassen ihn fehlschlagen, der Rest steht in der Zusammenfassung, und geprüfte werden mit Begründung in `.github/zizmor.yml` ignoriert. Er hat kein Recht außer Lesen und nutzt kein Geheimnis.
+
 ### Behoben
 
 - **Die Signaturwarteschlange von A5 bietet nichts mehr an, was nicht signiert werden muss**: Ein Lauf kommt nur hinein, wenn er kein Probelauf ist (der Schritt „Prepare the draft“ lief), ein Release-Entwurf wartet oder das Repository kein veröffentlichtes Release hat und die Version nicht schon mit Signatur veröffentlicht ist. Die fünf falschen Zeilen (vier manuelle Builds, deren Version schon veröffentlicht und signiert war, und ein Probelauf, dessen Befehl `--sign --publish --bench` falsch gewesen wäre) sind weg. Jeder Lauf der Warteschlange wird alle sechs Stunden angesehen (die Jobs des Laufs und die Releases seines Repositorys, zwei Lesevorgänge, höchstens drei Läufe je Zyklus); was die Warteschlange verlässt, steht darunter als „geprüft: bereits veröffentlicht vX“ oder „Probelauf“ statt „ungeprüft“.

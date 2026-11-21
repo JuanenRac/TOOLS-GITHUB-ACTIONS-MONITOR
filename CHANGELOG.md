@@ -161,6 +161,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **A release is suggested only from five entries under [Unreleased]**: `sentinel.candidate_min_entries` now starts at 5 (it was 1), so the release candidates of the CI sentinel and the release readiness no longer appear for one or two small changes. A value you chose yourself is kept; the number can be set from 1 to 100 in Settings.
 
+- **A CI job analyses the workflows with zizmor**: `.github/workflows/zizmor.yml` calls the shared reusable workflow, pinned by its full commit SHA, on every pull request, every push to main and by hand; only findings of high severity fail it, the rest are listed in the summary, and the reviewed ones are ignored with their reason in `.github/zizmor.yml`. It has no permission beyond reading and uses no secret.
+
 ### Fixed
 
 - **The signing queue of A5 no longer offers what does not have to be signed**: a run enters it only when it is not a dry run (the step "Prepare the draft" ran), a draft release is waiting or the repository has no published release, and the version is not already published with its signature. The five false rows (four manual builds whose version was already published and signed, and one dry run whose `--sign --publish --bench` command would have been wrong) are gone. Each run of the queue is looked at once every six hours (the jobs of the run and the releases of its repository, two reads, at most three runs a cycle) and what leaves is listed under the queue as "checked: already published vX" or "dry run" instead of "not checked".

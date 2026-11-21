@@ -159,6 +159,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **Uma versão só é sugerida a partir de cinco entradas em [Unreleased]**: `sentinel.candidate_min_entries` começa agora em 5 (era 1), pelo que os candidatos a versão do sentinela de CI e a prontidão da versão já não aparecem por uma ou duas alterações pequenas. Um valor que escolheu é mantido; o número pode ser definido de 1 a 100 nas Definições.
 
+- **Um trabalho de CI analisa os workflows com o zizmor**: `.github/workflows/zizmor.yml` chama o workflow reutilizável partilhado, fixado pelo seu SHA completo, em cada pull request, cada push para main e à mão; só os achados de gravidade alta o fazem falhar, o resto fica listado no resumo e os já revistos são ignorados com o seu motivo em `.github/zizmor.yml`. Não tem outra permissão além de ler e não usa segredos.
+
 ### Corrigido
 
 - **A fila de assinatura de A5 já não oferece o que não tem de ser assinado**: uma execução só entra se não for um ensaio (o passo «Prepare the draft» correu), houver um rascunho de release à espera ou o repositório não tiver release publicada, e a versão não estiver já publicada com a sua assinatura. As cinco linhas falsas (quatro builds manuais cuja versão já estava publicada e assinada, e um ensaio cujo comando `--sign --publish --bench` seria errado) desaparecem. Cada execução da fila é vista uma vez de seis em seis horas (os jobs da execução e as releases do seu repositório, duas leituras, no máximo três execuções por ciclo) e o que sai é listado por baixo da fila como «verificado: já publicada vX» ou «ensaio» em vez de «não verificado».
