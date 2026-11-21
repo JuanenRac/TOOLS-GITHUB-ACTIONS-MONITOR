@@ -21,6 +21,12 @@ GOOD = "name: CI\non: [push]\npermissions:\n  contents: read\njobs:\n  t:\n    r
 BAD = "name: CI\non: [push]\njobs:\n  t:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n"
 
 
+def setUpModule():
+    from github_actions_monitor import i18n
+    i18n.set_language("en")      # the sentences are judged in English whatever language an earlier test left in force
+    unittest.addModuleCleanup(i18n.set_language, None)
+
+
 class Api:
     """A fake of the contents API for repositories made of {path: text}; counts the calls and can fail a path."""
 

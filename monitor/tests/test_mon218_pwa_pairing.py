@@ -223,6 +223,8 @@ class Server(unittest.TestCase):
         if getattr(self, "server", None):
             self.server.shutdown()
             self.server.server_close()
+            self.server = None
+        if getattr(self, "saved", None):      # also when the test already closed its server by hand: the state of the process goes back to what it was
             am.CONFIG_FILE, settings_api.CONFIG_FILE, toolconfig.CONFIG_FILE = self.saved[:3]
             am.LIVE_CONFIG.clear()
             am.LIVE_CONFIG.update(self.saved[3])
@@ -234,6 +236,7 @@ class Server(unittest.TestCase):
                 devices.revoke(device["id"])
             self.tmp.cleanup()
             self.guard()
+            self.saved = None
 
     def call(self, path, body=None, headers=None, method=None):
         data = None if body is None else json.dumps(body).encode()
