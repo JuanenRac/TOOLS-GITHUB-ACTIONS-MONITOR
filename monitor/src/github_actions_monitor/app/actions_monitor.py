@@ -5345,7 +5345,7 @@ def start_sentinel(config):
             except Exception:
                 return []
 
-        ctx = {"gh": gh, "run_gh": run_gh, "repos_fn": repos_fn, "runs_fn": lambda: RUN_CACHE, "data_fn": lambda: STATE["data"], "eco_fn": ecosystem_of, "account_id": CHILD["account"]}
+        ctx = {"gh": gh, "run_gh": run_gh, "repos_fn": repos_fn, "runs_fn": lambda: RUN_CACHE, "sample_fn": lambda: SAMPLE_INFO, "data_fn": lambda: STATE["data"], "eco_fn": ecosystem_of, "account_id": CHILD["account"]}
         from github_actions_monitor.app import workspace
         if not workspace.has_workspace():   # optional: without the local clones the sentinel runs in reduced mode (GitHub API data only)
             print(i18n.t("mon.reduced_mode"))
