@@ -17,6 +17,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **O atualizador recusa, num zip descarregado, os nomes que o Windows trata como dispositivos ou fluxos ocultos**: além de `..`, caminhos absolutos e nomes que terminam em ponto ou espaço, a verificação recusa agora também um `:` em qualquer parte de um nome (em NTFS escreve um fluxo alternativo oculto) e os nomes de dispositivo reservados `CON`, `PRN`, `AUX`, `NUL`, `COM1` a `COM9` e `LPT1` a `LPT9`, com ou sem extensão. É um reforço: o zip continua a ter de coincidir com o seu SHA-256 publicado antes de ser aberto.
 
+- **A guarda de rede bloqueia também o antigo intervalo IPv6 site-local** (`fec0::/10`): deixa de ser tratado como um endereço público, por isso um notificador, um destino de webhook ou um endereço de IA não o consegue alcançar se `allow_private_targets` não estiver ativo, como nos outros intervalos privados.
+
 ## [2.1.7]
 
 A versão 2.1.7 reúne tudo o que estava previsto para a 2.1.6 e a 2.1.7. Por tema: ecrãs e quiosques (recarregamento com uma versão nova, ecrã da Frota, densidade, paleta, contraste, overscan, impressão e gravação de um relatório); telemóvel e PWA (instalar como aplicação, vista compacta, emparelhamento por QR, paleta e atalhos); tempo real e recuperação (fila do webhook, WebSocket sem endereço público, estado do GitHub, pulsação); escala e observabilidade (histogramas, quota por balde, OpenTelemetry, espaços de trabalho, custo e carbono); a linha de comandos e a IA (formatos, watch, doctor, propostas com aprovação, histórico de alertas); os sentinelas, com leituras honestas e sem falsos achados; e a cadeia de publicação (releases imutáveis, uma tarefa zizmor, um atualizador que guarda cópias e um registo).

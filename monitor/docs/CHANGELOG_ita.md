@@ -17,6 +17,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - **L'aggiornatore rifiuta, in uno zip scaricato, i nomi che Windows tratta come dispositivi o flussi nascosti**: oltre a `..`, ai percorsi assoluti e ai nomi che finiscono con un punto o uno spazio, il controllo rifiuta ora anche un `:` in qualsiasi parte di un nome (su NTFS scrive un flusso alternativo nascosto) e i nomi di dispositivo riservati `CON`, `PRN`, `AUX`, `NUL`, da `COM1` a `COM9` e da `LPT1` a `LPT9`, con o senza estensione. È un rafforzamento: lo zip deve comunque corrispondere al suo SHA-256 pubblicato prima di essere aperto.
 
+- **La guardia di rete blocca anche il vecchio intervallo IPv6 site-local** (`fec0::/10`): non è più trattato come un indirizzo pubblico, quindi un notificatore, una destinazione di webhook o un indirizzo di IA non può raggiungerlo se `allow_private_targets` non è attivo, come per gli altri intervalli privati.
+
 ## [2.1.7]
 
 La versione 2.1.7 riunisce tutto ciò che era previsto per la 2.1.6 e la 2.1.7. Per tema: schermi e chioschi (ricarica a ogni nuova versione, schermo Flotta, densità, tavolozza, contrasto, overscan, stampa e salvataggio di un rapporto); telefono e PWA (installazione come app, vista compatta, abbinamento con QR, tavolozza e scorciatoie); tempo reale e recupero (coda del webhook, WebSocket senza indirizzo pubblico, stato di GitHub, battito); scala e osservabilità (istogrammi, quota per bucket, OpenTelemetry, spazi di lavoro, costo e carbonio); la riga di comando e l'IA (formati, watch, doctor, proposte con approvazione, storico degli avvisi); le sentinelle, con letture oneste e senza falsi rilievi; e la catena di rilascio (release immutabili, un job zizmor, un aggiornatore che conserva copie e un registro).

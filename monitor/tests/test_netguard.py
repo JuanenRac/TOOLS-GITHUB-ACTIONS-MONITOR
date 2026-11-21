@@ -48,9 +48,9 @@ def resolver_for(table):
 
 class Rule(unittest.TestCase):
     def test_which_addresses_are_blocked(self):
-        for ip in ("127.0.0.1", "10.1.2.3", "172.16.0.9", "192.168.0.1", "169.254.169.254", "::1", "fc00::1", "fd12::1", "fe80::1", "0.0.0.0", "100.64.0.1", "::ffff:127.0.0.1", "224.0.0.1", "nonsense"):
+        for ip in ("127.0.0.1", "10.1.2.3", "172.16.0.9", "192.168.0.1", "169.254.169.254", "::1", "fc00::1", "fd12::1", "fe80::1", "0.0.0.0", "100.64.0.1", "::ffff:127.0.0.1", "224.0.0.1", "fec0::1", "feff::1", "[fec0::1234]", "nonsense"):
             self.assertTrue(netguard.blocked_ip(ip), ip)
-        for ip in ("93.184.216.34", "8.8.8.8", "2606:4700:4700::1111"):
+        for ip in ("93.184.216.34", "8.8.8.8", "2606:4700:4700::1111", "2606:4700::1"):
             self.assertFalse(netguard.blocked_ip(ip), ip)
 
     def test_a_name_is_judged_by_every_address_it_resolves_to(self):
