@@ -207,5 +207,34 @@ class OtlpReRunsAndMemory(unittest.TestCase):
         self.assertEqual(otlp.export(self.CFG, {"runs": last}, "2.1.8", now=now, post=self._post)["sent_spans"], 0)
 
 
+class CsvCellsAreNotFormulas(unittest.TestCase):
+    def test_cells_that_start_like_a_formula_get_an_apostrophe(self):
+        import csv
+        import tempfile
+        from pathlib import Path
+        from github_actions_monitor.integrations import event_export
+        row = {"at": "2026-11-21T10:00:00Z", "kind": "red_new", "repo": "demo", "workflow": "=HYPERLINK(\"https://example.invalid/x\",\"CI\")", "text": "+cmd|' /C calc'!A0"}
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+            target = Path(tmp) / "out.csv"
+            event_export.write([row, dict(row, workflow="@x", text="-5")], target, "csv")
+            with open(target, encoding="utf-8", newline="") as handle:
+                rows = list(csv.DictReader(handle))
+        self.assertTrue(rows[0]["workflow"].startswith("'="))
+        self.assertTrue(rows[0]["text"].startswith("'+"))
+        self.assertEqual(rows[1]["workflow"], "'@x")
+        self.assertEqual(rows[1]["text"], "-5")
+        self.assertEqual(rows[0]["repo"], "demo")
+
+    def test_jsonl_is_untouched(self):
+        import json
+        import tempfile
+        from pathlib import Path
+        from github_actions_monitor.integrations import event_export
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+            target = Path(tmp) / "out.jsonl"
+            event_export.write([{"workflow": "=1+1"}], target, "jsonl")
+            self.assertEqual(json.loads(target.read_text(encoding="utf-8").splitlines()[0])["workflow"], "=1+1")
+
+
 if __name__ == "__main__":
     unittest.main()

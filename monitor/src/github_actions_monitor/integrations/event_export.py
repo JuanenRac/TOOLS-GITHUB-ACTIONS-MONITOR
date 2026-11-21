@@ -50,6 +50,17 @@ def flat(row):
     return {c: ("" if row.get(c) is None else str(row.get(c))[:2000]) for c in COLUMNS}
 
 
+def csv_safe(text):
+    """A cell a spreadsheet would run as a formula (it starts with = + - @, a tab or a return) gets a leading apostrophe; a plain number such as -5 is left as it is."""
+    if text and text[0] in "=+-@\t\r":
+        try:
+            float(text)
+            return text
+        except ValueError:
+            return "'" + text
+    return text
+
+
 def summary(rows):
     """{"events": n, "first", "last", "by_kind": {...}, "by_repo": {top 20}, "by_day": {...}} with no package."""
     days = Counter(str(r.get("at") or "")[:10] for r in rows if r.get("at"))
@@ -85,7 +96,7 @@ def write(rows, path, fmt):
         with open(target, "x", encoding="utf-8", newline="") as handle:
             writer = csv.DictWriter(handle, fieldnames=COLUMNS)
             writer.writeheader()
-            writer.writerows(table)
+            writer.writerows({c: csv_safe(v) for c, v in row.items()} for row in table)
     elif fmt == "parquet":
         try:
             import pyarrow as pa
