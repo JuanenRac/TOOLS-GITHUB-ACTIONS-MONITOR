@@ -60,6 +60,10 @@
 
 对比开启后，“图表”标签页会显示“对比时段”部分：时段、日期和基准的选择器，每个数值一行及其变化，以及告警和变化列表。
 
+## 新鲜、过期和缓慢的回答
+
+比较和可选报告是耗时查询,所以它们的回答保存在内存中,每个请求会发现它处于三种状态之一。**新鲜**(比 `cache.heavy_fresh_s` 新,5 秒):原样返回,不再重新计算。**过期副本**(比这更旧,但比 `cache.stale_serve_h` 小时(1 小时)新):立即返回并带有 `freshness` = `{"state": "stale", "age_s": N}` 标记,同时由一次计算在后台刷新;新鲜的回答没有这个键。**已失效**(更旧或从未生成):现在计算,绝不提供那么旧的副本。计算有上限 `analytics.query_timeout_s`(120 秒):超过后回答是带代码 `query_timeout` 的 `504`,而不是永远等待;计算无法被终止,所以它会自行结束,其回答保留给下一个请求,期间不会为同一查询再启动第二次计算。这些都不会调用 GitHub。
+
 ## 设置
 
 设置，哨兵标签，“时段对比”区块：`compare.enabled`、`compare.default_window_days`、`compare.default_days_filter`、`compare.workdays`、`compare.min_runs_per_window`、`compare.min_days_of_history`、`compare.min_resolved`、`compare.min_snapshots`、`compare.min_repo_runs`、`compare.top_changes`、`compare.include_in_report` 和 `compare.cache_seconds`。结果会保留 `compare.cache_seconds` 秒，之后重新计算。

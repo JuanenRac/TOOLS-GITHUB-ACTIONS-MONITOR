@@ -4,10 +4,18 @@
  "format": 1,
  "version": "2.1.7",
  "previous": "2.1.6",
- "digest": "fbafd7ae2cf9bab7da5bb2d89507ebd0d05e38f03d335693e1c8f4272b4cc5d4",
+ "digest": "7c3d914bc3c1f6083cee8be8fcd5636627fbb752772a44ef20f28aab72bd2377",
  "data_schema": 2,
  "settings": {
   "added": [
+   {
+    "key": "analytics.query_timeout_s",
+    "kind": "int",
+    "bounds": [
+     5,
+     3600
+    ]
+   },
    {
     "key": "audit_feed.clone_alert.bot_patterns",
     "kind": "names",
@@ -90,6 +98,24 @@
      1000
     ],
     "default": 150
+   },
+   {
+    "key": "cache.heavy_fresh_s",
+    "kind": "int",
+    "bounds": [
+     0,
+     3600
+    ],
+    "default": 5
+   },
+   {
+    "key": "cache.stale_serve_h",
+    "kind": "int",
+    "bounds": [
+     0,
+     168
+    ],
+    "default": 1
    },
    {
     "key": "cli.status_codes",

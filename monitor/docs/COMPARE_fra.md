@@ -60,6 +60,10 @@ La comparaison lit le registre du score. Tant que `compare.enabled` est actif, l
 
 L'onglet Graphiques affiche la section « Comparer les périodes » quand la comparaison est active : un sélecteur de période, de jours et de référence, une ligne par chiffre avec sa variation, les alertes et les listes de changements.
 
+## Réponses fraîches, périmées et lentes
+
+La comparaison et les rapports facultatifs sont des requêtes lourdes ; leur réponse est donc gardée en mémoire et chaque requête la trouve dans l'un de trois états. **Fraîche** (plus jeune que `cache.heavy_fresh_s`, 5 secondes) : servie telle quelle, sans la recalculer. **Périmée** (plus vieille et plus jeune que `cache.stale_serve_h` heures, 1 heure) : servie immédiatement et marquée par `freshness` = `{"state": "stale", "age_s": N}` pendant qu'un calcul la renouvelle en arrière-plan ; une réponse fraîche ne porte pas cette clé. **Expirée** (plus vieille ou jamais faite) : calculée maintenant, et une copie aussi vieille n'est jamais servie. Un calcul a un plafond, `analytics.query_timeout_s` (120 secondes) : au-delà, la réponse est `504` avec le code `query_timeout` au lieu d'attendre indéfiniment ; un calcul ne peut pas être tué, il se termine donc seul, sa réponse est gardée pour la requête suivante et aucun second calcul de la même requête n'est lancé entre-temps. Rien de tout cela n'appelle GitHub.
+
 ## Les réglages
 
 Réglages, onglet Sentinelle, bloc Comparaison de périodes : `compare.enabled`, `compare.default_window_days`, `compare.default_days_filter`, `compare.workdays`, `compare.min_runs_per_window`, `compare.min_days_of_history`, `compare.min_resolved`, `compare.min_snapshots`, `compare.min_repo_runs`, `compare.top_changes`, `compare.include_in_report` et `compare.cache_seconds`. Une réponse est conservée `compare.cache_seconds` secondes puis recalculée.

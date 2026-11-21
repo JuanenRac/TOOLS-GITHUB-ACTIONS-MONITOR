@@ -26,7 +26,7 @@ from github_actions_monitor.storage import state_io
 from github_actions_monitor.util import paths
 HISTORY_FILE = paths.place("analytics_history.json")
 BAD = ("failure", "timed_out", "startup_failure")
-DEFAULTS = {"enabled": True, "keep_days": 30, "min_samples": 5, "max_samples": 200, "slow_factor": 1.5, "jobs_per_cycle": 3, "steps": True, "flaky": True}
+DEFAULTS = {"enabled": True, "keep_days": 30, "min_samples": 5, "max_samples": 200, "slow_factor": 1.5, "jobs_per_cycle": 3, "steps": True, "flaky": True, "query_timeout_s": 120}
 
 
 def percentile(values, q):

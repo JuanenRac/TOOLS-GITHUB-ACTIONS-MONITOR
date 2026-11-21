@@ -60,6 +60,10 @@
 
 比較がオンのとき、グラフタブに「期間を比較」セクションが表示されます。期間、曜日、比較先の選択、数値ごとの変化の行、アラート、変化の一覧が含まれます。
 
+## 新鮮な回答、古い回答、遅い回答
+
+比較と任意のレポートは重いクエリなので、その回答はメモリに保持され、各リクエストは次の 3 つの状態のどれかで見つけます。**新鮮**(`cache.heavy_fresh_s` より新しい、5 秒):再計算せずそのまま返します。**古い**(それより古く、`cache.stale_serve_h` 時間(1 時間)より新しい):すぐに返され、`freshness` = `{"state": "stale", "age_s": N}` が付き、裏で 1 回の計算が更新します。新鮮な回答にはこのキーは付きません。**期限切れ**(それより古い、または一度も作られていない):今計算し、そこまで古いコピーは返しません。計算には上限 `analytics.query_timeout_s`(120 秒)があり、超えると延々と待たずコード `query_timeout` の `504` を返します。計算は強制終了できないので自然に終わり、その回答は次のリクエストのために保持され、その間に同じクエリの 2 つ目の計算は始まりません。GitHub への呼び出しはありません。
+
 ## 設定
 
 設定、センチネルタブ、「期間の比較」ブロック：`compare.enabled`、`compare.default_window_days`、`compare.default_days_filter`、`compare.workdays`、`compare.min_runs_per_window`、`compare.min_days_of_history`、`compare.min_resolved`、`compare.min_snapshots`、`compare.min_repo_runs`、`compare.top_changes`、`compare.include_in_report`、`compare.cache_seconds`。回答は `compare.cache_seconds` 秒間保持され、その後に再計算されます。

@@ -60,6 +60,10 @@ Der Vergleich liest das Buch der Punktzahl. Solange `compare.enabled` an ist, be
 
 Der Reiter Diagramme zeigt den Abschnitt „Zeiträume vergleichen“, wenn der Vergleich an ist: eine Auswahl für Zeitraum, Tage und Basis, eine Zeile je Kennzahl mit ihrer Änderung, die Meldungen und die Listen der Änderungen.
 
+## Frische, veraltete und langsame Antworten
+
+Der Vergleich und die optionalen Berichte sind schwere Abfragen, daher wird ihre Antwort im Speicher gehalten, und jede Anfrage findet sie in einem von drei Zuständen. **Frisch** (jünger als `cache.heavy_fresh_s`, 5 Sekunden): unverändert ausgeliefert, ohne neu zu rechnen. **Veraltet** (älter und jünger als `cache.stale_serve_h` Stunden, 1 Stunde): sofort ausgeliefert und mit `freshness` = `{"state": "stale", "age_s": N}` markiert, während eine Berechnung sie im Hintergrund erneuert; eine frische Antwort trägt diesen Schlüssel nicht. **Abgelaufen** (älter oder nie berechnet): wird jetzt berechnet, und eine so alte Kopie wird nie ausgeliefert. Eine Berechnung hat ein Limit, `analytics.query_timeout_s` (120 Sekunden): danach lautet die Antwort `504` mit dem Code `query_timeout`, statt ewig zu warten; eine Berechnung lässt sich nicht abbrechen, sie endet von selbst, ihre Antwort wird für die nächste Anfrage aufbewahrt, und für dieselbe Abfrage wird währenddessen keine zweite gestartet. Nichts davon ruft GitHub auf.
+
 ## Die Einstellungen
 
 Einstellungen, Reiter Sentinel, Block Vergleich von Zeiträumen: `compare.enabled`, `compare.default_window_days`, `compare.default_days_filter`, `compare.workdays`, `compare.min_runs_per_window`, `compare.min_days_of_history`, `compare.min_resolved`, `compare.min_snapshots`, `compare.min_repo_runs`, `compare.top_changes`, `compare.include_in_report` und `compare.cache_seconds`. Eine Antwort wird `compare.cache_seconds` Sekunden behalten und dann neu berechnet.

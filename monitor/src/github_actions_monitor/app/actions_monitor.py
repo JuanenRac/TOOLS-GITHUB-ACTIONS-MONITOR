@@ -123,7 +123,7 @@ DEFAULTS = {
     "chatops": {"enabled": False, "slack": {"enabled": False, "signing_secret_env": "MONITOR_SLACK_SIGNING_SECRET"}, "discord": {"enabled": False, "public_key_env": "MONITOR_DISCORD_PUBLIC_KEY"}, "allowed_teams": [], "allowed_channels": [], "allowed_users": [],
                 "allowed_words": ["help", "status", "alerts", "red", "queue", "score"], "max_rows": 8, "show_repo_names": "all", "links": True, "max_age_seconds": 300, "rate_per_user_per_minute": 6, "rate_per_channel_per_minute": 20, "rate_per_minute": 60},   # read only commands from Slack and Discord, see chatops/inbound.py (off by default; the proofs are only in the environment)
     "config_check": {"strict": False},      # OFF: a key nobody reads, a wrong type or a number out of range is named at the start; ON: the monitor refuses to start (configcheck.py)
-    "cache": {"etag": {"enabled": True, "ttl_hours": 24, "skip_stateful": True, "revalidate_active": True}, "negative_ttl_s": 300},   # conditional reads: a 304 answer costs no quota; a refusal is remembered for negative_ttl_s seconds (etagcache.py)
+    "cache": {"etag": {"enabled": True, "ttl_hours": 24, "skip_stateful": True, "revalidate_active": True}, "negative_ttl_s": 300, "heavy_fresh_s": 5, "stale_serve_h": 1},   # conditional reads: a 304 answer costs no quota; a refusal is remembered for negative_ttl_s seconds (etagcache.py)
     "cli": {"prefer_v1": True, "default_format": "text", "status_codes": "classic", "watch": {"min_interval_seconds": 2, "default_interval_seconds": 5, "branch_timeout_seconds": 900}},      # the command line (cli/formats.py, cli/watch.py): the format of the answers when no --format is given, and the interval of `watch`
     "kiosk": {"enabled": False, "font_scale_percent": 150, "high_contrast": False, "rotate_views": False, "rotate_seconds": 30, "safe_margin_percent": 0, "scale_with_window": False},      # the profile for a TV or a wall (surfaces/kiosk.py): ?kiosk=1 only counts when enabled
     "expected_red": {"enabled": False, "max_days": 30},      # a workflow known to be red for a while, marked with a reason, an owner and an end (data_pipeline/expected_red.py): listed apart, not alerted until the mark runs out
@@ -4224,11 +4224,22 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             from github_actions_monitor.integrations import reports
-            snapshot = None
-            sentinel = SENTINEL.get("obj")
-            if sentinel is not None and reports.settings(LIVE_CONFIG or toolconfig.raw_config())["release_view"]:
-                snapshot = sentinel.snapshot()
-            self.json_reply(reports.payload(LIVE_CONFIG or toolconfig.raw_config(), snapshot))
+            from github_actions_monitor.data_pipeline import freshness
+            config = LIVE_CONFIG or toolconfig.raw_config()
+
+            def build_reports():
+                snapshot = None
+                sentinel = SENTINEL.get("obj")
+                if sentinel is not None and reports.settings(config)["release_view"]:
+                    snapshot = sentinel.snapshot()
+                return reports.payload(config, snapshot)
+            state, value, age = freshness.serve(("reports", CHILD["account"] or ""), build_reports, freshness.settings(config))
+            if state == "error":
+                raise value
+            if state == "timeout":
+                self.json_reply({"error": "the query took too long", "code": "query_timeout"}, 504)
+                return
+            self.json_reply(freshness.mark(value, state, age))
         elif path == "/api/run-log":      # read only, off by default (logs.failed_step.enabled): the failing step of one run and its last relevant lines, cleaned (steplog.py)
             if not self.guard():
                 return
@@ -4388,11 +4399,18 @@ class Handler(BaseHTTPRequestHandler):
                 self.json_reply(compare_service.off_answer(CHILD["account"] or ""))
                 return
             storage, account = runtime.process_storage(CHILD["account"] or None)
-            try:
-                answer = compare_service.build(storage, account, toolconfig.raw_config(), ask)
-            except compare_windows.WindowError as error:
-                self.json_reply({"error": "bad request", "code": error.code}, 400)
+            from github_actions_monitor.data_pipeline import freshness
+            config = toolconfig.raw_config()
+            state, value, age = freshness.serve(("compare", account, tuple(sorted(ask.items())), repr((config.get("compare"), config.get("score")))), lambda: compare_service.build(storage, account, config, ask), freshness.settings(config))
+            if state == "error":      # a bad request is answered as before; anything else was a failure of the computation itself
+                if isinstance(value, compare_windows.WindowError):
+                    self.json_reply({"error": "bad request", "code": value.code}, 400)
+                    return
+                raise value
+            if state == "timeout":      # past analytics.query_timeout_s: the answer says so instead of waiting for ever (no copy young enough to serve exists)
+                self.json_reply({"error": "the query took too long", "code": "query_timeout"}, 504)
                 return
+            answer = freshness.mark(value, state, age)      # a stale copy is served at once and says so; a fresh one is left exactly as it is
             if fmt == "json":
                 self.json_reply(answer)
             else:

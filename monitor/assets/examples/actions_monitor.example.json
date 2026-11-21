@@ -650,7 +650,9 @@
       "skip_stateful": true,
       "revalidate_active": true
     },
-    "negative_ttl_s": 300
+    "negative_ttl_s": 300,
+    "heavy_fresh_s": 5,
+    "stale_serve_h": 1
   },
   "analytics": {
     "enabled": true,
@@ -660,7 +662,8 @@
     "slow_factor": 1.5,
     "jobs_per_cycle": 3,
     "steps": true,
-    "flaky": true
+    "flaky": true,
+    "query_timeout_s": 120
   },
   "lint": {
     "enabled": true,
