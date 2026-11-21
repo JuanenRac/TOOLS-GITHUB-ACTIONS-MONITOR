@@ -9,6 +9,7 @@ import tempfile
 import threading
 import time
 import unittest
+import unittest.mock
 import urllib.error
 import urllib.request
 import zlib
@@ -298,7 +299,8 @@ class Server(unittest.TestCase):
         self.start({"pairing": {"enabled": True}})
         key = {"X-Monitor-Access": self.token}
         self.assertEqual(self.j("/api/pair/start", {}, key)[0], 403)      # no one-use token
-        status, started, _ = self.sensitive("/api/pair/start")
+        with unittest.mock.patch.object(am, "lan_address", return_value="192.168.1.20"):      # a runner without a network has no address of its own
+            status, started, _ = self.sensitive("/api/pair/start")
         self.assertEqual(status, 200)
         self.assertTrue(started["ok"] and started["svg"].startswith("<svg") and "/pair?c=" + started["code"] in started["url"])
         self.assertNotIn("127.0.0.1", started["url"])      # a phone cannot reach the loopback address: the address of the computer on the network is given
