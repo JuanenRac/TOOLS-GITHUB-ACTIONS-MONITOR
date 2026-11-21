@@ -39,6 +39,12 @@ when this file and `tool_version.py` disagree.
 
 - **A run that waits for an approval (`action_required`) is a warning, not a red, in every place that judges red, and the test that guards the rule now runs everywhere**: the rule of the monitor already said so; the test that compared it with the public dashboard of the profile was skipped in the CI and failed on a computer that has the profile next to it. Now one check, which needs nothing else, locks the rule, and the comparison with the dashboard accepts only that pending difference.
 
+- **The updater refuses names Windows treats as devices or hidden streams inside a downloaded zip**: besides `..`, absolute paths and names ending in a dot or a space, the check now also refuses a `:` in any part of a name (on NTFS it writes a hidden alternate stream) and the reserved device names `CON`, `PRN`, `AUX`, `NUL`, `COM1` to `COM9` and `LPT1` to `LPT9`, with or without an extension. It is hardening: the zip still has to match its published SHA-256 before it is opened.
+
+- **The network guard also blocks the obsolete IPv6 site-local range** (`fec0::/10`): it is no longer treated as a public address, so a notifier, a webhook target or an AI address cannot reach it unless `allow_private_targets` is on, like the other private ranges.
+
+- **The login state of the team mode is no longer told to a page on another name** (`GET /api/auth/me`): the check of the `Host` now comes before every answer of the login routes, so a page that reaches the monitor through DNS rebinding gets the same 403 as for every other route and cannot learn that a monitor is there, whether the team mode is on or whether the first administrator is still missing. The page of the monitor on `127.0.0.1`, `localhost` and the configured names is not affected.
+
 ## [2.1.7]
 
 Version 2.1.7 brings together everything planned for 2.1.6 and 2.1.7. By theme: screens and kiosks (reload on a new version, a Fleet screen, density, palette, contrast, overscan, print and save of a report); phone and PWA (install as an app, compact view, QR pairing, palette and shortcuts); real-time and recovery (webhook queue, WebSocket without a public address, GitHub status, heartbeat); scale and observability (histograms, allowance by bucket, OpenTelemetry, workspaces, cost and carbon); the command line and the AI (formats, watch, doctor, proposals with approval, alerts history); the Sentinels, with honest reads and no false findings; and the release chain (immutable releases, a zizmor job, an updater that keeps copies and a log).

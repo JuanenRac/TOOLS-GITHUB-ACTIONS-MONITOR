@@ -241,6 +241,18 @@ class LiveTeam(unittest.TestCase):
         self.assertEqual(self.call("/api/auth/bootstrap", {"username": "root", "password": PASSWORD})[0], 404)
         self.assertEqual(self.call("/api/session-token")[0], 200, "the one-use token of the local page still works")
 
+    def test_the_state_of_the_login_is_not_told_to_a_foreign_host(self):
+        for config in ({}, {"auth": {"enabled": True}, "session_guard": False}):
+            with self.subTest(config=config):
+                self.start(config)
+                port = self.server.server_address[1]
+                status, body, _ = self.call("/api/auth/me", headers={"Host": f"rebind.example:{port}"})
+                self.assertEqual((status, body.get("code")), (403, "forbidden"))
+                self.assertNotIn("bootstrap", body)
+                self.assertEqual(self.call("/api/auth/me", headers={"Host": f"127.0.0.1:{port}"})[0], 200)
+                self.assertEqual(self.call("/api/auth/me", headers={"Host": f"localhost:{port}"})[0], 200)
+                self.assertEqual(self.call("/api/auth/me", headers={"Host": f"127.0.0.1:{port}", "Origin": "http://rebind.example"})[0], 403)
+
     def test_on_without_users_nothing_changes_until_the_first_admin_exists(self):
         self.start({"auth": {"enabled": True}, "session_guard": False})
         self.assertEqual(self.call("/api/alerts")[0], 200)
