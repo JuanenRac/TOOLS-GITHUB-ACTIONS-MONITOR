@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.7",
  "previous": "2.1.6",
- "digest": "fbafd7ae2cf9bab7da5bb2d89507ebd0d05e38f03d335693e1c8f4272b4cc5d4",
+ "digest": "a7f45362d8aeebaba4af00770cf10203944fcc8da30519f78ad1ab3419064b0c",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -90,6 +90,11 @@
      1000
     ],
     "default": 150
+   },
+   {
+    "key": "ci.branches_by_repo",
+    "kind": "names",
+    "default": []
    },
    {
     "key": "cli.status_codes",

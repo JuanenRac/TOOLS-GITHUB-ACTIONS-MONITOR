@@ -15,7 +15,8 @@ Which runs may decide (the block `ci` of the configuration):
     "Has run" includes a run that has no verdict yet or never got one (cancelled, skipped, in progress, queued, waiting for an approval): the workflow is alive, so its red stays red. A workflow whose natural
     period is longer than the age (a monthly schedule) waits for twice its observed interval before it ages;
   * the merge queue of the default branch (branches `gh-readonly-queue/<branch>/...`, event merge_group) is its own lane, shown as "merge queue";
-  * `ci.extra_branches` (patterns) adds maintenance branches to the watched ones; by default only the default branch is.
+  * `ci.extra_branches` (patterns) adds maintenance branches to the watched ones; by default only the default branch is. `ci.branches_by_repo` (`owner/repo=pattern`) adds branches for ONE repository only.
+    What is not watched is not hidden: a failure on a branch that nobody asked to watch is counted apart (`ignored`), so the figure says how much is being left out.
 """
 import fnmatch
 import time
@@ -34,7 +35,7 @@ QUEUE_PREFIX = "gh-readonly-queue/"
 AWAITING_DAYS = 14
 DEFAULT_INACTIVE_DAYS = 90
 DEFAULT_RED_AGE_DAYS = 30
-POLICY = {"events": RED_EVENTS, "fork_runs": False, "automation": False, "inactive_days": DEFAULT_INACTIVE_DAYS, "red_age_days": DEFAULT_RED_AGE_DAYS, "branches": (), "disabled_apart": True, "dependabot_alerts": True, "copilot_alerts": False}      # replaced by configure(): the whole monitor shares one rule
+POLICY = {"events": RED_EVENTS, "fork_runs": False, "automation": False, "inactive_days": DEFAULT_INACTIVE_DAYS, "red_age_days": DEFAULT_RED_AGE_DAYS, "branches": (), "repo_branches": {}, "disabled_apart": True, "dependabot_alerts": True, "copilot_alerts": False}      # replaced by configure(): the whole monitor shares one rule
 
 
 def configure(config):
@@ -55,6 +56,12 @@ def configure(config):
     POLICY["copilot_alerts"] = block.get("copilot_alerts") is True      # the activity of Copilot that failed is a notice (information) only when asked for
     extra = block.get("extra_branches")
     POLICY["branches"] = tuple(b for b in extra if isinstance(b, str) and b) if isinstance(extra, (list, tuple)) else ()
+    by_repo = {}
+    for entry in block.get("branches_by_repo") if isinstance(block.get("branches_by_repo"), (list, tuple)) else ():
+        repo, _eq, pattern = entry.partition("=") if isinstance(entry, str) else ("", "", "")
+        if repo.strip() and pattern.strip():
+            by_repo[repo.strip().lower()] = by_repo.get(repo.strip().lower(), ()) + (pattern.strip(),)
+    POLICY["repo_branches"] = by_repo      # {"owner/repo": (patterns,)}: the maintenance branches of one repository
     expected_red.configure(config)      # the workflows marked "expected red" (expected_red.py) are listed apart while their mark lasts
 
 
@@ -148,7 +155,8 @@ def lane(run, default, policy=None):
         return ""
     if run.get("event") == "merge_group" and isinstance(branch, str) and branch.startswith(QUEUE_PREFIX + str(default) + "/"):
         return "queue"
-    if isinstance(branch, str) and any(fnmatch.fnmatchcase(branch, pattern) for pattern in policy["branches"]):
+    patterns = tuple(policy["branches"]) + tuple((policy.get("repo_branches") or {}).get(str(run.get("repo") or "").lower(), ()))
+    if isinstance(branch, str) and any(fnmatch.fnmatchcase(branch, pattern) for pattern in patterns):
         return branch
     return None
 
@@ -228,7 +236,16 @@ def classify(runs, branch, now=None, policy=None):
         if is_awaiting(run) or run.get("status") != "completed" or not run.get("conclusion") or run.get("conclusion") in IGNORED:
             continue
         series.setdefault((where, workflow_key(run)), []).append(run)
-    out = {"red": [], "inactive": [], "expected": []}
+    out = {"red": [], "inactive": [], "expected": [], "ignored": []}
+    unwatched = {}      # (branch, workflow) -> the counted runs on a branch nobody asked to watch: its last failure is not a red, but it is not silent either
+    for run in sorted(runs, key=lambda r: r.get("started") or ""):
+        if lane(run, branch, policy) is None and isinstance(run.get("branch"), str) and not is_dynamic(run) and origin_counts(run, policy) and not str(run.get("event") or "").startswith("pull_request") \
+                and not is_awaiting(run) and run.get("status") == "completed" and run.get("conclusion") and run.get("conclusion") not in IGNORED and workflow_kind(events_of.get(workflow_key(run), ())) != "automation":
+            unwatched.setdefault((run["branch"], workflow_key(run)), []).append(run)
+    for (_branch, _key), items in unwatched.items():
+        stamp = _epoch(items[-1].get("started"))
+        if items[-1].get("conclusion") in BAD and not (policy["inactive_days"] and stamp is not None and now - stamp > policy["inactive_days"] * 86400):
+            out["ignored"].append({"run": items[-1], "lane": None, "streak": 1, "kind": "build", "recent": (1, 1), "class": trigger_class(items[-1].get("event"))})
     for (where, key), items in series.items():
         last = items[-1]
         if last.get("conclusion") not in BAD:
@@ -333,12 +350,13 @@ def red_workflows(runs_by_repo, default_branches=None, guess=False, sample=None,
 def states(runs_by_repo, default_branches=None, guess=False, now=None):
     """{"inactive": [rows], "awaiting": [rows], "services": [rows]} for all repositories: the workflows not red because they were abandoned, the runs that wait for an approval and the
     services of GitHub (dynamic workflows) whose last run failed."""
-    out = {"inactive": [], "awaiting": [], "services": [], "expected": []}
+    out = {"inactive": [], "awaiting": [], "services": [], "expected": [], "ignored": []}
     for repo, runs in runs_by_repo.items():
         branch, _guessed = branch_of(repo, runs, default_branches, guess)
         sorted_out = classify(runs, branch, now)
         out["inactive"].extend(row_of(repo, item) for item in sorted_out["inactive"])
         out["expected"].extend({**row_of(repo, item), "reason": item["mark"]["reason"], "owner": item["mark"]["owner"], "until": item["mark"]["until"]} for item in sorted_out["expected"])
+        out["ignored"].extend(row_of(repo, item) for item in sorted_out["ignored"])
         out["awaiting"].extend(awaiting_runs(runs, now))
         out["services"].extend(service_rows(runs, now))
     return out

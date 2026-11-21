@@ -31,6 +31,7 @@
     "forks_need_own_ci": true,
     "fork_own_ci_days": 90,
     "extra_branches": [],
+    "branches_by_repo": [],
     "stuck": {
       "learned": false,
       "percentile": 95,
