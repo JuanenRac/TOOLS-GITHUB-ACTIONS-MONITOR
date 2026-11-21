@@ -34,7 +34,7 @@ curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/ale
 
 ## 4. Errori
 
-Un errore delle rotte proprie è un oggetto JSON con tre chiavi: `error` e `code` sono stabili e pensati per i programmi, `message` segue la lingua di `?lang=` ed è pensato per le persone. I codici sono api.bad_cursor, api.bad_limit, api.unknown_field, api.bad_profile e api.server_error. Ogni risposta del prefisso, errori inclusi, porta l'intestazione `X-API-Version: 1`.
+Un errore delle rotte proprie è un oggetto JSON con tre chiavi: `error` e `code` sono stabili e pensati per i programmi, `message` segue la lingua di `?lang=` ed è pensato per le persone. I codici sono api.bad_cursor, api.bad_limit, api.unknown_field, api.bad_profile e api.server_error. Ogni risposta del prefisso, errori inclusi, porta l'intestazione `X-API-Version: 1`. Ogni errore porta anche `help`, una frase con il passo successivo e la guida da leggere, nella stessa lingua (il campo manca quando un codice non ne ha; un programma che lo ignora non perde nulla).
 
 ```
 curl -s -i -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?limit=0"

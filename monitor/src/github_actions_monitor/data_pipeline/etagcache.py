@@ -91,6 +91,8 @@ class EtagCache:
         self.skipped_stateful = 0    # reads sent without If-None-Match because the endpoint describes a state in motion
         self.skipped_active = 0      # reads sent without If-None-Match because the last body still had something running
         self.denied_hits = 0         # reads not made because the refusal was remembered
+        self._mark = (0, 0, 0, 0)    # calls, saved, misses and no_etag at the end of the previous cycle (what `end_cycle` subtracts)
+        self.recent = []             # the last cycles, newest last: {"calls", "saved", "misses", "no_etag", "hit_pct"}; memory only
         self.dirty = False
         self._load()
 
@@ -234,9 +236,20 @@ class EtagCache:
                 self.dirty = True
             return len(gone)
 
+    def end_cycle(self, keep=30):
+        """What the cycle that just ended did with the conditional reads: the difference of the counters since the previous call, kept for the last `keep` cycles and returned (the line of the log of the cycle and the doctor read it)."""
+        with self.lock:
+            now = (self.calls, self.saved, self.misses, self.no_etag)
+            calls, saved, misses, no_etag = (max(0, a - b) for a, b in zip(now, self._mark))
+            self._mark = now
+            row = {"calls": calls, "saved": saved, "misses": misses, "no_etag": no_etag, "hit_pct": round(100.0 * saved / calls, 1) if calls else None}
+            self.recent.append(row)
+            del self.recent[:-max(1, int(keep))]
+            return row
+
     def stats(self):
         """The counters of the cache. `hit_pct` is the share of conditional calls answered with 304; `no_etag` counts full answers without an ETag (something between here and GitHub strips it)."""
         calls = self.calls
         return {"enabled": self.enabled, "entries": len(self.entries), "saved": self.saved, "calls": calls, "invalid": self.invalid, "no_etag": self.no_etag, "misses": self.misses,
                 "skipped_stateful": self.skipped_stateful, "skipped_active": self.skipped_active, "denied": len(self.denied), "denied_hits": self.denied_hits,
-                "hit_pct": round(100.0 * self.saved / calls, 1) if calls else None}
+                "hit_pct": round(100.0 * self.saved / calls, 1) if calls else None, "recent_cycles": list(self.recent)}
