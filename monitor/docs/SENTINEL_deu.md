@@ -72,7 +72,7 @@ Alle sind reine Lese-Vorschläge für einen Menschen; der Monitor schließt nie 
 | `matrix_os` | Fehler nur auf einem System der Matrix | on · max_per_tick=4 |
 | `artifacts` | Artifact-Kosten | on · max_mb=500, retention_days=30 |
 | `required_checks` | Pflicht-Checks, die rot sind oder fehlen | on |
-| `commit_state` | Zustand des letzten Commits: alle Prüfungen und Status, von allen Apps | off · include_other_apps, include_statuses, include_pr_heads, pr_heads_max |
+| `commit_state` | Zustand des letzten Commits: alle Prüfungen und Status, von allen Apps | off · include_other_apps, include_statuses, include_pr_heads (`sentinel.surface.checks.commit_state.include_pr_heads`), pr_heads_max |
 | `release_assets` | Unvollständig veröffentlichte Releases | on · recent_days=30, required, require_sha256, require_signature, allow_empty (ein Release ohne Dateien ist in Ordnung) |
 | `tag_vs_version` | Tag gegen die Version des Manifests | on · prefixes (`sentinel.surface.checks.tag_vs_version.prefixes`), prerelease_ok |
 | `tag_vs_version` | Release-Tag vs. Version in Manifest/CHANGELOG | on |
