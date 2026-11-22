@@ -389,8 +389,8 @@ function gaugeSvg(el,frac,color,text,sub){
   const b=el.querySelector("b");if(typeof text==="number")tween(b,text,v=>Math.round(v).toLocaleString(D.locale));else b.textContent=text;
   el.querySelector(".mid2 .mut").textContent=sub||"";
 }
-function fit(list,keep){
-  /* a list shows only the rows that fit its box: nothing is cut in half and nothing scrolls; what does not fit is told in a last line, "+N more" (`keep` = how many first children are never hidden) */
+function fit(list,keep,extra){
+  /* a list shows only the rows that fit its box: nothing is cut in half and nothing scrolls; what does not fit is told in a last line, "+N more" (`keep` = how many first children are never hidden; `extra` = rows the server already left out, they count in the "+N more" even when every row sent fits) */
   if(!list)return;
   list.querySelectorAll(":scope>.more").forEach(m=>m.remove());
   const rows=[...list.children];rows.forEach(c=>{c.hidden=false});
@@ -398,9 +398,10 @@ function fit(list,keep){
   let hid=0;
   const hideLast=()=>{for(let i=rows.length-1;i>=first;i--)if(!rows[i].hidden){rows[i].hidden=true;hid++;return true}return false};
   while(over()&&hideLast());
-  if(hid>0){
+  const left=Math.max(0,Math.floor(Number(extra))||0);
+  if(hid>0||left>0){
     const m=document.createElement("div");m.className="more";list.appendChild(m);
-    const say=()=>{m.textContent=T("ui.scr_more",{n:hid})};say();
+    const say=()=>{m.textContent=T("ui.scr_more",{n:hid+left})};say();
     while(over()&&hideLast())say();
   }
 }
@@ -684,7 +685,7 @@ function renderFleet(d){
       return '<span class="tn s-'+esc(x.state)+'" title="'+esc(x.name+" · "+T("ui.lv_"+x.state))+'">'+esc(x.name)+"</span>"}).join("");
     return '<div class="fg" id="fg-'+gi+'"><div class="gh"><b title="'+esc(gname(g))+'">'+esc(gname(g))+"</b><span>"+num(g.repos)+" · "+num(g.bad)+" "+esc(T("ui.lv_bad"))+(num(g.warn)?" · "+num(g.warn)+" "+esc(T("ui.lv_warn")):"")+'</span></div><div class="tiles">'+tiles+"</div></div>"}).join("")
     +(d.more_groups?'<div class="more">'+esc(T("ui.scr_grp_more",{n:d.more_groups}))+"</div>":"");
-  box.querySelectorAll(".tiles").forEach(l=>fit(l));
+  box.querySelectorAll(".tiles").forEach((l,i)=>fit(l,0,num(gs[i]&&gs[i].hidden)));
   gs.forEach((g,gi)=>{if(num(g.bad)>0)failMark($("fg-"+gi),"fg:"+g.key,null)});
   return keys;
 }

@@ -37,7 +37,7 @@ Optional, **standardmäßig aus**. Damit können Personen den Monitor aus einem 
 | `queue` | laufend, in der Warteschlange, wartend auf Freigabe und Minuten in 24 Stunden |
 | `score` | die Punktzahl, ihr Buchstabe und ihre Veränderung |
 
-`chatops.show_repo_names` bestimmt die Namen: `all` (Standard: jeder Name, auch private Repositories), `public` (ein privates Repository heißt `private-N`, seine Workflows werden nicht genannt) oder `none`. **Risiko von `all`:** Die Namen privater Repositories und Workflows erreichen jeden Kanal und Benutzer, den Ihre Listen erlauben. Deshalb sind die Listen Pflicht und jede Liste mit Einträgen muss passen (Team, Kanal und Benutzer zugleich). Wählen Sie `public` oder `none`, wenn der Kanal größer ist als der Kreis, der diese Namen kennen darf.
+`chatops.show_repo_names` bestimmt die Namen: `all` (jeder Name, auch private Repositories), `public` (Standard: ein privates Repository heißt `private-N`, seine Workflows werden nicht genannt) oder `none`. **Risiko von `all`:** Die Namen privater Repositories und Workflows erreichen jeden Kanal und Benutzer, den Ihre Listen erlauben. Deshalb sind die Listen Pflicht und jede Liste mit Einträgen muss passen (Team, Kanal und Benutzer zugleich). Behalten Sie `public` oder wählen Sie `none`, wenn der Kanal größer ist als der Kreis, der diese Namen kennen darf.
 
 ## Slack, Schritt für Schritt
 

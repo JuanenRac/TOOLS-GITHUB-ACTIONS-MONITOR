@@ -6,7 +6,9 @@ knows (`?screen=`, `?tabs=`, `?rotate=`, `?chrome=0`) and adds two parameters: `
 
 The profile reads nothing from GitHub and writes nothing: it only decides how the page looks. The presets are fixed lists of tabs (see PRESETS); the tab ids are the ones of the page.
 """
-from urllib.parse import urlencode
+import json
+import re
+from urllib.parse import parse_qs, urlencode
 
 PRESETS = {"ops": ("now", "al", "charts"), "team": ("al", "team"), "release": ("now", "repos", "rep"), "quiet": ("al",)}
 SCALE_RANGE = (100, 400)
@@ -57,3 +59,50 @@ def url(base, preset, raw, account=""):
     if account:
         query["account"] = account
     return base.rstrip("/") + "/?" + urlencode(query, safe=",")
+
+
+# what a row of a repository says besides its name: the titles of a commit or a pull request, the branch, the workflow and the addresses; a hidden repository gives none of it to a kiosk
+HIDDEN_TEXT_KEYS = ("title", "display_title", "message", "commit_message", "commit", "branch", "head_branch", "pr_title", "workflow", "workflow_name", "url", "html_url", "run_url", "actor", "name", "step", "runner")
+
+
+def asked(raw, query):
+    """True when the address of /api/data asks for the data of a kiosk (`kiosk=1`) and the profile is on: a link copied from somewhere else changes nothing."""
+    ask = parse_qs(query or "")
+    return settings(raw)["enabled"] and (ask.get("kiosk") or [""])[0] == "1"
+
+
+def _blank(node, names):
+    if isinstance(node, dict):
+        repo = node.get("repo")
+        if isinstance(repo, str) and names.hidden(repo):
+            for key in HIDDEN_TEXT_KEYS:
+                if key in node and isinstance(node[key], str):
+                    node[key] = ""
+            if isinstance(node.get("jobs"), list):
+                node["jobs"] = []
+        for value in node.values():
+            _blank(value, names)
+    elif isinstance(node, list):
+        for value in node:
+            _blank(value, names)
+
+
+def redact(picture, names):
+    """The answer of /api/data for a kiosk, as JSON text, with the repositories named the way the wall screens name them (`screens.show_repo_names`): every hidden repository is private-N (or repo-N),
+    whole or by its short name, wherever it stands in the data, and its rows lose the text that tells what it holds (HIDDEN_TEXT_KEYS). `names` is a screens.Names; nothing is changed when no repository is hidden."""
+    text = json.dumps(picture)
+    hidden = [r for r in names.repos if names.hidden(r)]
+    if not hidden:
+        return text
+    doc = json.loads(text)
+    _blank(doc, names)
+    text = json.dumps(doc)
+    swaps = {}
+    for repo in hidden:
+        swaps[repo] = names.name(repo)
+        short = repo.rsplit("/", 1)[-1]
+        if len(short) >= 3:
+            swaps.setdefault(short, names.name(repo))
+    for old in sorted(swaps, key=len, reverse=True):
+        text = re.sub(r"(?<![\w.-])" + re.escape(json.dumps(old)[1:-1]) + r"(?![\w.-])", lambda _m, new=swaps[old]: new, text)
+    return text

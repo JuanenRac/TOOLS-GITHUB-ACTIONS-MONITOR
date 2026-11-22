@@ -63,9 +63,9 @@ Ein Browser-Test öffnet die Seite in jeder dieser Größen, geht alle Tabs durc
 2. `http://dieser-rechner:8765/screen/1` im Fenster des ersten Monitors und `/screen/2` im zweiten öffnen; F11 für Vollbild. Von einem anderen Rechner den Netzmodus mit Zugriffstoken nutzen.
 3. Für einen Wandbildschirm, den niemand bedient, mehrere Tabs vergeben und `ui.rotate_seconds` auf 20-30 setzen.
 
-## Wandanzeigen: Übersicht, Gerade jetzt und Wächter
+## Wandanzeigen: Übersicht, Flotte, Gerade jetzt und Wächter
 
-Drei Seiten für einen Monitor oder Fernseher, den niemand bedient. Sie haben kein Seitenmenü und keine Navigation, zeigen alles in einer Ansicht mit großer Schrift, animieren, was lebt, und lassen Fehler sanft blinken. Sie lesen nur: Keine Schaltfläche ändert etwas, und sie rufen GitHub nie auf (sie zeigen, was der Monitor schon hat).
+Vier Seiten für einen Monitor oder Fernseher, den niemand bedient. Sie haben kein Seitenmenü und keine Navigation, zeigen alles in einer Ansicht mit großer Schrift, animieren, was lebt, und lassen Fehler sanft blinken. Sie lesen nur: Keine Schaltfläche ändert etwas, und sie rufen GitHub nie auf (sie zeigen, was der Monitor schon hat).
 
 | Adresse | Was sie zeigt |
 |---|---|
@@ -100,11 +100,11 @@ Die Sprache einer Anzeige wird in dieser Reihenfolge bestimmt: `?lang=xx` in der
 
 | Einstellung | Was sie bewirkt |
 |---|---|
-| `screens.enabled` | Schaltet die drei Seiten ein. Aus: `/screen/overview`, `/screen/now`, `/screen/sentinels` und `/api/screens/data` antworten mit 404 (`/screen/1` bis `/screen/3` sind die Seite selbst und hängen nicht davon ab). Die Lite-Edition liefert die Wandbildschirme ebenfalls, mit leerem Wächter-Bildschirm. Standardmäßig aus. |
+| `screens.enabled` | Schaltet die vier Seiten ein. Aus: `/screen/overview`, `/screen/fleet`, `/screen/now`, `/screen/sentinels` und `/api/screens/data` antworten mit 404 (`/screen/1` bis `/screen/3` sind die Seite selbst und hängen nicht davon ab). Die Lite-Edition liefert die Wandbildschirme ebenfalls, mit leerem Wächter-Bildschirm. Standardmäßig aus. |
 | `screens.default_theme` | inherit (Standard: das für das ganze Produkt gewählte Design, siehe unten), auto, light, dark, eines der sechzehn Designs oder contrast. |
 | `screens.default_density` | compact, normal (Standard) oder large. |
 | `screens.refresh_seconds` | Sekunden zwischen den Aktualisierungen eines Fensters (standardmäßig 10). Die Seiten lesen vom Monitor, nie von GitHub, eine kurze Zeit kostet also kein Kontingent. |
-| `screens.rotate_seconds` | Nur mit `screens.mode` = three. 0 (Standard) = keine Rotation; ab 5 wechselt ein Fenster durch die drei Seiten. |
+| `screens.rotate_seconds` | Nur mit `screens.mode` = three. 0 (Standard) = keine Rotation; ab 5 wechselt ein Fenster durch die vier Seiten. |
 | `screens.blink` | Fehler blinken sanft (standardmäßig an). |
 | `screens.blink_calm_minutes` | Minuten, nach denen ein Fehler, um den sich niemand gekümmert hat, einen festen Schein behält statt zu blinken (standardmäßig 30; 0 = blinkt bis zur Lösung). |
 | `screens.sound` | Ein Signalton bei einem neuen Fehler (standardmäßig aus). |
@@ -113,7 +113,7 @@ Die Sprache einer Anzeige wird in dieser Reihenfolge bestimmt: `?lang=xx` in der
 | `screens.night_dim` | Dunkelt die Anzeigen zwischen `screens.night_dim_from_hour` (22) und `screens.night_dim_to_hour` (7) ab; standardmäßig aus. |
 | `screens.show_repo_names` | all, public (Standard: private Repositories erscheinen als private-1, private-2...) oder none (jeder Name wird ausgeblendet). Für einen Bildschirm, den andere sehen können, public oder none verwenden. Bei einer von Hand geschriebenen Liste in `repos` wird die Sichtbarkeit alle `discover_refresh_seconds` mit einer Auflistung des Kontos gelesen; ein Repository, dessen Sichtbarkeit nicht gelesen werden konnte, gilt als privat. Die Nummern (private-1...) erhalten nur die verborgenen Repositorys, in der Reihenfolge eines HMAC des Namens mit einem Schlüssel der Installation, der in einer privaten Datei im Datenordner liegt; sie sagen also nichts darüber, wo ein Repository unter den anderen liegt. |
 | `screens.theme_overview`, `screens.theme_fleet`, `screens.theme_now`, `screens.theme_sentinels` | Das Design einer Anzeige: inherit (Standard: das von `screens.default_theme`) oder eines der obigen Designs. |
-| `screens.mode` | three (Standard: die drei Seiten getrennt, eine pro Fenster) oder rotate (eine einzige Seite, die durch die drei wechselt und zu einem neuen Rot springt). |
+| `screens.mode` | three (Standard: die vier Seiten getrennt, eine pro Fenster) oder rotate (eine einzige Seite, die durch die vier wechselt und zu einem neuen Rot springt). |
 | `screens.rotate_every_seconds` | Im Modus rotate die Sekunden pro Anzeige (Standard 20; 5 bis 300). |
 | `screens.alert_hold_seconds` | Im Modus rotate die Sekunden, die ein neues Rot das Fenster auf seiner Anzeige hält (Standard 30; 5 bis 600), oder bis das Rot verschwindet. |
 | `screens.logo_overview`, `screens.logo_fleet`, `screens.logo_now`, `screens.logo_sentinels` | Auf welchen Anzeigen das Logo erscheint (standardmäßig nur auf der Übersicht). |
@@ -137,11 +137,11 @@ Die Sprache einer Anzeige wird in dieser Reihenfolge bestimmt: `?lang=xx` in der
 
 Alles, was der Monitor zeigt, trägt das in den Einstellungen gewählte Design (`ui.theme`: auto, light, dark oder eines der sechzehn Designs): die Seite, die Wandanzeigen und die Anmeldeseite. Wer im Reiter Dieser Browser ein Design wählt, speichert es zugleich als `ui.theme`; ein Browser, der nie gewählt hat, übernimmt das des Monitors. Die auf die Festplatte geschriebenen HTML-Berichte folgen der hellen oder dunklen Einstellung des Computers, der sie öffnet.
 
-Die Wandanzeigen erben es: `screens.default_theme` ist standardmäßig `inherit`. Setze es auf ein anderes Design, um allen Anzeigen dasselbe zu geben, und `screens.theme_overview`, `screens.theme_now` oder `screens.theme_sentinels`, um einer Anzeige ein eigenes zu geben. Die Adresse kann ein Fenster weiterhin mit `?theme=` festlegen. Keine Anzeige schreibt eine eigene Farbe: alle nutzen die Paletten des Designs, daher erscheint ein der Seite hinzugefügtes Design auch auf den Anzeigen.
+Die Wandanzeigen erben es: `screens.default_theme` ist standardmäßig `inherit`. Setze es auf ein anderes Design, um allen Anzeigen dasselbe zu geben, und `screens.theme_overview`, `screens.theme_fleet`, `screens.theme_now` oder `screens.theme_sentinels`, um einer Anzeige ein eigenes zu geben. Die Adresse kann ein Fenster weiterhin mit `?theme=` festlegen. Keine Anzeige schreibt eine eigene Farbe: alle nutzen die Paletten des Designs, daher erscheint ein der Seite hinzugefügtes Design auch auf den Anzeigen.
 
 ### Modus der Anzeigen: drei oder rotierend
 
-`screens.mode` = three (Standard) hält die drei Seiten getrennt, eine pro Fenster. `screens.mode` = rotate macht jedes Fenster zu einer einzigen Anzeige, die alle `screens.rotate_every_seconds` Sekunden (Standard 20; 5 bis 300) durch Übersicht, Gerade jetzt und Wächter wechselt.
+`screens.mode` = three (Standard) hält die vier Seiten getrennt, eine pro Fenster. `screens.mode` = rotate macht jedes Fenster zu einer einzigen Anzeige, die alle `screens.rotate_every_seconds` Sekunden (Standard 20; 5 bis 300) durch Übersicht, Flotte, Gerade jetzt und Wächter wechselt.
 
 Ein rotes Problem lässt das Fenster zu der Anzeige springen, die es zeigt: **Gerade jetzt** für einen fehlgeschlagenen Workflow, **Wächter** für ein Wächterfeld, das rot wird. Das Fenster bleibt dort `screens.alert_hold_seconds` Sekunden (Standard 30; 5 bis 600) oder bis dieses Rot verschwunden ist, was zuerst eintritt, und wechselt dann weiter. Ein bereits gezeigtes Rot lässt das Fenster nicht erneut springen, bis es sich ändert oder wiederkehrt. Was beim Öffnen des Fensters rot ist, ist nur der Ausgangspunkt und lässt es nicht springen. Kommt ein zweites Rot, während das Fenster das erste hält, wartet es, bis es dran ist. Um das zu wissen, liest ein Fenster die beiden anderen Anzeigen im Hintergrund mit demselben schreibgeschützten Aufruf (nie GitHub). `?rotate=0` lässt ein Fenster auf seiner Anzeige und `?jump=off` behält das Wechseln ohne die Sprünge. Jede Anzeige legt beim Erscheinen ihr eigenes Design und ihr eigenes Logo an.
 
@@ -149,7 +149,7 @@ Ein rotes Problem lässt das Fenster zu der Anzeige springen, die es zeigt: **Ge
 
 Der Reiter Dieser Browser der Einstellungen hat einen Block zum Hochladen des Logos deiner Organisation: PNG, JPEG, WebP oder SVG, höchstens 1 MB. Der Monitor prüft den echten Typ an den ersten Bytes der Datei (Name und mitgeschicktes Etikett zählen nicht), lehnt ein SVG mit Skripten, Ereignis-Handlern, Verweisen auf andere Dateien oder Adressen oder einem Dokumenttyp ab und speichert das Bild im Ordner `data/` dieses Computers als `org_logo` mit seiner Endung, nie in der Konfiguration. Es gibt nur ein Logo: ein neues ersetzt das alte. Das Aktionsprotokoll vermerkt das Hochladen und das Entfernen, nie die Datei.
 
-`screens.logo_overview`, `screens.logo_now` und `screens.logo_sentinels` wählen, auf welchen Wandanzeigen es erscheint (standardmäßig nur auf der Übersicht), `screens.logo_corner` die Ecke (standardmäßig oben rechts) und `screens.logo_max_width` und `screens.logo_max_height` die größte Größe in Pixeln bei 1920 x 1080 (Standard 160 x 64; das Logo wächst mit dem Bildschirm). Das Bild wird in diese Größe eingepasst, ohne seine Form zu ändern, und hat einen eigenen Platz in der Kopf- oder Fußzeile, sodass es den Inhalt nie verdeckt. Der Hintergrund bleibt transparent: Ein Logo mit transparentem Hintergrund sieht in hellen wie in dunklen Designs richtig aus.
+`screens.logo_overview`, `screens.logo_fleet`, `screens.logo_now` und `screens.logo_sentinels` wählen, auf welchen Wandanzeigen es erscheint (standardmäßig nur auf der Übersicht), `screens.logo_corner` die Ecke (standardmäßig oben rechts) und `screens.logo_max_width` und `screens.logo_max_height` die größte Größe in Pixeln bei 1920 x 1080 (Standard 160 x 64; das Logo wächst mit dem Bildschirm). Das Bild wird in diese Größe eingepasst, ohne seine Form zu ändern, und hat einen eigenen Platz in der Kopf- oder Fußzeile, sodass es den Inhalt nie verdeckt. Der Hintergrund bleibt transparent: Ein Logo mit transparentem Hintergrund sieht in hellen wie in dunklen Designs richtig aus.
 
 Das Fenster „Über“ zeigt immer das Logo des Monitors. Ist `ui.about_org_logo` eingeschaltet (standardmäßig aus), zeigt es daneben auch dieses Logo Ihrer Organisation, mit einem Alternativtext in der Sprache der Seite und einer Größe, die der Breite des Fensters folgt, ohne das Bild zu verzerren. Wurde kein Logo hochgeladen oder lässt sich die Datei nicht lesen, sagt das Fenster es, und sonst ändert sich nichts.
 
@@ -159,7 +159,7 @@ Die Daten kommen von `/api/screens/data?screen=overview` (oder `now`, `sentinels
 
 ### Was hineinpasst und was geschieht, wenn es nicht passt
 
-Die drei Seiten werden in Einheiten gezeichnet, die der kurzen Seite des Fensters folgen; dasselbe Layout füllt also die unten genannten Größen, nichts wird gedehnt und nichts scrollt. Ein Werkzeug misst sie mit dem DOM in den acht Sprachen und mit Daten, die eine Anzeige hart fordern (Repository-Namen mit 90 Zeichen, deutsche Zusammensetzungen und japanische Namen ohne Leerzeichen, die größte Zeilenzahl, die der Monitor senden kann, siebenstellige Zahlen, gar keine Daten, ein einziger Wert, eine alte Messung): `python tools/check_screens.py` (`--list` zeigt jeden Befund, `--report DATEI` schreibt sie als JSON, `--size` und `--lang` wählen, was gemessen wird, `--surface kiosk` misst den Kiosk). Es schlägt fehl bei einer Seite, die scrollt, einem Text oder Kasten jenseits des Rands, einem Kasten, dessen Inhalt nicht passt, einer Überschrift, die mit Auslassungspunkten endet, zwei Texten, die sich überdecken, einer Schrift unter einem Hundertstel der kurzen Fensterseite (12 px bei einem Fenster von 1080 px) und Zeilen, die ohne Hinweis verborgen sind. Dasselbe Werkzeug misst den Kontrast im Browser: jeden Text gegen die Farbe dahinter (die Stufen eines Verlaufs zählen; 4,5:1, bei großer Schrift 3:1) in jedem Thema mit `--theme NAME ...` (zum Beispiel `python tools/check_screens.py --theme Ice light contrast`); ein Text darunter ist ein Befund der Art `contrast`. Auf einem Telefon lautet die Prüfung `python tools/check_mobile.py` (ein Fenster von 375 px, die kompakte Ansicht, jeder Tab): Kein Bedienelement, das ein Finger drücken muss, ist kleiner als 44 x 44 px, die Seite scrollt nie seitwärts, das Menü ist eine Zeile, die von selbst scrollt, und die Dialoge folgen der Höhe, die die Bildschirmtastatur freilässt.
+Die vier Seiten werden in Einheiten gezeichnet, die der kurzen Seite des Fensters folgen; dasselbe Layout füllt also die unten genannten Größen, nichts wird gedehnt und nichts scrollt. Ein Werkzeug misst sie mit dem DOM in den acht Sprachen und mit Daten, die eine Anzeige hart fordern (Repository-Namen mit 90 Zeichen, deutsche Zusammensetzungen und japanische Namen ohne Leerzeichen, die größte Zeilenzahl, die der Monitor senden kann, siebenstellige Zahlen, gar keine Daten, ein einziger Wert, eine alte Messung): `python tools/check_screens.py` (`--list` zeigt jeden Befund, `--report DATEI` schreibt sie als JSON, `--size` und `--lang` wählen, was gemessen wird, `--surface kiosk` misst den Kiosk). Es schlägt fehl bei einer Seite, die scrollt, einem Text oder Kasten jenseits des Rands, einem Kasten, dessen Inhalt nicht passt, einer Überschrift, die mit Auslassungspunkten endet, zwei Texten, die sich überdecken, einer Schrift unter einem Hundertstel der kurzen Fensterseite (12 px bei einem Fenster von 1080 px) und Zeilen, die ohne Hinweis verborgen sind. Dasselbe Werkzeug misst den Kontrast im Browser: jeden Text gegen die Farbe dahinter (die Stufen eines Verlaufs zählen; 4,5:1, bei großer Schrift 3:1) in jedem Thema mit `--theme NAME ...` (zum Beispiel `python tools/check_screens.py --theme Ice light contrast`); ein Text darunter ist ein Befund der Art `contrast`. Auf einem Telefon lautet die Prüfung `python tools/check_mobile.py` (ein Fenster von 375 px, die kompakte Ansicht, jeder Tab): Kein Bedienelement, das ein Finger drücken muss, ist kleiner als 44 x 44 px, die Seite scrollt nie seitwärts, das Menü ist eine Zeile, die von selbst scrollt, und die Dialoge folgen der Höhe, die die Bildschirmtastatur freilässt.
 
 | Größe | Art |
 |---|---|
@@ -233,8 +233,8 @@ Die Schaltfläche **Bildschirme** in der oberen Leiste (das Symbol mit zwei Moni
 | Kiosk | `/?chrome=0&view=now` | Eine Ansicht ohne Kopfzeile, Tabs und Filter, für einen Monitor, den niemand anfasst. Die Ansicht ist ein Parameter. |
 | Teamansicht | `/?chrome=0&view=team` | Die Teamansicht als Kiosk (vollständige Ausgabe). |
 | Tab-Bildschirme 1 bis 3 | `/screen/1`, `/screen/2`, `/screen/3` | Die für jeden Monitor eines Schreibtischs festgelegten Tabs; `?tabs=`, `?orient=` und `?rotate=` ändern sie für ein Fenster. |
-| Wandbildschirme | `/screen/overview`, `/screen/now`, `/screen/sentinels` | Die drei oben beschriebenen Wandbildschirme. |
-| Rotierende Wand | `/screen/overview?rotate=20` | Ein Fenster, das durch die drei rotiert und zu einem neuen Rot springt. |
+| Wandbildschirme | `/screen/overview`, `/screen/fleet`, `/screen/now`, `/screen/sentinels` | Die vier oben beschriebenen Wandbildschirme. |
+| Rotierende Wand | `/screen/overview?rotate=20` | Ein Fenster, das durch die vier rotiert und zu einem neuen Rot springt. |
 | Fernseher | `/screen/overview?theme=contrast&density=large&scale=1.5&rotate=20` | Die rotierende Wand für einen Bildschirm, der aus der Ferne gesehen wird. |
 | Mehrere Monitore | eine Adresse je Fenster | Ein Satz Fenster, eines je Monitor (siehe unten). |
 
@@ -242,7 +242,7 @@ Jede Karte zeigt die Parameter, die diese Adresse annimmt (Thema, Dichte, Aktual
 
 ### Mehrere Monitore
 
-Wählen Sie die Zahl der Fenster (höchstens `screens.menu_max_windows`), die Anordnung (in einer Reihe, einer Spalte oder einem Raster) und was jedes Fenster zeigt (die drei Wandbildschirme der Reihe nach, von selbst rotierende Wände oder die Tab-Bildschirme). **Alle Fenster öffnen** öffnet ein Fenster je Monitor. In einem Browser mit der Window-Management-API (Chrome und Edge fragen nach der Berechtigung *Fensterverwaltung*) wird jedes Fenster auf seinen eigenen Monitor gesetzt, in der Reihenfolge der Anordnung; bei mehr Fenstern als Monitoren teilen sie sich einen Monitor als Kacheln. Ohne sie öffnen sich die Fenster dort, wo der Browser sie hinsetzt, und die Karte listet je Fenster einen Kiosk-Befehl (`msedge --kiosk ADRESSE --window-position=X,Y`) zum manuellen Start. Der Browser muss Pop-ups für die Adresse des Monitors erlauben.
+Wählen Sie die Zahl der Fenster (höchstens `screens.menu_max_windows`), die Anordnung (in einer Reihe, einer Spalte oder einem Raster) und was jedes Fenster zeigt (die vier Wandbildschirme der Reihe nach, von selbst rotierende Wände oder die Tab-Bildschirme). **Alle Fenster öffnen** öffnet ein Fenster je Monitor. In einem Browser mit der Window-Management-API (Chrome und Edge fragen nach der Berechtigung *Fensterverwaltung*) wird jedes Fenster auf seinen eigenen Monitor gesetzt, in der Reihenfolge der Anordnung; bei mehr Fenstern als Monitoren teilen sie sich einen Monitor als Kacheln. Ohne sie öffnen sich die Fenster dort, wo der Browser sie hinsetzt, und die Karte listet je Fenster einen Kiosk-Befehl (`msedge --kiosk ADRESSE --window-position=X,Y`) zum manuellen Start. Der Browser muss Pop-ups für die Adresse des Monitors erlauben.
 
 Denselben Katalog lesen Werkzeuge: `GET /api/screens/menu`, `monitor_cli.py screens [list|urls]` und das MCP-Werkzeug `screens_menu`. Alle drei sind nur lesend.
 
@@ -258,7 +258,7 @@ Der Reiter Jetzt in vier Größen, mit erfundenen Daten (4K, ein 21:9-Monitor, e
 
 ![Smartphone 390x844](../../docs/screenshots/web_size_phone_light.png)
 
-Die drei Wandanzeigen in 4K und auf einem gedrehten Monitor, mit erfundenen Daten:
+Die vier Wandanzeigen in 4K und auf einem gedrehten Monitor, mit erfundenen Daten:
 
 ![Übersicht 4K 3840x2160](../../docs/screenshots/web_screen_overview_4k.png)
 
@@ -280,4 +280,4 @@ Die Wandanzeigen in anderen Themen, mit dem Logo einer Organisation und das Fens
 
 ![Wächter, hoher Kontrast](../../docs/screenshots/web_screen_sentinels_contrast.png)
 
-![Das Fenster, das durch die drei Bildschirme dreht](../../docs/screenshots/web_screen_rotate.png)
+![Das Fenster, das durch die vier Bildschirme dreht](../../docs/screenshots/web_screen_rotate.png)

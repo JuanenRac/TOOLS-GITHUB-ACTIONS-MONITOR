@@ -187,7 +187,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `chatops.rate_per_channel_per_minute` | `20` | webhook | Commands per channel per minute |
 | `chatops.rate_per_minute` | `60` | webhook | Commands per minute (whole chat) |
 | `chatops.rate_per_user_per_minute` | `6` | webhook | Commands per user per minute |
-| `chatops.show_repo_names` (secure) | `"all"` | webhook | Repository names in the chat |
+| `chatops.show_repo_names` (secure) | `"public"` | webhook | Repository names in the chat |
 | `chatops.slack.enabled` (secure) | `false` | webhook | Slack on |
 | `chatops.slack.signing_secret_env` (secure) | `"MONITOR_SLACK_SIGNING_SECRET"` | webhook | Environment variable with the Slack signing secret |
 | `chatops.slack.state` | `-` | webhook | Slack signing secret |

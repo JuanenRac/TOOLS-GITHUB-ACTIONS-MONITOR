@@ -63,9 +63,9 @@ Um teste de navegador abre a página em cada um destes tamanhos, percorre todos 
 2. Abra `http://este-computador:8765/screen/1` numa janela do primeiro monitor e `/screen/2` no segundo; F11 para ecrã inteiro. A partir de outro computador, use o modo de rede com o seu token de acesso.
 3. Para um ecrã de parede em que ninguém toca, dê-lhe vários separadores e ponha `ui.rotate_seconds` em 20-30.
 
-## Ecrãs de parede: visão geral, neste momento e sentinelas
+## Ecrãs de parede: visão geral, frota, neste momento e sentinelas
 
-Três páginas para um monitor ou uma televisão em que ninguém toca. Não têm menu lateral nem navegação, mostram tudo numa única vista com letra grande, animam o que está vivo e fazem piscar as falhas com suavidade. Só leem: nenhum botão altera nada e nunca chamam o GitHub (mostram o que o monitor já tem).
+Quatro páginas para um monitor ou uma televisão em que ninguém toca. Não têm menu lateral nem navegação, mostram tudo numa única vista com letra grande, animam o que está vivo e fazem piscar as falhas com suavidade. Só leem: nenhum botão altera nada e nunca chamam o GitHub (mostram o que o monitor já tem).
 
 | Endereço | O que mostra |
 |---|---|
@@ -100,11 +100,11 @@ O idioma de um ecrã decide-se por esta ordem: `?lang=xx` no endereço; depois o
 
 | Definição | O que faz |
 |---|---|
-| `screens.enabled` | Ativa as três páginas. Desativado: `/screen/overview`, `/screen/now`, `/screen/sentinels` e `/api/screens/data` respondem 404 (`/screen/1` a `/screen/3` são a própria página e não dependem disto). A edição lite também serve os ecrãs de parede, com o ecrã dos sentinelas vazio. Desativado por defeito. |
+| `screens.enabled` | Ativa as quatro páginas. Desativado: `/screen/overview`, `/screen/fleet`, `/screen/now`, `/screen/sentinels` e `/api/screens/data` respondem 404 (`/screen/1` a `/screen/3` são a própria página e não dependem disto). A edição lite também serve os ecrãs de parede, com o ecrã dos sentinelas vazio. Desativado por defeito. |
 | `screens.default_theme` | inherit (por omissão: o tema escolhido para todo o produto, ver abaixo), auto, light, dark, um dos dezasseis temas ou contrast. |
 | `screens.default_density` | compact, normal (por defeito) ou large. |
 | `screens.refresh_seconds` | Segundos entre atualizações de uma janela (10 por defeito). As páginas leem do monitor, nunca do GitHub, por isso um tempo curto não gasta quota. |
-| `screens.rotate_seconds` | Só com `screens.mode` = three. 0 (por omissão) = sem rotação; a partir de 5, uma janela passa pelas três páginas. |
+| `screens.rotate_seconds` | Só com `screens.mode` = three. 0 (por omissão) = sem rotação; a partir de 5, uma janela passa pelas quatro páginas. |
 | `screens.blink` | As falhas piscam suavemente (ativado por defeito). |
 | `screens.blink_calm_minutes` | Minutos após os quais uma falha a que ninguém atende mantém um halo fixo em vez de piscar (30 por defeito; 0 = pisca até ser resolvida). |
 | `screens.sound` | Um sinal sonoro a cada falha nova (desativado por defeito). |
@@ -113,7 +113,7 @@ O idioma de um ecrã decide-se por esta ordem: `?lang=xx` no endereço; depois o
 | `screens.night_dim` | Escurece os ecrãs entre `screens.night_dim_from_hour` (22) e `screens.night_dim_to_hour` (7); desativado por defeito. |
 | `screens.show_repo_names` | all, public (por defeito: os repositórios privados aparecem como private-1, private-2...) ou none (todos os nomes ficam ocultos). Use public ou none num ecrã que outras pessoas possam ver. Com uma lista de repositórios escrita à mão em `repos`, a visibilidade é lida com uma listagem da conta a cada `discover_refresh_seconds`; um repositório cuja visibilidade não pôde ser lida conta como privado. Os números (private-1...) só se dão aos repositórios ocultos, pela ordem de um HMAC do nome com uma chave da instalação guardada num ficheiro privado da pasta de dados, pelo que nada dizem sobre onde um repositório cai entre os outros. |
 | `screens.theme_overview`, `screens.theme_fleet`, `screens.theme_now`, `screens.theme_sentinels` | O tema de um ecrã: inherit (por omissão: o de `screens.default_theme`) ou qualquer um dos temas acima. |
-| `screens.mode` | three (por omissão: as três páginas separadas, uma por janela) ou rotate (uma só página que passa pelas três e salta para um vermelho novo). |
+| `screens.mode` | three (por omissão: as quatro páginas separadas, uma por janela) ou rotate (uma só página que passa pelas quatro e salta para um vermelho novo). |
 | `screens.rotate_every_seconds` | No modo rotate, segundos em cada ecrã (20 por omissão; de 5 a 300). |
 | `screens.alert_hold_seconds` | No modo rotate, segundos que um vermelho novo mantém a janela no seu ecrã (30 por omissão; de 5 a 600), ou até o vermelho desaparecer. |
 | `screens.logo_overview`, `screens.logo_fleet`, `screens.logo_now`, `screens.logo_sentinels` | Em que ecrãs aparece o logótipo (por omissão, só na visão geral). |
@@ -137,11 +137,11 @@ O idioma de um ecrã decide-se por esta ordem: `?lang=xx` no endereço; depois o
 
 Tudo o que o monitor mostra usa o tema escolhido nas Definições (`ui.theme`: auto, light, dark ou um dos dezasseis temas): a página, os ecrãs de parede e a página de início de sessão. Ao escolher um tema no seletor do separador Este navegador, ele também é guardado como `ui.theme`, pelo que um navegador que nunca escolheu fica com o do monitor. Os relatórios HTML escritos em disco seguem a definição clara ou escura do computador que os abre.
 
-Os ecrãs de parede herdam-no: `screens.default_theme` é `inherit` por omissão. Defina-o para outro tema para fixar o mesmo em todos os ecrãs, e `screens.theme_overview`, `screens.theme_now` ou `screens.theme_sentinels` para dar a um ecrã o seu próprio tema. O endereço ainda pode fixar uma janela com `?theme=`. Nenhum ecrã escreve uma cor própria: todos usam as paletas do tema, pelo que um tema acrescentado à página aparece também nos ecrãs.
+Os ecrãs de parede herdam-no: `screens.default_theme` é `inherit` por omissão. Defina-o para outro tema para fixar o mesmo em todos os ecrãs, e `screens.theme_overview`, `screens.theme_fleet`, `screens.theme_now` ou `screens.theme_sentinels` para dar a um ecrã o seu próprio tema. O endereço ainda pode fixar uma janela com `?theme=`. Nenhum ecrã escreve uma cor própria: todos usam as paletas do tema, pelo que um tema acrescentado à página aparece também nos ecrãs.
 
 ### Modo dos ecrãs: três ou rotação
 
-`screens.mode` = three (por omissão) mantém as três páginas separadas, uma por janela. `screens.mode` = rotate faz de cada janela um só ecrã que passa por visão geral, neste momento e sentinelas a cada `screens.rotate_every_seconds` segundos (20 por omissão; de 5 a 300).
+`screens.mode` = three (por omissão) mantém as quatro páginas separadas, uma por janela. `screens.mode` = rotate faz de cada janela um só ecrã que passa por visão geral, frota, neste momento e sentinelas a cada `screens.rotate_every_seconds` segundos (20 por omissão; de 5 a 300).
 
 Uma falha a vermelho faz a janela saltar para o ecrã que a mostra: **Neste momento** para um workflow que falhou, **Sentinelas** para um painel de sentinela que fica vermelho. A janela fica aí `screens.alert_hold_seconds` segundos (30 por omissão; de 5 a 600) ou até esse vermelho desaparecer, o que acontecer primeiro, e depois continua a rodar. Um vermelho já mostrado não volta a fazer a janela saltar até mudar ou reaparecer. O que está vermelho quando a janela abre é apenas o ponto de partida e não a faz saltar. Se chegar um segundo vermelho enquanto a janela mantém o primeiro, espera a sua vez. Para o saber, a janela lê os outros dois ecrãs em segundo plano com a mesma chamada só de leitura (nunca o GitHub). `?rotate=0` mantém uma janela no seu ecrã e `?jump=off` mantém a rotação sem os saltos. Cada ecrã aplica o seu próprio tema e o seu próprio logótipo ao aparecer.
 
@@ -149,7 +149,7 @@ Uma falha a vermelho faz a janela saltar para o ecrã que a mostra: **Neste mome
 
 O separador Este navegador das Definições tem um bloco para carregar o logótipo da sua organização: PNG, JPEG, WebP ou SVG, no máximo 1 MB. O monitor verifica o tipo real pelos primeiros bytes do ficheiro (o nome e a etiqueta que o acompanha não contam), recusa um SVG com scripts, manipuladores de eventos, ligações a outros ficheiros ou endereços ou um tipo de documento, e guarda a imagem na pasta `data/` deste computador como `org_logo` com a sua extensão, nunca na configuração. Só existe um logótipo: carregar outro substitui-o. O registo de ações anota o carregamento e a remoção, nunca o ficheiro.
 
-`screens.logo_overview`, `screens.logo_now` e `screens.logo_sentinels` escolhem em que ecrãs de parede aparece (por omissão, só na visão geral), `screens.logo_corner` o canto (cima à direita por omissão) e `screens.logo_max_width` e `screens.logo_max_height` o tamanho máximo em píxeis a 1920 x 1080 (160 x 64 por omissão; o logótipo cresce com o ecrã). A imagem ajusta-se a esse tamanho sem se deformar e tem um lugar próprio no cabeçalho ou no rodapé, pelo que nunca tapa o conteúdo. O fundo mantém-se transparente: um logótipo com fundo transparente fica bem nos temas claros e nos escuros.
+`screens.logo_overview`, `screens.logo_fleet`, `screens.logo_now` e `screens.logo_sentinels` escolhem em que ecrãs de parede aparece (por omissão, só na visão geral), `screens.logo_corner` o canto (cima à direita por omissão) e `screens.logo_max_width` e `screens.logo_max_height` o tamanho máximo em píxeis a 1920 x 1080 (160 x 64 por omissão; o logótipo cresce com o ecrã). A imagem ajusta-se a esse tamanho sem se deformar e tem um lugar próprio no cabeçalho ou no rodapé, pelo que nunca tapa o conteúdo. O fundo mantém-se transparente: um logótipo com fundo transparente fica bem nos temas claros e nos escuros.
 
 O painel Acerca de mostra sempre o logótipo do monitor. Com `ui.about_org_logo` ativado (desativado por predefinição) mostra também ao lado este logótipo da sua organização, com um texto alternativo na língua da página e um tamanho que acompanha a largura do painel sem deformar a imagem. Se não foi carregado nenhum logótipo, ou o ficheiro não se consegue ler, o painel di-lo e mais nada muda.
 
@@ -159,7 +159,7 @@ Os dados vêm de `/api/screens/data?screen=overview` (ou `now`, `sentinels`): um
 
 ### O que cabe e o que acontece quando não cabe
 
-As três páginas são desenhadas com unidades que seguem o lado curto da janela, pelo que o mesmo desenho preenche os tamanhos abaixo; nada é esticado e nada tem scroll. Uma ferramenta mede-as com o DOM nos oito idiomas e com dados que põem um ecrã à prova (nomes de repositórios de 90 caracteres, palavras compostas alemãs e nomes japoneses sem espaços, o máximo de linhas que o monitor pode enviar, números de sete dígitos, nenhum dado, um único dado, uma leitura antiga): `python tools/check_screens.py` (`--list` mostra cada deteção, `--report FICHEIRO` escreve-as em JSON, `--size` e `--lang` escolhem o que medir, `--surface kiosk` mede o quiosque). Falha perante uma página com scroll, um texto ou uma caixa para lá da borda, uma caixa cujo conteúdo não cabe, um título que acaba em reticências, dois textos que se tapam, uma letra menor do que um centésimo do lado curto da janela (12 px numa janela de 1080 px) e linhas escondidas sem aviso. A mesma ferramenta mede o contraste no navegador: cada texto contra a cor que tem atrás (contam os pontos de um gradiente; 4,5:1, ou 3:1 em letra grande) em cada tema com `--theme NOME ...` (por exemplo `python tools/check_screens.py --theme Ice light contrast`); um texto abaixo disso é um achado do tipo `contrast`. Num telemóvel a auditoria é `python tools/check_mobile.py` (uma janela de 375 px, a vista compacta, cada separador): nenhum controlo que um dedo tenha de premir mede menos de 44 x 44 px, a página nunca desliza para os lados, o menu é uma linha que desliza sozinha e os diálogos seguem a altura que o teclado do ecrã deixa.
+As quatro páginas são desenhadas com unidades que seguem o lado curto da janela, pelo que o mesmo desenho preenche os tamanhos abaixo; nada é esticado e nada tem scroll. Uma ferramenta mede-as com o DOM nos oito idiomas e com dados que põem um ecrã à prova (nomes de repositórios de 90 caracteres, palavras compostas alemãs e nomes japoneses sem espaços, o máximo de linhas que o monitor pode enviar, números de sete dígitos, nenhum dado, um único dado, uma leitura antiga): `python tools/check_screens.py` (`--list` mostra cada deteção, `--report FICHEIRO` escreve-as em JSON, `--size` e `--lang` escolhem o que medir, `--surface kiosk` mede o quiosque). Falha perante uma página com scroll, um texto ou uma caixa para lá da borda, uma caixa cujo conteúdo não cabe, um título que acaba em reticências, dois textos que se tapam, uma letra menor do que um centésimo do lado curto da janela (12 px numa janela de 1080 px) e linhas escondidas sem aviso. A mesma ferramenta mede o contraste no navegador: cada texto contra a cor que tem atrás (contam os pontos de um gradiente; 4,5:1, ou 3:1 em letra grande) em cada tema com `--theme NOME ...` (por exemplo `python tools/check_screens.py --theme Ice light contrast`); um texto abaixo disso é um achado do tipo `contrast`. Num telemóvel a auditoria é `python tools/check_mobile.py` (uma janela de 375 px, a vista compacta, cada separador): nenhum controlo que um dedo tenha de premir mede menos de 44 x 44 px, a página nunca desliza para os lados, o menu é uma linha que desliza sozinha e os diálogos seguem a altura que o teclado do ecrã deixa.
 
 | Tamanho | Tipo |
 |---|---|
@@ -233,8 +233,8 @@ O botão **Ecrãs** da barra superior (o ícone de dois monitores) abre um menu 
 | Quiosque | `/?chrome=0&view=now` | Uma vista sem cabeçalho, separadores nem filtros, para um monitor que ninguém toca. A vista é um parâmetro. |
 | Vista de equipa | `/?chrome=0&view=team` | A vista de equipa como quiosque (edição completa). |
 | Ecrãs de separadores 1 a 3 | `/screen/1`, `/screen/2`, `/screen/3` | Os separadores definidos para cada monitor de uma secretária; `?tabs=`, `?orient=` e `?rotate=` alteram-nos para uma janela. |
-| Ecrãs de parede | `/screen/overview`, `/screen/now`, `/screen/sentinels` | Os três ecrãs de parede descritos acima. |
-| Parede rotativa | `/screen/overview?rotate=20` | Uma janela que roda pelos três e salta para um novo vermelho. |
+| Ecrãs de parede | `/screen/overview`, `/screen/fleet`, `/screen/now`, `/screen/sentinels` | Os quatro ecrãs de parede descritos acima. |
+| Parede rotativa | `/screen/overview?rotate=20` | Uma janela que roda pelos quatro e salta para um novo vermelho. |
 | TV | `/screen/overview?theme=contrast&density=large&scale=1.5&rotate=20` | A parede rotativa para um ecrã visto de longe. |
 | Vários monitores | um endereço por janela | Um conjunto de janelas, uma por monitor (ver abaixo). |
 
@@ -242,7 +242,7 @@ Cada cartão mostra os parâmetros que esse endereço aceita (tema, densidade, a
 
 ### Vários monitores
 
-Escolha quantas janelas (no máximo `screens.menu_max_windows`), a distribuição (em fila, em coluna ou em grelha) e o que cada janela mostra (os três ecrãs de parede por turnos, paredes que rodam sozinhas ou os ecrãs de separadores). **Abrir todas as janelas** abre uma janela por monitor. Num navegador com a API de gestão de janelas (o Chrome e o Edge pedem a permissão *gestão de janelas*) cada janela é colocada no seu próprio monitor, ordenados como a distribuição indica; com mais janelas do que monitores partilham um monitor em mosaico. Sem ela, as janelas abrem onde o navegador as põe e o cartão lista um comando de quiosque por janela (`msedge --kiosk ENDEREÇO --window-position=X,Y`) para as iniciar à mão. O navegador tem de permitir as janelas pop-up para o endereço do monitor.
+Escolha quantas janelas (no máximo `screens.menu_max_windows`), a distribuição (em fila, em coluna ou em grelha) e o que cada janela mostra (os quatro ecrãs de parede por turnos, paredes que rodam sozinhas ou os ecrãs de separadores). **Abrir todas as janelas** abre uma janela por monitor. Num navegador com a API de gestão de janelas (o Chrome e o Edge pedem a permissão *gestão de janelas*) cada janela é colocada no seu próprio monitor, ordenados como a distribuição indica; com mais janelas do que monitores partilham um monitor em mosaico. Sem ela, as janelas abrem onde o navegador as põe e o cartão lista um comando de quiosque por janela (`msedge --kiosk ENDEREÇO --window-position=X,Y`) para as iniciar à mão. O navegador tem de permitir as janelas pop-up para o endereço do monitor.
 
 O mesmo catálogo é lido pelas ferramentas: `GET /api/screens/menu`, `monitor_cli.py screens [list|urls]` e a ferramenta MCP `screens_menu`. As três são só de leitura.
 
@@ -258,7 +258,7 @@ O separador Agora em quatro tamanhos, com dados inventados (4K, um monitor 21:9,
 
 ![telemóvel 390x844](../../docs/screenshots/web_size_phone_light.png)
 
-Os três ecrãs de parede em 4K e num monitor na vertical, com dados inventados:
+Os quatro ecrãs de parede em 4K e num monitor na vertical, com dados inventados:
 
 ![Visão geral 4K 3840x2160](../../docs/screenshots/web_screen_overview_4k.png)
 
@@ -280,4 +280,4 @@ Os ecrãs de parede com outros temas, com o logótipo de uma organização e a j
 
 ![Sentinelas, contraste elevado](../../docs/screenshots/web_screen_sentinels_contrast.png)
 
-![A janela que roda pelos três ecrãs](../../docs/screenshots/web_screen_rotate.png)
+![A janela que roda pelos quatro ecrãs](../../docs/screenshots/web_screen_rotate.png)

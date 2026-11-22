@@ -423,7 +423,7 @@ def run_suite(label, command, cwd, env, timeout):
     if not SHOW_PROGRESS:
         return subprocess.run(command, cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace", env=env, timeout=timeout)
     import threading
-    proc = subprocess.Popen(command + ["-v"], cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace", env=env)
+    proc = subprocess.Popen(command if "-v" in command else command + ["-v"], cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace", env=env)
     out, err, count = [], [], [0]
 
     def drain(stream, into, counting):
@@ -450,19 +450,85 @@ def run_suite(label, command, cwd, env, timeout):
     return subprocess.CompletedProcess(command, proc.returncode, "".join(out), "".join(err))
 
 
+SKIPPED_LINE = re.compile(r" \.\.\. skipped '(?P<reason>.*)'\s*$")      # a line of a verbose run of unittest: `test_x (module.Class.test_x) ... skipped 'reason'`
+SKIP_GROUPS = (      # (name of the cause, words of the reason that put a skip in it), checked in this order; what none of them names is "other" and is listed one by one
+    ("browser", ("browser", "edge", "chrome", "chromium", "monitor_browser_tests", "screens_matrix")),
+    ("outside the zip", ("travel in the zip", "does not travel", "not part of the", "tools folder", "tools of the repository", "workflows", "lives in the repository", "live in the repository", "repository root",
+                         "no tools folder", "deploy/", "profile repository", "workspace of the repositories", "manifest lives", "not a git checkout", "readme of the repository",
+                         "not in the package", "this copy", "tools/", "no copy of the real file", "repository is not here", "tools are not in", "2_release_y_firma", ".monitor-root", "not inside a workspace",
+                         "travel with the docs", "not a clean checkout", "only in the repository", "no parser builder", "helper not available")),
+    ("optional tool", ("node", "git is", "openssl", " jq ", "jq is", "rich is not", "library", "not installed", "no node", "optional package", "textual")),
+    ("platform", ("windows", "posix", "symbolic link", "dpapi", "cmd", "shared bind", "shell script", "modes of a file", "start of a process")),
+    ("this computer", ("container", "loopback", "measured with", "console takes", "nothing is unreleased", "clean install is its own stage", "state of the ais")),
+)
+
+
+def skip_cause(reason):
+    """The cause group of the reason of a skipped test (see SKIP_GROUPS); "other" when none fits."""
+    low = " " + str(reason).lower() + " "
+    for name, words in SKIP_GROUPS:
+        if any(word in low for word in words):
+            return name
+    return "other"
+
+
+def skip_breakdown(output):
+    """The skipped tests of a verbose run of unittest, counted by cause and by reason: {"total": N, "causes": {cause: n}, "reasons": {reason: n}}. Empty counts when nothing was skipped or the run
+    was not verbose (the totals of the last line say how many, never why)."""
+    reasons, causes = {}, {}
+    for line in str(output).splitlines():
+        found = SKIPPED_LINE.search(line)
+        if found:
+            reason = found.group("reason")[:160]
+            reasons[reason] = reasons.get(reason, 0) + 1
+            cause = skip_cause(reason)
+            causes[cause] = causes.get(cause, 0) + 1
+    return {"total": sum(reasons.values()), "causes": dict(sorted(causes.items(), key=lambda kv: (-kv[1], kv[0]))), "reasons": dict(sorted(reasons.items(), key=lambda kv: (-kv[1], kv[0])))}
+
+
+def skip_summary(breakdown):
+    """One line: `24 skipped (browser 24)`; empty text when nothing was skipped."""
+    if not breakdown.get("total"):
+        return ""
+    return f"{breakdown['total']} skipped (" + ", ".join(f"{name} {count}" for name, count in breakdown["causes"].items()) + ")"
+
+
+def save_skips(stage, breakdown, env=None):
+    """Keeps the breakdown next to the result, in the folder of the logs (`MONITOR_RELEASE_LOG_DIR`, else the temporary folder), as make_release_<stage>_skips.json, so that a number of skipped tests
+    in a record (24 in the tree, many more from the zip) explains itself. Returns the path or "" when it could not be written."""
+    folder = Path(str((os.environ if env is None else env).get("MONITOR_RELEASE_LOG_DIR") or tempfile.gettempdir()))
+    target = folder / f"make_release_{stage}_skips.json"
+    try:
+        folder.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(breakdown, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        return str(target)
+    except OSError:
+        return ""
+
+
+def with_skips(stage, result, line):
+    """`line` (the result of a suite) followed by the breakdown of its skipped tests, which is also saved."""
+    breakdown = skip_breakdown((result.stdout or "") + "\n" + (result.stderr or ""))
+    text = skip_summary(breakdown)
+    if not text:
+        return line
+    saved = save_skips(stage, breakdown)
+    return f"{line} | {text}" + (f" - details: {saved}" if saved else "")
+
+
 def run_tests(timeout=None):
     """Stage 1 of the gate: the ordinary suite, ONCE, with a time limit. The nested "clean folder" test is switched off here (MONITOR_NO_NESTED): the clean install is its own stage
     (clean_install_check), so the suite never runs twice inside one command."""
     env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", MONITOR_NO_NESTED="1")
     timeout = test_timeout() if timeout is None else timeout      # read when called, so a variable set after the import still counts
     try:
-        result = run_suite("unit tests", [sys.executable, "-I", "-m", "unittest", "discover", "-s", "tests"], str(HERE), env, timeout)
+        result = run_suite("unit tests", [sys.executable, "-I", "-m", "unittest", "discover", "-s", "tests", "-v"], str(HERE), env, timeout)
     except subprocess.TimeoutExpired:
         fail(f"the unit tests did not finish in {timeout} s")
     tail = (result.stderr or result.stdout).strip().splitlines()[-1:] or ["(no output)"]
     if result.returncode != 0:
         fail("the unit tests do not pass: " + suite_failure("suite", result))
-    return tail[0]
+    return with_skips("suite", result, tail[0])
 
 
 def failing_tests(output):
@@ -618,13 +684,13 @@ def clean_install_check(archive, entries, python=None, skip_suite=False):
         if skip_suite:
             return f"{len(found)} files, version {smoke.stdout.strip().splitlines()[0][:40]}, suite from the zip: SKIPPED on purpose (a green run of this commit was accepted)"
         try:
-            suite = run_suite("clean install suite", [python, "-I", "-m", "unittest", "discover", "-s", "tests"], str(base), env, clean_install_timeout())
+            suite = run_suite("clean install suite", [python, "-I", "-m", "unittest", "discover", "-s", "tests", "-v"], str(base), env, clean_install_timeout())
         except subprocess.TimeoutExpired:
             fail(f"clean install: the suite from the extracted zip did not finish in {clean_install_timeout()} s")
         if suite.returncode != 0:
             fail("clean install: the suite fails from the extracted zip: " + suite_failure("clean", suite))
         tail = (suite.stderr or suite.stdout).strip().splitlines()[-3:]
-        return f"{len(found)} files, version {smoke.stdout.strip().splitlines()[0][:40]}, suite: {' '.join(tail)}"
+        return with_skips("clean", suite, f"{len(found)} files, version {smoke.stdout.strip().splitlines()[0][:40]}, suite: {' '.join(tail)}")
 
 
 def main():

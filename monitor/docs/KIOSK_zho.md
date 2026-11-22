@@ -50,5 +50,6 @@ http://127.0.0.1:8765/?screen=1&tabs=now,al,charts&chrome=0&kiosk=1&scale=150
 | `screens.version_check_seconds` | 300 | 页面多久查询一次 `/api/version`,并在监视器更新或重启后自动重新加载(0 = 从不;最小 30) |
 | `kiosk.safe_margin_percent` | 0 | 页面为会裁掉边缘的电视（过扫描）在每条边上留空的百分比；0 到 10 |
 | `kiosk.scale_with_window` | 关闭 | 上面的字号是短边为 1080 px 的窗口中的大小；开启后它随窗口增大，4K 电视看起来就和全高清电视一样 |
+| `screens.show_repo_names` | public | 展示模式中的仓库名称,与墙面屏幕相同:`public` 将私有仓库显示为 `private-N` 并省略其运行的标题、分支和工作流,`none` 将每个仓库称为 `repo-N`,`all` 显示全部(适用于页面数据 `/api/data`) |
 
 字号通过页面缩放来应用，所以每个数字和每个表格会一起放大。超出范围的值不是错误：它会被默认值取代。

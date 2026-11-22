@@ -123,7 +123,7 @@ DEFAULTS = {
     "github_status": {"enabled": False, "interval_seconds": 300, "mark_reds": True, "quiet_notices": False},      # optional: the state of GitHub (githubstatus.com) in the bar, and the reds that appear during an incident of Actions (githubstatus.py)
     "heartbeat": {"enabled": False, "url_env": "MONITOR_HEARTBEAT_URL", "interval_seconds": 300, "send_state": True, "fail_suffix": ""},      # optional: a ping to an outside service that raises the alarm when the monitor stops (heartbeat.py)
     "chatops": {"enabled": False, "slack": {"enabled": False, "signing_secret_env": "MONITOR_SLACK_SIGNING_SECRET"}, "discord": {"enabled": False, "public_key_env": "MONITOR_DISCORD_PUBLIC_KEY"}, "allowed_teams": [], "allowed_channels": [], "allowed_users": [],
-                "allowed_words": ["help", "status", "alerts", "red", "queue", "score"], "max_rows": 8, "show_repo_names": "all", "links": True, "max_age_seconds": 300, "rate_per_user_per_minute": 6, "rate_per_channel_per_minute": 20, "rate_per_minute": 60},   # read only commands from Slack and Discord, see chatops/inbound.py (off by default; the proofs are only in the environment)
+                "allowed_words": ["help", "status", "alerts", "red", "queue", "score"], "max_rows": 8, "show_repo_names": "public", "links": True, "max_age_seconds": 300, "rate_per_user_per_minute": 6, "rate_per_channel_per_minute": 20, "rate_per_minute": 60},   # read only commands from Slack and Discord, see chatops/inbound.py (off by default; the proofs are only in the environment)
     "config_check": {"strict": False},      # OFF: a key nobody reads, a wrong type or a number out of range is named at the start; ON: the monitor refuses to start (configcheck.py)
     "cache": {"etag": {"enabled": True, "ttl_hours": 24, "skip_stateful": True, "revalidate_active": True}, "negative_ttl_s": 300, "heavy_fresh_s": 5, "stale_serve_h": 1},   # conditional reads: a 304 answer costs no quota; a refusal is remembered for negative_ttl_s seconds (etagcache.py)
     "cli": {"prefer_v1": True, "default_format": "text", "status_codes": "classic", "watch": {"min_interval_seconds": 2, "default_interval_seconds": 5, "branch_timeout_seconds": 900}},      # the command line (cli/formats.py, cli/watch.py): the format of the answers when no --format is given, and the interval of `watch`
@@ -4623,6 +4623,12 @@ class Handler(BaseHTTPRequestHandler):
             with LOCK:      # only the references are taken under the lock: writing to a slow or dead connection with the lock held froze every other page and the cycle itself
                 picture = {"data": STATE["data"], "error": STATE["error"], "hint": STATE["hint"]}
             picture = {**picture, "loop": WATCH.snapshot(limit_seconds=watchdog_limit(LIVE_CONFIG or DEFAULTS))}
+            from github_actions_monitor.surfaces import kiosk as kiosk_profile
+            raw = toolconfig.raw_config()
+            if kiosk_profile.asked(raw, self.path.partition("?")[2]):      # a kiosk names the repositories the way the wall screens do (screens.show_repo_names)
+                data = picture.get("data") if isinstance(picture.get("data"), dict) else {}
+                self.reply(kiosk_profile.redact(picture, screens.Names(data.get("repos"), data.get("repo_meta"), screens.settings(raw)["show_repo_names"])), "application/json; charset=utf-8")
+                return
             self.reply(json.dumps(picture), "application/json; charset=utf-8")
         elif path in ("/", "/index.html") or re.fullmatch(r"/screen/[1-3]/?", path):
             if not self.guard():      # the page checks the Host like the API does (a rebinding page gets a 403, not the monitor)

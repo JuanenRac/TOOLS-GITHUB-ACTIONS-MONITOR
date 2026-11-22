@@ -627,7 +627,7 @@
     "allowed_channels": [],
     "allowed_users": [],
     "allowed_words": ["help", "status", "alerts", "red", "queue", "score"],
-    "show_repo_names": "all",
+    "show_repo_names": "public",
     "links": true,
     "max_rows": 8,
     "max_age_seconds": 300,
