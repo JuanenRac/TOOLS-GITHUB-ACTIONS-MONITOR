@@ -150,6 +150,8 @@ summary{cursor:pointer;padding:6px 10px;display:flex;gap:8px;align-items:center;
 summary::-webkit-details-marker{display:none}summary::before{content:"\25B8";color:var(--mut)}details[open]>summary::before{content:"\25BE"}
 summary>.sem{flex:0 0 auto;white-space:nowrap;overflow-wrap:normal;word-break:normal}
 details>.dbody{padding:4px 10px 10px;overflow:auto;max-height:46vh}
+/* a panel that carries information (its lamp is a warning, an error or a note) may grow taller than a compact one: up to 85% of the visible height, never under 28rem or 46% of it, so a low screen or a phone (--vvh is the height left by the keyboard) still shows the findings without scrolling inside the panel; a panel that is ok or without data keeps the short limit above */
+details:has(>summary .sem:is(.warn,.bad,.info))>.dbody{max-height:min(calc(var(--vvh,100vh)*.85),max(calc(var(--vvh,100vh)*.46),28rem))}
 /* the Sentinel tabs: the one panel that is unfolded takes the rest of the height of its box (the others keep the limit above) */
 #t-sci section>.body,#t-scol section>.body,#t-ssec section>.body,#t-sdel section>.body,#t-ssup section>.body{display:flex;flex-direction:column}
 #t-sci .body>details,#t-scol .body>details,#t-ssec .body>details,#t-sdel .body>details,#t-ssup .body>details{flex:0 0 auto}

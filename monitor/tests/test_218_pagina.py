@@ -12,6 +12,7 @@ from pathlib import Path
 
 import _testenv  # noqa: F401
 import make_release
+import make_release
 import test_190_cli as base
 from github_actions_monitor.cli import completions, monitor_cli
 import test_206_wall_screens as t206
@@ -270,6 +271,27 @@ OK (skipped=4)
     def test_the_progress_mode_does_not_ask_twice_for_the_verbose_output(self):
         source = (HERE / "tools" / "make_release.py").read_text(encoding="utf-8")
         self.assertIn('command if "-v" in command else command + ["-v"]', source)
+
+
+class ThePanelsOfTheSentinelsGrowWhenTheyCarryInformation(unittest.TestCase):
+    def setUp(self):
+        self.page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
+
+    def test_a_panel_with_a_warning_an_error_or_a_note_has_a_taller_limit_that_follows_the_visible_height(self):
+        rule = re.search(r"details:has\(>summary \.sem:is\(\.warn,\.bad,\.info\)\)>\.dbody\{([^}]*)\}", self.page)
+        self.assertIsNotNone(rule)
+        self.assertIn("max-height:min(calc(var(--vvh,100vh)*.85),max(calc(var(--vvh,100vh)*.46),28rem))", rule.group(1))
+
+    def test_a_panel_that_is_ok_or_without_data_keeps_the_short_limit(self):
+        self.assertIn("details>.dbody{padding:4px 10px 10px;overflow:auto;max-height:46vh}", self.page)
+        self.assertLess(self.page.index("details>.dbody{padding:4px 10px 10px;overflow:auto;max-height:46vh}"), self.page.index("details:has(>summary .sem:is(.warn,.bad,.info))>.dbody"))      # the taller limit comes after, so it wins
+        self.assertNotRegex(self.page, r"\.sem:is\([^)]*\.ok[^)]*\)\)>\.dbody\{max-height")
+
+    def test_the_one_open_panel_of_a_tab_still_takes_all_the_height(self):
+        self.assertIn(".body>details[open]:not(details[open]~details):not(:has(~details[open]))>.dbody{flex:1 1 auto;max-height:none;min-height:0}", self.page)
+
+    def test_every_panel_of_the_sentinels_has_a_lamp_that_the_rule_can_read(self):
+        self.assertIn('<summary><span class="sem ${level}"', self.page)
 
 
 if __name__ == "__main__":
