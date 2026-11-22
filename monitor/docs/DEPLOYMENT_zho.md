@@ -121,7 +121,7 @@ launchd（macOS）：`ProgramArguments` = `/usr/bin/python3`、`-m`、`github_ac
 | `MONITOR_PASSWORD_FILE` | 供 `bin/monitor_cli.py` 使用：第一行为 `MONITOR_USER` 密码的文件。 |
 | `MONITOR_RELEASE_TEST_TIMEOUT` | `tools/make_release.py`：常规测试套件在闸门失败之前可用的秒数（默认 3600；60 到 86400）。 |
 | `MONITOR_RELEASE_CLEAN_TIMEOUT` | `tools/make_release.py`：解压后的 zip 中测试套件可用的秒数（默认 3600；60 到 86400）。 |
-| `MONITOR_RELEASE_LOG_DIR` | `tools/make_release.py`：保存失败测试套件完整输出的文件夹（默认为临时文件夹）；检查门的消息会指出失败的测试和该文件。 |
+| `MONITOR_RELEASE_LOG_DIR` | `tools/make_release.py`：保存失败测试套件完整输出的文件夹（默认为临时文件夹）；检查门的消息会指出失败的测试和该文件。同一文件夹还保存 `make_release_suite_skips.json` 和 `make_release_clean_skips.json`：被跳过的测试，按原因（浏览器、zip 之外、可选工具、平台、这台电脑、其他）和理由统计；每个套件的结果行也重复这个数量，因此源码树中的 24 个跳过和从 zip 运行时更多的跳过可以自行解释。 |
 | `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py`：不再重复运行常规测试套件，而是接受同一提交的一次完整通过记录（已结束、无失败无错误、所有测试均已运行）；`--skip-clean-suite` 还会跳过解压后 zip 的测试套件（仍执行快速检查）并予以说明。 |
 | `--progress` | `tools/make_release.py`:每运行 250 个测试输出一行进度,干净安装的套件也一样。 |
 

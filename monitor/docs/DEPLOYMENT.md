@@ -121,7 +121,7 @@ Only the names in this table are read. In the service a value that cannot be rea
 | `MONITOR_PASSWORD_FILE` | For `bin/monitor_cli.py`: a file with the password of `MONITOR_USER` on its first line. |
 | `MONITOR_RELEASE_TEST_TIMEOUT` | `tools/make_release.py`: seconds the ordinary suite may take before the gate fails (default 3600; 60 to 86400). |
 | `MONITOR_RELEASE_CLEAN_TIMEOUT` | `tools/make_release.py`: seconds the suite of the extracted zip may take (default 3600; 60 to 86400). |
-| `MONITOR_RELEASE_LOG_DIR` | `tools/make_release.py`: folder where the WHOLE output of a failed suite is saved (default: the temporary folder); the message of the gate names the failing tests and this file. |
+| `MONITOR_RELEASE_LOG_DIR` | `tools/make_release.py`: folder where the WHOLE output of a failed suite is saved (default: the temporary folder); the message of the gate names the failing tests and this file. The same folder keeps `make_release_suite_skips.json` and `make_release_clean_skips.json`: the tests that were SKIPPED, counted by cause (browser, outside the zip, optional tool, platform, this computer, other) and by reason, and the result line of each suite repeats the count, so that 24 skipped in the tree and more from the zip explain themselves. |
 | `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py`: instead of running the ordinary suite again, accept the record of a complete green run of that very commit (finished, no failure, no error, every test run); `--skip-clean-suite` also skips the suite of the extracted zip (its smoke checks still run) and says so. |
 | `--progress` | `tools/make_release.py`: says how far the suites are, one line every 250 tests, also in the suite of the clean install. |
 

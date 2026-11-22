@@ -121,7 +121,7 @@ launchd（macOS）: `ProgramArguments` = `/usr/bin/python3`、`-m`、`github_act
 | `MONITOR_PASSWORD_FILE` | `bin/monitor_cli.py` 用: 1 行目に `MONITOR_USER` のパスワードを書いたファイル。 |
 | `MONITOR_RELEASE_TEST_TIMEOUT` | `tools/make_release.py`: ゲートが失敗するまでに通常のスイートが使える秒数（既定 3600、60〜86400）。 |
 | `MONITOR_RELEASE_CLEAN_TIMEOUT` | `tools/make_release.py`: 展開した zip のスイートが使える秒数（既定 3600、60〜86400）。 |
-| `MONITOR_RELEASE_LOG_DIR` | `tools/make_release.py`: 失敗したスイートの出力全体を保存するフォルダー（既定は一時フォルダー）。ゲートのメッセージは失敗したテストとこのファイルを示します。 |
+| `MONITOR_RELEASE_LOG_DIR` | `tools/make_release.py`: 失敗したスイートの出力全体を保存するフォルダー（既定は一時フォルダー）。ゲートのメッセージは失敗したテストとこのファイルを示します。同じフォルダーには `make_release_suite_skips.json` と `make_release_clean_skips.json` も残ります。スキップされたテストを原因（ブラウザー、zip の外、任意のツール、プラットフォーム、このコンピューター、その他）と理由ごとに数えたもので、各スイートの結果行にも同じ件数が入るため、ツリーでの24件のスキップと zip からのより多くのスキップが自ら説明されます。 |
 | `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py`: 通常のスイートを再実行する代わりに、まさにそのコミットの完全な成功実行の記録（完了、失敗・エラーなし、全テスト実行）を受け入れます。`--skip-clean-suite` は展開した zip のスイートも省略します（簡易チェックは実行）。その旨が表示されます。 |
 | `--progress` | `tools/make_release.py`: スイートの進み具合を 250 テストごとに 1 行で表示します(クリーンインストールのスイートも同様です)。 |
 

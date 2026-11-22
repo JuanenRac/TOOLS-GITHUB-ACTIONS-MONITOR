@@ -4,10 +4,14 @@
 the command line refuses a format it cannot write, lists every command it has, and the panels of the Sentinel grow when they carry information."""
 import json
 import re
+import subprocess
+import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 import _testenv  # noqa: F401
+import make_release
 import test_190_cli as base
 from github_actions_monitor.cli import completions, monitor_cli
 import test_206_wall_screens as t206
@@ -208,6 +212,64 @@ class TheCommandLine(unittest.TestCase):
                 for word in english:
                     if word not in ours:      # a word that the language shares with English ("options" in French) is not a leftover
                         self.assertNotIn(word, out + err, (lang, word))
+
+
+class TheGateExplainsWhatItSkipped(unittest.TestCase):
+    VERBOSE = """test_a (test_x.A.test_a) ... ok
+test_b (test_x.A.test_b) ... skipped 'the browser tests run on your computer'
+test_c (test_x.A.test_c)
+Docstring of the test ... skipped 'the tools folder does not travel in the zip of a release'
+test_d (test_x.A.test_d) ... skipped 'the browser tests run on your computer'
+test_e (test_x.A.test_e) ... skipped 'something nobody classified'
+test_f (test_x.A.test_f) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.1s
+
+OK (skipped=4)
+"""
+
+    def test_the_skips_are_counted_by_cause_and_by_reason(self):
+        found = make_release.skip_breakdown(self.VERBOSE)
+        self.assertEqual(found["total"], 4)
+        self.assertEqual(found["causes"], {"browser": 2, "other": 1, "outside the zip": 1})
+        self.assertEqual(found["reasons"]["the browser tests run on your computer"], 2)
+        self.assertEqual(make_release.skip_summary(found), "4 skipped (browser 2, other 1, outside the zip 1)")
+
+    def test_nothing_skipped_or_a_quiet_run_says_nothing(self):
+        self.assertEqual(make_release.skip_breakdown("..\nOK\n")["total"], 0)
+        self.assertEqual(make_release.skip_summary(make_release.skip_breakdown("..\nOK\n")), "")
+
+    def test_the_line_of_the_result_carries_the_breakdown_and_it_is_saved(self):
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as folder:
+            with mock.patch.dict(make_release.os.environ, {"MONITOR_RELEASE_LOG_DIR": folder}):
+                result = subprocess.CompletedProcess([], 0, stdout="", stderr=self.VERBOSE)
+                line = make_release.with_skips("suite", result, "OK (skipped=4)")
+            self.assertTrue(line.startswith("OK (skipped=4) | 4 skipped (browser 2"), line)
+            saved = json.loads((Path(folder) / "make_release_suite_skips.json").read_text(encoding="utf-8"))
+            self.assertEqual(saved["total"], 4)
+            self.assertEqual(make_release.with_skips("suite", subprocess.CompletedProcess([], 0, stdout="", stderr="OK\n"), "OK"), "OK")
+
+    def test_both_suites_of_the_gate_run_verbose_so_that_the_reasons_are_there(self):
+        source = (HERE / "tools" / "make_release.py").read_text(encoding="utf-8")
+        self.assertRegex(source, r'"discover", "-s", "tests", "-v"\], str\(HERE\)')
+        self.assertRegex(source, r'"discover", "-s", "tests", "-v"\], str\(base\)')
+        self.assertIn('with_skips("suite", result, tail[0])', source)
+        self.assertIn('with_skips("clean", suite,', source)
+
+    def test_every_reason_the_tests_give_has_a_cause_of_its_own(self):
+        """A skip whose reason no group names would be "other" and unexplained: the groups are kept up to date with the reasons of the tests."""
+        reasons = set()
+        for path in (HERE / "tests").glob("*.py"):
+            text = path.read_text(encoding="utf-8")
+            reasons.update(re.findall(r'skip(?:If|Unless)\((?:[^()]|\([^()]*\))*?,\s*f?"([^"]+)"\)', text))
+            reasons.update(re.findall(r'skipTest\(\s*f?"([^"]+)"', text))
+        self.assertGreater(len(reasons), 20)
+        self.assertEqual(sorted(r for r in reasons if make_release.skip_cause(r) == "other"), [])
+
+    def test_the_progress_mode_does_not_ask_twice_for_the_verbose_output(self):
+        source = (HERE / "tools" / "make_release.py").read_text(encoding="utf-8")
+        self.assertIn('command if "-v" in command else command + ["-v"]', source)
 
 
 if __name__ == "__main__":
