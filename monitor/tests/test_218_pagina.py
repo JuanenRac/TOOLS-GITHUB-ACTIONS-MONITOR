@@ -162,6 +162,9 @@ class TheGuideOfTheScreensCountsFour(unittest.TestCase):
 class TheCommandLine(unittest.TestCase):
     URL = ("--url", "http://127.0.0.1:1", "--timeout", "1")
 
+    def setUp(self):
+        self.addCleanup(i18n.set_language, i18n.language())      # the command line pins the language of the process (--lang): the next test must find the one it had
+
     def test_a_format_csv_that_the_command_cannot_write_is_a_wrong_use(self):
         for command in ("status", "alerts", "score", "live"):
             code, out, err = base.run(command, "--format", "csv", *self.URL, "--lang", "en")
@@ -188,6 +191,13 @@ class TheCommandLine(unittest.TestCase):
             self.assertRegex(text, r"(?<![\w-])monitor(?![\w-])", shell)
         for lang in i18n.LANGS:
             self.assertIn("monitor [N]", i18n.tl(lang, "cli.help_command"), lang)
+
+    def test_monitor_reaching_the_parser_is_watch_status(self):
+        self.assertIn("monitor", monitor_cli.HANDLERS)
+        calls = []
+        with mock.patch.object(monitor_cli, "cmd_watch", lambda ctx: calls.append(ctx["action"]) or ({}, [], 0)):
+            monitor_cli.cmd_monitor({"action": ""})
+        self.assertEqual(calls, ["status"])
 
     def test_monitor_n_still_means_watch_status_even_after_an_option(self):
         self.assertEqual(monitor_cli.monitor_words(["monitor", "30", "--json"]), ["watch", "status", "--interval", "30", "--json"])

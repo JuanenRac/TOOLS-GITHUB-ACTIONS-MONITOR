@@ -1200,7 +1200,12 @@ def cmd_watch(ctx):
     return None, None, code
 
 
-HANDLERS = {"proposals": cmd_proposals, "credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "compare": cmd_compare, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "briefs": cmd_briefs, "docs": cmd_docs, "screens": cmd_screens, "toolbox": cmd_toolbox, "api": cmd_api, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai, "watch": cmd_watch, "completions": cmd_completions, "kiosk": cmd_kiosk, "metrics": cmd_metrics}
+def cmd_monitor(ctx):
+    """`monitor [N]`: `watch status`. `monitor_words` turns the words into `watch status` before the parser reads them, so this is only the way in when the command reached the parser as it is."""
+    return cmd_watch(dict(ctx, action="status"))
+
+
+HANDLERS = {"proposals": cmd_proposals, "monitor": cmd_monitor, "credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "compare": cmd_compare, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "briefs": cmd_briefs, "docs": cmd_docs, "screens": cmd_screens, "toolbox": cmd_toolbox, "api": cmd_api, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai, "watch": cmd_watch, "completions": cmd_completions, "kiosk": cmd_kiosk, "metrics": cmd_metrics}
 
 
 def cmd_update(rest):
@@ -1343,6 +1348,8 @@ def main(argv=None):
         args = parser.parse_args(args_list)
     except SystemExit as exit_:
         return EXIT_OK if exit_.code in (0, None) else EXIT_USAGE
+    if args.command == "monitor":      # monitor_words did not meet it (something odd stood in front): it is `watch status` all the same
+        args.command, args.action = "watch", "status"
     if args.format == "json":
         args.json = True
     if args.lang:
