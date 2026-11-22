@@ -63,9 +63,9 @@
 2. 在第一块显示器的窗口打开 `http://本机:8765/screen/1`，第二块打开 `/screen/2`，按 F11 全屏。从其他电脑访问请使用网络模式和访问令牌。
 3. 对无人触碰的墙面屏幕，给它多个标签页并把 `ui.rotate_seconds` 设为 20-30。
 
-## 墙面屏幕：总览、此刻与哨兵
+## 墙面屏幕：总览、仓库总览、此刻与哨兵
 
-三个供无人操作的显示器或电视使用的页面。没有侧边菜单和导航，用大号文字在一个视图中显示全部内容，让有生命的部分动起来，并让失败柔和地闪烁。它们只读：没有任何按钮会更改内容，也从不调用 GitHub（只显示监视器已有的数据）。
+四个供无人操作的显示器或电视使用的页面。没有侧边菜单和导航，用大号文字在一个视图中显示全部内容，让有生命的部分动起来，并让失败柔和地闪烁。它们只读：没有任何按钮会更改内容，也从不调用 GitHub（只显示监视器已有的数据）。
 
 | 地址 | 显示内容 |
 |---|---|
@@ -100,11 +100,11 @@
 
 | 设置 | 作用 |
 |---|---|
-| `screens.enabled` | 启用三个页面。关闭后 `/screen/overview`、`/screen/now`、`/screen/sentinels` 和 `/api/screens/data` 返回 404（`/screen/1` 到 `/screen/3` 就是页面本身，不依赖此设置）。精简版同样提供墙屏页面，其中哨兵屏为空。 默认关闭。 |
+| `screens.enabled` | 启用四个页面。关闭后 `/screen/overview`、`/screen/fleet`、`/screen/now`、`/screen/sentinels` 和 `/api/screens/data` 返回 404（`/screen/1` 到 `/screen/3` 就是页面本身，不依赖此设置）。精简版同样提供墙屏页面，其中哨兵屏为空。 默认关闭。 |
 | `screens.default_theme` | inherit（默认：整个产品选定的主题，见下文）、auto、light、dark、十六种主题之一或 contrast。 |
 | `screens.default_density` | compact、normal（默认）或 large。 |
 | `screens.refresh_seconds` | 窗口的更新间隔秒数（默认 10）。页面读取的是监视器而不是 GitHub，所以间隔再短也不消耗配额。 |
-| `screens.rotate_seconds` | 仅在 `screens.mode` = three 时。0（默认）= 不轮换；5 及以上时窗口在三个页面之间轮换。 |
+| `screens.rotate_seconds` | 仅在 `screens.mode` = three 时。0（默认）= 不轮换；5 及以上时窗口在四个页面之间轮换。 |
 | `screens.blink` | 失败柔和闪烁（默认开启）。 |
 | `screens.blink_calm_minutes` | 无人处理的失败在多少分钟后停止闪烁并保持固定光晕（默认 30；0 = 一直闪烁到解决）。 |
 | `screens.sound` | 出现新失败时发出提示音（默认关闭）。 |
@@ -112,11 +112,11 @@
 | `screens.safe_margin_percent` | 让内容与窗口每条边保持这一百分比的距离，适用于会裁掉边缘的电视（过扫描）：所有内容画得略小。0（默认）使用整个窗口；0 到 10。 |
 | `screens.night_dim` | 在 `screens.night_dim_from_hour`（22）和 `screens.night_dim_to_hour`（7）之间调暗屏幕；默认关闭。 |
 | `screens.show_repo_names` | all、public（默认：私有仓库显示为 private-1、private-2...）或 none（隐藏所有名称）。供其他人查看的屏幕请使用 public 或 none。在 `repos` 中使用手写列表时,可见性每隔 `discover_refresh_seconds` 通过一次账户列表读取;无法读取可见性的仓库按私有处理。 编号(private-1 等)只分配给被隐藏的仓库,按名称的 HMAC 顺序排列,所用密钥属于本次安装,保存在数据文件夹的私有文件中,因此无法看出某个仓库在全部仓库中的位置。 |
-| `screens.theme_overview`、`screens.theme_now`、`screens.theme_sentinels` | 单个屏幕的主题：inherit（默认：与 `screens.default_theme` 相同）或上述任一主题。 |
-| `screens.mode` | three（默认：三个页面分开，每个窗口一个）或 rotate（单个页面在三者之间轮换，并跳转到新的红色）。 |
+| `screens.theme_overview`、`screens.theme_fleet`、`screens.theme_now`、`screens.theme_sentinels` | 单个屏幕的主题：inherit（默认：与 `screens.default_theme` 相同）或上述任一主题。 |
+| `screens.mode` | three（默认：四个页面分开，每个窗口一个）或 rotate（单个页面在四者之间轮换，并跳转到新的红色）。 |
 | `screens.rotate_every_seconds` | 在 rotate 模式下每个屏幕停留的秒数（默认 20；5 到 300）。 |
 | `screens.alert_hold_seconds` | 在 rotate 模式下，新的红色让窗口停留在其屏幕的秒数（默认 30；5 到 600），或直到红色消失。 |
-| `screens.logo_overview`、`screens.logo_now`、`screens.logo_sentinels` | 标志显示在哪些屏幕上（默认仅总览）。 |
+| `screens.logo_overview`、`screens.logo_fleet`、`screens.logo_now`、`screens.logo_sentinels` | 标志显示在哪些屏幕上（默认仅总览）。 |
 | `screens.logo_corner` | top-right（默认）、top-left、bottom-right 或 bottom-left。 |
 | `screens.logo_max_width`、`screens.logo_max_height` | 标志在 1920 x 1080 下的最大尺寸，单位为像素（默认 160 x 64；随屏幕放大）。 |
 | `screens.group_map` | 默认开启。在总览屏幕上按分组显示车队地图(与车队视图相同的分组方式)。关闭后只显示四个方块。 |
@@ -137,11 +137,11 @@
 
 监视器显示的一切都使用在设置中选定的主题（`ui.theme`：auto、light、dark 或十六种主题之一）：页面、墙面屏幕和登录页面。在「此浏览器」标签页的选择器中选择主题时，也会将其保存为 `ui.theme`，因此从未自选过的浏览器会采用监视器的主题。写入磁盘的 HTML 报告遵循打开它的电脑的浅色或深色设置。
 
-墙面屏幕继承它：`screens.default_theme` 默认为 `inherit`。将其设为其他主题可为所有屏幕固定同一个主题；设置 `screens.theme_overview`、`screens.theme_now` 或 `screens.theme_sentinels` 可为单个屏幕指定专属主题。地址仍可用 `?theme=` 固定单个窗口。任何屏幕都不会写入自己的颜色：它们都使用主题的调色板，因此添加到页面的主题也会出现在屏幕上。
+墙面屏幕继承它：`screens.default_theme` 默认为 `inherit`。将其设为其他主题可为所有屏幕固定同一个主题；设置 `screens.theme_overview`、`screens.theme_fleet`、`screens.theme_now` 或 `screens.theme_sentinels` 可为单个屏幕指定专属主题。地址仍可用 `?theme=` 固定单个窗口。任何屏幕都不会写入自己的颜色：它们都使用主题的调色板，因此添加到页面的主题也会出现在屏幕上。
 
 ### 屏幕模式：三屏或轮换
 
-`screens.mode` = three（默认）使三个页面保持分开，每个窗口一个。`screens.mode` = rotate 使每个窗口成为单个屏幕，每隔 `screens.rotate_every_seconds` 秒（默认 20；5 到 300）在总览、此刻和哨兵之间轮换。
+`screens.mode` = three（默认）使四个页面保持分开，每个窗口一个。`screens.mode` = rotate 使每个窗口成为单个屏幕，每隔 `screens.rotate_every_seconds` 秒（默认 20；5 到 300）在总览、仓库总览、此刻和哨兵之间轮换。
 
 红色故障会让窗口跳转到显示它的屏幕：失败的工作流跳到 **此刻**，变红的哨兵面板跳到 **哨兵**。窗口会在那里停留 `screens.alert_hold_seconds` 秒（默认 30；5 到 600），或直到该红色消失，以先到者为准，然后继续轮换。已经显示过的红色在发生变化或再次出现之前不会再让窗口跳转。窗口打开时已经是红色的内容只是起点，不会触发跳转。如果窗口正在停留于第一个红色时又来了第二个，它会等待轮到自己。为了得知这些，窗口用同样的只读调用在后台读取另外两个屏幕（绝不访问 GitHub）。`?rotate=0` 让单个窗口停留在其屏幕，`?jump=off` 保持轮换但不跳转。每个屏幕在出现时会应用自己的主题和自己的标志。
 
@@ -149,7 +149,7 @@
 
 设置的「此浏览器」标签页有一个用于上传组织标志的块：PNG、JPEG、WebP 或 SVG，最大 1 MB。监视器根据文件的前几个字节检查真实类型（名称和随附的标签不算数），拒绝含有脚本、事件处理程序、指向其他文件或地址的链接或文档类型的 SVG，并把图片以 `org_logo` 加扩展名保存在这台电脑的 `data/` 文件夹中，绝不写入配置。只存在一个标志：上传新的会替换旧的。操作日志会记录上传和移除，但绝不记录文件本身。
 
-`screens.logo_overview`、`screens.logo_now` 和 `screens.logo_sentinels` 选择它显示在哪些墙面屏幕上（默认仅总览），`screens.logo_corner` 选择角落（默认右上角），`screens.logo_max_width` 和 `screens.logo_max_height` 选择在 1920 x 1080 下的最大尺寸，单位为像素（默认 160 x 64；标志随屏幕放大）。图片会按比例缩放到该尺寸内，并在页眉或页脚中有专属位置，因此绝不会遮挡内容。背景保持透明：背景透明的标志在浅色和深色主题中都显示得当。
+`screens.logo_overview`、`screens.logo_fleet`、`screens.logo_now` 和 `screens.logo_sentinels` 选择它显示在哪些墙面屏幕上（默认仅总览），`screens.logo_corner` 选择角落（默认右上角），`screens.logo_max_width` 和 `screens.logo_max_height` 选择在 1920 x 1080 下的最大尺寸，单位为像素（默认 160 x 64；标志随屏幕放大）。图片会按比例缩放到该尺寸内，并在页眉或页脚中有专属位置，因此绝不会遮挡内容。背景保持透明：背景透明的标志在浅色和深色主题中都显示得当。
 
 “关于”面板始终显示监视器的标志。开启 `ui.about_org_logo`(默认关闭)后,还会在旁边显示您组织的这个标志,替代文字使用页面语言,大小随面板宽度变化且图片不会变形。如果没有上传标志,或文件无法读取,面板会提示,其他内容不变。
 
@@ -159,7 +159,7 @@
 
 ### 能放下什么，放不下时会怎样
 
-三个页面使用跟随窗口短边的单位绘制，因此同一布局可以铺满下表中的各种尺寸，不拉伸也不滚动。一个工具会用 DOM 在八种语言下、用能给屏幕施压的数据（90 个字符的仓库名、德语复合词和没有空格的日语名称、监视器能发送的最多行数、七位数字、完全没有数据、只有一条数据、过期的读数）进行测量：`python tools/check_screens.py`（`--list` 显示每个发现，`--report FILE` 写成 JSON，`--size` 和 `--lang` 选择测量对象，`--surface kiosk` 测量展台）。出现以下情况会失败：页面滚动、文字或方框超出边缘、内容放不下的方框、以省略号结尾的标题、相互遮盖的两段文字、小于窗口短边百分之一的字号（1080 px 的窗口中为 12 px）以及未加提示就被隐藏的行。 同一工具还会在浏览器中测量对比度：把每段文字与其背后的颜色（渐变的各个色标都计入）比较，要求达到 4.5:1（大号字体为 3:1），可用 `--theme 名称 ...` 逐个主题检查（例如 `python tools/check_screens.py --theme Ice light contrast`）；低于该值的文字会成为 `contrast` 类型的发现。 在手机上的审计是 `python tools/check_mobile.py`（375 px 宽的窗口、紧凑视图、每个标签页）：手指需要点按的控件都不小于 44 x 44 px，页面从不横向滚动，菜单是自行滚动的一行，对话框会跟随屏幕键盘留出的高度。
+四个页面使用跟随窗口短边的单位绘制，因此同一布局可以铺满下表中的各种尺寸，不拉伸也不滚动。一个工具会用 DOM 在八种语言下、用能给屏幕施压的数据（90 个字符的仓库名、德语复合词和没有空格的日语名称、监视器能发送的最多行数、七位数字、完全没有数据、只有一条数据、过期的读数）进行测量：`python tools/check_screens.py`（`--list` 显示每个发现，`--report FILE` 写成 JSON，`--size` 和 `--lang` 选择测量对象，`--surface kiosk` 测量展台）。出现以下情况会失败：页面滚动、文字或方框超出边缘、内容放不下的方框、以省略号结尾的标题、相互遮盖的两段文字、小于窗口短边百分之一的字号（1080 px 的窗口中为 12 px）以及未加提示就被隐藏的行。 同一工具还会在浏览器中测量对比度：把每段文字与其背后的颜色（渐变的各个色标都计入）比较，要求达到 4.5:1（大号字体为 3:1），可用 `--theme 名称 ...` 逐个主题检查（例如 `python tools/check_screens.py --theme Ice light contrast`）；低于该值的文字会成为 `contrast` 类型的发现。 在手机上的审计是 `python tools/check_mobile.py`（375 px 宽的窗口、紧凑视图、每个标签页）：手指需要点按的控件都不小于 44 x 44 px，页面从不横向滚动，菜单是自行滚动的一行，对话框会跟随屏幕键盘留出的高度。
 
 | 尺寸 | 类型 |
 |---|---|
@@ -233,8 +233,8 @@
 | 展台 | `/?chrome=0&view=now` | 没有页眉、标签页和筛选器的单个视图,适合无人操作的显示器。视图是一个参数。 |
 | 团队视图 | `/?chrome=0&view=team` | 展台模式的团队视图(完整版)。 |
 | 标签页屏幕 1 到 3 | `/screen/1`、`/screen/2`、`/screen/3` | 为桌面上每台显示器设置的标签页;`?tabs=`、`?orient=` 和 `?rotate=` 可为单个窗口更改。 |
-| 墙屏 | `/screen/overview`、`/screen/now`、`/screen/sentinels` | 上文所述的三个墙屏。 |
-| 轮播墙屏 | `/screen/overview?rotate=20` | 一个窗口轮播这三个屏幕,并跳转到新出现的红色。 |
+| 墙屏 | `/screen/overview`、`/screen/fleet`、`/screen/now`、`/screen/sentinels` | 上文所述的四个墙屏。 |
+| 轮播墙屏 | `/screen/overview?rotate=20` | 一个窗口轮播这四个屏幕,并跳转到新出现的红色。 |
 | 电视 | `/screen/overview?theme=contrast&density=large&scale=1.5&rotate=20` | 为远距离观看的屏幕准备的轮播墙屏。 |
 | 多显示器 | 每个窗口一个地址 | 一组窗口,每台显示器一个(见下)。 |
 
@@ -242,7 +242,7 @@
 
 ### 多显示器
 
-选择窗口数(最多 `screens.menu_max_windows`)、布局(按行、按列或网格)以及每个窗口显示的内容(依次显示三个墙屏、自动轮播的墙屏,或标签页屏幕)。**打开所有窗口**会为每台显示器打开一个窗口。在支持 Window Management API 的浏览器中(Chrome 和 Edge 会请求*窗口管理*权限),每个窗口会放到各自的显示器上,顺序按布局确定;窗口多于显示器时,它们在同一台显示器上平铺。没有该 API 时,窗口会在浏览器放置的位置打开,卡片会为每个窗口列出一条展台命令(`msedge --kiosk 地址 --window-position=X,Y`),供手动启动。浏览器必须允许监视器地址的弹出窗口。
+选择窗口数(最多 `screens.menu_max_windows`)、布局(按行、按列或网格)以及每个窗口显示的内容(依次显示四个墙屏、自动轮播的墙屏,或标签页屏幕)。**打开所有窗口**会为每台显示器打开一个窗口。在支持 Window Management API 的浏览器中(Chrome 和 Edge 会请求*窗口管理*权限),每个窗口会放到各自的显示器上,顺序按布局确定;窗口多于显示器时,它们在同一台显示器上平铺。没有该 API 时,窗口会在浏览器放置的位置打开,卡片会为每个窗口列出一条展台命令(`msedge --kiosk 地址 --window-position=X,Y`),供手动启动。浏览器必须允许监视器地址的弹出窗口。
 
 工具也读取同一份目录:`GET /api/screens/menu`、`monitor_cli.py screens [list|urls]` 和 MCP 工具 `screens_menu`。三者都是只读的。
 
@@ -258,7 +258,7 @@
 
 ![手机 390x844](../../docs/screenshots/web_size_phone_light.png)
 
-三个墙面屏幕（4K 和竖屏显示器，使用虚构数据）：
+四个墙面屏幕（4K 和竖屏显示器，使用虚构数据）：
 
 ![总览 4K 3840x2160](../../docs/screenshots/web_screen_overview_4k.png)
 
@@ -280,4 +280,4 @@
 
 ![哨兵，高对比度](../../docs/screenshots/web_screen_sentinels_contrast.png)
 
-![在三个屏幕之间轮换的窗口](../../docs/screenshots/web_screen_rotate.png)
+![在四个屏幕之间轮换的窗口](../../docs/screenshots/web_screen_rotate.png)

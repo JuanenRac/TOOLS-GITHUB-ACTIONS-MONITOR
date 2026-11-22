@@ -63,9 +63,9 @@ A browser test opens the page in each of these sizes, goes through every tab and
 2. Open `http://this-computer:8765/screen/1` in a window on the first monitor and `/screen/2` on the second; press F11 for full screen. From another computer, use the network mode with its access token.
 3. For a wall screen nobody touches, give it several tabs and set `ui.rotate_seconds` to 20-30.
 
-## Wall screens: overview, right now and sentinels
+## Wall screens: overview, fleet, right now and sentinels
 
-Three pages for a monitor or a TV that nobody touches. They have no side menu and no navigation, show everything in one view with big type, animate what is alive and make failures blink softly. They only read: no button changes anything, and they never call GitHub (they show what the monitor already holds).
+Four pages for a monitor or a TV that nobody touches. They have no side menu and no navigation, show everything in one view with big type, animate what is alive and make failures blink softly. They only read: no button changes anything, and they never call GitHub (they show what the monitor already holds).
 
 | Address | What it shows |
 |---|---|
@@ -85,7 +85,7 @@ One address for each monitor. A parameter can make a window quieter or smaller t
 | `?density=compact`, `normal` or `large` | Size of the type. `?scale=1.5` enlarges everything (0.5 to 3). |
 | `?refresh=10` | Seconds between updates (5 to 120). |
 | `?lang=de` | Language (en, es, de, fr, it, ja, zh, pt). |
-| `?rotate=30` | The window turns by itself through overview, right now and sentinels every 30 seconds (at least 5; 0 = it stays on one screen). With `screens.mode` = rotate it already turns; this changes the pace of one window. |
+| `?rotate=30` | The window turns by itself through overview, fleet, right now and sentinels every 30 seconds (at least 5; 0 = it stays on one screen). With `screens.mode` = rotate it already turns; this changes the pace of one window. |
 | `?jump=off` | Only with `screens.mode` = rotate: the window turns but never jumps to a new red. |
 | `?blink=off` | Failures keep a fixed glow instead of blinking. It cannot turn on what `screens.blink` keeps off. |
 | `?repo=WORD,WORD` | Only the repositories whose name holds one of the words (letters, digits and `. _ - /`, up to eight words). `/screen/overview` and `/screen/now` keep only the repositories whose name the screen shows (a hidden name is never matched), the figures follow the rows that are kept, and the score and the map of groups, which belong to the whole fleet, are not shown; `/screen/sentinels` is not filtered. |
@@ -100,11 +100,11 @@ The language of a screen is decided in this order: `?lang=xx` in the address; th
 
 | Setting | What it does |
 |---|---|
-| `screens.enabled` | Turns the three pages on. Off: `/screen/overview`, `/screen/now`, `/screen/sentinels` and `/api/screens/data` answer 404 (`/screen/1` to `/screen/3` are the page itself and do not depend on it). The lite edition serves the wall screens too, with the sentinel screen empty. Off by default. |
+| `screens.enabled` | Turns the four pages on. Off: `/screen/overview`, `/screen/fleet`, `/screen/now`, `/screen/sentinels` and `/api/screens/data` answer 404 (`/screen/1` to `/screen/3` are the page itself and do not depend on it). The lite edition serves the wall screens too, with the sentinel screen empty. Off by default. |
 | `screens.default_theme` | inherit (default: the theme chosen for the whole product, see below), auto, light, dark, one of the sixteen themes or contrast. |
 | `screens.default_density` | compact, normal (default) or large. |
 | `screens.refresh_seconds` | Seconds between updates of a window (10 by default). The pages read the monitor, never GitHub, so a short time costs no allowance. |
-| `screens.rotate_seconds` | Only with `screens.mode` = three. 0 (default) = no rotation; above 5, one window turns through the three pages. |
+| `screens.rotate_seconds` | Only with `screens.mode` = three. 0 (default) = no rotation; above 5, one window turns through the four pages. |
 | `screens.blink` | Failures blink softly (on by default). |
 | `screens.blink_calm_minutes` | Minutes after which a failure that nobody attended to keeps a fixed glow instead of blinking (30 by default; 0 = it blinks until solved). |
 | `screens.sound` | A beep for a new failure (off by default). |
@@ -113,7 +113,7 @@ The language of a screen is decided in this order: `?lang=xx` in the address; th
 | `screens.night_dim` | Dims the screens between `screens.night_dim_from_hour` (22) and `screens.night_dim_to_hour` (7); off by default. |
 | `screens.show_repo_names` | all, public (default: private repositories appear as private-1, private-2...) or none (every name is hidden). Use public or none for a screen that other people can see. With a list of repositories written by hand in `repos`, the visibility is read with one listing of the account every `discover_refresh_seconds`; a repository whose visibility could not be read counts as private. The numbers (private-1...) go only to the hidden repositories, in the order of an HMAC of the name with a key of the installation kept in a private file of the data folder, so they say nothing about where a repository falls among the others. |
 | `screens.theme_overview`, `screens.theme_fleet`, `screens.theme_now`, `screens.theme_sentinels` | The theme of one screen: inherit (default: the one of `screens.default_theme`) or any of the themes above. |
-| `screens.mode` | three (default: the three pages apart, one for each window) or rotate (one single page that turns through the three and jumps to a new red). |
+| `screens.mode` | three (default: the four pages apart, one for each window) or rotate (one single page that turns through the four and jumps to a new red). |
 | `screens.rotate_every_seconds` | In rotate mode, seconds on each screen (20 by default; 5 to 300). |
 | `screens.alert_hold_seconds` | In rotate mode, seconds that a new red keeps the window on its screen (30 by default; 5 to 600), or until the red is gone. |
 | `screens.logo_overview`, `screens.logo_fleet`, `screens.logo_now`, `screens.logo_sentinels` | On which screens the logo shows (only the overview by default). |
@@ -137,11 +137,11 @@ The language of a screen is decided in this order: `?lang=xx` in the address; th
 
 Everything the monitor shows wears the theme chosen in Settings (`ui.theme`: auto, light, dark or one of the sixteen themes): the page, the wall screens and the sign-in page. Choosing a theme in the selector of the tab This browser also saves it as `ui.theme`, so a browser that never chose takes the one of the monitor. The HTML reports written to disk follow the light or dark setting of the computer that opens them.
 
-The wall screens inherit it: `screens.default_theme` is `inherit` by default. Set it to another theme to fix the same one for all the screens, and `screens.theme_overview`, `screens.theme_now` or `screens.theme_sentinels` to give one screen its own. The address can still fix one window with `?theme=`. No screen writes a colour of its own: they all use the palettes of the theme, so a theme added to the page appears on the screens as well.
+The wall screens inherit it: `screens.default_theme` is `inherit` by default. Set it to another theme to fix the same one for all the screens, and `screens.theme_overview`, `screens.theme_fleet`, `screens.theme_now` or `screens.theme_sentinels` to give one screen its own. The address can still fix one window with `?theme=`. No screen writes a colour of its own: they all use the palettes of the theme, so a theme added to the page appears on the screens as well.
 
 ### Mode of the screens: three or rotate
 
-`screens.mode` = three (default) keeps the three pages apart, one for each window. `screens.mode` = rotate makes every window one single screen that turns through overview, right now and sentinels every `screens.rotate_every_seconds` seconds (20 by default; 5 to 300).
+`screens.mode` = three (default) keeps the four pages apart, one for each window. `screens.mode` = rotate makes every window one single screen that turns through overview, right now and sentinels every `screens.rotate_every_seconds` seconds (20 by default; 5 to 300).
 
 A red failure makes the window jump to the screen that shows it: **Right now** for a workflow that failed, **Sentinels** for a sentinel panel that turns red. The window stays there `screens.alert_hold_seconds` seconds (30 by default; 5 to 600) or until that red is gone, whichever comes first, and then goes on turning. A red that was already shown does not make the window jump again until it changes or comes back. What is red when the window opens is only the starting point and does not make it jump. If a second red arrives while the window holds the first, it waits for its turn. To know, a window reads the other two screens in the background with the same read-only call (never GitHub). `?rotate=0` keeps one window on its screen and `?jump=off` keeps the turning without the jumps. Each screen puts on its own theme and its own logo as it comes up.
 
@@ -149,7 +149,7 @@ A red failure makes the window jump to the screen that shows it: **Right now** f
 
 The tab This browser of Settings has a block to upload the logo of your organization: PNG, JPEG, WebP or SVG, at most 1 MB. The monitor checks the real type by the first bytes of the file (the name and the label that came with it do not count), refuses an SVG with scripts, event handlers, links to other files or addresses or a document type, and keeps the picture in the `data/` folder of this computer as `org_logo` with its extension, never in the configuration. Only one logo exists: uploading another replaces it. The log of actions records the upload and the removal, never the file.
 
-`screens.logo_overview`, `screens.logo_now` and `screens.logo_sentinels` choose on which wall screens it shows (only the overview by default), `screens.logo_corner` the corner (top-right by default) and `screens.logo_max_width` and `screens.logo_max_height` the largest size in pixels at 1920 x 1080 (160 x 64 by default; the logo grows with the screen). The picture is fitted inside that size without changing its shape and has a place of its own in the header or the footer, so it never covers the content. Its background stays transparent: a logo with a transparent background looks right in the light and in the dark themes.
+`screens.logo_overview`, `screens.logo_fleet`, `screens.logo_now` and `screens.logo_sentinels` choose on which wall screens it shows (only the overview by default), `screens.logo_corner` the corner (top-right by default) and `screens.logo_max_width` and `screens.logo_max_height` the largest size in pixels at 1920 x 1080 (160 x 64 by default; the logo grows with the screen). The picture is fitted inside that size without changing its shape and has a place of its own in the header or the footer, so it never covers the content. Its background stays transparent: a logo with a transparent background looks right in the light and in the dark themes.
 
 The About panel always shows the logo of the monitor. With `ui.about_org_logo` on (off by default) it also shows this logo of your organization next to it, with an alternative text in the language of the page and a size that follows the width of the panel without deforming the picture. If no logo was uploaded, or the file cannot be read, the panel says so and nothing else changes.
 
@@ -159,7 +159,7 @@ The data come from `/api/screens/data?screen=overview` (or `now`, `sentinels`): 
 
 ### What fits, and what happens when it does not
 
-The three pages are drawn in units that follow the short side of the window, so the same layout fills the sizes below; nothing is stretched and nothing scrolls. A tool measures them with the DOM in the eight languages and with data that stress a screen (names of repositories of 90 characters, German compound words and Japanese names without spaces, the most rows the monitor can send, figures of seven digits, no data at all, a single datum, an old reading): `python tools/check_screens.py` (`--list` shows each finding, `--report FILE` writes them as JSON, `--size` and `--lang` choose what to measure, `--surface kiosk` measures the kiosk). It fails on a page that scrolls, a text or a box beyond the edge, a box whose content does not fit, a heading that ends in dots, two texts that cover each other, a type smaller than a hundredth of the short side of the window (12 px in a window of 1080 px) and rows hidden without notice. The same tool measures the contrast in the browser: every text against the colour behind it (the stops of a gradient count; 4.5:1, or 3:1 for large type) in each theme with `--theme NAME ...` (for example `python tools/check_screens.py --theme Ice light contrast`); a text under it is a finding of the kind `contrast`. On a phone the audit is `python tools/check_mobile.py` (a window of 375 px, the compact view, every tab): no control a finger has to press is under 44 x 44 px, the page never scrolls sideways, the menu is a row that scrolls by itself and the dialogs follow the height the on-screen keyboard leaves.
+The four pages are drawn in units that follow the short side of the window, so the same layout fills the sizes below; nothing is stretched and nothing scrolls. A tool measures them with the DOM in the eight languages and with data that stress a screen (names of repositories of 90 characters, German compound words and Japanese names without spaces, the most rows the monitor can send, figures of seven digits, no data at all, a single datum, an old reading): `python tools/check_screens.py` (`--list` shows each finding, `--report FILE` writes them as JSON, `--size` and `--lang` choose what to measure, `--surface kiosk` measures the kiosk). It fails on a page that scrolls, a text or a box beyond the edge, a box whose content does not fit, a heading that ends in dots, two texts that cover each other, a type smaller than a hundredth of the short side of the window (12 px in a window of 1080 px) and rows hidden without notice. The same tool measures the contrast in the browser: every text against the colour behind it (the stops of a gradient count; 4.5:1, or 3:1 for large type) in each theme with `--theme NAME ...` (for example `python tools/check_screens.py --theme Ice light contrast`); a text under it is a finding of the kind `contrast`. On a phone the audit is `python tools/check_mobile.py` (a window of 375 px, the compact view, every tab): no control a finger has to press is under 44 x 44 px, the page never scrolls sideways, the menu is a row that scrolls by itself and the dialogs follow the height the on-screen keyboard leaves.
 
 | Size | Kind |
 |---|---|
@@ -233,8 +233,8 @@ The **Screens** button in the top bar (the icon of two monitors) opens a menu wi
 | Kiosk | `/?chrome=0&view=now` | One view without header, tabs or filters, for a monitor nobody touches. The view is a parameter. |
 | Team view | `/?chrome=0&view=team` | The team view as a kiosk (complete edition). |
 | Tab screens 1 to 3 | `/screen/1`, `/screen/2`, `/screen/3` | The tabs set for each monitor of a desk; `?tabs=`, `?orient=` and `?rotate=` change them for one window. |
-| Wall screens | `/screen/overview`, `/screen/now`, `/screen/sentinels` | The three wall screens above. |
-| Wall that turns | `/screen/overview?rotate=20` | One window that turns through the three and jumps to a new red. |
+| Wall screens | `/screen/overview`, `/screen/fleet`, `/screen/now`, `/screen/sentinels` | The four wall screens above. |
+| Wall that turns | `/screen/overview?rotate=20` | One window that turns through the four and jumps to a new red. |
 | TV | `/screen/overview?theme=contrast&density=large&scale=1.5&rotate=20` | The turning wall for a screen seen from far away. |
 | Several monitors | one address per window | A set of windows, one per monitor (see below). |
 
@@ -242,7 +242,7 @@ Each card shows the parameters that address accepts (theme, density, refresh, sc
 
 ### Several monitors
 
-Choose how many windows (at most `screens.menu_max_windows`), the layout (in a row, in a column or in a grid) and what each window shows (the three wall screens in turn, walls that turn by themselves, or the tab screens). **Open all windows** opens one window per monitor. In a browser with the Window Management API (Chrome and Edge ask for the permission *window management*) each window is placed on its own monitor, ordered as the layout says; with more windows than monitors they share a monitor in tiles. Without it the windows open where the browser puts them and the card lists one kiosk command per window (`msedge --kiosk ADDRESS --window-position=X,Y`) to start them by hand. The browser must allow pop-ups for the monitor's address.
+Choose how many windows (at most `screens.menu_max_windows`), the layout (in a row, in a column or in a grid) and what each window shows (the four wall screens in turn, walls that turn by themselves, or the tab screens). **Open all windows** opens one window per monitor. In a browser with the Window Management API (Chrome and Edge ask for the permission *window management*) each window is placed on its own monitor, ordered as the layout says; with more windows than monitors they share a monitor in tiles. Without it the windows open where the browser puts them and the card lists one kiosk command per window (`msedge --kiosk ADDRESS --window-position=X,Y`) to start them by hand. The browser must allow pop-ups for the monitor's address.
 
 The same catalogue is read by tools: `GET /api/screens/menu`, `monitor_cli.py screens [list|urls]` and the MCP tool `screens_menu`. All three are read only.
 
@@ -258,7 +258,7 @@ The tab Now in four sizes, with invented data (4K, a 21:9 monitor, a turned moni
 
 ![phone 390x844](../../docs/screenshots/web_size_phone_light.png)
 
-The three wall screens in 4K and on a turned monitor, with invented data:
+The four wall screens in 4K and on a turned monitor, with invented data:
 
 ![Overview 4K 3840x2160](../../docs/screenshots/web_screen_overview_4k.png)
 
@@ -280,4 +280,4 @@ The wall screens in other themes, with the logo of an organization and the windo
 
 ![Sentinels, high contrast](../../docs/screenshots/web_screen_sentinels_contrast.png)
 
-![The window that turns through the three screens](../../docs/screenshots/web_screen_rotate.png)
+![The window that turns through the four screens](../../docs/screenshots/web_screen_rotate.png)

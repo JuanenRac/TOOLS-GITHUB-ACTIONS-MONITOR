@@ -63,9 +63,9 @@ Un test de navigateur ouvre la page dans chacune de ces tailles, parcourt tous l
 2. Ouvrez `http://cet-ordinateur:8765/screen/1` dans une fenêtre du premier écran et `/screen/2` sur le second ; F11 pour le plein écran. Depuis un autre ordinateur, utilisez le mode réseau avec son jeton d'accès.
 3. Pour un écran mural que personne ne touche, donnez-lui plusieurs onglets et mettez `ui.rotate_seconds` à 20-30.
 
-## Écrans muraux : vue d'ensemble, en ce moment et sentinelles
+## Écrans muraux : vue d'ensemble, parc, en ce moment et sentinelles
 
-Trois pages pour un moniteur ou un téléviseur que personne ne touche. Elles n'ont ni menu latéral ni navigation, montrent tout en une seule vue avec de grands caractères, animent ce qui est vivant et font clignoter doucement les échecs. Elles ne font que lire : aucun bouton ne modifie quoi que ce soit, et elles n'appellent jamais GitHub (elles montrent ce que le moniteur détient déjà).
+Quatre pages pour un moniteur ou un téléviseur que personne ne touche. Elles n'ont ni menu latéral ni navigation, montrent tout en une seule vue avec de grands caractères, animent ce qui est vivant et font clignoter doucement les échecs. Elles ne font que lire : aucun bouton ne modifie quoi que ce soit, et elles n'appellent jamais GitHub (elles montrent ce que le moniteur détient déjà).
 
 | Adresse | Ce qu'elle montre |
 |---|---|
@@ -100,11 +100,11 @@ La langue d'un écran se décide dans cet ordre : `?lang=xx` dans l'adresse ; pu
 
 | Réglage | Ce qu'il fait |
 |---|---|
-| `screens.enabled` | Active les trois pages. Désactivé : `/screen/overview`, `/screen/now`, `/screen/sentinels` et `/api/screens/data` répondent 404 (`/screen/1` à `/screen/3` sont la page elle-même et n'en dépendent pas). L'édition lite sert aussi les écrans muraux, avec l'écran des sentinelles vide. Désactivé par défaut. |
+| `screens.enabled` | Active les quatre pages. Désactivé : `/screen/overview`, `/screen/fleet`, `/screen/now`, `/screen/sentinels` et `/api/screens/data` répondent 404 (`/screen/1` à `/screen/3` sont la page elle-même et n'en dépendent pas). L'édition lite sert aussi les écrans muraux, avec l'écran des sentinelles vide. Désactivé par défaut. |
 | `screens.default_theme` | inherit (par défaut : le thème choisi pour tout le produit, voir plus bas), auto, light, dark, l'un des seize thèmes ou contrast. |
 | `screens.default_density` | compact, normal (par défaut) ou large. |
 | `screens.refresh_seconds` | Secondes entre les mises à jour d'une fenêtre (10 par défaut). Les pages lisent le moniteur, jamais GitHub : un délai court ne consomme pas de quota. |
-| `screens.rotate_seconds` | Seulement avec `screens.mode` = three. 0 (par défaut) = pas de rotation ; à partir de 5, une fenêtre passe par les trois pages. |
+| `screens.rotate_seconds` | Seulement avec `screens.mode` = three. 0 (par défaut) = pas de rotation ; à partir de 5, une fenêtre passe par les quatre pages. |
 | `screens.blink` | Les échecs clignotent doucement (activé par défaut). |
 | `screens.blink_calm_minutes` | Minutes après lesquelles un échec dont personne ne s'est occupé garde un halo fixe au lieu de clignoter (30 par défaut ; 0 = il clignote jusqu'à sa résolution). |
 | `screens.sound` | Un bip pour un nouvel échec (désactivé par défaut). |
@@ -113,7 +113,7 @@ La langue d'un écran se décide dans cet ordre : `?lang=xx` dans l'adresse ; pu
 | `screens.night_dim` | Atténue les écrans entre `screens.night_dim_from_hour` (22) et `screens.night_dim_to_hour` (7) ; désactivé par défaut. |
 | `screens.show_repo_names` | all, public (par défaut : les dépôts privés apparaissent comme private-1, private-2...) ou none (tous les noms sont masqués). Utilisez public ou none pour un écran que d'autres personnes peuvent voir. Avec une liste de dépôts écrite à la main dans `repos`, la visibilité est lue par une liste du compte toutes les `discover_refresh_seconds` ; un dépôt dont la visibilité n'a pas pu être lue compte comme privé. Les numéros (private-1...) ne vont qu'aux dépôts masqués, dans l'ordre d'un HMAC du nom avec une clé de l'installation gardée dans un fichier privé du dossier de données : ils ne disent rien de la place d'un dépôt parmi les autres. |
 | `screens.theme_overview`, `screens.theme_fleet`, `screens.theme_now`, `screens.theme_sentinels` | Le thème d'un écran : inherit (par défaut : celui de `screens.default_theme`) ou l'un des thèmes ci-dessus. |
-| `screens.mode` | three (par défaut : les trois pages séparées, une par fenêtre) ou rotate (une seule page qui passe par les trois et saute vers un nouveau rouge). |
+| `screens.mode` | three (par défaut : les quatre pages séparées, une par fenêtre) ou rotate (une seule page qui passe par les quatre et saute vers un nouveau rouge). |
 | `screens.rotate_every_seconds` | En mode rotate, secondes sur chaque écran (20 par défaut ; de 5 à 300). |
 | `screens.alert_hold_seconds` | En mode rotate, secondes pendant lesquelles un nouveau rouge garde la fenêtre sur son écran (30 par défaut ; de 5 à 600), ou jusqu'à ce que le rouge disparaisse. |
 | `screens.logo_overview`, `screens.logo_fleet`, `screens.logo_now`, `screens.logo_sentinels` | Sur quels écrans le logo apparaît (seulement la vue d'ensemble par défaut). |
@@ -137,11 +137,11 @@ La langue d'un écran se décide dans cet ordre : `?lang=xx` dans l'adresse ; pu
 
 Tout ce que montre le moniteur porte le thème choisi dans les Réglages (`ui.theme` : auto, light, dark ou l'un des seize thèmes) : la page, les écrans muraux et la page de connexion. Choisir un thème dans le sélecteur de l'onglet Ce navigateur l'enregistre aussi comme `ui.theme`, si bien qu'un navigateur qui n'a jamais choisi prend celui du moniteur. Les rapports HTML écrits sur disque suivent le réglage clair ou sombre de l'ordinateur qui les ouvre.
 
-Les écrans muraux en héritent : `screens.default_theme` vaut `inherit` par défaut. Mettez-le sur un autre thème pour fixer le même sur tous les écrans, et `screens.theme_overview`, `screens.theme_now` ou `screens.theme_sentinels` pour donner son propre thème à un écran. L'adresse peut toujours fixer une fenêtre avec `?theme=`. Aucun écran n'écrit de couleur à lui : tous utilisent les palettes du thème, donc un thème ajouté à la page apparaît aussi sur les écrans.
+Les écrans muraux en héritent : `screens.default_theme` vaut `inherit` par défaut. Mettez-le sur un autre thème pour fixer le même sur tous les écrans, et `screens.theme_overview`, `screens.theme_fleet`, `screens.theme_now` ou `screens.theme_sentinels` pour donner son propre thème à un écran. L'adresse peut toujours fixer une fenêtre avec `?theme=`. Aucun écran n'écrit de couleur à lui : tous utilisent les palettes du thème, donc un thème ajouté à la page apparaît aussi sur les écrans.
 
 ### Mode des écrans : trois ou rotation
 
-`screens.mode` = three (par défaut) garde les trois pages séparées, une par fenêtre. `screens.mode` = rotate fait de chaque fenêtre un seul écran qui passe par vue d'ensemble, en ce moment et sentinelles toutes les `screens.rotate_every_seconds` secondes (20 par défaut ; de 5 à 300).
+`screens.mode` = three (par défaut) garde les quatre pages séparées, une par fenêtre. `screens.mode` = rotate fait de chaque fenêtre un seul écran qui passe par vue d'ensemble, parc, en ce moment et sentinelles toutes les `screens.rotate_every_seconds` secondes (20 par défaut ; de 5 à 300).
 
 Un échec en rouge fait sauter la fenêtre vers l'écran qui le montre : **En ce moment** pour un workflow en échec, **Sentinelles** pour un panneau de sentinelle qui passe au rouge. La fenêtre y reste `screens.alert_hold_seconds` secondes (30 par défaut ; de 5 à 600) ou jusqu'à ce que ce rouge disparaisse, selon ce qui arrive en premier, puis continue de tourner. Un rouge déjà montré ne refait pas sauter la fenêtre tant qu'il ne change pas ou ne revient pas. Ce qui est rouge à l'ouverture de la fenêtre n'est que le point de départ et ne la fait pas sauter. Si un second rouge arrive pendant que la fenêtre tient le premier, il attend son tour. Pour le savoir, une fenêtre lit les deux autres écrans en arrière-plan avec le même appel en lecture seule (jamais GitHub). `?rotate=0` garde une fenêtre sur son écran et `?jump=off` garde la rotation sans les sauts. Chaque écran met son propre thème et son propre logo en arrivant.
 
@@ -149,7 +149,7 @@ Un échec en rouge fait sauter la fenêtre vers l'écran qui le montre : **En ce
 
 L'onglet Ce navigateur des Réglages a un bloc pour envoyer le logo de votre organisation : PNG, JPEG, WebP ou SVG, 1 Mo au maximum. Le moniteur vérifie le vrai type d'après les premiers octets du fichier (le nom et l'étiquette qui l'accompagne ne comptent pas), refuse un SVG avec des scripts, des gestionnaires d'événements, des liens vers d'autres fichiers ou adresses ou un type de document, et garde l'image dans le dossier `data/` de cet ordinateur sous le nom `org_logo` avec son extension, jamais dans la configuration. Un seul logo existe : en envoyer un autre le remplace. Le journal des actions note l'envoi et le retrait, jamais le fichier.
 
-`screens.logo_overview`, `screens.logo_now` et `screens.logo_sentinels` choisissent sur quels écrans muraux il apparaît (seulement la vue d'ensemble par défaut), `screens.logo_corner` le coin (en haut à droite par défaut) et `screens.logo_max_width` et `screens.logo_max_height` la taille maximale en pixels à 1920 x 1080 (160 x 64 par défaut ; le logo grandit avec l'écran). L'image est ajustée dans cette taille sans être déformée et a sa place dans l'en-tête ou le pied de page, si bien qu'elle ne cache jamais le contenu. Son fond reste transparent : un logo à fond transparent rend bien dans les thèmes clairs comme dans les sombres.
+`screens.logo_overview`, `screens.logo_fleet`, `screens.logo_now` et `screens.logo_sentinels` choisissent sur quels écrans muraux il apparaît (seulement la vue d'ensemble par défaut), `screens.logo_corner` le coin (en haut à droite par défaut) et `screens.logo_max_width` et `screens.logo_max_height` la taille maximale en pixels à 1920 x 1080 (160 x 64 par défaut ; le logo grandit avec l'écran). L'image est ajustée dans cette taille sans être déformée et a sa place dans l'en-tête ou le pied de page, si bien qu'elle ne cache jamais le contenu. Son fond reste transparent : un logo à fond transparent rend bien dans les thèmes clairs comme dans les sombres.
 
 Le panneau À propos affiche toujours le logo du moniteur. Avec `ui.about_org_logo` activé (désactivé par défaut), il affiche aussi à côté ce logo de votre organisation, avec un texte alternatif dans la langue de la page et une taille qui suit la largeur du panneau sans déformer l'image. Si aucun logo n'a été importé ou si le fichier est illisible, le panneau le dit et rien d'autre ne change.
 
@@ -159,7 +159,7 @@ Les données viennent de `/api/screens/data?screen=overview` (ou `now`, `sentine
 
 ### Ce qui tient, et ce qui se passe quand cela ne tient pas
 
-Les trois pages sont dessinées avec des unités qui suivent le petit côté de la fenêtre : la même mise en page remplit donc les tailles ci-dessous, rien n'est étiré et rien ne défile. Un outil les mesure avec le DOM dans les huit langues et avec des données qui mettent un écran à l'épreuve (noms de dépôts de 90 caractères, mots composés allemands et noms japonais sans espaces, le plus grand nombre de lignes que le moniteur peut envoyer, chiffres à sept chiffres, aucune donnée, une seule donnée, une lecture ancienne) : `python tools/check_screens.py` (`--list` montre chaque constat, `--report FICHIER` les écrit en JSON, `--size` et `--lang` choisissent ce qui est mesuré, `--surface kiosk` mesure le kiosque). Il échoue devant une page qui défile, un texte ou une boîte au-delà du bord, une boîte dont le contenu ne tient pas, un titre qui finit par des points de suspension, deux textes qui se recouvrent, une police inférieure à un centième du petit côté de la fenêtre (12 px dans une fenêtre de 1080 px) et des lignes masquées sans avertissement. Le même outil mesure le contraste dans le navigateur : chaque texte contre la couleur qu'il a derrière (les paliers d'un dégradé comptent ; 4,5:1, ou 3:1 pour les grands caractères) dans chaque thème avec `--theme NOM ...` (par exemple `python tools/check_screens.py --theme Ice light contrast`) ; un texte en dessous est un constat de type `contrast`. Sur un téléphone, l'audit est `python tools/check_mobile.py` (une fenêtre de 375 px, la vue compacte, chaque onglet) : aucun contrôle qu'un doigt doit presser ne fait moins de 44 x 44 px, la page ne défile jamais de côté, le menu est une ligne qui défile seule et les dialogues suivent la hauteur que laisse le clavier à l'écran.
+Les quatre pages sont dessinées avec des unités qui suivent le petit côté de la fenêtre : la même mise en page remplit donc les tailles ci-dessous, rien n'est étiré et rien ne défile. Un outil les mesure avec le DOM dans les huit langues et avec des données qui mettent un écran à l'épreuve (noms de dépôts de 90 caractères, mots composés allemands et noms japonais sans espaces, le plus grand nombre de lignes que le moniteur peut envoyer, chiffres à sept chiffres, aucune donnée, une seule donnée, une lecture ancienne) : `python tools/check_screens.py` (`--list` montre chaque constat, `--report FICHIER` les écrit en JSON, `--size` et `--lang` choisissent ce qui est mesuré, `--surface kiosk` mesure le kiosque). Il échoue devant une page qui défile, un texte ou une boîte au-delà du bord, une boîte dont le contenu ne tient pas, un titre qui finit par des points de suspension, deux textes qui se recouvrent, une police inférieure à un centième du petit côté de la fenêtre (12 px dans une fenêtre de 1080 px) et des lignes masquées sans avertissement. Le même outil mesure le contraste dans le navigateur : chaque texte contre la couleur qu'il a derrière (les paliers d'un dégradé comptent ; 4,5:1, ou 3:1 pour les grands caractères) dans chaque thème avec `--theme NOM ...` (par exemple `python tools/check_screens.py --theme Ice light contrast`) ; un texte en dessous est un constat de type `contrast`. Sur un téléphone, l'audit est `python tools/check_mobile.py` (une fenêtre de 375 px, la vue compacte, chaque onglet) : aucun contrôle qu'un doigt doit presser ne fait moins de 44 x 44 px, la page ne défile jamais de côté, le menu est une ligne qui défile seule et les dialogues suivent la hauteur que laisse le clavier à l'écran.
 
 | Taille | Type |
 |---|---|
@@ -233,8 +233,8 @@ Le bouton **Écrans** de la barre du haut (l'icône de deux moniteurs) ouvre un 
 | Borne | `/?chrome=0&view=now` | Une vue sans en-tête, onglets ni filtres, pour un moniteur que personne ne touche. La vue est un paramètre. |
 | Vue d'équipe | `/?chrome=0&view=team` | La vue d'équipe en borne (édition complète). |
 | Écrans d'onglets 1 à 3 | `/screen/1`, `/screen/2`, `/screen/3` | Les onglets définis pour chaque moniteur d'un bureau ; `?tabs=`, `?orient=` et `?rotate=` les changent pour une fenêtre. |
-| Écrans muraux | `/screen/overview`, `/screen/now`, `/screen/sentinels` | Les trois écrans muraux ci-dessus. |
-| Mur tournant | `/screen/overview?rotate=20` | Une fenêtre qui tourne entre les trois et saute sur un nouveau rouge. |
+| Écrans muraux | `/screen/overview`, `/screen/fleet`, `/screen/now`, `/screen/sentinels` | Les quatre écrans muraux ci-dessus. |
+| Mur tournant | `/screen/overview?rotate=20` | Une fenêtre qui tourne entre les quatre et saute sur un nouveau rouge. |
 | Télé | `/screen/overview?theme=contrast&density=large&scale=1.5&rotate=20` | Le mur tournant pour un écran vu de loin. |
 | Plusieurs moniteurs | une adresse par fenêtre | Un ensemble de fenêtres, une par moniteur (voir ci-dessous). |
 
@@ -242,7 +242,7 @@ Chaque carte montre les paramètres que cette adresse accepte (thème, densité,
 
 ### Plusieurs moniteurs
 
-Choisissez le nombre de fenêtres (au plus `screens.menu_max_windows`), la disposition (en ligne, en colonne ou en grille) et ce que montre chaque fenêtre (les trois écrans muraux à tour de rôle, des murs qui tournent seuls ou les écrans d'onglets). **Ouvrir toutes les fenêtres** ouvre une fenêtre par moniteur. Dans un navigateur doté de l'API de gestion des fenêtres (Chrome et Edge demandent l'autorisation *gestion des fenêtres*), chaque fenêtre est placée sur son propre moniteur, ordonnés comme l'indique la disposition ; avec plus de fenêtres que de moniteurs, elles se partagent un moniteur en mosaïque. Sans elle, les fenêtres s'ouvrent là où le navigateur les met et la carte liste une commande de borne par fenêtre (`msedge --kiosk ADRESSE --window-position=X,Y`) pour les lancer à la main. Le navigateur doit autoriser les fenêtres contextuelles pour l'adresse du moniteur.
+Choisissez le nombre de fenêtres (au plus `screens.menu_max_windows`), la disposition (en ligne, en colonne ou en grille) et ce que montre chaque fenêtre (les quatre écrans muraux à tour de rôle, des murs qui tournent seuls ou les écrans d'onglets). **Ouvrir toutes les fenêtres** ouvre une fenêtre par moniteur. Dans un navigateur doté de l'API de gestion des fenêtres (Chrome et Edge demandent l'autorisation *gestion des fenêtres*), chaque fenêtre est placée sur son propre moniteur, ordonnés comme l'indique la disposition ; avec plus de fenêtres que de moniteurs, elles se partagent un moniteur en mosaïque. Sans elle, les fenêtres s'ouvrent là où le navigateur les met et la carte liste une commande de borne par fenêtre (`msedge --kiosk ADRESSE --window-position=X,Y`) pour les lancer à la main. Le navigateur doit autoriser les fenêtres contextuelles pour l'adresse du moniteur.
 
 Le même catalogue est lu par les outils : `GET /api/screens/menu`, `monitor_cli.py screens [list|urls]` et l'outil MCP `screens_menu`. Les trois sont en lecture seule.
 
@@ -258,7 +258,7 @@ L'onglet Maintenant en quatre tailles, avec des données inventées (4K, un moni
 
 ![téléphone 390x844](../../docs/screenshots/web_size_phone_light.png)
 
-Les trois écrans muraux en 4K et sur un moniteur tourné, avec des données inventées :
+Les quatre écrans muraux en 4K et sur un moniteur tourné, avec des données inventées :
 
 ![Vue d'ensemble 4K 3840x2160](../../docs/screenshots/web_screen_overview_4k.png)
 
@@ -280,4 +280,4 @@ Les écrans muraux dans d'autres thèmes, avec le logo d'une organisation et la 
 
 ![Sentinelles, contraste élevé](../../docs/screenshots/web_screen_sentinels_contrast.png)
 
-![La fenêtre qui tourne entre les trois écrans](../../docs/screenshots/web_screen_rotate.png)
+![La fenêtre qui tourne entre les quatre écrans](../../docs/screenshots/web_screen_rotate.png)

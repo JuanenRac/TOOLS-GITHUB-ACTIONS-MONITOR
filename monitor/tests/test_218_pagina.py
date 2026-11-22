@@ -9,6 +9,7 @@ from pathlib import Path
 
 import _testenv  # noqa: F401
 import test_206_wall_screens as t206
+from github_actions_monitor import i18n
 from github_actions_monitor.app import screens
 from github_actions_monitor.surfaces import kiosk
 
@@ -120,6 +121,35 @@ class TheGuidesOfTheNames(unittest.TestCase):
         notice = [n for n in manual["2.1.8"]["notices"] if n["id"] == "chatops_names_public"][0]
         self.assertEqual((notice["keys"], notice["old_value"], notice["new_value"]), (["chatops.show_repo_names"], "all", "public"))
         self.assertEqual(sorted(notice["text"]), ["de", "en", "es", "fr", "it", "ja", "pt", "zh"])
+
+
+class TheGuideOfTheScreensCountsFour(unittest.TestCase):
+    SUFFIXES = ("", "_spa", "_deu", "_fra", "_ita", "_jpn", "_por", "_zho")
+    COUNTED = {"": r"\bthree pages\b", "_spa": r"\btres páginas\b", "_deu": r"\bdrei Seiten\b", "_fra": r"\btrois pages\b", "_ita": r"\btre pagine\b", "_jpn": "3つのページ", "_por": r"\btrês páginas\b",
+               "_zho": "三个页面"}
+
+    def test_the_four_screens_are_the_kinds_of_the_code(self):
+        self.assertEqual(len(screens.KINDS), 4)
+
+    def test_every_guide_names_every_screen_and_its_theme_and_logo_setting(self):
+        for suffix in self.SUFFIXES:
+            text = (HERE / "docs" / f"SCREENS{suffix}.md").read_text(encoding="utf-8")
+            for kind in screens.KINDS:
+                self.assertIn(f"`/screen/{kind}`", text, (suffix, kind))
+                self.assertIn(f"`screens.theme_{kind}`", text, (suffix, kind))
+                self.assertIn(f"`screens.logo_{kind}`", text, (suffix, kind))
+            row = [line for line in text.split("\n") if line.startswith("| `screens.enabled`")][0]
+            self.assertIn("/screen/fleet", row, suffix)
+            self.assertNotRegex(text, self.COUNTED[suffix], suffix)
+
+    def test_the_help_of_the_mode_and_the_rotation_does_not_say_three(self):
+        for lang in i18n.LANGS:
+            with i18n.use_language(lang):
+                for key in ("cfg.h.screens.mode", "cfg.h.screens.rotate_seconds", "cfg.h.screens.menu_rotate_seconds", "ui.scrm_ph_set"):
+                    text = i18n.t(key)
+                    self.assertNotEqual(text, key, (lang, key))
+                    self.assertNotRegex(text.replace("(three)", "").replace("three =", ""), r"(?i)(three|tres|drei|trois|tre|três)|3画面|3つ|3 つ|三个|三屏", (lang, key))      # `three` is the name of the mode, not a count
+                self.assertIn(i18n.t("ui.scr_fleet"), i18n.t("cfg.h.screens.mode"), lang)
 
 
 if __name__ == "__main__":
