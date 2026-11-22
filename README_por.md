@@ -85,7 +85,7 @@ Método, pressupostos e como medi-lo na sua própria utilização: [`monitor/doc
 
 | | |
 |---|---|
-| **Versão** | **2.1.7** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versão** | **2.1.8** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Requisitos** | Python 3.11+ e a CLI do GitHub (`gh auth login`); mais nada (a vista de consola usa o pacote opcional `rich`) |
 | **Abre** | uma página só em `127.0.0.1`, em oito idiomas |
 | **Escreve no GitHub** | nunca sozinho: apenas os comandos por lotes que lançar com um `--go` explícito |
@@ -93,7 +93,7 @@ Método, pressupostos e como medi-lo na sua própria utilização: [`monitor/doc
 
 <!-- glance:begin -->
 
-**Medido hoje** (v2.1.7)
+**Medido hoje** (v2.1.8)
 
 | | |
 |---|---|

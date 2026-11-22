@@ -9,6 +9,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+## [2.1.8]
+
+La versione 2.1.8 non aggiunge alcuna funzione: corregge ciò che ha trovato una revisione della 2.1.7. La sentinella di CI non è più verde quando l'elenco delle esecuzioni può nascondere un workflow; approvare o rifiutare una proposta dell'IA funziona; un dispositivo revocato perde i flussi che aveva aperti; le connessioni hanno un limite di tempo e di numero; il tunnel del proxy funziona; tornare indietro non passa più sopra un aggiornamento in corso; l'immagine del contenitore viene pubblicata solo da un tag; e le schermate, il chiosco, la riga di comando e la documentazione dicono ciò che fa il programma.
+
 ### Corretto
 
 - **Il controllo del webhook dell'audit in container (E8) ora invia davvero un corpo oltre il limite e dà a ogni consegna un id proprio**: il corpo di «un corpo oltre il limite» era di 300 KB, sotto il valore predefinito di 1 MiB di `webhook.max_body_kb`, e condivideva l'id di consegna del primo ping; il ricevitore (che già giudica prima la dimensione) lo risolveva come duplicato. Ora il corpo supera il limite e i controlli che attendono un evento ignorato non si nascondono dietro un id ripetuto.

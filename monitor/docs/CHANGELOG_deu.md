@@ -9,6 +9,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+## [2.1.8]
+
+Version 2.1.8 bringt keine neue Funktion: Sie korrigiert, was eine Überprüfung von 2.1.7 gefunden hat. Der CI-Wächter ist nicht mehr grün, wenn die Liste der Läufe einen Workflow verbergen kann; das Freigeben oder Ablehnen eines KI-Vorschlags funktioniert; ein gesperrtes Gerät verliert seine offenen Datenströme; Verbindungen haben ein Zeit- und ein Anzahllimit; der Proxy-Tunnel funktioniert; das Zurückgehen läuft nicht mehr über eine laufende Aktualisierung hinweg; das Container-Image wird nur noch von einem Tag veröffentlicht; und die Bildschirme, der Kiosk, die Befehlszeile und die Dokumentation sagen, was das Programm tut.
+
 ### Behoben
 
 - **Die Webhook-Prüfung des Container-Audits (E8) sendet jetzt wirklich einen Body über dem Limit und gibt jeder Zustellung eine eigene ID**: Der Body von „ein Body über dem Limit“ war 300 KB groß, unter dem Standard von 1 MiB für `webhook.max_body_kb`, und teilte die Zustellungs-ID des ersten Pings; der Empfänger (der die Größe schon zuerst prüft) beantwortete ihn daher als Duplikat. Der Body liegt jetzt über dem Limit, und die Prüfungen, die ein ignoriertes Ereignis erwarten, verstecken sich nicht hinter einer wiederholten ID.

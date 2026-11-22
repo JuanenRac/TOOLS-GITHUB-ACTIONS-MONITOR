@@ -85,7 +85,7 @@ Méthode, hypothèses et comment le mesurer dans votre propre usage: [`monitor/d
 
 | | |
 |---|---|
-| **Version** | **2.1.7** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **2.1.8** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Prérequis** | Python 3.11+ et la CLI GitHub (`gh auth login`) ; rien d'autre (la vue console utilise le paquet optionnel `rich`) |
 | **S'ouvre** | sur une page `127.0.0.1` uniquement, en huit langues |
 | **Écrit sur GitHub** | jamais seul : seulement les commandes par lots que vous lancez avec un `--go` explicite |
@@ -93,7 +93,7 @@ Méthode, hypothèses et comment le mesurer dans votre propre usage: [`monitor/d
 
 <!-- glance:begin -->
 
-**Mesuré aujourd'hui** (v2.1.7)
+**Mesuré aujourd'hui** (v2.1.8)
 
 | | |
 |---|---|

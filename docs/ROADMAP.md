@@ -21,7 +21,11 @@ What only shows with long real use: the migration from 1.8 and 1.9, the growth o
 
 The monitor's own workflows keep to what the hygiene sentinel will ask of others: actions pinned to a commit, the least permissions and a time limit on every job.
 
-## Done in 1.8.2 to 2.1.7
+## Done in 1.8.2 to 2.1.8
+
+### 2.1.8 - A review of 2.1.7: honest sentinels, working approvals of AI proposals, stricter network access, a proxy tunnel and a safer release image
+
+Version 2.1.8 adds no new function: it corrects what a review of 2.1.7 found. The CI sentinel is no longer green when the list of runs may hide a workflow; approving or rejecting a proposal of the AI works; a revoked device loses the streams it had open; connections have a time and a number limit; the proxy tunnel works; going back no longer runs over an update in progress; the container image is only published from a tag; and the screens, the kiosk, the command line and the documentation say what the program does.
 
 ### 2.1.7 - Screens and kiosks that keep up, a phone view, real-time delivery and recovery, scale and observability, honest sentinels and a release chain with immutable releases
 

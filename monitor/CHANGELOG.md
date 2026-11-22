@@ -11,6 +11,10 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+## [2.1.8]
+
+Version 2.1.8 adds no new function: it corrects what a review of 2.1.7 found. The CI sentinel is no longer green when the list of runs may hide a workflow; approving or rejecting a proposal of the AI works; a revoked device loses the streams it had open; connections have a time and a number limit; the proxy tunnel works; going back no longer runs over an update in progress; the container image is only published from a tag; and the screens, the kiosk, the command line and the documentation say what the program does.
+
 ### Fixed
 
 - **The webhook check of the container audit (E8) now really sends a body over the limit and gives every delivery its own id**: the body of "a body over the limit" was 300 KB, under the 1 MiB default of `webhook.max_body_kb`, and shared the delivery id of the first ping, so the receiver (which already judges the size first) answered it as a duplicate. The body is now over the limit, and the checks that expect an ignored event do not hide behind a repeated id.

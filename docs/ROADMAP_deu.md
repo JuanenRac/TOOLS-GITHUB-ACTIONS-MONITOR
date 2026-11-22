@@ -16,7 +16,11 @@ Was sich nur im langen echten Einsatz zeigt: die Migration von 1.8 und 1.9, das 
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 2.1.7
+## Erledigt in 1.8.2 bis 2.1.8
+
+### 2.1.8 - Überprüfung von 2.1.7: ehrliche Wächter, funktionierende Freigaben von KI-Vorschlägen, strengerer Netzzugriff, Proxy-Tunnel und ein sichereres Release-Image
+
+Version 2.1.8 bringt keine neue Funktion: Sie korrigiert, was eine Überprüfung von 2.1.7 gefunden hat. Der CI-Wächter ist nicht mehr grün, wenn die Liste der Läufe einen Workflow verbergen kann; das Freigeben oder Ablehnen eines KI-Vorschlags funktioniert; ein gesperrtes Gerät verliert seine offenen Datenströme; Verbindungen haben ein Zeit- und ein Anzahllimit; der Proxy-Tunnel funktioniert; das Zurückgehen läuft nicht mehr über eine laufende Aktualisierung hinweg; das Container-Image wird nur noch von einem Tag veröffentlicht; und die Bildschirme, der Kiosk, die Befehlszeile und die Dokumentation sagen, was das Programm tut.
 
 ### 2.1.7 - Bildschirme und Kioske auf dem neuesten Stand, eine Telefonansicht, Echtzeit-Zustellung und Wiederherstellung, Skalierung und Beobachtbarkeit, ehrliche Wächter und eine Release-Kette mit unveränderlichen Releases
 
