@@ -1353,7 +1353,7 @@
  "cli.help_assistant": "ai-hook: 既定のアシスタントツール (既定)",
  "cli.help_baseline": "compare: 比較先（previous または year_ago）",
  "cli.help_ca_file": "HTTPS: この認証局を信頼する（PEM ファイル）。独自の証明書を使うモニター向け",
- "cli.help_command": "status, accounts, alerts, live, doctor, health（または check）, score, team, compare, ai-hook, credential, lessons, briefs, docs (list | show NAME), screens, api, install-skill, gh-token, backup (create | verify | restore | status | list), proposals (list | show | approve | reject | execute), update, toolbox, watch, completions, kiosk, metrics",
+ "cli.help_command": "status, accounts, alerts, live, doctor, health（または check）, score, team, compare, ai-hook, credential, lessons, briefs, docs (list | show NAME), screens, api, install-skill, gh-token, backup (create | verify | restore | status | list), proposals (list | show | approve | reject | execute), update, toolbox, watch, monitor [N], completions, kiosk, metrics",
  "cli.help_compare": "score：期間の履歴とも比較します",
  "cli.help_cursor": "ai-hook: Cursor (ベストエフォート)",
  "cli.help_days": "compare: 集計する曜日（all、workdays、weekend）",
@@ -5386,5 +5386,16 @@
  "cfg.h.report_export.name": "「名前を付けて保存」ウィンドウが提案する名前(拡張子なし)。{tab} はタブ、{date} は日付です。英数字、ピリオド、ハイフン、アンダースコアのみ。",
  "cfg.h.report_export.paper": "a4 または letter: モニター自身が書き出す PDF の用紙サイズ。",
  "cfg.h.report_export.pdf_path": "auto、own、browser のいずれか。auto: ラテン文字の言語ではモニターが PDF を書き出します。own: 同じ。browser: ブラウザーの印刷ウィンドウ。日本語と中国語は、フォントを持つブラウザーを常に使います。",
- "cli.help_if_problem": "metrics：赤いワークフローがなく、--fail-on（既定は error）以上のアラートもないときは何も出力せず 0 で終了します。あるときは数値を出力して 5 で終了します（出力があるとメールを送る cron 向け）"
+ "cli.help_if_problem": "metrics：赤いワークフローがなく、--fail-on（既定は error）以上のアラートもないときは何も出力せず 0 で終了します。あるときは数値を出力して 5 で終了します（出力があるとメールを送る cron 向け）",
+ "cli.argparse_usage": "使い方:",
+ "cli.argparse_positional": "位置引数",
+ "cli.argparse_options": "オプション",
+ "cli.argparse_help": "このヘルプを表示して終了します",
+ "cli.argparse_error": "エラー",
+ "cli.argparse_invalid_choice": "引数 {name}: 無効な選択です: {value}（{choices} から選んでください）",
+ "cli.argparse_required": "次の引数が必要です: {names}",
+ "cli.argparse_unrecognized": "認識できない引数: {values}",
+ "cli.argparse_expected": "引数 {name}: 引数が1つ必要です",
+ "cli.argparse_invalid_value": "引数 {name}: {kind} の値が無効です: {value}",
+ "cli.csv_only_compare": "--format csv は compare コマンドでのみ使えます（{command} では使えません）。text、table、plain、json、ndjson を使ってください"
 }

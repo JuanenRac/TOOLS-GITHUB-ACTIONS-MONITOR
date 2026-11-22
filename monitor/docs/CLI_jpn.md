@@ -21,7 +21,7 @@
 | `alerts` | すべての番人のアラートを 1 つの一覧で：`--sentinel ci\|collab\|security\|supply\|delivery`、`--level info\|warning\|error`、`--muted show\|hide\|only`；`--since 90m|24h|7d|2w` はその期間のどこかで開いていたものを、閉じたものも含めて一覧にします（モニターが動作中に保持する履歴から。アラートは 10 分間見えなくなると閉じたと数えます） | 不可 |
 | `proposals` | AI が提案した操作（`ai.actions.enabled`）：`proposals list`、`show ID`、`approve ID`、`reject ID`、`execute ID`（ID は短縮できます）。`approve` と `reject` は決定を記録するだけです。`execute` はページと同じ入口で実行し、`ai.actions.execute` が必要で、`ai.actions.require_approval` がオンなら先に承認が必要です。承認・却下・実行はこのコンピューターからのみ可能です | 不可 |
 | `score` | アカウントのスコア：数値、文字評価、傾向、要素、カバレッジ、リポジトリ別の内訳。`--compare` で期間の履歴と比較します | 不可 |
-| `compare` | 今の期間と直前の期間の比較：数値とその変化・方向、悪化または改善したもの。`--window 7\|30d`、`--days all\|workdays\|weekend`、`--baseline previous\|year_ago`、`--format table\|json\|ndjson\|csv`。数値のデータが少ないと終了コード 4、`--fail-on` 指定で悪化があれば 5 | 不可 |
+| `compare` | 今の期間と直前の期間の比較：数値とその変化・方向、悪化または改善したもの。`--window 7\|30d`、`--days all\|workdays\|weekend`、`--baseline previous\|year_ago`、`--format table\|json\|ndjson\|csv`。数値のデータが少ないと終了コード 4、`--fail-on` 指定で悪化があれば 5。他のコマンドでの `--format csv` は誤用（終了コード 1） | 不可 |
 | `api` | クライアント向けの読み取りAPI:`api openapi` は固定された各ルートの OpenAPI 文書を出力し(ファイルにリダイレクトできます)、`api me` はモニターがこのクライアントを何者と見ているか(モード、ユーザー、ロール、セッションができること、契約のバージョン)を示します。`api.v1_enabled` が閉じているモニターはそう伝えます。`api contract-check` はクライアント向けの契約スイートをそれに対して実行します(検査が失敗すると終了コード4) | 不可 |
 | `team` | リポジトリの健全性を、人の手が必要なものから順に表示します。`--severity warn\|bad` で悪いものだけに絞り、`--repo owner/name` で 1 件の詳細を表示します | 不可 |
 | `live` | Webhook 受信の状態と直近のイベント | 不可 |

@@ -1353,7 +1353,7 @@
  "cli.help_assistant": "ai-hook : l'outil d'assistant par défaut (par défaut)",
  "cli.help_baseline": "compare : avec quoi comparer (previous ou year_ago)",
  "cli.help_ca_file": "HTTPS : faire confiance à cette autorité de certification (un fichier PEM), pour un moniteur avec un certificat à vous",
- "cli.help_command": "status, accounts, alerts, live, doctor, health (ou check), score, team, compare, ai-hook, credential, lessons, briefs, docs (list | show NAME), screens, api, install-skill, gh-token, backup (create | verify | restore | status | list), proposals (list | show | approve | reject | execute), update, toolbox, watch, completions, kiosk, metrics",
+ "cli.help_command": "status, accounts, alerts, live, doctor, health (ou check), score, team, compare, ai-hook, credential, lessons, briefs, docs (list | show NAME), screens, api, install-skill, gh-token, backup (create | verify | restore | status | list), proposals (list | show | approve | reject | execute), update, toolbox, watch, monitor [N], completions, kiosk, metrics",
  "cli.help_compare": "score : compare aussi avec l'historique de la fenêtre",
  "cli.help_cursor": "ai-hook : Cursor (au mieux)",
  "cli.help_days": "compare : quels jours comptent (all, workdays ou weekend)",
@@ -5386,5 +5386,16 @@
  "cfg.h.report_export.name": "Nom proposé par la fenêtre Enregistrer sous, sans l'extension. {tab} est l'onglet et {date} le jour. Lettres, chiffres, point, tiret et tiret bas uniquement.",
  "cfg.h.report_export.paper": "a4 ou letter : le papier du PDF que le moniteur écrit lui-même.",
  "cfg.h.report_export.pdf_path": "auto, own ou browser. auto : le moniteur écrit le PDF pour les langues latines. own : pareil. browser : la fenêtre d'impression du navigateur. Le japonais et le chinois passent toujours par le navigateur, qui a leurs polices.",
- "cli.help_if_problem": "metrics : n'écrit rien et sort avec 0 quand aucun workflow n'est rouge et qu'aucune alerte de niveau --fail-on (error par défaut) ou pire n'existe ; sinon écrit les chiffres et sort avec 5 (pour cron, qui envoie par courrier toute sortie)"
+ "cli.help_if_problem": "metrics : n'écrit rien et sort avec 0 quand aucun workflow n'est rouge et qu'aucune alerte de niveau --fail-on (error par défaut) ou pire n'existe ; sinon écrit les chiffres et sort avec 5 (pour cron, qui envoie par courrier toute sortie)",
+ "cli.argparse_usage": "usage :",
+ "cli.argparse_positional": "arguments positionnels",
+ "cli.argparse_options": "options",
+ "cli.argparse_help": "affiche cette aide et quitte",
+ "cli.argparse_error": "erreur",
+ "cli.argparse_invalid_choice": "argument {name} : choix invalide : {value} (choisissez parmi {choices})",
+ "cli.argparse_required": "les arguments suivants sont obligatoires : {names}",
+ "cli.argparse_unrecognized": "arguments non reconnus : {values}",
+ "cli.argparse_expected": "argument {name} : un argument est attendu",
+ "cli.argparse_invalid_value": "argument {name} : valeur {kind} invalide : {value}",
+ "cli.csv_only_compare": "--format csv ne fonctionne qu'avec la commande compare, pas avec {command} ; utilisez text, table, plain, json ou ndjson"
 }

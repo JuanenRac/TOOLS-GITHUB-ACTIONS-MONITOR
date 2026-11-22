@@ -1353,7 +1353,7 @@
  "cli.help_assistant": "ai-hook: la herramienta de asistente por defecto (por defecto)",
  "cli.help_baseline": "compare: con qué comparar (previous o year_ago)",
  "cli.help_ca_file": "HTTPS: confiar en esta autoridad de certificación (un archivo PEM), para un monitor con certificado propio",
- "cli.help_command": "status, accounts, alerts, live, doctor, health (o check), score, team, compare, ai-hook, credential, lessons, briefs, docs (list | show NAME), screens, api, install-skill, gh-token, backup (create | verify | restore | status | list), proposals (list | show | approve | reject | execute), update, toolbox, watch, completions, kiosk, metrics",
+ "cli.help_command": "status, accounts, alerts, live, doctor, health (o check), score, team, compare, ai-hook, credential, lessons, briefs, docs (list | show NAME), screens, api, install-skill, gh-token, backup (create | verify | restore | status | list), proposals (list | show | approve | reject | execute), update, toolbox, watch, monitor [N], completions, kiosk, metrics",
  "cli.help_compare": "score: compara también con el histórico de la ventana",
  "cli.help_cursor": "ai-hook: Cursor (mejor esfuerzo)",
  "cli.help_days": "compare: qué días cuentan (all, workdays o weekend)",
@@ -5386,5 +5386,16 @@
  "cfg.h.report_export.name": "Nombre que propone la ventana Guardar como, sin la extensión. {tab} es la pestaña y {date} el día. Solo letras, cifras, punto, guion y guion bajo.",
  "cfg.h.report_export.paper": "a4 o letter: el papel del PDF que escribe el propio monitor.",
  "cfg.h.report_export.pdf_path": "auto, own o browser. auto: el monitor escribe el PDF en los idiomas latinos. own: igual. browser: la ventana de impresión del navegador. Japonés y chino usan siempre el navegador, que tiene sus fuentes.",
- "cli.help_if_problem": "metrics: no escribe nada y sale con 0 cuando no hay ningún workflow en rojo ni alertas de --fail-on (error por defecto) o peores; si las hay, escribe las cifras y sale con 5 (para cron, que envía por correo toda salida)"
+ "cli.help_if_problem": "metrics: no escribe nada y sale con 0 cuando no hay ningún workflow en rojo ni alertas de --fail-on (error por defecto) o peores; si las hay, escribe las cifras y sale con 5 (para cron, que envía por correo toda salida)",
+ "cli.argparse_usage": "uso:",
+ "cli.argparse_positional": "argumentos posicionales",
+ "cli.argparse_options": "opciones",
+ "cli.argparse_help": "muestra esta ayuda y termina",
+ "cli.argparse_error": "error",
+ "cli.argparse_invalid_choice": "argumento {name}: opción no válida: {value} (elige entre {choices})",
+ "cli.argparse_required": "faltan estos argumentos obligatorios: {names}",
+ "cli.argparse_unrecognized": "argumentos no reconocidos: {values}",
+ "cli.argparse_expected": "argumento {name}: se esperaba un argumento",
+ "cli.argparse_invalid_value": "argumento {name}: valor {kind} no válido: {value}",
+ "cli.csv_only_compare": "--format csv solo sirve con la orden compare, no con {command}; usa text, table, plain, json o ndjson"
 }

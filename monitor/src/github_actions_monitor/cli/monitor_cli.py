@@ -76,7 +76,7 @@ from github_actions_monitor.cli import watch as watch_loop      # noqa: E402
 from github_actions_monitor.cli import branchwatch      # noqa: E402
 from github_actions_monitor.app import codestale      # noqa: E402
 from github_actions_monitor.surfaces import kiosk      # noqa: E402
-COMMANDS = COMMANDS + ("toolbox", "watch", "completions", "kiosk", "metrics", "proposals")      # the operator commands (docs/CLI_OPERATOR.md)
+COMMANDS = COMMANDS + ("toolbox", "watch", "monitor", "completions", "kiosk", "metrics", "proposals")      # the operator commands (docs/CLI_OPERATOR.md)
 STATUS_CODES = ("classic", "operator")      # `cli.status_codes` / --status-codes: classic = the codes 0 to 5 of every command; operator = status alone says 0 healthy, 1 nothing serving, 2 up but needs attention
 EXIT_CHANGED = watch_loop.EXIT_CHANGED      # 6: `watch --exit-on-change` saw something change (only when the flag is given)
 OPERATOR_WORDS = {"watch": watch_loop.WATCHABLE, "completions": completions.SHELLS, "kiosk": tuple(kiosk.PRESETS)}
@@ -1218,8 +1218,41 @@ def cmd_update(rest):
     return int(module.main(rest))
 
 
+class TranslatedFormatter(argparse.RawDescriptionHelpFormatter):
+    """The formatter of the help with the word of the usage line in the language of the command line (`--lang`, MONITOR_LANG)."""
+
+    def add_usage(self, usage, actions, groups, prefix=None):
+        return super().add_usage(usage, actions, groups, prefix if prefix is not None else i18n.t("cli.argparse_usage") + " ")
+
+
+class TranslatedParser(argparse.ArgumentParser):
+    """An ArgumentParser whose own words (the titles of the sections, the line of -h and the messages of a wrong use) come from the catalogue of the monitor, in the eight languages, so that a
+    wrong use is not told half in English. The error still ends the command with the exit code of a wrong use."""
+
+    PATTERNS = (
+        (re.compile(r"argument (?P<name>.+?): invalid choice: (?P<value>.+?) \(choose from (?P<choices>.*)\)$", re.S), "cli.argparse_invalid_choice"),
+        (re.compile(r"the following arguments are required: (?P<names>.+)$"), "cli.argparse_required"),
+        (re.compile(r"unrecognized arguments: (?P<values>.+)$"), "cli.argparse_unrecognized"),
+        (re.compile(r"argument (?P<name>.+?): expected one argument$"), "cli.argparse_expected"),
+        (re.compile(r"argument (?P<name>.+?): invalid (?P<kind>\w+) value: (?P<value>.+)$"), "cli.argparse_invalid_value"),
+    )
+
+    def translate(self, message):
+        for pattern, key in self.PATTERNS:
+            found = pattern.match(message)
+            if found:
+                return i18n.t(key, **found.groupdict())
+        return message
+
+    def error(self, message):
+        self.print_usage(sys.stderr)
+        self.exit(2, f"{self.prog}: {i18n.t('cli.argparse_error')}: {self.translate(message)}\n")
+
+
 def build_parser():
-    ap = argparse.ArgumentParser(prog="monitor_cli.py", description=i18n.t("cli.description"), epilog=i18n.t("cli.epilog"), formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = TranslatedParser(prog="monitor_cli.py", description=i18n.t("cli.description"), epilog=i18n.t("cli.epilog"), formatter_class=TranslatedFormatter, add_help=False)
+    ap._positionals.title, ap._optionals.title = i18n.t("cli.argparse_positional"), i18n.t("cli.argparse_options")
+    ap.add_argument("-h", "--help", action="help", help=i18n.t("cli.argparse_help"))
     ap.add_argument("command", choices=COMMANDS, help=i18n.t("cli.help_command"))
     ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + PROPOSALS_ACTIONS + BRIEFS_ACTIONS + DOCS_ACTIONS + API_ACTIONS + SKILL_ACTIONS + AI_ACTIONS + BACKUP_ACTIONS + SCREENS_ACTIONS + TOOLBOX_ACTIONS + tuple(w for words in OPERATOR_WORDS.values() for w in words), default=None, help=i18n.t("cli.help_ai_action"))
     ap.add_argument("file", nargs="?", default="", help=i18n.t("cli.help_file"))
@@ -1281,13 +1314,18 @@ def build_parser():
 
 def monitor_words(args_list):
     """`monitor [N]` is `watch status` that refreshes every N seconds (the interval of the setting when N is not given; raised to the floor `cli.watch.min_interval_seconds`): the screen of a terminal left open. The
-    rest of the options are kept, so `monitor 10 --json` and `monitor --url ...` work. Anything else is returned as it came."""
-    if args_list[:1] != ["monitor"]:
+    rest of the options are kept, so `monitor 10 --json` and `monitor --url ...` work, and so do options in front (`--lang es monitor 10`). Anything else is returned as it came."""
+    at = 0
+    known = build_parser()._option_string_actions if "monitor" in args_list else {}
+    while at < len(args_list) and args_list[at].startswith("-"):      # the options in front of the command: a flag takes no word, an option with a value takes the next one
+        action = known.get(args_list[at])
+        at += 2 if action is not None and action.nargs != 0 and "=" not in args_list[at] else 1
+    if args_list[at:at + 1] != ["monitor"]:
         return args_list
-    rest = args_list[1:]
+    head, rest = args_list[:at], args_list[at + 1:]
     if rest and re.fullmatch(r"[0-9]{1,4}", rest[0]):
-        return ["watch", "status", "--interval", rest[0]] + rest[1:]
-    return ["watch", "status"] + rest
+        return head + ["watch", "status", "--interval", rest[0]] + rest[1:]
+    return head + ["watch", "status"] + rest
 
 
 def main(argv=None):
@@ -1318,6 +1356,8 @@ def main(argv=None):
                "sentinel": args.sentinel, "level": args.level, "since": args.since.strip() if re.fullmatch(r"\s*[0-9]{1,6}\s*[smhdwSMHDW]?\s*", args.since) else ("bad" if args.since.strip() else ""), "muted": args.muted, "fail_on": args.fail_on, "lite": args.lite, "compare": args.compare, "severity": args.severity, "window": args.window if re.fullmatch(r"[0-9]{1,3}d?", args.window) else "", "days": args.days, "baseline": args.baseline, "format": args.format,
                "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run, "deep": args.deep, "file": args.file, "strict": args.strict, "force": args.force, "encrypt": args.encrypt, "key_env": args.key_env if re.fullmatch(r"[A-Z_][A-Z0-9_]{0,63}", args.key_env) else "", "to_dir": args.to_dir, "new_token_file": args.new_token_file, "dest": args.dest, "read_only": args.read_only, "repo": args.repo if re.fullmatch(r"[A-Za-z0-9._/-]{0,201}", args.repo) else "",
                "provider": args.provider if re.fullmatch(r"[A-Za-z0-9-]{0,40}", args.provider) else "", "model": args.model if re.fullmatch(r"[A-Za-z0-9._:/@+-]{0,100}", args.model) else "", "refresh": args.refresh}
+        if args.format == "csv" and args.command != "compare":      # only `compare` writes csv: any other command would give text with a 0, which a script that asked for csv takes for csv
+            raise CliError(EXIT_USAGE, i18n.t("cli.csv_only_compare", command=args.command))
         raw = _config() if args.command in ("watch", "kiosk", "status") or not (args.format or args.json) else {}
         ctx.update({"raw": raw, "format": "csv" if args.format == "csv" else formats.choose(args.format, args.json, formats.configured_format(raw)), "interval": args.interval, "once": args.once or args.single_pass, "exit_on_change": args.exit_on_change, "clear": not args.no_clear,
                     "branch": args.branch, "repo_asked": args.repo, "wait": args.wait, "status_codes": args.status_codes, "if_problem": args.if_problem, "color": terminal.use_color(args.color)})

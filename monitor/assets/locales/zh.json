@@ -1353,7 +1353,7 @@
  "cli.help_assistant": "ai-hook: 默认的助手工具 (默认)",
  "cli.help_baseline": "compare：对比基准（previous 或 year_ago）",
  "cli.help_ca_file": "HTTPS：信任此证书颁发机构（PEM 文件），适用于使用自有证书的监视器",
- "cli.help_command": "status, accounts, alerts, live, doctor, health（或 check）, score, team, compare, ai-hook, credential, lessons, briefs, docs (list | show NAME), screens, api, install-skill, gh-token, backup (create | verify | restore | status | list), proposals (list | show | approve | reject | execute), update, toolbox, watch, completions, kiosk, metrics",
+ "cli.help_command": "status, accounts, alerts, live, doctor, health（或 check）, score, team, compare, ai-hook, credential, lessons, briefs, docs (list | show NAME), screens, api, install-skill, gh-token, backup (create | verify | restore | status | list), proposals (list | show | approve | reject | execute), update, toolbox, watch, monitor [N], completions, kiosk, metrics",
  "cli.help_compare": "score：同时与窗口内的历史记录比较",
  "cli.help_cursor": "ai-hook: Cursor (尽力而为)",
  "cli.help_days": "compare：统计哪些日期（all、workdays 或 weekend）",
@@ -5386,5 +5386,16 @@
  "cfg.h.report_export.name": "“另存为”窗口建议的文件名(不含扩展名)。{tab} 为标签页,{date} 为日期。仅限字母、数字、点、连字符和下划线。",
  "cfg.h.report_export.paper": "a4 或 letter:监视器自行生成的 PDF 的纸张。",
  "cfg.h.report_export.pdf_path": "auto、own 或 browser。auto:拉丁语系语言由监视器生成 PDF。own:相同。browser:浏览器的打印窗口。日语和中文始终使用自带字体的浏览器。",
- "cli.help_if_problem": "metrics：没有红色工作流且没有 --fail-on（默认 error）及更严重级别的警报时不输出任何内容并以 0 退出；否则输出数值并以 5 退出（适用于会把任何输出都发邮件的 cron）"
+ "cli.help_if_problem": "metrics：没有红色工作流且没有 --fail-on（默认 error）及更严重级别的警报时不输出任何内容并以 0 退出；否则输出数值并以 5 退出（适用于会把任何输出都发邮件的 cron）",
+ "cli.argparse_usage": "用法：",
+ "cli.argparse_positional": "位置参数",
+ "cli.argparse_options": "选项",
+ "cli.argparse_help": "显示此帮助并退出",
+ "cli.argparse_error": "错误",
+ "cli.argparse_invalid_choice": "参数 {name}：无效的选择：{value}（请从 {choices} 中选择）",
+ "cli.argparse_required": "以下参数是必需的：{names}",
+ "cli.argparse_unrecognized": "无法识别的参数：{values}",
+ "cli.argparse_expected": "参数 {name}：需要一个参数",
+ "cli.argparse_invalid_value": "参数 {name}：无效的 {kind} 值：{value}",
+ "cli.csv_only_compare": "--format csv 只适用于 compare 命令，不适用于 {command}；请使用 text、table、plain、json 或 ndjson"
 }

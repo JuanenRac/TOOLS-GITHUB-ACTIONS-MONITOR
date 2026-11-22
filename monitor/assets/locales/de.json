@@ -1353,7 +1353,7 @@
  "cli.help_assistant": "ai-hook: das Standard-Assistentenwerkzeug (Standard)",
  "cli.help_baseline": "compare: womit verglichen wird (previous oder year_ago)",
  "cli.help_ca_file": "HTTPS: dieser Zertifizierungsstelle vertrauen (eine PEM-Datei), für einen Monitor mit eigenem Zertifikat",
- "cli.help_command": "status, accounts, alerts, live, doctor, health (oder check), score, team, compare, ai-hook, credential, lessons, briefs, docs (list | show NAME), screens, api, install-skill, gh-token, backup (create | verify | restore | status | list), proposals (list | show | approve | reject | execute), update, toolbox, watch, completions, kiosk, metrics",
+ "cli.help_command": "status, accounts, alerts, live, doctor, health (oder check), score, team, compare, ai-hook, credential, lessons, briefs, docs (list | show NAME), screens, api, install-skill, gh-token, backup (create | verify | restore | status | list), proposals (list | show | approve | reject | execute), update, toolbox, watch, monitor [N], completions, kiosk, metrics",
  "cli.help_compare": "score: zusätzlich mit dem Verlauf des Fensters vergleichen",
  "cli.help_cursor": "ai-hook: Cursor (nach bestem Wissen)",
  "cli.help_days": "compare: welche Tage zählen (all, workdays oder weekend)",
@@ -5386,5 +5386,16 @@
  "cfg.h.report_export.name": "Name, den das Fenster „Speichern unter“ vorschlägt, ohne Endung. {tab} ist der Tab, {date} der Tag. Nur Buchstaben, Ziffern, Punkt, Bindestrich und Unterstrich.",
  "cfg.h.report_export.paper": "a4 oder letter: das Papier des PDF, das der Monitor selbst schreibt.",
  "cfg.h.report_export.pdf_path": "auto, own oder browser. auto: Der Monitor schreibt das PDF für die lateinischen Sprachen. own: ebenso. browser: das Druckfenster des Browsers. Japanisch und Chinesisch nutzen immer den Browser, der deren Schriften hat.",
- "cli.help_if_problem": "metrics: schreibt nichts und endet mit 0, wenn kein Workflow rot ist und keine Warnung der Stufe --fail-on (Standard error) oder schlimmer vorliegt; sonst werden die Zahlen geschrieben und der Code ist 5 (für cron, das jede Ausgabe mailt)"
+ "cli.help_if_problem": "metrics: schreibt nichts und endet mit 0, wenn kein Workflow rot ist und keine Warnung der Stufe --fail-on (Standard error) oder schlimmer vorliegt; sonst werden die Zahlen geschrieben und der Code ist 5 (für cron, das jede Ausgabe mailt)",
+ "cli.argparse_usage": "Aufruf:",
+ "cli.argparse_positional": "Positionsargumente",
+ "cli.argparse_options": "Optionen",
+ "cli.argparse_help": "diese Hilfe anzeigen und beenden",
+ "cli.argparse_error": "Fehler",
+ "cli.argparse_invalid_choice": "Argument {name}: ungültige Auswahl: {value} (wähle aus {choices})",
+ "cli.argparse_required": "diese Argumente sind erforderlich: {names}",
+ "cli.argparse_unrecognized": "nicht erkannte Argumente: {values}",
+ "cli.argparse_expected": "Argument {name}: ein Argument erwartet",
+ "cli.argparse_invalid_value": "Argument {name}: ungültiger Wert ({kind}): {value}",
+ "cli.csv_only_compare": "--format csv gilt nur für den Befehl compare, nicht für {command}; verwende text, table, plain, json oder ndjson"
 }

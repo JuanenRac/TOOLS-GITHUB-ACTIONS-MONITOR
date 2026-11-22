@@ -8,6 +8,8 @@ import unittest
 from pathlib import Path
 
 import _testenv  # noqa: F401
+import test_190_cli as base
+from github_actions_monitor.cli import completions, monitor_cli
 import test_206_wall_screens as t206
 from github_actions_monitor import i18n
 from github_actions_monitor.app import screens
@@ -150,6 +152,62 @@ class TheGuideOfTheScreensCountsFour(unittest.TestCase):
                     self.assertNotEqual(text, key, (lang, key))
                     self.assertNotRegex(text.replace("(three)", "").replace("three =", ""), r"(?i)(three|tres|drei|trois|tre|três)|3画面|3つ|3 つ|三个|三屏", (lang, key))      # `three` is the name of the mode, not a count
                 self.assertIn(i18n.t("ui.scr_fleet"), i18n.t("cfg.h.screens.mode"), lang)
+
+
+class TheCommandLine(unittest.TestCase):
+    URL = ("--url", "http://127.0.0.1:1", "--timeout", "1")
+
+    def test_a_format_csv_that_the_command_cannot_write_is_a_wrong_use(self):
+        for command in ("status", "alerts", "score", "live"):
+            code, out, err = base.run(command, "--format", "csv", *self.URL, "--lang", "en")
+            self.assertEqual(code, 1, command)
+            self.assertEqual(out, "", command)
+            self.assertIn("csv", err, command)
+            self.assertIn("compare", err, command)
+
+    def test_the_message_comes_in_the_language_asked(self):
+        for lang in i18n.LANGS:
+            code, _out, err = base.run("status", "--format", "csv", *self.URL, "--lang", lang)
+            self.assertEqual(code, 1, lang)
+            self.assertEqual(err.split("\n")[0], i18n.tl(lang, "cli.csv_only_compare", command="status"), lang)
+
+    def test_compare_still_takes_csv(self):
+        code, _out, err = base.run("compare", "--format", "csv", *self.URL, "--lang", "en")
+        self.assertNotEqual(code, 1, err)      # the monitor is not there: it is a failure of the connection (2), not a wrong use
+
+    def test_monitor_is_a_command_of_the_parser_and_of_the_four_scripts_of_completion(self):
+        action = next(a for a in monitor_cli.build_parser()._actions if a.dest == "command")
+        self.assertIn("monitor", action.choices)
+        for shell in completions.SHELLS:
+            text = completions.script(shell, monitor_cli.build_parser(), monitor_cli.WORDS_BY_COMMAND)
+            self.assertRegex(text, r"(?<![\w-])monitor(?![\w-])", shell)
+        for lang in i18n.LANGS:
+            self.assertIn("monitor [N]", i18n.tl(lang, "cli.help_command"), lang)
+
+    def test_monitor_n_still_means_watch_status_even_after_an_option(self):
+        self.assertEqual(monitor_cli.monitor_words(["monitor", "30", "--json"]), ["watch", "status", "--interval", "30", "--json"])
+        self.assertEqual(monitor_cli.monitor_words(["--lang", "es", "monitor", "10"]), ["--lang", "es", "watch", "status", "--interval", "10"])
+        self.assertEqual(monitor_cli.monitor_words(["--json", "monitor"]), ["--json", "watch", "status"])
+        self.assertEqual(monitor_cli.monitor_words(["status", "--repo", "monitor"]), ["status", "--repo", "monitor"])
+        self.assertEqual(monitor_cli.monitor_words(["--repo", "monitor", "status"]), ["--repo", "monitor", "status"])
+
+    def test_the_words_of_argparse_come_in_the_language_asked(self):
+        english = ("usage:", "positional arguments", "options:", "show this help message and exit", "invalid choice")
+        for lang in i18n.LANGS:
+            code, out, _err = base.run("--help", "--lang", lang)
+            self.assertEqual(code, 0, lang)
+            self.assertIn(i18n.tl(lang, "cli.argparse_usage"), out, lang)
+            self.assertIn(i18n.tl(lang, "cli.argparse_help"), out, lang)
+            self.assertIn(i18n.tl(lang, "cli.argparse_options"), out, lang)
+            self.assertIn("monitor", out.split("\n\n")[0], lang)      # the line of usage lists every command, `monitor` too
+            code, _out, err = base.run("bogus-command", "--lang", lang)
+            self.assertEqual(code, 1, lang)
+            self.assertIn(i18n.tl(lang, "cli.argparse_error"), err, lang)
+            if lang != "en":
+                ours = {i18n.tl(lang, key) + suffix for key in ("cli.argparse_usage", "cli.argparse_positional", "cli.argparse_options") for suffix in ("", ":", " :")}
+                for word in english:
+                    if word not in ours:      # a word that the language shares with English ("options" in French) is not a leftover
+                        self.assertNotIn(word, out + err, (lang, word))
 
 
 if __name__ == "__main__":

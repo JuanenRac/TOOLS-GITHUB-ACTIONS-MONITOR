@@ -1353,7 +1353,7 @@
  "cli.help_assistant": "ai-hook: the default assistant tool (default)",
  "cli.help_baseline": "compare: what to compare against (previous or year_ago)",
  "cli.help_ca_file": "HTTPS: trust this certificate authority (a PEM file), for a monitor with a certificate of your own",
- "cli.help_command": "status, accounts, alerts, live, doctor, health (or check), score, team, compare, ai-hook, credential, lessons, briefs, docs (list | show NAME), screens, api, install-skill, gh-token, backup (create | verify | restore | status | list), proposals (list | show | approve | reject | execute), update, toolbox, watch, completions, kiosk, metrics",
+ "cli.help_command": "status, accounts, alerts, live, doctor, health (or check), score, team, compare, ai-hook, credential, lessons, briefs, docs (list | show NAME), screens, api, install-skill, gh-token, backup (create | verify | restore | status | list), proposals (list | show | approve | reject | execute), update, toolbox, watch, monitor [N], completions, kiosk, metrics",
  "cli.help_compare": "score: also compare with the history of the window",
  "cli.help_cursor": "ai-hook: Cursor (best effort)",
  "cli.help_days": "compare: which days count (all, workdays or weekend)",
@@ -5386,5 +5386,16 @@
  "cfg.h.report_export.name": "Name suggested in the Save as window, without the extension. {tab} is the tab and {date} the day. Letters, digits, dot, dash and underscore only.",
  "cfg.h.report_export.paper": "a4 or letter: the paper of the PDF that the monitor writes itself.",
  "cfg.h.report_export.pdf_path": "auto, own or browser. auto: the monitor writes the PDF for the Latin languages. own: the same. browser: the print window of the browser. Japanese and Chinese always use the browser, which has their fonts.",
- "cli.help_if_problem": "metrics: write nothing and exit 0 when there is no red workflow and no alert at --fail-on (error by default) or worse; otherwise write the figures and exit 5 (for cron, which mails any output)"
+ "cli.help_if_problem": "metrics: write nothing and exit 0 when there is no red workflow and no alert at --fail-on (error by default) or worse; otherwise write the figures and exit 5 (for cron, which mails any output)",
+ "cli.argparse_usage": "usage:",
+ "cli.argparse_positional": "positional arguments",
+ "cli.argparse_options": "options",
+ "cli.argparse_help": "show this help message and exit",
+ "cli.argparse_error": "error",
+ "cli.argparse_invalid_choice": "argument {name}: invalid choice: {value} (choose from {choices})",
+ "cli.argparse_required": "the following arguments are required: {names}",
+ "cli.argparse_unrecognized": "unrecognized arguments: {values}",
+ "cli.argparse_expected": "argument {name}: expected one argument",
+ "cli.argparse_invalid_value": "argument {name}: invalid {kind} value: {value}",
+ "cli.csv_only_compare": "--format csv only works with the compare command, not with {command}; use text, table, plain, json or ndjson"
 }
