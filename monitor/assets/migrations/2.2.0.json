@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.2.0",
  "previous": "2.1.8",
- "digest": "fc254d907ddcc377c3b962df1222ae5da689ce678d4f76319413524da442f349",
+ "digest": "31d81581d04833879bcc2f452af33abc4026256601fa33d92167f94861e8490c",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -145,6 +145,222 @@
     "key": "ops.verify_release.fetch",
     "kind": "bool",
     "default": false
+   },
+   {
+    "key": "plugins.alert_title_max",
+    "kind": "int",
+    "bounds": [
+     40,
+     400
+    ],
+    "default": 120
+   },
+   {
+    "key": "plugins.breaker.failures",
+    "kind": "int",
+    "bounds": [
+     1,
+     50
+    ],
+    "default": 3
+   },
+   {
+    "key": "plugins.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "plugins.entry_points",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "plugins.official.discussions.days",
+    "kind": "int",
+    "bounds": [
+     1,
+     365
+    ],
+    "default": 7
+   },
+   {
+    "key": "plugins.official.discussions.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "plugins.official.packages.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "plugins.official.packages.max_versions",
+    "kind": "int",
+    "bounds": [
+     1,
+     10000
+    ],
+    "default": 50
+   },
+   {
+    "key": "plugins.official.packages.types",
+    "kind": "names",
+    "bounds": {
+     "re": "^(container|npm)\\Z"
+    },
+    "default": [
+     "container"
+    ]
+   },
+   {
+    "key": "plugins.official_timeout_s",
+    "kind": "int",
+    "bounds": [
+     10,
+     3600
+    ],
+    "default": 300
+   },
+   {
+    "key": "plugins.reverify_on_start",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "plugins.third_party.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "plugins.worker.max_output_kb",
+    "kind": "int",
+    "bounds": [
+     16,
+     4096
+    ],
+    "default": 256
+   },
+   {
+    "key": "plugins.worker.memory_mb",
+    "kind": "int",
+    "bounds": [
+     64,
+     4096
+    ],
+    "default": 256
+   },
+   {
+    "key": "plugins.worker.platforms_ok",
+    "kind": "names",
+    "bounds": {
+     "re": "^(linux|windows|darwin)\\Z"
+    },
+    "default": [
+     "linux",
+     "windows",
+     "darwin"
+    ]
+   },
+   {
+    "key": "plugins.worker.timeout_s",
+    "kind": "int",
+    "bounds": [
+     1,
+     300
+    ],
+    "default": 20
+   },
+   {
+    "key": "secrets.backend",
+    "kind": "enum",
+    "bounds": [
+     "local",
+     "vault",
+     "sops",
+     "bitwarden",
+     "aws",
+     "azure",
+     "gcp"
+    ],
+    "default": "local"
+   },
+   {
+    "key": "secrets.bitwarden.secret_id",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9-]{0,100}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "secrets.cloud.ref",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9_./:@=+-]{0,300}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "secrets.reload_on_rotate",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "secrets.reload_seconds",
+    "kind": "int",
+    "bounds": [
+     60,
+     86400
+    ],
+    "default": 900
+   },
+   {
+    "key": "secrets.sops.file",
+    "kind": "text",
+    "bounds": {
+     "re": "^[^\\x00-\\x1f]{0,260}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "secrets.sops.key",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9_.-]{1,100}\\Z"
+    },
+    "default": "token"
+   },
+   {
+    "key": "secrets.vault.addr",
+    "kind": "text",
+    "bounds": {
+     "re": "^(https?://[^\\s]{1,200})?\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "secrets.vault.key",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9_.-]{1,100}\\Z"
+    },
+    "default": "token"
+   },
+   {
+    "key": "secrets.vault.path",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9_./-]{0,200}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "secrets.vault.token_env",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z_][A-Za-z0-9_]{0,63}\\Z"
+    },
+    "default": "VAULT_TOKEN"
    },
    {
     "key": "updates.notify_window",
