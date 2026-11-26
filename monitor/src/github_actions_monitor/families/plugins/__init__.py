@@ -8,6 +8,7 @@ import re
 from urllib.parse import urlsplit
 
 from github_actions_monitor.families.declare import Command, Egress, Family, Option, Route, Setting
+from github_actions_monitor.security import envguard
 
 
 def _api():
@@ -68,13 +69,19 @@ def _text(pattern):
     return re.compile(pattern)
 
 
+def _env_name():
+    """The name of a variable of the person: never one of the system or a secret of the monitor (security/envguard.py); empty means none."""
+    barred = "|".join(re.escape(name) for name in envguard.SYSTEM_NAMES + envguard.SECRET_NAMES)
+    return re.compile(rf"^(?!(?:{barred})\Z)(?:[A-Z_][A-Z0-9_]{{0,63}})?\Z")
+
+
 FAMILY = Family(
     "plugins",
     defaults={"plugins": {"enabled": False, "official": {"discussions": {"enabled": False, "days": 7}, "packages": {"enabled": False, "max_versions": 50, "types": ["container"]}},
                           "third_party": {"enabled": False}, "worker": {"timeout_s": 20, "max_output_kb": 256, "memory_mb": 256, "platforms_ok": ["linux", "windows", "darwin"]},
                           "official_timeout_s": 300, "alert_title_max": 120, "breaker": {"failures": 3}, "reverify_on_start": True, "entry_points": False},
-              "secrets": {"backend": "local", "reload_on_rotate": True, "reload_seconds": 900, "vault": {"addr": "", "path": "", "key": "token", "token_env": "VAULT_TOKEN"},
-                          "sops": {"file": "", "key": "token"}, "bitwarden": {"secret_id": ""}, "cloud": {"ref": ""}}},
+              "secrets": {"backend": "local", "reload_on_rotate": True, "reload_seconds": 900, "vault": {"addr": "", "path": "", "field": "token", "token_env": "VAULT_TOKEN"},
+                          "sops": {"file": "", "field": "token"}, "bitwarden": {"item": ""}, "cloud": {"ref": ""}}},
     settings=(_p("enabled", "bool", secure=True), _p("official.discussions.enabled", "bool"), _p("official.discussions.days", "int", (1, 365)), _p("official.packages.enabled", "bool"),
               _p("official.packages.max_versions", "int", (1, 10000)), _p("official.packages.types", "names", _text(r"^(container|npm)\Z")), _p("third_party.enabled", "bool", secure=True),
               _p("worker.timeout_s", "int", (1, 300), secure=True, unit="s"), _p("worker.max_output_kb", "int", (16, 4096), secure=True), _p("worker.memory_mb", "int", (64, 4096), secure=True),
@@ -82,9 +89,9 @@ FAMILY = Family(
               _p("breaker.failures", "int", (1, 50)), _p("reverify_on_start", "bool", secure=True), _p("entry_points", "bool", secure=True),
               _s("backend", "enum", ("local", "vault", "sops", "bitwarden", "aws", "azure", "gcp")), _s("reload_on_rotate", "bool"), _s("reload_seconds", "int", (60, 86400), unit="s"),
               _s("vault.addr", "text", _text(r"^(https?://[^\s]{1,200})?\Z")), _s("vault.path", "text", _text(r"^[A-Za-z0-9_./-]{0,200}\Z")),
-              _s("vault.key", "text", _text(r"^[A-Za-z0-9_.-]{1,100}\Z")), _s("vault.token_env", "text", _text(r"^[A-Za-z_][A-Za-z0-9_]{0,63}\Z")),
-              _s("sops.file", "text", _text(r"^[^\x00-\x1f]{0,260}\Z")), _s("sops.key", "text", _text(r"^[A-Za-z0-9_.-]{1,100}\Z")),
-              _s("bitwarden.secret_id", "text", _text(r"^[A-Za-z0-9-]{0,100}\Z")), _s("cloud.ref", "text", _text(r"^[A-Za-z0-9_./:@=+-]{0,300}\Z"))),
+              _s("vault.field", "text", _text(r"^[A-Za-z0-9_.-]{1,100}\Z")), _s("vault.token_env", "text", _env_name()),
+              _s("sops.file", "text", _text(r"^[^\x00-\x1f]{0,260}\Z")), _s("sops.field", "text", _text(r"^[A-Za-z0-9_.-]{1,100}\Z")),
+              _s("bitwarden.item", "text", _text(r"^[A-Za-z0-9-]{0,100}\Z")), _s("cloud.ref", "text", _text(r"^[A-Za-z0-9_./:@=+-]{0,300}\Z"))),
     settings_tabs=(("plugins", "outputs"),),
     routes=(
         Route("GET", "/api/plugins/catalog", _catalog, "the plugins that exist here: permissions, key, fingerprint, state and what is isolated", role="admin"),

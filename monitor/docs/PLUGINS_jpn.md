@@ -69,4 +69,4 @@ python bin/monitor_cli.py plugin uninstall --name my-plugin
 
 ## 別のプログラムから GitHub トークンを読む
 
-`secrets.backend` はトークンをモニターに保存せずに読み取ります（`github_token.enabled` がオンであること）。読み取り専用です。`vault`（HTTP、`secrets.vault.addr`、`path`、`key`、Vault トークンは `token_env` の環境変数。https、http はこの端末のみ）、`sops`（`secrets.sops.file`、`key`。信頼できる端末のみ）、`bitwarden`（`bws`、`secrets.bitwarden.secret_id`）、`aws`・`azure`・`gcp`（各 CLI、`secrets.cloud.ref`）。`secrets.reload_on_rotate` がオンなら `secrets.reload_seconds` ごとに読み直します。疑似サーバーと開発モードの Vault で試験し、実際のクラウドアカウントは未確認です。
+`secrets.backend` はトークンをモニターに保存せずに読み取ります（`github_token.enabled` がオンであること）。読み取り専用です。`vault`（HTTP、`secrets.vault.addr`、`path`、`field`、Vault トークンは `token_env` の環境変数。https、http はこの端末のみ）、`sops`（`secrets.sops.file`、`field`。信頼できる端末のみ）、`bitwarden`（`bws`、`secrets.bitwarden.item`）、`aws`・`azure`・`gcp`（各 CLI、`secrets.cloud.ref`）。`secrets.reload_on_rotate` がオンなら `secrets.reload_seconds` ごとに読み直します。疑似サーバーと開発モードの Vault で試験し、実際のクラウドアカウントは未確認です。

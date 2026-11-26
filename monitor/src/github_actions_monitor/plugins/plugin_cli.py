@@ -46,7 +46,10 @@ def init(folder):
     target = Path(folder)
     if target.exists() and any(target.iterdir()):
         return _usage(i18n.t("cli.plugins.not_empty"))
-    shutil.copytree(paths.ROOT.joinpath(*TEMPLATE), target, dirs_exist_ok=True, ignore=shutil.ignore_patterns("__pycache__"))
+    target.mkdir(parents=True, exist_ok=True)
+    for source in sorted(paths.ROOT.joinpath(*TEMPLATE).iterdir()):
+        if source.is_file():      # the code of the template travels as .py.txt: nothing under assets/ is code
+            shutil.copyfile(source, target / source.name.removesuffix(".txt"))
     return {"ok": True, "folder": str(target)}, [i18n.t("cli.plugins.made", folder=str(target))], OK
 
 

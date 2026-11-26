@@ -29,7 +29,6 @@ from github_actions_monitor.security import keyring, secret_backends, secretstor
 from github_actions_monitor.sentinels import alert_center  # noqa: E402
 
 SEED = bytes.fromhex("9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60")      # the first test vector of RFC 8032: a key made for tests, known to everybody
-TEMPLATE = HERE / "assets" / "plugin_template"
 
 
 def _sign_with_test_seed(data):
@@ -212,10 +211,11 @@ class Packages(Temp):
 
 class Authoring(Temp):
     def test_the_template_is_valid_and_passes_its_own_test(self):
-        report = packages.validate(TEMPLATE)
-        self.assertTrue(report["ok"], report)
+        from github_actions_monitor.plugins import plugin_cli
         work = self.base / "template"
-        shutil.copytree(TEMPLATE, work, ignore=shutil.ignore_patterns("__pycache__"))
+        self.assertEqual(plugin_cli.init(work)[2], plugin_cli.OK)
+        report = packages.validate(work)
+        self.assertTrue(report["ok"], report)
         done = subprocess.run([sys.executable, "-m", "unittest", "test_plugin"], cwd=work, capture_output=True, text=True, timeout=120)
         self.assertEqual(done.returncode, 0, done.stderr)
 
@@ -355,7 +355,7 @@ class SecretBackends(unittest.TestCase):
         return mock.Mock(open=open_)
 
     def test_vault_kv2_and_kv1_over_https_or_loopback_only(self):
-        config = {"secrets": {"backend": "vault", "vault": {"addr": "http://127.0.0.1:8200", "path": "secret/data/monitor", "key": "token", "token_env": "T"}}}
+        config = {"secrets": {"backend": "vault", "vault": {"addr": "http://127.0.0.1:8200", "path": "secret/data/monitor", "field": "token", "token_env": "T"}}}
         seen = []
         for body in ({"data": {"data": {"token": "abc"}}}, {"data": {"token": "abc"}}):
             self.assertEqual(secret_backends.read(config, environ={"T": "root"}, opener=self.opener(body, seen)), "abc")
@@ -372,7 +372,7 @@ class SecretBackends(unittest.TestCase):
         def runner(command):
             seen.append(command)
             return mock.Mock(returncode=0, stdout=json.dumps({"value": "v"}) if command[0] == "bws" else "v\n")
-        for backend, section in (("sops", {"sops": {"file": "s.enc.yaml", "key": "token"}}), ("bitwarden", {"bitwarden": {"secret_id": "abc-1"}}), ("aws", {"cloud": {"ref": "my/secret"}}),
+        for backend, section in (("sops", {"sops": {"file": "s.enc.yaml", "field": "token"}}), ("bitwarden", {"bitwarden": {"item": "abc-1"}}), ("aws", {"cloud": {"ref": "my/secret"}}),
                                  ("azure", {"cloud": {"ref": "https://v.vault.azure.net/secrets/x"}}), ("gcp", {"cloud": {"ref": "x"}})):
             self.assertEqual(secret_backends.read({"secrets": dict(section, backend=backend)}, runner=runner), "v", backend)
         self.assertEqual([c[0] for c in seen], ["sops", "bws", "aws", "az", "gcloud"])
@@ -397,12 +397,12 @@ class SecretBackends(unittest.TestCase):
             self.assertEqual(secretstore.gh_kwargs()["env"]["GH_TOKEN"], values[1], "a backend that does not answer keeps the token read before")
 
 
-@unittest.skipUnless(os.environ.get("MONITOR_VAULT_LAB_ADDR"), "needs a Vault in development mode (the secrets lab workflow)")
+@unittest.skipUnless(os.environ.get("MONITOR_VAULT_LAB_ADDR"), "runs only in the workflows: it needs a Vault in development mode")
 class VaultLab(unittest.TestCase):
     def test_a_real_vault_in_development_mode_and_a_rotation(self):
         import urllib.request
         address, root = os.environ["MONITOR_VAULT_LAB_ADDR"], os.environ["MONITOR_VAULT_LAB_ROOT"]
-        config = {"secrets": {"backend": "vault", "vault": {"addr": address, "path": "secret/data/monitor", "key": "token", "token_env": "MONITOR_VAULT_LAB_ROOT"}}}
+        config = {"secrets": {"backend": "vault", "vault": {"addr": address, "path": "secret/data/monitor", "field": "token", "token_env": "MONITOR_VAULT_LAB_ROOT"}}}
         for value in ("first-value", "second-value"):
             request = urllib.request.Request(address + "/v1/secret/data/monitor", data=json.dumps({"data": {"token": value}}).encode(), headers={"X-Vault-Token": root}, method="POST")
             urllib.request.urlopen(request, timeout=20).close()
