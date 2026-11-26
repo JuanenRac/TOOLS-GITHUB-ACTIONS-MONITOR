@@ -1,0 +1,5 @@
+/* Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+   GPL-3.0-or-later - see LICENSE */
+.extci-log{max-height:16em;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.extci-log:empty{display:none}
+#extci-test input{max-width:100%}

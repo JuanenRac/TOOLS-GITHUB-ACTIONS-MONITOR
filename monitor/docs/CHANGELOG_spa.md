@@ -11,6 +11,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Añadido
 
+- Fuentes de CI externas, solo lectura y apagadas de fábrica: Buildbot, GitLab CI, Jenkins y Azure Pipelines (los dos últimos experimentales) para repositorios espejados. Sus fallos se cuentan, notifican y silencian como los de Actions; un servicio que no responde aparece degradado, nunca en rojo. Lecturas seguras, final de logs opcional, acotado y depurado, Probar conexión y `external-ci` en la consola.
 - **Las releases van firmadas y el actualizador comprueba la firma**: desde la versión 2.2.0 una release lleva una firma Ed25519 separada de SHA256SUMS y de cada fichero, hecha en GitHub por el workflow de release. El actualizador (página, ventana, consola y línea de órdenes) rechaza una release desde la 2.2.0 sin firma o con firma incorrecta, y un zip firmado ofrecido con otra versión, antes de descomprimir nada; volver a una versión anterior sin firma está permitido con un aviso.
 - **Dos listas de materiales y atestaciones en cada release**: documentos CycloneDX y SPDX enumeran cada fichero del zip y las librerías opcionales, y el workflow de release atestigua la procedencia de los ficheros, la lista de materiales y el acta de la puerta de calidad.
 - **La puerta de calidad puede ejecutarse en GitHub**: un workflow ejecuta la puerta completa en un runner de Windows, comprueba que una segunda compilación da los mismos bytes y guarda un acta de lo ejecutado; ejecutarla en tu equipo sigue siendo posible y opcional.

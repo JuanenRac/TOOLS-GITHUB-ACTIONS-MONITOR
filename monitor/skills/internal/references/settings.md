@@ -278,6 +278,24 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `exclude` | `[]` | general | Repositories to skip |
 | `expected_red.enabled` | `false` | sentinel | Expected red |
 | `expected_red.max_days` | `30` | sentinel | Most days of an expected red |
+| `external_ci.alert.enabled` | `true` | extci | Alert on a failed external build |
+| `external_ci.alert.level` | `"error"` | extci | Level of that alert |
+| `external_ci.allow_private_targets` (secure) | `false` | extci | Allow private addresses |
+| `external_ci.azure.enabled` (secure) | `false` | extci | Azure Pipelines sources (experimental) |
+| `external_ci.breaker.failures` | `3` | extci | Failures before waiting longer |
+| `external_ci.buildbot.max_builders` | `50` | extci | Buildbot: builders at most |
+| `external_ci.enabled` (secure) | `false` | extci | Read external CI sources |
+| `external_ci.experimental` | `true` | extci | Show the experimental label |
+| `external_ci.gitlab.max_pipelines` | `30` | extci | GitLab: pipelines at most |
+| `external_ci.jenkins.enabled` (secure) | `false` | extci | Jenkins sources (experimental) |
+| `external_ci.logs.enabled` (secure) | `false` | extci | Fetch the end of failed logs |
+| `external_ci.logs.keep_hours` | `72` | extci | Hours a log is kept |
+| `external_ci.logs.max_kb` | `64` | extci | Log tail size (KB) |
+| `external_ci.logs.tail_lines` | `200` | extci | Log tail lines |
+| `external_ci.max_bytes` | `2000000` | extci | Largest answer (bytes) |
+| `external_ci.refresh_seconds` | `600` | extci | Seconds between reads |
+| `external_ci.sources` (secure) | `[]` | extci | Sources |
+| `external_ci.timeout_s` | `15` | extci | Time limit of a read (seconds) |
 | `extra_reader.any_folder` (secure) | `false` | quota | Accept the token file from any folder |
 | `extra_reader.enabled` (secure) | `false` | quota | Read also with a second account |
 | `extra_reader.file` (secure) | `""` | quota | File with the token of the second account |
