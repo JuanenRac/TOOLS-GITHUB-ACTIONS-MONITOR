@@ -2068,7 +2068,7 @@ def posture_alerts():
         config = toolconfig.raw_config()
         if ((config or {}).get("posture") or {}).get("enabled") is not True:
             return []
-        from github_actions_monitor.families.posture import engine
+        from github_actions_monitor.families.posture import posture_engine as engine
         return engine.alerts(config, CHILD["account"] or "")
     except Exception as error:   # noqa: BLE001 - the list of alerts must still answer
         degraded.note("posture.alerts", error)

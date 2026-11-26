@@ -13,8 +13,8 @@ sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
 from github_actions_monitor import i18n  # noqa: E402
-from github_actions_monitor.families.posture import catalogue, checks, engine  # noqa: E402
-from github_actions_monitor.families.posture.checks import Unread  # noqa: E402
+from github_actions_monitor.families.posture import posture_catalogue as catalogue, posture_checks as checks, posture_engine as engine  # noqa: E402
+from github_actions_monitor.families.posture.posture_checks import Unread  # noqa: E402
 
 NOW = 1_800_000_000.0
 OLD = "2020-01-01T00:00:00Z"

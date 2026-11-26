@@ -1,6 +1,6 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
-"""Posture of repositories and organizations, read only (engine.py does the work, catalogue.py lists the checks).
+"""Posture of repositories and organizations, read only (posture_engine.py does the work, posture_catalogue.py lists the checks).
 
 Everything this part adds to the monitor is declared in FAMILY (families/declare.py says what each field is). Its texts go in i18n/<language>.json and its page in page.js and page.css,
 all inside this folder."""
@@ -15,7 +15,7 @@ WINDOW_RE = re.compile(r"^(?:[1-7]-[1-7] (?:[01]\d|2[0-4])-(?:[01]\d|2[0-4]))?\Z
 
 
 def _engine():
-    from github_actions_monitor.families.posture import engine
+    from github_actions_monitor.families.posture import posture_engine as engine
     return engine
 
 
@@ -34,7 +34,7 @@ def _cli(ctx):
     engine = _engine()
     config = toolconfig.raw_config()
     if ctx["action"] == "matrix":
-        from github_actions_monitor.families.posture import catalogue
+        from github_actions_monitor.families.posture import posture_catalogue as catalogue
         rows = catalogue.matrix()
         return {"ok": True, "permissions": rows}, [f"{r['permission']}: {', '.join(r['checks'])}" for r in rows], 0
     if ctx["action"] == "check":      # one read of one repository, now

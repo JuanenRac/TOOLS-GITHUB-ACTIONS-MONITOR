@@ -9,8 +9,8 @@ import threading
 import time
 
 from github_actions_monitor import families, i18n
-from github_actions_monitor.families.posture import catalogue
-from github_actions_monitor.families.posture.checks import ORG_GROUPS, REPO_GROUPS, Unread
+from github_actions_monitor.families.posture import posture_catalogue as catalogue
+from github_actions_monitor.families.posture.posture_checks import ORG_GROUPS, REPO_GROUPS, Unread
 from github_actions_monitor.storage import state_io
 from github_actions_monitor.util import paths
 
