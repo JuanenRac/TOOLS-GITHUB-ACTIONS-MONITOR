@@ -13,7 +13,9 @@
     box.hidden=true;remember(shown);document.removeEventListener("keydown",keys,true);
     if(back&&back.focus&&document.contains(back))try{back.focus()}catch(e){}
   }
+  const busy=()=>[...document.querySelectorAll(".dlg")].some(d=>d!==box&&!d.hidden);      /* a dialog of the page (a question, the guide, About) goes first */
   function keys(e){
+    if(busy())return;
     if(e.key==="Escape"){e.preventDefault();e.stopImmediatePropagation();close();return}
     if(e.key!=="Tab")return;
     const all=[...box.querySelectorAll("button,a[href]")];if(!all.length)return;
@@ -47,6 +49,7 @@
   }
   async function look(){
     if(quiet()||(box&&!box.hidden))return;
+    if(busy()){setTimeout(look,60000);return}
     try{
       const j=await (await fetch("/api/supply/update-notice?lang="+encodeURIComponent(LANG),{cache:"no-store"})).json();
       if(j&&j.show&&j.version!==later())open(j);

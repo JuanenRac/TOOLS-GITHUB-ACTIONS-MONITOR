@@ -46,6 +46,10 @@ class Notice(unittest.TestCase):
                     self.assertEqual(ask(bad)[0], 400, bad)
             self.assertEqual(updatecheck._load(Path(folder) / "update_check.json")["dismissed"], "9.0.0")
 
+    def test_the_demo_shows_no_window(self):
+        with mock.patch.dict(actions_monitor.DEMO, {"on": True}):
+            self.assertEqual(notice.state(families.Request("GET", "/api/supply/update-notice", {}, {}, "", {})), {"show": False})
+
     def test_the_page_script_is_silent_on_wall_screens_and_shows_the_text_as_text(self):
         script = (families.FOLDER / "supply" / "page.js").read_text(encoding="utf-8")
         self.assertIn('classList.contains("kiosk")', script)

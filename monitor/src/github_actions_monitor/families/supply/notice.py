@@ -20,6 +20,8 @@ def answer(info, config, language):
 
 def state(request):
     from github_actions_monitor.app import actions_monitor
+    if actions_monitor.DEMO["on"]:      # the demo invents a newer version for the picture of the badge: no window covers the invented page
+        return {"show": False}
     return answer(actions_monitor.update_info(read=False), request.config, request.query.get("lang", "en"))
 
 
