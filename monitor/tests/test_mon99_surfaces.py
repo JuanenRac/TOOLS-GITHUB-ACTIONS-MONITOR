@@ -16,10 +16,11 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(HERE / "src"))
+from github_actions_monitor import families, i18n  # noqa: E402
 
 PAGE = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
 LANGS = ("en", "es", "de", "fr", "it", "ja", "zh", "pt")
-LOCALES = {lang: json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8")) for lang in LANGS}
+LOCALES = {lang: i18n.catalogue(lang) for lang in LANGS}      # the texts of the monitor and of the parts (families/<name>/i18n)
 HELPDOCS = (HERE / "src" / "github_actions_monitor" / "ui" / "helpdocs.py").read_text(encoding="utf-8")
 SIGNALS = (HERE / "src" / "github_actions_monitor" / "data_pipeline" / "signals.py").read_text(encoding="utf-8")
 BRIEFS = (HERE / "src" / "github_actions_monitor" / "data_pipeline" / "briefs.py").read_text(encoding="utf-8")
@@ -185,6 +186,8 @@ def settings_checks():
     def in_example(key):
         if key in settings_api.STATUS_KEYS:      # computed and read-only: it is shown, never written in a file
             return True
+        if key in {row.key for row in families.settings()}:      # the default of a setting of a part lives with the part (families/)
+            return True
         node = example
         for part in key.split("."):
             if not isinstance(node, dict) or part not in node:
@@ -222,7 +225,7 @@ def commands_checks():
     skill = read(HERE / "skills" / "external" / "references" / "cli.md")
     return {
         "handler": lambda c: c in monitor_cli.HANDLERS or c == "update",      # `update` is read before the others and parses its own options
-        "help_x8": lambda c: all(re.search(rf"\b{re.escape(c)}\b", LOCALES[lang].get("cli.help_command", "")) for lang in LANGS),
+        "help_x8": lambda c: c in {x.name for x in families.commands()} or all(re.search(rf"\b{re.escape(c)}\b", LOCALES[lang].get("cli.help_command", "")) for lang in LANGS),      # a part brings the help of its command
         "doc_x8": lambda c: all(c in d for d in docs),
         "skill_external": lambda c: c in skill,
     }

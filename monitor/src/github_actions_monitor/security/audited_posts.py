@@ -4,6 +4,7 @@
 
 Every route that accepts a POST is in exactly one of the two tables: AUDITED (a line is written for every request that reaches the handler, with the result and the status, and never the body) or EXEMPT (with
 the reason). A test reads the handler and fails when a route is in neither, so a new action cannot be added without deciding whether it is recorded. Standard library only."""
+from github_actions_monitor import families
 
 #: route -> name of the action in the log (security/audit_log.py)
 AUDITED = {
@@ -64,6 +65,10 @@ EXEMPT = {
     "/api/gh-action/plan": "only prepares what would be sent; nothing is sent until the confirmation, which is recorded",
     "/api/act/plan": "only prepares what would run; nothing runs until the confirmation, which is recorded",
 }
+
+
+AUDITED.update(families.audited())      # the routes of the parts that plug in by themselves say it where they are declared (families/)
+EXEMPT.update(families.exempt())
 
 
 def action_for(path):

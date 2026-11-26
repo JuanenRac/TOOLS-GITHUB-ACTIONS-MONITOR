@@ -22,6 +22,7 @@ import os
 import threading
 from pathlib import Path
 
+from github_actions_monitor import families
 from github_actions_monitor.util.paths import LOCALES
 LANGS = ("en", "es", "de", "fr", "it", "ja", "zh", "pt")
 NATIVE_NAMES = {"en": "English", "es": "Español", "de": "Deutsch", "fr": "Français", "it": "Italiano", "ja": "日本語", "zh": "中文", "pt": "Português"}
@@ -82,7 +83,16 @@ def _load(lang):
                 data = json.loads((LOCALES / f"{lang}.json").read_text(encoding="utf-8"))
             except (OSError, ValueError):
                 data = {}
-            _catalogues[lang] = {k: v for k, v in data.items() if isinstance(k, str) and not k.startswith("_") and isinstance(v, str)}
+            texts = {k: v for k, v in data.items() if isinstance(k, str) and not k.startswith("_") and isinstance(v, str)}
+            for path in families.catalogue_files(lang):      # the texts of the parts (families/<name>/i18n): they add keys, they never replace one
+                try:
+                    extra = json.loads(path.read_text(encoding="utf-8"))
+                except (OSError, ValueError):
+                    continue
+                for key, value in extra.items():
+                    if not key.startswith("_") and isinstance(value, str):
+                        texts.setdefault(key, value)
+            _catalogues[lang] = texts
         return _catalogues[lang]
 
 

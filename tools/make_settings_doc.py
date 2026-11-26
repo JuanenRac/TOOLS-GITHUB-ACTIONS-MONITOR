@@ -18,6 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 MON = ROOT / "monitor"
 sys.path.insert(0, str(MON / "src"))
+from github_actions_monitor import i18n  # noqa: E402
 from github_actions_monitor.app import settings_api as sa  # noqa: E402
 
 BEGIN, END = "<!-- settings:begin -->", "<!-- settings:end -->"
@@ -96,7 +97,7 @@ ECO_NEW = {'en': 'Which repositories are watched: the example catalogue of ecosy
 
 
 def locale(lang):
-    return json.loads((MON / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+    return i18n.catalogue(lang)      # the texts of the page and the ones of the parts (families/<name>/i18n)
 
 
 def render(lang):

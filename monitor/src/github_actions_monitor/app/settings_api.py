@@ -28,7 +28,7 @@ import threading
 import time
 from pathlib import Path
 
-from github_actions_monitor import i18n
+from github_actions_monitor import families, i18n
 from github_actions_monitor.data_pipeline import alertflow
 from github_actions_monitor.integrations import soundlib
 from github_actions_monitor.app import screens, surface
@@ -994,8 +994,11 @@ _f("quota", "savings", "savings.feeds.enabled", "bool", restart=False, secure=Tr
 _f("quota", "savings", "savings.feeds.method", "enum", ("atom", "git", "auto"), restart=False)
 _f("quota", "savings", "savings.feeds.max_age_minutes", "int", (15, 10080), restart=False)
 # @@MORE_SETTINGS@@
+for _row in families.settings():      # the settings of the parts that plug in by themselves (families/)
+    _f(_row.tab, _row.block, _row.key, _row.kind, _row.bounds, restart=_row.restart, secure=_row.secure, unit=_row.unit, label=_row.label, help=_row.help)
 
 TAB_ORDER = ("basic", "general", "polling", "cache", "quota", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook", "notify", "analytics", "lint", "advanced", "console")
+TAB_ORDER = families.tab_order(TAB_ORDER)
 ROWS.sort(key=lambda row: TAB_ORDER.index(row[0]))     # stable: inside a tab the order of writing is kept
 SCHEMA = [(tab, key, kind, bounds, restart) for tab, _block, key, kind, bounds, restart in ROWS]
 FIELDS = {row[1]: row for row in SCHEMA}
@@ -1098,6 +1101,8 @@ def check_value(path, value):
         return True, text
     if kind == "names":
         pattern = BYREPO_BRANCH_RE if path == "ci.branches_by_repo" else WS_TARGET_RE if path == "webhook.ws_targets" else REDELIVER_HOOK_RE if path == "webhook.redeliver.hooks" else USES_RE if path == "sentinels.supply.ignore_uses" else WORKSPACE_RE if path == "workspaces.list" else WORKDAY_RE if path == "compare.workdays" else FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else RUNNER_LABEL_RE if path in RUNNER_LABEL_KEYS else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path in ("sentinel.hygiene.ruleset_names", "sentinels.delivery.expected_assets") else (PATH_RE if path in PATH_KEYS else (alertflow.SILENCE_RE if path == "alerts.silences" else (alertflow.PATTERN_RE if path == "alerts.service.workflows" else (PAIR_RE if path in PAIR_KEYS else NAME_RE)))))))
+        if isinstance(bounds, re.Pattern):      # a list that brings its own shape
+            pattern = bounds
         if not isinstance(value, list) or len(value) > 200 or not all(isinstance(v, str) and pattern.match(v) for v in value):
             return False, "names"
         if path == "sentinel.hygiene.ruleset_names" and not value:
@@ -1172,7 +1177,7 @@ def check_value_list(value):
 
 
 LITE_KEYS = ("ports.complete", "ports.lite", "github_owner", "language", "repos", "ecosystems", "exclude", "refresh_seconds", "open_browser", "updates.check", "airgapped") + tuple(
-    k for k in FIELDS if k.startswith(("ai_alerts.", "sound.", "display.", "report_export.", "modes.", "central.", "extra_reader.", "github_app.", "network.etag", "network.graphql")))      # the short settings page of the lite product; the connection with an AI tool, the sound and the look are the same in both editions
+    k for k in FIELDS if k.startswith(("ai_alerts.", "sound.", "display.", "report_export.", "modes.", "central.", "extra_reader.", "github_app.", "network.etag", "network.graphql"))) + tuple(row.key for row in families.settings() if row.lite)      # the short settings page of the lite product; the connection with an AI tool, the sound and the look are the same in both editions
 
 
 def validate(changes, lite=False):
@@ -1248,6 +1253,8 @@ def describe(path=CONFIG_FILE, lite=False, remote=False):
                 default = _get(template, key)
                 if default is None and key.startswith("outputs."):
                     default = _get(OUTPUT_DEFAULTS, key[len("outputs."):], False)
+                if default is None:      # a setting of a part that the example file does not carry
+                    default = families.default_of(key)
                 if default is None and key == "repos":
                     default = "all"
                 value = _get(current, key, default)
