@@ -1,0 +1,149 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.2.0",
+ "previous": "2.1.8",
+ "digest": "faa09f5a28ebc9baf816e75b8a56d46cb291bdc030c86cf7bd07e60df0ff68ab",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "external_ci.alert.enabled",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "external_ci.alert.level",
+    "kind": "enum",
+    "bounds": [
+     "error",
+     "warning"
+    ],
+    "default": "error"
+   },
+   {
+    "key": "external_ci.allow_private_targets",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "external_ci.azure.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "external_ci.breaker.failures",
+    "kind": "int",
+    "bounds": [
+     1,
+     20
+    ],
+    "default": 3
+   },
+   {
+    "key": "external_ci.buildbot.max_builders",
+    "kind": "int",
+    "bounds": [
+     1,
+     500
+    ],
+    "default": 50
+   },
+   {
+    "key": "external_ci.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "external_ci.experimental",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "external_ci.gitlab.max_pipelines",
+    "kind": "int",
+    "bounds": [
+     1,
+     200
+    ],
+    "default": 30
+   },
+   {
+    "key": "external_ci.jenkins.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "external_ci.logs.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "external_ci.logs.keep_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     720
+    ],
+    "default": 72
+   },
+   {
+    "key": "external_ci.logs.max_kb",
+    "kind": "int",
+    "bounds": [
+     4,
+     1024
+    ],
+    "default": 64
+   },
+   {
+    "key": "external_ci.logs.tail_lines",
+    "kind": "int",
+    "bounds": [
+     10,
+     5000
+    ],
+    "default": 200
+   },
+   {
+    "key": "external_ci.max_bytes",
+    "kind": "int",
+    "bounds": [
+     10000,
+     50000000
+    ],
+    "default": 2000000
+   },
+   {
+    "key": "external_ci.refresh_seconds",
+    "kind": "int",
+    "bounds": [
+     300,
+     86400
+    ],
+    "default": 600
+   },
+   {
+    "key": "external_ci.sources",
+    "kind": "names",
+    "bounds": {
+     "re": "^(buildbot|gitlab|jenkins|azure)(;[a-z_]{2,12}=[^;\\s,]{1,200}){2,7}\\Z"
+    },
+    "default": []
+   },
+   {
+    "key": "external_ci.timeout_s",
+    "kind": "int",
+    "bounds": [
+     2,
+     120
+    ],
+    "default": 15
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {}
+}
