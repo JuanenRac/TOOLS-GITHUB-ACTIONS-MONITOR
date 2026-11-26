@@ -12,7 +12,7 @@ LINE_RE = re.compile(r"^(buildbot|gitlab|jenkins|azure)(;[a-z_]{2,12}=[^;\s,]{1,
 
 
 def _engine():
-    from github_actions_monitor.integrations.external_ci import engine
+    from github_actions_monitor.integrations.external_ci import extci_engine as engine
     return engine
 
 

@@ -2053,7 +2053,7 @@ def external_ci(call, *args):
         config = toolconfig.raw_config()
         if ((config or {}).get("external_ci") or {}).get("enabled") is not True:
             return []
-        from github_actions_monitor.integrations.external_ci import engine
+        from github_actions_monitor.integrations.external_ci import extci_engine as engine
         return getattr(engine, call)(config, *args)
     except Exception as error:   # noqa: BLE001 - a source of another service never stops a cycle nor the list of alerts
         degraded.note("external_ci." + call, error)

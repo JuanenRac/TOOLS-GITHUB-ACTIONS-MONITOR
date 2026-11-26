@@ -38,4 +38,4 @@ Settings > External CI has **Test connection**: one read, nothing saved (`POST /
 
 ## Not yet verified
 
-All four adapters have been tested against fake servers only (`tools/extci_fake_servers.py`). Jenkins and Azure Pipelines carry the label **experimental** (`external_ci.experimental`) and need `external_ci.jenkins.enabled` / `external_ci.azure.enabled`. To write another adapter: a function `(reader, source, cfg) -> (runs, missing)` in `integrations/external_ci/adapters.py`, reading only through `reader`.
+All four adapters have been tested against fake servers only (`tools/extci_fake_servers.py`). Jenkins and Azure Pipelines carry the label **experimental** (`external_ci.experimental`) and need `external_ci.jenkins.enabled` / `external_ci.azure.enabled`. To write another adapter: a function `(reader, source, cfg) -> (runs, missing)` in `integrations/external_ci/extci_adapters.py`, reading only through `reader`.

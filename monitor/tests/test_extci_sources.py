@@ -18,8 +18,8 @@ sys.path.insert(0, str(HERE / "tools"))
 import _testenv  # noqa: F401,E402
 import extci_fake_servers as fake  # noqa: E402
 from github_actions_monitor import families  # noqa: E402
-from github_actions_monitor.integrations.external_ci import engine  # noqa: E402
-from github_actions_monitor.integrations.external_ci.fetch import Failed, Reader  # noqa: E402
+from github_actions_monitor.integrations.external_ci import extci_engine as engine  # noqa: E402
+from github_actions_monitor.integrations.external_ci.extci_fetch import Failed, Reader  # noqa: E402
 from github_actions_monitor.sentinels import alert_center  # noqa: E402
 
 

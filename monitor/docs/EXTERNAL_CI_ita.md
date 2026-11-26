@@ -38,4 +38,4 @@ In Impostazioni > CI esterna c'è **Prova connessione**: una lettura senza salva
 
 ## Non ancora verificato
 
-I quattro adattatori sono stati provati solo con server fittizi (`tools/extci_fake_servers.py`). Jenkins e Azure Pipelines hanno l'etichetta **sperimentale** (`external_ci.experimental`) e richiedono `external_ci.jenkins.enabled` / `external_ci.azure.enabled`. Per un altro adattatore: una funzione `(reader, source, cfg) -> (runs, missing)` in `integrations/external_ci/adapters.py` che legga solo tramite `reader`.
+I quattro adattatori sono stati provati solo con server fittizi (`tools/extci_fake_servers.py`). Jenkins e Azure Pipelines hanno l'etichetta **sperimentale** (`external_ci.experimental`) e richiedono `external_ci.jenkins.enabled` / `external_ci.azure.enabled`. Per un altro adattatore: una funzione `(reader, source, cfg) -> (runs, missing)` in `integrations/external_ci/extci_adapters.py` che legga solo tramite `reader`.

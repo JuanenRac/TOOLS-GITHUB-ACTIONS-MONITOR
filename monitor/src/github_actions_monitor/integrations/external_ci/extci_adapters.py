@@ -6,7 +6,7 @@ import calendar
 import time
 import urllib.parse
 
-from github_actions_monitor.integrations.external_ci.fetch import Failed
+from github_actions_monitor.integrations.external_ci.extci_fetch import Failed
 
 EXPERIMENTAL = ("jenkins", "azure")      # no real server has been read yet: the label stays until one has
 REQUIRED = {"buildbot": (), "gitlab": ("project",), "jenkins": ("job",), "azure": ("project",)}

@@ -10,8 +10,8 @@ from urllib.parse import urlsplit
 
 from github_actions_monitor import families, i18n
 from github_actions_monitor.data_pipeline import redrule
-from github_actions_monitor.integrations.external_ci import adapters
-from github_actions_monitor.integrations.external_ci.fetch import Failed, Reader
+from github_actions_monitor.integrations.external_ci import extci_adapters as adapters
+from github_actions_monitor.integrations.external_ci.extci_fetch import Failed, Reader
 from github_actions_monitor.security import redactor
 
 CODE_RED, CODE_DEGRADED = "ci.external.red", "ci.external.degraded"

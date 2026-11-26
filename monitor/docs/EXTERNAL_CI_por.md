@@ -38,4 +38,4 @@ Em Definições > CI externa há **Testar ligação**: uma leitura sem guardar n
 
 ## Ainda não verificado
 
-Os quatro adaptadores só foram testados com servidores simulados (`tools/extci_fake_servers.py`). Jenkins e Azure Pipelines têm a etiqueta **experimental** (`external_ci.experimental`) e precisam de `external_ci.jenkins.enabled` / `external_ci.azure.enabled`. Para outro adaptador: uma função `(reader, source, cfg) -> (runs, missing)` em `integrations/external_ci/adapters.py` que leia apenas através de `reader`.
+Os quatro adaptadores só foram testados com servidores simulados (`tools/extci_fake_servers.py`). Jenkins e Azure Pipelines têm a etiqueta **experimental** (`external_ci.experimental`) e precisam de `external_ci.jenkins.enabled` / `external_ci.azure.enabled`. Para outro adaptador: uma função `(reader, source, cfg) -> (runs, missing)` em `integrations/external_ci/extci_adapters.py` que leia apenas através de `reader`.
