@@ -56,6 +56,9 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/analytics` | GET | viewer | history, trends, the numbers behind the charts and, when `productivity.enabled` is on, the ESTIMATE of the time saved (`time_saved`: a task without notes is `no_data`, a percentage that was not timed is `assumed`) |
 | `/api/assistant` | GET | viewer | whether the optional assistant is on (404 while it is off), its three fixed questions, its closed list of read-only tools and its limits (it spends nothing) |
 | `/api/assistant/ask` | POST | viewer | one fixed question to the assistant ({action: explain_alert | summarize_week | why_slow | explain_repo | prioritize, alert?, repo?}); answered by the AI of the monitor from the data it holds, with sources, the size sent and the one daily budget; a viewer may ask; 404 while it is off |
+| `/api/assistant/chat` | POST | viewer | one turn of the free chat with read only tools (ai.chat.enabled); body {message, history}; spends from the budget of the AI; nothing is run |
+| `/api/assistant/extras` | GET | viewer | whether the chat, the repository report and the proposals of the assistant are on, and how many people decide on a proposal |
+| `/api/assistant/repo-report` | GET | viewer | the report of one repository in Markdown and a draft of a triage comment, to copy by hand (ui.copy_report.enabled); ?repo=; no request to GitHub |
 | `/api/audit-log` | GET | maintainer | the log of actions of the account (who changed what, when): the last 200 lines and whether the chain of hashes holds; an administrator, or a maintainer when `audit_log.maintainers_can_read` is on; names only, never values or secrets (Complete only) |
 | `/api/auth` | GET | viewer | who you are in the team mode (`/api/auth/me`: whether the sign-in is on, the mode and whether you are signed in); the complete edition only |
 | `/api/auth/audit` | GET | admin | the audit of the team mode (administrators) |

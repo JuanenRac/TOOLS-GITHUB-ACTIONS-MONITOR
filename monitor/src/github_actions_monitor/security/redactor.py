@@ -52,7 +52,7 @@ def _ipv4(match):
 
 _SECRETS = [
     (re.compile(r"(?s)[-\u2010-\u2015\u2212]{2,80}BEGIN [A-Z ]*PRIVATE KEY(?: BLOCK)?[-\u2010-\u2015\u2212]{2,80}.*?(?:[-\u2010-\u2015\u2212]{2,80}END [A-Z ]*PRIVATE KEY(?: BLOCK)?[-\u2010-\u2015\u2212]{2,80}|$)"), "[pem]"),
-    (re.compile(r"(?i)\b([a-z][a-z0-9+.-]{0,30}://)[^/\s:@]{1,300}:[^\s?#]{1,300}@"), r"\1[credentials]@"),      # user:password@host in an address
+    (re.compile(r"(?i)\b([a-z][a-z0-9+.-]{0,30}://)[^/\s:@]{1,300}:(?!\d{1,5}/)[^\s?#]{1,300}@"), r"\1[credentials]@"),      # user:password@host in an address
     (re.compile(r"(?i)\bhooks\.slack\.com/services/[A-Za-z0-9/_-]+"), "hooks.slack.com/services/[webhook]"),
     (re.compile(r"(?i)\bdiscord(?:app)?\.com/api/webhooks/\d+/[A-Za-z0-9._-]+"), "discord.com/api/webhooks/[webhook]"),
     (re.compile(r"\bbot\d{6,}:[A-Za-z0-9_-]{20,}"), "bot[token]"),
