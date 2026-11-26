@@ -8,6 +8,7 @@ import re
 import sys
 import tempfile
 import threading
+import time
 import unittest
 import urllib.error
 import urllib.request
@@ -257,6 +258,9 @@ class TheServer(unittest.TestCase):
         self.assertEqual(self.call("/api/zz/state?a=1"), (200, {"ok": True, "q": {"a": "1"}}))
         self.assertEqual(self.call("/api/zz/do", b'{"x": 2}'), (201, {"ok": True}))
         self.assertEqual(self.asked[-1].body, {"x": 2})
+        deadline = time.monotonic() + 10      # the line of the log is written after the answer was sent: the client can have it first
+        while actions_monitor.audit_action.call_args is None and time.monotonic() < deadline:
+            time.sleep(0.01)
         self.assertEqual(actions_monitor.audit_action.call_args[0][1], "zz_do")
 
     def test_the_server_refuses_before_the_handler(self):
