@@ -286,6 +286,15 @@ class TheFilesOfABuild(unittest.TestCase):
         self.assertFalse(make_release.drive_refused("D:/runner/temp/release", {"GITHUB_ACTIONS": "true"}))
         self.assertFalse(make_release.drive_refused(r"C:\out", {}))
 
+    def test_every_text_of_the_zip_has_the_same_line_endings_on_every_system(self):
+        import make_release
+        for path in make_release.members():
+            data = path.read_bytes().replace(b"\r\n", b"\n")
+            if b"\0" in data or path.suffix in (".bat", ".cmd", ".png"):
+                continue
+            built = make_release.line_endings_for_zip(path.name, data.replace(b"\n", b"\r\n"))
+            self.assertEqual(built, data, path.name)
+
     def test_signing_with_openssl_and_checking_the_set(self):
         openssl = shutil.which("openssl")
         if not openssl:

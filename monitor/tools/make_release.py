@@ -77,13 +77,14 @@ def lf_for_scripts(data):
     return data.replace(b"\r\n", b"\n") if data.startswith(b"#!") else data
 
 
-TEXT_SUFFIXES = (".py", ".md", ".json", ".txt", ".html", ".sh", ".command", ".yml")      # the text the zip carries with one line ending, whatever machine builds it
+TEXT_SUFFIXES = (".py", ".md", ".json", ".txt", ".html", ".sh", ".command", ".yml", ".yaml", ".js", ".css", ".svg", ".csv", ".toml", ".cfg", ".ini")      # the text the zip carries with one line ending, whatever machine builds it
+TEXT_NAMES = ("LICENSE", "NOTICE", "AUTHORS")      # the text files without a suffix
 CRLF_SUFFIXES = (".bat", ".cmd")      # Windows launchers: CRLF in the zip as in a Windows checkout
 
 
 def line_endings_for_zip(name, data):
     """The bytes of a file as the zip carries them: LF for the text (the blob of git, so the same commit gives the same zip on Windows, Linux and macOS) and CRLF for the Windows launchers."""
-    if name.endswith(TEXT_SUFFIXES) and b"\0" not in data:
+    if (name.endswith(TEXT_SUFFIXES) or name in TEXT_NAMES) and b"\0" not in data:
         return data.replace(b"\r\n", b"\n")
     if name.endswith(CRLF_SUFFIXES):
         return data.replace(b"\r\n", b"\n").replace(b"\n", b"\r\n")
