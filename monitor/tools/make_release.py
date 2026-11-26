@@ -658,6 +658,12 @@ def write_zip(target, entries):
             z.writestr(info, entries[name])
 
 
+def drive_refused(out, env=None):
+    """D: is never written (it is a removable drive on the computer of the person); on a runner of GitHub Actions D: is the ordinary disk of the job."""
+    env = os.environ if env is None else env
+    return str(out).upper().startswith("D:") and env.get("GITHUB_ACTIONS") != "true"
+
+
 def write_release_files(out, version, target, entries):
     """What travels next to the zip: the stand-alone updater, the two bills of materials and SHA256SUMS naming the four (the zip first, as every older updater reads it). Returns [(name, sha256)]."""
     out, digest = Path(out), hashlib.sha256(Path(target).read_bytes()).hexdigest()
@@ -759,7 +765,7 @@ def main():
         suite_line = green_run(args.accept_green_suite, args.commit) if args.accept_green_suite else run_tests()
         print("gate: unit tests:", suite_line)
     out = Path(args.out) if args.out else workspace.signed_dir() / "github_actions_monitor"
-    if str(out).upper().startswith("D:"):
+    if drive_refused(out):
         raise SystemExit("never write on D:")
     entries = {f"github_actions_monitor/{p.relative_to(HERE).as_posix()}": line_endings_for_zip(p.name, lf_for_scripts(p.read_bytes())) for p in members()}
     entries[f"github_actions_monitor/{EXAMPLES_DIR}/{EXAMPLE}"] = template().encode("utf-8")

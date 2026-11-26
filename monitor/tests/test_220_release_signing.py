@@ -280,6 +280,12 @@ class TheFilesOfABuild(unittest.TestCase):
         self.assertIn("EMBEDDED_REGISTRY = json.loads(", loose)
         compile(loose, "monitor_updater.py", "exec")
 
+    def test_the_drive_d_is_refused_except_on_a_runner_of_github(self):
+        import make_release
+        self.assertTrue(make_release.drive_refused(r"d:\out", {}))
+        self.assertFalse(make_release.drive_refused("D:/runner/temp/release", {"GITHUB_ACTIONS": "true"}))
+        self.assertFalse(make_release.drive_refused(r"C:\out", {}))
+
     def test_signing_with_openssl_and_checking_the_set(self):
         openssl = shutil.which("openssl")
         if not openssl:
