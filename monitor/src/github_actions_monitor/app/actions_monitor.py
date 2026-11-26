@@ -3050,6 +3050,9 @@ def screens_payload(kind, cfg, repo=""):
     """GET /api/screens/data: what the screens show, from what the monitor holds. Nothing is read from GitHub here: the last cycle, the snapshot of the sentinel, the alerts and the score are already in memory or in the local files."""
     with LOCK:
         state = STATE["data"]
+    extra = external_ci("red_rows")
+    if extra and isinstance(state, dict):
+        state = dict(state, external_red=extra)
     sentinel = None if LITE["on"] else SENTINEL["obj"]
     snapshot = alerts = score = None
     if sentinel is not None:

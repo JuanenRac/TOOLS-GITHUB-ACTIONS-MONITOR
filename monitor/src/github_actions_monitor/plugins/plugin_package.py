@@ -102,7 +102,7 @@ def extract(files, folder):
     for name, data in files.items():
         target = Path(folder) / name
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(data)
+        private_io.write_tmp(target, data)
 
 
 def signature_check(blob, signature_text, keys):
@@ -177,8 +177,8 @@ def install(package, keys, fingerprint, now=None):
         raise PackageError("files", "the package changed while it was read")
     folder = install_folder() / name
     folder.mkdir(parents=True, exist_ok=True)
-    (folder / PACKAGE_NAME).write_bytes(blob)
-    (folder / (PACKAGE_NAME + keyring.SIGNATURE_SUFFIX)).write_text(signature, encoding="ascii")
+    private_io.write_tmp(folder / PACKAGE_NAME, blob)
+    private_io.write_tmp(folder / (PACKAGE_NAME + keyring.SIGNATURE_SUFFIX), signature)
     rows = registry()
     previous = rows.get(name) or {}
     same_key = previous.get("fingerprint") == found["fingerprint"]
@@ -317,7 +317,7 @@ def pack(folder, out):
     blob = buffer.getvalue()
     if len(blob) > MAX_ZIP:
         raise PackageError("size", "the package is bigger than 2 MB")
-    Path(out).write_bytes(blob)
+    private_io.write_tmp(Path(out), blob)
     return hashlib.sha256(blob).hexdigest()
 
 

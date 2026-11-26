@@ -18,6 +18,7 @@ sys.path.insert(0, str(HERE / "tools"))
 import _testenv  # noqa: F401,E402
 import extci_fake_servers as fake  # noqa: E402
 from github_actions_monitor import families  # noqa: E402
+from github_actions_monitor.app import screens  # noqa: E402
 from github_actions_monitor.integrations.external_ci import extci_engine as engine  # noqa: E402
 from github_actions_monitor.integrations.external_ci.extci_fetch import Failed, Reader  # noqa: E402
 from github_actions_monitor.sentinels import alert_center  # noqa: E402
@@ -167,6 +168,15 @@ class Logs(Base):
         reader = Reader({"kind": "jenkins", "url": self.base}, engine.settings(config))
         text, cut = reader.tail("/job/folder/job/app/12/consoleText", 10)
         self.assertEqual((len(text), cut), (10, True))
+
+
+class Screens(Base):
+    def test_the_wall_screens_count_an_external_red_like_the_others(self):
+        config = self.config([fake.sources(self.base)[0]])
+        engine.refresh(config, now=1000.0)
+        own = {"a2": {"red": [{"repo": "app", "workflow": "ci"}]}}
+        self.assertEqual(sorted(screens._red_repos({"external_red": engine.red_rows(config)}, own)), ["app", "mirror-bb"])
+        self.assertEqual(sorted(screens._red_repos({}, own)), ["app"])
 
 
 class Alerts(Base):

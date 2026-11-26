@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.2.0",
  "previous": "2.1.8",
- "digest": "4e6d0a249da47d38bc9283e373f0ed4dcb9b92c19f4a884f0c12e587c6cb6c90",
+ "digest": "b3b502252b8631402611bedadfd2d5b9141dc52b7745e1ed1b9886bdd51b1a2f",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -449,7 +449,7 @@
     "default": "local"
    },
    {
-    "key": "secrets.bitwarden.secret_id",
+    "key": "secrets.bitwarden.item",
     "kind": "text",
     "bounds": {
      "re": "^[A-Za-z0-9-]{0,100}\\Z"
@@ -479,20 +479,20 @@
     "default": 900
    },
    {
+    "key": "secrets.sops.field",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9_.-]{1,100}\\Z"
+    },
+    "default": "token"
+   },
+   {
     "key": "secrets.sops.file",
     "kind": "text",
     "bounds": {
      "re": "^[^\\x00-\\x1f]{0,260}\\Z"
     },
     "default": ""
-   },
-   {
-    "key": "secrets.sops.key",
-    "kind": "text",
-    "bounds": {
-     "re": "^[A-Za-z0-9_.-]{1,100}\\Z"
-    },
-    "default": "token"
    },
    {
     "key": "secrets.vault.addr",
@@ -503,7 +503,7 @@
     "default": ""
    },
    {
-    "key": "secrets.vault.key",
+    "key": "secrets.vault.field",
     "kind": "text",
     "bounds": {
      "re": "^[A-Za-z0-9_.-]{1,100}\\Z"
@@ -522,7 +522,7 @@
     "key": "secrets.vault.token_env",
     "kind": "text",
     "bounds": {
-     "re": "^[A-Za-z_][A-Za-z0-9_]{0,63}\\Z"
+     "re": "^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|PATHEXT|COMSPEC|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|SSH_AUTH_SOCK|MONITOR_SUPERVISOR_KEY|MONITOR_ACCESS_TOKEN|MONITOR_WEBHOOK_SECRET|MONITOR_SLACK_SIGNING_SECRET|MONITOR_DISCORD_PUBLIC_KEY|MONITOR_HEARTBEAT_URL)\\Z)(?:[A-Z_][A-Z0-9_]{0,63})?\\Z"
     },
     "default": "VAULT_TOKEN"
    },

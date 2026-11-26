@@ -56,7 +56,7 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
 def read_vault(cfg, environ, opener=None):
     vault = cfg.get("vault", {})
     address = vault_address(vault.get("addr"))
-    path, key, name = str(vault.get("path") or ""), str(vault.get("key") or ""), str(vault.get("token_env") or "VAULT_TOKEN")
+    path, key, name = str(vault.get("path") or ""), str(vault.get("field") or ""), str(vault.get("token_env") or "VAULT_TOKEN")
     if not VAULT_PATH_RE.match(path) or ".." in path.split("/") or not KEY_RE.match(key) or not ENV_RE.match(name):
         raise BackendError("settings")
     token = environ.get(name, "")
@@ -82,12 +82,12 @@ def tool_command(backend, cfg):
     """The fixed command (no shell) that prints the secret, for the backends that have a tool of their own."""
     if backend == "sops":
         sops = cfg.get("sops", {})
-        path, key = str(sops.get("file") or ""), str(sops.get("key") or "")
+        path, key = str(sops.get("file") or ""), str(sops.get("field") or "")
         if not path or path.startswith("-") or len(path) > 260 or not KEY_RE.match(key):
             raise BackendError("settings")
         return ["sops", "--decrypt", "--extract", f'["{key}"]', path]
     section = cfg.get("bitwarden" if backend == "bitwarden" else "cloud", {})
-    ref = str(section.get("secret_id" if backend == "bitwarden" else "ref") or "")
+    ref = str(section.get("item" if backend == "bitwarden" else "ref") or "")
     if not REF_RE.match(ref):
         raise BackendError("settings")
     if backend == "bitwarden":

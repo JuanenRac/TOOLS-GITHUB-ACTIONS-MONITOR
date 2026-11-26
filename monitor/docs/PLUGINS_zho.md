@@ -69,4 +69,4 @@ python bin/monitor_cli.py plugin uninstall --name my-plugin
 
 ## 从其他程序读取 GitHub 令牌
 
-`secrets.backend` 读取令牌而不在监视器中保存（需开启 `github_token.enabled`）。只读。`vault`（HTTP，`secrets.vault.addr`、`path`、`key`，Vault 令牌放在 `token_env` 指定的环境变量；https，http 仅限本机）、`sops`（`secrets.sops.file`、`key`；仅限可信计算机）、`bitwarden`（`bws`、`secrets.bitwarden.secret_id`）、`aws`、`azure`、`gcp`（各自命令行工具，`secrets.cloud.ref`）。开启 `secrets.reload_on_rotate` 时每 `secrets.reload_seconds` 重读一次。已对模拟服务器和开发模式 Vault 测试；未使用真实云账户。
+`secrets.backend` 读取令牌而不在监视器中保存（需开启 `github_token.enabled`）。只读。`vault`（HTTP，`secrets.vault.addr`、`path`、`field`，Vault 令牌放在 `token_env` 指定的环境变量；https，http 仅限本机）、`sops`（`secrets.sops.file`、`field`；仅限可信计算机）、`bitwarden`（`bws`、`secrets.bitwarden.item`）、`aws`、`azure`、`gcp`（各自命令行工具，`secrets.cloud.ref`）。开启 `secrets.reload_on_rotate` 时每 `secrets.reload_seconds` 重读一次。已对模拟服务器和开发模式 Vault 测试；未使用真实云账户。

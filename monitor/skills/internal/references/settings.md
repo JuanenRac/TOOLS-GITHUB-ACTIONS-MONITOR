@@ -702,14 +702,14 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `screens.transition` | `"fade"` | general | Change between screens |
 | `screens.version_check_seconds` | `300` | general | Look for a new version every |
 | `secrets.backend` (secure) | `"local"` | plugins | Read the token from |
-| `secrets.bitwarden.secret_id` (secure) | `""` | plugins | Bitwarden: id of the secret |
+| `secrets.bitwarden.item` (secure) | `""` | plugins | Bitwarden: id of the secret |
 | `secrets.cloud.ref` (secure) | `""` | plugins | Cloud: name of the secret |
 | `secrets.reload_on_rotate` (secure) | `true` | plugins | Read the token again now and then |
 | `secrets.reload_seconds` (secure) | `900` | plugins | Seconds between two reads of the token |
+| `secrets.sops.field` (secure) | `"token"` | plugins | SOPS: name of the value |
 | `secrets.sops.file` (secure) | `""` | plugins | SOPS: encrypted file |
-| `secrets.sops.key` (secure) | `"token"` | plugins | SOPS: name of the value |
 | `secrets.vault.addr` (secure) | `""` | plugins | Vault: address |
-| `secrets.vault.key` (secure) | `"token"` | plugins | Vault: name of the value |
+| `secrets.vault.field` (secure) | `"token"` | plugins | Vault: name of the value |
 | `secrets.vault.path` (secure) | `""` | plugins | Vault: path of the secret |
 | `secrets.vault.token_env` (secure) | `"VAULT_TOKEN"` | plugins | Vault: environment variable of its token |
 | `selfwatch.enabled` | `true` | paths | The monitor watches itself |
