@@ -19,6 +19,7 @@ import json
 import re
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.request
 import zipfile
@@ -113,6 +114,14 @@ def static_page(page, index):
     return page.replace("<head>", "<head>\n" + shim, 1)
 
 
+def scrub(text):
+    """The folders of the computer that built the site are not part of the demo: each one becomes "demo"."""
+    for folder in (str(PRODUCT), str(REPO), str(Path.home()), tempfile.gettempdir()):
+        for form in (json.dumps(folder)[1:-1], folder, folder.replace(chr(92), "/")):
+            text = text.replace(form, "demo")
+    return text
+
+
 def lint_site(target, version):
     target.mkdir(parents=True, exist_ok=True)
     buffer = io.BytesIO()
@@ -150,9 +159,10 @@ def build(out, port, version=PYODIDE, wait=90):
             if not kind.startswith("application/json"):
                 continue
             name = "data/" + re.sub(r"[^a-z0-9]+", "_", path[5:].lower()).strip("_") + ".json"
-            (out / name).write_bytes(body)
+            (out / name).write_text(scrub(body.decode("utf-8")), encoding="utf-8", newline="
+")
             index[path] = name
-        (out / "index.html").write_text(static_page(page.decode("utf-8"), index), encoding="utf-8", newline="\n")
+        (out / "index.html").write_text(static_page(scrub(page.decode("utf-8")), index), encoding="utf-8", newline="\n")
     finally:
         demo.terminate()
         demo.wait(timeout=20)
