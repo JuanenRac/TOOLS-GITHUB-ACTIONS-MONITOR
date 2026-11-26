@@ -76,7 +76,7 @@ FAMILY = Family(
     defaults={"external_ci": {"enabled": False, "sources": [], "refresh_seconds": 600, "timeout_s": 15, "max_bytes": 2000000, "allow_private_targets": False, "experimental": True,
                               "breaker": {"failures": 3}, "buildbot": {"max_builders": 50}, "gitlab": {"max_pipelines": 30}, "jenkins": {"enabled": False}, "azure": {"enabled": False},
                               "alert": {"enabled": True, "level": "error"}, "logs": {"enabled": False, "max_kb": 64, "tail_lines": 200, "keep_hours": 72}}},
-    settings=(_s("enabled", "bool", secure=True), _s("sources", "names", LINE_RE, secure=True), _s("refresh_seconds", "int", (300, 86400), unit="seconds"), _s("timeout_s", "int", (2, 120), unit="seconds"),
+    settings=(_s("enabled", "bool", secure=True), _s("sources", "names", LINE_RE, secure=True), _s("refresh_seconds", "int", (300, 86400), unit="s"), _s("timeout_s", "int", (2, 120), unit="s"),
               _s("max_bytes", "int", (10000, 50000000)), _s("allow_private_targets", "bool", secure=True), _s("experimental", "bool"), _s("breaker.failures", "int", (1, 20)),
               _s("buildbot.max_builders", "int", (1, 500)), _s("gitlab.max_pipelines", "int", (1, 200)), _s("jenkins.enabled", "bool", secure=True), _s("azure.enabled", "bool", secure=True),
               _s("alert.enabled", "bool"), _s("alert.level", "enum", ("error", "warning")), _s("logs.enabled", "bool", secure=True), _s("logs.max_kb", "int", (4, 1024)),

@@ -10,6 +10,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+### Added
+
+- External CI sources, read only and off by default: Buildbot, GitLab CI, Jenkins and Azure Pipelines (the last two experimental) for mirrored repositories. Their failures are counted, notified and silenced like those of Actions; a service that does not answer is shown as degraded, never red. Safe reads, optional bounded and redacted log tails, Test connection, `external-ci` on the command line.
+
 ## [2.1.8]
 
 Version 2.1.8 adds no new function: it corrects what a review of 2.1.7 found. The CI sentinel is no longer green when the list of runs may hide a workflow; approving or rejecting a proposal of the AI works; a revoked device loses the streams it had open; connections have a time and a number limit; the proxy tunnel works; going back no longer runs over an update in progress; the container image is only published from a tag; and the screens, the kiosk, the command line and the documentation say what the program does.
