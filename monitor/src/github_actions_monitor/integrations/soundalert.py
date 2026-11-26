@@ -146,7 +146,7 @@ def beep(config, reason="new_red", now=None, runner=None, wait=False):
 def kind_of(code, level=""):
     """Which kind an alert of the list is (the same rule as the page): the code says it, else the level."""
     code, level = str(code or ""), str(level or "")
-    if code == "ci.red":
+    if code in ("ci.red", "ci.external.red"):
         return "new_red"
     if code == "score.dropped":
         return "score_drop"

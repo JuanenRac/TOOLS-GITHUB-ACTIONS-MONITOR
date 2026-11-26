@@ -9,6 +9,10 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+### Añadido
+
+- Fuentes de CI externas, solo lectura y apagadas de fábrica: Buildbot, GitLab CI, Jenkins y Azure Pipelines (los dos últimos experimentales) para repositorios espejados. Sus fallos se cuentan, notifican y silencian como los de Actions; un servicio que no responde aparece degradado, nunca en rojo. Lecturas seguras, final de logs opcional, acotado y depurado, Probar conexión y `external-ci` en la consola.
+
 ## [2.1.8]
 
 La versión 2.1.8 no añade ninguna función: corrige lo que encontró una revisión de la 2.1.7. El centinela de CI ya no sale en verde cuando la lista de ejecuciones puede ocultar un workflow; aprobar o rechazar una propuesta de la IA funciona; un dispositivo revocado pierde los flujos que tenía abiertos; las conexiones tienen límite de tiempo y de número; el túnel del proxy funciona; deshacer ya no pasa por encima de una actualización en curso; la imagen del contenedor solo se publica desde una etiqueta; y las pantallas, el quiosco, la línea de órdenes y la documentación dicen lo que hace el programa.

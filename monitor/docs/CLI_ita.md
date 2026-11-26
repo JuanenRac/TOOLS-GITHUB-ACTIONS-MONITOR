@@ -38,6 +38,7 @@
 | `completions` | lo script di completamento per `bash`, `zsh`, `fish` o `powershell`, scritto dal parser reale (si limita a stampare) | no |
 | `kiosk` | l'indirizzo del monitor per una TV o una parete (`ops`, `team`, `release`, `quiet`); vedi [KIOSK_ita.md](KIOSK_ita.md) | no |
 | `metrics` | le cifre come righe `nome=valore` per cron e la posta; con `--if-problem` non scrive nulla quando va tutto bene; vedi [CLI_OPERATOR.md](CLI_OPERATOR.md) | no |
+| `external-ci` | Fonti CI esterne, sola lettura (`external-ci list|status|probe --source`); vedere [EXTERNAL_CI.md](EXTERNAL_CI_ita.md) | no |
 
 Opzioni di tutti i comandi: `--json` (la risposta come un documento JSON: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (porta 8766), `--timeout SECONDI` (da 1 a 60), `--lang CODICE`. In modalità di rete metti il token di accesso nella variabile d'ambiente `MONITOR_ACCESS_TOKEN`, quella che legge il monitor stesso (`MONITOR_TOKEN` è accettata come alias; `--token TOKEN` è l'ultima risorsa, perché un'opzione compare nell'elenco dei processi). L'ordine: `MONITOR_ACCESS_TOKEN`, poi `MONITOR_TOKEN`, poi `--token`. Viaggia nell'intestazione `X-Monitor-Access`, mai nell'indirizzo e mai a schermo. Un `--url` in `http` non cifrato verso un altro computer stampa un avviso su stderr (il token e le risposte viaggerebbero in chiaro): usa `https` fuori da una rete che controlli.
 

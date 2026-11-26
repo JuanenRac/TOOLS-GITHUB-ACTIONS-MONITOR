@@ -9,6 +9,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+### Hinzugefügt
+
+- Externe CI-Quellen, nur lesend und standardmäßig aus: Buildbot, GitLab CI, Jenkins und Azure Pipelines (die letzten beiden experimentell) für gespiegelte Repositorys. Fehler werden wie die von Actions gezählt, gemeldet und stummgeschaltet; ein nicht antwortender Dienst erscheint eingeschränkt, nie rot. Sichere Abfragen, optionales begrenztes und bereinigtes Logende, Verbindungstest und `external-ci` in der Befehlszeile.
+
 ## [2.1.8]
 
 Version 2.1.8 bringt keine neue Funktion: Sie korrigiert, was eine Überprüfung von 2.1.7 gefunden hat. Der CI-Wächter ist nicht mehr grün, wenn die Liste der Läufe einen Workflow verbergen kann; das Freigeben oder Ablehnen eines KI-Vorschlags funktioniert; ein gesperrtes Gerät verliert seine offenen Datenströme; Verbindungen haben ein Zeit- und ein Anzahllimit; der Proxy-Tunnel funktioniert; das Zurückgehen läuft nicht mehr über eine laufende Aktualisierung hinweg; das Container-Image wird nur noch von einem Tag veröffentlicht; und die Bildschirme, der Kiosk, die Befehlszeile und die Dokumentation sagen, was das Programm tut.

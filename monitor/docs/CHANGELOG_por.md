@@ -9,6 +9,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+### Adicionado
+
+- Fontes de CI externas, só de leitura e desligadas por predefinição: Buildbot, GitLab CI, Jenkins e Azure Pipelines (os dois últimos experimentais) para repositórios espelhados. As falhas são contadas, notificadas e silenciadas como as do Actions; um serviço que não responde aparece degradado, nunca vermelho. Leituras seguras, fim de registo opcional, limitado e expurgado, Testar ligação e `external-ci` na linha de comandos.
+
 ## [2.1.8]
 
 A versão 2.1.8 não acrescenta nenhuma função: corrige o que uma revisão da 2.1.7 encontrou. O sentinela de CI deixa de ficar verde quando a lista de execuções pode esconder um workflow; aprovar ou rejeitar uma proposta da IA funciona; um dispositivo revogado perde os fluxos que tinha abertos; as ligações têm limite de tempo e de número; o túnel do proxy funciona; voltar atrás já não passa por cima de uma atualização em curso; a imagem do contentor só é publicada a partir de uma etiqueta; e os ecrãs, o quiosque, a linha de comandos e a documentação dizem o que o programa faz.

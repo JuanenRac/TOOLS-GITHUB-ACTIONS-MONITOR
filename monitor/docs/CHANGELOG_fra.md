@@ -9,6 +9,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+### Ajouté
+
+- Sources CI externes, lecture seule et désactivées par défaut : Buildbot, GitLab CI, Jenkins et Azure Pipelines (les deux derniers expérimentaux) pour les dépôts miroirs. Leurs échecs sont comptés, notifiés et mis en sourdine comme ceux d'Actions ; un service muet est dégradé, jamais rouge. Lectures sûres, fin de journal facultative, limitée et expurgée, test de connexion et `external-ci` en ligne de commande.
+
 ## [2.1.8]
 
 La version 2.1.8 n'ajoute aucune fonction : elle corrige ce qu'une revue de la 2.1.7 a trouvé. La sentinelle de CI n'est plus verte quand la liste des exécutions peut cacher un workflow ; approuver ou rejeter une proposition de l'IA fonctionne ; un appareil révoqué perd les flux qu'il avait ouverts ; les connexions ont une limite de durée et de nombre ; le tunnel du proxy fonctionne ; revenir en arrière ne passe plus par-dessus une mise à jour en cours ; l'image du conteneur n'est publiée qu'à partir d'une étiquette ; et les écrans, le kiosque, la ligne de commande et la documentation disent ce que fait le programme.
