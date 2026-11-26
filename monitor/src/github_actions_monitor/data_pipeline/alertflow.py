@@ -24,7 +24,7 @@ FOREVER = "9999-12-31T23:59:59Z"
 # What a silence by pattern may silence: the notices and alerts of a workflow that is red or stuck. The one list for the channels (shape) and for the Alerts tab (alert_center.permanent): a new security alert,
 # a required check in red, a pending signature or a release notice of a silenced repository is still announced, and the tab never shows it as silenced.
 SILENCE_EVENTS = ("red_new", "red_fixed", "stuck_new", "workflow_failed")
-SILENCE_ALERT_CODES = ("ci.red", "ci.stuck")
+SILENCE_ALERT_CODES = ("ci.red", "ci.stuck", "ci.external.red")
 
 
 def _int(value, low, high, default):

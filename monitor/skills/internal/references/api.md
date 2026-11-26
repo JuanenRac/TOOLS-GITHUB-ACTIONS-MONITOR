@@ -77,6 +77,9 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/discovery/group` | POST | maintainer | put discovered repositories in a group |
 | `/api/events` | GET | viewer | the event journal |
 | `/api/expected-red` | GET,POST | viewer / maintainer | the workflows marked as red on purpose with a reason, an owner and an end (GET: the list with each state; POST {action: add|remove, repo, workflow, reason, owner, days}: a maintainer, `expected_red.enabled`, a note of this monitor) |
+| `/api/external-ci/log` | GET | maintainer | the bounded and redacted end of the log of a failed external build (external_ci.logs.enabled); ?source=&build= |
+| `/api/external-ci/probe` | POST | admin | one read of a source line, nothing is saved |
+| `/api/external-ci/status` | GET | viewer | state of the external CI sources, what each says and why one could not be read |
 | `/api/gh-action` | POST | admin | prefix of the actions on GitHub (plan and confirm, see below) |
 | `/api/gh-action/confirm` | POST | admin | confirm an action on GitHub (this computer only) |
 | `/api/gh-action/plan` | POST | admin | plan an action on GitHub; nothing is sent until it is confirmed (this computer only) |

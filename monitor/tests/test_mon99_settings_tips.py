@@ -13,12 +13,15 @@ sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-from github_actions_monitor import i18n
+from github_actions_monitor import families  # noqa: E402
 from github_actions_monitor.app import settings_api  # noqa: E402
 
 PAGE = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
 LANGS = ("en", "es", "de", "fr", "it", "ja", "zh", "pt")
-TABLES = {lang: i18n.catalogue(lang) for lang in LANGS}      # the catalogue of the monitor and of the parts that plug in (families/)
+TABLES = {lang: json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8")) for lang in LANGS}
+for _lang in LANGS:      # the parts that plug in by themselves (families/) keep their texts in their own folder
+    for _path in families.catalogue_files(_lang):
+        TABLES[_lang].update(json.loads(_path.read_text(encoding="utf-8")))
 TIP_KEYS = ("ui.cfg_tip_default_on", "ui.cfg_tip_default_off", "ui.cfg_tip_on", "ui.cfg_tip_off", "ui.cfg_tip_range", "ui.cfg_tip_default", "ui.cfg_tip_values", "ui.cfg_tip_restart", "ui.cfg_tip_live",
             "ui.cfg_tip_secure")
 

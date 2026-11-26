@@ -135,7 +135,8 @@ class TheRegistry(unittest.TestCase):
     def test_the_tabs_of_settings_take_the_new_one_after_the_one_it_names(self):
         with families.using(made_up()):
             order = families.tab_order(("basic", "ai", "console"))
-        self.assertEqual(order, ("basic", "ai", "zztab", "console"))
+        real = {tab for family in families.all_families() for tab, _after in family.settings_tabs}      # the tabs that the real parts add are not what is looked at here
+        self.assertEqual(tuple(tab for tab in order if tab not in real), ("basic", "ai", "zztab", "console"))
 
     def test_a_part_reads_its_block_over_its_defaults(self):
         with families.using(made_up()):

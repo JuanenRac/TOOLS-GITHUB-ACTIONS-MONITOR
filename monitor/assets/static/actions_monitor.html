@@ -922,7 +922,7 @@ function soundQuiet(c,when){if(!c.quiet||c.qfrom===c.qto)return false;const h=ne
 function soundOn(k){const c=soundCfg();return c.enabled&&!SOUND.muted&&c.types[k]!==false&&!soundQuiet(c)}
 /* which kind an alert of the list is: the code says it, else the level */
 function soundKindOf(a){const c=String(a.code||""),l=String(a.level||"");
-  if(c==="ci.red")return "red";
+  if(c==="ci.red"||c==="ci.external.red")return "red";
   if(c==="score.dropped")return "score";
   if(c==="ci.stuck"||c==="ci.ghost_queue"||c.indexOf("runner.")===0)return "stuck";
   if(c.indexOf("security.")===0||c.indexOf("system.")===0||l==="error"||l==="critical")return "sentinel";
