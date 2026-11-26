@@ -53,5 +53,5 @@ Solo se llama probado a lo que de verdad se probó.
 
 | Asistente o camino | Línea de órdenes | HTTP y ficheros | MCP |
 |---|---|---|---|
-| Claude Code | probado | probado | compatible por protocolo, no probado |
+| Un asistente de código en terminal | probado | probado | compatible por protocolo, no probado |
 | Otros asistentes | compatible por protocolo, no probado | compatible por protocolo, no probado | compatible por protocolo, no probado |

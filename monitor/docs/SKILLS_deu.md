@@ -53,5 +53,5 @@ Als getestet gilt nur, was wirklich ausprobiert wurde.
 
 | Assistent oder Weg | Kommandozeile | HTTP und Dateien | MCP |
 |---|---|---|---|
-| Claude Code | getestet | getestet | protokollkompatibel, nicht getestet |
+| Ein Coding-Assistent im Terminal | getestet | getestet | protokollkompatibel, nicht getestet |
 | Andere Assistenten | protokollkompatibel, nicht getestet | protokollkompatibel, nicht getestet | protokollkompatibel, nicht getestet |
