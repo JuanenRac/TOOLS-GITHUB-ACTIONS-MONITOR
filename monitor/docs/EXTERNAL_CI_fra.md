@@ -38,4 +38,4 @@ Réglages > CI externe propose **Tester la connexion** : une lecture, rien d'enr
 
 ## Pas encore vérifié
 
-Les quatre adaptateurs n'ont été testés qu'avec des serveurs simulés (`tools/extci_fake_servers.py`). Jenkins et Azure Pipelines portent la mention **expérimental** (`external_ci.experimental`) et demandent `external_ci.jenkins.enabled` / `external_ci.azure.enabled`. Autre adaptateur : une fonction `(reader, source, cfg) -> (runs, missing)` dans `integrations/external_ci/adapters.py`, lisant seulement via `reader`.
+Les quatre adaptateurs n'ont été testés qu'avec des serveurs simulés (`tools/extci_fake_servers.py`). Jenkins et Azure Pipelines portent la mention **expérimental** (`external_ci.experimental`) et demandent `external_ci.jenkins.enabled` / `external_ci.azure.enabled`. Autre adaptateur : une fonction `(reader, source, cfg) -> (runs, missing)` dans `integrations/external_ci/extci_adapters.py`, lisant seulement via `reader`.

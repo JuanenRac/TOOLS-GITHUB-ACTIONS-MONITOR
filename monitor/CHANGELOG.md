@@ -15,6 +15,16 @@ when this file and `tool_version.py` disagree.
 
 - Posture checks of repositories and organization, read only and off by default: webhooks, Actions settings, scanning, branch and release-branch protection, deploy keys, secret age, apps, organization audit log, hardening of what ran and changed releases, each with its OWASP CI/CD and CIS reference. What GitHub refuses is shown as not checked. Maturity per repository, history, `posture` on the command line.
 - External CI sources, read only and off by default: Buildbot, GitLab CI, Jenkins and Azure Pipelines (the last two experimental) for mirrored repositories. Their failures are counted, notified and silenced like those of Actions; a service that does not answer is shown as degraded, never red. Safe reads, optional bounded and redacted log tails, Test connection, `external-ci` on the command line.
+- **Releases are signed and the updater checks the signature**: from version 2.2.0 a release carries a detached Ed25519 signature of SHA256SUMS and of every file, made on GitHub by the release workflow. The updater (page, window, console and command line) refuses a release from 2.2.0 on whose signature is missing or wrong, and a signed zip offered under another version, before anything is unpacked; going back to an older unsigned version is allowed with a warning.
+- **Two bills of materials and attestations with every release**: CycloneDX and SPDX documents list every file of the zip and the optional libraries, and the release workflow attests the provenance of the files, the bill of materials and the record of the quality gate.
+- **The quality gate can run on GitHub**: a workflow runs the whole gate on a Windows runner, checks that a second build gives the same bytes and keeps a record of what ran; running it on your own computer stays possible and optional.
+- **A keyring of public keys and the check of a downloaded release**: one place for the keys that may sign (a private value is refused) and the verification of a folder of release files without any network. Their commands in the console arrive separately.
+- **The notes of a release can carry a short summary in the eight languages**, read by the update check with the same request; it also remembers a dismissed version. The window that shows it arrives separately.
+- **Checks of the repository**: a review of the dependencies a pull request adds and CodeQL analysis of the code.
+
+### Changed
+
+- **The stand-alone updater published with a release now carries the registry of migrations inside**, and SHA256SUMS names it together with the zip and the two bills of materials.
 
 ## [2.1.8]
 

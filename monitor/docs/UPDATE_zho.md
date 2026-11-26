@@ -22,7 +22,15 @@
 
 在服务管理器下，页面默认不会应用更新。如果监视器作为 systemd 的“用户”服务（`systemctl --user`）运行，可以开启 `updates.systemd_helper`（默认关闭）：页面随后会提供更新，应用更新的进程会停止该服务、应用更新并再次启动该服务，始终使用 `systemctl --user`，从不使用 `sudo`。系统服务（需要管理员权限的服务）不会被触碰，仍然是“请使用命令行”。命令行中用 `--systemd-unit 单元`（`apply` 和 `rollback`）也能做到同样的事；如果无法停止该服务，则不会启动任何操作；如果新版本无法启动，则恢复之前的版本并再次启动该服务。
 
-**信任.** 该检查将 zip 与 SHA256SUMS 进行比对，二者来自同一个 GitHub 发布：它能发现损坏或不完整的下载，但发现不了在源头被替换的发布。对发布的信任取决于 GitHub 以及您在那里的账户。
+**信任.** SHA256SUMS 与 zip 来自同一个 GitHub 发布，因此单靠它只能发现损坏或不完整的下载。自 2.2.0 起，证明发布来源的是它的签名（见下文）。
+
+## 带签名的发布
+
+自 2.2.0 版起，每个发布都带签名：SHA256SUMS 有一个独立的 Ed25519 签名文件 `SHA256SUMS.ed25519.sig`，用项目密钥生成，公钥随更新器一起提供。更新器在解压任何内容之前先校验签名。2.2.0 及以上版本若没有有效签名会被拒绝，以其他版本号提供的已签名 zip 也会被拒绝。回退到发布时没有签名的旧版本是允许的，但会给出警告。手动下载的 zip，请把 `SHA256SUMS` 和 `SHA256SUMS.ed25519.sig` 放在它旁边（配合 `--zip`）。
+
+公钥（Ed25519，十六进制）：`380c75210e444f71bc4fe4b9aa7cb451aad5ef2592711f7dc6ba2fd7adc3d272`。其 SHA-256 指纹：`6d6b995655147955a1c2fb8a84a02d828606de29b36583799ada6ca5524b5d1a`。
+
+除 zip 外，发布还包含 `monitor_updater.py`、两份物料清单（CycloneDX 格式的 `github_actions_monitor.cdx.json` 和 SPDX 格式的 `github_actions_monitor.spdx.json`）、每个文件的签名，以及 GitHub 对构建过程的证明（attestation），可用 `gh attestation verify github_actions_monitor.zip --repo JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR` 校验。签名证明谁持有密钥；证明记录说明是哪个工作流构建了该文件。这是两项独立的检查。
 
 ## 逐步说明 支撑它的路由是 `/api/updates/status`、`/api/updates/progress`、`/api/updates/history`、`/api/updates/log`（进程日志的最后几行，token 或 secret 之后的值已隐藏）、`/api/updates/copies`（只读）以及 `/api/updates/check`、`/api/updates/plan`、`/api/updates/apply`、`/api/updates/rollback`、`/api/updates/discard`（管理员，仅限本机）。 进度也会通过 `/api/updates/stream` 以服务器发送事件的方式推送（更新期间页面使用它；当浏览器或连接不支持时，回退为每 1.5 秒查询一次）。
 

@@ -13,6 +13,16 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - Prüfungen der Sicherheitslage, nur lesend und standardmäßig aus: Webhooks, Actions-Einstellungen, Scans, Schutz von Branches und Release-Branches, Deploy-Schlüssel, Alter von Secrets, Apps, Audit-Log der Organisation, Härtung der ausgeführten Läufe und geänderte Releases, jeweils mit OWASP-CI/CD- und CIS-Bezug. Verweigertes erscheint als nicht geprüft. Reife je Repository, Verlauf und `posture` in der Befehlszeile.
 - Externe CI-Quellen, nur lesend und standardmäßig aus: Buildbot, GitLab CI, Jenkins und Azure Pipelines (die letzten beiden experimentell) für gespiegelte Repositorys. Fehler werden wie die von Actions gezählt, gemeldet und stummgeschaltet; ein nicht antwortender Dienst erscheint eingeschränkt, nie rot. Sichere Abfragen, optionales begrenztes und bereinigtes Logende, Verbindungstest und `external-ci` in der Befehlszeile.
+- **Releases sind signiert und der Updater prüft die Signatur**: ab Version 2.2.0 trägt ein Release eine separate Ed25519-Signatur von SHA256SUMS und jeder Datei, erstellt auf GitHub durch den Release-Workflow. Der Updater (Seite, Fenster, Konsole und Befehlszeile) lehnt ein Release ab 2.2.0 mit fehlender oder falscher Signatur sowie ein unter anderer Version angebotenes signiertes Zip ab, bevor etwas entpackt wird; die Rückkehr zu einer älteren unsignierten Version ist mit Warnung erlaubt.
+- **Zwei Stücklisten und Attestierungen bei jedem Release**: CycloneDX- und SPDX-Dokumente listen jede Datei des Zips und die optionalen Bibliotheken, und der Release-Workflow attestiert die Herkunft der Dateien, die Stückliste und das Protokoll der Qualitätsprüfung.
+- **Die Qualitätsprüfung kann auf GitHub laufen**: ein Workflow führt die gesamte Prüfung auf einem Windows-Runner aus, prüft, dass ein zweiter Build dieselben Bytes ergibt, und hält fest, was gelaufen ist; die Ausführung auf dem eigenen Rechner bleibt möglich und optional.
+- **Ein Schlüsselbund öffentlicher Schlüssel und die Prüfung eines heruntergeladenen Releases**: ein Ort für die Schlüssel, die signieren dürfen (ein privater Wert wird abgelehnt), und die Prüfung eines Ordners mit Release-Dateien ohne Netz. Die Konsolenbefehle dazu folgen separat.
+- **Die Release-Notizen können eine kurze Zusammenfassung in acht Sprachen tragen**, die die Versionsprüfung mit derselben Anfrage liest; sie merkt sich auch eine verworfene Version. Das Fenster, das sie zeigt, folgt separat.
+- **Prüfungen des Repositorys**: Überprüfung der Abhängigkeiten, die ein Pull Request hinzufügt, und CodeQL-Analyse des Codes.
+
+### Geändert
+
+- **Der einzeln veröffentlichte Updater eines Releases enthält nun das Migrationsregister**, und SHA256SUMS nennt ihn zusammen mit dem Zip und den zwei Stücklisten.
 
 ## [2.1.8]
 

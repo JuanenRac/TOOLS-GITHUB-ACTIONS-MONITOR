@@ -38,4 +38,4 @@ azure;repo=my-mirror;url=https://dev.azure.com/my-org;project=my-project
 
 ## 尚未验证
 
-四个适配器仅用模拟服务器测试(`tools/extci_fake_servers.py`)。Jenkins 和 Azure Pipelines 带有**实验性**标签(`external_ci.experimental`),需要 `external_ci.jenkins.enabled` / `external_ci.azure.enabled`。编写新适配器:在 `integrations/external_ci/adapters.py` 中写函数 `(reader, source, cfg) -> (runs, missing)`,只通过 `reader` 读取。
+四个适配器仅用模拟服务器测试(`tools/extci_fake_servers.py`)。Jenkins 和 Azure Pipelines 带有**实验性**标签(`external_ci.experimental`),需要 `external_ci.jenkins.enabled` / `external_ci.azure.enabled`。编写新适配器:在 `integrations/external_ci/extci_adapters.py` 中写函数 `(reader, source, cfg) -> (runs, missing)`,只通过 `reader` 读取。

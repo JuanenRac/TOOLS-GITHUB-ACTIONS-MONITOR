@@ -7,6 +7,8 @@
   * The answer is kept for about 24 hours in `update_check.json` next to the monitor; between two checks nothing is requested.
   * Switch: `updates.check` (Settings > Basic). It is off whenever `airgapped` is on or the connection is down; a failed check is silent (the last answer stays).
   * Versions are compared as numbers (1.6.10 is newer than 1.6.9); a pre-release or a draft is never offered.
+  * The notes of the release come in the same answer: the marked blocks `<!-- whats-new:<language> ... -->` hold a short summary per language and only those are kept (plain text, bounded).
+  * A person may dismiss the notice of ONE version (`dismiss`); a newer one is announced again.
 """
 import json
 import os
@@ -24,6 +26,30 @@ ENDPOINT = f"repos/{REPO}/releases/latest"
 URL_RE = re.compile(r"^https://github\.com/" + re.escape(REPO) + r"/releases/tag/[A-Za-z0-9._-]{1,40}\Z")
 TAG_RE = re.compile(r"^v?(\d{1,6})\.(\d{1,6})\.(\d{1,6})(?:\.(\d{1,6}))?\Z")
 INTERVAL = 24 * 3600
+LANGS = ("en", "es", "de", "fr", "it", "ja", "zh", "pt")
+NOTES_RE = re.compile(r"<!--\s*whats-new:(en|es|de|fr|it|ja|zh|pt)[ \t]*\r?\n(.*?)-->", re.S)
+MAX_NOTE = 900
+MAX_BODY = 200_000
+
+
+def parse_notes(body):
+    """{language: text} of the marked blocks of the notes of a release ({} when there are none). The text is what GitHub gave: it is shown as plain text, never as markup."""
+    found = {}
+    for lang, text in NOTES_RE.findall(str(body or "")[:MAX_BODY]):
+        clean = "".join(c for c in text.replace("\r\n", "\n") if c == "\n" or c.isprintable()).strip()
+        if clean and lang not in found:
+            found[lang] = clean[:MAX_NOTE]
+    return found
+
+
+def _clean_notes(value):
+    return {k: v[:MAX_NOTE] for k, v in value.items() if k in LANGS and isinstance(v, str) and v} if isinstance(value, dict) else {}
+
+
+def pick_notes(notes, language):
+    """The summary in `language`, else in English, else ""."""
+    notes = notes or {}
+    return notes.get(str(language or "")[:2].lower()) or notes.get("en") or ""
 
 
 def parse_semver(text):
@@ -93,6 +119,10 @@ def _load(path):
     release = value.get("release")
     if isinstance(release, dict) and isinstance(release.get("tag"), str) and isinstance(release.get("url", ""), str):
         clean["release"] = {"tag": release["tag"][:40], "url": release.get("url", "")[:300], "published": release.get("published", "") if isinstance(release.get("published"), str) else ""}
+        if _clean_notes(release.get("notes")):
+            clean["release"]["notes"] = _clean_notes(release.get("notes"))
+    if isinstance(value.get("dismissed"), str) and parse_semver(value["dismissed"]):
+        clean["dismissed"] = value["dismissed"].strip().lstrip("v")
     return clean
 
 
@@ -104,7 +134,7 @@ def _save(path, state):
 
 
 def clean_release(body):
-    """{"tag", "url", "published"} from the answer of GitHub, or None for a draft, a pre-release or anything that is not a plain version tag from this project."""
+    """{"tag", "url", "published"[, "notes"]} from the answer of GitHub, or None for a draft, a pre-release or anything that is not a plain version tag from this project."""
     if not isinstance(body, dict) or body.get("draft") or body.get("prerelease"):
         return None
     tag = body.get("tag_name")
@@ -114,11 +144,25 @@ def clean_release(body):
     if not isinstance(url, str) or not URL_RE.match(url):
         url = f"https://github.com/{REPO}/releases/tag/{tag}"
     published = body.get("published_at")
-    return {"tag": tag, "url": url, "published": published if isinstance(published, str) and len(published) <= 30 else ""}
+    release = {"tag": tag, "url": url, "published": published if isinstance(published, str) and len(published) <= 30 else ""}
+    notes = parse_notes(body.get("body"))
+    if notes:
+        release["notes"] = notes
+    return release
+
+
+def dismiss(version, state_file=None):
+    """The person does not want to hear again about `version`: kept next to the last answer. False for a text that is not a version."""
+    if parse_semver(version) is None:
+        return False
+    path = state_file or STATE_FILE
+    _save(path, dict(_load(path), dismissed=str(version).strip().lstrip("v")))
+    return True
 
 
 def view(config, current, state, offline=False):
-    """What the page, the console and `doctor` show: {"enabled", "airgapped", "current", "latest", "newer", "url", "changelog", "checked_at", "offline"}."""
+    """What the page, the console and `doctor` show: {"enabled", "airgapped", "current", "latest", "newer", "url", "changelog", "checked_at", "offline", "notes", "dismissed"}.
+    `notes` is {language: summary} of the newer release; `dismissed` says that the person asked not to be told about that version again."""
     cfg = settings(config)
     release = state.get("release") if isinstance(state.get("release"), dict) else None
     latest = release.get("tag", "").lstrip("v") if release else ""
@@ -127,17 +171,26 @@ def view(config, current, state, offline=False):
     return {"enabled": cfg["check"], "airgapped": cfg["airgapped"], "current": current, "latest": latest if release else "", "newer": newer,
             "channel": channel, "command": update_command(channel, latest) if newer else "",
             "url": release.get("url", "") if newer else "", "changelog": f"https://github.com/{REPO}/blob/{release['tag']}/monitor/CHANGELOG.md" if newer else "",
-            "checked_at": state.get("checked_at") or 0, "offline": bool(offline)}
+            "checked_at": state.get("checked_at") or 0, "offline": bool(offline), "notes": dict(release.get("notes") or {}) if newer else {},
+            "dismissed": bool(newer and state.get("dismissed") == latest)}
 
 
 _BUSY = set()
 _BUSY_LOCK = threading.Lock()
 
 
+def _keep(state, now, release):
+    """The state written after a good answer: the dismissed version stays."""
+    new = {"checked_at": int(now), "release": release}
+    if state.get("dismissed"):
+        new["dismissed"] = state["dismissed"]
+    return new
+
+
 def _refresh(reader, path, now, state):
     try:
         release = clean_release(reader(ENDPOINT))
-        _save(path, {"checked_at": int(now), "release": release})
+        _save(path, _keep(_load(path) or state, now, release))
     except Exception:   # noqa: BLE001 - offline, air-gapped networks, rate limits: the check is silent, it tries again later
         _save(path, dict(state, checked_at=int(now) - INTERVAL + 3600))      # tried again in an hour, not at every request
 
@@ -166,7 +219,7 @@ def check(config, current, reader, now=None, state_file=None, offline=False, for
         else:
             try:
                 release = clean_release(reader(ENDPOINT))
-                state = {"checked_at": int(now), "release": release}
+                state = _keep(state, now, release)
                 _save(path, state)
             except Exception:   # noqa: BLE001
                 state = dict(state, checked_at=int(now) - INTERVAL + 3600)

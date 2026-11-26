@@ -51,7 +51,7 @@ def run_tool(*args):
 class Hook(unittest.TestCase):
     def test_both_variables_and_an_existing_file_are_needed(self):
         with tempfile.TemporaryDirectory() as tmp:
-            zip_path = base.build_zip(Path(tmp) / "m.zip", "2.9.9")
+            zip_path = base.build_zip(Path(tmp) / "m.zip", "2.1.90")
             self.assertEqual(updates.test_zip({}), None)
             self.assertEqual(updates.test_zip({"MONITOR_TEST_UPDATE_ZIP": str(zip_path)}), None)
             self.assertEqual(updates.test_zip({"MONITOR_TEST_HOOKS": "1"}), None)
@@ -62,7 +62,7 @@ class Hook(unittest.TestCase):
     def test_the_updater_of_the_page_reads_the_zip_and_hands_it_to_the_process_that_applies(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = base.make_install(Path(tmp) / "inst", "2.0.8", cfg=own_config())
-            zip_path = base.build_zip(Path(tmp) / "m.zip", "2.9.9")
+            zip_path = base.build_zip(Path(tmp) / "m.zip", "2.1.90")
             env = {"MONITOR_TEST_HOOKS": "1", "MONITOR_TEST_UPDATE_ZIP": str(zip_path)}
             spawned = []
             with mock.patch.object(updates, "ROOT", root), mock.patch.dict(os.environ, env), mock.patch.object(updates, "_spawn", lambda args, up: spawned.append(args)), \
@@ -74,7 +74,7 @@ class Hook(unittest.TestCase):
                 finally:
                     up.cleanup()
             self.assertTrue(answer["started"])
-            self.assertEqual(answer["to"], "2.9.9")
+            self.assertEqual(answer["to"], "2.1.90")
             self.assertIn("--zip", spawned[0])
             self.assertEqual(spawned[0][spawned[0].index("--zip") + 1], str(zip_path))
 
@@ -162,11 +162,11 @@ class Restart(unittest.TestCase):
         self.cfg = own_config()
         self.root = base.make_install(Path(self.tmp.name) / "inst", "2.0.8", cfg=self.cfg)
         base.write_tree(self.root, stub_files())
-        self.zip = base.build_zip(Path(self.tmp.name) / "m.zip", "2.9.9", extra=stub_files())
+        self.zip = base.build_zip(Path(self.tmp.name) / "m.zip", "2.1.90", extra=stub_files())
         self.env = dict(clean_env(), STUB_PID_FILE=str(self.pid_file), PYTHONDONTWRITEBYTECODE="1")
 
     def spawn(self, *more):
-        return subprocess.Popen([sys.executable, "-I", str(TOOL), "apply", "--dir", str(self.root), "--to", "2.9.9", "--zip", str(self.zip), "--yes", "--backups", str(Path(self.tmp.name) / "backups"), "--json", *more],
+        return subprocess.Popen([sys.executable, "-I", str(TOOL), "apply", "--dir", str(self.root), "--to", "2.1.90", "--zip", str(self.zip), "--yes", "--backups", str(Path(self.tmp.name) / "backups"), "--json", *more],
                                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=self.env, creationflags=0x08000000 if os.name == "nt" else 0)
 
     def finish(self, proc):
@@ -183,7 +183,7 @@ class Restart(unittest.TestCase):
     def test_start_brings_up_the_new_version_and_checks_its_health(self):
         code, out = self.apply("--start")
         self.assertEqual(code, 0, self.shown(out))
-        self.assertEqual(health_version(self.cfg["ports"]["complete"]), "2.9.9")
+        self.assertEqual(health_version(self.cfg["ports"]["complete"]), "2.1.90")
 
     def test_handover_waits_for_the_running_monitor_to_stop_then_starts_the_new_one(self):
         import time
@@ -200,7 +200,7 @@ class Restart(unittest.TestCase):
         old.kill()
         code, out = self.finish(proc)
         self.assertEqual(code, 0, self.shown(out))
-        self.assertEqual(health_version(self.cfg["ports"]["complete"]), "2.9.9")
+        self.assertEqual(health_version(self.cfg["ports"]["complete"]), "2.1.90")
 
     def test_a_running_monitor_blocks_the_update_when_no_handover_is_asked(self):
         old = subprocess.Popen([sys.executable, "-m", "github_actions_monitor", "--port", str(self.cfg["ports"]["complete"])], cwd=str(self.root), env=dict(self.env, PYTHONPATH=str(self.root / "src")),
@@ -218,11 +218,11 @@ class TwoProcesses(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = base.make_install(Path(tmp) / "inst", "2.0.8", cfg=own_config())
             backups = Path(tmp) / "backups"
-            zip_path = base.build_zip(Path(tmp) / "m.zip", "2.9.9")
+            zip_path = base.build_zip(Path(tmp) / "m.zip", "2.1.90")
             before = base.tree_hash(root)
-            code, out = run_tool("apply", "--dir", str(root), "--to", "2.9.9", "--zip", str(zip_path), "--yes", "--backups", str(backups), "--json")
+            code, out = run_tool("apply", "--dir", str(root), "--to", "2.1.90", "--zip", str(zip_path), "--yes", "--backups", str(backups), "--json")
             self.assertEqual(code, 0, out[-1500:])
-            self.assertEqual(mu.read_tool_version(root), "2.9.9")
+            self.assertEqual(mu.read_tool_version(root), "2.1.90")
             code, out = run_tool("rollback", "--dir", str(root), "--yes", "--backups", str(backups), "--json")
             self.assertEqual(code, 0, out[-1500:])
             self.assertEqual(mu.read_tool_version(root), "2.0.8")
@@ -234,7 +234,7 @@ class TwoProcesses(unittest.TestCase):
             bad = Path(tmp) / "bad.zip"
             bad.write_bytes(b"not a zip")
             before = base.tree_hash(root)
-            code, out = run_tool("apply", "--dir", str(root), "--to", "2.9.9", "--zip", str(bad), "--yes", "--backups", str(Path(tmp) / "b"), "--json")
+            code, out = run_tool("apply", "--dir", str(root), "--to", "2.1.90", "--zip", str(bad), "--yes", "--backups", str(Path(tmp) / "b"), "--json")
             self.assertNotEqual(code, 0)
             self.assertEqual(base.tree_hash(root), before)
 

@@ -38,4 +38,4 @@ Actionsと同様に、各ビルダー・パイプライン・ジョブのブラ�
 
 ## 未検証
 
-4つのアダプターは模擬サーバー(`tools/extci_fake_servers.py`)でのみ検証しています。JenkinsとAzure Pipelinesには**実験的**ラベル(`external_ci.experimental`)があり、`external_ci.jenkins.enabled` / `external_ci.azure.enabled` が必要です。別のアダプターは `integrations/external_ci/adapters.py` に関数 `(reader, source, cfg) -> (runs, missing)` を書き、`reader` 経由でのみ読み取ります。
+4つのアダプターは模擬サーバー(`tools/extci_fake_servers.py`)でのみ検証しています。JenkinsとAzure Pipelinesには**実験的**ラベル(`external_ci.experimental`)があり、`external_ci.jenkins.enabled` / `external_ci.azure.enabled` が必要です。別のアダプターは `integrations/external_ci/extci_adapters.py` に関数 `(reader, source, cfg) -> (runs, missing)` を書き、`reader` 経由でのみ読み取ります。
