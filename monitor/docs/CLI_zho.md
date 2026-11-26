@@ -107,3 +107,12 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python bin/monitor
 ```
 python bin/monitor_cli.py identity plan
 ```
+
+## 命令: actions, runner-hook
+
+```
+python bin/monitor_cli.py actions proposals
+python bin/monitor_cli.py runner-hook started
+```
+
+[COLLABORATION_zho.md](COLLABORATION_zho.md)

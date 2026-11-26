@@ -14,6 +14,23 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `act.allowed` (secure) | `[]` | advanced | Workflows that can run (closed list) |
 | `act.enabled` (secure) | `false` | advanced | Allow running workflows here with act |
 | `act.timeout_seconds` | `900` | advanced | Time limit of a run |
+| `actions.auto_rerun` (secure) | `false` | teamwork | Re-run once by itself after an infrastructure failure |
+| `actions.bot_authors` | `["dependabot[bot]", "renovate[bot]"]` | teamwork | Bot accounts of dependency updates |
+| `actions.bot_branches` | `["dependabot/*", "renovate/*"]` | teamwork | Branch patterns of dependency updates |
+| `actions.bot_labels` | `["dependencies"]` | teamwork | Labels of dependency updates |
+| `actions.cancel_policy` (secure) | `[]` | teamwork | Runs that should not run (repository:workflow:branch) |
+| `actions.dismiss_allowed` (secure) | `[]` | teamwork | People allowed to dismiss alerts |
+| `actions.dismiss_days` | `30` | teamwork | Days a red run stays set aside |
+| `actions.dismissed_alerts` | `false` | teamwork | Watch dismissed security alerts |
+| `actions.enabled` (secure) | `false` | teamwork | Collaboration views and actions |
+| `actions.forks_help` | `false` | teamwork | Facts about authors of fork runs |
+| `actions.hide_workflows` | `["Dependabot Updates"]` | teamwork | Workflows hidden from these views |
+| `actions.inactive_workflows` | `false` | teamwork | Find workflows switched off for inactivity |
+| `actions.queued_hours` | `6` | teamwork | Hours queued before proposing to cancel |
+| `actions.refresh_hours` | `6` | teamwork | Hours between reads of a repository |
+| `actions.repos_per_cycle` | `3` | teamwork | Repositories read per cycle |
+| `actions.runner_hooks` (secure) | `false` | teamwork | Accept events of self-hosted runner hooks |
+| `actions.stuck_hours` | `6` | teamwork | Hours running before proposing a forced cancel |
 | `ai.actions.allowed` | `-` | ai | Allowed actions |
 | `ai.actions.enabled` (secure) | `-` | ai | Proposals on |
 | `ai.actions.execute` (secure) | `-` | ai | Run with confirmation |

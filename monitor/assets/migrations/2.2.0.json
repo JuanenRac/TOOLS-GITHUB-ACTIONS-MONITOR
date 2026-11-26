@@ -4,10 +4,143 @@
  "format": 1,
  "version": "2.2.0",
  "previous": "2.1.8",
- "digest": "2bab1cbd74451cd37b5d3c82e6a6407d355c771f01a732b732b5737e4d41f14c",
+ "digest": "f1a683c06477f052e88af0c196211b277dace80d875b781334b2e18482c37c33",
  "data_schema": 2,
  "settings": {
   "added": [
+   {
+    "key": "actions.auto_rerun",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "actions.bot_authors",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9\\[\\]-]{1,60}\\Z"
+    },
+    "default": [
+     "dependabot[bot]",
+     "renovate[bot]"
+    ]
+   },
+   {
+    "key": "actions.bot_branches",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9 ._/*?\\[\\]()-]{1,100}\\Z"
+    },
+    "default": [
+     "dependabot/*",
+     "renovate/*"
+    ]
+   },
+   {
+    "key": "actions.bot_labels",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9 ._/*?\\[\\]()-]{1,100}\\Z"
+    },
+    "default": [
+     "dependencies"
+    ]
+   },
+   {
+    "key": "actions.cancel_policy",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9._*?-]{1,100}:[^:]{1,100}:[A-Za-z0-9._/*?-]{1,100}\\Z"
+    },
+    "default": []
+   },
+   {
+    "key": "actions.dismiss_allowed",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9\\[\\]-]{1,60}\\Z"
+    },
+    "default": []
+   },
+   {
+    "key": "actions.dismiss_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     365
+    ],
+    "default": 30
+   },
+   {
+    "key": "actions.dismissed_alerts",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "actions.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "actions.forks_help",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "actions.hide_workflows",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9 ._/*?\\[\\]()-]{1,100}\\Z"
+    },
+    "default": [
+     "Dependabot Updates"
+    ]
+   },
+   {
+    "key": "actions.inactive_workflows",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "actions.queued_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     720
+    ],
+    "default": 6
+   },
+   {
+    "key": "actions.refresh_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     720
+    ],
+    "default": 6
+   },
+   {
+    "key": "actions.repos_per_cycle",
+    "kind": "int",
+    "bounds": [
+     1,
+     50
+    ],
+    "default": 3
+   },
+   {
+    "key": "actions.runner_hooks",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "actions.stuck_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     720
+    ],
+    "default": 6
+   },
    {
     "key": "external_ci.alert.enabled",
     "kind": "bool",

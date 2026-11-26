@@ -2060,8 +2060,20 @@ def external_ci(call, *args):
         return []
 
 
+def part_alerts():
+    """The alerts the parts declare (families/), [] in the lite edition; never raises."""
+    if LITE["on"]:
+        return []
+    return families.alerts(toolconfig.raw_config(), CHILD["account"] or "", degraded.note)
+
+
 def posture_alerts():
-    """The alerts of the posture checks (families/posture/), [] in the lite edition and while they are off. Reads only the file the checks keep; never raises."""
+    """The alerts of the posture checks (families/posture/) and of the parts that declare some, [] in the lite edition. Reads only the files they keep; never raises."""
+    return posture_only_alerts() + part_alerts()
+
+
+def posture_only_alerts():
+    """The alerts of the posture checks, [] while they are off."""
     if LITE["on"]:
         return []
     try:

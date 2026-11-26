@@ -107,3 +107,12 @@ Línea de órdenes: `identity status`, `identity plan`, `identity apply`.
 ```
 python bin/monitor_cli.py identity plan
 ```
+
+## Órdenes: actions, runner-hook
+
+```
+python bin/monitor_cli.py actions proposals
+python bin/monitor_cli.py runner-hook started
+```
+
+[COLLABORATION_spa.md](COLLABORATION_spa.md)

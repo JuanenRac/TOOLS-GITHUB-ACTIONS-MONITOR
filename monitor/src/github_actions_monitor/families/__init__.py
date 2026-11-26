@@ -142,6 +142,20 @@ def checks():
     return [check for family in all_families() for check in family.checks]
 
 
+# --- the alerts ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+def alerts(config, account, failed):
+    """The alerts of every part that has some; one that raises is handed to `failed(name, error)`."""
+    out = []
+    for family in all_families():
+        if family.alerts:
+            try:
+                out.extend(family.alerts(config, account))
+            except Exception as error:      # noqa: BLE001 - the list of alerts must still answer
+                failed(f"family.{family.name}", error)
+    return out
+
+
 # --- the loop and the network ----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 def run_ticks(config, data, failed):

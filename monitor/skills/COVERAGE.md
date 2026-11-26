@@ -10,9 +10,9 @@ A test fails when something in the code is not named in these skills, so this ta
 
 | kind | how many | internal skill | external skill |
 | --- | --- | --- | --- |
-| endpoints | 160 | references/api.md | references/api.md |
-| commands | 34 | out of scope: the AI of the monitor does not run commands | references/cli.md |
-| settings | 951 | references/settings.md (the ai, lessons and alert ones matter) | references/settings.md |
+| endpoints | 166 | references/api.md | references/api.md |
+| commands | 36 | out of scope: the AI of the monitor does not run commands | references/cli.md |
+| settings | 968 | references/settings.md (the ai, lessons and alert ones matter) | references/settings.md |
 | files | 14 | references/files.md | references/files.md |
 | roles | 3 | references/roles.md | references/roles.md |
 | tabs | 21 | references/tabs.md | references/tabs.md |

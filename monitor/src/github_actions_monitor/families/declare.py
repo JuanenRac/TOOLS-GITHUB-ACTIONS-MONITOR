@@ -109,3 +109,4 @@ class Family:
     ticks: tuple = ()             # tick(config, data): after each cycle of the complete edition; a failure is noted and never stops the loop
     egress: tuple = ()            # Egress
     checks: tuple = ()            # Check
+    alerts: object = None         # alerts(config, account) -> alerts in the shape of those of the sentinels (complete edition); it reads only what the part keeps

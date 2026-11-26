@@ -41,6 +41,8 @@ Le défaut reste votre propre connexion `gh`. Avec `github_token.enabled` activ�
 
 Avec `github_actions.enabled` activé, le moniteur peut relancer une exécution en échec (`rerun_failed`, `rerun_run`, `rerun_job`), annuler une exécution (`cancel`), fermer une issue ou une pull request (`close_issue`, `close_pr`) et en fusionner une (`merge_pr`, avec `github_actions.merge_method`). Seuls les noms de `github_actions.allowed` sont utilisables (par défaut `rerun_failed` et `cancel`). **Chaque action est confirmée séparément** : la page montre exactement ce qui sera envoyé (méthode et point d'accès) et n'envoie rien tant que vous n'avez pas confirmé ce plan avec le jeton à usage unique. Le jeton GitHub doit avoir la permission (`workflow` pour les exécutions, `repo` pour les issues et pull requests ; sinon le refus de GitHub est affiché). Chaque tentative est écrite dans `github_actions_log.jsonl`. L'assistant IA n'a aucun moyen d'en lancer une.
 
+Ajoutées par les vues de collaboration: `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch` ([COLLABORATION_fra.md](COLLABORATION_fra.md)).
+
 ## Exécuter un workflow ici avec act
 
 Avec `act.enabled` activé et des entrées `dépôt:fichier.yml:évènement` dans `act.allowed` (les trois exactes), un bouton exécute `act` sur le clone local après confirmation de la ligne de commande exacte. Aucun vrai secret n'est fourni (fichiers de secrets, variables, environnement et entrées vides, et un environnement minimal sans jeton), la sortie s'affiche au fil de l'eau, une exécution à la fois, avec la limite de durée `act.timeout_seconds`, et vous pouvez l'arrêter.

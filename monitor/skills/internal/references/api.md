@@ -19,6 +19,12 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/act/plan` | POST | admin | plan a local run of a workflow; nothing runs until it is confirmed (this computer only) |
 | `/api/act/status` | GET | viewer | progress of the local run |
 | `/api/act/stop` | POST | admin | stop the local run (this computer only) |
+| `/api/actions/dismiss` | POST | maintainer | set a red run aside for a while or restore it (kept by the monitor, nothing on GitHub) |
+| `/api/actions/dispatch-form` | GET | maintainer | the inputs of a workflow fired by hand; ?repo=&workflow=file.yml |
+| `/api/actions/environments` | GET | maintainer | the environments a run waits for; ?repo=&run= |
+| `/api/actions/fork-facts` | GET | maintainer | facts about the author of a fork run that waits for approval (actions.forks_help); ?repo=&run= |
+| `/api/actions/plan` | POST | admin | the plan of an action on GitHub (nothing is sent); confirmed with /api/gh-action/confirm |
+| `/api/actions/state` | GET | viewer | collaboration views: what waits for a person or a runner, last run of each lane, set aside runs, dependency pull requests, vulnerable repositories (and the ones not read), proposals |
 | `/api/advanced` | GET | admin | state of the opt-in features (token store, mirror, OpenTelemetry, runners) |
 | `/api/ai` | GET | viewer | prefix of the routes for AIs (see the routes below) |
 | `/api/ai/ack` | POST | maintainer | acknowledge an alert of the feed: changes only the local state, never GitHub (this computer only) |
