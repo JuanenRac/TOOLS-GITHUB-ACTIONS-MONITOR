@@ -25,6 +25,7 @@ from pathlib import Path
 from github_actions_monitor import i18n
 from github_actions_monitor.app import toolconfig
 from github_actions_monitor.data_pipeline import causes
+from github_actions_monitor.data_pipeline import repo_identity
 from github_actions_monitor.data_pipeline import githubstatus
 from github_actions_monitor.data_pipeline import alertflow
 from github_actions_monitor.security import envguard, private_io
@@ -73,7 +74,7 @@ def diff(old, new, loaded):
     events = []
 
     def ev(kind, level, where, url=None, **args):
-        events.append({"kind": kind, "code": kind, "level": level, "repo": where, "owner": owner_of(where), "text": i18n.t("evt." + kind, **args), "url": url, "args": args})
+        events.append({"kind": kind, "code": kind, "level": level, "repo": where, "repo_key": repo_identity.github(toolconfig.github_owner(), where) if where else "", "owner": owner_of(where), "text": i18n.t("evt." + kind, **args), "url": url, "args": args})
 
     for key, r in new["reds"].items():
         if key not in old["reds"]:

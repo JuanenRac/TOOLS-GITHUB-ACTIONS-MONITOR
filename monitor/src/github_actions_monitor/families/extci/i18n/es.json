@@ -66,5 +66,19 @@
  "cli.extci.need_source": "probe necesita --source LÍNEA",
  "cli.extci.seen": "Leído: {workflows} flujos, {builds} builds, {red} en rojo.",
  "cli.extci.failed": "No se pudo leer: {reason}",
- "cli.extci.none": "No hay fuentes de CI externas configuradas."
+ "cli.extci.none": "No hay fuentes de CI externas configuradas.",
+ "cfg.f.sources.multi_owner": "Cuentas de más de un dueño",
+ "cfg.h.sources.multi_owner": "Permite que una instalación registre cuentas de dueños distintos. La identidad de cada repositorio (fuente, dueño, nombre) se guarda siempre.",
+ "cfg.t.sources.multi_owner": "varios dueños",
+ "ui.cfg_b_sources": "Identidad de repositorios",
+ "ui.cfg_err_extci_owner": "otra cuenta de esta instalación es de un dueño distinto (activa sources.multi_owner)",
+ "cli.extci.help_identity": "identidad de repositorios: mostrar, planificar (no cambia nada) o aplicar la migración de los datos guardados",
+ "cli.extci.identity_owner": "Dueño de los datos guardados: {was}; dueño vigilado: {owner}",
+ "cli.extci.identity_done": "Hecho. Copia de lo que ha cambiado: {backup}",
+ "cli.extci.identity_nothing": "No hay nada que migrar.",
+ "doctor.t.extci": "Fuentes de CI externas",
+ "doctor.f.extci": "Una fuente no se puede leer o su línea no se entiende: ejecuta la orden de abajo.",
+ "doctor.t.extci_identity": "Identidad de repositorios",
+ "doctor.f.extci_identity": "Las cuentas de varios dueños necesitan sources.multi_owner, o los datos guardados son de otro dueño: mira el plan.",
+ "ui.extci.last_ok": "última lectura {at}"
 }

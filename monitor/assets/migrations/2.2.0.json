@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.2.0",
  "previous": "2.1.8",
- "digest": "2850c66351ccc47183e77dc902645372fdd2bc1d1232c2e0b6f69111caa337fb",
+ "digest": "2bab1cbd74451cd37b5d3c82e6a6407d355c771f01a732b732b5737e4d41f14c",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -269,6 +269,11 @@
      "re": "^[A-Za-z0-9._*?-]{1,100}=(standard|library|internal|sandbox)\\Z"
     },
     "default": []
+   },
+   {
+    "key": "sources.multi_owner",
+    "kind": "bool",
+    "default": false
    },
    {
     "key": "updates.notify_window",

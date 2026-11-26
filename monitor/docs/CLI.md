@@ -99,3 +99,11 @@ In the network mode the token is read from `MONITOR_ACCESS_TOKEN`, then `MONITOR
 ## Backup and the doctor
 
 `backup` and `doctor` work on the folders of the installation, so they need no running monitor. `doctor` exits `0` when all is well (warnings too), `1` when a check failed, `3` when there are only warnings and `--strict` (or `ops.doctor.strict_exit`) is on, and `4` when the doctor itself could not run; these are the codes of the doctor, the other commands keep the exit codes above. `backup` exits `0` when it is done and `1` when it is refused or the package does not verify. The guide [OPS.md](OPS.md) has the checks, the restore and the scheduled copy. The doctor also has `compare_window` (can the comparison of two periods look back two windows with the history it asks for and keeps) and `etag` (the share of conditional reads answered with 304 in the monitor that runs here, and whether GitHub answers come back without an ETag).
+
+## Identity of a repository, several owners
+
+Command line: `identity status`, `identity plan`, `identity apply`.
+
+```
+python bin/monitor_cli.py identity plan
+```

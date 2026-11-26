@@ -161,6 +161,40 @@ def create_account(account_id, owner="", base=None, example=None):
     return path
 
 
+def owners(base=None):
+    """{account id: its github_owner in lower case} of the accounts that name one."""
+    out = {}
+    for account_id in list_accounts(base):
+        try:
+            data = json.loads(config_path(account_id, base).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        name = data.get("github_owner") if isinstance(data, dict) else None
+        if isinstance(name, str) and name.strip():
+            out[account_id] = name.strip().lower()
+    return out
+
+
+def multi_owner_allowed(base=None):
+    """True when some account of this installation has `sources.multi_owner` on."""
+    for account_id in list_accounts(base):
+        try:
+            data = json.loads(config_path(account_id, base).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        block = data.get("sources") if isinstance(data, dict) else None
+        if isinstance(block, dict) and block.get("multi_owner") is True:
+            return True
+    return False
+
+
+def owner_conflict(account_id, owner, base=None):
+    """True when giving `owner` to the account would put a second owner in this installation while `sources.multi_owner` is off. Accounts that already have several owners keep working."""
+    owner = str(owner or "").strip().lower()
+    others = {name for ident, name in owners(base).items() if ident != account_id}
+    return bool(owner and others and owner not in others and not multi_owner_allowed(base))
+
+
 def migration_plan(base=None, source=None, account_id=DEFAULT_ID):
     """What `--migrate-accounts` would do: [(from, to, kind)] for every file of the old layout that exists next to the code, copied into accounts/<id>/. Nothing is written.
     Refuses (returns []) when that account already exists, so a second run never mixes two states."""

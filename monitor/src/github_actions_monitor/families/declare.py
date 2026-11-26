@@ -90,6 +90,15 @@ class Egress:
 
 
 @dataclass(frozen=True)
+class Check:
+    """A check of `monitor_cli doctor` (complete edition): `run(config)` returns (ok | warn | fail, detail). Its texts are doctor.t.<id> and doctor.f.<id> in the i18n of the part; `fix` is the command shown
+    when it is not ok."""
+    id: str
+    run: object
+    fix: str = ""
+
+
+@dataclass(frozen=True)
 class Family:
     name: str
     defaults: dict = field(default_factory=dict)      # merged into actions_monitor.DEFAULTS; it may add keys inside a block that exists, never change one
@@ -99,3 +108,4 @@ class Family:
     commands: tuple = ()          # Command
     ticks: tuple = ()             # tick(config, data): after each cycle of the complete edition; a failure is noted and never stops the loop
     egress: tuple = ()            # Egress
+    checks: tuple = ()            # Check

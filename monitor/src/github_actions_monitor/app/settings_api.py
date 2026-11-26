@@ -1376,6 +1376,15 @@ def apply(changes, path=CONFIG_FILE, lite=False):
         return {"ok": False, "errors": {"_": "busy"}}
 
 
+def _second_owner(path, owner):
+    """True when the configuration is the one of an account and `owner` would be a second owner of the installation while `sources.multi_owner` is off (accounts/accounts.py)."""
+    from github_actions_monitor.accounts import accounts
+    account_id = path.parent.name
+    if not accounts.valid_id(account_id) or path != accounts.config_path(account_id):
+        return False
+    return accounts.owner_conflict(account_id, owner)
+
+
 def _apply_locked(clean, path):
     try:
         current = _read_file(path) if path.is_file() else {}
@@ -1391,6 +1400,8 @@ def _apply_locked(clean, path):
     clashes = {key: "invalid" for key in changed if key in taken and key in envguard.ENV_SETTINGS}      # a variable is named by ONE setting: the second to say it is refused
     if clashes:
         return {"ok": False, "errors": clashes}
+    if "github_owner" in changed and clean.get("sources.multi_owner") is not True and _second_owner(path, clean["github_owner"]):
+        return {"ok": False, "errors": {"github_owner": "extci_owner"}}
     for key in changed:
         _set(current, key, clean[key])
     backup = _backup(path)

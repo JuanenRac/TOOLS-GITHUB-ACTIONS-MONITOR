@@ -7,7 +7,7 @@
 
 Generated from the code. It reads what the running monitor says (and never writes to GitHub). `--json` prints one JSON document; the exit codes are stable.
 
-Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `briefs`, `api`, `install-skill`, `gh-token`, `ai`, `backup`, `update`, `compare`, `screens`, `docs`, `toolbox`, `watch`, `monitor`, `completions`, `kiosk`, `metrics`, `proposals`, `keyring`, `verify-release`, `external-ci`, `posture`.
+Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `briefs`, `api`, `install-skill`, `gh-token`, `ai`, `backup`, `update`, `compare`, `screens`, `docs`, `toolbox`, `watch`, `monitor`, `completions`, `kiosk`, `metrics`, `proposals`, `keyring`, `verify-release`, `external-ci`, `identity`, `posture`.
 
 | flag | what |
 | --- | --- |

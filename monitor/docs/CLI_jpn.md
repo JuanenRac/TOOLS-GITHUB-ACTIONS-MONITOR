@@ -99,3 +99,11 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python bin/monitor
 ## バックアップと doctor
 
 `backup` と `doctor` はインストールのフォルダを対象に動作するため、モニターが動いている必要はありません。`doctor` は、すべて正常なら (警告があっても) `0`、チェックが失敗したら `1`、警告のみで `--strict` (または `ops.doctor.strict_exit`) がオンなら `3`、doctor 自体を実行できなければ `4` で終了します。これは doctor のコードで、他のコマンドは上の終了コードのままです。`backup` は完了すれば `0`、拒否された場合やパッケージの検証に失敗した場合は `1` で終了します。チェック、復元、定期バックアップは [OPS_jpn.md](OPS_jpn.md) のガイドにあります。 doctor には `compare_window`（2 期間の比較が、必要とし保持する履歴で期間 2 つ分さかのぼれるか）と `etag`（ここで動いているモニターで条件付き読み取りが 304 で返された割合と、GitHub の応答が ETag なしで届いていないか）もあります。
+
+## リポジトリの識別と複数の所有者
+
+コマンドライン：`identity status`、`identity plan`、`identity apply`。
+
+```
+python bin/monitor_cli.py identity plan
+```

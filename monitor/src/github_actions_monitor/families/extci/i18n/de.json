@@ -66,5 +66,19 @@
  "cli.extci.need_source": "probe braucht --source ZEILE",
  "cli.extci.seen": "Gelesen: {workflows} Workflows, {builds} Builds, {red} rot.",
  "cli.extci.failed": "Konnte nicht gelesen werden: {reason}",
- "cli.extci.none": "Keine externe CI-Quelle eingerichtet."
+ "cli.extci.none": "Keine externe CI-Quelle eingerichtet.",
+ "cfg.f.sources.multi_owner": "Konten von mehr als einem Eigentümer",
+ "cfg.h.sources.multi_owner": "Erlaubt einer Installation, Konten verschiedener Eigentümer zu registrieren. Die Identität jedes Repositorys (Quelle, Eigentümer, Name) wird immer gespeichert.",
+ "cfg.t.sources.multi_owner": "mehrere Eigentümer",
+ "ui.cfg_b_sources": "Repository-Identität",
+ "ui.cfg_err_extci_owner": "ein anderes Konto dieser Installation gehört einem anderen Eigentümer (sources.multi_owner einschalten)",
+ "cli.extci.help_identity": "Repository-Identität: anzeigen, planen (ändert nichts) oder die Migration der gespeicherten Daten anwenden",
+ "cli.extci.identity_owner": "Eigentümer der gespeicherten Daten: {was}; beobachteter Eigentümer: {owner}",
+ "cli.extci.identity_done": "Fertig. Kopie des Geänderten: {backup}",
+ "cli.extci.identity_nothing": "Nichts zu migrieren.",
+ "doctor.t.extci": "Externe CI-Quellen",
+ "doctor.f.extci": "Eine Quelle kann nicht gelesen werden oder ihre Zeile wird nicht verstanden: den Befehl unten ausführen.",
+ "doctor.t.extci_identity": "Repository-Identität",
+ "doctor.f.extci_identity": "Konten mehrerer Eigentümer brauchen sources.multi_owner, oder die gespeicherten Daten gehören einem anderen Eigentümer: den Plan ansehen.",
+ "ui.extci.last_ok": "zuletzt gelesen {at}"
 }

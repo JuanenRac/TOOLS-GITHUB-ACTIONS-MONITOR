@@ -39,3 +39,9 @@ azure;repo=my-mirror;url=https://dev.azure.com/my-org;project=my-project
 ## 尚未验证
 
 四个适配器仅用模拟服务器测试(`tools/extci_fake_servers.py`)。Jenkins 和 Azure Pipelines 带有**实验性**标签(`external_ci.experimental`),需要 `external_ci.jenkins.enabled` / `external_ci.azure.enabled`。编写新适配器:在 `integrations/external_ci/extci_adapters.py` 中写函数 `(reader, source, cfg) -> (runs, missing)`,只通过 `reader` 读取。
+
+## 仓库身份与多个所有者
+
+在监视器内部，一个仓库是（来源、所有者、名称），记作 `repo_key`（`github:所有者/名称`、`gitlab@主机:组/名称`）；路由仍按名称指代它。来自两处的同名仓库不会共用标识、运行记录或告警：当两个同类服务器镜像同一名称时，标签中会加上主机名。监视器记录其保存的数据属于哪个所有者。所有者变更后，仓库的静音、告警台账以及事件流的最后状态会先复制到 `identity_backup/`，然后搁置（保留，不删除）。这在一个周期之后进行；`identity plan` 只显示而不更改，`identity apply` 立即执行，`identity status` 显示记录。`sources.multi_owner`（默认关闭）允许登记不同所有者的账户；已经有多个所有者的安装照常运行，doctor 会指出。`doctor` 还会读取每个外部来源一次。
+
+命令行：`identity status`、`identity plan`、`identity apply`。

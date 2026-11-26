@@ -2609,6 +2609,7 @@ async function openAbout(){
   html+=`<h3>${esc(T("ui.about_credits"))}</h3>`+dl((a.credits||[]).map(c=>[c.name+" ("+c.license+")",T("ui.credit_"+c.id)+" · "+T(c.installed?"ui.about_installed":"ui.about_not_installed")]));
   const ops=a.edition==="lite"?null:await opsLoad();if(ops)html+=opsCard(ops);
   body.innerHTML=html;aboutLogosWire(a.logo);opsWire();
+  if(window.FAM)window.FAM.run("about",body);
 }
 /* the logos at the top of About: the one of the monitor (the drawing of the side panel, drawn again, so no image is loaded) and, when Settings asks for it (ui.about_org_logo), the one of the organization;
    an organization logo that is not there or cannot be read leaves a short note and never breaks the panel */

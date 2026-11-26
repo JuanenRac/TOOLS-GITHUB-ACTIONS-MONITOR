@@ -99,3 +99,11 @@ Im Netzwerkmodus wird das Token aus `MONITOR_ACCESS_TOKEN`, dann `MONITOR_TOKEN`
 ## Sicherung und der Doctor
 
 `backup` und `doctor` arbeiten auf den Ordnern der Installation und brauchen daher keinen laufenden Monitor. `doctor` endet mit `0`, wenn alles in Ordnung ist (auch mit Warnungen), mit `1`, wenn eine Prüfung fehlschlug, mit `3`, wenn es nur Warnungen gibt und `--strict` (oder `ops.doctor.strict_exit`) aktiv ist, und mit `4`, wenn der Doctor selbst nicht laufen konnte; das sind die Codes des Doctors, die anderen Befehle behalten die oben genannten Exit-Codes. `backup` endet mit `0`, wenn es erledigt ist, und mit `1`, wenn es abgelehnt wird oder das Paket die Prüfung nicht besteht. Die Anleitung [OPS_deu.md](OPS_deu.md) enthält die Prüfungen, die Wiederherstellung und die geplante Sicherung. Der Doctor hat außerdem `compare_window` (kann der Vergleich zweier Zeiträume zwei Fenster zurückschauen, mit dem Verlauf, den er verlangt und behält) und `etag` (Anteil der bedingten Abfragen, die mit 304 beantwortet wurden, im hier laufenden Monitor, und ob Antworten von GitHub ohne ETag ankommen).
+
+## Identität eines Repositorys, mehrere Eigentümer
+
+Befehlszeile: `identity status`, `identity plan`, `identity apply`.
+
+```
+python bin/monitor_cli.py identity plan
+```

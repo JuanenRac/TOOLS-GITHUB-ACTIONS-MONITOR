@@ -9,7 +9,7 @@ import copy
 import importlib
 from pathlib import Path
 
-from github_actions_monitor.families.declare import Command, Egress, Family, Option, Request, Route, Setting  # noqa: F401 - the one place to import them from
+from github_actions_monitor.families.declare import Check, Command, Egress, Family, Option, Request, Route, Setting  # noqa: F401 - the one place to import them from
 
 NAMES = ("supply", "plugins", "assistant", "extci", "compliance", "actions", "fleet", "posture")      # the order in which their settings, commands and pages are added
 FOLDER = Path(__file__).resolve().parent
@@ -134,6 +134,12 @@ def exempt():
 
 def commands():
     return [command for family in all_families() for command in family.commands]
+
+
+# --- the doctor --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+def checks():
+    return [check for family in all_families() for check in family.checks]
 
 
 # --- the loop and the network ----------------------------------------------------------------------------------------------------------------------------------------------------------

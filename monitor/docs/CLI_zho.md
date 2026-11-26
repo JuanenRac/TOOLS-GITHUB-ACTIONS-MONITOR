@@ -99,3 +99,11 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python bin/monitor
 ## 备份与 doctor
 
 `backup` 和 `doctor` 直接作用于安装的文件夹，因此不需要监视器在运行。`doctor` 在一切正常时（含警告）以 `0` 退出，检查失败时为 `1`，只有警告且 `--strict`（或 `ops.doctor.strict_exit`）开启时为 `3`，doctor 本身无法运行时为 `4`；这些是 doctor 的退出码，其他命令保持上文的退出码。`backup` 完成时以 `0` 退出，被拒绝或备份包未通过验证时为 `1`。检查项、恢复和计划备份见指南 [OPS_zho.md](OPS_zho.md)。 doctor 还有 `compare_window`（两个时期的对比能否用它要求并保留的历史回溯两个窗口）和 `etag`（本机运行的监视器中条件读取以 304 应答的比例，以及 GitHub 的响应是否不带 ETag 返回）。
+
+## 仓库身份与多个所有者
+
+命令行：`identity status`、`identity plan`、`identity apply`。
+
+```
+python bin/monitor_cli.py identity plan
+```

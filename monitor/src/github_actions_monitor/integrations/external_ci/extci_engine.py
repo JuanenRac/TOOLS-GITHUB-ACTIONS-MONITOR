@@ -9,7 +9,7 @@ import time
 from urllib.parse import urlsplit
 
 from github_actions_monitor import families, i18n
-from github_actions_monitor.data_pipeline import redrule
+from github_actions_monitor.data_pipeline import redrule, repo_identity
 from github_actions_monitor.integrations.external_ci import extci_adapters as adapters
 from github_actions_monitor.integrations.external_ci.extci_fetch import Failed, Reader
 from github_actions_monitor.security import redactor
@@ -54,10 +54,27 @@ def configured(config):
     out, seen = [], set()
     for line in cfg["sources"] if isinstance(cfg["sources"], list) else []:
         source, _why = parse(line)
-        if source and source["id"] not in seen and (source["kind"] not in adapters.EXPERIMENTAL or cfg[source["kind"]]["enabled"]):
-            seen.add(source["id"])
-            out.append(source)
-    return out[:MAX_SOURCES]
+        if source and (source["kind"] not in adapters.EXPERIMENTAL or cfg[source["kind"]]["enabled"]):
+            source["host"] = repo_identity.host_of(source["url"])
+            unique = (source["id"], source["host"])
+            if unique not in seen:
+                seen.add(unique)
+                out.append(source)
+    return identified(out[:MAX_SOURCES])
+
+
+def identified(sources):
+    """Gives each source its repository key and, only when two sources would otherwise be told apart by nothing (one kind and one mirror on two servers), puts the host in their id and label."""
+    hosts_of = {}
+    for source in sources:
+        hosts_of.setdefault((source["kind"], source["repo"]), set()).add(source["host"])
+    for source in sources:
+        source["repo_key"] = repo_identity.external(source["kind"], source["url"], source.get("project") or source.get("job"), source["repo"])
+        twin = len(hosts_of[(source["kind"], source["repo"])]) > 1
+        source["label"] = f"{source['kind']} {source['host']}" if twin else source["kind"]
+        if twin:
+            source["id"] = f"{source['id']}@{source['host']}"
+    return sources
 
 
 def active(config):
@@ -105,7 +122,8 @@ def verdicts(runs):
 def row_of(source, item):
     """A red row with the fields of the red workflows of Actions, so that the feed, the notifications, the header and the screens treat it the same way."""
     last = item["run"]
-    return {"repo": source["repo"], "workflow": f"{item['workflow']} ({source['kind']})", "conclusion": last["conclusion"], "since": last["started"], "url": last["url"], "streak": item["streak"],
+    label = source.get("label") or source["kind"]
+    return {"repo": source["repo"], "repo_key": source.get("repo_key", ""), "workflow": f"{item['workflow']} ({label})", "conclusion": last["conclusion"], "since": last["started"], "url": last["url"], "streak": item["streak"],
             "sha": last["sha"], "origin": "external", "branch": last["branch"], "kind": "build", "run_id": last["id"], "reusable": [], "aged": False, "event": last["event"], "class": "main",
             "file": item["workflow"], "recent_runs": item["total"], "fail_rate": round(100 * item["failed"] / item["total"]), "source": last["source"], "source_id": source["id"]}
 
@@ -208,10 +226,12 @@ def red_rows(config):
 
 
 def runs(config):
+    """The runs of every source for the score. Each name carries its source, so that a build of another server is never counted as a run of the workflow of Actions with the same name."""
     if not active(config):
         return []
     with LOCK:
-        return [dict(r) for source in configured(config) for r in STATE.get(source["id"], {}).get("runs", []) if r["conclusion"] != "unknown"]
+        return [dict(r, name=f"{r['name']} ({source['label']})", repo_key=source["repo_key"]) for source in configured(config)
+                for r in STATE.get(source["id"], {}).get("runs", []) if r["conclusion"] != "unknown"]
 
 
 def degraded_reason(entry, cfg):
@@ -234,8 +254,9 @@ def alerts(config, account=""):
             if not entry:
                 continue
             for row in entry["reds"]:
-                out.append({"id": f"{CODE_RED}:{source['kind']}:{row['repo']}:{row['file']}:{row['branch'] or ''}", "code": CODE_RED, "level": cfg["alert"]["level"], "sentinel": "ci", "account_id": account,
-                            "repo": row["repo"], "title": i18n.t("ui.extci.alert_red", workflow=row["workflow"], repo=row["repo"]), "created_at": row["since"],
+                where = f"{source['kind']}@{source['host']}" if source["label"] != source["kind"] else source["kind"]
+                out.append({"id": f"{CODE_RED}:{where}:{row['repo']}:{row['file']}:{row['branch'] or ''}", "code": CODE_RED, "level": cfg["alert"]["level"], "sentinel": "ci", "account_id": account,
+                            "repo": row["repo"], "repo_key": source["repo_key"], "title": i18n.t("ui.extci.alert_red", workflow=row["workflow"], repo=row["repo"]), "created_at": row["since"],
                             "details": {"workflow": row["file"], "branch": row["branch"], "url": row["url"], "source": source["kind"], "streak": row["streak"], "stale": bool(entry["reason"])}})
             why = degraded_reason(entry, cfg)
             if why:
@@ -264,7 +285,7 @@ def status(config):
                 state = "degraded"
             else:
                 state = "red" if entry["reds"] else ("ok" if entry["judged"] else "no_builds")
-            rows.append({"id": source["id"], "kind": source["kind"], "repo": source["repo"], "state": state, "reason": why or (entry["reason"] if entry else ""),
+            rows.append({"id": source["id"], "kind": source["kind"], "repo": source["repo"], "repo_key": source["repo_key"], "state": state, "reason": why or (entry["reason"] if entry else ""),
                          "experimental": cfg["experimental"] is True and source["kind"] in adapters.EXPERIMENTAL, "last_ok": adapters.iso(entry["last_ok"]) if entry else "",
                          "next_try": adapters.iso(entry["next"]) if entry else "", "red": [{"workflow": r["workflow"], "branch": r["branch"], "url": r["url"], "run_id": r["run_id"]} for r in (entry["reds"] if entry else [])],
                          "logs": sorted(entry["logs"]) if entry and cfg["logs"]["enabled"] else []})

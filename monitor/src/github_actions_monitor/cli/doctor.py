@@ -103,6 +103,18 @@ def _writable(folder):
         return False
 
 
+def _part_checks(config, out, order, fixes):
+    """The checks the parts of the monitor declare (families/). One that cannot run answers warn: the doctor always answers."""
+    from github_actions_monitor import families
+    for check in families.checks():
+        try:
+            out[check.id] = check.run(config)
+        except Exception as error:   # noqa: BLE001
+            out[check.id] = ("warn", f"could not run ({type(error).__name__})")
+        order, fixes[check.id] = order + (check.id,), check.fix
+    return order, fixes
+
+
 def run(runner=default_runner, folder=HERE, ports=None, python=None, config=None, edition=None, reader=None, etag_reader=None):
     """The list of checks, in ORDER (and, for edition="complete", ORDER_OPS after them). `config` is the content of the configuration file ({} when there is none)."""
     config = config if isinstance(config, dict) else {}
@@ -170,7 +182,10 @@ def run(runner=default_runner, folder=HERE, ports=None, python=None, config=None
         from github_actions_monitor.ops import checks as ops_checks
         out.update(ops_checks.run_all(config, folder))
         order = ORDER + ORDER_OPS
-    return [{"id": name, "status": out[name][0], "detail": out[name][1], "fix": FIX[name] if out[name][0] != "ok" else ""} for name in order]
+    fixes = dict(FIX)
+    if edition == "complete":
+        order, fixes = _part_checks(config, out, order, fixes)
+    return [{"id": name, "status": out[name][0], "detail": out[name][1], "fix": fixes[name] if out[name][0] != "ok" else ""} for name in order]
 
 
 LATENCY_WARN_SECONDS = 120      # a push that GitHub tells in its events more than this long after the run began makes `--latency` warn
