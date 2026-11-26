@@ -31,5 +31,20 @@
  "cli.supply_result": "Signature : {result} (clé {key})",
  "cli.supply_signature": "Signature de SHA256SUMS : {result}",
  "cli.supply_release_ok": "Les fichiers de la version sont complets et signés par le projet.",
- "cli.supply_release_bad": "Ces fichiers ne peuvent pas être considérés comme une version du projet."
+ "cli.supply_release_bad": "Ces fichiers ne peuvent pas être considérés comme une version du projet.",
+ "cfg.f.ops.verify_release.fetch": "Autoriser la vérification à télécharger la version",
+ "cfg.h.ops.verify_release.fetch": "Désactivé par défaut : `verify-release` ne lit qu'un dossier que vous donnez. Activé, `verify-release --fetch` télécharge de GitHub les fichiers de la version installée pour les vérifier.",
+ "egress.use.supply_verify": "téléchargement des fichiers de la version installée pour les vérifier",
+ "egress.fail.supply_verify": "`verify-release --fetch` ne peut pas télécharger ; la vérification d'un dossier téléchargé fonctionne toujours",
+ "cli.supply_help_installed": "comparer aussi cette installation avec la nomenclature de la version",
+ "cli.supply_help_attestations": "demander aussi à GitHub l'attestation du zip (nécessite gh et le réseau)",
+ "cli.supply_help_fetch": "télécharger les fichiers de la version installée (nécessite ops.verify_release.fetch)",
+ "cli.supply_help_doctor": "avec doctor : vérifier un dossier de fichiers de version et cette installation",
+ "cli.supply_installed_ok": "Cette installation correspond à la version ({count} fichiers).",
+ "cli.supply_installed_bad": "Cette installation diffère de la version : {changed} modifiés, {missing} manquants ({why}).",
+ "cli.supply_attestation": "Attestation du zip : {result}",
+ "cli.supply_fetch_off": "Le téléchargement est désactivé : activez d'abord ops.verify_release.fetch dans les réglages.",
+ "cli.supply_fetch_failed": "Impossible de télécharger la version : {why}",
+ "cli.supply_expires_soon": "La clé {id} expire dans {days} jours : installez avant une version avec la clé suivante.",
+ "cli.supply_rotation": "Annonce d'une nouvelle clé : {result} (nouvelle clé {key})"
 }

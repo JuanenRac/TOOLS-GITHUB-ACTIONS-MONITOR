@@ -55,6 +55,7 @@
       if(j&&j.show&&j.version!==later())open(j);
     }catch(e){console.error(e)}
   }
+  window.supplyNotice={show:open};      /* tools/make_screenshots.py draws the window with invented data */
   let started=false;
   window.FAM.on("data",()=>{if(started)return;started=true;setTimeout(look,1500);setInterval(look,3600000)});
 })();

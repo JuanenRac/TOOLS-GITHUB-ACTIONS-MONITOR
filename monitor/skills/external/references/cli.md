@@ -72,5 +72,9 @@ Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `
 | `--expires` | the last day the key is valid, YYYY-MM-DD |
 | `--document` | the file to verify; its signature is the same name with .ed25519.sig |
 | `--folder` | the folder with the files of a release |
+| `--installed` | also compare this installation with the bill of materials of the release |
+| `--attestations` | also ask GitHub for the attestation of the zip (needs gh and the network) |
+| `--fetch` | download the files of the installed version (needs ops.verify_release.fetch) |
+| `--verify-release` | with doctor: check a folder of release files and this installation |
 
 Other entry points: `bin/mcp_server.py` (MCP over standard input and output; `--allow-ack`, `--allow-lessons`), `bin/ai_hook.py` (gate script of an AI tool), `bin/read_report.py`, `bin/actions_monitor.py --doctor`.

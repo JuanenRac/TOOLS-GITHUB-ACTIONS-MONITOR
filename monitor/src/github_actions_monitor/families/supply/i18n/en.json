@@ -31,5 +31,20 @@
  "cli.supply_result": "Signature: {result} (key {key})",
  "cli.supply_signature": "Signature of SHA256SUMS: {result}",
  "cli.supply_release_ok": "The release files are complete and signed by the project.",
- "cli.supply_release_bad": "These files cannot be trusted as a release of the project."
+ "cli.supply_release_bad": "These files cannot be trusted as a release of the project.",
+ "cfg.f.ops.verify_release.fetch": "Let the release check download the release",
+ "cfg.h.ops.verify_release.fetch": "Off by default: `verify-release` only reads a folder you give it. With this on, `verify-release --fetch` downloads the files of the installed version from GitHub to check them.",
+ "egress.use.supply_verify": "download of the files of the installed release, to check them",
+ "egress.fail.supply_verify": "`verify-release --fetch` cannot download; the check of a folder you downloaded still works",
+ "cli.supply_help_installed": "also compare this installation with the bill of materials of the release",
+ "cli.supply_help_attestations": "also ask GitHub for the attestation of the zip (needs gh and the network)",
+ "cli.supply_help_fetch": "download the files of the installed version (needs ops.verify_release.fetch)",
+ "cli.supply_help_doctor": "with doctor: check a folder of release files and this installation",
+ "cli.supply_installed_ok": "This installation matches the release ({count} files).",
+ "cli.supply_installed_bad": "This installation differs from the release: {changed} changed, {missing} missing ({why}).",
+ "cli.supply_attestation": "Attestation of the zip: {result}",
+ "cli.supply_fetch_off": "Downloading is off: switch on ops.verify_release.fetch in Settings first.",
+ "cli.supply_fetch_failed": "The release could not be downloaded: {why}",
+ "cli.supply_expires_soon": "Key {id} expires in {days} days: a release with the next key must be installed before then.",
+ "cli.supply_rotation": "Announcement of a new key: {result} (new key {key})"
 }

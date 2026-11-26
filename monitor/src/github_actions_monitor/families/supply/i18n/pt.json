@@ -31,5 +31,20 @@
  "cli.supply_result": "Assinatura: {result} (chave {key})",
  "cli.supply_signature": "Assinatura de SHA256SUMS: {result}",
  "cli.supply_release_ok": "Os ficheiros da versão estão completos e assinados pelo projeto.",
- "cli.supply_release_bad": "Não se pode confiar nestes ficheiros como versão do projeto."
+ "cli.supply_release_bad": "Não se pode confiar nestes ficheiros como versão do projeto.",
+ "cfg.f.ops.verify_release.fetch": "Permitir que a verificação transfira a versão",
+ "cfg.h.ops.verify_release.fetch": "Desligado por omissão: `verify-release` só lê a pasta que indicar. Ligado, `verify-release --fetch` transfere do GitHub os ficheiros da versão instalada para os verificar.",
+ "egress.use.supply_verify": "transferência dos ficheiros da versão instalada para os verificar",
+ "egress.fail.supply_verify": "`verify-release --fetch` não consegue transferir; a verificação de uma pasta transferida continua a funcionar",
+ "cli.supply_help_installed": "comparar também esta instalação com a lista de materiais da versão",
+ "cli.supply_help_attestations": "pedir também ao GitHub a atestação do zip (precisa de gh e rede)",
+ "cli.supply_help_fetch": "transferir os ficheiros da versão instalada (precisa de ops.verify_release.fetch)",
+ "cli.supply_help_doctor": "com doctor: verificar uma pasta de ficheiros de versão e esta instalação",
+ "cli.supply_installed_ok": "Esta instalação coincide com a versão ({count} ficheiros).",
+ "cli.supply_installed_bad": "Esta instalação difere da versão: {changed} alterados, {missing} em falta ({why}).",
+ "cli.supply_attestation": "Atestação do zip: {result}",
+ "cli.supply_fetch_off": "A transferência está desligada: ligue primeiro ops.verify_release.fetch nas definições.",
+ "cli.supply_fetch_failed": "Não foi possível transferir a versão: {why}",
+ "cli.supply_expires_soon": "A chave {id} expira em {days} dias: antes disso instale uma versão com a chave seguinte.",
+ "cli.supply_rotation": "Anúncio de chave nova: {result} (chave nova {key})"
 }

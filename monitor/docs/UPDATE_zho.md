@@ -32,6 +32,8 @@
 
 除 zip 外，发布还包含 `monitor_updater.py`、两份物料清单（CycloneDX 格式的 `github_actions_monitor.cdx.json` 和 SPDX 格式的 `github_actions_monitor.spdx.json`）、每个文件的签名，以及 GitHub 对构建过程的证明（attestation），可用 `gh attestation verify github_actions_monitor.zip --repo JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR` 校验。签名证明谁持有密钥；证明记录说明是哪个工作流构建了该文件。这是两项独立的检查。
 
+**密钥轮换。** 新密钥随一个在重叠期内同时携带新旧密钥的发布分发；不再受信任的密钥在之后的发布中移除（或标记为吊销）。cosign 包（`github_actions_monitor.zip.cosign.bundle`）记录工作流的无密钥签名，可用 `cosign verify-blob --bundle github_actions_monitor.zip.cosign.bundle --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/.github/workflows/release-build.yml@refs/heads/main github_actions_monitor.zip` 校验。
+
 ## 新版本提醒与命令
 
 当更新检查（`updates.check`）发现新版本时，完整版会用窗口以你的语言显示变更摘要、更新日志链接和进入更新页面的按钮（设置 `updates.notify_window`，默认开启）。“稍后”仅在本次浏览器会话内关闭；“不再提醒此版本”只静默该版本。墙面屏和展示屏上绝不出现。其接口为 `/api/supply/update-notice` 和 `/api/supply/update-dismiss`。

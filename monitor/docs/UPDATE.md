@@ -32,6 +32,8 @@ Public key (Ed25519, hex): `380c75210e444f71bc4fe4b9aa7cb451aad5ef2592711f7dc6ba
 
 Besides the zip, a release carries `monitor_updater.py`, two bills of materials (`github_actions_monitor.cdx.json` in CycloneDX and `github_actions_monitor.spdx.json` in SPDX), a signature next to each file and the attestations GitHub makes of the build, which you can check with `gh attestation verify github_actions_monitor.zip --repo JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR`. The signature proves who holds the key; the attestation proves which workflow built the file. They are two separate checks.
 
+**Key rotation.** A new key travels in a release that carries both the old and the new one during an overlap; a key that is no longer trusted is dropped (or marked revoked) in a later release. A cosign bundle (`github_actions_monitor.zip.cosign.bundle`) records the keyless signature of the workflow; check it with `cosign verify-blob --bundle github_actions_monitor.zip.cosign.bundle --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/.github/workflows/release-build.yml@refs/heads/main github_actions_monitor.zip`.
+
 ## The notice of a new version and the commands
 
 When the update check (`updates.check`) finds a newer version, a window in the Complete edition shows the summary of its changes in your language, a link to the changelog and a button to the Updates page (setting `updates.notify_window`, on by default). "Later" closes it for this browser session; "Do not announce this version" silences that version only. It never appears on wall or kiosk screens. Its routes are `/api/supply/update-notice` and `/api/supply/update-dismiss`.

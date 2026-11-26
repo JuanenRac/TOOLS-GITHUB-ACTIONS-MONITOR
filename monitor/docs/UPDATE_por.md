@@ -32,6 +32,8 @@ Chave pública (Ed25519, hex): `380c75210e444f71bc4fe4b9aa7cb451aad5ef2592711f7d
 
 Além do zip, uma versão inclui `monitor_updater.py`, duas listas de materiais (`github_actions_monitor.cdx.json` em CycloneDX e `github_actions_monitor.spdx.json` em SPDX), uma assinatura junto de cada ficheiro e as atestações que o GitHub faz da compilação, que se verificam com `gh attestation verify github_actions_monitor.zip --repo JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR`. A assinatura prova quem tem a chave; a atestação prova que workflow construiu o ficheiro. São duas verificações separadas.
 
+**Rotação da chave.** Uma chave nova chega numa versão que traz a antiga e a nova durante uma sobreposição; uma chave que deixa de ser de confiança é retirada (ou marcada como revogada) numa versão posterior. O pacote cosign (`github_actions_monitor.zip.cosign.bundle`) regista a assinatura sem chave do workflow; verifica-se com `cosign verify-blob --bundle github_actions_monitor.zip.cosign.bundle --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/.github/workflows/release-build.yml@refs/heads/main github_actions_monitor.zip`.
+
 ## O aviso de versão nova e os comandos
 
 Quando a verificação (`updates.check`) encontra uma versão mais nova, uma janela na edição Completa mostra o resumo das alterações no seu idioma, uma ligação para o registo e um botão para a página Atualizações (definição `updates.notify_window`, ligada por omissão). «Mais tarde» fecha-a nesta sessão do navegador; «Não avisar desta versão» silencia apenas essa versão. Nunca aparece em ecrãs de parede ou quiosque. As suas rotas são `/api/supply/update-notice` e `/api/supply/update-dismiss`.

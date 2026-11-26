@@ -4,10 +4,15 @@
  "format": 1,
  "version": "2.2.0",
  "previous": "2.1.8",
- "digest": "5553496564b4c4fb212ac77eb3905326d0a8beaa6356fdd597e351d238075e6b",
+ "digest": "24e891e45c0b36f1beb559a1152768242c1a0f7b7f2e4628bae68d38e602f44e",
  "data_schema": 2,
  "settings": {
   "added": [
+   {
+    "key": "ops.verify_release.fetch",
+    "kind": "bool",
+    "default": false
+   },
    {
     "key": "updates.notify_window",
     "kind": "bool",

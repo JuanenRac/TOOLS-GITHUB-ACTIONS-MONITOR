@@ -31,5 +31,20 @@
  "cli.supply_result": "Firma: {result} (clave {key})",
  "cli.supply_signature": "Firma de SHA256SUMS: {result}",
  "cli.supply_release_ok": "Los ficheros de la release están completos y firmados por el proyecto.",
- "cli.supply_release_bad": "No se puede confiar en estos ficheros como release del proyecto."
+ "cli.supply_release_bad": "No se puede confiar en estos ficheros como release del proyecto.",
+ "cfg.f.ops.verify_release.fetch": "Permitir que la comprobación de release la descargue",
+ "cfg.h.ops.verify_release.fetch": "Apagado por defecto: `verify-release` solo lee una carpeta que le des. Encendido, `verify-release --fetch` descarga de GitHub los ficheros de la versión instalada para comprobarlos.",
+ "egress.use.supply_verify": "descarga de los ficheros de la release instalada para comprobarlos",
+ "egress.fail.supply_verify": "`verify-release --fetch` no puede descargar; la comprobación de una carpeta descargada sigue funcionando",
+ "cli.supply_help_installed": "comparar además esta instalación con la lista de materiales de la release",
+ "cli.supply_help_attestations": "preguntar además a GitHub por la atestación del zip (necesita gh y red)",
+ "cli.supply_help_fetch": "descargar los ficheros de la versión instalada (necesita ops.verify_release.fetch)",
+ "cli.supply_help_doctor": "con doctor: comprobar una carpeta de ficheros de release y esta instalación",
+ "cli.supply_installed_ok": "Esta instalación coincide con la release ({count} ficheros).",
+ "cli.supply_installed_bad": "Esta instalación difiere de la release: {changed} cambiados, {missing} ausentes ({why}).",
+ "cli.supply_attestation": "Atestación del zip: {result}",
+ "cli.supply_fetch_off": "La descarga está apagada: enciende antes ops.verify_release.fetch en Ajustes.",
+ "cli.supply_fetch_failed": "No se pudo descargar la release: {why}",
+ "cli.supply_expires_soon": "La clave {id} caduca en {days} días: antes hay que instalar una release con la clave siguiente.",
+ "cli.supply_rotation": "Anuncio de clave nueva: {result} (clave nueva {key})"
 }

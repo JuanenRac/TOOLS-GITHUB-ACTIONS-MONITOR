@@ -475,6 +475,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ops.doctor.webhook_min_length` | `-` | paths | Shortest webhook secret accepted |
 | `ops.purge.enabled` (secure) | `-` | paths | Allow "purge now" |
 | `ops.purge.require_backup_hours` (secure) | `-` | paths | Require a good copy newer than |
+| `ops.verify_release.fetch` (secure) | `false` | basic | Let the release check download the release |
 | `organizations.discover` | `false` | advanced | List the organisations of the login |
 | `otlp.cicd_conventions` | `false` | advanced | Names and attributes of the CI/CD conventions |
 | `otlp.enabled` (secure) | `false` | advanced | Export OpenTelemetry (OTLP) |

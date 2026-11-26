@@ -31,7 +31,7 @@
 | `docs` | このバージョンのガイドをインストール先から読み取ります（モニター不要）: `docs list` はタイトル付きで一覧し、`docs show NAME` は `--lang` の言語で 1 件を表示します | いいえ |
 | `screens` | ページの「画面」メニュー:`screens list`(画面の種類と開けるかどうか)と `screens urls`(キオスクのコマンドにそのまま使える完全なアドレス) | 不可 |
 | `keyring` | 署名できる公開鍵: `keyring list`、`add`（`--key-id`、`--public-key`、`--key-scope`、`--expires`）、`revoke --key-id`、`verify --document FILE`。モニター不要、秘密鍵は拒否 | いいえ |
-| `verify-release` | ダウンロードしたリリースファイルのフォルダーをネットワークなしで SHA256SUMS と署名により確認: `verify-release --folder DIR`。信頼できない場合は終了コード 4 | いいえ |
+| `verify-release` | ダウンロードしたリリースファイルのフォルダーをネットワークなしで SHA256SUMS と署名により確認: `verify-release --folder DIR`。信頼できない場合は終了コード 4 ほかに `--installed`（部品表とこのインストールの比較）、`--attestations`、`--fetch`（`ops.verify_release.fetch` が必要）。`doctor --verify-release DIR` はインストールを確認し、`keyring check-rotation --document FILE` は新しい鍵の告知を確認します。 | いいえ |
 | `toolbox` | モニターを起動せずにこのコンピューター上で動く運用者向けの小さなツール：`toolbox limits [N]`（設定と上限の比較）、`toolbox workspaces`（ワークスペースと使用中のもの）、`toolbox ledger [--force]`（送信済み通知の台帳。`--force` で消去）、`toolbox summary`（種類・リポジトリ・日別のイベント数）、`toolbox export-events FILE`（名前の末尾に応じて jsonl、csv、parquet、duckdb でイベントを書き出し。parquet と duckdb は各パッケージが必要で、ファイルは新規であること） | いいえ |
 | `credential` | すべてが動いたまま、1つのアカウントの GitHub ログインを差し替える:`credential replace\|reload [--account ID] [--new-token-file FILE\|-]`。トークンは表示しません | 不可 |
 | `install-skill` | モニターのスキル(`internal` または `external`)を、AI ツールがスキルを読むフォルダーにコピーします:`install-skill external --dest FOLDER`。モニターが動いている必要はありません | 不可 |

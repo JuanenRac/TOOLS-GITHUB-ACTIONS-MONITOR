@@ -31,5 +31,20 @@
  "cli.supply_result": "署名: {result}（鍵 {key}）",
  "cli.supply_signature": "SHA256SUMS の署名: {result}",
  "cli.supply_release_ok": "リリースファイルは完全で、プロジェクトの署名があります。",
- "cli.supply_release_bad": "これらのファイルはプロジェクトのリリースとして信頼できません。"
+ "cli.supply_release_bad": "これらのファイルはプロジェクトのリリースとして信頼できません。",
+ "cfg.f.ops.verify_release.fetch": "リリース確認によるダウンロードを許可",
+ "cfg.h.ops.verify_release.fetch": "既定はオフで、`verify-release` は指定されたフォルダーだけを読みます。オンにすると `verify-release --fetch` がインストール中のバージョンのファイルを GitHub からダウンロードして確認します。",
+ "egress.use.supply_verify": "インストール中のリリースのファイルを確認用にダウンロード",
+ "egress.fail.supply_verify": "`verify-release --fetch` はダウンロードできません。ダウンロード済みフォルダーの確認は引き続き動作します",
+ "cli.supply_help_installed": "このインストールをリリースの部品表とも比較する",
+ "cli.supply_help_attestations": "zip の証明も GitHub に確認する（gh とネットワークが必要）",
+ "cli.supply_help_fetch": "インストール中のバージョンのファイルをダウンロード（ops.verify_release.fetch が必要）",
+ "cli.supply_help_doctor": "doctor と併用: リリースファイルのフォルダーとこのインストールを確認",
+ "cli.supply_installed_ok": "このインストールはリリースと一致します（{count} ファイル）。",
+ "cli.supply_installed_bad": "このインストールはリリースと異なります: 変更 {changed}、欠落 {missing}（{why}）。",
+ "cli.supply_attestation": "zip の証明: {result}",
+ "cli.supply_fetch_off": "ダウンロードはオフです。先に設定で ops.verify_release.fetch をオンにしてください。",
+ "cli.supply_fetch_failed": "リリースをダウンロードできませんでした: {why}",
+ "cli.supply_expires_soon": "鍵 {id} は {days} 日で期限切れになります。その前に次の鍵を持つリリースをインストールしてください。",
+ "cli.supply_rotation": "新しい鍵の告知: {result}（新しい鍵 {key}）"
 }

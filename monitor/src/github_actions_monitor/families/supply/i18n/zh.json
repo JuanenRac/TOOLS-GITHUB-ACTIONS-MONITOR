@@ -31,5 +31,20 @@
  "cli.supply_result": "签名：{result}（密钥 {key}）",
  "cli.supply_signature": "SHA256SUMS 的签名：{result}",
  "cli.supply_release_ok": "发布文件完整且由项目签名。",
- "cli.supply_release_bad": "不能将这些文件视为项目的发布。"
+ "cli.supply_release_bad": "不能将这些文件视为项目的发布。",
+ "cfg.f.ops.verify_release.fetch": "允许发布校验下载发布文件",
+ "cfg.h.ops.verify_release.fetch": "默认关闭：`verify-release` 只读取你给出的文件夹。开启后，`verify-release --fetch` 会从 GitHub 下载已安装版本的文件进行校验。",
+ "egress.use.supply_verify": "下载已安装发布的文件以进行校验",
+ "egress.fail.supply_verify": "`verify-release --fetch` 无法下载；对已下载文件夹的校验仍然可用",
+ "cli.supply_help_installed": "同时将本安装与发布的物料清单比较",
+ "cli.supply_help_attestations": "同时向 GitHub 查询 zip 的证明（需要 gh 和网络）",
+ "cli.supply_help_fetch": "下载已安装版本的文件（需要 ops.verify_release.fetch）",
+ "cli.supply_help_doctor": "与 doctor 一起使用：校验发布文件夹和本安装",
+ "cli.supply_installed_ok": "本安装与发布一致（{count} 个文件）。",
+ "cli.supply_installed_bad": "本安装与发布不同：{changed} 个已更改，{missing} 个缺失（{why}）。",
+ "cli.supply_attestation": "zip 的证明：{result}",
+ "cli.supply_fetch_off": "下载已关闭：请先在设置中开启 ops.verify_release.fetch。",
+ "cli.supply_fetch_failed": "无法下载发布：{why}",
+ "cli.supply_expires_soon": "密钥 {id} 将在 {days} 天后过期：请在此之前安装带有下一把密钥的发布。",
+ "cli.supply_rotation": "新密钥公告：{result}（新密钥 {key}）"
 }

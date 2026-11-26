@@ -99,6 +99,15 @@ jobs:
           subject-name: ${{ steps.names.outputs.image }}
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
+
+      - name: Keyless signature of the image (cosign, identity of this workflow)
+        if: env.PUBLISH == 'true'
+        env:
+          IMAGE: ${{ steps.names.outputs.image }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          sh tools/fetch_pinned.sh cosign "$RUNNER_TEMP/cosign"
+          "$RUNNER_TEMP/cosign/cosign" sign --yes "${IMAGE}@${DIGEST}"
     outputs:
       version: ${{ steps.names.outputs.version }}
       image: ${{ steps.names.outputs.image }}

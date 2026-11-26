@@ -31,5 +31,20 @@
  "cli.supply_result": "Firma: {result} (chiave {key})",
  "cli.supply_signature": "Firma di SHA256SUMS: {result}",
  "cli.supply_release_ok": "I file della release sono completi e firmati dal progetto.",
- "cli.supply_release_bad": "Questi file non sono affidabili come release del progetto."
+ "cli.supply_release_bad": "Questi file non sono affidabili come release del progetto.",
+ "cfg.f.ops.verify_release.fetch": "Consentire al controllo di scaricare la release",
+ "cfg.h.ops.verify_release.fetch": "Spento per impostazione: `verify-release` legge solo la cartella che indichi. Acceso, `verify-release --fetch` scarica da GitHub i file della versione installata per controllarli.",
+ "egress.use.supply_verify": "scaricamento dei file della release installata per controllarli",
+ "egress.fail.supply_verify": "`verify-release --fetch` non può scaricare; il controllo di una cartella scaricata funziona ancora",
+ "cli.supply_help_installed": "confrontare anche questa installazione con la distinta della release",
+ "cli.supply_help_attestations": "chiedere anche a GitHub l'attestazione dello zip (servono gh e rete)",
+ "cli.supply_help_fetch": "scaricare i file della versione installata (serve ops.verify_release.fetch)",
+ "cli.supply_help_doctor": "con doctor: controllare una cartella di file di release e questa installazione",
+ "cli.supply_installed_ok": "Questa installazione corrisponde alla release ({count} file).",
+ "cli.supply_installed_bad": "Questa installazione differisce dalla release: {changed} modificati, {missing} mancanti ({why}).",
+ "cli.supply_attestation": "Attestazione dello zip: {result}",
+ "cli.supply_fetch_off": "Il download è spento: attiva prima ops.verify_release.fetch nelle impostazioni.",
+ "cli.supply_fetch_failed": "Impossibile scaricare la release: {why}",
+ "cli.supply_expires_soon": "La chiave {id} scade tra {days} giorni: prima va installata una release con la chiave successiva.",
+ "cli.supply_rotation": "Annuncio di una nuova chiave: {result} (nuova chiave {key})"
 }
