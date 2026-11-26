@@ -85,7 +85,7 @@ Método, supuestos y cómo medirlo en tu propio uso: [`monitor/docs/PRODUCTIVITY
 
 | | |
 |---|---|
-| **Versión** | **2.1.7** · [todas las versiones](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versión** | **2.1.8** · [todas las versiones](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Necesita** | Python 3.11+ y la CLI de GitHub (`gh auth login`); nada más (la vista de consola usa el paquete opcional `rich`) |
 | **Se abre** | en una página de `127.0.0.1` solamente, en ocho idiomas |
 | **Escribe en GitHub** | nunca por sí solo: solo las órdenes por lotes que lances con un `--go` explícito |
@@ -93,7 +93,7 @@ Método, supuestos y cómo medirlo en tu propio uso: [`monitor/docs/PRODUCTIVITY
 
 <!-- glance:begin -->
 
-**Medido hoy** (v2.1.7)
+**Medido hoy** (v2.1.8)
 
 | | |
 |---|---|

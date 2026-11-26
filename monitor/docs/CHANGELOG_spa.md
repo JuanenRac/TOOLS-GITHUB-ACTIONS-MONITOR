@@ -9,6 +9,10 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+## [2.1.8]
+
+La versión 2.1.8 no añade ninguna función: corrige lo que encontró una revisión de la 2.1.7. El centinela de CI ya no sale en verde cuando la lista de ejecuciones puede ocultar un workflow; aprobar o rechazar una propuesta de la IA funciona; un dispositivo revocado pierde los flujos que tenía abiertos; las conexiones tienen límite de tiempo y de número; el túnel del proxy funciona; deshacer ya no pasa por encima de una actualización en curso; la imagen del contenedor solo se publica desde una etiqueta; y las pantallas, el quiosco, la línea de órdenes y la documentación dicen lo que hace el programa.
+
 ### Corregido
 
 - **La comprobación del webhook de la auditoría en contenedor (E8) ahora envía de verdad un cuerpo por encima del límite y da a cada entrega su propio id**: el cuerpo de «un cuerpo por encima del límite» pesaba 300 KB, bajo el defecto de 1 MiB de `webhook.max_body_kb`, y compartía el id de entrega del primer ping, así que el receptor (que ya juzga el tamaño primero) lo contestaba como duplicado. Ahora el cuerpo supera el límite y las comprobaciones que esperan un evento ignorado no se esconden tras un id repetido.

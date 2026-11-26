@@ -9,6 +9,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+## [2.1.8]
+
+A versão 2.1.8 não acrescenta nenhuma função: corrige o que uma revisão da 2.1.7 encontrou. O sentinela de CI deixa de ficar verde quando a lista de execuções pode esconder um workflow; aprovar ou rejeitar uma proposta da IA funciona; um dispositivo revogado perde os fluxos que tinha abertos; as ligações têm limite de tempo e de número; o túnel do proxy funciona; voltar atrás já não passa por cima de uma atualização em curso; a imagem do contentor só é publicada a partir de uma etiqueta; e os ecrãs, o quiosque, a linha de comandos e a documentação dizem o que o programa faz.
+
 ### Corrigido
 
 - **A verificação do webhook da auditoria em contentor (E8) envia agora mesmo um corpo acima do limite e dá a cada entrega o seu próprio id**: o corpo de «um corpo acima do limite» tinha 300 KB, abaixo do valor por defeito de 1 MiB de `webhook.max_body_kb`, e partilhava o id de entrega do primeiro ping; o recetor (que já avalia primeiro o tamanho) respondia-lhe como duplicado. O corpo passa agora o limite, e as verificações que esperam um evento ignorado já não se escondem atrás de um id repetido.

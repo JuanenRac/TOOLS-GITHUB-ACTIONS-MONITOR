@@ -16,7 +16,11 @@ Ce qui n'apparaît qu'à l'usage réel prolongé : la migration depuis la 1.8 et
 
 Les workflows du moniteur lui-même respectent ce que la sentinelle d'hygiène demandera aux autres : actions fixées à un commit, permissions minimales et une limite de temps sur chaque job.
 
-## Fait dans la 1.8.2 à la 2.1.7
+## Fait dans la 1.8.2 à la 2.1.8
+
+### 2.1.8 - Revue de la 2.1.7 : sentinelles honnêtes, approbations des propositions de l'IA qui fonctionnent, accès réseau plus strict, tunnel de proxy et image de release plus sûre
+
+La version 2.1.8 n'ajoute aucune fonction : elle corrige ce qu'une revue de la 2.1.7 a trouvé. La sentinelle de CI n'est plus verte quand la liste des exécutions peut cacher un workflow ; approuver ou rejeter une proposition de l'IA fonctionne ; un appareil révoqué perd les flux qu'il avait ouverts ; les connexions ont une limite de durée et de nombre ; le tunnel du proxy fonctionne ; revenir en arrière ne passe plus par-dessus une mise à jour en cours ; l'image du conteneur n'est publiée qu'à partir d'une étiquette ; et les écrans, le kiosque, la ligne de commande et la documentation disent ce que fait le programme.
 
 ### 2.1.7 - Des écrans et bornes à jour, une vue téléphone, une livraison en temps réel et une reprise, l'échelle et l'observabilité, des sentinelles honnêtes et une chaîne de publication à releases immuables
 

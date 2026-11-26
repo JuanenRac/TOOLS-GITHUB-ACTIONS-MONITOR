@@ -16,7 +16,11 @@ Lo que solo aparece con un uso real prolongado: la migración desde la 1.8 y la 
 
 Los workflows del propio monitor cumplen lo que el centinela de higiene pedirá a los demás: acciones fijadas a un commit, los permisos mínimos y un límite de tiempo en cada trabajo.
 
-## Hecho en la 1.8.2 a la 2.1.7
+## Hecho en la 1.8.2 a la 2.1.8
+
+### 2.1.8 - Revisión de la 2.1.7: centinelas honestos, aprobaciones de propuestas de la IA que funcionan, acceso de red más estricto, túnel de proxy e imagen de release más segura
+
+La versión 2.1.8 no añade ninguna función: corrige lo que encontró una revisión de la 2.1.7. El centinela de CI ya no sale en verde cuando la lista de ejecuciones puede ocultar un workflow; aprobar o rechazar una propuesta de la IA funciona; un dispositivo revocado pierde los flujos que tenía abiertos; las conexiones tienen límite de tiempo y de número; el túnel del proxy funciona; deshacer ya no pasa por encima de una actualización en curso; la imagen del contenedor solo se publica desde una etiqueta; y las pantallas, el quiosco, la línea de órdenes y la documentación dicen lo que hace el programa.
 
 ### 2.1.7 - Pantallas y quioscos al día, vista de teléfono, entrega en tiempo real y recuperación, escala y observabilidad, centinelas honestos y una cadena de publicación con releases inmutables
 
