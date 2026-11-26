@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6051_passing-brightgreen.svg" alt="6051 tests">
+  <img src="https://img.shields.io/badge/Tests-6062_passing-brightgreen.svg" alt="6062 tests">
 </p>
 
 > Vigia os workflows de todos os seus repositórios e diz-lhe, numa página local, o que está a vermelho, o que está encravado e o que o espera.
@@ -98,8 +98,8 @@ Método, pressupostos e como medi-lo na sua própria utilização: [`monitor/doc
 | | |
 |---|---|
 | **Maturidade** | functional |
-| **Testes** | 6051 métodos de teste (`python -m unittest discover -s monitor/tests`) |
-| **Definições** | 968 definições, todas com ajuda |
+| **Testes** | 6062 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Definições** | 972 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -355,6 +355,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/EXTERNAL_CI_por.md`](monitor/docs/EXTERNAL_CI_por.md): Fontes de CI externas, só de leitura: Buildbot, GitLab CI, Jenkins, Azure Pipelines
 - [`monitor/docs/POSTURE_por.md`](monitor/docs/POSTURE_por.md): Postura dos repositórios e da organização, só de leitura
 - [`monitor/docs/COLLABORATION_por.md`](monitor/docs/COLLABORATION_por.md): Vistas de colaboração e ações opcionais no GitHub
+- [`monitor/docs/FLEET_APIS_por.md`](monitor/docs/FLEET_APIS_por.md): Frota por papel e grupo, APIs CCTray e de segurança, impressão dos relatórios, sítio de demonstração
 - [`monitor/docs/AI_CONNECTION_por.md`](monitor/docs/AI_CONNECTION_por.md): Ligar uma ferramenta de IA: tudo o que o monitor diz, como sinais, no resumo, no endpoint, nas ferramentas MCP e no hook
 - [`monitor/docs/AI_SETUP_PROMPT_por.md`](monitor/docs/AI_SETUP_PROMPT_por.md): Configurar o monitor com uma IA: um prompt para colar no teu assistente de IA que o instala, pergunta o que queres e escreve a configuração
 - [`monitor/docs/QUOTA_por.md`](monitor/docs/QUOTA_por.md): Mais quota, menos gasto: modo poupança, o painel central, uma GitHub App e como partilhar a quota

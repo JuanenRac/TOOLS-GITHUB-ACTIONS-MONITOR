@@ -6,6 +6,7 @@
  "a9.defs_not_json": "le definizioni non hanno restituito JSON",
  "a9.no_defs_file": "tools/roadmap_defs.py non trovato nel clone del repository del profilo",
  "a9.no_status": "Senza stato",
+ "a9.p.clone_behind": "il clone del repository del profilo è indietro rispetto a origin: esegui fetch, il confronto può essere vecchio",
  "a9.p.defs_newer": "le definizioni sono cambiate dopo l'ultima esecuzione: vanno ancora applicate",
  "a9.p.drift": "il board di GitHub non coincide con le definizioni",
  "a9.p.last_failed": "l'ultima esecuzione è terminata con {conclusion}",

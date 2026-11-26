@@ -9,7 +9,7 @@ import copy
 import importlib
 from pathlib import Path
 
-from github_actions_monitor.families.declare import Check, Command, Egress, Family, Option, Request, Route, Setting  # noqa: F401 - the one place to import them from
+from github_actions_monitor.families.declare import Check, Command, Egress, Family, Option, Raw, Request, Route, Setting  # noqa: F401 - the one place to import them from
 
 NAMES = ("supply", "plugins", "assistant", "extci", "compliance", "actions", "fleet", "posture")      # the order in which their settings, commands and pages are added
 FOLDER = Path(__file__).resolve().parent

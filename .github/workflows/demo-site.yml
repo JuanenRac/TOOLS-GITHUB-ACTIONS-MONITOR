@@ -1,0 +1,45 @@
+# Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+# GPL-3.0-or-later - see LICENSE
+name: Demo site
+
+# Builds the static demo (invented data only) and the browser workflow check, and keeps them as an artifact.
+# It publishes NOTHING: putting the folder on a web address is a decision of the owner of the repository and a separate step.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - tools/make_public_demo.py
+      - tools/demo_monitor.py
+      - .github/workflows/demo-site.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: demo-site-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Build the static demo
+        run: python tools/make_public_demo.py "$RUNNER_TEMP/demo-site"
+      - name: The demo answers and carries no real account
+        run: |
+          test -s "$RUNNER_TEMP/demo-site/index.html"
+          test -s "$RUNNER_TEMP/demo-site/data/data.json"
+          test -s "$RUNNER_TEMP/demo-site/lint/monitor.zip"
+          ! grep -rIl "JuanenRac" "$RUNNER_TEMP/demo-site/data"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: demo-site
+          path: ${{ runner.temp }}/demo-site
+          retention-days: 7

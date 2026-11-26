@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6051_passing-brightgreen.svg" alt="6051 tests">
+  <img src="https://img.shields.io/badge/Tests-6062_passing-brightgreen.svg" alt="6062 tests">
 </p>
 
 > Überwacht die Workflows aller deiner Repositories und zeigt dir auf einer lokalen Seite, was rot ist, was hängt und was auf dich wartet.
@@ -98,8 +98,8 @@ Methode, Annahmen und wie Sie es in Ihrer eigenen Nutzung messen: [`monitor/docs
 | | |
 |---|---|
 | **Reifegrad** | functional |
-| **Tests** | 6051 Testmethoden (`python -m unittest discover -s monitor/tests`) |
-| **Einstellungen** | 968 Einstellungen, alle mit Hilfe |
+| **Tests** | 6062 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Einstellungen** | 972 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -355,6 +355,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/EXTERNAL_CI_deu.md`](monitor/docs/EXTERNAL_CI_deu.md): Externe CI-Quellen, nur lesend: Buildbot, GitLab CI, Jenkins, Azure Pipelines
 - [`monitor/docs/POSTURE_deu.md`](monitor/docs/POSTURE_deu.md): Sicherheitslage von Repositorys und Organisation, nur lesend
 - [`monitor/docs/COLLABORATION_deu.md`](monitor/docs/COLLABORATION_deu.md): Ansichten der Zusammenarbeit und optionale GitHub-Aktionen
+- [`monitor/docs/FLEET_APIS_deu.md`](monitor/docs/FLEET_APIS_deu.md): Flotte nach Rolle und Gruppe, CCTray- und Sicherheits-APIs, Berichts-Fingerabdruck, Demo-Seite
 - [`monitor/docs/AI_CONNECTION_deu.md`](monitor/docs/AI_CONNECTION_deu.md): Ein KI-Werkzeug verbinden: alles, was der Monitor sagt, als Signale, in der Zusammenfassung, im Endpunkt, in den MCP-Werkzeugen und im Hook
 - [`monitor/docs/AI_SETUP_PROMPT_deu.md`](monitor/docs/AI_SETUP_PROMPT_deu.md): Den Monitor mit einer KI einrichten: ein Prompt für deinen KI-Assistenten, der ihn installiert, dich fragt, was du möchtest, und die Konfiguration schreibt
 - [`monitor/docs/QUOTA_deu.md`](monitor/docs/QUOTA_deu.md): Mehr Kontingent, weniger Verbrauch: Sparmodus, das zentrale Panel, eine GitHub-App und wie man das Kontingent teilt

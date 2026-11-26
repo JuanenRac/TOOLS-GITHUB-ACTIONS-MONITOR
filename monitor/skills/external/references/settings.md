@@ -321,6 +321,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `finops.co2_grams_per_kwh` | `400` | advanced | Grams of CO2 per kWh of the grid (for the carbon estimate) |
 | `finops.co2_watts` | `40` | advanced | Watts of a runner (for the carbon estimate) |
 | `finops.jobs_per_cycle` | `0` | advanced | Jobs read per cycle for their system |
+| `fleet.cctray` (secure) | `false` | fleetapi | CCTray feed (read only) |
+| `fleet.disabled` | `[]` | fleetapi | Repositories and groups switched off |
 | `fleet.fork_behind` | `false` | general | Show how far a fork is behind its original |
 | `fleet.fork_behind_per_call` | `5` | general | Forks read per round for the column behind the original |
 | `fleet.group_by` | `"ecosystem"` | general | Group the fleet by |
@@ -329,7 +331,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `fleet.meta_per_call` | `20` | general | Files read per round for the metadata columns |
 | `fleet.meta_ttl_hours` | `6` | general | Hours before a metadata value is read again |
 | `fleet.page_size` | `50` | general | Repositories per page |
+| `fleet.roles` | `["release=*release*|*publish*", "nightly=*nightly*|*schedule*", "benchmark=*bench*", "docs=*doc*|*pages*", "build=*build*|*firmware*|*package*", "test=*test*|*ci*|*check*"]` | fleetapi | Columns by role of workflow |
 | `fleet.saved_filters` | `[]` | general | Saved filters |
+| `fleet.security_api` (secure) | `false` | fleetapi | API of secret and code scanning alerts |
 | `fleet.show_all_active` | `true` | general | Every run that is going |
 | `fleet.sort` | `"risk"` | general | Order inside a group |
 | `github_actions.allowed` (secure) | `["rerun_failed", "cancel"]` | advanced | Actions that can be planned |

@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.2.0",
  "previous": "2.1.8",
- "digest": "f1a683c06477f052e88af0c196211b277dace80d875b781334b2e18482c37c33",
+ "digest": "96acaccd61ffa722f947617700bea6cb9e5aad424f075bf7b0a39bfe1fce11ec",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -273,6 +273,39 @@
      120
     ],
     "default": 15
+   },
+   {
+    "key": "fleet.cctray",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "fleet.disabled",
+    "kind": "names",
+    "bounds": {
+     "re": "^(?:group:[a-z0-9_-]{1,40}|[A-Za-z0-9._*?\\[\\]-]{1,100})\\Z"
+    },
+    "default": []
+   },
+   {
+    "key": "fleet.roles",
+    "kind": "names",
+    "bounds": {
+     "re": "^[a-z][a-z0-9_-]{0,19}=[A-Za-z0-9 ._/*?|()-]{1,150}\\Z"
+    },
+    "default": [
+     "release=*release*|*publish*",
+     "nightly=*nightly*|*schedule*",
+     "benchmark=*bench*",
+     "docs=*doc*|*pages*",
+     "build=*build*|*firmware*|*package*",
+     "test=*test*|*ci*|*check*"
+    ]
+   },
+   {
+    "key": "fleet.security_api",
+    "kind": "bool",
+    "default": false
    },
    {
     "key": "ops.verify_release.fetch",

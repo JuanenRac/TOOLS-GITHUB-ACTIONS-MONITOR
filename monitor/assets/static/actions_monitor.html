@@ -3189,6 +3189,8 @@ function fsSync(){const b=$("fs");if(!b)return;const on=!!document.fullscreenEle
 {const b=$("fs");if(b){if(!document.fullscreenEnabled)b.hidden=true;else{b.addEventListener("click",()=>{const r=document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();if(r&&r.catch)r.catch(()=>{})});document.addEventListener("fullscreenchange",fsSync);fsSync()}}}
 {if(QS.get("dlg")==="notes")setTimeout(openNotes,800)}      /* deep link: ?dlg=notes opens the window of the notices (the pictures use it) */
 try{/*EXTRAS_JS*/}catch(e){}
+/* --vvh: the height that is really visible (the bar of a phone browser takes part of 100vh) */
+(function(){const v=window.visualViewport;if(!v)return;const set=()=>document.documentElement.style.setProperty("--vvh",v.height+"px");v.addEventListener("resize",set);set()})();
 </script>
 </body>
 </html>
