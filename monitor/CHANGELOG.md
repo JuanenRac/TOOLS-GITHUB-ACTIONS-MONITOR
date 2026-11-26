@@ -13,6 +13,9 @@ when this file and `tool_version.py` disagree.
 
 ### Added
 
+- **Proposals of the AI are decided by people**: they are marked as AI, carry a fingerprint, survive a restart, need two persons when there are two or more users, or the typed code when there is one, and are shown in the Alerts tab with `ai.assistant.can_propose` for those born in the chat.
+- **Free chat with read-only tools** (`ai.chat.enabled`, off), **similar alerts by a local embedding model** (`ai.rag.enabled`, off), **report of a repository and triage draft to copy**, and **the briefs as MCP resources**.
+- A link with a port and an `@` in its path is no longer cleaned as if it were a user and a password.
 - Posture checks of repositories and organization, read only and off by default: webhooks, Actions settings, scanning, branch and release-branch protection, deploy keys, secret age, apps, organization audit log, hardening of what ran and changed releases, each with its OWASP CI/CD and CIS reference. What GitHub refuses is shown as not checked. Maturity per repository, history, `posture` on the command line.
 - **A window announces a newer version**: with the summary of its changes in your language, a button to the Updates page, "Later" and "Do not announce this version"; it is on by default and silent on wall and kiosk screens.
 - **New commands**: to check a downloaded release without network and to manage the public keys.

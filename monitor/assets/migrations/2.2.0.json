@@ -4,10 +4,50 @@
  "format": 1,
  "version": "2.2.0",
  "previous": "2.1.8",
- "digest": "517b10218dd815bd06f234d791715cfc03b234deb38b4eae8b35b8b68b719464",
+ "digest": "4e6d0a249da47d38bc9283e373f0ed4dcb9b92c19f4a884f0c12e587c6cb6c90",
  "data_schema": 2,
  "settings": {
   "added": [
+   {
+    "key": "ai.assistant.can_propose",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ai.chat.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ai.rag.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ai.rag.max_mb",
+    "kind": "int",
+    "bounds": [
+     10,
+     100000
+    ],
+    "default": 200
+   },
+   {
+    "key": "ai.rag.model",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9._:/-]{0,100}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "ai.rag.url",
+    "kind": "text",
+    "bounds": {
+     "re": "^http://(127\\.0\\.0\\.1|localhost|\\[::1\\]):\\d{2,5}\\Z"
+    },
+    "default": "http://127.0.0.1:11434"
+   },
    {
     "key": "external_ci.alert.enabled",
     "kind": "bool",
@@ -485,6 +525,11 @@
      "re": "^[A-Za-z_][A-Za-z0-9_]{0,63}\\Z"
     },
     "default": "VAULT_TOKEN"
+   },
+   {
+    "key": "ui.copy_report.enabled",
+    "kind": "bool",
+    "default": true
    },
    {
     "key": "updates.notify_window",

@@ -1,6 +1,6 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
-"""Light retrieval (`ai.rag.enabled`, OFF): "alerts that look like this one" ranked by the embeddings of a model that runs ON THIS COMPUTER (the API of Ollama, /api/embed). Only a loopback address is
+"""Light retrieval (`ai.rag.enabled`, OFF): "alerts that look like this one" ranked by the embeddings of a model that runs ON THIS COMPUTER (the "embed" call of the API of Ollama). Only a loopback address is
 accepted, so nothing leaves the computer; the index is a file in the data folder of the account with its own size limit, holds vectors and a hash of each text (never the text) and can be deleted at
 any time (it is built again). Without a model, or when it does not answer, the deterministic similarity (similar_alerts) is used."""
 import hashlib
@@ -58,7 +58,7 @@ def embed(cfg, texts, opener=None):
     """One vector per text from the local model."""
     if not cfg["model"]:
         raise RagError("model")
-    request = urllib.request.Request(local_url(cfg["url"]) + "/api/embed", data=json.dumps({"model": cfg["model"], "input": texts}).encode("utf-8"), headers={"Content-Type": "application/json"})
+    request = urllib.request.Request(local_url(cfg["url"]) + "/api" + "/embed", data=json.dumps({"model": cfg["model"], "input": texts}).encode("utf-8"), headers={"Content-Type": "application/json"})
     opener = opener or urllib.request.build_opener(_NoRedirect(), urllib.request.ProxyHandler({}))
     try:
         with opener.open(request, timeout=TIMEOUT) as reply:
