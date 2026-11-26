@@ -430,7 +430,7 @@ class Settings(unittest.TestCase):
     def test_every_setting_of_the_block_is_in_the_page_and_none_can_hold_a_secret(self):
         from github_actions_monitor.app import settings_api
         keys = [k for k in settings_api.FIELDS if k.startswith("ops.")]
-        self.assertEqual(len(keys), 16)
+        self.assertEqual(len(keys), 17)      # 16 of the operations and ops.verify_release.fetch of the release check
         self.assertEqual(settings_api.check_value("ops.backup.dir", "../x"), (False, "path"))
         self.assertEqual(settings_api.check_value("ops.backup.key_env", "GH_TOKEN"), (False, "text"))
         self.assertEqual(settings_api.check_value("ops.backup.key_env", "MY_BACKUP_KEY"), (True, "MY_BACKUP_KEY"))

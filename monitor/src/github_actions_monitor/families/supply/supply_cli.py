@@ -63,7 +63,8 @@ def keyring_command(ctx):
 
 def verify_release_command(ctx):
     args = ctx["args"]
-    if args.fetch:
+    compare, attest = getattr(args, "installed", False), getattr(args, "attestations", False)
+    if getattr(args, "fetch", False):
         if families.block(toolconfig.raw_config(), "ops").get("verify_release", {}).get("fetch") is not True:
             return _usage(i18n.t("cli.supply_fetch_off"))
         with tempfile.TemporaryDirectory(prefix="verify_release_") as folder:
@@ -71,10 +72,10 @@ def verify_release_command(ctx):
                 installed.fetch(folder)
             except (OSError, ValueError, RuntimeError) as error:
                 return {"ok": False, "error": str(error)[:100]}, [i18n.t("cli.supply_fetch_failed", why=str(error)[:100])], DEGRADED
-            return _check(folder, args.installed, args.attestations)
+            return _check(folder, compare, attest)
     if not args.folder or not Path(args.folder).is_dir():
         return _usage(i18n.t("cli.supply_need_folder"))
-    return _check(args.folder, args.installed, args.attestations)
+    return _check(args.folder, compare, attest)
 
 
 def doctor_release(folder):

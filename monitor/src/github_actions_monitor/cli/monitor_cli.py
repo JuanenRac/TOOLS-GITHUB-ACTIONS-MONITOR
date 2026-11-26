@@ -860,8 +860,8 @@ def cmd_doctor(ctx):
         rows = egress.table(config)
         return {"egress": rows, "airgapped": config.get("airgapped") is True}, egress.lines(config, i18n.t), EXIT_OK
     if getattr(ctx.get("args"), "doctor_release", ""):      # `doctor --verify-release DIR`: the signed files of a release against this installation, nothing else is checked
-        from github_actions_monitor.families.supply import commands
-        return commands.doctor_release(ctx["args"].doctor_release)
+        from github_actions_monitor.families.supply import supply_cli
+        return supply_cli.doctor_release(ctx["args"].doctor_release)
     try:
         checks = doctor.run(config=config, edition=edition)
     except Exception:      # noqa: BLE001 - the doctor itself could not run: its own exit code, not a traceback

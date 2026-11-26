@@ -21,7 +21,8 @@ import _testenv  # noqa: F401,E402
 import sbom  # noqa: E402
 import test_220_release_signing as signing  # noqa: E402
 from github_actions_monitor.app import actions_monitor  # noqa: E402
-from github_actions_monitor.families.supply import commands, installed  # noqa: E402
+from github_actions_monitor.families.supply import installed
+from github_actions_monitor.families.supply import supply_cli as commands  # noqa: E402
 from github_actions_monitor.security import keyring  # noqa: E402
 
 VERSION = installed.TOOL_VERSION

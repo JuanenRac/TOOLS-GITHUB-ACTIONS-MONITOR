@@ -16,7 +16,8 @@ import _testenv  # noqa: F401,E402
 from github_actions_monitor import families  # noqa: E402
 from github_actions_monitor.app import actions_monitor, updatecheck  # noqa: E402
 from github_actions_monitor.cli import monitor_cli  # noqa: E402
-from github_actions_monitor.families.supply import commands, notice  # noqa: E402
+from github_actions_monitor.families.supply import notice
+from github_actions_monitor.families.supply import supply_cli as commands  # noqa: E402
 from github_actions_monitor.util import paths  # noqa: E402
 
 PUBLIC = "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"      # the public key of the first test vector of RFC 8032

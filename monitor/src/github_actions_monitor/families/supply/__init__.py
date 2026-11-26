@@ -18,13 +18,13 @@ def update_dismiss(request):
 
 
 def run_keyring(ctx):
-    from github_actions_monitor.families.supply import commands
-    return commands.keyring_command(ctx)
+    from github_actions_monitor.families.supply import supply_cli
+    return supply_cli.keyring_command(ctx)
 
 
 def run_verify_release(ctx):
-    from github_actions_monitor.families.supply import commands
-    return commands.verify_release_command(ctx)
+    from github_actions_monitor.families.supply import supply_cli
+    return supply_cli.verify_release_command(ctx)
 
 
 FAMILY = Family(
