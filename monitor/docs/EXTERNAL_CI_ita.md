@@ -22,7 +22,7 @@ azure;repo=my-mirror;url=https://dev.azure.com/my-org;project=my-project
 
 ## Rosso, corretto o degradato
 
-Decide l'ultima build conclusa di ogni builder, pipeline o job sul suo ramo, come per Actions: richieste di unione e stati annullati, saltati o sconosciuti non decidono mai. Un servizio che non risponde, risponde altro o non ha un builder è **degradato**, mai rosso; gli errori già visti restano, segnati come vecchi. Gli errori generano `ci.external.red` (livello `external_ci.alert.level`), contati, notificati e silenziati come un rosso di Actions; `ci.external.degraded` è informativo. Silenziarli non silenzia mai un avviso di sicurezza. Ogni fonte è letta al massimo ogni `external_ci.refresh_seconds` (300 o più) e meno spesso dopo `external_ci.breaker.failures` errori.
+Decide l'ultima build conclusa di ogni builder, pipeline o job sul suo ramo, come per Actions: richieste di unione e stati annullati, saltati o sconosciuti non decidono mai. Un servizio che non risponde, risponde altro o non ha un builder è **degradato**, mai rosso; gli errori già visti restano, segnati come vecchi. Gli errori generano ci.external.red (livello `external_ci.alert.level`), contati, notificati e silenziati come un rosso di Actions; ci.external.degraded è informativo. Silenziarli non silenzia mai un avviso di sicurezza. Ogni fonte è letta al massimo ogni `external_ci.refresh_seconds` (300 o più) e meno spesso dopo `external_ci.breaker.failures` errori.
 
 ## Sicurezza
 

@@ -22,7 +22,7 @@ azure;repo=my-mirror;url=https://dev.azure.com/my-org;project=my-project
 
 ## 失败、正常或降级
 
-与 Actions 相同,以每个构建器、流水线或任务在其分支上最后一次完成的构建为准:合并请求以及已取消、已跳过和未知状态不参与判定。无响应、响应异常或缺少构建器的服务标记为**降级**,绝不标红;此前看到的失败保留并标记为过时。失败触发 `ci.external.red`(级别 `external_ci.alert.level`),像 Actions 失败一样计数、通知和静音;`ci.external.degraded` 仅为提示。静音它们不会静音任何安全告警。每个来源最多每 `external_ci.refresh_seconds`(不少于 300)读取一次,失败 `external_ci.breaker.failures` 次后降低频率。
+与 Actions 相同,以每个构建器、流水线或任务在其分支上最后一次完成的构建为准:合并请求以及已取消、已跳过和未知状态不参与判定。无响应、响应异常或缺少构建器的服务标记为**降级**,绝不标红;此前看到的失败保留并标记为过时。失败触发 ci.external.red(级别 `external_ci.alert.level`),像 Actions 失败一样计数、通知和静音;ci.external.degraded 仅为提示。静音它们不会静音任何安全告警。每个来源最多每 `external_ci.refresh_seconds`(不少于 300)读取一次,失败 `external_ci.breaker.failures` 次后降低频率。
 
 ## 安全
 

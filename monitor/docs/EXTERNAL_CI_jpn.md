@@ -22,7 +22,7 @@ azure;repo=my-mirror;url=https://dev.azure.com/my-org;project=my-project
 
 ## 赤、正常、低下
 
-Actionsと同様に、各ビルダー・パイプライン・ジョブのブランチ上で最後に完了したビルドで判定します。マージリクエストや取消・スキップ・不明の状態は判定しません。応答がない、内容が異なる、ビルダーがないサービスは**低下**となり、赤にはしません。以前の失敗は古い情報として残します。失敗は `ci.external.red`(レベル `external_ci.alert.level`)となり、Actionsの赤と同様に集計・通知・ミュートできます。`ci.external.degraded` は情報です。ミュートしてもセキュリティ警告は消えません。各ソースの読み取りは `external_ci.refresh_seconds`(300以上)に1回までで、`external_ci.breaker.failures` 回失敗すると間隔を延ばします。
+Actionsと同様に、各ビルダー・パイプライン・ジョブのブランチ上で最後に完了したビルドで判定します。マージリクエストや取消・スキップ・不明の状態は判定しません。応答がない、内容が異なる、ビルダーがないサービスは**低下**となり、赤にはしません。以前の失敗は古い情報として残します。失敗は ci.external.red(レベル `external_ci.alert.level`)となり、Actionsの赤と同様に集計・通知・ミュートできます。ci.external.degraded は情報です。ミュートしてもセキュリティ警告は消えません。各ソースの読み取りは `external_ci.refresh_seconds`(300以上)に1回までで、`external_ci.breaker.failures` 回失敗すると間隔を延ばします。
 
 ## 安全性
 

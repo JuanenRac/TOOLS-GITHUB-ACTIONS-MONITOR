@@ -22,7 +22,7 @@ azure;repo=my-mirror;url=https://dev.azure.com/my-org;project=my-project
 
 ## Rouge, correct ou dégradé
 
-Le dernier build terminé de chaque builder, pipeline ou job sur sa branche décide, comme pour Actions : les demandes de fusion et les états annulés, ignorés ou inconnus ne décident jamais. Un service muet, qui répond autre chose ou à qui manque un builder est **dégradé**, jamais rouge ; les échecs déjà vus restent, marqués comme anciens. Les échecs lèvent `ci.external.red` (niveau `external_ci.alert.level`), comptés, notifiés et mis en sourdine comme un rouge d'Actions ; `ci.external.degraded` est informatif. Les mettre en sourdine ne tait jamais une alerte de sécurité. Chaque source est lue au plus toutes les `external_ci.refresh_seconds` (300 ou plus), moins souvent après `external_ci.breaker.failures` échecs.
+Le dernier build terminé de chaque builder, pipeline ou job sur sa branche décide, comme pour Actions : les demandes de fusion et les états annulés, ignorés ou inconnus ne décident jamais. Un service muet, qui répond autre chose ou à qui manque un builder est **dégradé**, jamais rouge ; les échecs déjà vus restent, marqués comme anciens. Les échecs lèvent ci.external.red (niveau `external_ci.alert.level`), comptés, notifiés et mis en sourdine comme un rouge d'Actions ; ci.external.degraded est informatif. Les mettre en sourdine ne tait jamais une alerte de sécurité. Chaque source est lue au plus toutes les `external_ci.refresh_seconds` (300 ou plus), moins souvent après `external_ci.breaker.failures` échecs.
 
 ## Sécurité
 

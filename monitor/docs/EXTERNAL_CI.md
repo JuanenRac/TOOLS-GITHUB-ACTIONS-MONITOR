@@ -22,7 +22,7 @@ azure;repo=my-mirror;url=https://dev.azure.com/my-org;project=my-project
 
 ## Red, fine or degraded
 
-The last finished build of each builder, pipeline or job on its branch decides, as for Actions: pull or merge requests, cancelled, skipped and unknown states never decide. A service that does not answer, answers something else or misses a builder is **degraded**, never red; the failures seen before stay, marked stale. Failures raise `ci.external.red` (level `external_ci.alert.level`) and are counted, notified and silenced like a red of Actions; `ci.external.degraded` is information. Silencing them never silences a security alert. Each source is read at most once every `external_ci.refresh_seconds` (300 or more), and less often after `external_ci.breaker.failures` failures.
+The last finished build of each builder, pipeline or job on its branch decides, as for Actions: pull or merge requests, cancelled, skipped and unknown states never decide. A service that does not answer, answers something else or misses a builder is **degraded**, never red; the failures seen before stay, marked stale. Failures raise ci.external.red (level `external_ci.alert.level`) and are counted, notified and silenced like a red of Actions; ci.external.degraded is information. Silencing them never silences a security alert. Each source is read at most once every `external_ci.refresh_seconds` (300 or more), and less often after `external_ci.breaker.failures` failures.
 
 ## Safety
 

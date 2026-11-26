@@ -22,7 +22,7 @@ azure;repo=my-mirror;url=https://dev.azure.com/my-org;project=my-project
 
 ## Rot, in Ordnung oder eingeschränkt
 
-Der letzte beendete Build jedes Builders, jeder Pipeline oder jedes Jobs auf seinem Branch entscheidet, wie bei Actions: Merge-Anfragen sowie abgebrochene, übersprungene und unbekannte Zustände entscheiden nie. Ein Dienst, der nicht antwortet, etwas anderes liefert oder dem ein Builder fehlt, ist **eingeschränkt**, nie rot; frühere Fehler bleiben als veraltet stehen. Fehler erzeugen `ci.external.red` (Stufe `external_ci.alert.level`), gezählt, gemeldet und stummschaltbar wie ein Rot von Actions; `ci.external.degraded` ist eine Information. Stummschalten verdeckt nie eine Sicherheitswarnung. Jede Quelle wird höchstens alle `external_ci.refresh_seconds` (ab 300) gelesen, nach `external_ci.breaker.failures` Fehlern seltener.
+Der letzte beendete Build jedes Builders, jeder Pipeline oder jedes Jobs auf seinem Branch entscheidet, wie bei Actions: Merge-Anfragen sowie abgebrochene, übersprungene und unbekannte Zustände entscheiden nie. Ein Dienst, der nicht antwortet, etwas anderes liefert oder dem ein Builder fehlt, ist **eingeschränkt**, nie rot; frühere Fehler bleiben als veraltet stehen. Fehler erzeugen ci.external.red (Stufe `external_ci.alert.level`), gezählt, gemeldet und stummschaltbar wie ein Rot von Actions; ci.external.degraded ist eine Information. Stummschalten verdeckt nie eine Sicherheitswarnung. Jede Quelle wird höchstens alle `external_ci.refresh_seconds` (ab 300) gelesen, nach `external_ci.breaker.failures` Fehlern seltener.
 
 ## Sicherheit
 
