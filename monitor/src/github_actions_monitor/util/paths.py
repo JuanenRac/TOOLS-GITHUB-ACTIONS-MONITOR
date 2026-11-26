@@ -39,7 +39,7 @@ KINDS = ("config", "data", "logs", "ai")
 PATHS_FILE_NAME = "paths.json"
 #: (kind, regular expression of the name without the `_lite` / `_demo` mark): the first line that matches wins. The same table drives the code, the migration and the doctor.
 _RULES = (
-    ("config", r"actions_monitor\.json|targets\.json|ecosystems\.json|profiles\.json|quotas\.json|lessons\.json|lessons_rules\.json|ai_models\.json|config_backups|paths\.json"),
+    ("config", r"actions_monitor\.json|targets\.json|ecosystems\.json|profiles\.json|quotas\.json|lessons\.json|lessons_rules\.json|ai_models\.json|keyring\.json|config_backups|paths\.json"),
     ("ai", r"ALERTS_BRIEF\.md|ai_alerts\.jsonl|ai_alerts_state\.json|ai_heartbeat\.json|ai_hook_state\.json|ai_notify\.jsonl|ai_notify_state\.json|ci_red\.json|INDEX\.json|LESSONS\.md"),
     ("logs", r"actions_monitor_log\.txt|ai_actions_log\.jsonl|github_actions_log\.jsonl|auth_audit\.jsonl|ai_prompts\.jsonl|loop\.log"),
     ("data", r"etag_cache\.json|events_monitor\.jsonl|events_state\.json|eventos_monitor\.jsonl|eventos_estado\.json|analytics_history\.json|sentinel_cache\.json|sentinel_history\.json|"

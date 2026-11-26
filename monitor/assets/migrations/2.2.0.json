@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.2.0",
  "previous": "2.1.8",
- "digest": "faa09f5a28ebc9baf816e75b8a56d46cb291bdc030c86cf7bd07e60df0ff68ab",
+ "digest": "fc254d907ddcc377c3b962df1222ae5da689ce678d4f76319413524da442f349",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -140,6 +140,16 @@
      120
     ],
     "default": 15
+   },
+   {
+    "key": "ops.verify_release.fetch",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "updates.notify_window",
+    "kind": "bool",
+    "default": true
    }
   ],
   "removed": [],

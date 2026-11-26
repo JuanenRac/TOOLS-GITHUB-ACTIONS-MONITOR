@@ -882,7 +882,8 @@
   },
   "updates": {
     "check": true,
-    "systemd_helper": false
+    "systemd_helper": false,
+    "notify_window": true
   },
   "airgapped": false,
   "open_browser": true,
@@ -1267,6 +1268,9 @@
     "use_proxy": false
   },
   "ops": {
+    "verify_release": {
+      "fetch": false
+    },
     "backup": {
       "compress_level": 6,
       "dir": "backups",

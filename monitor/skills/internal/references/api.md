@@ -144,6 +144,8 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/settings` | GET,POST | viewer / admin | read and change the settings (a fixed list of keys, validated, with a backup) |
 | `/api/skills` | GET | viewer | the two skills of the monitor (`?name=internal|external[&file=NAME]`) as text |
 | `/api/statusbar` | GET | viewer | the data of the status bar of the page |
+| `/api/supply/update-dismiss` | POST | admin | do not announce one version again; body {version} |
+| `/api/supply/update-notice` | GET | viewer | what the window that announces a newer version shows: the version, the summary of its changes in the language asked and whether to show it (setting updates.notify_window) |
 | `/api/tags` | GET | viewer | tags and releases of the repositories |
 | `/api/team` | GET | viewer | the prefix of the health views of the repositories and of the team (see /api/team/health); Complete only |
 | `/api/team/fleet` | GET | viewer | the same health grouped and ordered for hundreds of repositories: `groups` with their totals and `rows` (one per repository, at most 5,000; the page draws them a page at a time); `?group=ecosystem|label|state|none`, `?sort=risk|name|last_run|state`, `?saved=<name>` and the filters of the team view (read only; Complete only) |

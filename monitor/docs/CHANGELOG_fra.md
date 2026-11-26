@@ -11,6 +11,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Une fenêtre annonce une version plus récente**: avec le résumé des changements dans votre langue, un bouton vers Mises à jour, « Plus tard » et « Ne plus annoncer cette version » ; activée par défaut et muette sur les écrans muraux et kiosque.
+- **Nouvelles commandes**: pour vérifier sans réseau une version téléchargée et gérer les clés publiques.
 - Sources CI externes, lecture seule et désactivées par défaut : Buildbot, GitLab CI, Jenkins et Azure Pipelines (les deux derniers expérimentaux) pour les dépôts miroirs. Leurs échecs sont comptés, notifiés et mis en sourdine comme ceux d'Actions ; un service muet est dégradé, jamais rouge. Lectures sûres, fin de journal facultative, limitée et expurgée, test de connexion et `external-ci` en ligne de commande.
 - **Les versions sont signées et le programme de mise à jour vérifie la signature** : à partir de la 2.2.0, une version porte une signature Ed25519 détachée de SHA256SUMS et de chaque fichier, faite sur GitHub par le workflow de publication. Le programme de mise à jour (page, fenêtre, console et ligne de commande) refuse une version à partir de la 2.2.0 sans signature ou mal signée, ainsi qu'un zip signé proposé sous une autre version, avant toute décompression ; revenir à une ancienne version non signée est permis avec un avertissement.
 - **Deux nomenclatures et des attestations à chaque version** : des documents CycloneDX et SPDX listent chaque fichier du zip et les bibliothèques facultatives, et le workflow atteste la provenance des fichiers, la nomenclature et le procès-verbal du contrôle qualité.

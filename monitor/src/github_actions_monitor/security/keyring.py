@@ -146,6 +146,43 @@ def revoke_key(path, wanted):
     raise KeyringError("unknown", "no key with that id or fingerprint")
 
 
+def expiring(keys, today, days=60):
+    """[(id, days left)] of the keys that are not revoked and expire within `days` (negative: already expired): the warning that comes before a rotation."""
+    out = []
+    for entry in keys:
+        end = _date(entry["expires"]) if entry.get("expires") else None
+        if end and not entry.get("revoked") and (end - today).days <= days:
+            out.append((entry["id"], (end - today).days))
+    return out
+
+
+ROTATION_SUFFIX = ".new" + SIGNATURE_SUFFIX
+
+
+def verify_rotation(path, keys=None, today=None):
+    """{"result", "new", "replaces"} of an announcement of a new release key: a JSON {"new": entry, "replaces": id} signed by the key it replaces (<path>.ed25519.sig) AND by the new key itself
+    (<path>.new.ed25519.sig). The announcement only informs: the product trusts a new key when a release that carries it is installed."""
+    report = {"result": INVALID, "new": "", "replaces": ""}
+    path = Path(path)
+    try:
+        if path.stat().st_size > MAX_KEYRING_BYTES:
+            return report
+        data = json.loads(path.read_text(encoding="utf-8"))
+        new = clean_entry(data["new"])
+        replaces = str(data["replaces"])
+    except (OSError, ValueError, KeyError, TypeError):
+        return report
+    report.update(new=new["id"], replaces=replaces)
+    old = [k for k in (builtin_keys() if keys is None else keys) if k["id"] == replaces and "release" in k["scopes"]]
+    if not old:
+        report["result"] = UNKNOWN_KEY
+        return report
+    first, _ = verify_file(path, scope="release", keys=old, today=today)
+    second, _ = verify_file(path, signature_path=path.with_name(path.name + ROTATION_SUFFIX), scope="release", keys=[dict(new, scopes=["release"])], today=today)
+    report["result"] = first if first != VALID else second
+    return report
+
+
 def parse_signature(text):
     """The 64 bytes of a detached signature file, or None when the text is not one."""
     text = str(text or "").strip()
