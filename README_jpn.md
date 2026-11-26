@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6071_passing-brightgreen.svg" alt="6071 tests">
+  <img src="https://img.shields.io/badge/Tests-6097_passing-brightgreen.svg" alt="6097 tests">
 </p>
 
 > 所有するすべてのリポジトリのワークフローを監視し、赤いもの・止まっているもの・対応待ちのものを、ローカルの1ページで教えます。
@@ -98,8 +98,8 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **テスト** | テストメソッド 6071 件(`python -m unittest discover -s monitor/tests`) |
-| **設定** | 設定 973 件、すべてヘルプ付き |
+| **テスト** | テストメソッド 6097 件(`python -m unittest discover -s monitor/tests`) |
+| **設定** | 設定 1000 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows、Python 3.11, 3.13 |
 
@@ -353,6 +353,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/QUOTAS_jpn.md`](monitor/docs/QUOTAS_jpn.md): GitHub のクォータとプラン
 - [`monitor/docs/MODES_jpn.md`](monitor/docs/MODES_jpn.md): 動作モード: 通常・高速・ターボ
 - [`monitor/docs/EXTERNAL_CI_jpn.md`](monitor/docs/EXTERNAL_CI_jpn.md): 外部CIソース(読み取り専用): Buildbot、GitLab CI、Jenkins、Azure Pipelines
+- [`monitor/docs/PLUGINS_jpn.md`](monitor/docs/PLUGINS_jpn.md): プラグイン（既定でオフ）、パッケージ、分離、シークレット保管庫からのトークン読み取り
 - [`monitor/docs/POSTURE_jpn.md`](monitor/docs/POSTURE_jpn.md): リポジトリと組織のセキュリティ体制(読み取り専用)
 - [`monitor/docs/COLLABORATION_jpn.md`](monitor/docs/COLLABORATION_jpn.md): 共同作業の表示と任意の GitHub 操作
 - [`monitor/docs/FLEET_APIS_jpn.md`](monitor/docs/FLEET_APIS_jpn.md): 役割とグループ別のフリート、CCTray とセキュリティ API、レポートのダイジェスト、デモサイト

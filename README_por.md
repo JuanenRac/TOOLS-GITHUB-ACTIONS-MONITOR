@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6071_passing-brightgreen.svg" alt="6071 tests">
+  <img src="https://img.shields.io/badge/Tests-6097_passing-brightgreen.svg" alt="6097 tests">
 </p>
 
 > Vigia os workflows de todos os seus repositórios e diz-lhe, numa página local, o que está a vermelho, o que está encravado e o que o espera.
@@ -98,8 +98,8 @@ Método, pressupostos e como medi-lo na sua própria utilização: [`monitor/doc
 | | |
 |---|---|
 | **Maturidade** | functional |
-| **Testes** | 6071 métodos de teste (`python -m unittest discover -s monitor/tests`) |
-| **Definições** | 973 definições, todas com ajuda |
+| **Testes** | 6097 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Definições** | 1000 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -353,6 +353,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/QUOTAS_por.md`](monitor/docs/QUOTAS_por.md): quotas e planos do GitHub
 - [`monitor/docs/MODES_por.md`](monitor/docs/MODES_por.md): modos de trabalho: normal, rápido e turbo
 - [`monitor/docs/EXTERNAL_CI_por.md`](monitor/docs/EXTERNAL_CI_por.md): Fontes de CI externas, só de leitura: Buildbot, GitLab CI, Jenkins, Azure Pipelines
+- [`monitor/docs/PLUGINS_por.md`](monitor/docs/PLUGINS_por.md): Plugins (desligados por predefinição), os pacotes, o isolamento e ler o token de um cofre de segredos
 - [`monitor/docs/POSTURE_por.md`](monitor/docs/POSTURE_por.md): Postura dos repositórios e da organização, só de leitura
 - [`monitor/docs/COLLABORATION_por.md`](monitor/docs/COLLABORATION_por.md): Vistas de colaboração e ações opcionais no GitHub
 - [`monitor/docs/FLEET_APIS_por.md`](monitor/docs/FLEET_APIS_por.md): Frota por papel e grupo, APIs CCTray e de segurança, impressão dos relatórios, sítio de demonstração

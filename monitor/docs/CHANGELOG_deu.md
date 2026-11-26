@@ -30,6 +30,12 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Der einzeln veröffentlichte Updater eines Releases enthält nun das Migrationsregister**, und SHA256SUMS nennt ihn zusammen mit dem Zip und den zwei Stücklisten.
 
+### Plugins
+
+- **Plugins, standardmäßig aus** (Complete): offizielle für unbeantwortete Diskussionen und Paketaufbewahrung; Fremd-Plugins nur als mit Ihrem Schlüsselbund signierte Pakete, in eigenem Prozess ohne Token, mit dem Hinweis „ohne Netzisolierung“, wo das Netz nicht abgetrennt werden kann. Ausgaben werden bereinigt, fehlschlagende Plugins pausiert; dazu Katalog in den Einstellungen, Befehl `plugin`, Doctor-Prüfung, Autorenvorlage und versionierter Vertrag (`api_compat` 1).
+- **Das GitHub-Token kann aus Vault, SOPS, Bitwarden Secrets Manager oder den Secret-Managern von AWS, Azure oder Google gelesen werden** (nur lesend, `secrets.backend`).
+- **Der externe Skill lässt sich für ein Skill-Verzeichnis paketieren** (`tools/prepare_skill_bundle.py`, veröffentlicht nichts).
+
 ## [2.1.8]
 
 Version 2.1.8 bringt keine neue Funktion: Sie korrigiert, was eine Überprüfung von 2.1.7 gefunden hat. Der CI-Wächter ist nicht mehr grün, wenn die Liste der Läufe einen Workflow verbergen kann; das Freigeben oder Ablehnen eines KI-Vorschlags funktioniert; ein gesperrtes Gerät verliert seine offenen Datenströme; Verbindungen haben ein Zeit- und ein Anzahllimit; der Proxy-Tunnel funktioniert; das Zurückgehen läuft nicht mehr über eine laufende Aktualisierung hinweg; das Container-Image wird nur noch von einem Tag veröffentlicht; und die Bildschirme, der Kiosk, die Befehlszeile und die Dokumentation sagen, was das Programm tut.

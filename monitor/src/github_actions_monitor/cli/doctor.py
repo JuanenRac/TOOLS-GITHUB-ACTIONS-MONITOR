@@ -23,11 +23,11 @@ from pathlib import Path
 from github_actions_monitor.util import paths
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder
 ORDER = ("python", "gh", "login", "quota", "access", "estimate", "network", "folder", "port", "running", "docker", "rich", "textual", "targets", "token", "exposure", "risks", "conflicts", "backend", "degraded", "credential", "timezone", "github_app", "layout", "storage", "retention", "compare_window", "etag")
-FIX = {"access": "gh auth refresh -h github.com -s repo,read:org   |   https://github.com/settings/tokens (Configure SSO)", "estimate": "", "python": "https://www.python.org/downloads/", "gh": "winget install --id GitHub.cli   |   brew install gh   |   sudo apt install gh", "login": "gh auth login",
+FIX = {"plugins": "python bin/monitor_cli.py plugin audit", "access": "gh auth refresh -h github.com -s repo,read:org   |   https://github.com/settings/tokens (Configure SSO)", "estimate": "", "python": "https://www.python.org/downloads/", "gh": "winget install --id GitHub.cli   |   brew install gh   |   sudo apt install gh", "login": "gh auth login",
        "quota": "gh api rate_limit", "network": "gh api rate_limit", "folder": "", "port": "python bin/actions_monitor.py --port 8800", "running": "", "docker": "", "rich": "pip install rich",
        "textual": "pip install textual", "targets": "python bin/actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "conflicts": "", "backend": "", "degraded": "", "credential": "", "timezone": "", "github_app": "", "layout": "python -m github_actions_monitor.util.rootmigrate --apply", "storage": "python tools/migrate_storage.py --from file --to sqlite", "retention": "", "compare_window": "", "etag": "",
        "volumes": "", "supervisor": "python bin/monitor_cli.py health --deep", "limits": "", "capacity": "python bin/monitor_cli.py doctor --json", "sqlite_hot": "python tools/backup_storage.py backup FILE.zip --backend sqlite", "backup_age": "python bin/monitor_cli.py backup create", "disk": "", "metrics": "", "latency": "python bin/monitor_cli.py doctor --latency"}
-ORDER_OPS = ("volumes", "supervisor", "limits", "capacity", "sqlite_hot", "backup_age", "disk", "metrics")
+ORDER_OPS = ("volumes", "supervisor", "limits", "capacity", "sqlite_hot", "backup_age", "disk", "metrics", "plugins")
 EXIT_OK, EXIT_FAIL, EXIT_WARN, EXIT_DOCTOR_ERROR = 0, 1, 3, 4
 
 

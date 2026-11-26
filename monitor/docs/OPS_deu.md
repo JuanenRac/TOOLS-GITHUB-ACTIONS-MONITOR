@@ -72,6 +72,7 @@ Die Aufbewahrungs-Bereinigung läuft alle `retention.interval_hours` von selbst.
 | `backup_age` | die letzte gute Sicherung gegen `ops.doctor.backup_max_age_days` |
 | `disk` | freier Platz des Datenvolumes gegen `ops.doctor.min_free_mb` |
 | `metrics` | `/metrics` antwortet, wenn die Prometheus-Ausgabe an ist und ein Monitor läuft |
+| `plugins` | mit `plugins.enabled`: installierte Plugins, die die Prüfung nicht mehr bestehen (widerrufener Schlüssel, geänderte Datei), und pausierte |
 
 **Exit-Codes (stabil, für Cron):** `0` alles in Ordnung (auch mit Warnungen, ohne `--strict`); `1` mindestens eine Prüfung ist fehlgeschlagen; `3` nur Warnungen und `--strict` (oder `ops.doctor.strict_exit`); `4` der Doctor selbst konnte nicht laufen. Das sind die Codes des Doctors; die übrigen Befehle von `monitor_cli.py` behalten ihre. Beispiel: `0 * * * * python3 bin/monitor_cli.py doctor --strict --json > /var/lib/github-actions-monitor/doctor.json || true` und alarmieren Sie bei jedem Code außer 0.
 

@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6071_passing-brightgreen.svg" alt="6071 tests">
+  <img src="https://img.shields.io/badge/Tests-6097_passing-brightgreen.svg" alt="6097 tests">
 </p>
 
 > Controlla i workflow di tutti i tuoi repository e ti dice, su una pagina locale, cosa è rosso, cosa è bloccato e cosa ti aspetta.
@@ -98,8 +98,8 @@ Metodo, ipotesi e come misurarlo nel proprio uso: [`monitor/docs/PRODUCTIVITY_it
 | | |
 |---|---|
 | **Maturità** | functional |
-| **Test** | 6071 metodi di test (`python -m unittest discover -s monitor/tests`) |
-| **Impostazioni** | 973 impostazioni, tutte con aiuto |
+| **Test** | 6097 metodi di test (`python -m unittest discover -s monitor/tests`) |
+| **Impostazioni** | 1000 impostazioni, tutte con aiuto |
 | **Lingue** | 8 (inglese, spagnolo, tedesco, francese, italiano, giapponese, cinese e portoghese) |
 | **Provato nel CI su** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -353,6 +353,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/QUOTAS_ita.md`](monitor/docs/QUOTAS_ita.md): quote e piani di GitHub
 - [`monitor/docs/MODES_ita.md`](monitor/docs/MODES_ita.md): modalità di lavoro: normale, veloce e turbo
 - [`monitor/docs/EXTERNAL_CI_ita.md`](monitor/docs/EXTERNAL_CI_ita.md): Fonti CI esterne, sola lettura: Buildbot, GitLab CI, Jenkins, Azure Pipelines
+- [`monitor/docs/PLUGINS_ita.md`](monitor/docs/PLUGINS_ita.md): Plugin (spenti per impostazione predefinita), pacchetti, isolamento e token da un archivio di segreti
 - [`monitor/docs/POSTURE_ita.md`](monitor/docs/POSTURE_ita.md): Postura di repository e organizzazione, sola lettura
 - [`monitor/docs/COLLABORATION_ita.md`](monitor/docs/COLLABORATION_ita.md): Viste di collaborazione e azioni facoltative su GitHub
 - [`monitor/docs/FLEET_APIS_ita.md`](monitor/docs/FLEET_APIS_ita.md): Flotta per ruolo e gruppo, API CCTray e di sicurezza, impronta dei rapporti, sito dimostrativo

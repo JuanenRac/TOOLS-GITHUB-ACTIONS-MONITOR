@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6071_passing-brightgreen.svg" alt="6071 tests">
+  <img src="https://img.shields.io/badge/Tests-6097_passing-brightgreen.svg" alt="6097 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -98,8 +98,8 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 6071 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **设置** | 973 个设置,均有帮助 |
+| **测试** | 6097 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **设置** | 1000 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
 
@@ -353,6 +353,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/QUOTAS_zho.md`](monitor/docs/QUOTAS_zho.md)：GitHub 的配额与套餐
 - [`monitor/docs/MODES_zho.md`](monitor/docs/MODES_zho.md)：工作模式：普通、快速和极速
 - [`monitor/docs/EXTERNAL_CI_zho.md`](monitor/docs/EXTERNAL_CI_zho.md): 外部 CI 来源(只读):Buildbot、GitLab CI、Jenkins、Azure Pipelines
+- [`monitor/docs/PLUGINS_zho.md`](monitor/docs/PLUGINS_zho.md): 插件（默认关闭）、软件包、隔离以及从密钥存储读取令牌
 - [`monitor/docs/POSTURE_zho.md`](monitor/docs/POSTURE_zho.md): 仓库与组织的安全态势(只读)
 - [`monitor/docs/COLLABORATION_zho.md`](monitor/docs/COLLABORATION_zho.md): 协作视图与可选的 GitHub 操作
 - [`monitor/docs/FLEET_APIS_zho.md`](monitor/docs/FLEET_APIS_zho.md): 按角色与分组查看机群、CCTray 与安全 API、报告摘要值、演示站点

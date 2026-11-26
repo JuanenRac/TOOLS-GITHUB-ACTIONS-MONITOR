@@ -536,6 +536,22 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `pairing.device_days` | `90` | general | Days a paired device keeps its access |
 | `pairing.enabled` (secure) | `false` | general | Pair phones with a QR code |
 | `pairing.max_devices` | `10` | general | Most paired devices |
+| `plugins.alert_title_max` | `120` | plugins | Longest title of a plugin alert |
+| `plugins.breaker.failures` | `3` | plugins | Failures before a plugin is paused |
+| `plugins.enabled` (secure) | `false` | plugins | Run plugins |
+| `plugins.entry_points` (secure) | `false` | plugins | Find plugin packages installed with pip |
+| `plugins.official.discussions.days` | `7` | plugins | Days without an answer |
+| `plugins.official.discussions.enabled` | `false` | plugins | Official plugin: unanswered discussions |
+| `plugins.official.packages.enabled` | `false` | plugins | Official plugin: package retention |
+| `plugins.official.packages.max_versions` | `50` | plugins | Versions kept at most |
+| `plugins.official.packages.types` | `["container"]` | plugins | Package types |
+| `plugins.official_timeout_s` | `300` | plugins | Time limit of an official plugin (seconds) |
+| `plugins.reverify_on_start` (secure) | `true` | plugins | Check installed plugins at start |
+| `plugins.third_party.enabled` (secure) | `false` | plugins | Run plugins of other people |
+| `plugins.worker.max_output_kb` (secure) | `256` | plugins | Largest answer of a plugin (KB) |
+| `plugins.worker.memory_mb` (secure) | `256` | plugins | Memory ceiling of a plugin (MB) |
+| `plugins.worker.platforms_ok` (secure) | `["linux", "windows", "darwin"]` | plugins | Systems where plugins of others may run |
+| `plugins.worker.timeout_s` (secure) | `20` | plugins | Time limit of a plugin (seconds) |
 | `ports.complete` | `8765` | general | Port of the complete edition |
 | `ports.lite` | `8766` | general | Port of the lite edition |
 | `posture.alerts` | `true` | posture | Alerts for the findings |
@@ -701,6 +717,17 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `screens.theme_sentinels` | `"inherit"` | general | Theme of the screen: Sentinels |
 | `screens.transition` | `"fade"` | general | Change between screens |
 | `screens.version_check_seconds` | `300` | general | Look for a new version every |
+| `secrets.backend` (secure) | `"local"` | plugins | Read the token from |
+| `secrets.bitwarden.item` (secure) | `""` | plugins | Bitwarden: id of the secret |
+| `secrets.cloud.ref` (secure) | `""` | plugins | Cloud: name of the secret |
+| `secrets.reload_on_rotate` (secure) | `true` | plugins | Read the token again now and then |
+| `secrets.reload_seconds` (secure) | `900` | plugins | Seconds between two reads of the token |
+| `secrets.sops.field` (secure) | `"token"` | plugins | SOPS: name of the value |
+| `secrets.sops.file` (secure) | `""` | plugins | SOPS: encrypted file |
+| `secrets.vault.addr` (secure) | `""` | plugins | Vault: address |
+| `secrets.vault.field` (secure) | `"token"` | plugins | Vault: name of the value |
+| `secrets.vault.path` (secure) | `""` | plugins | Vault: path of the secret |
+| `secrets.vault.token_env` (secure) | `"VAULT_TOKEN"` | plugins | Vault: environment variable of its token |
 | `selfwatch.enabled` | `true` | paths | The monitor watches itself |
 | `selfwatch.interval_seconds` | `60` | paths | Seconds between two readings |
 | `selfwatch.rss_warn_mb` | `1024` | paths | Warn when its memory is above |

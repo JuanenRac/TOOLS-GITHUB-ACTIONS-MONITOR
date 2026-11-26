@@ -42,6 +42,7 @@
 | `metrics` | 以 `名称=值` 的行输出数值，供 cron 和邮件使用；加上 `--if-problem` 时一切正常则不输出任何内容；参见 [CLI_OPERATOR.md](CLI_OPERATOR.md) | 否 |
 | `posture` | 仓库与组织安全态势,只读(`posture status|matrix|check --repo-name`);见 [POSTURE.md](POSTURE_zho.md) | 否 |
 | `external-ci` | 外部 CI 来源,只读(`external-ci list|status|probe --source`);见 [EXTERNAL_CI.md](EXTERNAL_CI_zho.md) | 否 |
+| `plugin` | 插件：`plugin list|validate|pack|verify|init|install|enable|disable|uninstall|audit`；参见 [PLUGINS.md](PLUGINS_zho.md) | 否 |
 
 所有命令的选项：`--json`（以单个 JSON 文档输出：`{"ok", "exit", "data"}`）、`--account ID`、`--url URL`、`--lite`（端口 8766）、`--timeout 秒数`（1 到 60）、`--lang 代码`。在网络模式下,请把访问令牌放在监视器自己读取的环境变量 `MONITOR_ACCESS_TOKEN` 中(`MONITOR_TOKEN` 作为别名也可用;`--token TOKEN` 是最后手段,因为命令行选项会出现在进程列表中)。优先顺序:`MONITOR_ACCESS_TOKEN`、`MONITOR_TOKEN`、`--token`。令牌通过请求头 `X-Monitor-Access` 传送,绝不出现在地址或屏幕上。对其他计算机使用未加密 `http` 的 `--url` 时,会在 stderr 打印警告(令牌和响应将以明文传输):在不受你控制的网络中请使用 `https`。
 

@@ -32,6 +32,12 @@ when this file and `tool_version.py` disagree.
 
 - **The stand-alone updater published with a release now carries the registry of migrations inside**, and SHA256SUMS names it together with the zip and the two bills of materials.
 
+### Plugins
+
+- **Plugins, off by default** (Complete): official ones for unanswered discussions and package retention; plugins of other people only as packages signed by a key of your keyring, in a separate process without the token, with the label "no network isolation" where the network cannot be cut off. Untrusted output is cleaned, a failing plugin is paused, and there are a catalogue in Settings, the command `plugin`, a doctor check, a template for authors and a versioned contract (`api_compat` 1).
+- **The GitHub token can be read from Vault, SOPS, Bitwarden Secrets Manager or the secret manager of AWS, Azure or Google** (read only, `secrets.backend`).
+- **The external skill can be packaged for a skill registry** (`tools/prepare_skill_bundle.py`, publishes nothing).
+
 ## [2.1.8]
 
 Version 2.1.8 adds no new function: it corrects what a review of 2.1.7 found. The CI sentinel is no longer green when the list of runs may hide a workflow; approving or rejecting a proposal of the AI works; a revoked device loses the streams it had open; connections have a time and a number limit; the proxy tunnel works; going back no longer runs over an update in progress; the container image is only published from a tag; and the screens, the kiosk, the command line and the documentation say what the program does.

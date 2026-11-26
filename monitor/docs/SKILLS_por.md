@@ -42,3 +42,16 @@ Nas Definições, separador IA, o bloco **Skills para IAs** tem Copiar (o núcle
 ## Definições
 
 `ai.skill` (ligado) e `ai.skill_max_chars` (3000; 1500 para um modelo local pequeno). Registar falhas a partir de fora é `POST /api/ai/failures` e exige `lessons.allow_write` e um administrador, como escrever uma lição.
+
+## Publicação num registo de skills
+
+`python tools/prepare_skill_bundle.py --out DIR` deixa a pasta da skill externa pronta a publicar (SKILL.md, referências, `bundle.json` com a versão do monitor e a licença, `SHA256SUMS`); as mesmas fontes dão os mesmos bytes. Não publica nada: o envio para o ClawHub faz-se à mão, com a conta do responsável, depois de ler as condições.
+
+## Assistentes
+
+Só se diz testado o que foi realmente experimentado.
+
+| Assistente ou via | Linha de comandos | HTTP e ficheiros | MCP |
+|---|---|---|---|
+| Um assistente de código no terminal | testado | testado | compatível por protocolo, não testado |
+| Outros assistentes | compatível por protocolo, não testado | compatível por protocolo, não testado | compatível por protocolo, não testado |
