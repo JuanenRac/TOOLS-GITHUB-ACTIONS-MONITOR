@@ -159,8 +159,7 @@ def build(out, port, version=PYODIDE, wait=90):
             if not kind.startswith("application/json"):
                 continue
             name = "data/" + re.sub(r"[^a-z0-9]+", "_", path[5:].lower()).strip("_") + ".json"
-            (out / name).write_text(scrub(body.decode("utf-8")), encoding="utf-8", newline="
-")
+            (out / name).write_text(scrub(body.decode("utf-8")), encoding="utf-8", newline="\n")
             index[path] = name
         (out / "index.html").write_text(static_page(scrub(page.decode("utf-8")), index), encoding="utf-8", newline="\n")
     finally:
