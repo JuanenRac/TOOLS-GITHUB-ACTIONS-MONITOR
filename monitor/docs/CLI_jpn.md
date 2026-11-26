@@ -38,6 +38,7 @@
 | `completions` | `bash`、`zsh`、`fish`、`powershell` の補完スクリプト。実際のパーサーから作られ、出力するだけです | 不可 |
 | `kiosk` | テレビや壁面向けのモニターのアドレス（`ops`、`team`、`release`、`quiet`）。[KIOSK_jpn.md](KIOSK_jpn.md) を参照 | 不可 |
 | `metrics` | cron とメール向けに数値を `名前=値` の行で出力します。`--if-problem` を付けると問題がないときは何も出力しません。[CLI_OPERATOR.md](CLI_OPERATOR.md) を参照 | いいえ |
+| `posture` | リポジトリと組織の体制、読み取り専用(`posture status|matrix|check --repo-name`)。[POSTURE.md](POSTURE_jpn.md) を参照 | 不可 |
 | `external-ci` | 外部CIソース、読み取り専用(`external-ci list|status|probe --source`)。[EXTERNAL_CI.md](EXTERNAL_CI_jpn.md) を参照 | 不可 |
 
 全コマンド共通のオプション：`--json`（応答を 1 つの JSON 文書で：`{"ok", "exit", "data"}`）、`--account ID`、`--url URL`、`--lite`（ポート 8766）、`--timeout 秒`（1〜60）、`--lang コード`。ネットワークモードではアクセストークンを、モニター自身が読む環境変数 `MONITOR_ACCESS_TOKEN` に設定します(`MONITOR_TOKEN` は別名として受け付けます。`--token TOKEN` は最後の手段で、オプションはプロセス一覧に表示されるためです)。優先順位は `MONITOR_ACCESS_TOKEN`、`MONITOR_TOKEN`、`--token` の順です。ヘッダー `X-Monitor-Access` で送られ、アドレスや画面には出ません。別のコンピューターへの暗号化されていない `http` の `--url` では stderr に警告を出します(トークンと応答が平文で送られるため)。管理下にないネットワークでは `https` を使ってください。

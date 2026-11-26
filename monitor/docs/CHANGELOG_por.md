@@ -11,6 +11,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Adicionado
 
+- Verificações de postura de repositórios e organização, só de leitura e desligadas por predefinição: webhooks, definições do Actions, análises, proteção de ramos e ramos de versão, chaves de implementação, idade dos segredos, aplicações, auditoria da organização, reforço do que foi executado e versões alteradas, com referência OWASP CI/CD e CIS. O que o GitHub recusa aparece por verificar. Maturidade por repositório, histórico e `posture` na linha de comandos.
 - Fontes de CI externas, só de leitura e desligadas por predefinição: Buildbot, GitLab CI, Jenkins e Azure Pipelines (os dois últimos experimentais) para repositórios espelhados. As falhas são contadas, notificadas e silenciadas como as do Actions; um serviço que não responde aparece degradado, nunca vermelho. Leituras seguras, fim de registo opcional, limitado e expurgado, Testar ligação e `external-ci` na linha de comandos.
 
 ## [2.1.8]

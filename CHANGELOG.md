@@ -12,6 +12,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- Posture checks of repositories and organization, read only and off by default: webhooks, Actions settings, scanning, branch and release-branch protection, deploy keys, secret age, apps, organization audit log, hardening of what ran and changed releases, each with its OWASP CI/CD and CIS reference. What GitHub refuses is shown as not checked. Maturity per repository, history, `posture` on the command line.
 - External CI sources, read only and off by default: Buildbot, GitLab CI, Jenkins and Azure Pipelines (the last two experimental) for mirrored repositories. Their failures are counted, notified and silenced like those of Actions; a service that does not answer is shown as degraded, never red. Safe reads, optional bounded and redacted log tails, Test connection, `external-ci` on the command line.
 
 ## [2.1.8]

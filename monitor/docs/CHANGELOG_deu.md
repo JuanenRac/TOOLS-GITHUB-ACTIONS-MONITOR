@@ -11,6 +11,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Hinzugefügt
 
+- Prüfungen der Sicherheitslage, nur lesend und standardmäßig aus: Webhooks, Actions-Einstellungen, Scans, Schutz von Branches und Release-Branches, Deploy-Schlüssel, Alter von Secrets, Apps, Audit-Log der Organisation, Härtung der ausgeführten Läufe und geänderte Releases, jeweils mit OWASP-CI/CD- und CIS-Bezug. Verweigertes erscheint als nicht geprüft. Reife je Repository, Verlauf und `posture` in der Befehlszeile.
 - Externe CI-Quellen, nur lesend und standardmäßig aus: Buildbot, GitLab CI, Jenkins und Azure Pipelines (die letzten beiden experimentell) für gespiegelte Repositorys. Fehler werden wie die von Actions gezählt, gemeldet und stummgeschaltet; ein nicht antwortender Dienst erscheint eingeschränkt, nie rot. Sichere Abfragen, optionales begrenztes und bereinigtes Logende, Verbindungstest und `external-ci` in der Befehlszeile.
 
 ## [2.1.8]

@@ -516,6 +516,22 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `pairing.max_devices` | `10` | general | Most paired devices |
 | `ports.complete` | `8765` | general | Port of the complete edition |
 | `ports.lite` | `8766` | general | Port of the lite edition |
+| `posture.alerts` | `true` | posture | Alerts for the findings |
+| `posture.audit_log` | `false` | posture | Read the organization audit log |
+| `posture.deploy_max_days` | `365` | posture | Age limit of deploy keys |
+| `posture.enabled` (secure) | `false` | posture | Check the posture |
+| `posture.org_checks` | `true` | posture | Check the organization |
+| `posture.profile` | `"basic"` | posture | Profile |
+| `posture.refresh_hours` | `24` | posture | Hours between reads |
+| `posture.release_branches` | `["release/*", "release-*", "hotfix/*"]` | posture | Release branches |
+| `posture.release_window` | `""` | posture | Hours for releases |
+| `posture.releases` | `true` | posture | Watch published releases |
+| `posture.repos_per_cycle` | `3` | posture | Repositories per cycle |
+| `posture.review_sample` | `0` | posture | Merged changes looked at |
+| `posture.runner_runs` | `0` | posture | Runs looked at for hardening |
+| `posture.skip` | `[]` | posture | Checks not asked for |
+| `posture.stored_max_days` | `365` | posture | Age limit of stored secrets |
+| `posture.types` | `[]` | posture | Kinds of project |
 | `productivity.enabled` | `-` | analytics | Time saved (estimate) |
 | `productivity.saving_percent` | `-` | analytics | Assumed saving when nothing was timed |
 | `productivity.team_hours_per_week` | `-` | analytics | Hours worked in a week (team) |
