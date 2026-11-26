@@ -58,6 +58,7 @@ from github_actions_monitor.security import wsforward
 from github_actions_monitor.integrations import heartbeat
 from github_actions_monitor.data_pipeline import graphql_checks
 from github_actions_monitor import i18n
+from github_actions_monitor import families
 from github_actions_monitor.security import auth_http
 from github_actions_monitor.security import envguard
 from github_actions_monitor.security import localguard
@@ -197,6 +198,7 @@ DEFAULTS = {
                   "heartbeat": {"enabled": True, "window_minutes": 15},
                   "client_hook": {"enabled": True, "block_on_stop": False, "cooldown_minutes": 20, "stale_hours": 3, "max_lines": 12, "max_chars": 2400}},     # a local, read-only feed of alerts for AIs (ai_alerts.py); the hook is OFF                                          # 0: the system of each job is not read (quota.default_runner is assumed)
 }
+families.merge_into(DEFAULTS, families.defaults())      # the defaults of the parts that plug in by themselves (families/)
 
 DEMO = {"on": False}      # --demo: invented data, no gh, no network
 LITE = {"on": False}      # the lite product: the same server without the sentinel, with its own configuration file, its own state files and a short settings page
@@ -2706,6 +2708,8 @@ def maintain(config, data):
     backup_tick(toolconfig.raw_config() if not LITE["on"] else config)
     score_tick(toolconfig.raw_config() if not LITE["on"] else config, data)
     report_tick(toolconfig.raw_config() if not LITE["on"] else config)
+    if not LITE["on"]:
+        families.run_ticks(toolconfig.raw_config(), data, degraded.note)
     try:
         if ETAG["cache"]:
             ETAG["cache"].save()
@@ -2985,7 +2989,8 @@ def render_page():
     if pwa_cfg["enabled"]:
         extras += "\n" + pwa.REGISTER_JS
     page = page.replace("/*EXTRAS_JS*/", extras, 1)
-    return page.replace("/*I18N_DATA*/null", blob, 1)
+    page = page.replace("/*I18N_DATA*/null", blob, 1)
+    return page if LITE["on"] else families.inject_page(page)
 
 
 def render_screen(kind, query):
@@ -3663,8 +3668,45 @@ class Handler(BaseHTTPRequestHandler):
             degraded.note("chatops", error)
             self.json_reply({"ok": False}, 400)
 
+    def family_route(self, method, path):
+        """A route that a part of the monitor declared (families/): the checks it asks for, then its handler. True when the path was one of them (and answered)."""
+        route = families.find_route(method, path)
+        if route is None:
+            return False
+        if LITE["on"] and not route.lite:
+            self.send_response(404)
+            self.end_headers()
+            return True
+        if not self.guard() or (route.this_computer and not self.this_computer()) or (method == "POST" and route.token and not self.token_ok()):
+            return True
+        body = {}
+        if method == "POST":
+            try:
+                size = int(self.headers.get("Content-Length") or 0)
+                if not 0 <= size <= route.max_body:
+                    self.json_reply({"ok": False, "error": "size"}, 413)
+                    return True
+                body = json.loads(self.rfile.read(size) or b"{}")
+            except ValueError:
+                body = None
+            if not isinstance(body, dict):
+                self.json_reply({"ok": False, "error": "request"}, 400)
+                return True
+        query = {k: v[0] for k, v in urllib.parse.parse_qs(self.path.partition("?")[2]).items() if v}
+        try:
+            answer = route.handler(families.Request(method, path, query, body, auth_http.acting_user(self), toolconfig.raw_config()))
+        except (AttributeError, IndexError, KeyError, RuntimeError, TypeError, ValueError) as error:      # a storage that does not answer goes on to storage_failure
+            degraded.note("family.route", error)
+            self.json_reply({"ok": False, "error": "server"}, 500)
+            return True
+        status, payload = answer if isinstance(answer, tuple) else (200, answer)
+        self.json_reply(payload, status)
+        return True
+
     def handle_post(self):
         path = self.path.split("?")[0]
+        if self.family_route("POST", path):
+            return
         if LITE["on"] and path.startswith(LITE_PATHS) and path not in LITE_SHARED:
             self.send_response(404)
             self.end_headers()
@@ -4031,6 +4073,8 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(204)
             self.send_header("Cache-Control", "max-age=86400")
             self.end_headers()
+            return
+        if self.family_route("GET", path):
             return
         if LITE["on"] and path.startswith(LITE_PATHS) and path not in LITE_SHARED:      # the lite product does not have these endpoints
             self.send_response(404)

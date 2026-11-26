@@ -17,6 +17,7 @@ sys.path.insert(0, str(HERE / "tests"))
 import _testenv  # noqa: F401,E402
 from github_actions_monitor.app import actions_monitor  # noqa: E402
 from github_actions_monitor.integrations import ghactions  # noqa: E402
+from github_actions_monitor import families  # noqa: E402
 from github_actions_monitor.security import audit_log, audited_posts  # noqa: E402
 
 
@@ -28,6 +29,7 @@ def post_routes():
         if isinstance(node, ast.FunctionDef) and node.name == "handle_post":
             found |= {c.value for c in ast.walk(node) if isinstance(c, ast.Constant) and isinstance(c.value, str) and c.value.startswith("/api/")}
     found |= set(actions_monitor.THIS_COMPUTER_POST)
+    found |= {r.path for r in families.routes() if r.method == "POST"}      # the routes of the parts (families/)
     return found
 
 

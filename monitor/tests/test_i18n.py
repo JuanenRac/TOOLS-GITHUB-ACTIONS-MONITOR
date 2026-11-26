@@ -20,7 +20,7 @@ import _testenv  # noqa: F401
 
 from github_actions_monitor.data_pipeline import events as event_feed
 from github_actions_monitor.cli import gha_dispatch_all as gd
-from github_actions_monitor import i18n
+from github_actions_monitor import families, i18n
 import make_release as mr
 from github_actions_monitor.sentinels import sentinel_local as sl
 from github_actions_monitor.app import surface
@@ -34,6 +34,8 @@ PH = re.compile(r"\{(\w+)(?:![rsa])?(?::[^}]*)?\}")
 
 def catalogue(lang):
     data = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+    for path in families.catalogue_files(lang):      # the texts of the parts (families/<name>/i18n)
+        data.update(json.loads(path.read_text(encoding="utf-8")))
     return {k: v for k, v in data.items() if not k.startswith("_")}
 
 

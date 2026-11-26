@@ -71,6 +71,7 @@ AI_HOOK_ACTIONS = ("install", "status", "uninstall")
 CREDENTIAL_ACTIONS = ("replace", "reload")
 LITE_COMMANDS = ("status", "doctor", "health", "check", "briefs")
 LEVELS = ("info", "warning", "error", "critical")
+from github_actions_monitor import families      # noqa: E402
 from github_actions_monitor.cli import completions, formats, monitor_admin, terminal      # noqa: E402
 from github_actions_monitor.cli import watch as watch_loop      # noqa: E402
 from github_actions_monitor.cli import branchwatch      # noqa: E402
@@ -79,8 +80,10 @@ from github_actions_monitor.surfaces import kiosk      # noqa: E402
 COMMANDS = COMMANDS + ("toolbox", "watch", "monitor", "completions", "kiosk", "metrics", "proposals")      # the operator commands (docs/CLI_OPERATOR.md)
 STATUS_CODES = ("classic", "operator")      # `cli.status_codes` / --status-codes: classic = the codes 0 to 5 of every command; operator = status alone says 0 healthy, 1 nothing serving, 2 up but needs attention
 EXIT_CHANGED = watch_loop.EXIT_CHANGED      # 6: `watch --exit-on-change` saw something change (only when the flag is given)
+COMMANDS = COMMANDS + tuple(c.name for c in families.commands())      # the commands of the parts that plug in by themselves (families/)
+LITE_COMMANDS = LITE_COMMANDS + tuple(c.name for c in families.commands() if c.lite)
 OPERATOR_WORDS = {"watch": watch_loop.WATCHABLE, "completions": completions.SHELLS, "kiosk": tuple(kiosk.PRESETS)}
-WORDS_BY_COMMAND = {"proposals": PROPOSALS_ACTIONS, "ai-hook": AI_HOOK_ACTIONS, "credential": CREDENTIAL_ACTIONS, "lessons": LESSONS_ACTIONS, "install-skill": SKILL_ACTIONS, "ai": AI_ACTIONS, **OPERATOR_WORDS}
+WORDS_BY_COMMAND = {"proposals": PROPOSALS_ACTIONS, "ai-hook": AI_HOOK_ACTIONS, "credential": CREDENTIAL_ACTIONS, "lessons": LESSONS_ACTIONS, "install-skill": SKILL_ACTIONS, "ai": AI_ACTIONS, **OPERATOR_WORDS, **{c.name: tuple(c.words) for c in families.commands() if c.words}}
 CLIENT = monitor_admin.CLIENT      # the session of the team mode and the authority of the certificate: one dict, shared
 PORTS = dict(ports.DEFAULTS)      # the defaults; the port in use is ports.resolve (configuration file, MONITOR_PORT)
 TOKEN_VARIABLES = ("MONITOR_ACCESS_TOKEN", "MONITOR_TOKEN")      # the first is the one the monitor itself reads; the second is an alias
@@ -1206,6 +1209,7 @@ def cmd_monitor(ctx):
 
 
 HANDLERS = {"proposals": cmd_proposals, "monitor": cmd_monitor, "credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "compare": cmd_compare, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "briefs": cmd_briefs, "docs": cmd_docs, "screens": cmd_screens, "toolbox": cmd_toolbox, "api": cmd_api, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai, "watch": cmd_watch, "completions": cmd_completions, "kiosk": cmd_kiosk, "metrics": cmd_metrics}
+HANDLERS.update({c.name: c.run for c in families.commands()})
 
 
 def cmd_update(rest):
@@ -1258,8 +1262,8 @@ def build_parser():
     ap = TranslatedParser(prog="monitor_cli.py", description=i18n.t("cli.description"), epilog=i18n.t("cli.epilog"), formatter_class=TranslatedFormatter, add_help=False)
     ap._positionals.title, ap._optionals.title = i18n.t("cli.argparse_positional"), i18n.t("cli.argparse_options")
     ap.add_argument("-h", "--help", action="help", help=i18n.t("cli.argparse_help"))
-    ap.add_argument("command", choices=COMMANDS, help=i18n.t("cli.help_command"))
-    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + PROPOSALS_ACTIONS + BRIEFS_ACTIONS + DOCS_ACTIONS + API_ACTIONS + SKILL_ACTIONS + AI_ACTIONS + BACKUP_ACTIONS + SCREENS_ACTIONS + TOOLBOX_ACTIONS + tuple(w for words in OPERATOR_WORDS.values() for w in words), default=None, help=i18n.t("cli.help_ai_action"))
+    ap.add_argument("command", choices=COMMANDS, help=command_help(families.commands()))
+    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + PROPOSALS_ACTIONS + BRIEFS_ACTIONS + DOCS_ACTIONS + API_ACTIONS + SKILL_ACTIONS + AI_ACTIONS + BACKUP_ACTIONS + SCREENS_ACTIONS + TOOLBOX_ACTIONS + tuple(w for words in OPERATOR_WORDS.values() for w in words) + tuple(w for c in families.commands() for w in c.words), default=None, help=i18n.t("cli.help_ai_action"))
     ap.add_argument("file", nargs="?", default="", help=i18n.t("cli.help_file"))
     ap.add_argument("--json", action="store_true", help=i18n.t("cli.help_json"))
     for name in ("assistant", "cursor", "generic"):
@@ -1314,7 +1318,21 @@ def build_parser():
     ap.add_argument("--egress", action="store_true", help=i18n.t("cli.help_egress"))
     ap.add_argument("--latency", action="store_true", help=i18n.t("cli.help_latency"))
     ap.add_argument("--version", action="store_true", help=i18n.t("cli.help_version"))
+    add_family_options(ap, families.commands())
     return ap
+
+
+def command_help(commands):
+    """The help of the word `command`: the text of the monitor and, after it, one line for each command of a part."""
+    return " ".join([i18n.t("cli.help_command")] + [f"{c.name}: {i18n.t(c.help)}" for c in commands])
+
+
+def add_family_options(parser, commands):
+    """The options of the commands of the parts. Two commands may share one option (the same flag is added once)."""
+    for command in commands:
+        for option in command.options:
+            if option.flag not in parser._option_string_actions:      # noqa: SLF001
+                parser.add_argument(option.flag, help=i18n.t(option.help), **option.kwargs)
 
 
 def monitor_words(args_list):
@@ -1369,6 +1387,7 @@ def main(argv=None):
         ctx.update({"raw": raw, "format": "csv" if args.format == "csv" else formats.choose(args.format, args.json, formats.configured_format(raw)), "interval": args.interval, "once": args.once or args.single_pass, "exit_on_change": args.exit_on_change, "clear": not args.no_clear,
                     "branch": args.branch, "repo_asked": args.repo, "wait": args.wait, "status_codes": args.status_codes, "if_problem": args.if_problem, "color": terminal.use_color(args.color)})
         scheme["operator"] = args.command == "status" and status_scheme(ctx) == "operator"
+        ctx["args"] = args      # every parsed option, for the commands of the parts
         ctx["egress"] = args.egress
         ctx["latency"] = args.latency
         CLIENT.update({"session": "", "ca": (args.ca_file or os.environ.get("MONITOR_CA_FILE") or "").strip()})
