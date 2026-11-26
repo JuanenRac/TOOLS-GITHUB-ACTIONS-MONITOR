@@ -395,7 +395,7 @@ def _red_repos(state, snapshot):
     if not isinstance(rows, list):
         rows = [{"repo": r.get("repo"), "workflow": r.get("name"), "since": r.get("started"), "streak": 1} for r in (state.get("failing") or []) if isinstance(r, dict)]
     out = {}
-    for row in rows:
+    for row in rows + list(state.get("external_red") or []):      # the reds of the external CI sources count like the others
         if isinstance(row, dict) and row.get("repo"):
             out.setdefault(row["repo"], []).append(row)
     return out
