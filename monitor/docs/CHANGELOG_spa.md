@@ -9,6 +9,19 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+### Añadido
+
+- **Las releases van firmadas y el actualizador comprueba la firma**: desde la versión 2.2.0 una release lleva una firma Ed25519 separada de SHA256SUMS y de cada fichero, hecha en GitHub por el workflow de release. El actualizador (página, ventana, consola y línea de órdenes) rechaza una release desde la 2.2.0 sin firma o con firma incorrecta, y un zip firmado ofrecido con otra versión, antes de descomprimir nada; volver a una versión anterior sin firma está permitido con un aviso.
+- **Dos listas de materiales y atestaciones en cada release**: documentos CycloneDX y SPDX enumeran cada fichero del zip y las librerías opcionales, y el workflow de release atestigua la procedencia de los ficheros, la lista de materiales y el acta de la puerta de calidad.
+- **La puerta de calidad puede ejecutarse en GitHub**: un workflow ejecuta la puerta completa en un runner de Windows, comprueba que una segunda compilación da los mismos bytes y guarda un acta de lo ejecutado; ejecutarla en tu equipo sigue siendo posible y opcional.
+- **Un llavero de claves públicas y la comprobación de una release descargada**: un único sitio para las claves que pueden firmar (un valor privado se rechaza) y la verificación de una carpeta de ficheros de release sin red. Sus órdenes de consola llegan aparte.
+- **Las notas de una release pueden llevar un resumen corto en los ocho idiomas**, leído por la comprobación de versión con la misma petición; además recuerda una versión descartada. La ventana que lo muestra llega aparte.
+- **Comprobaciones del repositorio**: revisión de las dependencias que añade un pull request y análisis CodeQL del código.
+
+### Cambiado
+
+- **El actualizador suelto que se publica con una release lleva ahora dentro el registro de migraciones**, y SHA256SUMS lo nombra junto con el zip y las dos listas de materiales.
+
 ## [2.1.8]
 
 La versión 2.1.8 no añade ninguna función: corrige lo que encontró una revisión de la 2.1.7. El centinela de CI ya no sale en verde cuando la lista de ejecuciones puede ocultar un workflow; aprobar o rechazar una propuesta de la IA funciona; un dispositivo revocado pierde los flujos que tenía abiertos; las conexiones tienen límite de tiempo y de número; el túnel del proxy funciona; deshacer ya no pasa por encima de una actualización en curso; la imagen del contenedor solo se publica desde una etiqueta; y las pantallas, el quiosco, la línea de órdenes y la documentación dicen lo que hace el programa.

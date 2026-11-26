@@ -22,7 +22,15 @@ L'edizione Completa ha lo stesso aggiornatore dentro la sua pagina: **Sistema > 
 
 Sotto un gestore di servizi la pagina non applica gli aggiornamenti per impostazione predefinita. Se il monitor gira come servizio UTENTE di systemd (`systemctl --user`), puoi attivare `updates.systemd_helper` (spento di default): la pagina offre allora l'aggiornamento e il processo che lo applica ferma quel servizio, applica l'aggiornamento e riavvia il servizio, sempre con `systemctl --user` e mai con `sudo`. Un servizio di sistema (che richiede l'amministratore) non viene toccato e resta «usa la riga di comando». Lo stesso funziona dalla riga di comando con `--systemd-unit UNITÀ` (`apply` e `rollback`); se il servizio non si può fermare non parte nulla, e se la nuova versione non si avvia viene rimessa la precedente e il servizio riavviato.
 
-**Fiducia.** Il controllo confronta lo zip con SHA256SUMS ed entrambi provengono dalla stessa release di GitHub: rileva un download danneggiato o incompleto, non una release sostituita all'origine. La fiducia nella release poggia su GitHub e sul tuo account lì.
+**Fiducia.** SHA256SUMS proviene dalla stessa release di GitHub dello zip: da solo rileva soltanto un download danneggiato o incompleto. Ciò che prova l'origine di una release dalla 2.2.0 in poi è la sua firma (sotto).
+
+## Release firmate
+
+Dalla versione 2.2.0 ogni release è firmata: SHA256SUMS ha una firma Ed25519 separata, il file `SHA256SUMS.ed25519.sig`, fatta con la chiave del progetto, la cui parte pubblica viaggia dentro l'aggiornatore. L'aggiornatore la controlla prima di scompattare qualsiasi cosa. Una release dalla 2.2.0 senza firma valida viene rifiutata, così come uno zip firmato offerto con un'altra versione. Tornare a una versione precedente, pubblicata senza firma, è consentito con un avviso. Per uno zip scaricato a mano, metti `SHA256SUMS` e `SHA256SUMS.ed25519.sig` accanto ad esso (con `--zip`).
+
+Chiave pubblica (Ed25519, hex): `380c75210e444f71bc4fe4b9aa7cb451aad5ef2592711f7dc6ba2fd7adc3d272`. La sua impronta SHA-256: `6d6b995655147955a1c2fb8a84a02d828606de29b36583799ada6ca5524b5d1a`.
+
+Oltre allo zip, una release contiene `monitor_updater.py`, due distinte dei materiali (`github_actions_monitor.cdx.json` in CycloneDX e `github_actions_monitor.spdx.json` in SPDX), una firma accanto a ogni file e le attestazioni di GitHub sulla build, verificabili con `gh attestation verify github_actions_monitor.zip --repo JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR`. La firma prova chi possiede la chiave; l'attestazione prova quale workflow ha costruito il file. Sono due controlli separati.
 
 ## Cosa fa, passo per passo Le rotte che lo sostengono sono `/api/updates/status`, `/api/updates/progress`, `/api/updates/history`, `/api/updates/log` (le ultime righe del registro del processo, valori dopo token o secret nascosti), `/api/updates/copies` (sola lettura) e `/api/updates/check`, `/api/updates/plan`, `/api/updates/apply`, `/api/updates/rollback`, `/api/updates/discard` (amministratore, solo da questo computer). L'avanzamento viaggia anche come eventi inviati dal server su `/api/updates/stream` (la pagina lo usa mentre un aggiornamento è in corso e torna a chiedere ogni secondo e mezzo se il browser o la connessione non lo consentono).
 

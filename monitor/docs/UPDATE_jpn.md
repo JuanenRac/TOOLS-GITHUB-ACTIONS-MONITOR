@@ -22,7 +22,15 @@
 
 サービスマネージャーの下では、ページは既定で更新を適用しません。モニターが systemd の「ユーザー」サービス（`systemctl --user`）として動いている場合は、`updates.systemd_helper`（既定はオフ）をオンにできます。ページが更新を提供し、適用するプロセスがそのサービスを停止して更新を適用し、サービスを再び起動します。常に `systemctl --user` を使い、`sudo` は使いません。システムサービス（管理者権限が必要なもの）には触れず、これまでどおり「コマンドラインを使う」ままです。コマンドラインでも `--systemd-unit ユニット`（`apply` と `rollback`）で同じことができます。サービスを停止できなければ何も開始されず、新しいバージョンが起動しなければ前のバージョンが戻されてサービスが再び起動されます。
 
-**信頼.** この確認は zip を SHA256SUMS と照合しますが、どちらも同じ GitHub リリースのものです。破損または不完全なダウンロードは検出できますが、配布元で差し替えられたリリースは検出できません。リリースへの信頼は GitHub と、そこにあるご自身のアカウントに依存します。
+**信頼.** SHA256SUMS は zip と同じ GitHub リリースのものなので、それだけでは破損や不完全なダウンロードしか検出できません。2.2.0 以降のリリースの出所を証明するのは署名です（下記）。
+
+## 署名付きリリース
+
+バージョン 2.2.0 以降、すべてのリリースに署名があります。SHA256SUMS には分離型の Ed25519 署名ファイル `SHA256SUMS.ed25519.sig` があり、プロジェクトの鍵で作成されます。公開鍵はアップデーターに含まれています。アップデーターは何かを展開する前にこの署名を確認します。有効な署名のない 2.2.0 以降のリリースは拒否され、別のバージョンとして提供された署名済み zip も拒否されます。署名なしで公開された古いバージョンに戻すことは、警告付きで可能です。手動でダウンロードした zip には、`SHA256SUMS` と `SHA256SUMS.ed25519.sig` を同じ場所に置いてください（`--zip` を使用）。
+
+公開鍵（Ed25519、16 進数）: `380c75210e444f71bc4fe4b9aa7cb451aad5ef2592711f7dc6ba2fd7adc3d272`。SHA-256 フィンガープリント: `6d6b995655147955a1c2fb8a84a02d828606de29b36583799ada6ca5524b5d1a`。
+
+リリースには zip のほかに `monitor_updater.py`、2 種類の部品表（CycloneDX の `github_actions_monitor.cdx.json` と SPDX の `github_actions_monitor.spdx.json`）、各ファイルの署名、そして GitHub によるビルドの証明（アテステーション）があり、`gh attestation verify github_actions_monitor.zip --repo JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR` で確認できます。署名は鍵の保持者を、アテステーションはファイルをビルドしたワークフローを証明します。両者は別々の確認です。
 
 ## 処理の流れ これを支えるルートは `/api/updates/status`、`/api/updates/progress`、`/api/updates/history`、`/api/updates/log`（プロセスのログの最後の行。token や secret の後の値は隠されます）、`/api/updates/copies` (読み取り専用) と `/api/updates/check`、`/api/updates/plan`、`/api/updates/apply`、`/api/updates/rollback`、`/api/updates/discard` (管理者、このコンピューターからのみ) です。 進行状況は `/api/updates/stream` でサーバー送信イベントとしても配信されます（更新中はページがこれを使い、ブラウザーや接続が対応しない場合は 1.5 秒ごとの問い合わせに戻ります）。
 

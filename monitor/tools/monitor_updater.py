@@ -26,6 +26,7 @@ Exit codes (stable): 0 done (or nothing to do); 2 wrong use; 3 blocked by a chec
 was restored; 6 the update failed AND the automatic return failed (the copy is intact: restore it by hand); 7 no connection to GitHub and no zip given; 8 not confirmed.
 """
 import argparse
+import base64
 import contextlib
 import difflib
 import hashlib
@@ -50,10 +51,15 @@ import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-UPDATER_VERSION = "1.0"
+UPDATER_VERSION = "1.1"
 REPO = "JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR"
 ZIP_NAME = "github_actions_monitor.zip"
 SUMS_NAME = "SHA256SUMS"
+SIG_NAME = "SHA256SUMS.ed25519.sig"      # the detached Ed25519 signature of SHA256SUMS (one line of base64)
+#: the first version whose release MUST carry a valid signature; an older one may be installed without it (with a warning)
+SIGNED_FROM = "2.2.0"
+#: the public keys of the project that sign a release (raw Ed25519, hex). The same values as security/keyring.py; a test keeps them equal.
+RELEASE_KEYS = ("380c75210e444f71bc4fe4b9aa7cb451aad5ef2592711f7dc6ba2fd7adc3d272",)
 TOP = "github_actions_monitor"
 BACKUPS_NAME = "update_backups"
 HISTORY_NAME = "update_history.jsonl"
@@ -164,6 +170,11 @@ _add("c.handover", "The monitor on port {port} stops by itself, the update is ap
 _add("c.running", "The monitor is running on port {port}: stop it before updating.", "El monitor está en marcha en el puerto {port}: páralo antes de actualizar.", "Der Monitor läuft auf Port {port}: beende ihn vor dem Update.", "Le moniteur tourne sur le port {port} : arrêtez-le avant de mettre à jour.", "Il monitor è in esecuzione sulla porta {port}: fermalo prima di aggiornare.", "モニターがポート {port} で稼働中です。更新前に停止してください。", "监视器正在端口 {port} 运行：更新前请先停止。", "O monitor está em execução na porta {port}: pare-o antes de atualizar.")
 _add("c.sha", "The SHA-256 of the zip does not match the published one: nothing was changed.", "El SHA-256 del zip no coincide con el publicado: no se cambió nada.", "Der SHA-256 des Zips stimmt nicht mit dem veröffentlichten überein: nichts wurde geändert.", "Le SHA-256 du zip ne correspond pas à celui publié : rien n'a été modifié.", "Lo SHA-256 dello zip non corrisponde a quello pubblicato: nulla è stato modificato.", "zipのSHA-256が公開値と一致しません。何も変更していません。", "zip 的 SHA-256 与发布值不符：未做任何更改。", "O SHA-256 do zip não coincide com o publicado: nada foi alterado.")
 _add("c.unverified", "This zip cannot be checked against a published SHA-256 (local file without SHA256SUMS).", "Este zip no se puede comprobar con un SHA-256 publicado (fichero local sin SHA256SUMS).", "Dieses Zip lässt sich nicht gegen einen veröffentlichten SHA-256 prüfen (lokale Datei ohne SHA256SUMS).", "Ce zip ne peut pas être vérifié avec un SHA-256 publié (fichier local sans SHA256SUMS).", "Questo zip non si può verificare con uno SHA-256 pubblicato (file locale senza SHA256SUMS).", "このzipは公開SHA-256で検証できません（SHA256SUMSのないローカルファイル）。", "无法用已发布的 SHA-256 校验此 zip（本地文件没有 SHA256SUMS）。", "Este zip não pode ser verificado com um SHA-256 publicado (ficheiro local sem SHA256SUMS).")
+_add("c.sig_ok", "The release is signed by the project: the Ed25519 signature of SHA256SUMS is valid and names this zip.", "La release está firmada por el proyecto: la firma Ed25519 de SHA256SUMS es válida y nombra este zip.", "Das Release ist vom Projekt signiert: die Ed25519-Signatur von SHA256SUMS ist gültig und nennt dieses Zip.", "La version est signée par le projet : la signature Ed25519 de SHA256SUMS est valide et désigne ce zip.", "La release è firmata dal progetto: la firma Ed25519 di SHA256SUMS è valida e indica questo zip.", "このリリースはプロジェクトが署名しています。SHA256SUMS の Ed25519 署名は有効で、この zip を指しています。", "该发布由项目签名：SHA256SUMS 的 Ed25519 签名有效且指向此 zip。", "A versão está assinada pelo projeto: a assinatura Ed25519 de SHA256SUMS é válida e indica este zip.")
+_add("c.sig_bad", "The signature of the release is NOT valid for this zip: nothing was changed.", "La firma de la release NO es válida para este zip: no se cambió nada.", "Die Signatur des Releases ist für dieses Zip NICHT gültig: nichts wurde geändert.", "La signature de la version n'est PAS valide pour ce zip : rien n'a été modifié.", "La firma della release NON è valida per questo zip: nulla è stato modificato.", "リリースの署名はこの zip に対して無効です。何も変更していません。", "发布签名对此 zip 无效：未做任何更改。", "A assinatura da versão NÃO é válida para este zip: nada foi alterado.")
+_add("c.sig_missing", "Version {version} must be signed and no signature was found (SHA256SUMS.ed25519.sig next to SHA256SUMS): nothing was changed.", "La versión {version} debe estar firmada y no se encontró la firma (SHA256SUMS.ed25519.sig junto a SHA256SUMS): no se cambió nada.", "Version {version} muss signiert sein, aber es wurde keine Signatur gefunden (SHA256SUMS.ed25519.sig neben SHA256SUMS): nichts wurde geändert.", "La version {version} doit être signée et aucune signature n'a été trouvée (SHA256SUMS.ed25519.sig à côté de SHA256SUMS) : rien n'a été modifié.", "La versione {version} deve essere firmata e la firma non è stata trovata (SHA256SUMS.ed25519.sig accanto a SHA256SUMS): nulla è stato modificato.", "バージョン {version} には署名が必須ですが、見つかりません（SHA256SUMS と同じ場所の SHA256SUMS.ed25519.sig）。何も変更していません。", "版本 {version} 必须带签名，但未找到签名（与 SHA256SUMS 同目录的 SHA256SUMS.ed25519.sig）：未做任何更改。", "A versão {version} tem de estar assinada e não foi encontrada a assinatura (SHA256SUMS.ed25519.sig junto de SHA256SUMS): nada foi alterado.")
+_add("c.sig_unsigned", "Version {version} was published without a signature: only the SHA-256 is checked.", "La versión {version} se publicó sin firma: solo se comprueba el SHA-256.", "Version {version} wurde ohne Signatur veröffentlicht: nur der SHA-256 wird geprüft.", "La version {version} a été publiée sans signature : seul le SHA-256 est vérifié.", "La versione {version} è stata pubblicata senza firma: viene controllato solo lo SHA-256.", "バージョン {version} は署名なしで公開されています。SHA-256 のみを確認します。", "版本 {version} 发布时没有签名：仅校验 SHA-256。", "A versão {version} foi publicada sem assinatura: só é verificado o SHA-256.")
+_add("c.sig_version", "The signed zip holds version {found}, not {version}: nothing was changed.", "El zip firmado contiene la versión {found}, no la {version}: no se cambió nada.", "Das signierte Zip enthält Version {found}, nicht {version}: nichts wurde geändert.", "Le zip signé contient la version {found}, pas la {version} : rien n'a été modifié.", "Lo zip firmato contiene la versione {found}, non la {version}: nulla è stato modificato.", "署名済み zip の中身は {version} ではなくバージョン {found} です。何も変更していません。", "已签名的 zip 内是版本 {found} 而非 {version}：未做任何更改。", "O zip assinado contém a versão {found}, não a {version}: nada foi alterado.")
 _add("c.disk", "Not enough free space: {need} MB needed, {free} MB free in {where}.", "No hay espacio libre suficiente: hacen falta {need} MB y quedan {free} MB en {where}.", "Zu wenig freier Platz: {need} MB nötig, {free} MB frei in {where}.", "Espace libre insuffisant : {need} Mo nécessaires, {free} Mo libres dans {where}.", "Spazio libero insufficiente: servono {need} MB, ne restano {free} MB in {where}.", "空き容量が不足: {where} に {need} MB 必要ですが {free} MB しかありません。", "可用空间不足：{where} 需要 {need} MB，仅剩 {free} MB。", "Sem espaço livre suficiente: são precisos {need} MB e restam {free} MB em {where}.")
 _add("c.perm", "No permission to write in {where}.", "Sin permiso para escribir en {where}.", "Keine Schreibberechtigung in {where}.", "Pas d'autorisation d'écriture dans {where}.", "Nessun permesso di scrittura in {where}.", "{where} への書き込み権限がありません。", "没有写入 {where} 的权限。", "Sem permissão para escrever em {where}.")
 _add("c.db_newer", "The data are from a newer version (schema {have}) than the target understands (schema {want}): going back could damage them.", "Los datos son de una versión más nueva (esquema {have}) que la que entiende el destino (esquema {want}): volver atrás podría dañarlos.", "Die Daten stammen aus einer neueren Version (Schema {have}) als das Ziel versteht (Schema {want}): ein Zurückgehen könnte sie beschädigen.", "Les données viennent d'une version plus récente (schéma {have}) que celle comprise par la cible (schéma {want}) : revenir en arrière pourrait les abîmer.", "I dati sono di una versione più nuova (schema {have}) di quella capita dalla destinazione (schema {want}): tornare indietro potrebbe danneggiarli.", "データは対象より新しいバージョン（スキーマ {have}、対象は {want}）のものです。戻すとデータが壊れる恐れがあります。", "数据来自比目标更新的版本（架构 {have}，目标仅支持 {want}）：回退可能损坏数据。", "Os dados são de uma versão mais nova (esquema {have}) do que a de destino entende (esquema {want}): voltar atrás pode danificá-los.")
@@ -665,6 +676,93 @@ def release_from_api(item):
             "prerelease": bool(item.get("prerelease")), "draft": bool(item.get("draft")), "assets": assets}
 
 
+# --- Ed25519 verification (RFC 8032, standard library: the same code as security/sigverify.py, this file must work alone) -------------------
+_EDP = 2 ** 255 - 19
+_EDQ = 2 ** 252 + 27742317777372353535851937790883648493
+_EDD = -121665 * pow(121666, _EDP - 2, _EDP) % _EDP
+_EDI = pow(2, (_EDP - 1) // 4, _EDP)
+
+
+def _ed_add(a, b):
+    x1, y1, z1, t1 = a
+    x2, y2, z2, t2 = b
+    pa, pb = (y1 - x1) * (y2 - x2) % _EDP, (y1 + x1) * (y2 + x2) % _EDP
+    pc, pd = 2 * t1 * t2 * _EDD % _EDP, 2 * z1 * z2 % _EDP
+    e, f, g, h = pb - pa, pd - pc, pd + pc, pb + pa
+    return (e * f % _EDP, g * h % _EDP, f * g % _EDP, e * h % _EDP)
+
+
+def _ed_mul(scalar, point):
+    result = (0, 1, 1, 0)
+    while scalar > 0:
+        if scalar & 1:
+            result = _ed_add(result, point)
+        point = _ed_add(point, point)
+        scalar >>= 1
+    return result
+
+
+def _ed_x(y, sign):
+    if y >= _EDP:
+        return None
+    x2 = (y * y - 1) * pow(_EDD * y * y + 1, _EDP - 2, _EDP) % _EDP
+    if x2 == 0:
+        return None if sign else 0
+    x = pow(x2, (_EDP + 3) // 8, _EDP)
+    if (x * x - x2) % _EDP:
+        x = x * _EDI % _EDP
+    if (x * x - x2) % _EDP:
+        return None
+    return _EDP - x if (x & 1) != sign else x
+
+
+def _ed_point(data):
+    y = int.from_bytes(data, "little")
+    sign, y = y >> 255, y & ((1 << 255) - 1)
+    x = _ed_x(y, sign)
+    return None if x is None else (x, y, 1, x * y % _EDP)
+
+
+_EDBY = 4 * pow(5, _EDP - 2, _EDP) % _EDP
+_EDBX = _ed_x(_EDBY, 0)
+_EDBASE = (_EDBX, _EDBY, 1, _EDBX * _EDBY % _EDP)
+
+
+def ed25519_verify(public, message, signature):
+    """True only for a valid signature. Never raises on malformed input."""
+    if len(public) != 32 or len(signature) != 64:
+        return False
+    a, r = _ed_point(public), _ed_point(signature[:32])
+    s = int.from_bytes(signature[32:], "little")
+    if a is None or r is None or s >= _EDQ:
+        return False
+    h = int.from_bytes(hashlib.sha512(signature[:32] + public + message).digest(), "little") % _EDQ
+    left, right = _ed_mul(s, _EDBASE), _ed_add(r, _ed_mul(h, a))
+    return (left[0] * right[2] - right[0] * left[2]) % _EDP == 0 and (left[1] * right[2] - right[1] * left[2]) % _EDP == 0
+
+
+def release_signature(folder, zip_sha, keys=None):
+    """What the files downloaded next to the zip say about it: "valid" (SHA256SUMS is signed by a key of the project AND names the SHA-256 of this zip), "absent" (no signature file) or "invalid"."""
+    folder = Path(folder)
+    sums, sig = folder / SUMS_NAME, folder / SIG_NAME
+    if not sig.is_file():
+        return "absent"
+    try:
+        if not sums.is_file() or sums.stat().st_size > (1 << 20) or sig.stat().st_size > 1024:
+            return "invalid"
+        data = sums.read_bytes()
+        signature = base64.b64decode(sig.read_bytes().strip(), validate=True)
+    except (OSError, ValueError):
+        return "invalid"
+    if not any(ed25519_verify(bytes.fromhex(key), data, signature) for key in (RELEASE_KEYS if keys is None else keys)):
+        return "invalid"
+    return "valid" if parse_sums(data.decode("utf-8", "replace")) == zip_sha else "invalid"
+
+
+def signature_required(version):
+    return vkey(version) >= vkey(SIGNED_FROM)
+
+
 def parse_sums(text, name=ZIP_NAME):
     """The SHA-256 of `name` in the text of a SHA256SUMS file, or None."""
     for line in (text or "").splitlines():
@@ -744,6 +842,11 @@ class GitHubSource:
             expected = parse_sums(sums.read_text(encoding="utf-8", errors="replace"))
         if expected is None:
             raise UpdaterError(FETCH_FAILED, f"{release.get('tag')} publishes no SHA-256 for the zip", "c.unverified")
+        if SIG_NAME in assets:      # the signature of SHA256SUMS: its absence is judged by the plan (it blocks from SIGNED_FROM on)
+            try:
+                self._download(assets[SIG_NAME]["url"], Path(dest_dir) / SIG_NAME, 1024)
+            except (OSError, urllib.error.URLError) as error:
+                raise UpdaterError(FETCH_FAILED, "could not download " + SIG_NAME + ": " + str(error)[:80])
         if not (zip_path.is_file() and sha256_file(zip_path) == expected):
             try:
                 self._download(assets[ZIP_NAME]["url"], zip_path, MAX_ZIP)
@@ -778,6 +881,10 @@ class LocalZipSource:
         Path(dest_dir).mkdir(parents=True, exist_ok=True)
         zip_path = Path(dest_dir) / ZIP_NAME
         shutil.copyfile(str(self.path), str(zip_path))
+        for name in (SUMS_NAME, SIG_NAME):      # a signed release that was downloaded by hand: the two files sit next to the zip
+            sibling = self.path.with_name(name)
+            if sibling.is_file():
+                shutil.copyfile(str(sibling), str(Path(dest_dir) / name))
         expected = self.sha256
         how = "given" if expected else None
         if expected is None:
@@ -1323,7 +1430,8 @@ def resolve_launchers(read_old, product, registry, installed_version):
 
 
 class Updater:
-    def __init__(self, root, source=None, backups=None, env=None, emit=None, probe=None, lang=None):
+    def __init__(self, root, source=None, backups=None, env=None, emit=None, probe=None, lang=None, keys=None):
+        self.keys = tuple(RELEASE_KEYS if keys is None else keys)      # the keys that may sign a release; only the tests give others
         self.root = Path(root).resolve()
         self.source = source or GitHubSource()
         self.env = dict(os.environ if env is None else env)
@@ -1386,7 +1494,8 @@ class Updater:
         self._downloads.append(cache)
         zip_path, expected, how = self.source.fetch_zip(release, cache)
         actual = sha256_file(zip_path)
-        return {"zip": zip_path, "expected": expected, "actual": actual, "sha_ok": expected is None or expected == actual, "verified": how if expected else None, "size": zip_path.stat().st_size}
+        return {"zip": zip_path, "expected": expected, "actual": actual, "sha_ok": expected is None or expected == actual, "verified": how if expected else None, "size": zip_path.stat().st_size,
+                "signature": release_signature(zip_path.parent, actual, self.keys)}
 
     def unpack(self, prep, release):
         key = release["version"]
@@ -1455,12 +1564,23 @@ class Updater:
 
         prep = self.prepare(release)
         product = None
+        signature = prep["signature"]
         if not prep["sha_ok"]:
             add("sha", "block")
+        elif signature == "invalid":      # nothing is unpacked from a release whose signature is wrong or missing when it must be there
+            add("sig_bad", "block")
+        elif signature == "absent" and signature_required(to):
+            add("sig_missing", "block", version=to)
         else:
+            if signature == "valid":
+                add("sig_ok", "info")
+            else:
+                add("sig_unsigned", "warn", version=to)
             if prep["verified"] is None:
                 add("unverified", "warn")
             product = self.unpack(prep, release)
+            if signature_required(to) and read_tool_version(product) != to:      # an older signed zip offered under a newer version
+                add("sig_version", "block", version=to, found=read_tool_version(product) or "?")
         registry = load_registry(product, self.root)
         lang = _STATE["lang"]
         if direction == "same":
@@ -1545,7 +1665,7 @@ class Updater:
             note["rendered"] = notice_text(note, lang)
         blocked = any(c["severity"] == "block" for c in checks)
         return {"installed": installed, "target": to, "direction": direction, "release": {"tag": release["tag"], "name": release["name"], "published": release["published"]},
-                "source": getattr(self.source, "kind", "?"), "verified": prep["verified"], "sha256": prep["actual"], "chain": [d["version"] for d in docs], "checks": checks, "blocked": blocked,
+                "source": getattr(self.source, "kind", "?"), "verified": prep["verified"], "signature": signature, "sha256": prep["actual"], "chain": [d["version"] for d in docs], "checks": checks, "blocked": blocked,
                 "config": config_plan, "notices": ordered, "launchers": launchers, "steps": list(STEPS), "policy": policy, "mb_needed": need, "mode": inst["mode"], "root": str(self.root),
                 "editions": inst["editions"]}
 
@@ -1626,6 +1746,10 @@ class Updater:
         if not prep["sha_ok"]:
             report.update(code=FETCH_FAILED, error=tr("c.sha"))
             return report
+        signature = prep["signature"]      # the files were downloaded again: they are judged again
+        if signature == "invalid" or (signature == "absent" and signature_required(plan["target"])):
+            report.update(code=FETCH_FAILED, error=tr("c.sig_bad") if signature == "invalid" else tr("c.sig_missing", version=plan["target"]))
+            return report
         folders = self.folders()
         installed, to = plan["installed"], plan["target"]
         stamp = now_stamp()
@@ -1646,6 +1770,8 @@ class Updater:
             private_dir(bk)
             self._write_journal(journal)
             product = self._step(report, journal, "extract", lambda: self.unpack(prep, release))
+            if signature_required(to) and read_tool_version(product) != to:
+                raise UpdaterError(FETCH_FAILED, tr("c.sig_version", version=to, found=read_tool_version(product) or "?"))
             registry = load_registry(product, self.root)
             manifest = self._step(report, journal, "backup", lambda: self._snapshot(bk, folders))
             journal["manifest"] = True

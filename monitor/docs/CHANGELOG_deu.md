@@ -9,6 +9,19 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+### Hinzugefügt
+
+- **Releases sind signiert und der Updater prüft die Signatur**: ab Version 2.2.0 trägt ein Release eine separate Ed25519-Signatur von SHA256SUMS und jeder Datei, erstellt auf GitHub durch den Release-Workflow. Der Updater (Seite, Fenster, Konsole und Befehlszeile) lehnt ein Release ab 2.2.0 mit fehlender oder falscher Signatur sowie ein unter anderer Version angebotenes signiertes Zip ab, bevor etwas entpackt wird; die Rückkehr zu einer älteren unsignierten Version ist mit Warnung erlaubt.
+- **Zwei Stücklisten und Attestierungen bei jedem Release**: CycloneDX- und SPDX-Dokumente listen jede Datei des Zips und die optionalen Bibliotheken, und der Release-Workflow attestiert die Herkunft der Dateien, die Stückliste und das Protokoll der Qualitätsprüfung.
+- **Die Qualitätsprüfung kann auf GitHub laufen**: ein Workflow führt die gesamte Prüfung auf einem Windows-Runner aus, prüft, dass ein zweiter Build dieselben Bytes ergibt, und hält fest, was gelaufen ist; die Ausführung auf dem eigenen Rechner bleibt möglich und optional.
+- **Ein Schlüsselbund öffentlicher Schlüssel und die Prüfung eines heruntergeladenen Releases**: ein Ort für die Schlüssel, die signieren dürfen (ein privater Wert wird abgelehnt), und die Prüfung eines Ordners mit Release-Dateien ohne Netz. Die Konsolenbefehle dazu folgen separat.
+- **Die Release-Notizen können eine kurze Zusammenfassung in acht Sprachen tragen**, die die Versionsprüfung mit derselben Anfrage liest; sie merkt sich auch eine verworfene Version. Das Fenster, das sie zeigt, folgt separat.
+- **Prüfungen des Repositorys**: Überprüfung der Abhängigkeiten, die ein Pull Request hinzufügt, und CodeQL-Analyse des Codes.
+
+### Geändert
+
+- **Der einzeln veröffentlichte Updater eines Releases enthält nun das Migrationsregister**, und SHA256SUMS nennt ihn zusammen mit dem Zip und den zwei Stücklisten.
+
 ## [2.1.8]
 
 Version 2.1.8 bringt keine neue Funktion: Sie korrigiert, was eine Überprüfung von 2.1.7 gefunden hat. Der CI-Wächter ist nicht mehr grün, wenn die Liste der Läufe einen Workflow verbergen kann; das Freigeben oder Ablehnen eines KI-Vorschlags funktioniert; ein gesperrtes Gerät verliert seine offenen Datenströme; Verbindungen haben ein Zeit- und ein Anzahllimit; der Proxy-Tunnel funktioniert; das Zurückgehen läuft nicht mehr über eine laufende Aktualisierung hinweg; das Container-Image wird nur noch von einem Tag veröffentlicht; und die Bildschirme, der Kiosk, die Befehlszeile und die Dokumentation sagen, was das Programm tut.
