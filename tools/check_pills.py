@@ -35,7 +35,10 @@ PROBE = r"""
   const out=document.createElement("pre");out.id="pills-report";document.body.appendChild(out);
   try{
     await wait(1200);
-    for(let i=0;i<60;i++){      /* wait for the condition (the data of the sentinel has arrived), not for a fixed time */
+    const real=typeof SENT!=="undefined";   /* the page of the monitor; the small page that proves the probe has no sentinel at all */
+    for(let i=0;i<(real?320:60);i++){      /* wait for the condition (the data of the sentinel has arrived), not for a fixed time */
+      /* on a loaded computer the page's own read of the sentinel can come very late: ask for it here too, so the panels are never measured empty */
+      try{if(real&&!SENT&&i%8===4){const j=await(await fetch("/api/sentinel?lang=en")).json();if(j.data)SENT=j.data}}catch(e){}
       try{OPEN.add("a2");renderSent();showTab("sci")}catch(e){}
       await wait(250);
       if(document.querySelectorAll("#s-details summary>.sem").length)break;
