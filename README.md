@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6041_passing-brightgreen.svg" alt="6041 tests">
+  <img src="https://img.shields.io/badge/Tests-6054_passing-brightgreen.svg" alt="6054 tests">
 </p>
 
 > Watches the workflows of every repository you own and tells you, on one local page, what is red, what is stuck and what is waiting for you.
@@ -98,8 +98,8 @@ Method, assumptions and how to measure it in your own use: [`monitor/docs/PRODUC
 | | |
 |---|---|
 | **Maturity** | functional |
-| **Tests** | 6041 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Settings** | 961 settings, all with help |
+| **Tests** | 6054 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Settings** | 977 settings, all with help |
 | **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
 | **Tested in the CI on** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -358,6 +358,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/MODES.md`](monitor/docs/MODES.md): working modes: normal, fast and turbo
 - [`monitor/docs/EXTERNAL_CI.md`](monitor/docs/EXTERNAL_CI.md): External CI sources, read only: Buildbot, GitLab CI, Jenkins, Azure Pipelines
 - [`monitor/docs/PLUGINS.md`](monitor/docs/PLUGINS.md): Plugins (off by default), their packages, isolation, and reading the token from a secret store
+- [`monitor/docs/POSTURE.md`](monitor/docs/POSTURE.md): Posture of repositories and organization, read only
 - [`monitor/docs/AI_CONNECTION.md`](monitor/docs/AI_CONNECTION.md): Connect an AI tool: everything the monitor says, as signals, in the brief, the endpoint, the MCP tools and the hook
 - [`monitor/docs/AI_SETUP_PROMPT.md`](monitor/docs/AI_SETUP_PROMPT.md): Set up the monitor with an AI: a prompt to paste into your AI assistant that installs it, asks what you want and writes the configuration
 - [`monitor/docs/QUOTA.md`](monitor/docs/QUOTA.md): More quota, less spending: Low mode, the central panel, a GitHub App and how to share the allowance

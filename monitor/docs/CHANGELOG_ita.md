@@ -11,6 +11,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Aggiunto
 
+- Controlli di postura di repository e organizzazione, sola lettura e disattivati di default: webhook, impostazioni di Actions, scansioni, protezione dei rami e dei rami di rilascio, chiavi di distribuzione, età dei segreti, app, audit dell'organizzazione, protezione di ciò che è stato eseguito e release modificate, con riferimento OWASP CI/CD e CIS. Ciò che GitHub nega risulta non verificato. Maturità per repository, cronologia e `posture` da riga di comando.
 - **Una finestra annuncia una versione più nuova**: con il riassunto delle modifiche nella tua lingua, un pulsante verso Aggiornamenti, «Più tardi» e «Non segnalare questa versione»; attiva per impostazione e muta sugli schermi a parete e chiosco.
 - **Nuovi comandi**: per controllare senza rete una release scaricata e gestire le chiavi pubbliche.
 - Fonti CI esterne, sola lettura e disattivate di default: Buildbot, GitLab CI, Jenkins e Azure Pipelines (gli ultimi due sperimentali) per repository replicati. Gli errori sono contati, notificati e silenziati come quelli di Actions; un servizio che non risponde è degradato, mai rosso. Letture sicure, coda dei log facoltativa, limitata e depurata, prova di connessione e `external-ci` da riga di comando.

@@ -13,6 +13,7 @@ when this file and `tool_version.py` disagree.
 
 ### Added
 
+- Posture checks of repositories and organization, read only and off by default: webhooks, Actions settings, scanning, branch and release-branch protection, deploy keys, secret age, apps, organization audit log, hardening of what ran and changed releases, each with its OWASP CI/CD and CIS reference. What GitHub refuses is shown as not checked. Maturity per repository, history, `posture` on the command line.
 - **A window announces a newer version**: with the summary of its changes in your language, a button to the Updates page, "Later" and "Do not announce this version"; it is on by default and silent on wall and kiosk screens.
 - **New commands**: to check a downloaded release without network and to manage the public keys.
 - External CI sources, read only and off by default: Buildbot, GitLab CI, Jenkins and Azure Pipelines (the last two experimental) for mirrored repositories. Their failures are counted, notified and silenced like those of Actions; a service that does not answer is shown as degraded, never red. Safe reads, optional bounded and redacted log tails, Test connection, `external-ci` on the command line.

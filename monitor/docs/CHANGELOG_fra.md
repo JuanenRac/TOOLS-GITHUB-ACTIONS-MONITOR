@@ -11,6 +11,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- Contrôles de posture des dépôts et de l'organisation, lecture seule et désactivés par défaut : webhooks, réglages d'Actions, analyses, protection des branches et des branches de version, clés de déploiement, âge des secrets, applications, journal d'audit, durcissement de ce qui s'est exécuté et versions modifiées, avec référence OWASP CI/CD et CIS. Ce que GitHub refuse est non vérifié. Maturité par dépôt, historique et `posture` en ligne de commande.
 - **Une fenêtre annonce une version plus récente**: avec le résumé des changements dans votre langue, un bouton vers Mises à jour, « Plus tard » et « Ne plus annoncer cette version » ; activée par défaut et muette sur les écrans muraux et kiosque.
 - **Nouvelles commandes**: pour vérifier sans réseau une version téléchargée et gérer les clés publiques.
 - Sources CI externes, lecture seule et désactivées par défaut : Buildbot, GitLab CI, Jenkins et Azure Pipelines (les deux derniers expérimentaux) pour les dépôts miroirs. Leurs échecs sont comptés, notifiés et mis en sourdine comme ceux d'Actions ; un service muet est dégradé, jamais rouge. Lectures sûres, fin de journal facultative, limitée et expurgée, test de connexion et `external-ci` en ligne de commande.

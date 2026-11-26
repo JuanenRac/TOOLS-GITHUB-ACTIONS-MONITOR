@@ -40,6 +40,7 @@
 | `completions` | o script de completação para `bash`, `zsh`, `fish` ou `powershell`, escrito a partir do analisador real (só imprime) | não |
 | `kiosk` | o endereço do monitor para uma TV ou uma parede (`ops`, `team`, `release`, `quiet`); veja [KIOSK_por.md](KIOSK_por.md) | não |
 | `metrics` | os números como linhas `nome=valor` para o cron e o correio; com `--if-problem` não escreve nada quando tudo está bem; veja [CLI_OPERATOR.md](CLI_OPERATOR.md) | não |
+| `posture` | Postura dos repositórios e da organização, só de leitura (`posture status|matrix|check --repo-name`); ver [POSTURE.md](POSTURE_por.md) | não |
 | `external-ci` | Fontes de CI externas, só de leitura (`external-ci list|status|probe --source`); ver [EXTERNAL_CI.md](EXTERNAL_CI_por.md) | não |
 | `plugin` | Plugins: `plugin list|validate|pack|verify|init|install|enable|disable|uninstall|audit`; ver [PLUGINS.md](PLUGINS_por.md) | não |
 

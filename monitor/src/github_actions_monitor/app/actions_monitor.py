@@ -2060,6 +2060,21 @@ def external_ci(call, *args):
         return []
 
 
+def posture_alerts():
+    """The alerts of the posture checks (families/posture/), [] in the lite edition and while they are off. Reads only the file the checks keep; never raises."""
+    if LITE["on"]:
+        return []
+    try:
+        config = toolconfig.raw_config()
+        if ((config or {}).get("posture") or {}).get("enabled") is not True:
+            return []
+        from github_actions_monitor.families.posture import posture_engine as engine
+        return engine.alerts(config, CHILD["account"] or "")
+    except Exception as error:   # noqa: BLE001 - the list of alerts must still answer
+        degraded.note("posture.alerts", error)
+        return []
+
+
 def red_rows(data):
     """The red workflows of this cycle, those of the external CI sources included."""
     return actions_red_rows(data) + external_ci("red_rows")
@@ -2564,7 +2579,7 @@ def report_gather():
     storage, account = runtime.process_storage(CHILD["account"] or None)
     snapshot = score_api.latest(storage, account, config)
     try:
-        alerts = alert_center.collect(SENTINEL["registry"], extra=credential_alerts() + score_alerts() + runner_alerts() + mark_alerts() + external_ci("alerts", CHILD["account"] or ""))
+        alerts = alert_center.collect(SENTINEL["registry"], extra=credential_alerts() + score_alerts() + runner_alerts() + mark_alerts() + external_ci("alerts", CHILD["account"] or "") + posture_alerts())
     except Exception as error:   # noqa: BLE001 - the report still has the rest
         degraded.note("reports.alerts", error)
         alerts = []
@@ -2627,7 +2642,7 @@ def health_views(now=None, only=None):
     failing, active = data.get("failing") or [], data.get("active") or []
     registry = SENTINEL["registry"]
     try:
-        alerts = alert_center.collect(registry, extra=credential_alerts() + score_alerts() + runner_alerts() + mark_alerts() + external_ci("alerts", CHILD["account"] or ""))
+        alerts = alert_center.collect(registry, extra=credential_alerts() + score_alerts() + runner_alerts() + mark_alerts() + external_ci("alerts", CHILD["account"] or "") + posture_alerts())
     except Exception as error:   # noqa: BLE001 - the health still answers without the alerts
         degraded.note("health.alerts", error)
         alerts = []
@@ -4754,7 +4769,7 @@ def alerts_payload(ask):
     from github_actions_monitor.sentinels import alert_center
     refresh_feed()
     registry = SENTINEL["registry"]
-    extra = credential_alerts() + score_alerts() + runner_alerts() + mark_alerts() + external_ci("alerts", CHILD["account"] or "")
+    extra = credential_alerts() + score_alerts() + runner_alerts() + mark_alerts() + external_ci("alerts", CHILD["account"] or "") + posture_alerts()
     everything = alert_center.collect(registry, extra=extra)
     chosen = alert_center.select(everything, ask.get("sentinel", ""), ask.get("level", ""), ask.get("muted", "show") if ask.get("muted") in ("show", "hide", "only") else "show")
     out = {"schema": 1, "account": CHILD["account"] or None, "alerts": chosen, "summary": alert_center.summary(everything), "mutes": alert_center.active(), "history": alert_center.history(20),

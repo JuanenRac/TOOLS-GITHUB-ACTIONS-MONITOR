@@ -7,7 +7,7 @@
 
 Generated from the code. It reads what the running monitor says (and never writes to GitHub). `--json` prints one JSON document; the exit codes are stable.
 
-Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `briefs`, `api`, `install-skill`, `gh-token`, `ai`, `backup`, `update`, `compare`, `screens`, `docs`, `toolbox`, `watch`, `monitor`, `completions`, `kiosk`, `metrics`, `proposals`, `keyring`, `verify-release`, `plugin`, `external-ci`.
+Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `briefs`, `api`, `install-skill`, `gh-token`, `ai`, `backup`, `update`, `compare`, `screens`, `docs`, `toolbox`, `watch`, `monitor`, `completions`, `kiosk`, `metrics`, `proposals`, `keyring`, `verify-release`, `plugin`, `external-ci`, `posture`.
 
 | flag | what |
 | --- | --- |
@@ -82,5 +82,6 @@ Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `
 | `--keyring` | plugin: another keyring file |
 | `--out` | plugin pack: file to write |
 | `--source` | The source line to try (external-ci probe). |
+| `--repo-name` | The repository to read now (posture check). |
 
 Other entry points: `bin/mcp_server.py` (MCP over standard input and output; `--allow-ack`, `--allow-lessons`), `bin/ai_hook.py` (gate script of an AI tool), `bin/read_report.py`, `bin/actions_monitor.py --doctor`.

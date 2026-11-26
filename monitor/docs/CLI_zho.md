@@ -40,6 +40,7 @@
 | `completions` | `bash`、`zsh`、`fish` 或 `powershell` 的补全脚本，由真实解析器生成（只打印） | 不支持 |
 | `kiosk` | 电视或墙面所用的监控器地址（`ops`、`team`、`release`、`quiet`）；参见 [KIOSK_zho.md](KIOSK_zho.md) | 不支持 |
 | `metrics` | 以 `名称=值` 的行输出数值，供 cron 和邮件使用；加上 `--if-problem` 时一切正常则不输出任何内容；参见 [CLI_OPERATOR.md](CLI_OPERATOR.md) | 否 |
+| `posture` | 仓库与组织安全态势,只读(`posture status|matrix|check --repo-name`);见 [POSTURE.md](POSTURE_zho.md) | 否 |
 | `external-ci` | 外部 CI 来源,只读(`external-ci list|status|probe --source`);见 [EXTERNAL_CI.md](EXTERNAL_CI_zho.md) | 否 |
 | `plugin` | 插件：`plugin list|validate|pack|verify|init|install|enable|disable|uninstall|audit`；参见 [PLUGINS.md](PLUGINS_zho.md) | 否 |
 

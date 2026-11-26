@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.2.0",
  "previous": "2.1.8",
- "digest": "31d81581d04833879bcc2f452af33abc4026256601fa33d92167f94861e8490c",
+ "digest": "517b10218dd815bd06f234d791715cfc03b234deb38b4eae8b35b8b68b719464",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -269,6 +269,130 @@
      300
     ],
     "default": 20
+   },
+   {
+    "key": "posture.alerts",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "posture.audit_log",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "posture.deploy_max_days",
+    "kind": "int",
+    "bounds": [
+     30,
+     3650
+    ],
+    "default": 365
+   },
+   {
+    "key": "posture.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "posture.org_checks",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "posture.profile",
+    "kind": "enum",
+    "bounds": [
+     "basic",
+     "strict"
+    ],
+    "default": "basic"
+   },
+   {
+    "key": "posture.refresh_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     720
+    ],
+    "default": 24
+   },
+   {
+    "key": "posture.release_branches",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9._/*?-]{1,100}\\Z"
+    },
+    "default": [
+     "release/*",
+     "release-*",
+     "hotfix/*"
+    ]
+   },
+   {
+    "key": "posture.release_window",
+    "kind": "text",
+    "bounds": {
+     "re": "^(?:[1-7]-[1-7] (?:[01]\\d|2[0-4])-(?:[01]\\d|2[0-4]))?\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "posture.releases",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "posture.repos_per_cycle",
+    "kind": "int",
+    "bounds": [
+     1,
+     50
+    ],
+    "default": 3
+   },
+   {
+    "key": "posture.review_sample",
+    "kind": "int",
+    "bounds": [
+     0,
+     30
+    ],
+    "default": 0
+   },
+   {
+    "key": "posture.runner_runs",
+    "kind": "int",
+    "bounds": [
+     0,
+     20
+    ],
+    "default": 0
+   },
+   {
+    "key": "posture.skip",
+    "kind": "names",
+    "bounds": {
+     "re": "^(webhook|actions|scan|repo|branch|deploy|stored|org|runner|release)\\.[a-z_]{2,30}\\Z"
+    },
+    "default": []
+   },
+   {
+    "key": "posture.stored_max_days",
+    "kind": "int",
+    "bounds": [
+     30,
+     3650
+    ],
+    "default": 365
+   },
+   {
+    "key": "posture.types",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9._*?-]{1,100}=(standard|library|internal|sandbox)\\Z"
+    },
+    "default": []
    },
    {
     "key": "secrets.backend",

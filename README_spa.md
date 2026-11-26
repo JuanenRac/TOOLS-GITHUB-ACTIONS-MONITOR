@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6041_passing-brightgreen.svg" alt="6041 tests">
+  <img src="https://img.shields.io/badge/Tests-6054_passing-brightgreen.svg" alt="6054 tests">
 </p>
 
 > Vigila los workflows de todos tus repositorios y te dice, en una página local, qué está en rojo, qué está atascado y qué te espera.
@@ -98,8 +98,8 @@ Método, supuestos y cómo medirlo en tu propio uso: [`monitor/docs/PRODUCTIVITY
 | | |
 |---|---|
 | **Madurez** | functional |
-| **Tests** | 6041 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Ajustes** | 961 ajustes, todos con ayuda |
+| **Tests** | 6054 métodos de test (`python -m unittest discover -s monitor/tests`) |
+| **Ajustes** | 977 ajustes, todos con ayuda |
 | **Idiomas** | 8 (inglés, español, alemán, francés, italiano, japonés, chino y portugués) |
 | **Probado en el CI en** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -354,6 +354,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/MODES_spa.md`](monitor/docs/MODES_spa.md): modos de trabajo: normal, rápido y turbo
 - [`monitor/docs/EXTERNAL_CI_spa.md`](monitor/docs/EXTERNAL_CI_spa.md): Fuentes de CI externas, solo lectura: Buildbot, GitLab CI, Jenkins, Azure Pipelines
 - [`monitor/docs/PLUGINS_spa.md`](monitor/docs/PLUGINS_spa.md): Complementos (apagados por defecto), sus paquetes, el aislamiento y leer el token de un almacén de secretos
+- [`monitor/docs/POSTURE_spa.md`](monitor/docs/POSTURE_spa.md): Postura de repositorios y organización, solo lectura
 - [`monitor/docs/AI_CONNECTION_spa.md`](monitor/docs/AI_CONNECTION_spa.md): Conectar una herramienta de IA: todo lo que dice el monitor, como señales, en el resumen, el endpoint, las herramientas MCP y el hook
 - [`monitor/docs/AI_SETUP_PROMPT_spa.md`](monitor/docs/AI_SETUP_PROMPT_spa.md): Configurar el monitor con una IA: un prompt para pegar en tu asistente de IA que lo instala, te pregunta qué quieres y escribe la configuración
 - [`monitor/docs/QUOTA_spa.md`](monitor/docs/QUOTA_spa.md): Más cuota, menos gasto: modo Bajo, el panel central, una GitHub App y cómo compartir la cuota
