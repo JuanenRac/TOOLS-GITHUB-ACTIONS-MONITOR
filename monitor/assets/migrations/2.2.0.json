@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.2.0",
  "previous": "2.1.8",
- "digest": "96acaccd61ffa722f947617700bea6cb9e5aad424f075bf7b0a39bfe1fce11ec",
+ "digest": "b1c139b6c65dcc583023362d81a484ccedc79d8cfcb94d789f6fbd49c8273532",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -415,7 +415,7 @@
     "key": "posture.skip",
     "kind": "names",
     "bounds": {
-     "re": "^(webhook|actions|scan|repo|branch|deploy|stored|org|runner|release)\\.[a-z_]{2,30}\\Z"
+     "re": "^(webhook|actions|scan|repo|branch|deploy|stored|org|runner|release|upstream)\\.[a-z_]{2,30}\\Z"
     },
     "default": []
    },
@@ -435,6 +435,11 @@
      "re": "^[A-Za-z0-9._*?-]{1,100}=(standard|library|internal|sandbox)\\Z"
     },
     "default": []
+   },
+   {
+    "key": "posture.upstream",
+    "kind": "bool",
+    "default": false
    },
    {
     "key": "sources.multi_owner",

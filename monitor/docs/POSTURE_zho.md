@@ -24,7 +24,7 @@
 | 代码与依赖 | scan.no_code scan.no_credentials scan.no_push_protection scan.no_dependency_alerts repo.no_policy repo.no_update_tool |
 | 分支 | branch.unprotected branch.no_review branch.bypass branch.release_unprotected branch.merged_unreviewed |
 | 密钥 | deploy.write deploy.old stored.old |
-| 组织 | org.no_two_factor org.default_write org.public_creation org.app_broad org.settings_changed |
+| 组织 | org.no_two_factor org.default_write org.public_creation org.app_broad org.settings_changed org.pat_broad |
 | 运行器 | runner.not_hardened runner.coverage_lost |
 | 发布版本 | release.asset_replaced release.asset_removed release.tag_moved release.outside_window |
 
@@ -44,8 +44,13 @@ GitHub 拒绝或未应答的内容列为**未检查**,绝不视为正常,该区�
 posture status
 posture matrix
 posture check --repo-name my-repo
+posture report
 ```
 
 ## 限制
 
-不读取成员的细粒度令牌(GitHub 仅向 GitHub App 列出),也不管理第二个写入型应用。组织检查仅用虚构应答测试过。
+尚未实现：第二个负责写入的 GitHub App（读写未分到两个 App）。`org.pat_broad` 需要具有个人访问令牌权限的 GitHub App；使用个人令牌时不做检查。组织检查仅用虚构的应答测试过。
+
+## 合规报告与权限
+
+`posture report`（以及 `GET /api/posture` 中的 `compliance`）把发现对照 OWASP 的十项 CI/CD 风险及相应的 CIS 章节：有发现、无发现、部分读取或未检查，并附每项风险含义的简短说明和与一周前相比的趋势。这只是阅读辅助，不是认证；CIS 章节编号未与官方文件核对。`upstream.weak`（`posture.upstream`，默认关闭）指出公开原仓库缺少安全策略或更新工具的分叉。权限表说明每组检查需要的 GitHub App 权限；配置了 App 时还显示是否已授予。

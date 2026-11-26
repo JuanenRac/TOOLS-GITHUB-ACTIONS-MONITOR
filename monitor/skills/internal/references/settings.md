@@ -554,6 +554,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `posture.skip` | `[]` | posture | Checks not asked for |
 | `posture.stored_max_days` | `365` | posture | Age limit of stored secrets |
 | `posture.types` | `[]` | posture | Kinds of project |
+| `posture.upstream` | `false` | posture | Look at the original of forks |
 | `productivity.enabled` | `-` | analytics | Time saved (estimate) |
 | `productivity.saving_percent` | `-` | analytics | Assumed saving when nothing was timed |
 | `productivity.team_hours_per_week` | `-` | analytics | Hours worked in a week (team) |

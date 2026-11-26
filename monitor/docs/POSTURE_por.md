@@ -24,7 +24,7 @@ Cada constatação indica o seu lugar nos riscos OWASP Top 10 CI/CD e no guia CI
 | Código e dependências | scan.no_code scan.no_credentials scan.no_push_protection scan.no_dependency_alerts repo.no_policy repo.no_update_tool |
 | Ramos | branch.unprotected branch.no_review branch.bypass branch.release_unprotected branch.merged_unreviewed |
 | Chaves e segredos | deploy.write deploy.old stored.old |
-| Organização | org.no_two_factor org.default_write org.public_creation org.app_broad org.settings_changed |
+| Organização | org.no_two_factor org.default_write org.public_creation org.app_broad org.settings_changed org.pat_broad |
 | Executores | runner.not_hardened runner.coverage_lost |
 | Versões | release.asset_replaced release.asset_removed release.tag_moved release.outside_window |
 
@@ -44,8 +44,13 @@ O separador Segurança das sentinelas mostra as constatações, a maturidade da 
 posture status
 posture matrix
 posture check --repo-name my-repo
+posture report
 ```
 
 ## Limites
 
-Os tokens granulares dos membros não são lidos (o GitHub só os lista a uma GitHub App) e não se gere uma segunda aplicação de escrita. As verificações de organização só foram testadas com respostas inventadas.
+Por fazer: uma segunda GitHub App de escrita (leitura e escrita não estão divididas por duas Apps). `org.pat_broad` precisa de uma GitHub App com a permissão de tokens de acesso pessoal; com um token pessoal não é verificado. As verificações de organização só foram testadas com respostas inventadas.
+
+## Relatório de conformidade e permissões
+
+`posture report` (e `compliance` em `GET /api/posture`) lê as constatações face aos dez riscos OWASP de CI/CD e às secções CIS correspondentes: com constatações, sem constatações, lido em parte ou não verificado, com um texto curto sobre o que significa cada risco e a tendência face a uma semana antes. É uma ajuda de leitura, não uma certificação; os números de secção CIS não foram confrontados com o documento oficial. `upstream.weak` (`posture.upstream`, desligado) assinala um fork cujo original público não tem política de segurança ou ferramenta de atualização. A tabela de permissões diz que permissão de GitHub App desbloqueia cada grupo e, com uma App configurada, se está concedida.

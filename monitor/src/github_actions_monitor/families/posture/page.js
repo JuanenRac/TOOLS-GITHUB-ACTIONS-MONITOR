@@ -29,7 +29,15 @@
     body.append(rows.length?table([T("ui.posture.col_repo"),T("ui.posture.col_level"),T("ui.posture.col_finding"),T("ui.posture.col_standard")],rows):el("p",T("ui.posture.none")));
     body.append(fold(T("ui.posture.maturity"),table([T("ui.posture.col_repo"),T("ui.posture.maturity")],j.repos.map(r=>[r.repo,r.maturity?r.maturity.passed+" / "+r.maturity.checked:T("ui.posture.unchecked")]))));
     body.append(fold(T("ui.posture.history"),table([T("ui.posture.col_day"),T("ui.posture.level_error"),T("ui.posture.level_warning"),T("ui.posture.level_info")],j.history.slice(-30).map(h=>[h.day,h.error,h.warning,h.info]))));
-    body.append(fold(T("ui.posture.permissions"),table([T("ui.posture.permissions"),T("ui.posture.col_finding")],j.permissions.map(p=>[p.permission+(p.refused?" - "+T("ui.posture.refused"):""),p.checks.join(", ")]))));
+    body.append(fold(T("ui.posture.report_title"),(()=>{
+      const box=el("div");box.append(el("p",T("ui.posture.report_note")),el("p",T("ui.posture.trend_"+j.trend.direction,{since:j.trend.since,delta:j.trend.delta})));
+      box.append(table(["OWASP",T("ui.posture.col_finding"),T("ui.posture.col_level")],j.compliance.owasp.map(r=>[r.id+" "+r.name,r.findings,T("ui.posture.status_"+r.status)])));
+      box.append(table(["CIS",T("ui.posture.col_finding"),T("ui.posture.col_level")],j.compliance.cis.map(r=>[r.id,r.findings,T("ui.posture.status_"+r.status)])));
+      return box;
+    })()));
+    const lessons=el("ul");j.compliance.owasp.filter(r=>r.findings).forEach(r=>lessons.append(el("li",r.id+": "+j.learn[r.id])));
+    if(lessons.children.length)body.append(fold(T("ui.posture.learn_title"),lessons));
+    body.append(fold(T("ui.posture.permissions"),table([T("ui.posture.permissions"),"GitHub App",T("ui.posture.col_finding")],j.permissions.map(p=>[p.permission+(p.refused?" - "+T("ui.posture.refused"):""),p.app_permission+": "+p.granted,p.checks.join(", ")]))));
   }
   FAM.on("tab",tab=>{if(tab==="ssec"){at=0;draw()}});
   FAM.on("data",()=>{if(CURTAB==="ssec")draw()});
