@@ -5,6 +5,9 @@
 
   py -3 tools/make_release.py [--out DIR]   default: <signed_dir>/github_actions_monitor/ (see workspace.py; never on D:)
 
+Next to the zip it leaves the stand-alone monitor_updater.py (with the registry of migrations inside) and the two bills of materials (CycloneDX and SPDX); SHA256SUMS names the four, the zip first.
+--build-only makes the same files without running any test (to compare two builds, never to publish); --gate-record writes what the gate saw. The files are signed afterwards by tools/sign_release.py.
+
 The zip (folder github_actions_monitor/) carries: the launchers (*.bat, *.sh, *.command) in its root, the tiny entry points (bin/*.py), the package src/github_actions_monitor/**, assets/ (examples/ with the neutral
 *.example.json and quotas.json, static/ with the page, locales/*.json, ai/ with the guide for AI tools), tools/*.py, docs/*.md, CHANGELOG.md, docs/README_<lang>.txt
 and docs/QUICKSTART_<lang>.txt in the 8 languages (+ README.txt), LICENSE, NOTICE, AUTHORS, assets/examples/actions_monitor.example.json (the template; the tool copies it to
@@ -35,6 +38,9 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent.parent      # the product folder (the one that holds the launchers, src/, assets/, docs/, tests/ and tools/)
 sys.path.insert(0, str(HERE / "src"))                # works also under `py -3 -I`
 from github_actions_monitor.app import workspace   # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import release_summary   # noqa: E402
+import sbom   # noqa: E402
 FIXED_TIME = (2026, 1, 1, 0, 0, 0)
 STATE_KEYS = ("repos",)   # a saved list of repositories is session state: the template goes back to "all"
 EXAMPLE = "actions_monitor.example.json"
@@ -90,6 +96,7 @@ def members():
     names += sorted(p for p in (HERE / "src").rglob("*") if p.is_file() and p.suffix in DATA_SUFFIXES and "__pycache__" not in p.parts)      # the data files the package loads (ai_presets.json): without them the product starts with empty presets
     names += sorted((HERE / "tools").glob("*.py"))
     names += sorted((HERE / "assets" / "migrations").glob("*.json"))      # the registry of migrations the updater reads
+    names += sorted((HERE / "assets" / "release_summaries").glob("*.json"))      # the short summary of each release in the eight languages
     names += [HERE / "assets" / "examples" / n for n in DATA_JSON] + [HERE / "assets" / "static" / "actions_monitor.html", HERE / "assets" / "static" / "screens.html", HERE / "assets" / "static" / "ui_extras.js"]
     names += [HERE / n for n in LEGAL] + [HERE / "CHANGELOG.md", HERE / "README.txt"]
     names += sorted((HERE / "docs").glob("README_*.txt")) + sorted((HERE / "docs").glob("QUICKSTART_*.txt")) + sorted((HERE / "assets" / "locales").glob("*.json")) + sorted((HERE / "assets" / "ai").glob("*.md"))
@@ -635,6 +642,9 @@ def gate_static():
     problems = help_version_problems(tool_version.TOOL_VERSION)
     if problems:
         fail("the help is not up to date with the version: " + "; ".join(problems))
+    problems = release_summary.problems(tool_version.TOOL_VERSION)
+    if problems:
+        fail("; ".join(problems))
     return tool_version.TOOL_VERSION
 
 
@@ -646,6 +656,36 @@ def write_zip(target, entries):
             info.create_system = 3   # Unix: unzip and the Linux/macOS file managers then honour the permission bits (the executable launchers)
             info.external_attr = (0o755 if name.endswith((".sh", ".command")) else 0o644) << 16   # launchers keep the executable bit on Linux and macOS
             z.writestr(info, entries[name])
+
+
+def write_release_files(out, version, target, entries):
+    """What travels next to the zip: the stand-alone updater, the two bills of materials and SHA256SUMS naming the four (the zip first, as every older updater reads it). Returns [(name, sha256)]."""
+    out, digest = Path(out), hashlib.sha256(Path(target).read_bytes()).hexdigest()
+    beside = {"monitor_updater.py": standalone_updater().encode("utf-8")}
+    beside.update(sbom.documents(version, Path(target).name, digest, entries))
+    sums = [(Path(target).name, digest)]
+    for name in sorted(beside):
+        (out / name).write_bytes(beside[name])
+        sums.append((name, hashlib.sha256(beside[name]).hexdigest()))
+    for stale in out.glob("*.ed25519.sig"):      # a signature of an earlier build would be of other bytes
+        stale.unlink()
+    (out / "SHA256SUMS").write_text("".join(f"{sha}  {name}\n" for name, sha in sums), encoding="ascii", newline="\n")
+    return sums
+
+
+def head_commit(here=HERE):
+    try:
+        done = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(here), capture_output=True, text=True, timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    return done.stdout.strip() if done.returncode == 0 else ""
+
+
+def write_gate_record(path, version, commit, suite_line, clean_line, sums):
+    record = {"_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>", "_license": "GPL-3.0-or-later - see LICENSE", "version": version,
+              "commit": head_commit() or str(commit or ""), "suite": suite_line, "clean_install": clean_line, "files": {name: sha for name, sha in sums}}
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    Path(path).write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8", newline="\n")
 
 
 def clean_install_check(archive, entries, python=None, skip_suite=False):
@@ -701,14 +741,23 @@ def main():
     parser.add_argument("--commit", help="the commit that is being released, to check the record of --accept-green-suite against")
     parser.add_argument("--skip-clean-suite", action="store_true", help="with --accept-green-suite: do not repeat the suite from the extracted zip either (the smoke checks of the clean install still run); say so in the release notes")
     parser.add_argument("--progress", action="store_true", help="say how far the suites are (one line every 250 tests), also the suite of the clean install")
+    parser.add_argument("--build-only", action="store_true", help="build the files without the unit tests and without the clean install: for comparing two builds, NEVER for publishing")
+    parser.add_argument("--gate-record", metavar="JSON", help="write what the gate saw (version, commit, suite, clean install, SHA-256 of each file)")
     args = parser.parse_args()
+    if args.build_only and (args.accept_green_suite or args.gate_record):
+        parser.error("--build-only runs no gate: it goes with neither --accept-green-suite nor --gate-record")
     global SHOW_PROGRESS
     SHOW_PROGRESS = args.progress
     if args.skip_clean_suite and not args.accept_green_suite:
         parser.error("--skip-clean-suite needs --accept-green-suite")
     version = gate_static()
     print("gate: example, targets and version ok (tool", version + ")")
-    print("gate: unit tests:", green_run(args.accept_green_suite, args.commit) if args.accept_green_suite else run_tests())
+    if args.build_only:
+        print("gate: NOT RUN (--build-only): these files are not to be published")
+        suite_line = clean_line = "not run"
+    else:
+        suite_line = green_run(args.accept_green_suite, args.commit) if args.accept_green_suite else run_tests()
+        print("gate: unit tests:", suite_line)
     out = Path(args.out) if args.out else workspace.signed_dir() / "github_actions_monitor"
     if str(out).upper().startswith("D:"):
         raise SystemExit("never write on D:")
@@ -759,10 +808,12 @@ def main():
         fail("files that must not travel: " + ", ".join(bad))
     out.mkdir(parents=True, exist_ok=True)
     target = out / "github_actions_monitor.zip"
-    with tempfile.TemporaryDirectory(prefix="monitor_install_") as scratch:   # the install gate runs BEFORE anything is left in the output folder
-        trial = Path(scratch) / "github_actions_monitor.zip"
-        write_zip(trial, entries)
-        print("gate: clean install:", clean_install_check(trial, entries, skip_suite=args.skip_clean_suite))
+    if not args.build_only:
+        with tempfile.TemporaryDirectory(prefix="monitor_install_") as scratch:   # the install gate runs BEFORE anything is left in the output folder
+            trial = Path(scratch) / "github_actions_monitor.zip"
+            write_zip(trial, entries)
+            clean_line = clean_install_check(trial, entries, skip_suite=args.skip_clean_suite)
+            print("gate: clean install:", clean_line)
     write_zip(target, entries)
     with zipfile.ZipFile(target) as z:   # open it again: what is on disk is what is checked
         if z.testzip() is not None:
@@ -774,9 +825,11 @@ def main():
     if sorted(again) != sorted(entries) or check_entries(again):
         fail("the written zip does not hold what was planned")
     digest = hashlib.sha256(target.read_bytes()).hexdigest()
-    (out / "SHA256SUMS").write_text(f"{digest}  {target.name}\n", encoding="ascii", newline="\n")
+    sums = write_release_files(out, version, target, entries)
     if (out / "SHA256SUMS").read_text(encoding="ascii").split()[0] != hashlib.sha256(target.read_bytes()).hexdigest():
         fail("SHA256SUMS does not match the zip")
+    if args.gate_record:
+        write_gate_record(args.gate_record, version, args.commit, suite_line, clean_line, sums)
     print(f"{target} ({target.stat().st_size / 1024:.0f} KB, {len(entries)} files) tool {version} sha256 {digest[:16]}")
     return 0
 

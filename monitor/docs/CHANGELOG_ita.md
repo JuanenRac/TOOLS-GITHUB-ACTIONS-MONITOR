@@ -9,6 +9,19 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+### Aggiunto
+
+- **Le release sono firmate e l'aggiornatore controlla la firma**: dalla 2.2.0 una release porta una firma Ed25519 separata di SHA256SUMS e di ogni file, fatta su GitHub dal workflow di release. L'aggiornatore (pagina, finestra, console e riga di comando) rifiuta una release dalla 2.2.0 senza firma o con firma errata, e uno zip firmato offerto con un'altra versione, prima di scompattare qualsiasi cosa; tornare a una versione precedente non firmata è consentito con un avviso.
+- **Due distinte dei materiali e attestazioni in ogni release**: documenti CycloneDX e SPDX elencano ogni file dello zip e le librerie facoltative, e il workflow attesta la provenienza dei file, la distinta e il verbale del controllo di qualità.
+- **Il controllo di qualità può girare su GitHub**: un workflow esegue l'intero controllo su un runner Windows, verifica che una seconda build dia gli stessi byte e conserva il verbale di ciò che è stato eseguito; eseguirlo sul proprio computer resta possibile e facoltativo.
+- **Un portachiavi di chiavi pubbliche e la verifica di una release scaricata**: un solo posto per le chiavi che possono firmare (un valore privato è rifiutato) e la verifica senza rete di una cartella di file di release. I comandi da console arrivano a parte.
+- **Le note di una release possono portare un breve riassunto nelle otto lingue**, letto dal controllo degli aggiornamenti con la stessa richiesta; ricorda anche una versione scartata. La finestra che lo mostra arriva a parte.
+- **Controlli del repository**: revisione delle dipendenze aggiunte da una pull request e analisi CodeQL del codice.
+
+### Modificato
+
+- **L'aggiornatore autonomo pubblicato con una release contiene ora il registro delle migrazioni**, e SHA256SUMS lo nomina insieme allo zip e alle due distinte.
+
 ## [2.1.8]
 
 La versione 2.1.8 non aggiunge alcuna funzione: corregge ciò che ha trovato una revisione della 2.1.7. La sentinella di CI non è più verde quando l'elenco delle esecuzioni può nascondere un workflow; approvare o rifiutare una proposta dell'IA funziona; un dispositivo revocato perde i flussi che aveva aperti; le connessioni hanno un limite di tempo e di numero; il tunnel del proxy funziona; tornare indietro non passa più sopra un aggiornamento in corso; l'immagine del contenitore viene pubblicata solo da un tag; e le schermate, il chiosco, la riga di comando e la documentazione dicono ciò che fa il programma.

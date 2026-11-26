@@ -9,6 +9,19 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+### Adicionado
+
+- **As versões são assinadas e o atualizador verifica a assinatura**: a partir da 2.2.0 uma versão traz uma assinatura Ed25519 separada do SHA256SUMS e de cada ficheiro, feita no GitHub pelo workflow de publicação. O atualizador (página, janela, consola e linha de comandos) recusa uma versão a partir da 2.2.0 sem assinatura ou com assinatura errada, e um zip assinado oferecido com outra versão, antes de descomprimir o que quer que seja; regressar a uma versão anterior sem assinatura é permitido com um aviso.
+- **Duas listas de materiais e atestações em cada versão**: documentos CycloneDX e SPDX listam cada ficheiro do zip e as bibliotecas opcionais, e o workflow atesta a proveniência dos ficheiros, a lista de materiais e a ata do controlo de qualidade.
+- **O controlo de qualidade pode correr no GitHub**: um workflow executa o controlo completo num runner Windows, confirma que uma segunda compilação dá os mesmos bytes e guarda o registo do que correu; executá-lo no próprio computador continua a ser possível e opcional.
+- **Um porta-chaves de chaves públicas e a verificação de uma versão transferida**: um único sítio para as chaves que podem assinar (um valor privado é recusado) e a verificação sem rede de uma pasta de ficheiros de versão. Os comandos de consola chegam à parte.
+- **As notas de uma versão podem trazer um resumo curto nos oito idiomas**, lido pela verificação de atualizações com o mesmo pedido; também memoriza uma versão dispensada. A janela que o mostra chega à parte.
+- **Verificações do repositório**: revisão das dependências que um pull request acrescenta e análise CodeQL do código.
+
+### Alterado
+
+- **O atualizador avulso publicado com uma versão passa a trazer o registo de migrações**, e o SHA256SUMS nomeia-o juntamente com o zip e as duas listas de materiais.
+
 ## [2.1.8]
 
 A versão 2.1.8 não acrescenta nenhuma função: corrige o que uma revisão da 2.1.7 encontrou. O sentinela de CI deixa de ficar verde quando a lista de execuções pode esconder um workflow; aprovar ou rejeitar uma proposta da IA funciona; um dispositivo revogado perde os fluxos que tinha abertos; as ligações têm limite de tempo e de número; o túnel do proxy funciona; voltar atrás já não passa por cima de uma atualização em curso; a imagem do contentor só é publicada a partir de uma etiqueta; e os ecrãs, o quiosque, a linha de comandos e a documentação dizem o que o programa faz.

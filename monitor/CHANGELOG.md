@@ -11,6 +11,19 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+### Added
+
+- **Releases are signed and the updater checks the signature**: from version 2.2.0 a release carries a detached Ed25519 signature of SHA256SUMS and of every file, made on GitHub by the release workflow. The updater (page, window, console and command line) refuses a release from 2.2.0 on whose signature is missing or wrong, and a signed zip offered under another version, before anything is unpacked; going back to an older unsigned version is allowed with a warning.
+- **Two bills of materials and attestations with every release**: CycloneDX and SPDX documents list every file of the zip and the optional libraries, and the release workflow attests the provenance of the files, the bill of materials and the record of the quality gate.
+- **The quality gate can run on GitHub**: a workflow runs the whole gate on a Windows runner, checks that a second build gives the same bytes and keeps a record of what ran; running it on your own computer stays possible and optional.
+- **A keyring of public keys and the check of a downloaded release**: one place for the keys that may sign (a private value is refused) and the verification of a folder of release files without any network. Their commands in the console arrive separately.
+- **The notes of a release can carry a short summary in the eight languages**, read by the update check with the same request; it also remembers a dismissed version. The window that shows it arrives separately.
+- **Checks of the repository**: a review of the dependencies a pull request adds and CodeQL analysis of the code.
+
+### Changed
+
+- **The stand-alone updater published with a release now carries the registry of migrations inside**, and SHA256SUMS names it together with the zip and the two bills of materials.
+
 ## [2.1.8]
 
 Version 2.1.8 adds no new function: it corrects what a review of 2.1.7 found. The CI sentinel is no longer green when the list of runs may hide a workflow; approving or rejecting a proposal of the AI works; a revoked device loses the streams it had open; connections have a time and a number limit; the proxy tunnel works; going back no longer runs over an update in progress; the container image is only published from a tag; and the screens, the kiosk, the command line and the documentation say what the program does.

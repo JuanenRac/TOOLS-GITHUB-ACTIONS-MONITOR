@@ -6,7 +6,9 @@
     "electro-hobby-3d.project.json",
     "CONTRIBUTING_*.md",
     "SECURITY_*.md",
-    "SUPPORT_*.md"
+    "SUPPORT_*.md",
+    "PRODUCT.md",
+    "PRODUCT_*.md"
   ],
   "cards": [
     {

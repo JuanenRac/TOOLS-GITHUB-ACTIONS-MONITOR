@@ -1,0 +1,188 @@
+# Builds the files of a release on GitHub, behind the quality gate, and (only when asked) signs and attests them.
+#   build     on every pull request that touches the release tooling: the files are built on Ubuntu and on Windows without running tests, and `compare` fails if the two are not the same byte for byte.
+#   gate      by hand only: the whole quality gate of tools/make_release.py (unit tests and the suite from the extracted zip) on a Windows runner; its record says what ran, on which commit.
+#   sign      by hand with `sign` on: signs SHA256SUMS and every file it names with the Ed25519 key kept as the secret MONITOR_RELEASE_SIGNING_KEY of the environment `release-signing`, checks the
+#             signatures against the public key that travels in the product, and attests the provenance, the bill of materials and the record of the gate.
+# Nothing here creates a tag or a release: the signed set is an artifact of the run, to be attached to the draft of the release by the person who publishes it.
+# Only actions of GitHub itself are used.
+name: Release build
+
+on:
+  pull_request:
+    paths:
+      - "monitor/tools/make_release.py"
+      - "monitor/tools/sbom.py"
+      - "monitor/tools/sign_release.py"
+      - "monitor/tools/release_summary.py"
+      - "monitor/tools/monitor_updater.py"
+      - ".github/workflows/release-build.yml"
+  workflow_dispatch:
+    inputs:
+      sign:
+        description: "Sign and attest the files (needs the secret of the environment release-signing; only for a commit that is in main)"
+        type: boolean
+        default: false
+
+permissions: {}
+
+concurrency:
+  group: release-build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+jobs:
+  build:
+    name: Build the files (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Unix line endings in the checkout
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Build without tests (these files are only compared, never published)
+        shell: bash
+        run: python monitor/tools/make_release.py --build-only --out "$RUNNER_TEMP/release"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: build-${{ matrix.os }}
+          path: ${{ runner.temp }}/release/
+          if-no-files-found: error
+          retention-days: 7
+
+  compare:
+    name: The two builds are the same
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: build-ubuntu-latest
+          path: ubuntu
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: build-windows-latest
+          path: windows
+      - name: Same SHA256SUMS, and each side matches its own
+        run: |
+          (cd ubuntu && sha256sum -c SHA256SUMS)
+          (cd windows && sha256sum -c SHA256SUMS)
+          diff ubuntu/SHA256SUMS windows/SHA256SUMS
+
+  gate:
+    name: The quality gate (Windows)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: windows-latest
+    timeout-minutes: 350
+    permissions:
+      contents: read
+    steps:
+      - name: Unix line endings in the checkout
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: The optional packages of the terminal views
+        run: python -m pip install -r .github/ci-requirements.txt
+      - name: Unit tests, clean install and the files
+        shell: bash
+        env:
+          PYTHONUTF8: "1"
+          MONITOR_RELEASE_TEST_TIMEOUT: "10000"
+          MONITOR_RELEASE_CLEAN_TIMEOUT: "10000"
+          MONITOR_RELEASE_LOG_DIR: ${{ runner.temp }}/gate-logs
+        run: python monitor/tools/make_release.py --progress --out "$RUNNER_TEMP/release" --gate-record "$RUNNER_TEMP/release/gate_record.json"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-set
+          path: ${{ runner.temp }}/release/
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: gate-logs
+          path: ${{ runner.temp }}/gate-logs/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  sign:
+    name: Sign and attest
+    needs: [compare, gate]
+    if: github.event_name == 'workflow_dispatch' && inputs.sign
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: release-signing
+    permissions:
+      contents: read
+      id-token: write       # the attestations
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Only a commit that is in main is signed
+        run: git merge-base --is-ancestor HEAD origin/main || { echo "this commit is not in main: nothing is signed"; exit 1; }
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-set
+          path: ${{ runner.temp }}/release
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: build-ubuntu-latest
+          path: ${{ runner.temp }}/second
+      - name: What the gate made is what a second build makes
+        run: diff "$RUNNER_TEMP/release/SHA256SUMS" "$RUNNER_TEMP/second/SHA256SUMS"
+      - name: Sign, and check the signatures with the public key of the product
+        env:
+          SIGNING_KEY: ${{ secrets.MONITOR_RELEASE_SIGNING_KEY }}
+        run: |
+          if [ -z "$SIGNING_KEY" ]; then
+            echo "the secret MONITOR_RELEASE_SIGNING_KEY is not set in the environment release-signing: nothing is signed"; exit 1
+          fi
+          umask 077
+          key_file="$(mktemp "$RUNNER_TEMP/key.XXXXXX")"
+          trap 'rm -f "$key_file"' EXIT
+          printf '%s\n' "$SIGNING_KEY" > "$key_file"
+          python3 monitor/tools/sign_release.py sign "$RUNNER_TEMP/release" --key "$key_file"
+      - name: Attestation of the provenance of every file
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-checksums: ${{ runner.temp }}/release/SHA256SUMS
+      - name: Attestation of the bill of materials of the zip
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: ${{ runner.temp }}/release/github_actions_monitor.zip
+          sbom-path: ${{ runner.temp }}/release/github_actions_monitor.cdx.json
+      - name: Attestation of the record of the quality gate
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: ${{ runner.temp }}/release/gate_record.json
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: signed-release-set
+          path: ${{ runner.temp }}/release/
+          if-no-files-found: error
+          retention-days: 30
