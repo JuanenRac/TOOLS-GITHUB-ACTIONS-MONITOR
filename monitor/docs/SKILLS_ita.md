@@ -53,5 +53,5 @@ Si dice provato solo ciò che è stato davvero provato.
 
 | Assistente o via | Riga di comando | HTTP e file | MCP |
 |---|---|---|---|
-| Claude Code | provato | provato | compatibile per protocollo, non provato |
+| Un assistente di codice in terminale | provato | provato | compatibile per protocollo, non provato |
 | Altri assistenti | compatibile per protocollo, non provato | compatibile per protocollo, non provato | compatibile per protocollo, non provato |

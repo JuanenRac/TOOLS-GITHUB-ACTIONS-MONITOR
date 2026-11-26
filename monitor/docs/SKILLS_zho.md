@@ -53,5 +53,5 @@ python bin/monitor_cli.py install-skill external --dest /path/to/the/skills/fold
 
 | 助手或方式 | 命令行 | HTTP 与文件 | MCP |
 |---|---|---|---|
-| Claude Code | 已测试 | 已测试 | 协议兼容，未测试 |
+| 终端编码助手 | 已测试 | 已测试 | 协议兼容，未测试 |
 | 其他助手 | 协议兼容，未测试 | 协议兼容，未测试 | 协议兼容，未测试 |

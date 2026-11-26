@@ -53,5 +53,5 @@ Only what was really tried is called tested.
 
 | Assistant or way | Command line | HTTP and files | MCP |
 |---|---|---|---|
-| Claude Code | tested | tested | compatible by protocol, not tested |
+| A coding assistant in a terminal | tested | tested | compatible by protocol, not tested |
 | Other assistants | compatible by protocol, not tested | compatible by protocol, not tested | compatible by protocol, not tested |

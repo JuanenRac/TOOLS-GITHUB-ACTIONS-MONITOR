@@ -53,5 +53,5 @@ Só se diz testado o que foi realmente experimentado.
 
 | Assistente ou via | Linha de comandos | HTTP e ficheiros | MCP |
 |---|---|---|---|
-| Claude Code | testado | testado | compatível por protocolo, não testado |
+| Um assistente de código no terminal | testado | testado | compatível por protocolo, não testado |
 | Outros assistentes | compatível por protocolo, não testado | compatível por protocolo, não testado | compatível por protocolo, não testado |
