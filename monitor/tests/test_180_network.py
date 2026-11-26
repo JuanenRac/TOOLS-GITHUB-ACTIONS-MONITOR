@@ -350,7 +350,7 @@ class EveryLocalOnlyRouteRefusesAClientOfTheNetwork(NetworkCase):
             self.assertRegex(SOURCE, r"if path in " + table + r":[^\n]*\n\s+if not self\.guard\(\) or not self\.this_computer\(\)", table + " must be guarded by this_computer")
             found.update(routes)
         self.assertEqual(found, set(LOCAL_ONLY_POST) | set(LOCAL_ONLY_GET), "a new route that is local only goes in the table (and a route that stops being local only must be taken out on purpose)")
-        self.assertEqual(SOURCE.count("self.this_computer()"), 8, "a new call to this_computer() needs its row in the table above")
+        self.assertEqual(SOURCE.count("self.this_computer()"), 9, "a new call to this_computer() needs its row in the table above")      # the ninth is family_route: the routes of the parts that ask for it (test_family_seams)
 
 
 if __name__ == "__main__":
