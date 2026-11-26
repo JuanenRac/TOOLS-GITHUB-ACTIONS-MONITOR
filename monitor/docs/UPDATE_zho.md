@@ -32,6 +32,12 @@
 
 除 zip 外，发布还包含 `monitor_updater.py`、两份物料清单（CycloneDX 格式的 `github_actions_monitor.cdx.json` 和 SPDX 格式的 `github_actions_monitor.spdx.json`）、每个文件的签名，以及 GitHub 对构建过程的证明（attestation），可用 `gh attestation verify github_actions_monitor.zip --repo JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR` 校验。签名证明谁持有密钥；证明记录说明是哪个工作流构建了该文件。这是两项独立的检查。
 
+## 新版本提醒与命令
+
+当更新检查（`updates.check`）发现新版本时，完整版会用窗口以你的语言显示变更摘要、更新日志链接和进入更新页面的按钮（设置 `updates.notify_window`，默认开启）。“稍后”仅在本次浏览器会话内关闭；“不再提醒此版本”只静默该版本。墙面屏和展示屏上绝不出现。其接口为 `/api/supply/update-notice` 和 `/api/supply/update-dismiss`。
+
+`monitor_cli.py verify-release --folder DIR` 在无网络时按 SHA256SUMS 及其签名校验下载的发布文件夹。`monitor_cli.py keyring list|add|revoke|verify` 管理公钥（`--key-id`、`--public-key`、`--key-scope`、`--expires`、`--document`）；你自己的密钥保存在配置文件夹的 `keyring.json` 中，私钥会被拒绝，项目的发布密钥无法更改。
+
 ## 逐步说明 支撑它的路由是 `/api/updates/status`、`/api/updates/progress`、`/api/updates/history`、`/api/updates/log`（进程日志的最后几行，token 或 secret 之后的值已隐藏）、`/api/updates/copies`（只读）以及 `/api/updates/check`、`/api/updates/plan`、`/api/updates/apply`、`/api/updates/rollback`、`/api/updates/discard`（管理员，仅限本机）。 进度也会通过 `/api/updates/stream` 以服务器发送事件的方式推送（更新期间页面使用它；当浏览器或连接不支持时，回退为每 1.5 秒查询一次）。
 
 1. 检测安装：文件夹、版本、版本类型（完整版或 Lite）、配置、数据、端口、监视器是否在运行、是容器还是服务。

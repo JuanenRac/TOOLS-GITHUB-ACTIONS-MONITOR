@@ -11,6 +11,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Hinzugefügt
 
+- **Ein Fenster kündigt eine neuere Version an**: mit der Zusammenfassung der Änderungen in Ihrer Sprache, einer Schaltfläche zur Seite Updates, „Später“ und „Diese Version nicht mehr melden“; standardmäßig ein und auf Wand- und Kioskbildschirmen stumm.
+- **Neue Befehle**: zur netzlosen Prüfung eines heruntergeladenen Releases und zur Verwaltung der öffentlichen Schlüssel.
 - **Releases sind signiert und der Updater prüft die Signatur**: ab Version 2.2.0 trägt ein Release eine separate Ed25519-Signatur von SHA256SUMS und jeder Datei, erstellt auf GitHub durch den Release-Workflow. Der Updater (Seite, Fenster, Konsole und Befehlszeile) lehnt ein Release ab 2.2.0 mit fehlender oder falscher Signatur sowie ein unter anderer Version angebotenes signiertes Zip ab, bevor etwas entpackt wird; die Rückkehr zu einer älteren unsignierten Version ist mit Warnung erlaubt.
 - **Zwei Stücklisten und Attestierungen bei jedem Release**: CycloneDX- und SPDX-Dokumente listen jede Datei des Zips und die optionalen Bibliotheken, und der Release-Workflow attestiert die Herkunft der Dateien, die Stückliste und das Protokoll der Qualitätsprüfung.
 - **Die Qualitätsprüfung kann auf GitHub laufen**: ein Workflow führt die gesamte Prüfung auf einem Windows-Runner aus, prüft, dass ein zweiter Build dieselben Bytes ergibt, und hält fest, was gelaufen ist; die Ausführung auf dem eigenen Rechner bleibt möglich und optional.

@@ -11,6 +11,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Adicionado
 
+- **Uma janela anuncia uma versão mais nova**: com o resumo das alterações no seu idioma, um botão para Atualizações, «Mais tarde» e «Não avisar desta versão»; vem ligada e não aparece em ecrãs de parede nem quiosque.
+- **Comandos novos**: para verificar sem rede uma versão transferida e gerir as chaves públicas.
 - **As versões são assinadas e o atualizador verifica a assinatura**: a partir da 2.2.0 uma versão traz uma assinatura Ed25519 separada do SHA256SUMS e de cada ficheiro, feita no GitHub pelo workflow de publicação. O atualizador (página, janela, consola e linha de comandos) recusa uma versão a partir da 2.2.0 sem assinatura ou com assinatura errada, e um zip assinado oferecido com outra versão, antes de descomprimir o que quer que seja; regressar a uma versão anterior sem assinatura é permitido com um aviso.
 - **Duas listas de materiais e atestações em cada versão**: documentos CycloneDX e SPDX listam cada ficheiro do zip e as bibliotecas opcionais, e o workflow atesta a proveniência dos ficheiros, a lista de materiais e a ata do controlo de qualidade.
 - **O controlo de qualidade pode correr no GitHub**: um workflow executa o controlo completo num runner Windows, confirma que uma segunda compilação dá os mesmos bytes e guarda o registo do que correu; executá-lo no próprio computador continua a ser possível e opcional.

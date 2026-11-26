@@ -1,0 +1,21 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.2.0",
+ "previous": "2.1.8",
+ "digest": "5553496564b4c4fb212ac77eb3905326d0a8beaa6356fdd597e351d238075e6b",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "updates.notify_window",
+    "kind": "bool",
+    "default": true
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {}
+}

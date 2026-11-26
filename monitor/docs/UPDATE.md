@@ -32,6 +32,12 @@ Public key (Ed25519, hex): `380c75210e444f71bc4fe4b9aa7cb451aad5ef2592711f7dc6ba
 
 Besides the zip, a release carries `monitor_updater.py`, two bills of materials (`github_actions_monitor.cdx.json` in CycloneDX and `github_actions_monitor.spdx.json` in SPDX), a signature next to each file and the attestations GitHub makes of the build, which you can check with `gh attestation verify github_actions_monitor.zip --repo JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR`. The signature proves who holds the key; the attestation proves which workflow built the file. They are two separate checks.
 
+## The notice of a new version and the commands
+
+When the update check (`updates.check`) finds a newer version, a window in the Complete edition shows the summary of its changes in your language, a link to the changelog and a button to the Updates page (setting `updates.notify_window`, on by default). "Later" closes it for this browser session; "Do not announce this version" silences that version only. It never appears on wall or kiosk screens. Its routes are `/api/supply/update-notice` and `/api/supply/update-dismiss`.
+
+`monitor_cli.py verify-release --folder DIR` checks, without network, a folder of downloaded release files against SHA256SUMS and its signature. `monitor_cli.py keyring list|add|revoke|verify` manages the public keys (`--key-id`, `--public-key`, `--key-scope`, `--expires`, `--document`); your own keys are kept in `keyring.json` of the configuration folder, private keys are refused and the release key of the project cannot be changed.
+
 ## What it does, step by step The routes behind it are `/api/updates/status`, `/api/updates/progress`, `/api/updates/history`, `/api/updates/log` (the last lines of the log of the process, values after token or secret hidden), `/api/updates/copies` (read only) and `/api/updates/check`, `/api/updates/plan`, `/api/updates/apply`, `/api/updates/rollback`, `/api/updates/discard` (administrator, this computer only). The progress also travels as server-sent events on `/api/updates/stream` (the page uses it while an update runs and falls back to asking every second and a half when the browser or the connection does not allow it).
 
 1. Detects the installation: folder, version, edition (Complete or Lite), configuration, data, ports, whether the monitor is running, container or service.

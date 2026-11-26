@@ -32,6 +32,12 @@ Clave pública (Ed25519, hex): `380c75210e444f71bc4fe4b9aa7cb451aad5ef2592711f7d
 
 Además del zip, una release lleva `monitor_updater.py`, dos listas de materiales (`github_actions_monitor.cdx.json` en CycloneDX y `github_actions_monitor.spdx.json` en SPDX), una firma junto a cada fichero y las atestaciones que GitHub hace de la compilación, que se comprueban con `gh attestation verify github_actions_monitor.zip --repo JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR`. La firma prueba quién tiene la clave; la atestación prueba qué workflow construyó el fichero. Son dos comprobaciones separadas.
 
+## El aviso de versión nueva y las órdenes
+
+Cuando la comprobación de versión (`updates.check`) encuentra una más nueva, una ventana en la edición Completa muestra el resumen de sus cambios en tu idioma, un enlace al historial y un botón a la página de Actualizaciones (ajuste `updates.notify_window`, encendido por defecto). «Más tarde» la cierra durante esta sesión del navegador; «No avisar de esta versión» silencia solo esa versión. Nunca aparece en pantallas de pared o quiosco. Sus rutas son `/api/supply/update-notice` y `/api/supply/update-dismiss`.
+
+`monitor_cli.py verify-release --folder DIR` comprueba sin red una carpeta de ficheros de release descargados contra SHA256SUMS y su firma. `monitor_cli.py keyring list|add|revoke|verify` gestiona las claves públicas (`--key-id`, `--public-key`, `--key-scope`, `--expires`, `--document`); tus claves se guardan en `keyring.json` en la carpeta de configuración, las claves privadas se rechazan y la clave de release del proyecto no se puede cambiar.
+
 ## Qué hace, paso a paso Las rutas que lo sostienen son `/api/updates/status`, `/api/updates/progress`, `/api/updates/history`, `/api/updates/log` (las últimas líneas del registro del proceso, con los valores tras token o secret ocultos), `/api/updates/copies` (solo lectura) y `/api/updates/check`, `/api/updates/plan`, `/api/updates/apply`, `/api/updates/rollback`, `/api/updates/discard` (administrador, solo desde este equipo). El progreso viaja además como eventos enviados por el servidor en `/api/updates/stream` (la página lo usa mientras corre una actualización y vuelve a preguntar cada segundo y medio si el navegador o la conexión no lo permiten).
 
 1. Detecta la instalación: carpeta, versión, edición (Completa o Lite), configuración, datos, puertos, si el monitor está en marcha, contenedor o servicio.

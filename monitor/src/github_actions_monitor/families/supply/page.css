@@ -1,0 +1,8 @@
+/* Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+   GPL-3.0-or-later - see LICENSE */
+#updn-dlg .dlg-box{width:min(560px,100%);padding:16px 18px;gap:10px;overflow:auto}
+#updn-dlg h2{margin:0;font-size:17px}
+#updn-dlg p{margin:0}
+#updn-notes{white-space:pre-wrap;overflow-wrap:anywhere}
+.updn-bar{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.updn-bar button{min-height:32px}

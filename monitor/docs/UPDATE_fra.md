@@ -32,6 +32,12 @@ Clé publique (Ed25519, hex) : `380c75210e444f71bc4fe4b9aa7cb451aad5ef2592711f7d
 
 Outre le zip, une version contient `monitor_updater.py`, deux nomenclatures (`github_actions_monitor.cdx.json` en CycloneDX et `github_actions_monitor.spdx.json` en SPDX), une signature à côté de chaque fichier et les attestations de construction produites par GitHub, vérifiables avec `gh attestation verify github_actions_monitor.zip --repo JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR`. La signature prouve qui détient la clé ; l'attestation prouve quel workflow a construit le fichier. Ce sont deux contrôles distincts.
 
+## L'annonce d'une nouvelle version et les commandes
+
+Quand la vérification (`updates.check`) trouve une version plus récente, une fenêtre de l'édition Complète montre le résumé des changements dans votre langue, un lien vers le journal et un bouton vers la page Mises à jour (réglage `updates.notify_window`, activé par défaut). « Plus tard » la ferme pour cette session du navigateur ; « Ne plus annoncer cette version » ne fait taire que cette version. Elle n'apparaît jamais sur les écrans muraux ou kiosque. Ses routes sont `/api/supply/update-notice` et `/api/supply/update-dismiss`.
+
+`monitor_cli.py verify-release --folder DIR` vérifie sans réseau un dossier de fichiers de version téléchargés avec SHA256SUMS et sa signature. `monitor_cli.py keyring list|add|revoke|verify` gère les clés publiques (`--key-id`, `--public-key`, `--key-scope`, `--expires`, `--document`) ; vos clés sont gardées dans `keyring.json` du dossier de configuration, les clés privées sont refusées et la clé de publication du projet ne peut pas être changée.
+
 ## Ce qu'il fait, étape par étape Les routes qui le soutiennent sont `/api/updates/status`, `/api/updates/progress`, `/api/updates/history`, `/api/updates/log` (les dernières lignes du journal du processus, valeurs après token ou secret masquées), `/api/updates/copies` (lecture seule) et `/api/updates/check`, `/api/updates/plan`, `/api/updates/apply`, `/api/updates/rollback`, `/api/updates/discard` (administrateur, depuis cet ordinateur seulement). La progression passe aussi en évènements envoyés par le serveur sur `/api/updates/stream` (la page l'utilise pendant une mise à jour et interroge toutes les secondes et demie si le navigateur ou la connexion ne le permettent pas).
 
 1. Détecte l'installation : dossier, version, édition (Complète ou Lite), configuration, données, ports, moniteur en marche ou non, conteneur ou service.
