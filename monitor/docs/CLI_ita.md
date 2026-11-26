@@ -42,6 +42,7 @@
 | `metrics` | le cifre come righe `nome=valore` per cron e la posta; con `--if-problem` non scrive nulla quando va tutto bene; vedi [CLI_OPERATOR.md](CLI_OPERATOR.md) | no |
 | `posture` | Postura di repository e organizzazione, sola lettura (`posture status|matrix|check --repo-name`); vedere [POSTURE.md](POSTURE_ita.md) | no |
 | `external-ci` | Fonti CI esterne, sola lettura (`external-ci list|status|probe --source`); vedere [EXTERNAL_CI.md](EXTERNAL_CI_ita.md) | no |
+| `plugin` | Plugin: `plugin list|validate|pack|verify|init|install|enable|disable|uninstall|audit`; vedi [PLUGINS.md](PLUGINS_ita.md) | no |
 
 Opzioni di tutti i comandi: `--json` (la risposta come un documento JSON: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (porta 8766), `--timeout SECONDI` (da 1 a 60), `--lang CODICE`. In modalità di rete metti il token di accesso nella variabile d'ambiente `MONITOR_ACCESS_TOKEN`, quella che legge il monitor stesso (`MONITOR_TOKEN` è accettata come alias; `--token TOKEN` è l'ultima risorsa, perché un'opzione compare nell'elenco dei processi). L'ordine: `MONITOR_ACCESS_TOKEN`, poi `MONITOR_TOKEN`, poi `--token`. Viaggia nell'intestazione `X-Monitor-Access`, mai nell'indirizzo e mai a schermo. Un `--url` in `http` non cifrato verso un altro computer stampa un avviso su stderr (il token e le risposte viaggerebbero in chiaro): usa `https` fuori da una rete che controlli.
 

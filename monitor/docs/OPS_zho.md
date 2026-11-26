@@ -72,6 +72,7 @@
 | `backup_age` | 最近一次有效备份与 `ops.doctor.backup_max_age_days` 对比 |
 | `disk` | 数据卷的可用空间与 `ops.doctor.min_free_mb` 对比 |
 | `metrics` | 当 Prometheus 输出开启且有监视器运行时，`/metrics` 有响应 |
+| `plugins` | 开启 `plugins.enabled` 时：不再通过检查（密钥吊销、文件变化）的已安装插件和已暂停插件 |
 
 **退出码（稳定，供 cron 使用）：** `0` 一切正常（没有 `--strict` 时，即使有警告也是 0）；`1` 至少一项检查失败；`3` 仅有警告且使用了 `--strict`（或 `ops.doctor.strict_exit`）；`4` doctor 本身无法运行。这些是 doctor 的退出码；`monitor_cli.py` 的其他命令保留各自的退出码。示例：`0 * * * * python3 bin/monitor_cli.py doctor --strict --json > /var/lib/github-actions-monitor/doctor.json || true`，并对非 0 的任何退出码发出告警。
 

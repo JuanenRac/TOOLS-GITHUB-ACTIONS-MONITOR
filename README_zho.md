@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6036_passing-brightgreen.svg" alt="6036 tests">
+  <img src="https://img.shields.io/badge/Tests-6062_passing-brightgreen.svg" alt="6062 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -98,8 +98,8 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 6036 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **设置** | 951 个设置,均有帮助 |
+| **测试** | 6062 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **设置** | 978 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
 
@@ -353,6 +353,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/QUOTAS_zho.md`](monitor/docs/QUOTAS_zho.md)：GitHub 的配额与套餐
 - [`monitor/docs/MODES_zho.md`](monitor/docs/MODES_zho.md)：工作模式：普通、快速和极速
 - [`monitor/docs/EXTERNAL_CI_zho.md`](monitor/docs/EXTERNAL_CI_zho.md): 外部 CI 来源(只读):Buildbot、GitLab CI、Jenkins、Azure Pipelines
+- [`monitor/docs/PLUGINS_zho.md`](monitor/docs/PLUGINS_zho.md): 插件（默认关闭）、软件包、隔离以及从密钥存储读取令牌
 - [`monitor/docs/POSTURE_zho.md`](monitor/docs/POSTURE_zho.md): 仓库与组织的安全态势(只读)
 - [`monitor/docs/AI_CONNECTION_zho.md`](monitor/docs/AI_CONNECTION_zho.md): 连接 AI 工具:监视器说的一切,以信号形式出现在简报、端点、MCP 工具和钩子中
 - [`monitor/docs/AI_SETUP_PROMPT_zho.md`](monitor/docs/AI_SETUP_PROMPT_zho.md): 用 AI 设置监视器:粘贴到你的 AI 助手中,它会安装监视器、询问你的需求并写好配置的提示词

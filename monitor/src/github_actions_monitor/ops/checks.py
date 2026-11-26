@@ -198,10 +198,22 @@ def capacity(config, folder=None, repos=-1):
     return status, f"{repos} repositories: {detail}"
 
 
+def plugins(config, folder=None):
+    """The installed plugins and what stopped them (monitor/docs/PLUGINS.md): a package that no longer passes its check is a warning, a paused one too. "off" while plugins.enabled is not on."""
+    block = config.get("plugins") if isinstance(config.get("plugins"), dict) else {}
+    if block.get("enabled") is not True:
+        return ("ok", "off")
+    from github_actions_monitor.plugins import plugin_host, plugin_package
+    rows = plugin_package.audit(plugin_host.user_keys())
+    bad = [f"{r['name']} {r['state']}" for r in rows if r["state"] != "ok"]
+    paused = [f"{name} paused" for name, row in sorted(plugin_host.load_state().items()) if row.get("paused")]
+    return ("warn", ", ".join((bad + paused)[:6])) if bad or paused else ("ok", f"{len(rows)} installed, {len(plugin_host.official())} official")
+
+
 def run_all(config, folder=None):
     """{id: (status, detail)} for the checks of ORDER_OPS. A check that cannot run answers warn, never raises: the doctor must always answer."""
     out = {}
-    for name, function in (("volumes", volumes), ("supervisor", supervisor), ("limits", limits), ("capacity", capacity), ("sqlite_hot", sqlite_hot), ("backup_age", backup_age), ("disk", disk), ("metrics", metrics)):
+    for name, function in (("volumes", volumes), ("supervisor", supervisor), ("limits", limits), ("capacity", capacity), ("sqlite_hot", sqlite_hot), ("backup_age", backup_age), ("disk", disk), ("metrics", metrics), ("plugins", plugins)):
         try:
             out[name] = function(config, folder)
         except Exception as error:   # noqa: BLE001 - one check that breaks must not hide the others

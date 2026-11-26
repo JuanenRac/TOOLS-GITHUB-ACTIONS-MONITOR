@@ -72,6 +72,7 @@ A purga de retenção corre sozinha a cada `retention.interval_hours`. Para a ex
 | `backup_age` | a última cópia boa face a `ops.doctor.backup_max_age_days` |
 | `disk` | espaço livre do volume de dados face a `ops.doctor.min_free_mb` |
 | `metrics` | `/metrics` responde quando a saída Prometheus está ligada e há um monitor em execução |
+| `plugins` | com `plugins.enabled`: plugins instalados que já não passam a verificação (chave revogada, ficheiro alterado) e os pausados |
 
 **Códigos de saída (estáveis, para cron):** `0` tudo bem (também com avisos, sem `--strict`); `1` falhou pelo menos uma verificação; `3` só avisos e `--strict` (ou `ops.doctor.strict_exit`); `4` o próprio doctor não conseguiu executar-se. São os códigos do doctor; os outros comandos de `monitor_cli.py` mantêm os seus. Exemplo: `0 * * * * python3 bin/monitor_cli.py doctor --strict --json > /var/lib/github-actions-monitor/doctor.json || true` e alerte para qualquer código diferente de 0.
 

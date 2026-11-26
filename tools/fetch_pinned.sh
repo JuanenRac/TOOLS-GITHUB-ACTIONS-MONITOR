@@ -2,7 +2,7 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
 # Downloads one tool of a release of another project and stops unless its SHA-256 is the pinned one. Used by the workflows (only actions of GitHub itself are allowed, so no third-party action installs them).
-#   sh tools/fetch_pinned.sh cosign|osv-scanner|scorecard DIRECTORY
+#   sh tools/fetch_pinned.sh cosign|osv-scanner|scorecard|vault DIRECTORY
 set -eu
 tool="$1"
 dest="$2"
@@ -20,6 +20,10 @@ case "$tool" in
     url="https://github.com/ossf/scorecard/releases/download/v5.7.0/scorecard_5.7.0_linux_amd64.tar.gz"
     sha="3b08ec0a8681806c3e744ec9210742a502c7d66f06f25523b70f7128738235d3"
     ;;
+  vault)
+    url="https://releases.hashicorp.com/vault/1.20.4/vault_1.20.4_linux_amd64.zip"
+    sha="fc5fb5d01d192f1216b139fb5c6af17e3af742aaeffc289fd861920ec55f2c9c"
+    ;;
   *)
     echo "unknown tool: $tool" >&2
     exit 2
@@ -30,6 +34,7 @@ curl -fsSL --retry 3 -o "$file" "$url"
 echo "$sha  $file" | sha256sum -c -
 case "$url" in
   *.tar.gz) tar -xzf "$file" -C "$dest" "$tool" && rm -f "$file" ;;
+  *.zip) unzip -q -o "$file" "$tool" -d "$dest" && rm -f "$file" ;;
   *) mv "$file" "$dest/$tool" ;;
 esac
 chmod +x "$dest/$tool"

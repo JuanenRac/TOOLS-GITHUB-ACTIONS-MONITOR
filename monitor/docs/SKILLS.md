@@ -42,3 +42,16 @@ In the Settings, AI tab, the block **Skills for AIs** has Copy (the core of the 
 ## Settings
 
 `ai.skill` (on) and `ai.skill_max_chars` (3000; 1500 for a small local model). Registering failures from outside is `POST /api/ai/failures` and needs `lessons.allow_write` and an administrator, like writing a lesson.
+
+## Publishing to a skill registry
+
+`python tools/prepare_skill_bundle.py --out DIR` makes the folder of the external skill ready to publish (SKILL.md, references, `bundle.json` with the version of the monitor and the licence, `SHA256SUMS`); the same sources give the same bytes. It publishes nothing: uploading it to ClawHub is done by hand, with the account of the maintainer, after reading the terms of the registry.
+
+## Assistants
+
+Only what was really tried is called tested.
+
+| Assistant or way | Command line | HTTP and files | MCP |
+|---|---|---|---|
+| A coding assistant in a terminal | tested | tested | compatible by protocol, not tested |
+| Other assistants | compatible by protocol, not tested | compatible by protocol, not tested | compatible by protocol, not tested |
