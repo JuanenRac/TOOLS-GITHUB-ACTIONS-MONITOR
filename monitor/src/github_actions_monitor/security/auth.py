@@ -150,6 +150,10 @@ def required_role(method, path):
     path = api_v1.route_of(path)[1]
     if path in PUBLIC:
         return None
+    from github_actions_monitor import families
+    declared = families.role_for(method, path)
+    if declared:
+        return declared
     if method in ("GET", "HEAD"):
         return "admin" if path in ADMIN_GET else ("maintainer" if path in MAINTAINER_GET else "viewer")
     if path in VIEWER_POST:
