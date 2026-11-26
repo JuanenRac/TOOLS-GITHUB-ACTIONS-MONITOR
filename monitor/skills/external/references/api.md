@@ -110,6 +110,11 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/pair/start` | POST | admin | open a one-use pairing code and answer its address and QR code (this computer only; needs `pairing.enabled` and the network mode) |
 | `/api/pair/status` | GET | viewer | the same answer as /api/devices (this computer only) |
 | `/api/paths` | GET | viewer | the folders and files of this monitor in use and what is left in the old places |
+| `/api/plugins/catalog` | GET | admin | the plugins that exist here: permissions, key, fingerprint, state and what is isolated |
+| `/api/plugins/enable` | POST | admin | switch an installed plugin of another person on or off, or resume a paused one; body {name, enabled} |
+| `/api/plugins/inspect` | POST | admin | what a package on this computer declares and who signed it, nothing is installed; body {path} |
+| `/api/plugins/install` | POST | admin | install a signed package after confirming the fingerprint of its key; it arrives switched off; body {path, fingerprint} |
+| `/api/plugins/uninstall` | POST | admin | remove an installed plugin; body {name} |
 | `/api/quota` | GET | viewer | plan, billable minutes, allowance of the API, concurrency, long jobs |
 | `/api/quota-pool/status` | GET | viewer | every read source with its allowance, the sum, and what each way of reading less has spared (this computer only) |
 | `/api/refresh-repos` | POST | maintainer | read the list of repositories again |

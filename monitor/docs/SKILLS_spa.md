@@ -42,3 +42,16 @@ En Ajustes, pestaña IA, el bloque **Skills para IAs** tiene Copiar (el núcleo 
 ## Ajustes
 
 `ai.skill` (activado) y `ai.skill_max_chars` (3000; 1500 para un modelo local pequeño). Registrar fallos desde fuera es `POST /api/ai/failures` y exige `lessons.allow_write` y un administrador, como escribir una lección.
+
+## Publicar en un registro de skills
+
+`python tools/prepare_skill_bundle.py --out DIR` deja la carpeta de la skill externa lista para publicar (SKILL.md, referencias, `bundle.json` con la versión del monitor y la licencia, `SHA256SUMS`); las mismas fuentes dan los mismos bytes. No publica nada: subirla a ClawHub se hace a mano, con la cuenta del responsable y tras leer las condiciones del registro.
+
+## Asistentes
+
+Solo se llama probado a lo que de verdad se probó.
+
+| Asistente o camino | Línea de órdenes | HTTP y ficheros | MCP |
+|---|---|---|---|
+| Claude Code | probado | probado | compatible por protocolo, no probado |
+| Otros asistentes | compatible por protocolo, no probado | compatible por protocolo, no probado | compatible por protocolo, no probado |

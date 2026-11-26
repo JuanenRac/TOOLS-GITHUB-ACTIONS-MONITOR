@@ -42,3 +42,16 @@ In den Einstellungen, Reiter KI, hat der Block **Skills für KIs** je Skill Kopi
 ## Einstellungen
 
 `ai.skill` (an) und `ai.skill_max_chars` (3000; 1500 für ein kleines lokales Modell). Fehler von außen zu registrieren geht mit `POST /api/ai/failures` und braucht `lessons.allow_write` und einen Administrator, wie das Schreiben einer Lehre.
+
+## Veröffentlichung in einem Skill-Verzeichnis
+
+`python tools/prepare_skill_bundle.py --out DIR` bereitet den Ordner des externen Skills zur Veröffentlichung vor (SKILL.md, Referenzen, `bundle.json` mit Monitor-Version und Lizenz, `SHA256SUMS`); gleiche Quellen ergeben gleiche Bytes. Es veröffentlicht nichts: das Hochladen zu ClawHub erfolgt von Hand mit dem Konto des Betreuers, nach Lesen der Bedingungen.
+
+## Assistenten
+
+Als getestet gilt nur, was wirklich ausprobiert wurde.
+
+| Assistent oder Weg | Kommandozeile | HTTP und Dateien | MCP |
+|---|---|---|---|
+| Claude Code | getestet | getestet | protokollkompatibel, nicht getestet |
+| Andere Assistenten | protokollkompatibel, nicht getestet | protokollkompatibel, nicht getestet | protokollkompatibel, nicht getestet |

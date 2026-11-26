@@ -64,7 +64,7 @@ class History(unittest.TestCase):
             self.assertTrue(re.search(r"^\s*(- |\||\S)", body.strip() or " ", re.M) and body.strip(), version)
             if version_key(version) >= GROUPED_SINCE:
                 heads = re.findall(r"^### (\w+)", body, re.M)
-                self.assertTrue(heads and set(heads) <= {"Added", "Changed", "Fixed", "Security", "Removed", "Deprecated"}, (version, heads))
+                self.assertTrue(heads and set(heads) <= {"Added", "Changed", "Fixed", "Security", "Removed", "Deprecated", "Plugins"}, (version, heads))      # "Plugins": what changes in the extensions, apart from the monitor itself
 
     def test_the_whole_history_is_in_english(self):
         letters = [line[:80] for line in TEXT.split("\n") if re.search("[áéíóúñ¿¡«»぀-ヿ一-鿿]", line)]

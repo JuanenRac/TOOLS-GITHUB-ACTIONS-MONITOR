@@ -41,6 +41,7 @@
 | `kiosk` | l'adresse du moniteur pour une télévision ou un mur (`ops`, `team`, `release`, `quiet`) ; voir [KIOSK_fra.md](KIOSK_fra.md) | non |
 | `metrics` | les chiffres en lignes `nom=valeur` pour cron et le courrier ; avec `--if-problem` il n'écrit rien quand tout va bien ; voir [CLI_OPERATOR.md](CLI_OPERATOR.md) | non |
 | `external-ci` | Sources CI externes, lecture seule (`external-ci list|status|probe --source`) ; voir [EXTERNAL_CI.md](EXTERNAL_CI_fra.md) | non |
+| `plugin` | Greffons : `plugin list|validate|pack|verify|init|install|enable|disable|uninstall|audit` ; voir [PLUGINS.md](PLUGINS_fra.md) | non |
 
 Options de toutes les commandes : `--json` (la réponse comme un document JSON : `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (port 8766), `--timeout SECONDES` (1 à 60), `--lang CODE`. En mode réseau, mettez le jeton d'accès dans la variable d'environnement `MONITOR_ACCESS_TOKEN`, celle que lit le moniteur lui-même (`MONITOR_TOKEN` est accepté comme alias ; `--token JETON` est le dernier recours, car une option apparaît dans la liste des processus). L'ordre : `MONITOR_ACCESS_TOKEN`, puis `MONITOR_TOKEN`, puis `--token`. Il voyage dans l'en-tête `X-Monitor-Access`, jamais dans l'adresse ni à l'écran. Un `--url` en `http` non chiffré vers un autre ordinateur affiche un avertissement sur stderr (le jeton et les réponses circuleraient en clair) : utilisez `https` hors d'un réseau que vous contrôlez.
 

@@ -70,14 +70,17 @@ def fetch(folder, source=None, version=TOOL_VERSION):
     if updater is None:
         raise ValueError("no_updater")
     source = source or updater.GitHubSource()
-    release = next((r for r in source.releases() if r["version"] == version), None)
-    if release is None:
-        raise ValueError("no_release")
-    assets, count = release.get("assets") or {}, 0
-    for name in ("SHA256SUMS", "SHA256SUMS.ed25519.sig", ZIP_NAME, SPDX_NAME, "github_actions_monitor.cdx.json", "monitor_updater.py"):
-        if name in assets:
-            source._download(assets[name]["url"], Path(folder) / name, 300 * 1024 * 1024)      # noqa: SLF001 - the checked downloader of the updater (hosts, redirects, size)
-            count += 1
+    try:      # the updater says "no connection" or "download not allowed" with its own error: the caller of this function only knows ValueError and OSError
+        release = next((r for r in source.releases() if r["version"] == version), None)
+        if release is None:
+            raise ValueError("no_release")
+        assets, count = release.get("assets") or {}, 0
+        for name in ("SHA256SUMS", "SHA256SUMS.ed25519.sig", ZIP_NAME, SPDX_NAME, "github_actions_monitor.cdx.json", "monitor_updater.py"):
+            if name in assets:
+                source._download(assets[name]["url"], Path(folder) / name, 300 * 1024 * 1024)      # noqa: SLF001 - the checked downloader of the updater (hosts, redirects, size)
+                count += 1
+    except updater.UpdaterError as error:
+        raise ValueError(str(error)[:100]) from None
     if not count:
         raise ValueError("no_release")
     return count

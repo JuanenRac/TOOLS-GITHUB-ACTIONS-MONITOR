@@ -7,7 +7,7 @@
 
 Generated from the code. It reads what the running monitor says (and never writes to GitHub). `--json` prints one JSON document; the exit codes are stable.
 
-Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `briefs`, `api`, `install-skill`, `gh-token`, `ai`, `backup`, `update`, `compare`, `screens`, `docs`, `toolbox`, `watch`, `monitor`, `completions`, `kiosk`, `metrics`, `proposals`, `keyring`, `verify-release`, `external-ci`.
+Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `briefs`, `api`, `install-skill`, `gh-token`, `ai`, `backup`, `update`, `compare`, `screens`, `docs`, `toolbox`, `watch`, `monitor`, `completions`, `kiosk`, `metrics`, `proposals`, `keyring`, `verify-release`, `plugin`, `external-ci`.
 
 | flag | what |
 | --- | --- |
@@ -76,6 +76,11 @@ Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `
 | `--attestations` | also ask GitHub for the attestation of the zip (needs gh and the network) |
 | `--fetch` | download the files of the installed version (needs ops.verify_release.fetch) |
 | `--verify-release` | with doctor: check a folder of release files and this installation |
+| `--path` | plugin: folder or package |
+| `--name` | plugin: name of an installed plugin |
+| `--fingerprint` | plugin install: fingerprint of the key, to confirm |
+| `--keyring` | plugin: another keyring file |
+| `--out` | plugin pack: file to write |
 | `--source` | The source line to try (external-ci probe). |
 
 Other entry points: `bin/mcp_server.py` (MCP over standard input and output; `--allow-ack`, `--allow-lessons`), `bin/ai_hook.py` (gate script of an AI tool), `bin/read_report.py`, `bin/actions_monitor.py --doctor`.

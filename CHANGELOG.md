@@ -6,7 +6,7 @@
 
 # Changelog
 
-The history of GitHub Actions Monitor, from the first version to the latest. Each version groups its changes under Added, Changed, Fixed and Security.
+The history of GitHub Actions Monitor, from the first version to the latest. Each version groups its changes under Added, Changed, Fixed and Security; what concerns the extensions goes under Plugins.
 
 ## [Unreleased]
 
@@ -25,6 +25,12 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 ### Changed
 
 - **The stand-alone updater published with a release now carries the registry of migrations inside**, and SHA256SUMS names it together with the zip and the two bills of materials.
+
+### Plugins
+
+- **Plugins, off by default** (Complete): official ones for unanswered discussions and package retention; plugins of other people only as packages signed by a key of your keyring, in a separate process without the token, with the label "no network isolation" where the network cannot be cut off. Untrusted output is cleaned, a failing plugin is paused, and there are a catalogue in Settings, the command `plugin`, a doctor check, a template for authors and a versioned contract (`api_compat` 1).
+- **The GitHub token can be read from Vault, SOPS, Bitwarden Secrets Manager or the secret manager of AWS, Azure or Google** (read only, `secrets.backend`).
+- **The external skill can be packaged for a skill registry** (`tools/prepare_skill_bundle.py`, publishes nothing).
 
 ## [2.1.8]
 

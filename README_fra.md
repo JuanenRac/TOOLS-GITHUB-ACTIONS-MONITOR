@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6015_passing-brightgreen.svg" alt="6015 tests">
+  <img src="https://img.shields.io/badge/Tests-6041_passing-brightgreen.svg" alt="6041 tests">
 </p>
 
 > Surveille les workflows de tous vos dépôts et vous dit, sur une page locale, ce qui est rouge, ce qui est bloqué et ce qui vous attend.
@@ -98,8 +98,8 @@ Méthode, hypothèses et comment le mesurer dans votre propre usage: [`monitor/d
 | | |
 |---|---|
 | **Maturité** | functional |
-| **Tests** | 6015 méthodes de test (`python -m unittest discover -s monitor/tests`) |
-| **Réglages** | 934 réglages, tous avec aide |
+| **Tests** | 6041 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Réglages** | 961 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -353,6 +353,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/QUOTAS_fra.md`](monitor/docs/QUOTAS_fra.md) : quotas et offres de GitHub
 - [`monitor/docs/MODES_fra.md`](monitor/docs/MODES_fra.md) : modes de travail : normal, rapide et turbo
 - [`monitor/docs/EXTERNAL_CI_fra.md`](monitor/docs/EXTERNAL_CI_fra.md): Sources CI externes, lecture seule : Buildbot, GitLab CI, Jenkins, Azure Pipelines
+- [`monitor/docs/PLUGINS_fra.md`](monitor/docs/PLUGINS_fra.md): Greffons (désactivés par défaut), leurs paquets, l'isolation et la lecture du jeton dans un coffre
 - [`monitor/docs/AI_CONNECTION_fra.md`](monitor/docs/AI_CONNECTION_fra.md): Connecter un outil d'IA : tout ce que dit le moniteur, en signaux, dans le résumé, le point d'accès, les outils MCP et le hook
 - [`monitor/docs/AI_SETUP_PROMPT_fra.md`](monitor/docs/AI_SETUP_PROMPT_fra.md): Configurer le moniteur avec une IA : un prompt à coller dans votre assistant IA qui l'installe, vous demande ce que vous voulez et écrit la configuration
 - [`monitor/docs/QUOTA_fra.md`](monitor/docs/QUOTA_fra.md): Plus de quota, moins de dépense : mode économe, le panneau central, une GitHub App et comment partager le quota

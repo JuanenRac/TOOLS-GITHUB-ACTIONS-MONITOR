@@ -12,6 +12,7 @@ at once when that value changes (a new comment, a push), or at the usual end of 
 import json
 import os
 import threading
+import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -241,6 +242,12 @@ def collect(registry, now=None, extra=()):
             alerts = list(registry.alerts())
         except Exception:       # noqa: BLE001 - the list is for reading; one broken sentinel must not blank the tab
             alerts, complete = [], False
+    plugins = sys.modules.get("github_actions_monitor.plugins.plugin_host")      # only once the plugins have run (never in the lite edition, never while they are off)
+    if plugins is not None:
+        try:
+            alerts = plugins.alerts() + alerts
+        except Exception:       # noqa: BLE001 - what a plugin says never costs the list
+            complete = False
     alerts = list(extra or ()) + alerts
     for alert in alerts:
         if isinstance(alert, dict) and alert.get("id"):

@@ -42,3 +42,16 @@ python bin/monitor_cli.py install-skill external --dest /path/to/the/skills/fold
 ## 设置
 
 `ai.skill`(开启)和 `ai.skill_max_chars`(3000；小型本地模型用 1500)。从外部登记失败记录用 `POST /api/ai/failures`，需要 `lessons.allow_write` 和管理员，与写入经验相同。
+
+## 发布到技能仓库
+
+`python tools/prepare_skill_bundle.py --out DIR` 生成可发布的外部技能文件夹（SKILL.md、参考资料、记录监视器版本与许可证的 `bundle.json`、`SHA256SUMS`）；相同来源得到相同字节。它不发布任何内容：上传到 ClawHub 需维护者阅读条款后用自己的账户手动完成。
+
+## 助手
+
+只有实际试过的才标为已测试。
+
+| 助手或方式 | 命令行 | HTTP 与文件 | MCP |
+|---|---|---|---|
+| Claude Code | 已测试 | 已测试 | 协议兼容，未测试 |
+| 其他助手 | 协议兼容，未测试 | 协议兼容，未测试 | 协议兼容，未测试 |

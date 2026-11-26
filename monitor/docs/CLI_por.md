@@ -41,6 +41,7 @@
 | `kiosk` | o endereço do monitor para uma TV ou uma parede (`ops`, `team`, `release`, `quiet`); veja [KIOSK_por.md](KIOSK_por.md) | não |
 | `metrics` | os números como linhas `nome=valor` para o cron e o correio; com `--if-problem` não escreve nada quando tudo está bem; veja [CLI_OPERATOR.md](CLI_OPERATOR.md) | não |
 | `external-ci` | Fontes de CI externas, só de leitura (`external-ci list|status|probe --source`); ver [EXTERNAL_CI.md](EXTERNAL_CI_por.md) | não |
+| `plugin` | Plugins: `plugin list|validate|pack|verify|init|install|enable|disable|uninstall|audit`; ver [PLUGINS.md](PLUGINS_por.md) | não |
 
 Opções de todos os comandos: `--json` (a resposta como um documento JSON: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (porta 8766), `--timeout SEGUNDOS` (de 1 a 60), `--lang CÓDIGO`. No modo de rede ponha o token de acesso na variável de ambiente `MONITOR_ACCESS_TOKEN`, a que o próprio monitor lê (`MONITOR_TOKEN` é aceite como alias; `--token TOKEN` é o último recurso, porque uma opção aparece na lista de processos). A ordem: `MONITOR_ACCESS_TOKEN`, depois `MONITOR_TOKEN`, depois `--token`. Viaja no cabeçalho `X-Monitor-Access`, nunca no endereço nem no ecrã. Um `--url` com `http` sem cifra para outro computador imprime um aviso no stderr (o token e as respostas viajariam em claro): use `https` fora de uma rede que controle.
 
