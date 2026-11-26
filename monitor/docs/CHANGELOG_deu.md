@@ -11,6 +11,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Hinzugefügt
 
+- **Ein Repository ist (Quelle, Eigentümer, Name)**: zwei gleichnamige Repositorys aus zwei Orten teilen keine Kennungen, Läufe oder Warnungen mehr, und gespeicherte Daten folgen dem beobachteten Eigentümer (vorher Kopie, Befehl `identity`, `sources.multi_owner` aus). Die externen CI-Quellen erhalten außerdem eine Doctor-Prüfung, eine Karte in Über und eine feste Route unter `/api/v1/`.
 - Prüfungen der Sicherheitslage, nur lesend und standardmäßig aus: Webhooks, Actions-Einstellungen, Scans, Schutz von Branches und Release-Branches, Deploy-Schlüssel, Alter von Secrets, Apps, Audit-Log der Organisation, Härtung der ausgeführten Läufe und geänderte Releases, jeweils mit OWASP-CI/CD- und CIS-Bezug. Verweigertes erscheint als nicht geprüft. Reife je Repository, Verlauf und `posture` in der Befehlszeile.
 - **Ein Fenster kündigt eine neuere Version an**: mit der Zusammenfassung der Änderungen in Ihrer Sprache, einer Schaltfläche zur Seite Updates, „Später“ und „Diese Version nicht mehr melden“; standardmäßig ein und auf Wand- und Kioskbildschirmen stumm.
 - **Neue Befehle**: zur netzlosen Prüfung eines heruntergeladenen Releases und zur Verwaltung der öffentlichen Schlüssel.

@@ -36,6 +36,9 @@ def allowed_key(family, key):
     exact = {f"cfg.{kind}.{k}" for k in keys for kind in "fht"} | {f"ui.cfg_b_{s.block}" for s in family.settings} | {f"ui.cfg_g_{tab}" for tab, _after in family.settings_tabs}
     exact |= {f"egress.{kind}.{row.id}" for row in family.egress for kind in ("use", "fail")}
     exact |= {x for s in family.settings for x in (s.label or []) + ([s.help] if s.help else [])}
+    exact |= {f"doctor.{kind}.{row.id}" for row in family.checks for kind in "tf"}
+    if key.startswith(f"ui.cfg_err_{family.name}_"):
+        return True
     return key in exact or re.match(rf"^[a-z]+\.{family.name}[._]", key) is not None
 
 

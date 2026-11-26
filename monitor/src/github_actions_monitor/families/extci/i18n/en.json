@@ -66,5 +66,19 @@
  "cli.extci.need_source": "probe needs --source LINE",
  "cli.extci.seen": "Read: {workflows} workflows, {builds} builds, {red} red.",
  "cli.extci.failed": "It could not be read: {reason}",
- "cli.extci.none": "No external CI source is configured."
+ "cli.extci.none": "No external CI source is configured.",
+ "cfg.f.sources.multi_owner": "Accounts of more than one owner",
+ "cfg.h.sources.multi_owner": "Lets one installation register accounts of different owners. The identity of every repository (source, owner, name) is always kept.",
+ "cfg.t.sources.multi_owner": "several owners",
+ "ui.cfg_b_sources": "Repository identity",
+ "ui.cfg_err_extci_owner": "another account of this installation belongs to a different owner (turn on sources.multi_owner)",
+ "cli.extci.help_identity": "repository identity: show, plan (changes nothing) or apply the migration of the saved data",
+ "cli.extci.identity_owner": "Owner of the saved data: {was}; owner watched: {owner}",
+ "cli.extci.identity_done": "Done. Copy of what changed: {backup}",
+ "cli.extci.identity_nothing": "Nothing to migrate.",
+ "doctor.t.extci": "External CI sources",
+ "doctor.f.extci": "A source cannot be read or its line is not understood: run the command below.",
+ "doctor.t.extci_identity": "Repository identity",
+ "doctor.f.extci_identity": "Accounts of several owners need sources.multi_owner, or the saved data belongs to another owner: look at the plan.",
+ "ui.extci.last_ok": "last read {at}"
 }

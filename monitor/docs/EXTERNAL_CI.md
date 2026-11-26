@@ -39,3 +39,9 @@ Settings > External CI has **Test connection**: one read, nothing saved (`POST /
 ## Not yet verified
 
 All four adapters have been tested against fake servers only (`tools/extci_fake_servers.py`). Jenkins and Azure Pipelines carry the label **experimental** (`external_ci.experimental`) and need `external_ci.jenkins.enabled` / `external_ci.azure.enabled`. To write another adapter: a function `(reader, source, cfg) -> (runs, missing)` in `integrations/external_ci/extci_adapters.py`, reading only through `reader`.
+
+## Identity of a repository, several owners
+
+Inside the monitor a repository is (source, owner, name), written `repo_key` (`github:owner/name`, `gitlab@host:group/name`); the routes keep naming it by its name. Two repositories with one name from two places never share ids, runs or alerts: when two servers of one kind mirror the same name, the host is added to their label. The monitor records which owner its saved data belongs to. After the owner changes, the silences and alert ledger of repositories and the last state of the event feed are set aside (kept, not deleted), after a copy of each file in `identity_backup/`. It happens after a cycle; `identity plan` shows it without changing anything, `identity apply` does it now and `identity status` shows the record. `sources.multi_owner` (off) lets an installation register accounts of different owners; installations that already have several keep working and the doctor says so. `doctor` also reads each external source once.
+
+Command line: `identity status`, `identity plan`, `identity apply`.

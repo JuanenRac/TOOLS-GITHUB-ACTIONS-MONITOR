@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.2.0",
  "previous": "2.1.8",
- "digest": "fca4ed9b6444d6af6981f97a7dca75924ec9cced9425ec9f68d06e75b9a2cda4",
+ "digest": "56c1d100315c691e73dfedcdedea42342ed5824bf03d9540b6ad064544969143",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -485,6 +485,11 @@
      "re": "^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|PATHEXT|COMSPEC|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|SSH_AUTH_SOCK|MONITOR_SUPERVISOR_KEY|MONITOR_ACCESS_TOKEN|MONITOR_WEBHOOK_SECRET|MONITOR_SLACK_SIGNING_SECRET|MONITOR_DISCORD_PUBLIC_KEY|MONITOR_HEARTBEAT_URL)\\Z)(?:[A-Z_][A-Z0-9_]{0,63})?\\Z"
     },
     "default": "VAULT_TOKEN"
+   },
+   {
+    "key": "sources.multi_owner",
+    "kind": "bool",
+    "default": false
    },
    {
     "key": "updates.notify_window",

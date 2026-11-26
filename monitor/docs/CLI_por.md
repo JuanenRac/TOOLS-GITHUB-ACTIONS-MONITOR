@@ -100,3 +100,11 @@ No modo de rede o token é lido de `MONITOR_ACCESS_TOKEN`, depois de `MONITOR_TO
 ## Cópia de segurança e o doctor
 
 `backup` e `doctor` trabalham sobre as pastas da instalação, por isso não precisam de um monitor em execução. `doctor` sai com `0` quando tudo está bem (também com avisos), `1` quando uma verificação falhou, `3` quando só há avisos e `--strict` (ou `ops.doctor.strict_exit`) está ativo, e `4` quando o próprio doctor não conseguiu executar-se; são os códigos do doctor, os outros comandos mantêm os códigos de saída acima. `backup` sai com `0` quando termina e `1` quando é recusado ou o pacote não passa a verificação. O guia [OPS_por.md](OPS_por.md) tem as verificações, o restauro e a cópia agendada. O doctor tem ainda `compare_window` (a comparação de dois períodos consegue olhar para trás duas janelas com o histórico que pede e guarda) e `etag` (a parte das leituras condicionais respondidas com 304 no monitor que corre aqui, e se as respostas do GitHub chegam sem ETag).
+
+## Identidade de um repositório, vários proprietários
+
+Linha de comandos: `identity status`, `identity plan`, `identity apply`.
+
+```
+python bin/monitor_cli.py identity plan
+```

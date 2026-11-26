@@ -60,6 +60,17 @@
     wrap.append(el("p",T("ui.extci.test_label")),input," ",button,out);
     host.append(wrap);
   }
+  async function about(body){
+    let j;
+    try{j=await (await fetch("/api/external-ci/status")).json()}catch(e){return}
+    if(!j.ok||!j.enabled||document.getElementById("extci-about"))return;
+    const card=el("section");card.id="extci-about";card.append(el("h3",T("ui.extci.title")));
+    if(!j.sources.length)card.append(el("p",T("ui.extci.none")));
+    const list=el("ul");
+    j.sources.forEach(s=>list.append(el("li",s.repo+" - "+s.kind+": "+T("ui.extci.state_"+s.state)+(s.reason?" ("+s.reason+")":"")+(s.last_ok?" - "+T("ui.extci.last_ok",{at:s.last_ok}):""))));
+    card.append(list);body.append(card);
+  }
+  FAM.on("about",about);
   FAM.on("tab",tab=>{if(tab==="sci"){at=0;draw()}});
   FAM.on("data",()=>{if(CURTAB==="sci")draw()});
   FAM.on("settings",tester);

@@ -926,6 +926,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sound.tick_seconds` | `1` | general | Seconds between ticks |
 | `sound.voices` | `""` | general | Sound of each kind of event |
 | `sound.volume` | `40` | general | Volume of the page |
+| `sources.multi_owner` (secure) | `false` | extci | Accounts of more than one owner |
 | `startup.resume_max_age_hours` | `12` | basic | Show the last picture after a restart (hours) |
 | `stuck_minutes` | `120` | polling | A build is stuck after |
 | `targets_file` | `-` | paths | Build targets file |

@@ -66,5 +66,19 @@
  "cli.extci.need_source": "probe nécessite --source LIGNE",
  "cli.extci.seen": "Lu : {workflows} flux, {builds} builds, {red} en rouge.",
  "cli.extci.failed": "Lecture impossible : {reason}",
- "cli.extci.none": "Aucune source CI externe configurée."
+ "cli.extci.none": "Aucune source CI externe configurée.",
+ "cfg.f.sources.multi_owner": "Comptes de plusieurs propriétaires",
+ "cfg.h.sources.multi_owner": "Permet à une installation d'enregistrer des comptes de propriétaires différents. L'identité de chaque dépôt (source, propriétaire, nom) est toujours conservée.",
+ "cfg.t.sources.multi_owner": "plusieurs propriétaires",
+ "ui.cfg_b_sources": "Identité des dépôts",
+ "ui.cfg_err_extci_owner": "un autre compte de cette installation appartient à un propriétaire différent (activez sources.multi_owner)",
+ "cli.extci.help_identity": "identité des dépôts : afficher, planifier (ne change rien) ou appliquer la migration des données enregistrées",
+ "cli.extci.identity_owner": "Propriétaire des données enregistrées : {was} ; propriétaire surveillé : {owner}",
+ "cli.extci.identity_done": "Fait. Copie de ce qui a changé : {backup}",
+ "cli.extci.identity_nothing": "Rien à migrer.",
+ "doctor.t.extci": "Sources de CI externes",
+ "doctor.f.extci": "Une source ne peut pas être lue ou sa ligne n'est pas comprise : lancez la commande ci-dessous.",
+ "doctor.t.extci_identity": "Identité des dépôts",
+ "doctor.f.extci_identity": "Les comptes de plusieurs propriétaires exigent sources.multi_owner, ou les données enregistrées appartiennent à un autre propriétaire : regardez le plan.",
+ "ui.extci.last_ok": "dernière lecture {at}"
 }
