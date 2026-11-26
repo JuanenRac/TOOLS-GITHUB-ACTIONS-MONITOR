@@ -12,6 +12,16 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 ### Ajouté
 
 - Sources CI externes, lecture seule et désactivées par défaut : Buildbot, GitLab CI, Jenkins et Azure Pipelines (les deux derniers expérimentaux) pour les dépôts miroirs. Leurs échecs sont comptés, notifiés et mis en sourdine comme ceux d'Actions ; un service muet est dégradé, jamais rouge. Lectures sûres, fin de journal facultative, limitée et expurgée, test de connexion et `external-ci` en ligne de commande.
+- **Les versions sont signées et le programme de mise à jour vérifie la signature** : à partir de la 2.2.0, une version porte une signature Ed25519 détachée de SHA256SUMS et de chaque fichier, faite sur GitHub par le workflow de publication. Le programme de mise à jour (page, fenêtre, console et ligne de commande) refuse une version à partir de la 2.2.0 sans signature ou mal signée, ainsi qu'un zip signé proposé sous une autre version, avant toute décompression ; revenir à une ancienne version non signée est permis avec un avertissement.
+- **Deux nomenclatures et des attestations à chaque version** : des documents CycloneDX et SPDX listent chaque fichier du zip et les bibliothèques facultatives, et le workflow atteste la provenance des fichiers, la nomenclature et le procès-verbal du contrôle qualité.
+- **Le contrôle qualité peut s'exécuter sur GitHub** : un workflow exécute tout le contrôle sur un runner Windows, vérifie qu'une seconde construction donne les mêmes octets et garde la trace de ce qui a tourné ; l'exécuter sur son ordinateur reste possible et facultatif.
+- **Un trousseau de clés publiques et la vérification d'une version téléchargée** : un seul endroit pour les clés autorisées à signer (une valeur privée est refusée) et la vérification sans réseau d'un dossier de fichiers de version. Leurs commandes de console arrivent séparément.
+- **Les notes d'une version peuvent porter un court résumé dans les huit langues**, lu par la vérification des mises à jour avec la même requête ; elle mémorise aussi une version écartée. La fenêtre qui l'affiche arrive séparément.
+- **Contrôles du dépôt** : revue des dépendances ajoutées par une demande de tirage et analyse CodeQL du code.
+
+### Modifié
+
+- **Le programme de mise à jour autonome publié avec une version contient désormais le registre des migrations**, et SHA256SUMS le nomme avec le zip et les deux nomenclatures.
 
 ## [2.1.8]
 
