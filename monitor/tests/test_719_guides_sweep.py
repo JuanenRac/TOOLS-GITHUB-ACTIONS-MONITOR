@@ -15,6 +15,7 @@ HERE = Path(__file__).resolve().parent.parent
 DOCS = HERE / "docs"
 # dotted names in the guides that are not settings of the page: a key of the data, a name of a mode, a setting that lives only in the configuration file or of another tool
 NOT_SETTINGS = {
+    "repos.list": "a permission of a plugin (PLUGINS.md)",
     "ai_alerts.transient_patterns": "only in the file",
     "ci.copilot_activity": "an alert code",
     "ci.dependabot_failed": "an alert code",

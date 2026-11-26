@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.2.0",
  "previous": "2.1.8",
- "digest": "2850c66351ccc47183e77dc902645372fdd2bc1d1232c2e0b6f69111caa337fb",
+ "digest": "fca4ed9b6444d6af6981f97a7dca75924ec9cced9425ec9f68d06e75b9a2cda4",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -147,6 +147,130 @@
     "default": false
    },
    {
+    "key": "plugins.alert_title_max",
+    "kind": "int",
+    "bounds": [
+     40,
+     400
+    ],
+    "default": 120
+   },
+   {
+    "key": "plugins.breaker.failures",
+    "kind": "int",
+    "bounds": [
+     1,
+     50
+    ],
+    "default": 3
+   },
+   {
+    "key": "plugins.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "plugins.entry_points",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "plugins.official.discussions.days",
+    "kind": "int",
+    "bounds": [
+     1,
+     365
+    ],
+    "default": 7
+   },
+   {
+    "key": "plugins.official.discussions.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "plugins.official.packages.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "plugins.official.packages.max_versions",
+    "kind": "int",
+    "bounds": [
+     1,
+     10000
+    ],
+    "default": 50
+   },
+   {
+    "key": "plugins.official.packages.types",
+    "kind": "names",
+    "bounds": {
+     "re": "^(container|npm)\\Z"
+    },
+    "default": [
+     "container"
+    ]
+   },
+   {
+    "key": "plugins.official_timeout_s",
+    "kind": "int",
+    "bounds": [
+     10,
+     3600
+    ],
+    "default": 300
+   },
+   {
+    "key": "plugins.reverify_on_start",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "plugins.third_party.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "plugins.worker.max_output_kb",
+    "kind": "int",
+    "bounds": [
+     16,
+     4096
+    ],
+    "default": 256
+   },
+   {
+    "key": "plugins.worker.memory_mb",
+    "kind": "int",
+    "bounds": [
+     64,
+     4096
+    ],
+    "default": 256
+   },
+   {
+    "key": "plugins.worker.platforms_ok",
+    "kind": "names",
+    "bounds": {
+     "re": "^(linux|windows|darwin)\\Z"
+    },
+    "default": [
+     "linux",
+     "windows",
+     "darwin"
+    ]
+   },
+   {
+    "key": "plugins.worker.timeout_s",
+    "kind": "int",
+    "bounds": [
+     1,
+     300
+    ],
+    "default": 20
+   },
+   {
     "key": "posture.alerts",
     "kind": "bool",
     "default": true
@@ -269,6 +393,98 @@
      "re": "^[A-Za-z0-9._*?-]{1,100}=(standard|library|internal|sandbox)\\Z"
     },
     "default": []
+   },
+   {
+    "key": "secrets.backend",
+    "kind": "enum",
+    "bounds": [
+     "local",
+     "vault",
+     "sops",
+     "bitwarden",
+     "aws",
+     "azure",
+     "gcp"
+    ],
+    "default": "local"
+   },
+   {
+    "key": "secrets.bitwarden.item",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9-]{0,100}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "secrets.cloud.ref",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9_./:@=+-]{0,300}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "secrets.reload_on_rotate",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "secrets.reload_seconds",
+    "kind": "int",
+    "bounds": [
+     60,
+     86400
+    ],
+    "default": 900
+   },
+   {
+    "key": "secrets.sops.field",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9_.-]{1,100}\\Z"
+    },
+    "default": "token"
+   },
+   {
+    "key": "secrets.sops.file",
+    "kind": "text",
+    "bounds": {
+     "re": "^[^\\x00-\\x1f]{0,260}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "secrets.vault.addr",
+    "kind": "text",
+    "bounds": {
+     "re": "^(https?://[^\\s]{1,200})?\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "secrets.vault.field",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9_.-]{1,100}\\Z"
+    },
+    "default": "token"
+   },
+   {
+    "key": "secrets.vault.path",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9_./-]{0,200}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "secrets.vault.token_env",
+    "kind": "text",
+    "bounds": {
+     "re": "^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|PATHEXT|COMSPEC|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|SSH_AUTH_SOCK|MONITOR_SUPERVISOR_KEY|MONITOR_ACCESS_TOKEN|MONITOR_WEBHOOK_SECRET|MONITOR_SLACK_SIGNING_SECRET|MONITOR_DISCORD_PUBLIC_KEY|MONITOR_HEARTBEAT_URL)\\Z)(?:[A-Z_][A-Z0-9_]{0,63})?\\Z"
+    },
+    "default": "VAULT_TOKEN"
    },
    {
     "key": "updates.notify_window",

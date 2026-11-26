@@ -42,3 +42,16 @@ python bin/monitor_cli.py install-skill external --dest /path/to/the/skills/fold
 ## 設定
 
 `ai.skill`(オン)と `ai.skill_max_chars`(3000。小さなローカルモデルは1500)。外部から失敗を登録するには `POST /api/ai/failures` を使い、レッスンの書き込みと同じく `lessons.allow_write` と管理者が必要です。
+
+## スキル登録所への公開
+
+`python tools/prepare_skill_bundle.py --out DIR` は外部スキルの公開用フォルダー（SKILL.md、参照、モニターの版とライセンスを含む `bundle.json`、`SHA256SUMS`）を作ります。同じ内容からは同じバイト列ができます。公開はしません。ClawHub へのアップロードは、規約を確認のうえ管理者のアカウントで手作業で行います。
+
+## アシスタント
+
+実際に試したものだけを「確認済み」とします。
+
+| アシスタント・方法 | コマンドライン | HTTP とファイル | MCP |
+|---|---|---|---|
+| ターミナル型コーディングアシスタント | 確認済み | 確認済み | プロトコル上は対応、未確認 |
+| その他のアシスタント | プロトコル上は対応、未確認 | プロトコル上は対応、未確認 | プロトコル上は対応、未確認 |

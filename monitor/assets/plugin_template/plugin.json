@@ -1,0 +1,14 @@
+{
+  "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+  "_license": "GPL-3.0-or-later - see LICENSE",
+  "name": "example-labels",
+  "version": "1.0.0",
+  "api_compat": "1",
+  "author": "Your name",
+  "description": "Repositories without any label (an example to start from).",
+  "trust": "third_party",
+  "entry": "plugin.py",
+  "permissions": ["repos.list", "gh.get"],
+  "get_paths": ["repos/{owner}/{repo}/labels"],
+  "refresh_seconds": 3600
+}

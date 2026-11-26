@@ -26,6 +26,12 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - **Le programme de mise à jour autonome publié avec une version contient désormais le registre des migrations**, et SHA256SUMS le nomme avec le zip et les deux nomenclatures.
 
+### Greffons
+
+- **Greffons, désactivés par défaut** (Complete) : officiels pour les discussions sans réponse et la rétention des paquets ; ceux de tiers uniquement en paquets signés par une clé de votre trousseau, dans un processus séparé sans le jeton, avec la mention « sans isolation réseau » là où le réseau ne peut être coupé. Sortie nettoyée, greffon défaillant mis en pause, catalogue dans les réglages, commande `plugin`, contrôle du doctor, modèle pour les auteurs et contrat versionné (`api_compat` 1).
+- **Le jeton GitHub peut être lu depuis Vault, SOPS, Bitwarden Secrets Manager ou le gestionnaire de secrets d'AWS, Azure ou Google** (lecture seule, `secrets.backend`).
+- **La skill externe peut être empaquetée pour un registre de skills** (`tools/prepare_skill_bundle.py`, ne publie rien).
+
 ## [2.1.8]
 
 La version 2.1.8 n'ajoute aucune fonction : elle corrige ce qu'une revue de la 2.1.7 a trouvé. La sentinelle de CI n'est plus verte quand la liste des exécutions peut cacher un workflow ; approuver ou rejeter une proposition de l'IA fonctionne ; un appareil révoqué perd les flux qu'il avait ouverts ; les connexions ont une limite de durée et de nombre ; le tunnel du proxy fonctionne ; revenir en arrière ne passe plus par-dessus une mise à jour en cours ; l'image du conteneur n'est publiée qu'à partir d'une étiquette ; et les écrans, le kiosque, la ligne de commande et la documentation disent ce que fait le programme.

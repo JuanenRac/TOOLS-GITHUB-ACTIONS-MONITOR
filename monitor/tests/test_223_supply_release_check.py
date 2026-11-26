@@ -114,6 +114,17 @@ class TheDownload(Base):
         with self.assertRaises(ValueError):
             installed.fetch(self.folder, Source(), version="0.0.1")
 
+    def test_no_connection_is_told_and_never_a_traceback(self):
+        from github_actions_monitor.ops import updates
+        updater = updates.module()
+
+        class Offline:
+            def releases(self):
+                raise updater.UpdaterError(updater.OFFLINE, "no connection to GitHub", "r.no_network")
+
+        with self.assertRaises(ValueError):
+            installed.fetch(self.folder, Offline())
+
 
 class TheKeys(Base):
     def test_a_key_that_is_about_to_expire_is_told(self):
@@ -143,10 +154,11 @@ class ThePinnedDownloads(unittest.TestCase):
             self.skipTest("the tools of the repository are not in this folder")
         text = script.read_text(encoding="utf-8")
         urls, shas = re.findall(r'url="(https://github\.com/[^"]+)"', text), re.findall(r'sha="([0-9a-f]{64})"', text)
-        self.assertEqual((len(urls), len(shas)), (3, 3))
+        self.assertEqual((len(urls), len(shas)), (3, 4))      # three from GitHub releases and Vault from the site of its maker, each with its SHA-256
         self.assertTrue(all("/releases/download/v" in url for url in urls))
+        self.assertRegex(text, r'url="https://releases\.hashicorp\.com/vault/\d+\.\d+\.\d+/')
         self.assertIn("sha256sum -c -", text)
-        for name, tool in (("release-build.yml", "cosign"), ("release-image.yml", "cosign"), ("repo-hygiene.yml", "osv-scanner"), ("repo-hygiene.yml", "scorecard")):
+        for name, tool in (("release-build.yml", "cosign"), ("release-image.yml", "cosign"), ("repo-hygiene.yml", "osv-scanner"), ("repo-hygiene.yml", "scorecard"), ("secrets-lab.yml", "vault")):
             self.assertIn("tools/fetch_pinned.sh " + tool, (ROOT / ".github" / "workflows" / name).read_text(encoding="utf-8"), name)
 
 

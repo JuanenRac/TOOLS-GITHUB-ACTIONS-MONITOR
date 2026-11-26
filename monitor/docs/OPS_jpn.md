@@ -72,6 +72,7 @@
 | `backup_age` | 最後の正常なバックアップを `ops.doctor.backup_max_age_days` と比較 |
 | `disk` | データボリュームの空き容量を `ops.doctor.min_free_mb` と比較 |
 | `metrics` | Prometheus 出力がオンでモニターが動作中のとき、`/metrics` が応答する |
+| `plugins` | `plugins.enabled` 時: 確認に通らなくなったプラグイン（鍵の失効、ファイル変更）と一時停止中のもの |
 
 **終了コード (安定、cron 向け):** `0` すべて正常 (`--strict` なしなら警告があっても); `1` 少なくとも 1 つのチェックが失敗; `3` 警告のみで `--strict` (または `ops.doctor.strict_exit`); `4` doctor 自体を実行できなかった。これは doctor のコードで、`monitor_cli.py` の他のコマンドは自分のコードのままです。例: `0 * * * * python3 bin/monitor_cli.py doctor --strict --json > /var/lib/github-actions-monitor/doctor.json || true` とし、0 以外のコードで通知します。
 

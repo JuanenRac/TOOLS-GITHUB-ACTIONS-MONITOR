@@ -42,3 +42,16 @@ Dans les Réglages, onglet IA, le bloc **Skills pour les IA** a Copier (le cœur
 ## Réglages
 
 `ai.skill` (activé) et `ai.skill_max_chars` (3000 ; 1500 pour un petit modèle local). Enregistrer des échecs depuis l'extérieur se fait par `POST /api/ai/failures` et demande `lessons.allow_write` et un administrateur, comme écrire une leçon.
+
+## Publication dans un registre de skills
+
+`python tools/prepare_skill_bundle.py --out DIR` prépare le dossier de la skill externe (SKILL.md, références, `bundle.json` avec la version du moniteur et la licence, `SHA256SUMS`) ; les mêmes sources donnent les mêmes octets. Rien n'est publié : l'envoi vers ClawHub se fait à la main, avec le compte du mainteneur, après lecture des conditions.
+
+## Assistants
+
+Seul ce qui a vraiment été essayé est dit testé.
+
+| Assistant ou voie | Ligne de commande | HTTP et fichiers | MCP |
+|---|---|---|---|
+| Un assistant de code en terminal | testé | testé | compatible par protocole, non testé |
+| Autres assistants | compatible par protocole, non testé | compatible par protocole, non testé | compatible par protocole, non testé |

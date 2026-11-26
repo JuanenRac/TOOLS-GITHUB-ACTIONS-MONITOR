@@ -26,6 +26,12 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - **El actualizador suelto que se publica con una release lleva ahora dentro el registro de migraciones**, y SHA256SUMS lo nombra junto con el zip y las dos listas de materiales.
 
+### Complementos
+
+- **Complementos, apagados por defecto** (Complete): oficiales para discusiones sin respuesta y retención de paquetes; los de terceros solo como paquetes firmados por una clave de tu llavero, en un proceso aparte sin el token y con la etiqueta «sin aislamiento de red» donde no se puede cortar la red. La salida no fiable se limpia, un complemento que falla se pausa, y hay catálogo en Ajustes, la orden `plugin`, una comprobación del doctor, una plantilla para autores y un contrato con versión (`api_compat` 1).
+- **El token de GitHub puede leerse de Vault, SOPS, Bitwarden Secrets Manager o el gestor de secretos de AWS, Azure o Google** (solo lectura, `secrets.backend`).
+- **La skill externa puede empaquetarse para un registro de skills** (`tools/prepare_skill_bundle.py`, no publica nada).
+
 ## [2.1.8]
 
 La versión 2.1.8 no añade ninguna función: corrige lo que encontró una revisión de la 2.1.7. El centinela de CI ya no sale en verde cuando la lista de ejecuciones puede ocultar un workflow; aprobar o rechazar una propuesta de la IA funciona; un dispositivo revocado pierde los flujos que tenía abiertos; las conexiones tienen límite de tiempo y de número; el túnel del proxy funciona; deshacer ya no pasa por encima de una actualización en curso; la imagen del contenedor solo se publica desde una etiqueta; y las pantallas, el quiosco, la línea de órdenes y la documentación dicen lo que hace el programa.
