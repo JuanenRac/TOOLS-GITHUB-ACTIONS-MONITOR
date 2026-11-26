@@ -24,7 +24,7 @@ Jeder Befund nennt seinen Platz in den OWASP-Top-10-CI/CD-Risiken und im CIS-Lei
 | Code und Abhängigkeiten | scan.no_code scan.no_credentials scan.no_push_protection scan.no_dependency_alerts repo.no_policy repo.no_update_tool |
 | Zweige | branch.unprotected branch.no_review branch.bypass branch.release_unprotected branch.merged_unreviewed |
 | Schlüssel und Secrets | deploy.write deploy.old stored.old |
-| Organisation (Konto) | org.no_two_factor org.default_write org.public_creation org.app_broad org.settings_changed |
+| Organisation (Konto) | org.no_two_factor org.default_write org.public_creation org.app_broad org.settings_changed org.pat_broad |
 | Runner (Ausführer) | runner.not_hardened runner.coverage_lost |
 | Releases (Veröffentlichungen) | release.asset_replaced release.asset_removed release.tag_moved release.outside_window |
 
@@ -44,8 +44,13 @@ Der Sicherheits-Reiter der Wächter zeigt Befunde, die Reife der Sicherheitskett
 posture status
 posture matrix
 posture check --repo-name my-repo
+posture report
 ```
 
 ## Grenzen
 
-Feingranulare Token der Mitglieder werden nicht gelesen (GitHub listet sie nur einer GitHub App), und eine zweite schreibende App wird nicht verwaltet. Die Organisationsprüfungen wurden nur mit erfundenen Antworten getestet.
+Nicht umgesetzt: eine zweite, schreibende GitHub App (Lesen und Schreiben sind nicht auf zwei Apps verteilt). `org.pat_broad` braucht eine GitHub App mit der Berechtigung für persönliche Zugriffstokens; mit einem persönlichen Token wird nicht geprüft. Die Organisationsprüfungen wurden nur mit erfundenen Antworten getestet.
+
+## Konformitätsbericht und Berechtigungen
+
+`posture report` (und `compliance` in `GET /api/posture`) liest die Befunde gegen die zehn OWASP-CI/CD-Risiken und die zugeordneten CIS-Abschnitte: mit Befunden, ohne Befunde, teilweise gelesen oder nicht geprüft, mit einem kurzen Text zur Bedeutung jedes Risikos und dem Trend gegenüber einer Woche zuvor. Eine Lesehilfe, keine Zertifizierung; die CIS-Abschnittsnummern wurden nicht mit dem offiziellen Dokument abgeglichen. `upstream.weak` (`posture.upstream`, aus) vermerkt einen Fork, dessen öffentliches Original keine Sicherheitsrichtlinie oder kein Aktualisierungswerkzeug hat. Die Berechtigungstabelle nennt, welche GitHub-App-Berechtigung jede Gruppe freischaltet und, mit eingerichteter App, ob sie erteilt ist.

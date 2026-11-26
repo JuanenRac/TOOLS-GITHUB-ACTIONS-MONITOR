@@ -24,7 +24,7 @@ Each finding carries its place in the OWASP Top 10 CI/CD risks and in the CIS So
 | Code and dependencies | scan.no_code scan.no_credentials scan.no_push_protection scan.no_dependency_alerts repo.no_policy repo.no_update_tool |
 | Branches | branch.unprotected branch.no_review branch.bypass branch.release_unprotected branch.merged_unreviewed |
 | Keys and secrets | deploy.write deploy.old stored.old |
-| Organization | org.no_two_factor org.default_write org.public_creation org.app_broad org.settings_changed |
+| Organization | org.no_two_factor org.default_write org.public_creation org.app_broad org.settings_changed org.pat_broad |
 | Runners | runner.not_hardened runner.coverage_lost |
 | Releases | release.asset_replaced release.asset_removed release.tag_moved release.outside_window |
 
@@ -44,8 +44,13 @@ The Security tab of the Sentinel area shows the findings, the maturity of the se
 posture status
 posture matrix
 posture check --repo-name my-repo
+posture report
 ```
 
 ## Limits
 
-Not read: fine-grained tokens of organization members (GitHub only lists them to a GitHub App), and a second, writing app is not managed. The organization checks have been tested with made-up answers only.
+Not done: a second, writing GitHub App (reading and writing are not split between two Apps). `org.pat_broad` needs a GitHub App with the personal access tokens permission; with a personal token it is not checked. The organization checks have been tested with made-up answers only.
+
+## Compliance report and permissions
+
+`posture report` (and `compliance` in `GET /api/posture`) reads the findings against the ten OWASP CI/CD risks and the CIS sections they map to: with findings, no findings, partly read or not checked, with a short text on what each risk means, and the trend against a week before. It is a reading aid, not a certification; the CIS section numbers have not been checked against the official document. `upstream.weak` (`posture.upstream`, off) notes a fork whose public original has no security policy or update tool. The permissions table says which GitHub App permission unlocks each group and, with an App configured, whether it is granted.

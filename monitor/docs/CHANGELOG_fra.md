@@ -11,6 +11,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Rapport de posture au regard de l'OWASP et du CIS** (`posture report`) : ce que montre chaque section, le sens des risques et la tendance sur une semaine ; aussi les jetons personnels larges de l'organisation, les originaux des forks (désactivé) et l'autorisation de GitHub App qui débloque chaque vérification.
 - Contrôles de posture des dépôts et de l'organisation, lecture seule et désactivés par défaut : webhooks, réglages d'Actions, analyses, protection des branches et des branches de version, clés de déploiement, âge des secrets, applications, journal d'audit, durcissement de ce qui s'est exécuté et versions modifiées, avec référence OWASP CI/CD et CIS. Ce que GitHub refuse est non vérifié. Maturité par dépôt, historique et `posture` en ligne de commande.
 - **Une fenêtre annonce une version plus récente**: avec le résumé des changements dans votre langue, un bouton vers Mises à jour, « Plus tard » et « Ne plus annoncer cette version » ; activée par défaut et muette sur les écrans muraux et kiosque.
 - **Nouvelles commandes**: pour vérifier sans réseau une version téléchargée et gérer les clés publiques.

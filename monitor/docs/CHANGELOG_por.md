@@ -11,6 +11,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Adicionado
 
+- **Relatório de postura face à OWASP e ao CIS** (`posture report`): o que mostra cada secção, o que significam os riscos e a tendência de uma semana; também os tokens pessoais amplos da organização, os originais dos forks (desligado) e que permissão de GitHub App desbloqueia cada verificação.
 - Verificações de postura de repositórios e organização, só de leitura e desligadas por predefinição: webhooks, definições do Actions, análises, proteção de ramos e ramos de versão, chaves de implementação, idade dos segredos, aplicações, auditoria da organização, reforço do que foi executado e versões alteradas, com referência OWASP CI/CD e CIS. O que o GitHub recusa aparece por verificar. Maturidade por repositório, histórico e `posture` na linha de comandos.
 - **Uma janela anuncia uma versão mais nova**: com o resumo das alterações no seu idioma, um botão para Atualizações, «Mais tarde» e «Não avisar desta versão»; vem ligada e não aparece em ecrãs de parede nem quiosque.
 - **Comandos novos**: para verificar sem rede uma versão transferida e gerir as chaves públicas.

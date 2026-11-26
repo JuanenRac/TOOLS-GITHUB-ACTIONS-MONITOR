@@ -311,8 +311,43 @@ def org_stored(get, base, ctx):
 BROAD = ("administration", "contents", "workflows", "secrets", "organization_administration", "members")
 
 
+def _writes(permissions):
+    return sorted(k for k, v in _dict(permissions).items() if v in ("write", "admin"))
+
+
+def pats(get, base, ctx):
+    """Fine-grained personal access tokens with access to the organization that can write to the organization or to all its repositories. GitHub only answers this to a GitHub App; with a personal
+    token the group is listed as not checked. Names and permissions only: a token itself is never in the answer."""
+    answer = get(f"{base}/personal-access-tokens?per_page=100")
+    if not isinstance(answer, list):
+        raise Unread("failed")
+    out = []
+    for row in _dicts(answer):
+        if row.get("token_expired") is True:
+            continue
+        granted = _dict(row.get("permissions"))
+        broad = _writes(granted.get("organization"))
+        if row.get("repository_selection") == "all":
+            broad += _writes(granted.get("repository"))
+        if broad:
+            detail = ", ".join(broad[:6]) + ("" if row.get("token_expires_at") else "; no expiry")
+            out.append(finding("org.pat_broad", f"{_dict(row.get('owner')).get('login', '?')}: {row.get('token_name') or '?'}", detail))
+    return out[:50]
+
+
+def upstream(get, base, ctx):
+    """For a fork: what its public original does not have (security policy, update tool). A signal about where the code comes from, not about the fork."""
+    parent = str(_dict(ctx["repo_info"].get("parent")).get("full_name") or "")
+    if not re.fullmatch(r"[A-Za-z0-9._-]{1,100}/[A-Za-z0-9._-]{1,100}", parent) or ".." in parent:
+        return []
+    found = files(get, f"repos/{parent}", ctx)
+    if not found:
+        return []
+    return [finding("upstream.weak", parent, ", ".join(sorted(f["check"].split(".", 1)[1] for f in found)))]
+
+
 def apps(get, base, ctx):
-    """Apps of the organization that can WRITE something sensitive in all its repositories. (Fine-grained tokens of members need a GitHub App to be listed: they are not read.)"""
+    """Apps of the organization that can WRITE something sensitive in all its repositories."""
     out = []
     for app in _dicts(_dict(get(f"{base}/installations?per_page=100")).get("installations")):
         writes = sorted(k for k, v in _dict(app.get("permissions")).items() if k in BROAD and v in ("write", "admin"))
@@ -339,4 +374,4 @@ def audit(get, base, ctx):
     return out[:20]
 
 
-ORG_GROUPS = {"org": org_settings, "hooks": org_hooks, "stored": org_stored, "apps": apps, "audit": audit}
+ORG_GROUPS = {"org": org_settings, "hooks": org_hooks, "stored": org_stored, "apps": apps, "audit": audit, "pats": pats}

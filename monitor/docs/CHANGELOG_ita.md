@@ -11,6 +11,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Aggiunto
 
+- **Rapporto di postura rispetto a OWASP e CIS** (`posture report`): cosa mostra ogni sezione, cosa significano i rischi e l'andamento di una settimana; inoltre i token personali ampi dell'organizzazione, gli originali dei fork (spento) e quale permesso di GitHub App sblocca ogni controllo.
 - Controlli di postura di repository e organizzazione, sola lettura e disattivati di default: webhook, impostazioni di Actions, scansioni, protezione dei rami e dei rami di rilascio, chiavi di distribuzione, età dei segreti, app, audit dell'organizzazione, protezione di ciò che è stato eseguito e release modificate, con riferimento OWASP CI/CD e CIS. Ciò che GitHub nega risulta non verificato. Maturità per repository, cronologia e `posture` da riga di comando.
 - **Una finestra annuncia una versione più nuova**: con il riassunto delle modifiche nella tua lingua, un pulsante verso Aggiornamenti, «Più tardi» e «Non segnalare questa versione»; attiva per impostazione e muta sugli schermi a parete e chiosco.
 - **Nuovi comandi**: per controllare senza rete una release scaricata e gestire le chiavi pubbliche.

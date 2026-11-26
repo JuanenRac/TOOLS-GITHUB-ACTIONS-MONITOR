@@ -11,6 +11,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Hinzugefügt
 
+- **Posture-Bericht gegen OWASP und CIS** (`posture report`): was jeder Abschnitt zeigt, was die Risiken bedeuten und der Wochentrend; außerdem weitreichende persönliche Tokens der Organisation, die Originale von Forks (aus) und welche GitHub-App-Berechtigung jede Prüfung freischaltet.
 - Prüfungen der Sicherheitslage, nur lesend und standardmäßig aus: Webhooks, Actions-Einstellungen, Scans, Schutz von Branches und Release-Branches, Deploy-Schlüssel, Alter von Secrets, Apps, Audit-Log der Organisation, Härtung der ausgeführten Läufe und geänderte Releases, jeweils mit OWASP-CI/CD- und CIS-Bezug. Verweigertes erscheint als nicht geprüft. Reife je Repository, Verlauf und `posture` in der Befehlszeile.
 - **Ein Fenster kündigt eine neuere Version an**: mit der Zusammenfassung der Änderungen in Ihrer Sprache, einer Schaltfläche zur Seite Updates, „Später“ und „Diese Version nicht mehr melden“; standardmäßig ein und auf Wand- und Kioskbildschirmen stumm.
 - **Neue Befehle**: zur netzlosen Prüfung eines heruntergeladenen Releases und zur Verwaltung der öffentlichen Schlüssel.
