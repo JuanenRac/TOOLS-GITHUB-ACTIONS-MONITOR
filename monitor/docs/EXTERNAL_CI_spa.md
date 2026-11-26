@@ -39,3 +39,9 @@ En Ajustes > CI externo está **Probar conexión**: una lectura sin guardar nada
 ## Aún sin verificar
 
 Los cuatro adaptadores solo se han probado contra servidores falsos (`tools/extci_fake_servers.py`). Jenkins y Azure Pipelines llevan la etiqueta **experimental** (`external_ci.experimental`) y necesitan `external_ci.jenkins.enabled` / `external_ci.azure.enabled`. Para escribir otro adaptador: una función `(reader, source, cfg) -> (runs, missing)` en `integrations/external_ci/extci_adapters.py` que lea solo con `reader`.
+
+## Identidad de un repositorio, varios dueños
+
+Dentro del monitor un repositorio es (fuente, dueño, nombre), escrito `repo_key` (`github:dueño/nombre`, `gitlab@servidor:grupo/nombre`); las rutas siguen nombrándolo por su nombre. Dos repositorios con el mismo nombre de dos sitios no comparten identificadores, ejecuciones ni alertas: cuando dos servidores del mismo tipo reflejan el mismo nombre, se añade el servidor a su etiqueta. El monitor anota a qué dueño pertenecen sus datos guardados. Si el dueño cambia, los silencios y el registro de alertas de repositorios y el último estado del canal de eventos se apartan (se conservan, no se borran), tras copiar cada fichero en `identity_backup/`. Ocurre después de un ciclo; `identity plan` lo muestra sin cambiar nada, `identity apply` lo hace ya y `identity status` muestra la anotación. `sources.multi_owner` (apagado) permite registrar cuentas de dueños distintos; las instalaciones que ya tienen varios siguen funcionando y el doctor lo dice. `doctor` además lee cada fuente externa una vez.
+
+Línea de órdenes: `identity status`, `identity plan`, `identity apply`.

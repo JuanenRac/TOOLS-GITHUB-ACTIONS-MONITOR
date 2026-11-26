@@ -66,5 +66,19 @@
  "cli.extci.need_source": "probe richiede --source RIGA",
  "cli.extci.seen": "Letto: {workflows} flussi, {builds} build, {red} in rosso.",
  "cli.extci.failed": "Impossibile leggere: {reason}",
- "cli.extci.none": "Nessuna fonte CI esterna configurata."
+ "cli.extci.none": "Nessuna fonte CI esterna configurata.",
+ "cfg.f.sources.multi_owner": "Account di più di un proprietario",
+ "cfg.h.sources.multi_owner": "Permette a un'installazione di registrare account di proprietari diversi. L'identità di ogni repository (fonte, proprietario, nome) è sempre conservata.",
+ "cfg.t.sources.multi_owner": "più proprietari",
+ "ui.cfg_b_sources": "Identità dei repository",
+ "ui.cfg_err_extci_owner": "un altro account di questa installazione è di un proprietario diverso (attiva sources.multi_owner)",
+ "cli.extci.help_identity": "identità dei repository: mostrare, pianificare (non cambia nulla) o applicare la migrazione dei dati salvati",
+ "cli.extci.identity_owner": "Proprietario dei dati salvati: {was}; proprietario osservato: {owner}",
+ "cli.extci.identity_done": "Fatto. Copia di ciò che è cambiato: {backup}",
+ "cli.extci.identity_nothing": "Niente da migrare.",
+ "doctor.t.extci": "Fonti di CI esterne",
+ "doctor.f.extci": "Una fonte non si può leggere o la sua riga non è compresa: esegui il comando qui sotto.",
+ "doctor.t.extci_identity": "Identità dei repository",
+ "doctor.f.extci_identity": "Gli account di più proprietari richiedono sources.multi_owner, oppure i dati salvati sono di un altro proprietario: guarda il piano.",
+ "ui.extci.last_ok": "ultima lettura {at}"
 }

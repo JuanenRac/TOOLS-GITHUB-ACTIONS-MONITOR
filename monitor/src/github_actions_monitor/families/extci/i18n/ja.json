@@ -66,5 +66,19 @@
  "cli.extci.need_source": "probe には --source 行 が必要です",
  "cli.extci.seen": "読み取り: ワークフロー{workflows}、ビルド{builds}、赤{red}。",
  "cli.extci.failed": "読み取れませんでした: {reason}",
- "cli.extci.none": "外部CIソースは未設定です。"
+ "cli.extci.none": "外部CIソースは未設定です。",
+ "cfg.f.sources.multi_owner": "複数の所有者のアカウント",
+ "cfg.h.sources.multi_owner": "1つのインストールで異なる所有者のアカウントを登録できるようにします。各リポジトリの識別（取得元、所有者、名前）は常に保持されます。",
+ "cfg.t.sources.multi_owner": "複数の所有者",
+ "ui.cfg_b_sources": "リポジトリの識別",
+ "ui.cfg_err_extci_owner": "このインストールの別のアカウントは別の所有者のものです（sources.multi_owner を有効にしてください）",
+ "cli.extci.help_identity": "リポジトリの識別：表示、計画（何も変更しない）、または保存データの移行の適用",
+ "cli.extci.identity_owner": "保存データの所有者：{was}、監視中の所有者：{owner}",
+ "cli.extci.identity_done": "完了しました。変更した内容の控え：{backup}",
+ "cli.extci.identity_nothing": "移行するものはありません。",
+ "doctor.t.extci": "外部CIソース",
+ "doctor.f.extci": "読み取れないソースか、理解できない行があります。下のコマンドを実行してください。",
+ "doctor.t.extci_identity": "リポジトリの識別",
+ "doctor.f.extci_identity": "複数の所有者のアカウントには sources.multi_owner が必要です。または保存データが別の所有者のものです。計画を確認してください。",
+ "ui.extci.last_ok": "最終読み取り {at}"
 }

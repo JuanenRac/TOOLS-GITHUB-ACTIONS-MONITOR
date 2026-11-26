@@ -39,3 +39,9 @@ Actionsと同様に、各ビルダー・パイプライン・ジョブのブラ�
 ## 未検証
 
 4つのアダプターは模擬サーバー(`tools/extci_fake_servers.py`)でのみ検証しています。JenkinsとAzure Pipelinesには**実験的**ラベル(`external_ci.experimental`)があり、`external_ci.jenkins.enabled` / `external_ci.azure.enabled` が必要です。別のアダプターは `integrations/external_ci/extci_adapters.py` に関数 `(reader, source, cfg) -> (runs, missing)` を書き、`reader` 経由でのみ読み取ります。
+
+## リポジトリの識別と複数の所有者
+
+モニター内部ではリポジトリは（取得元、所有者、名前）で、`repo_key`（`github:所有者/名前`、`gitlab@ホスト:グループ/名前`）と表記します。ルートは引き続き名前で指定します。2か所にある同名のリポジトリは、識別子・実行・アラートを共有しません。同じ種類の2つのサーバーが同じ名前をミラーする場合は、ラベルにホストが追加されます。モニターは保存データがどの所有者のものかを記録します。所有者が変わると、リポジトリのミュートとアラート台帳、イベントフィードの最後の状態は、各ファイルを `identity_backup/` に控えてから脇に移されます（削除せず保持）。これは1サイクル後に行われます。`identity plan` は何も変えずに表示し、`identity apply` はすぐに実行し、`identity status` は記録を表示します。`sources.multi_owner`（既定はオフ）は異なる所有者のアカウント登録を許可します。すでに複数あるインストールはそのまま動作し、doctor がそれを知らせます。`doctor` は各外部ソースも一度読み取ります。
+
+コマンドライン：`identity status`、`identity plan`、`identity apply`。

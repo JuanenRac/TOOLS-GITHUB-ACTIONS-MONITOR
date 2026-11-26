@@ -100,3 +100,11 @@ En mode réseau le jeton est lu dans `MONITOR_ACCESS_TOKEN`, puis `MONITOR_TOKEN
 ## Sauvegarde et le doctor
 
 `backup` et `doctor` travaillent sur les dossiers de l'installation, ils n'ont donc pas besoin d'un moniteur en marche. `doctor` sort avec `0` quand tout va bien (avertissements compris), `1` quand un contrôle a échoué, `3` quand il n'y a que des avertissements et que `--strict` (ou `ops.doctor.strict_exit`) est actif, et `4` quand le doctor lui-même n'a pas pu s'exécuter ; ce sont les codes du doctor, les autres commandes gardent les codes de sortie ci-dessus. `backup` sort avec `0` quand c'est fait et `1` quand il est refusé ou que le paquet ne se vérifie pas. Le guide [OPS_fra.md](OPS_fra.md) donne les contrôles, la restauration et la sauvegarde planifiée. Le doctor a aussi `compare_window` (la comparaison de deux périodes peut-elle remonter de deux fenêtres avec l'historique qu'elle demande et garde) et `etag` (la part des lectures conditionnelles répondues par 304 dans le moniteur qui tourne ici, et si les réponses de GitHub arrivent sans ETag).
+
+## Identité d'un dépôt, plusieurs propriétaires
+
+Ligne de commande : `identity status`, `identity plan`, `identity apply`.
+
+```
+python bin/monitor_cli.py identity plan
+```

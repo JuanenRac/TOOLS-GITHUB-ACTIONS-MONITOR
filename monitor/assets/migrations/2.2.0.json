@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.2.0",
  "previous": "2.1.8",
- "digest": "b3b502252b8631402611bedadfd2d5b9141dc52b7745e1ed1b9886bdd51b1a2f",
+ "digest": "f6b8402d972215d56d4b6d5157f3a2bf8fbdf5cfabedd5be63709dbdb77b06c0",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -525,6 +525,11 @@
      "re": "^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|PATHEXT|COMSPEC|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|SSH_AUTH_SOCK|MONITOR_SUPERVISOR_KEY|MONITOR_ACCESS_TOKEN|MONITOR_WEBHOOK_SECRET|MONITOR_SLACK_SIGNING_SECRET|MONITOR_DISCORD_PUBLIC_KEY|MONITOR_HEARTBEAT_URL)\\Z)(?:[A-Z_][A-Z0-9_]{0,63})?\\Z"
     },
     "default": "VAULT_TOKEN"
+   },
+   {
+    "key": "sources.multi_owner",
+    "kind": "bool",
+    "default": false
    },
    {
     "key": "ui.copy_report.enabled",

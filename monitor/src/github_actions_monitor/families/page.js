@@ -4,10 +4,11 @@
    FAM.on("tab", fn(tab))        when a tab is shown (also called at once with the one that is open)
    FAM.on("data", fn(data))      when new data is drawn
    FAM.on("settings", fn(j))     when the Settings page has been built (j.groups); the sub-tab of a group is the element cfp-<id>
+   FAM.on("about", fn(body))     when the About window has been drawn (body = its content)
    FAM.panel(tab, id, titleKey)  the body of a box of its own at the end of a tab (made once); titleKey is a key "ui.<part>.*"
    The page's own T(), esc(), $() are there; confirm(), alert() and prompt() are not allowed (askConfirm). */
 window.FAM=(function(){
-  const hooks={tab:[],data:[],settings:[]};
+  const hooks={tab:[],data:[],settings:[],about:[]};
   const call=(fn,arg)=>{try{fn(arg)}catch(e){console.error(e)}};
   return {
     run(name,arg){(hooks[name]||[]).forEach(fn=>call(fn,arg))},

@@ -66,5 +66,19 @@
  "cli.extci.need_source": "probe 需要 --source 行",
  "cli.extci.seen": "已读取:{workflows} 个工作流,{builds} 个构建,{red} 个失败。",
  "cli.extci.failed": "无法读取:{reason}",
- "cli.extci.none": "未配置外部 CI 来源。"
+ "cli.extci.none": "未配置外部 CI 来源。",
+ "cfg.f.sources.multi_owner": "多个所有者的账户",
+ "cfg.h.sources.multi_owner": "允许一个安装登记不同所有者的账户。每个仓库的身份（来源、所有者、名称）始终保留。",
+ "cfg.t.sources.multi_owner": "多个所有者",
+ "ui.cfg_b_sources": "仓库身份",
+ "ui.cfg_err_extci_owner": "本安装的另一个账户属于其他所有者（请开启 sources.multi_owner）",
+ "cli.extci.help_identity": "仓库身份：显示、计划（不做任何更改）或执行已保存数据的迁移",
+ "cli.extci.identity_owner": "已保存数据的所有者：{was}；当前监视的所有者：{owner}",
+ "cli.extci.identity_done": "完成。已更改内容的副本：{backup}",
+ "cli.extci.identity_nothing": "没有需要迁移的内容。",
+ "doctor.t.extci": "外部 CI 来源",
+ "doctor.f.extci": "某个来源无法读取或其配置行无法识别：请运行下面的命令。",
+ "doctor.t.extci_identity": "仓库身份",
+ "doctor.f.extci_identity": "多个所有者的账户需要开启 sources.multi_owner，或者已保存的数据属于其他所有者：请查看计划。",
+ "ui.extci.last_ok": "上次读取 {at}"
 }
