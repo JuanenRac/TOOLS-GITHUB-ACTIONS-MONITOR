@@ -18,7 +18,7 @@ import re
 from datetime import date
 from pathlib import Path
 
-from github_actions_monitor.security import sigverify
+from github_actions_monitor.security import private_io, sigverify
 
 SCOPES = ("release", "plugins", "federation", "packs")
 #: the keys of the project: what signs a release of the monitor. The same value is written in tools/monitor_updater.py (a single file that needs no package); a test keeps them equal.
@@ -116,9 +116,9 @@ def save_user_keys(path, entries):
     body = {"_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>", "_license": "GPL-3.0-or-later - see LICENSE", "keys": entries}
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_name(path.name + ".tmp")
-    temporary.write_text(json.dumps(body, indent=2) + "\n", encoding="utf-8")
-    temporary.replace(path)
+    temporary = private_io.unique_tmp(path)
+    private_io.write_tmp(temporary, json.dumps(body, indent=2) + "\n")
+    private_io.replace_with_retry(temporary, path)
 
 
 def add_key(path, key_id, public_hex, scopes, expires="", added=""):
