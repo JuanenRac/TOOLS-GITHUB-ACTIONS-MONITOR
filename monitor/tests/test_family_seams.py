@@ -119,7 +119,8 @@ def made_up(handler=lambda request: {"ok": True}):
     return Family("zz", defaults={"zz": {"enabled": False, "names": []}, "ui": {"zz_extra": 3}},
                   settings=(Setting("zztab", "zz", "zz.enabled", "bool", secure=True), Setting("zztab", "zz", "zz.names", "names", re.compile(r"^x[0-9]+\Z"))), settings_tabs=(("zztab", "ai"),),
                   routes=(Route("GET", "/api/zz/state", handler, "state"), Route("POST", "/api/zz/do", handler, "do", audit="zz_do", max_body=64),
-                          Route("POST", "/api/zz/ask", handler, "ask", role="maintainer", token=False, lite=True, exempt="only reads what the page already holds")),
+                          Route("POST", "/api/zz/ask", handler, "ask", role="maintainer", token=False, lite=True, exempt="only reads what the page already holds"),
+                          Route("GET", "/api/zz/local", handler, "local", this_computer=True)),
                   egress=(Egress("zz", ("zz.example.org",), "zz.enabled"),))
 
 
@@ -207,10 +208,9 @@ class TheTextsAndThePage(unittest.TestCase):
         self.assertTrue(out.endswith("</body></html>"))
 
     def test_without_page_files_the_page_is_the_same(self):
-        if any(families.FOLDER.glob("*/page.js")) or any(families.FOLDER.glob("*/page.css")):
-            self.skipTest("a part has a page of its own")
         page = "<html><head></head><body></body></html>"
-        self.assertEqual(families.inject_page(page), page)
+        with mock.patch.object(families, "_all", return_value=[(Family("zz"), self.folder / "empty")]):
+            self.assertEqual(families.inject_page(page), page)
 
     def test_the_page_calls_the_helper_only_when_it_is_there(self):
         html = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
@@ -266,6 +266,16 @@ class TheServer(unittest.TestCase):
         self.assertEqual(self.call("/api/zz/do", b"{}")[0], 403)
         self.assertEqual(self.asked, [])
         self.assertEqual(self.call("/api/zz/ask", b"{}")[0], 201)      # a route without the one-use token
+
+    def test_a_route_for_this_computer_refuses_another_one(self):
+        def refuse(handler):
+            handler.json_reply({"ok": False}, 403)
+            return False
+        with mock.patch.object(actions_monitor.Handler, "this_computer", refuse):
+            self.assertEqual(self.call("/api/zz/local")[0], 403)
+            self.assertEqual(self.asked, [])
+            self.assertEqual(self.call("/api/zz/state")[0], 200)
+        self.assertEqual(self.call("/api/zz/local")[0], 200)
 
     def test_the_lite_edition_only_has_the_routes_that_say_so(self):
         self.lite["on"] = True
