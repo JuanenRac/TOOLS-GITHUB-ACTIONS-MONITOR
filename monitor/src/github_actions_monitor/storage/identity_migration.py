@@ -8,12 +8,12 @@
 
 `plan` only reads. `apply` first copies every file it is going to change into `identity_backup/<time>/`, so nothing is lost. Running it again changes nothing."""
 import json
-import shutil
 import time
 from pathlib import Path
 
 from github_actions_monitor.app import toolconfig
 from github_actions_monitor.data_pipeline import events, repo_identity
+from github_actions_monitor.security import private_io
 from github_actions_monitor.sentinels import alert_center
 from github_actions_monitor.storage import state_io
 
@@ -89,10 +89,8 @@ def _copy(files, now):
     folder = record_file().parent / "identity_backup" / time.strftime("%Y%m%d-%H%M%S", time.gmtime(now))
     folder.mkdir(parents=True, exist_ok=True)
     for path, data in found:
-        if path.is_file() and not state_io.routed(path):
-            shutil.copy2(path, folder / path.name)      # byte for byte
-        else:      # kept in the database: its content
-            (folder / path.name).write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+        kept = path.is_file() and not state_io.routed(path)      # a file: byte for byte; kept in the database: its content
+        private_io.write_private(folder / path.name, path.read_bytes() if kept else json.dumps(data, ensure_ascii=False))
     return str(folder)
 
 
