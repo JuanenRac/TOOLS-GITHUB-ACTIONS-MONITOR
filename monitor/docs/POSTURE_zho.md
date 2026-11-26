@@ -53,4 +53,4 @@ posture report
 
 ## 合规报告与权限
 
-`posture report`（以及 `GET /api/posture` 中的 `compliance`）把发现对照 OWASP 的十项 CI/CD 风险及相应的 CIS 章节：有发现、无发现、部分读取或未检查，并附每项风险含义的简短说明和与一周前相比的趋势。这只是阅读辅助，不是认证；CIS 章节编号未与官方文件核对。`upstream.weak`（`posture.upstream`，默认关闭）指出公开原仓库缺少安全策略或更新工具的分叉。权限表说明每组检查需要的 GitHub App 权限；配置了 App 时还显示是否已授予。
+`posture report`（以及 `GET /api/posture` 中的 `compliance`）把发现对照 OWASP 的十项 CI/CD 风险及相应的 CIS 章节：有发现、无发现、部分读取或未检查，并附每项风险含义的简短说明和与一周前相比的趋势。这只是阅读辅助，不是认证；CIS 章节编号未与官方文件核对。`original.weak`（`posture.upstream`，默认关闭）指出公开原仓库缺少安全策略或更新工具的分叉。权限表说明每组检查需要的 GitHub App 权限；配置了 App 时还显示是否已授予。

@@ -3,7 +3,7 @@
 """When the collaboration views are read, what is kept (data/actions_state.json) and the one thing that can act by itself.
 
 Reading is GET only and a read that GitHub refuses is listed by name as not read, never as clean. Writing on GitHub goes only through integrations/ghactions.py (off by default, its allowed list, one
-confirmation for each plan). The single exception is `actions.auto_rerun` (off): one re-run of a run that the infrastructure ended, through the same checks, never a second one."""
+confirmation for each plan). The single exception is `teamwork.auto_rerun` (off): one re-run of a run that the infrastructure ended, through the same checks, never a second one."""
 import base64
 import json
 import re
@@ -29,7 +29,7 @@ RUNNING = {"on": False}
 
 
 def settings(config):
-    return families.block(config if isinstance(config, dict) else {}, "actions")
+    return families.block(config if isinstance(config, dict) else {}, "teamwork")
 
 
 def active(config):
@@ -121,7 +121,7 @@ def read_repo(get, owner, repo, cfg, now):
 
 
 def refresh(config, owner, repos, get=None, now=None, account=""):
-    """At most actions.repos_per_cycle repositories whose turn has come, the longest waiting first. Returns how many were read."""
+    """At most teamwork.repos_per_cycle repositories whose turn has come, the longest waiting first. Returns how many were read."""
     if not active(config) or not owner or not NAME_RE.match(str(owner)):
         return 0
     cfg = settings(config)
@@ -158,7 +158,7 @@ def runs_view(config, runs, now):
 
 
 def auto_rerun(config, owner, runs, run_gh, now=None, account=""):
-    """With actions.auto_rerun: one re-run of the failed jobs of each new run that the infrastructure ended, through the plan and the confirmation of ghactions (so it stays off while the actions are
+    """With teamwork.auto_rerun: one re-run of the failed jobs of each new run that the infrastructure ended, through the plan and the confirmation of ghactions (so it stays off while the actions are
     off, `rerun_failed` is not allowed, this monitor only observes or the credential cannot). Returns the ids tried now."""
     from github_actions_monitor.integrations import ghactions
     cfg = settings(config)
@@ -173,7 +173,7 @@ def auto_rerun(config, owner, runs, run_gh, now=None, account=""):
         done = data["rerun"]
         room = AUTO_PER_HOUR - sum(1 for v in done.values() if now - v.get("at", 0) < 3600)
         for run in views.rerun_candidates(runs, done, now)[:max(0, room)]:
-            item, why = ghactions.plan(config, owner, "rerun_failed", run.get("repo"), run.get("id"), reason="automatic single re-run of an infrastructure failure (actions.auto_rerun)",
+            item, why = ghactions.plan(config, owner, "rerun_failed", run.get("repo"), run.get("id"), reason="automatic single re-run of an infrastructure failure (teamwork.auto_rerun)",
                                        operator="monitor (automatic)", run_gh=run_gh)
             result = ghactions.execute(config, item["id"], run_gh) if item else {"ok": False, "status": why}
             done[str(run["id"])] = {"at": now, "repo": run.get("repo"), "workflow": run.get("name"), "status": result["status"]}      # whatever happened, this run is never tried again

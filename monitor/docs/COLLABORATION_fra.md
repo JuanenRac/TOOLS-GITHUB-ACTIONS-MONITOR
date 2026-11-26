@@ -11,23 +11,23 @@ Des vues de ce qui attend quelqu'un et quelques actions GitHub qui restent désa
 
 ## Activation
 
-Activez `actions.enabled` (Réglages > Collaboration). Les vues des exécutions viennent de ce que le moniteur lit déjà ; pull requests, alertes et workflows sont lus quelques dépôts par cycle (`actions.repos_per_cycle`, `actions.refresh_hours`). Le cadre est à la fin de l'onglet Collaboration de la zone Sentinelle.
+Activez `teamwork.enabled` (Réglages > Collaboration). Les vues des exécutions viennent de ce que le moniteur lit déjà ; pull requests, alertes et workflows sont lus quelques dépôts par cycle (`teamwork.repos_per_cycle`, `teamwork.refresh_hours`). Le cadre est à la fin de l'onglet Collaboration de la zone Sentinelle.
 
 ## Les vues
 
-En attente d'une personne (approbation d'environnement, workflow d'un fork, action requise), à part de l'attente d'un runner. La dernière exécution de chaque voie (workflow et branche) ; un rouge peut être mis de côté `actions.dismiss_days` jours, cette exécution seulement, puis rétabli. Pull requests ouvertes : fusionnables, en retard, action nécessaire ou inconnu, mises à jour de bots reconnues par auteur, branche ou étiquette ; `actions.hide_workflows` masque des workflows. Dépôts avec alertes critiques ou hautes et âge de la plus ancienne, et les dépôts NON lus, nommés. Avec `actions.dismissed_alerts`, qui a écarté des alertes ; un écart hors de `actions.dismiss_allowed` lève une alerte.
+En attente d'une personne (approbation d'environnement, workflow d'un fork, action requise), à part de l'attente d'un runner. La dernière exécution de chaque voie (workflow et branche) ; un rouge peut être mis de côté `teamwork.dismiss_days` jours, cette exécution seulement, puis rétabli. Pull requests ouvertes : fusionnables, en retard, action nécessaire ou inconnu, mises à jour de bots reconnues par auteur, branche ou étiquette ; `teamwork.hide_workflows` masque des workflows. Dépôts avec alertes critiques ou hautes et âge de la plus ancienne, et les dépôts NON lus, nommés. Avec `teamwork.dismissed_alerts`, qui a écarté des alertes ; un écart hors de `teamwork.dismiss_allowed` lève une alerte.
 
 ## Écrire sur GitHub
 
-Rien n'est écrit sauf si `github_actions.enabled` est activé, l'action figure dans `github_actions.allowed` et vous confirmez le plan, qui montre exactement l'envoi. Nouvelles actions : `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch`. Les vues ne font que PROPOSER : mises à jour de bots en échec, branches en retard, exécutions trop longtemps en file ou en cours (`actions.queued_hours`, `actions.stuck_hours`), celles visées par `actions.cancel_policy`, workflows désactivés pour inactivité (`actions.inactive_workflows`). Le formulaire d'un workflow manuel lit et vérifie ses entrées. Avec `actions.forks_help`, des faits sur l'auteur d'une exécution de fork ; sans verdict.
+Rien n'est écrit sauf si `github_actions.enabled` est activé, l'action figure dans `github_actions.allowed` et vous confirmez le plan, qui montre exactement l'envoi. Nouvelles actions : `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch`. Les vues ne font que PROPOSER : mises à jour de bots en échec, branches en retard, exécutions trop longtemps en file ou en cours (`teamwork.queued_hours`, `teamwork.stuck_hours`), celles visées par `teamwork.cancel_policy`, workflows désactivés pour inactivité (`teamwork.inactive_workflows`). Le formulaire d'un workflow manuel lit et vérifie ses entrées. Avec `teamwork.forks_help`, des faits sur l'auteur d'une exécution de fork ; sans verdict.
 
 ## La seule action automatique
 
-`actions.auto_rerun` (désactivé) relance une fois les jobs en échec d'une exécution non démarrée ou expirée, avec les mêmes contrôles. Jamais une seconde fois ; en cas de nouvel échec, une alerte est levée.
+`teamwork.auto_rerun` (désactivé) relance une fois les jobs en échec d'une exécution non démarrée ou expirée, avec les mêmes contrôles. Jamais une seconde fois ; en cas de nouvel échec, une alerte est levée.
 
 ## Hooks des runners auto-hébergés
 
-Avec `actions.runner_hooks`, un hook d'un runner de cet ordinateur note le début et la fin :
+Avec `teamwork.runner_hooks`, un hook d'un runner de cet ordinateur note le début et la fin :
 
 ```
 # ACTIONS_RUNNER_HOOK_JOB_STARTED
@@ -53,4 +53,4 @@ Lectures et écritures testées uniquement avec des réponses inventées ; aucun
 
 ## Tous les réglages
 
-`actions.enabled` `actions.repos_per_cycle` `actions.refresh_hours` `actions.dismiss_days` `actions.hide_workflows` `actions.bot_authors` `actions.bot_branches` `actions.bot_labels` `actions.dismissed_alerts` `actions.dismiss_allowed` `actions.auto_rerun` `actions.cancel_policy` `actions.queued_hours` `actions.stuck_hours` `actions.forks_help` `actions.inactive_workflows` `actions.runner_hooks`
+`teamwork.enabled` `teamwork.repos_per_cycle` `teamwork.refresh_hours` `teamwork.dismiss_days` `teamwork.hide_workflows` `teamwork.bot_authors` `teamwork.bot_branches` `teamwork.bot_labels` `teamwork.dismissed_alerts` `teamwork.dismiss_allowed` `teamwork.auto_rerun` `teamwork.cancel_policy` `teamwork.queued_hours` `teamwork.stuck_hours` `teamwork.forks_help` `teamwork.inactive_workflows` `teamwork.runner_hooks`

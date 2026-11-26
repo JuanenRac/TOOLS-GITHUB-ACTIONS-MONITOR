@@ -9,7 +9,7 @@ import re
 from github_actions_monitor.families.declare import Command, Family, Option, Route, Setting
 
 TYPE_RE = re.compile(r"^[A-Za-z0-9._*?-]{1,100}=(standard|library|internal|sandbox)\Z")
-CHECK_RE = re.compile(r"^(webhook|actions|scan|repo|branch|deploy|stored|org|runner|release|upstream)\.[a-z_]{2,30}\Z")
+CHECK_RE = re.compile(r"^(webhook|actions|scan|repo|branch|deploy|stored|org|runner|release|original)\.[a-z_]{2,30}\Z")
 BRANCH_RE = re.compile(r"^[A-Za-z0-9._/*?-]{1,100}\Z")
 WINDOW_RE = re.compile(r"^(?:[1-7]-[1-7] (?:[01]\d|2[0-4])-(?:[01]\d|2[0-4]))?\Z")
 

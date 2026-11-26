@@ -343,7 +343,7 @@ def upstream(get, base, ctx):
     found = files(get, f"repos/{parent}", ctx)
     if not found:
         return []
-    return [finding("upstream.weak", parent, ", ".join(sorted(f["check"].split(".", 1)[1] for f in found)))]
+    return [finding("original.weak", parent, ", ".join(sorted(f["check"].split(".", 1)[1] for f in found)))]
 
 
 def apps(get, base, ctx):

@@ -90,7 +90,7 @@
  "cli.posture.help_repo": "要立即读取的仓库(posture check)。",
  "cli.posture.none": "尚无保存的发现项。",
  "ui.posture.c.org_pat_broad": "个人访问令牌可在组织内大范围写入",
- "ui.posture.c.upstream_weak": "分叉的原仓库缺少基本安全措施",
+ "ui.posture.c.original_weak": "分叉的原仓库缺少基本安全措施",
  "cfg.f.posture.upstream": "查看分叉的原仓库",
  "cfg.h.posture.upstream": "对于分叉，读取其公开的原仓库，记录缺少的安全策略或更新工具。每个分叉多几次读取；默认关闭。",
  "ui.posture.report_title": "OWASP 与 CIS 合规报告",

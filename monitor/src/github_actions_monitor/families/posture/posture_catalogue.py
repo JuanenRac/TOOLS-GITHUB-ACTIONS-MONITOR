@@ -33,7 +33,7 @@ CHECKS = {
     "org.app_broad": ("warning", "basic", "apps", 8, "1.4"),
     "org.settings_changed": ("warning", "basic", "audit", 10, "5.2"),
     "org.pat_broad": ("warning", "basic", "pats", 2, "1.4"),
-    "upstream.weak": ("info", "basic", "upstream", 3, "3.1"),
+    "original.weak": ("info", "basic", "upstream", 3, "3.1"),
     "runner.not_hardened": ("info", "strict", "runner", 7, "2.2"),
     "runner.coverage_lost": ("warning", "basic", "runner", 7, "2.2"),
     "release.asset_replaced": ("error", "basic", "releases", 9, "4.1"),

@@ -90,7 +90,7 @@
  "cli.posture.help_repo": "O repositório a ler agora (posture check).",
  "cli.posture.none": "Ainda não há constatações guardadas.",
  "ui.posture.c.org_pat_broad": "Um token de acesso pessoal pode escrever de forma ampla na organização",
- "ui.posture.c.upstream_weak": "Falta o básico de segurança ao original de um fork",
+ "ui.posture.c.original_weak": "Falta o básico de segurança ao original de um fork",
  "cfg.f.posture.upstream": "Ver o original dos forks",
  "cfg.h.posture.upstream": "De um fork, lê o original público e regista se falta a política de segurança ou a ferramenta de atualização. Poucas leituras a mais por fork; desligado de fábrica.",
  "ui.posture.report_title": "Relatório de conformidade OWASP e CIS",

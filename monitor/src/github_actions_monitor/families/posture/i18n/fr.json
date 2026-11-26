@@ -90,7 +90,7 @@
  "cli.posture.help_repo": "Le dépôt à lire maintenant (posture check).",
  "cli.posture.none": "Aucun constat enregistré pour l'instant.",
  "ui.posture.c.org_pat_broad": "Un jeton d'accès personnel peut écrire largement dans l'organisation",
- "ui.posture.c.upstream_weak": "L'original d'un fork manque de bases de sécurité",
+ "ui.posture.c.original_weak": "L'original d'un fork manque de bases de sécurité",
  "cfg.f.posture.upstream": "Regarder l'original des forks",
  "cfg.h.posture.upstream": "Pour un fork, lit l'original public et note l'absence de politique de sécurité ou d'outil de mise à jour. Quelques lectures de plus par fork ; désactivé par défaut.",
  "ui.posture.report_title": "Rapport de conformité OWASP et CIS",

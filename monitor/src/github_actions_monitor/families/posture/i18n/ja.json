@@ -90,7 +90,7 @@
  "cli.posture.help_repo": "今読むリポジトリ(posture check)。",
  "cli.posture.none": "保存された指摘はまだありません。",
  "ui.posture.c.org_pat_broad": "個人アクセストークンが組織内で広く書き込めます",
- "ui.posture.c.upstream_weak": "フォーク元にセキュリティの基本がありません",
+ "ui.posture.c.original_weak": "フォーク元にセキュリティの基本がありません",
  "cfg.f.posture.upstream": "フォーク元も確認する",
  "cfg.h.posture.upstream": "フォークについては公開されている元リポジトリを読み、セキュリティポリシーや更新ツールがないことを記録します。フォークごとに読み取りが少し増えます。既定はオフです。",
  "ui.posture.report_title": "OWASP と CIS の準拠レポート",

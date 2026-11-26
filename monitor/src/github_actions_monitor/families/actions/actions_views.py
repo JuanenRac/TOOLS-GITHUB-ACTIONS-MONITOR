@@ -30,7 +30,7 @@ def _matches_any(value, patterns):
 
 
 def visible(runs, hide):
-    """The runs whose workflow name is not hidden (`actions.hide_workflows`, patterns)."""
+    """The runs whose workflow name is not hidden (`teamwork.hide_workflows`, patterns)."""
     return [r for r in _dicts(runs) if not _matches_any(r.get("name"), hide)]
 
 
@@ -107,7 +107,7 @@ def vulnerabilities(repo, alerts, now):
 
 
 def dismissals(repo, kind, alerts, allowed):
-    """Security alerts somebody dismissed: who, why and when. `authorized` is False when the person is not in `actions.dismiss_allowed` (None when that list is empty: nothing to compare)."""
+    """Security alerts somebody dismissed: who, why and when. `authorized` is False when the person is not in `teamwork.dismiss_allowed` (None when that list is empty: nothing to compare)."""
     out = []
     names = {str(a).lower() for a in allowed or ()}
     for alert in _dicts(alerts):
@@ -120,7 +120,7 @@ def dismissals(repo, kind, alerts, allowed):
 
 
 def policy_matches(runs, patterns):
-    """The runs still going that match a line `repository:workflow:branch` (patterns) of `actions.cancel_policy`."""
+    """The runs still going that match a line `repository:workflow:branch` (patterns) of `teamwork.cancel_policy`."""
     out = []
     for run in _dicts(runs):
         if run.get("status") not in RUNNING + QUEUED + ("waiting",):

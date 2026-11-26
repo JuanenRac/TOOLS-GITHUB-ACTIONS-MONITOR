@@ -48,7 +48,7 @@ class Original(unittest.TestCase):
         entry = engine.check_repo(get_from(answers), "me", "app", cfg, {}, 100)
         self.assertEqual((entry["findings"], entry["skipped"]), ([], "fork"))
         entry = engine.check_repo(get_from(answers), "me", "app", dict(cfg, upstream=True), {}, 100)
-        self.assertEqual([(f["check"], f["item"]) for f in entry["findings"]], [("upstream.weak", "them/app")])
+        self.assertEqual([(f["check"], f["item"]) for f in entry["findings"]], [("original.weak", "them/app")])
         self.assertEqual(entry["checked"], ["upstream"])
 
     def test_a_parent_name_that_is_not_one_is_not_asked(self):

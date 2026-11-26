@@ -78,7 +78,7 @@ class Reads(unittest.TestCase):
         answers = {"repos/me/app/pulls": [], "repos/me/app/dependabot/alerts": "forbidden",
                    "dismissed repos/me/app/dependabot/alerts": [{"number": 3, "dismissed_at": RECENT, "dismissed_by": {"login": "stranger"}, "dismissed_reason": "no_bandwidth"}],
                    "dismissed repos/me/app/code-scanning/alerts": [], "repos/me/app/actions/workflows": {"workflows": [{"id": 5, "name": "nightly", "state": "disabled_inactivity"}]}}
-        out = engine.read_repo(get_from(answers), "me", "app", engine.settings({"actions": ON}), NOW)
+        out = engine.read_repo(get_from(answers), "me", "app", engine.settings({"teamwork": ON}), NOW)
         self.assertEqual(out["unread"], {"vulnerabilities": "forbidden"})
         self.assertIsNone(out["vulnerable"])
         self.assertEqual([d["authorized"] for d in out["dismissals"]], [False])
@@ -95,7 +95,7 @@ class Reads(unittest.TestCase):
 
 class Writes(unittest.TestCase):
     def config(self, **gh):
-        return {"actions": {"enabled": True, "auto_rerun": True}, "github_actions": {"enabled": True, "allowed": ["rerun_failed", "dispatch"], "writer_lock": False, "preflight": False, "require_reason": True, **gh}}
+        return {"teamwork": {"enabled": True, "auto_rerun": True}, "github_actions": {"enabled": True, "allowed": ["rerun_failed", "dispatch"], "writer_lock": False, "preflight": False, "require_reason": True, **gh}}
 
     def test_only_the_two_actions_that_need_them_take_fields_from_a_caller(self):
         item, why = ghactions.plan(self.config(), "me", "dispatch", "app", 5, reason="because", operator="me")
@@ -135,7 +135,7 @@ class Writes(unittest.TestCase):
 
     def test_with_the_switch_off_nothing_runs_by_itself(self):
         config = self.config()
-        config["actions"]["auto_rerun"] = False
+        config["teamwork"]["auto_rerun"] = False
         self.assertEqual(engine.auto_rerun(config, "me", [run(1, conclusion="timed_out")], lambda *a: self.fail("call"), NOW), [])
 
 
@@ -161,14 +161,14 @@ class RunnerHooks(unittest.TestCase):
     def test_a_hook_is_recorded_only_when_asked(self):
         env = {"GITHUB_REPOSITORY": "me/app", "GITHUB_RUN_ID": "4", "GITHUB_JOB": "build", "RUNNER_NAME": "box"}
         with mock.patch.object(engine, "state_file", return_value=Path(tempfile.mkdtemp()) / "s.json"):
-            self.assertFalse(engine.record_hook({"actions": {"enabled": True}}, "started", env))
-            self.assertTrue(engine.record_hook({"actions": {"enabled": True, "runner_hooks": True}}, "started", env, now=NOW))
+            self.assertFalse(engine.record_hook({"teamwork": {"enabled": True}}, "started", env))
+            self.assertTrue(engine.record_hook({"teamwork": {"enabled": True, "runner_hooks": True}}, "started", env, now=NOW))
             self.assertEqual(engine.load()["hooks"][0]["job"], "build")
 
 
 class Declared(unittest.TestCase):
     def test_everything_is_off_by_default(self):
-        defaults = family.FAMILY.defaults["actions"]
+        defaults = family.FAMILY.defaults["teamwork"]
         for key in ("enabled", "auto_rerun", "forks_help", "inactive_workflows", "runner_hooks", "dismissed_alerts"):
             self.assertIs(defaults[key], False, key)
         self.assertEqual(ghactions.DEFAULT_ALLOWED, ("rerun_failed", "cancel"))

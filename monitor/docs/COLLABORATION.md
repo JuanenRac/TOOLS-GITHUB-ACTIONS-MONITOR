@@ -11,23 +11,23 @@ Views of what waits for somebody, and a few actions on GitHub that stay off unti
 
 ## Turn it on
 
-Set `actions.enabled` (Settings > Collaboration). The views of runs come from what the monitor already reads; pull requests, alerts and workflows are read a few repositories per cycle (`actions.repos_per_cycle`, `actions.refresh_hours`). The Collaboration box is at the end of the Collaboration tab of the Sentinel area.
+Set `teamwork.enabled` (Settings > Collaboration). The views of runs come from what the monitor already reads; pull requests, alerts and workflows are read a few repositories per cycle (`teamwork.repos_per_cycle`, `teamwork.refresh_hours`). The Collaboration box is at the end of the Collaboration tab of the Sentinel area.
 
 ## The views
 
-Waiting for a person (environment approval, workflow of a fork, action required) apart from waiting for a runner. The newest run of each lane (workflow and branch); a red one can be set aside for `actions.dismiss_days` days, only that run, and restored. Open pull requests grouped as mergeable, behind the base, needs action or not known, with the updates of bots recognised by author, branch or label; `actions.hide_workflows` hides workflows by name. Repositories with critical or high dependency alerts with the age of the oldest, and the repositories NOT read, named. With `actions.dismissed_alerts`, who dismissed security alerts; a dismissal by somebody not in `actions.dismiss_allowed` raises an alert.
+Waiting for a person (environment approval, workflow of a fork, action required) apart from waiting for a runner. The newest run of each lane (workflow and branch); a red one can be set aside for `teamwork.dismiss_days` days, only that run, and restored. Open pull requests grouped as mergeable, behind the base, needs action or not known, with the updates of bots recognised by author, branch or label; `teamwork.hide_workflows` hides workflows by name. Repositories with critical or high dependency alerts with the age of the oldest, and the repositories NOT read, named. With `teamwork.dismissed_alerts`, who dismissed security alerts; a dismissal by somebody not in `teamwork.dismiss_allowed` raises an alert.
 
 ## Writing on GitHub
 
-Nothing is written unless `github_actions.enabled` is on, the action is in `github_actions.allowed`, and you confirm the plan, which shows exactly what is sent. New actions: `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch`. The views only PROPOSE: bot updates with failing checks, branches behind, runs queued or running too long (`actions.queued_hours`, `actions.stuck_hours`), runs that match `actions.cancel_policy`, workflows switched off for inactivity (`actions.inactive_workflows`). The form of a manual workflow reads its inputs and checks them. With `actions.forks_help`, facts about the author of a fork run (age of the account, merged changes here, workflow files touched); no verdict is given.
+Nothing is written unless `github_actions.enabled` is on, the action is in `github_actions.allowed`, and you confirm the plan, which shows exactly what is sent. New actions: `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch`. The views only PROPOSE: bot updates with failing checks, branches behind, runs queued or running too long (`teamwork.queued_hours`, `teamwork.stuck_hours`), runs that match `teamwork.cancel_policy`, workflows switched off for inactivity (`teamwork.inactive_workflows`). The form of a manual workflow reads its inputs and checks them. With `teamwork.forks_help`, facts about the author of a fork run (age of the account, merged changes here, workflow files touched); no verdict is given.
 
 ## The one automatic action
 
-`actions.auto_rerun` (off) re-runs once the failed jobs of a run that did not start or timed out, through the same checks (it does nothing while the actions are off or `rerun_failed` is not allowed). It never tries a second time; if the run fails again an alert is raised.
+`teamwork.auto_rerun` (off) re-runs once the failed jobs of a run that did not start or timed out, through the same checks (it does nothing while the actions are off or `rerun_failed` is not allowed). It never tries a second time; if the run fails again an alert is raised.
 
 ## Hooks of self-hosted runners
 
-With `actions.runner_hooks`, a hook of a runner on this computer records job start and end:
+With `teamwork.runner_hooks`, a hook of a runner on this computer records job start and end:
 
 ```
 # ACTIONS_RUNNER_HOOK_JOB_STARTED
@@ -53,4 +53,4 @@ The reads and the writes have been tested against made-up answers only; none of 
 
 ## All settings
 
-`actions.enabled` `actions.repos_per_cycle` `actions.refresh_hours` `actions.dismiss_days` `actions.hide_workflows` `actions.bot_authors` `actions.bot_branches` `actions.bot_labels` `actions.dismissed_alerts` `actions.dismiss_allowed` `actions.auto_rerun` `actions.cancel_policy` `actions.queued_hours` `actions.stuck_hours` `actions.forks_help` `actions.inactive_workflows` `actions.runner_hooks`
+`teamwork.enabled` `teamwork.repos_per_cycle` `teamwork.refresh_hours` `teamwork.dismiss_days` `teamwork.hide_workflows` `teamwork.bot_authors` `teamwork.bot_branches` `teamwork.bot_labels` `teamwork.dismissed_alerts` `teamwork.dismiss_allowed` `teamwork.auto_rerun` `teamwork.cancel_policy` `teamwork.queued_hours` `teamwork.stuck_hours` `teamwork.forks_help` `teamwork.inactive_workflows` `teamwork.runner_hooks`

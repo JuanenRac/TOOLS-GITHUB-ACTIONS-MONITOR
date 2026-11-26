@@ -90,7 +90,7 @@
  "cli.posture.help_repo": "Das jetzt zu lesende Repository (posture check).",
  "cli.posture.none": "Noch keine Befunde gespeichert.",
  "ui.posture.c.org_pat_broad": "Ein persönliches Zugriffstoken kann in der Organisation weitreichend schreiben",
- "ui.posture.c.upstream_weak": "Dem Original eines Forks fehlen Sicherheitsgrundlagen",
+ "ui.posture.c.original_weak": "Dem Original eines Forks fehlen Sicherheitsgrundlagen",
  "cfg.f.posture.upstream": "Original von Forks ansehen",
  "cfg.h.posture.upstream": "Bei einem Fork wird das öffentliche Original gelesen und eine fehlende Sicherheitsrichtlinie oder ein fehlendes Aktualisierungswerkzeug vermerkt. Wenige zusätzliche Abfragen pro Fork; ab Werk aus.",
  "ui.posture.report_title": "OWASP- und CIS-Konformitätsbericht",

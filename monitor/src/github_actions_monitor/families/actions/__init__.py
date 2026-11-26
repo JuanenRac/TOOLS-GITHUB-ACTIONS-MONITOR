@@ -133,27 +133,27 @@ def _tick(config, data):
 
 
 def _alerts(config, account):
-    return _engine().alerts(config, account) if ((config.get("actions") or {}).get("enabled") is True) else []
+    return _engine().alerts(config, account) if ((config.get("teamwork") or {}).get("enabled") is True) else []
 
 
 def _s(key, kind, bounds=None, secure=False, unit=None):
-    return Setting("teamwork", "teamwork", "actions." + key, kind, bounds=bounds, restart=False, secure=secure, unit=unit)
+    return Setting("teamwork", "teamwork", "teamwork." + key, kind, bounds=bounds, restart=False, secure=secure, unit=unit)
 
 
 FAMILY = Family(
     "actions",
-    defaults={"actions": {"enabled": False, "repos_per_cycle": 3, "refresh_hours": 6, "dismiss_days": 30, "hide_workflows": ["Dependabot Updates"], "bot_authors": ["dependabot[bot]", "renovate[bot]"],
+    defaults={"teamwork": {"enabled": False, "repos_per_cycle": 3, "refresh_hours": 6, "dismiss_days": 30, "hide_workflows": ["Dependabot Updates"], "bot_authors": ["dependabot[bot]", "renovate[bot]"],
                           "bot_branches": ["dependabot/*", "renovate/*"], "bot_labels": ["dependencies"], "dismissed_alerts": False, "dismiss_allowed": [], "auto_rerun": False, "cancel_policy": [],
                           "queued_hours": 6, "stuck_hours": 6, "forks_help": False, "inactive_workflows": False, "runner_hooks": False}},
     settings=(_s("enabled", "bool", secure=True), _s("repos_per_cycle", "int", (1, 50)), _s("refresh_hours", "int", (1, 720), unit="h"), _s("dismiss_days", "int", (1, 365), unit="d"),
               _s("hide_workflows", "names", PATTERN_RE), _s("bot_authors", "names", LOGIN_RE), _s("bot_branches", "names", PATTERN_RE), _s("bot_labels", "names", PATTERN_RE),
               _s("dismissed_alerts", "bool"), _s("dismiss_allowed", "names", LOGIN_RE, secure=True), _s("auto_rerun", "bool", secure=True), _s("cancel_policy", "names", POLICY_RE, secure=True),
               _s("queued_hours", "int", (1, 720), unit="h"), _s("stuck_hours", "int", (1, 720), unit="h"), _s("forks_help", "bool"), _s("inactive_workflows", "bool"), _s("runner_hooks", "bool", secure=True)),
-    settings_tabs=(("teamwork", "posture"),),
+    settings_tabs=(("teamwork", "extci"),),
     routes=(Route("GET", "/api/actions/state", _state, "collaboration views: what waits for a person or a runner, last run of each lane, set aside runs, dependency pull requests, vulnerable repositories (and the ones not read), proposals"),
             Route("GET", "/api/actions/dispatch-form", _form, "the inputs of a workflow fired by hand; ?repo=&workflow=file.yml", role="maintainer"),
             Route("GET", "/api/actions/environments", _environments, "the environments a run waits for; ?repo=&run=", role="maintainer"),
-            Route("GET", "/api/actions/fork-facts", _facts, "facts about the author of a fork run that waits for approval (actions.forks_help); ?repo=&run=", role="maintainer"),
+            Route("GET", "/api/actions/fork-facts", _facts, "facts about the author of a fork run that waits for approval (teamwork.forks_help); ?repo=&run=", role="maintainer"),
             Route("POST", "/api/actions/plan", _plan, "the plan of an action on GitHub (nothing is sent); confirmed with /api/gh-action/confirm", this_computer=True, audit="actions_plan", max_body=16384),
             Route("POST", "/api/actions/dismiss", _dismiss, "set a red run aside for a while or restore it (kept by the monitor, nothing on GitHub)", role="maintainer", audit="actions_dismiss", max_body=2048)),
     commands=(Command("actions", _cli, "cli.actions.help", words=("status", "proposals")),

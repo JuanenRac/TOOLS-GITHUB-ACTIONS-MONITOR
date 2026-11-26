@@ -14,23 +14,6 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `act.allowed` (secure) | `[]` | advanced | Workflows that can run (closed list) |
 | `act.enabled` (secure) | `false` | advanced | Allow running workflows here with act |
 | `act.timeout_seconds` | `900` | advanced | Time limit of a run |
-| `actions.auto_rerun` (secure) | `false` | teamwork | Re-run once by itself after an infrastructure failure |
-| `actions.bot_authors` | `["dependabot[bot]", "renovate[bot]"]` | teamwork | Bot accounts of dependency updates |
-| `actions.bot_branches` | `["dependabot/*", "renovate/*"]` | teamwork | Branch patterns of dependency updates |
-| `actions.bot_labels` | `["dependencies"]` | teamwork | Labels of dependency updates |
-| `actions.cancel_policy` (secure) | `[]` | teamwork | Runs that should not run (repository:workflow:branch) |
-| `actions.dismiss_allowed` (secure) | `[]` | teamwork | People allowed to dismiss alerts |
-| `actions.dismiss_days` | `30` | teamwork | Days a red run stays set aside |
-| `actions.dismissed_alerts` | `false` | teamwork | Watch dismissed security alerts |
-| `actions.enabled` (secure) | `false` | teamwork | Collaboration views and actions |
-| `actions.forks_help` | `false` | teamwork | Facts about authors of fork runs |
-| `actions.hide_workflows` | `["Dependabot Updates"]` | teamwork | Workflows hidden from these views |
-| `actions.inactive_workflows` | `false` | teamwork | Find workflows switched off for inactivity |
-| `actions.queued_hours` | `6` | teamwork | Hours queued before proposing to cancel |
-| `actions.refresh_hours` | `6` | teamwork | Hours between reads of a repository |
-| `actions.repos_per_cycle` | `3` | teamwork | Repositories read per cycle |
-| `actions.runner_hooks` (secure) | `false` | teamwork | Accept events of self-hosted runner hooks |
-| `actions.stuck_hours` | `6` | teamwork | Hours running before proposing a forced cancel |
 | `ai.actions.allowed` | `-` | ai | Allowed actions |
 | `ai.actions.enabled` (secure) | `-` | ai | Proposals on |
 | `ai.actions.execute` (secure) | `-` | ai | Run with confirmation |
@@ -952,6 +935,23 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `startup.resume_max_age_hours` | `12` | basic | Show the last picture after a restart (hours) |
 | `stuck_minutes` | `120` | polling | A build is stuck after |
 | `targets_file` | `-` | paths | Build targets file |
+| `teamwork.auto_rerun` (secure) | `false` | teamwork | Re-run once by itself after an infrastructure failure |
+| `teamwork.bot_authors` | `["dependabot[bot]", "renovate[bot]"]` | teamwork | Bot accounts of dependency updates |
+| `teamwork.bot_branches` | `["dependabot/*", "renovate/*"]` | teamwork | Branch patterns of dependency updates |
+| `teamwork.bot_labels` | `["dependencies"]` | teamwork | Labels of dependency updates |
+| `teamwork.cancel_policy` (secure) | `[]` | teamwork | Runs that should not run (repository:workflow:branch) |
+| `teamwork.dismiss_allowed` (secure) | `[]` | teamwork | People allowed to dismiss alerts |
+| `teamwork.dismiss_days` | `30` | teamwork | Days a red run stays set aside |
+| `teamwork.dismissed_alerts` | `false` | teamwork | Watch dismissed security alerts |
+| `teamwork.enabled` (secure) | `false` | teamwork | Collaboration views and actions |
+| `teamwork.forks_help` | `false` | teamwork | Facts about authors of fork runs |
+| `teamwork.hide_workflows` | `["Dependabot Updates"]` | teamwork | Workflows hidden from these views |
+| `teamwork.inactive_workflows` | `false` | teamwork | Find workflows switched off for inactivity |
+| `teamwork.queued_hours` | `6` | teamwork | Hours queued before proposing to cancel |
+| `teamwork.refresh_hours` | `6` | teamwork | Hours between reads of a repository |
+| `teamwork.repos_per_cycle` | `3` | teamwork | Repositories read per cycle |
+| `teamwork.runner_hooks` (secure) | `false` | teamwork | Accept events of self-hosted runner hooks |
+| `teamwork.stuck_hours` | `6` | teamwork | Hours running before proposing a forced cancel |
 | `tools_dir` | `-` | paths | Folder of the local signing tools |
 | `tui.refresh_seconds` | `-` | console | Refresh |
 | `tui.theme` | `-` | console | Colours |

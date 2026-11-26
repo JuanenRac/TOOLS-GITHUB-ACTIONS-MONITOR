@@ -4,143 +4,10 @@
  "format": 1,
  "version": "2.2.0",
  "previous": "2.1.8",
- "digest": "251f5dfeddd9328bb8bad778fb53dbf69c6fe26df46b7bd714bd7c7cf6597bca",
+ "digest": "3cc4ce37694d827658368d806e4ef8c1772390a311ab82969c01a5a98c9c430f",
  "data_schema": 2,
  "settings": {
   "added": [
-   {
-    "key": "actions.auto_rerun",
-    "kind": "bool",
-    "default": false
-   },
-   {
-    "key": "actions.bot_authors",
-    "kind": "names",
-    "bounds": {
-     "re": "^[A-Za-z0-9\\[\\]-]{1,60}\\Z"
-    },
-    "default": [
-     "dependabot[bot]",
-     "renovate[bot]"
-    ]
-   },
-   {
-    "key": "actions.bot_branches",
-    "kind": "names",
-    "bounds": {
-     "re": "^[A-Za-z0-9 ._/*?\\[\\]()-]{1,100}\\Z"
-    },
-    "default": [
-     "dependabot/*",
-     "renovate/*"
-    ]
-   },
-   {
-    "key": "actions.bot_labels",
-    "kind": "names",
-    "bounds": {
-     "re": "^[A-Za-z0-9 ._/*?\\[\\]()-]{1,100}\\Z"
-    },
-    "default": [
-     "dependencies"
-    ]
-   },
-   {
-    "key": "actions.cancel_policy",
-    "kind": "names",
-    "bounds": {
-     "re": "^[A-Za-z0-9._*?-]{1,100}:[^:]{1,100}:[A-Za-z0-9._/*?-]{1,100}\\Z"
-    },
-    "default": []
-   },
-   {
-    "key": "actions.dismiss_allowed",
-    "kind": "names",
-    "bounds": {
-     "re": "^[A-Za-z0-9\\[\\]-]{1,60}\\Z"
-    },
-    "default": []
-   },
-   {
-    "key": "actions.dismiss_days",
-    "kind": "int",
-    "bounds": [
-     1,
-     365
-    ],
-    "default": 30
-   },
-   {
-    "key": "actions.dismissed_alerts",
-    "kind": "bool",
-    "default": false
-   },
-   {
-    "key": "actions.enabled",
-    "kind": "bool",
-    "default": false
-   },
-   {
-    "key": "actions.forks_help",
-    "kind": "bool",
-    "default": false
-   },
-   {
-    "key": "actions.hide_workflows",
-    "kind": "names",
-    "bounds": {
-     "re": "^[A-Za-z0-9 ._/*?\\[\\]()-]{1,100}\\Z"
-    },
-    "default": [
-     "Dependabot Updates"
-    ]
-   },
-   {
-    "key": "actions.inactive_workflows",
-    "kind": "bool",
-    "default": false
-   },
-   {
-    "key": "actions.queued_hours",
-    "kind": "int",
-    "bounds": [
-     1,
-     720
-    ],
-    "default": 6
-   },
-   {
-    "key": "actions.refresh_hours",
-    "kind": "int",
-    "bounds": [
-     1,
-     720
-    ],
-    "default": 6
-   },
-   {
-    "key": "actions.repos_per_cycle",
-    "kind": "int",
-    "bounds": [
-     1,
-     50
-    ],
-    "default": 3
-   },
-   {
-    "key": "actions.runner_hooks",
-    "kind": "bool",
-    "default": false
-   },
-   {
-    "key": "actions.stuck_hours",
-    "kind": "int",
-    "bounds": [
-     1,
-     720
-    ],
-    "default": 6
-   },
    {
     "key": "external_ci.alert.enabled",
     "kind": "bool",
@@ -539,7 +406,7 @@
     "key": "posture.skip",
     "kind": "names",
     "bounds": {
-     "re": "^(webhook|actions|scan|repo|branch|deploy|stored|org|runner|release|upstream)\\.[a-z_]{2,30}\\Z"
+     "re": "^(webhook|actions|scan|repo|branch|deploy|stored|org|runner|release|original)\\.[a-z_]{2,30}\\Z"
     },
     "default": []
    },
@@ -661,6 +528,139 @@
     "key": "sources.multi_owner",
     "kind": "bool",
     "default": false
+   },
+   {
+    "key": "teamwork.auto_rerun",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "teamwork.bot_authors",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9\\[\\]-]{1,60}\\Z"
+    },
+    "default": [
+     "dependabot[bot]",
+     "renovate[bot]"
+    ]
+   },
+   {
+    "key": "teamwork.bot_branches",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9 ._/*?\\[\\]()-]{1,100}\\Z"
+    },
+    "default": [
+     "dependabot/*",
+     "renovate/*"
+    ]
+   },
+   {
+    "key": "teamwork.bot_labels",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9 ._/*?\\[\\]()-]{1,100}\\Z"
+    },
+    "default": [
+     "dependencies"
+    ]
+   },
+   {
+    "key": "teamwork.cancel_policy",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9._*?-]{1,100}:[^:]{1,100}:[A-Za-z0-9._/*?-]{1,100}\\Z"
+    },
+    "default": []
+   },
+   {
+    "key": "teamwork.dismiss_allowed",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9\\[\\]-]{1,60}\\Z"
+    },
+    "default": []
+   },
+   {
+    "key": "teamwork.dismiss_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     365
+    ],
+    "default": 30
+   },
+   {
+    "key": "teamwork.dismissed_alerts",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "teamwork.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "teamwork.forks_help",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "teamwork.hide_workflows",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9 ._/*?\\[\\]()-]{1,100}\\Z"
+    },
+    "default": [
+     "Dependabot Updates"
+    ]
+   },
+   {
+    "key": "teamwork.inactive_workflows",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "teamwork.queued_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     720
+    ],
+    "default": 6
+   },
+   {
+    "key": "teamwork.refresh_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     720
+    ],
+    "default": 6
+   },
+   {
+    "key": "teamwork.repos_per_cycle",
+    "kind": "int",
+    "bounds": [
+     1,
+     50
+    ],
+    "default": 3
+   },
+   {
+    "key": "teamwork.runner_hooks",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "teamwork.stuck_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     720
+    ],
+    "default": 6
    },
    {
     "key": "updates.notify_window",

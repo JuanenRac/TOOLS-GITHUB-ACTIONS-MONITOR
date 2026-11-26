@@ -11,23 +11,23 @@ Vistas do que está à espera de alguém e algumas ações no GitHub que ficam d
 
 ## Ativar
 
-Ative `actions.enabled` (Definições > Colaboração). As vistas de execuções vêm do que o monitor já lê; pull requests, alertas e workflows leem-se de poucos repositórios por ciclo (`actions.repos_per_cycle`, `actions.refresh_hours`). A caixa fica no fim do separador Colaboração da área Sentinela.
+Ative `teamwork.enabled` (Definições > Colaboração). As vistas de execuções vêm do que o monitor já lê; pull requests, alertas e workflows leem-se de poucos repositórios por ciclo (`teamwork.repos_per_cycle`, `teamwork.refresh_hours`). A caixa fica no fim do separador Colaboração da área Sentinela.
 
 ## As vistas
 
-À espera de uma pessoa (aprovação de ambiente, workflow de um fork, ação necessária), à parte da espera por um executor. A execução mais recente de cada via (workflow e ramo); um vermelho pode ser posto de parte `actions.dismiss_days` dias, só essa execução, e reposto. Pull requests abertos: prontos a integrar, atrasados, a precisar de ação ou desconhecido, atualizações de bots reconhecidas por autor, ramo ou etiqueta; `actions.hide_workflows` oculta workflows. Repositórios com alertas críticos ou altos com a idade do mais antigo, e os repositórios NÃO lidos, pelo nome. Com `actions.dismissed_alerts`, quem descartou alertas; um descarte fora de `actions.dismiss_allowed` gera um alerta.
+À espera de uma pessoa (aprovação de ambiente, workflow de um fork, ação necessária), à parte da espera por um executor. A execução mais recente de cada via (workflow e ramo); um vermelho pode ser posto de parte `teamwork.dismiss_days` dias, só essa execução, e reposto. Pull requests abertos: prontos a integrar, atrasados, a precisar de ação ou desconhecido, atualizações de bots reconhecidas por autor, ramo ou etiqueta; `teamwork.hide_workflows` oculta workflows. Repositórios com alertas críticos ou altos com a idade do mais antigo, e os repositórios NÃO lidos, pelo nome. Com `teamwork.dismissed_alerts`, quem descartou alertas; um descarte fora de `teamwork.dismiss_allowed` gera um alerta.
 
 ## Escrever no GitHub
 
-Nada é escrito a menos que `github_actions.enabled` esteja ativo, a ação esteja em `github_actions.allowed` e confirme o plano, que mostra exatamente o que é enviado. Ações novas: `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch`. As vistas apenas PROPÕEM: atualizações de bots com verificações falhadas, ramos atrasados, execuções demasiado tempo em fila ou a correr (`actions.queued_hours`, `actions.stuck_hours`), as que correspondem a `actions.cancel_policy`, workflows desativados por inatividade (`actions.inactive_workflows`). O formulário de um workflow manual lê e verifica as entradas. Com `actions.forks_help`, dados sobre o autor de uma execução de fork; sem veredito.
+Nada é escrito a menos que `github_actions.enabled` esteja ativo, a ação esteja em `github_actions.allowed` e confirme o plano, que mostra exatamente o que é enviado. Ações novas: `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch`. As vistas apenas PROPÕEM: atualizações de bots com verificações falhadas, ramos atrasados, execuções demasiado tempo em fila ou a correr (`teamwork.queued_hours`, `teamwork.stuck_hours`), as que correspondem a `teamwork.cancel_policy`, workflows desativados por inatividade (`teamwork.inactive_workflows`). O formulário de um workflow manual lê e verifica as entradas. Com `teamwork.forks_help`, dados sobre o autor de uma execução de fork; sem veredito.
 
 ## A única ação automática
 
-`actions.auto_rerun` (desligado) repete uma vez os trabalhos falhados de uma execução que não arrancou ou expirou, com as mesmas verificações. Nunca uma segunda vez; se voltar a falhar é gerado um alerta.
+`teamwork.auto_rerun` (desligado) repete uma vez os trabalhos falhados de uma execução que não arrancou ou expirou, com as mesmas verificações. Nunca uma segunda vez; se voltar a falhar é gerado um alerta.
 
 ## Hooks de executores próprios
 
-Com `actions.runner_hooks`, um hook de um executor deste computador regista o início e o fim:
+Com `teamwork.runner_hooks`, um hook de um executor deste computador regista o início e o fim:
 
 ```
 # ACTIONS_RUNNER_HOOK_JOB_STARTED
@@ -53,4 +53,4 @@ Leituras e escritas só foram testadas com respostas inventadas; nenhuma das aç
 
 ## Todas as definições
 
-`actions.enabled` `actions.repos_per_cycle` `actions.refresh_hours` `actions.dismiss_days` `actions.hide_workflows` `actions.bot_authors` `actions.bot_branches` `actions.bot_labels` `actions.dismissed_alerts` `actions.dismiss_allowed` `actions.auto_rerun` `actions.cancel_policy` `actions.queued_hours` `actions.stuck_hours` `actions.forks_help` `actions.inactive_workflows` `actions.runner_hooks`
+`teamwork.enabled` `teamwork.repos_per_cycle` `teamwork.refresh_hours` `teamwork.dismiss_days` `teamwork.hide_workflows` `teamwork.bot_authors` `teamwork.bot_branches` `teamwork.bot_labels` `teamwork.dismissed_alerts` `teamwork.dismiss_allowed` `teamwork.auto_rerun` `teamwork.cancel_policy` `teamwork.queued_hours` `teamwork.stuck_hours` `teamwork.forks_help` `teamwork.inactive_workflows` `teamwork.runner_hooks`
