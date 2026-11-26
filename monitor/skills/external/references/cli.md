@@ -25,6 +25,7 @@ Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `
 | `--token-file` | file whose first line is the access token of the network mode (keep it readable by you only) |
 | `--token` | access token of the network mode (last resort: it shows in the list of processes; prefer MONITOR_ACCESS_TOKEN) |
 | `--deep` | health: also ask the deep check (the supervisor and the refresh cycle of every account) |
+| `--code` | proposals approve: the first 8 characters of the fingerprint (one user) |
 | `--user` | team mode: sign in as this user (with --password-file or MONITOR_PASSWORD_FILE) |
 | `--password-file` | team mode: a file with the password of --user on its first line |
 | `--ca-file` | HTTPS: trust this certificate authority (a PEM file), for a monitor with a certificate of your own |

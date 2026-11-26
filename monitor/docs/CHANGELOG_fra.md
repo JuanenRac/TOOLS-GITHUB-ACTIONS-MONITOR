@@ -11,6 +11,9 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Les propositions de l'IA sont décidées par des personnes** : marquées IA, avec empreinte, conservées après redémarrage, deux personnes quand il y a plusieurs utilisateurs ou le code saisi quand il n'y en a qu'un, visibles dans l'onglet Alertes ; avec `ai.assistant.can_propose` elles naissent aussi de la discussion.
+- **Discussion libre avec outils en lecture seule** (`ai.chat.enabled`, désactivée), **alertes similaires par un modèle d'embedding local** (`ai.rag.enabled`, désactivé), **rapport d'un dépôt et brouillon de triage à copier** et **les résumés comme ressources MCP**.
+- Un lien avec port et `@` dans le chemin n'est plus masqué comme un utilisateur et un mot de passe.
 - **Un dépôt est (source, propriétaire, nom)** : deux dépôts de même nom venant de deux endroits ne partagent plus identifiants, exécutions ni alertes, et les données enregistrées suivent le propriétaire surveillé (copie préalable, commande `identity`, `sources.multi_owner` désactivé). Les sources de CI externes ont aussi une vérification du doctor, une carte dans À propos et une route figée sous `/api/v1/`.
 - Contrôles de posture des dépôts et de l'organisation, lecture seule et désactivés par défaut : webhooks, réglages d'Actions, analyses, protection des branches et des branches de version, clés de déploiement, âge des secrets, applications, journal d'audit, durcissement de ce qui s'est exécuté et versions modifiées, avec référence OWASP CI/CD et CIS. Ce que GitHub refuse est non vérifié. Maturité par dépôt, historique et `posture` en ligne de commande.
 - **Une fenêtre annonce une version plus récente**: avec le résumé des changements dans votre langue, un bouton vers Mises à jour, « Plus tard » et « Ne plus annoncer cette version » ; activée par défaut et muette sur les écrans muraux et kiosque.

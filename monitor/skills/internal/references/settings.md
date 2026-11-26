@@ -26,6 +26,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.allowed_repos` | `-` | ai | Repositories it may see |
 | `ai.answer_language` | `-` | ai | Language of the answers |
 | `ai.api_key_env` | `-` | ai | Key variable |
+| `ai.assistant.can_propose` (secure) | `false` | ai | The assistant may propose actions |
 | `ai.assistant.enabled` (secure) | `-` | ai | Assistant panel |
 | `ai.assistant.max_context` | `-` | ai | Context sent per question |
 | `ai.assistant.max_tool_calls` | `-` | ai | Tool calls per question |
@@ -35,6 +36,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.catalog.fit_context` | `-` | ai | Fit the input to the context window |
 | `ai.catalog.max_requests_per_day` | `-` | ai | Requests for the list per day |
 | `ai.catalog.ttl_minutes` | `-` | ai | Life of the list of models |
+| `ai.chat.enabled` (secure) | `false` | ai | Free chat with the AI |
 | `ai.cost_limit_daily` | `-` | ai | Estimated cost per day (all models) |
 | `ai.daily_limit` | `-` | ai | Calls per day |
 | `ai.events` | `-` | ai | Events it may analyse |
@@ -51,6 +53,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.prompt_log.enabled` (secure) | `-` | ai | Local record of prompts |
 | `ai.prompt_log.keep` | `-` | ai | Prompts kept |
 | `ai.provider` (secure) | `"none"` | ai | AI service |
+| `ai.rag.enabled` (secure) | `false` | ai | Similar alerts by a local embedding model |
+| `ai.rag.max_mb` | `200` | ai | Largest size of the index (MB) |
+| `ai.rag.model` | `""` | ai | Embedding model |
+| `ai.rag.url` (secure) | `"http://127.0.0.1:11434"` | ai | Address of the local model |
 | `ai.redact.extra_patterns` (secure) | `-` | ai | Patterns to always hide |
 | `ai.redact.extra_terms` (secure) | `-` | ai | Words to always hide |
 | `ai.report_summary.enabled` | `-` | ai | AI draft for the summary of a report |
@@ -936,6 +942,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ui.about_org_logo` | `false` | general | Organization logo in About |
 | `ui.alerts_sort` | `"server"` | general | Order of the alerts |
 | `ui.compact` | `"auto"` | general | Compact view |
+| `ui.copy_report.enabled` | `true` | ai | Copy the report of a repository |
 | `ui.now_sort` | `"ecosystem"` | general | Order of the runs happening now |
 | `ui.orientation` | `"auto"` | general | Orientation of the page |
 | `ui.palette` | `true` | general | Palette and shortcuts |

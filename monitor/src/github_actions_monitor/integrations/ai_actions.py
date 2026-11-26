@@ -11,7 +11,12 @@ row the module locks itself until you unlock it.
 
 The closed list: `rerun_failed` (gh run rerun N --failed), `rerun` (gh run rerun N), `close_issue` (gh issue close N), `act_local` (act -W FILE -j JOB; only ever proposed, never run here).
 Not in the list, on purpose: deleting a branch, closing or merging a pull request, anything about secrets or settings.
+
+Every proposal comes from an AI (origin "ia"), carries the SHA-256 of what would run and is kept on disk (ai_proposals.json next to the log) until it expires. When the monitor answers a person (the page,
+the command line) an approval is a decision of PEOPLE: with two or more users two persons are needed (the one who asked the AI counts as one and cannot approve; a proposal nobody asked for needs two
+approvals); with one person the approval needs the first eight characters of the hash typed back. Such an approval is needed whatever `ai.actions.require_approval` says.
 """
+import hashlib
 import json
 import os
 import re
@@ -31,6 +36,8 @@ CLOSED_LIST = ("rerun_failed", "rerun", "close_issue", "act_local")
 RUNNABLE = ("rerun_failed", "rerun", "close_issue")        # act_local is only a suggestion
 DEFAULTS = {"enabled": False, "execute": False, "require_approval": True, "allowed": ["rerun_failed", "close_issue"], "max_per_hour": 5, "ttl_seconds": 600}
 LOCK_AFTER = 2
+STORE_NAME = "ai_proposals.json"
+CODE_CHARS = 8                     # how many characters of the hash a person types to approve when there is nobody else to approve
 # the shapes the module recognises in a text (owner/repo is optional in the text: the repository comes from the context, never from here)
 _PATTERNS = [
     ("rerun_failed", re.compile(r"\bgh\s+run\s+rerun\s+(\d{1,15})\s+--failed\b")),
@@ -38,6 +45,19 @@ _PATTERNS = [
     ("close_issue", re.compile(r"\bgh\s+issue\s+close\s+(\d{1,9})\b")),
     ("act_local", re.compile(r"\bact\s+-W\s+(\S+)\s+-j\s+(\S+)")),
 ]
+
+
+def argv_of(action, number, owner, repo):
+    """The argument list of an action of the closed list that may run, built from checked pieces only; None for anything else."""
+    if action not in RUNNABLE or not NAME_RE.match(repo or "") or not NAME_RE.match(owner or "") or isinstance(number, bool) or not isinstance(number, int) or number <= 0:
+        return None
+    if action == "close_issue":
+        return ["gh", "issue", "close", str(number), "-R", f"{owner}/{repo}"]
+    return ["gh", "run", "rerun", str(number), "-R", f"{owner}/{repo}"] + (["--failed"] if action == "rerun_failed" else [])
+
+
+def digest_of(command, repo):
+    return hashlib.sha256(f"{repo}\n{command}".encode("utf-8")).hexdigest()
 
 
 def settings(config):
@@ -68,16 +88,54 @@ def extract(text):
 
 
 class Actions:
-    def __init__(self, log_file=LOG_FILE, clock=time.time):
+    def __init__(self, log_file=LOG_FILE, clock=time.time, persist=False):
         self.log_file, self.clock = Path(log_file), clock
         self.lock = threading.Lock()
         self.pending = {}       # id -> proposal
         self.recent = []        # times of the actions that ran (for max_per_hour)
         self.failures = 0
         self.locked = False
+        self.persist, self._read = persist, False
+
+    def _store(self):
+        return self.log_file.with_name(STORE_NAME)
+
+    def _load(self):
+        """Once, with the lock held: the proposals of the file that have not expired. The argument list is built again from the checked pieces, never taken from the file."""
+        if not self.persist or self._read:
+            return
+        self._read = True
+        try:
+            rows = json.loads(self._store().read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return
+        for row in rows if isinstance(rows, list) else []:
+            try:
+                argv = argv_of(row["action"], row.get("number"), row.get("owner"), row["repo"])
+                command = " ".join(argv) if argv else str(row["command"])[:200]
+                if row["action"] not in CLOSED_LIST or self.clock() - row["at"] > row["ttl"] or command != row["command"]:
+                    continue
+                kept = {key: str(row.get(key) or "")[:60] for key in ("creator", "by", "owner")}
+                self.pending.setdefault(str(row["id"]), dict(kept, id=str(row["id"]), action=row["action"], command=command, runnable=row.get("runnable") is True and argv is not None, argv=argv,
+                                                             repo=row["repo"], at=float(row["at"]), ttl=int(row["ttl"]), number=row.get("number"), origin="ia", hash=digest_of(command, row["repo"]),
+                                                             status=row.get("status") if row.get("status") in ("pending", "approved", "rejected") else "pending",
+                                                             approvers=[str(a)[:60] for a in row.get("approvers") or []][:5]))
+            except (KeyError, TypeError, ValueError):
+                continue
+
+    def _save(self):
+        """With the lock held."""
+        if not self.persist:
+            return
+        rows = [{k: v for k, v in p.items() if k != "argv"} for p in self.pending.values()]
+        try:
+            self._store().parent.mkdir(parents=True, exist_ok=True)
+            private_io.write_private(self._store(), json.dumps(rows, ensure_ascii=False) + "\n")
+        except OSError:
+            pass      # kept in memory
 
     # ---- level 3
-    def propose(self, text, repo, config, watched, known_run, known_issue, owner):
+    def propose(self, text, repo, config, watched, known_run, known_issue, owner, creator=""):
         """The proposals of one answer for one repository: [{"id", "action", "command", "runnable", "argv"}] (only the ones that pass every check).
         known_run(repo, run_id) and known_issue(repo, number) say whether the monitor knows that target."""
         cfg = settings(config)
@@ -87,6 +145,7 @@ class Actions:
         for action, args in extract(text):
             if action not in cfg["allowed"]:
                 continue
+            number = None
             if action == "act_local":
                 if not (FILE_RE.match(args[0]) and JOB_RE.match(args[1])):
                     continue
@@ -97,27 +156,30 @@ class Actions:
                     continue
                 if action == "close_issue" and not known_issue(repo, number):
                     continue
-                if action == "close_issue":
-                    argv = ["gh", "issue", "close", str(number), "-R", f"{owner}/{repo}"]
-                else:
-                    argv = ["gh", "run", "rerun", str(number), "-R", f"{owner}/{repo}"] + (["--failed"] if action == "rerun_failed" else [])
+                argv = argv_of(action, number, owner, repo)
+                if argv is None:
+                    continue
                 command = " ".join(argv)
             ident = secrets.token_hex(8)
-            proposal = {"id": ident, "action": action, "command": command, "runnable": action in RUNNABLE and cfg["execute"], "argv": argv, "repo": repo, "at": self.clock(), "ttl": cfg["ttl_seconds"], "status": "pending", "by": ""}
+            proposal = {"id": ident, "action": action, "command": command, "runnable": action in RUNNABLE and cfg["execute"], "argv": argv, "repo": repo, "at": self.clock(), "ttl": cfg["ttl_seconds"], "status": "pending", "by": "",
+                        "number": number, "owner": owner, "origin": "ia", "creator": str(creator or "")[:60], "hash": digest_of(command, repo), "approvers": []}
             with self.lock:
+                self._load()
                 self.pending[ident] = proposal
                 for key in [k for k, v in self.pending.items() if self.clock() - v["at"] > v["ttl"]]:
                     del self.pending[key]
-            out.append({k: v for k, v in proposal.items() if k not in ("argv", "at", "ttl")})
+                self._save()
+            out.append({k: v for k, v in proposal.items() if k not in ("argv", "at", "ttl", "number", "owner", "approvers")})
         return out
 
     # ---- level 4
-    def run(self, ident, command, config, runner=None):
+    def run(self, ident, command, config, runner=None, people=None):
         """Runs the proposal `ident` when `command` is exactly its text. Returns {"ok", "reason", ...}; reasons: off, unknown, expired, mismatch, rejected, not_approved, locked, rate, failed, ok."""
         cfg = settings(config)
         if not cfg["enabled"] or not cfg["execute"]:
             return {"ok": False, "reason": "off"}
         with self.lock:
+            self._load()
             proposal = self.pending.get(str(ident))
             if proposal is None:
                 return {"ok": False, "reason": "unknown"}
@@ -128,7 +190,7 @@ class Actions:
                 return {"ok": False, "reason": "mismatch"}
             if proposal.get("status") == "rejected":
                 return {"ok": False, "reason": "rejected"}
-            if cfg.get("require_approval") and proposal.get("status") != "approved":
+            if (cfg.get("require_approval") or people is not None) and proposal.get("status") != "approved":      # asked by a person: an approval of people, always
                 return {"ok": False, "reason": "not_approved"}
             if self.locked:
                 return {"ok": False, "reason": "locked"}
@@ -137,6 +199,7 @@ class Actions:
                 return {"ok": False, "reason": "rate"}
             self.recent.append(self.clock())
             del self.pending[str(ident)]
+            self._save()
         try:
             from github_actions_monitor.security import secretstore
             done = (runner or subprocess.run)(proposal["argv"], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60, stdin=subprocess.DEVNULL, shell=False,
@@ -158,19 +221,25 @@ class Actions:
         `status` is pending, approved or rejected; with `ai.actions.require_approval` a proposal runs only when it is approved."""
         now, out = self.clock(), []
         with self.lock:
+            self._load()
             for key in [k for k, v in self.pending.items() if now - v["at"] > v["ttl"]]:
                 del self.pending[key]
             for proposal in sorted(self.pending.values(), key=lambda v: v["at"]):
                 out.append({"id": proposal["id"], "action": proposal["action"], "command": proposal["command"], "repo": proposal["repo"], "runnable": proposal["runnable"],
+                            "origin": "ia", "creator": proposal.get("creator", ""), "hash": proposal.get("hash", ""), "approvals": len(proposal.get("approvers") or []),
                             "status": proposal.get("status", "pending"), "by": proposal.get("by", ""), "age_s": int(now - proposal["at"]), "expires_in_s": max(0, int(proposal["ttl"] - (now - proposal["at"])))})
         return out
 
-    def review(self, ident, decision, who=""):
+    def review(self, ident, decision, who="", confirm="", people=None):
         """Approves or rejects the proposal `ident` (decision "approve" or "reject"), recording who did it. Returns {"ok", "reason", "status"}; reasons: bad_decision, unknown, expired, decided, ok.
-        A decision is final: a proposal that was approved or rejected is not changed again. Nothing is run here."""
+        A decision is final: a proposal that was approved or rejected is not changed again. Nothing is run here.
+        `people` is the number of users who can decide, when a person answers: with two or more, reasons also `who` (no name), `creator` (the one who asked cannot approve), `twice` (that person already
+        approved) and the status stays pending (reason `needs_second`) until two persons are in; with one, `confirm` must be the first eight characters of the hash (reason `confirm`). One may reject."""
         if decision not in ("approve", "reject"):
             return {"ok": False, "reason": "bad_decision"}
+        who = str(who or "")[:60]
         with self.lock:
+            self._load()
             proposal = self.pending.get(str(ident))
             if proposal is None:
                 return {"ok": False, "reason": "unknown"}
@@ -179,9 +248,22 @@ class Actions:
                 return {"ok": False, "reason": "expired"}
             if proposal.get("status", "pending") != "pending":
                 return {"ok": False, "reason": "decided", "status": proposal["status"]}
-            proposal["status"], proposal["by"] = ("approved" if decision == "approve" else "rejected"), str(who or "")[:60]
-        self._log({"action": proposal["action"], "repo": proposal["repo"], "command": proposal["command"], "review": proposal["status"], "by": proposal["by"]})
-        return {"ok": True, "reason": "ok", "status": proposal["status"]}
+            status, reason = ("approved" if decision == "approve" else "rejected"), "ok"
+            if decision == "approve" and people is not None:
+                if people >= 2:
+                    approvers = proposal.setdefault("approvers", [])
+                    why = "who" if not who else "creator" if who == proposal.get("creator") else "twice" if who in approvers else ""
+                    if why:
+                        return {"ok": False, "reason": why, "status": "pending"}
+                    approvers.append(who)
+                    if len(approvers) < (1 if proposal.get("creator") else 2):
+                        status, reason = "pending", "needs_second"
+                elif not proposal.get("hash") or str(confirm or "").strip().lower() != proposal["hash"][:CODE_CHARS]:
+                    return {"ok": False, "reason": "confirm", "status": "pending"}
+            proposal["status"], proposal["by"] = status, who
+            self._save()
+        self._log({"action": proposal["action"], "repo": proposal["repo"], "command": proposal["command"], "review": decision if reason == "needs_second" else status, "by": who, "hash": proposal.get("hash", "")[:16]})
+        return {"ok": True, "reason": reason, "status": status}
 
     def unlock(self):
         with self.lock:
@@ -218,4 +300,4 @@ class Actions:
                 "ran_last_hour": len([t for t in self.recent if self.clock() - t < 3600]), "max_per_hour": cfg["max_per_hour"]}
 
 
-ACTIONS = Actions()
+ACTIONS = Actions(persist=True)

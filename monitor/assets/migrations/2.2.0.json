@@ -4,10 +4,50 @@
  "format": 1,
  "version": "2.2.0",
  "previous": "2.1.8",
- "digest": "56c1d100315c691e73dfedcdedea42342ed5824bf03d9540b6ad064544969143",
+ "digest": "f6b8402d972215d56d4b6d5157f3a2bf8fbdf5cfabedd5be63709dbdb77b06c0",
  "data_schema": 2,
  "settings": {
   "added": [
+   {
+    "key": "ai.assistant.can_propose",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ai.chat.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ai.rag.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ai.rag.max_mb",
+    "kind": "int",
+    "bounds": [
+     10,
+     100000
+    ],
+    "default": 200
+   },
+   {
+    "key": "ai.rag.model",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9._:/-]{0,100}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "ai.rag.url",
+    "kind": "text",
+    "bounds": {
+     "re": "^http://(127\\.0\\.0\\.1|localhost|\\[::1\\]):\\d{2,5}\\Z"
+    },
+    "default": "http://127.0.0.1:11434"
+   },
    {
     "key": "external_ci.alert.enabled",
     "kind": "bool",
@@ -490,6 +530,11 @@
     "key": "sources.multi_owner",
     "kind": "bool",
     "default": false
+   },
+   {
+    "key": "ui.copy_report.enabled",
+    "kind": "bool",
+    "default": true
    },
    {
     "key": "updates.notify_window",

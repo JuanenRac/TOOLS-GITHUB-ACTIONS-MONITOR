@@ -408,18 +408,24 @@ def cmd_proposals(ctx):
     if action == "show":
         return {"proposal": row}, [_proposal_line(row), i18n.t("cli.proposals_detail", action=row.get("action", "?"), runnable=i18n.t("cli.yes" if row.get("runnable") else "cli.no"), by=row.get("by") or "-")], EXIT_OK
     if action in ("approve", "reject"):
-        status, result = post_json(ctx["base"], "/api/ai/actions/review", {"id": row["id"], "decision": action, "by": "cli"}, ctx["timeout"], ctx["token"], guarded=True)
+        body = {"id": row["id"], "decision": action, "by": "cli"}
+        code = str(getattr(ctx.get("args"), "code", "") or "").strip()
+        if code:      # one person approving: the first characters of the fingerprint of the proposal, typed
+            body["confirm"] = code[:64]
+        status, result = post_json(ctx["base"], "/api/ai/actions/review", body, ctx["timeout"], ctx["token"], guarded=True)
     else:
         status, result = post_json(ctx["base"], "/api/ai/actions/confirm", {"id": row["id"], "command": row.get("command")}, max(ctx["timeout"], 70.0), ctx["token"], guarded=True)
     if status in (401, 403):
         raise CliError(EXIT_AUTH, i18n.t("cli.proposals_refused", code=result.get("code") or result.get("error") or status))
     ok = status == 200 and result.get("ok") is True
     reason = str(result.get("reason") or result.get("error") or status)
+    if ok and reason == "needs_second":
+        return {"action": action, "id": row["id"], "ok": True, "reason": reason}, [i18n.t("cli.proposals_reason_needs_second")], EXIT_OK
     line = i18n.t("cli.proposals_done_" + action, id=row["id"]) if ok else i18n.t("cli.proposals_failed", id=row["id"], reason=i18n.t("cli.proposals_reason_" + reason) if reason in PROPOSAL_REASONS else reason)
     return {"action": action, "id": row["id"], "ok": ok, "reason": reason}, [line], EXIT_OK if ok else EXIT_DEGRADED
 
 
-PROPOSAL_REASONS = ("off", "unknown", "expired", "mismatch", "rejected", "not_approved", "locked", "rate", "failed", "decided", "bad_decision")
+PROPOSAL_REASONS = ("off", "unknown", "expired", "mismatch", "rejected", "not_approved", "locked", "rate", "failed", "decided", "bad_decision", "confirm", "who", "creator", "twice")
 
 
 def _signed(number):
@@ -1280,6 +1286,7 @@ def build_parser():
     ap.add_argument("--token-file", metavar="FILE", default="", dest="token_file", help=i18n.t("cli.help_token_file"))
     ap.add_argument("--token", metavar="TOKEN", default="", help=i18n.t("cli.help_token"))
     ap.add_argument("--deep", action="store_true", help=i18n.t("cli.help_deep"))
+    ap.add_argument("--code", metavar="HEX", default="", help=i18n.t("cli.help_code"))
     ap.add_argument("--user", metavar="NAME", default="", help=i18n.t("cli.help_user"))
     ap.add_argument("--password-file", metavar="FILE", default="", dest="password_file", help=i18n.t("cli.help_password_file"))
     ap.add_argument("--ca-file", metavar="FILE", default="", dest="ca_file", help=i18n.t("cli.help_ca_file"))

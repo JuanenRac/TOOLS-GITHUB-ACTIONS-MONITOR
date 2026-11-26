@@ -4453,7 +4453,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_response(404)
                 self.end_headers()
                 return
-            self.json_reply(assistant.describe(cfg))
+            self.json_reply(assistant.describe(cfg, families.block(toolconfig.raw_config(), "ai.chat").get("enabled") is True))
         elif path == "/api/ai/prompts":      # read only, administrator: the local record of the cleaned prompts and answers (off by default; it only exists while `ai.prompt_log.enabled` is on)
             if not self.guard():
                 return
@@ -5160,7 +5160,12 @@ def assistant_reader():
     def history():
         from github_actions_monitor.integrations import ai_alerts, similar_alerts
         return similar_alerts.from_feed(ai_alerts.alerts(toolconfig.raw_config(), states=("resolved",))[:200])
-    return {"views": health_views, "score": score, "history": history}
+    out = {"views": health_views, "score": score, "history": history}
+    from github_actions_monitor.integrations import ai_rag
+    rag = ai_rag.settings(toolconfig.raw_config())
+    if rag["enabled"]:      # "alerts like this one" ranked by a local embedding model
+        out["ranker"] = lambda found, pool, count: ai_rag.rank(rag, found, pool, count)
+    return out
 
 
 def assistant_ask(request, role="admin"):
@@ -5189,6 +5194,19 @@ def _register_cloud_hook():
 _register_cloud_hook()
 
 
+def ai_people(config):
+    """How many people can decide on a proposal of the AI: the active users who are not mere viewers in the team mode, else one."""
+    from github_actions_monitor.security import auth
+    try:
+        if not auth.settings(config)["enabled"]:
+            return 1
+        users = auth.list_users(auth.get_storage(config))
+        return max(1, sum(1 for u in users if u["active"] and u["role"] != "viewer"))
+    except Exception as error:   # noqa: BLE001 - when it cannot be known, the stricter rule
+        degraded.note("ai.people", error)
+        return 2
+
+
 def handle_action_post(path, request, who=""):
     """The endpoints that DO something on request of the page: confirm an action of the AI, unlock the actions, test the AI connection, send a test notification."""
     config = toolconfig.raw_config()
@@ -5197,10 +5215,11 @@ def handle_action_post(path, request, who=""):
         return ai_models.handle_post(path, request, sentinel_ai.ai_config(config), ai_store())
     if path == "/api/ai/actions/confirm":
         from github_actions_monitor.integrations import ai_actions
-        return ai_actions.ACTIONS.run(request.get("id"), request.get("command"), config)
+        return ai_actions.ACTIONS.run(request.get("id"), request.get("command"), config, people=ai_people(config))
     if path == "/api/ai/actions/review":     # approve or reject a proposal; the person with a session counts, never the name the request claims
         from github_actions_monitor.integrations import ai_actions
-        return ai_actions.ACTIONS.review(request.get("id"), request.get("decision"), who or str(request.get("by") or "")[:60])
+        people = ai_people(config)      # with several users the name is the one of the session, never the one the request claims
+        return ai_actions.ACTIONS.review(request.get("id"), request.get("decision"), who or ("" if people >= 2 else str(request.get("by") or "")[:60]), confirm=request.get("confirm"), people=people)
     if path == "/api/ai/actions/unlock":
         from github_actions_monitor.integrations import ai_actions
         ai_actions.ACTIONS.unlock()

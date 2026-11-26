@@ -11,6 +11,9 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Adicionado
 
+- **As propostas da IA são decididas por pessoas**: marcadas como IA, com impressão digital, sobrevivem a um reinício, exigem duas pessoas quando há vários utilizadores ou o código escrito quando há um, e veem-se no separador Alertas; com `ai.assistant.can_propose` também nascem da conversa.
+- **Conversa livre com ferramentas só de leitura** (`ai.chat.enabled`, desligada), **alertas parecidos com um modelo local de embeddings** (`ai.rag.enabled`, desligado), **relatório de um repositório e rascunho de triagem para copiar** e **os resumos como recursos MCP**.
+- Uma ligação com porta e um `@` no caminho já não é limpa como se fosse utilizador e palavra-passe.
 - **Um repositório é (fonte, proprietário, nome)**: dois repositórios com o mesmo nome em dois sítios já não partilham identificadores, execuções nem alertas, e os dados guardados acompanham o proprietário vigiado (com cópia prévia, comando `identity`, `sources.multi_owner` desligado). As fontes de CI externas têm ainda uma verificação no doctor, um cartão em Acerca de e uma rota congelada em `/api/v1/`.
 - Verificações de postura de repositórios e organização, só de leitura e desligadas por predefinição: webhooks, definições do Actions, análises, proteção de ramos e ramos de versão, chaves de implementação, idade dos segredos, aplicações, auditoria da organização, reforço do que foi executado e versões alteradas, com referência OWASP CI/CD e CIS. O que o GitHub recusa aparece por verificar. Maturidade por repositório, histórico e `posture` na linha de comandos.
 - **Uma janela anuncia uma versão mais nova**: com o resumo das alterações no seu idioma, um botão para Atualizações, «Mais tarde» e «Não avisar desta versão»; vem ligada e não aparece em ecrãs de parede nem quiosque.

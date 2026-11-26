@@ -19,7 +19,7 @@
 | `backup` | 安装的完整备份（监视器无需运行）：`backup create [文件] [--account ID]`、`verify 文件 [--deep]`、`restore 文件 [--account ID] [--to-dir 文件夹] [--force]`、`status`、`list`；`--encrypt` 配合 `--key-env 名称` 进行加密（可选库）；见 [OPS_zho.md](OPS_zho.md) | 不支持 |
 | `accounts` | 监督进程的账户（仅多账户时） | 不支持 |
 | `alerts` | 所有哨兵的警报合成一个列表：`--sentinel ci\|collab\|security\|supply\|delivery`、`--level info\|warning\|error`、`--muted show\|hide\|only`；`--since 90m|24h|7d|2w` 列出在该时间段内某一时刻处于打开状态的警报，包括已关闭的（来自监视器运行时保存的历史；警报消失十分钟后算作已关闭） | 不支持 |
-| `proposals` | AI 提出的操作（`ai.actions.enabled`）：`proposals list`、`show ID`、`approve ID`、`reject ID`、`execute ID`（id 可以缩写）。`approve` 和 `reject` 只记录决定；`execute` 通过与页面相同的入口执行，需要 `ai.actions.execute`，开启 `ai.actions.require_approval` 时需先批准。批准、拒绝和执行只能在本机进行 | 不支持 |
+| `proposals` | AI 提出的操作（`ai.actions.enabled`）：`proposals list`、`show ID`、`approve ID`、`reject ID`、`execute ID`（id 可以缩写）。`approve` 和 `reject` 只记录决定；`execute` 通过与页面相同的入口执行，需要 `ai.actions.execute`，开启 `ai.actions.require_approval` 时需先批准。批准、拒绝和执行只能在本机进行 单用户时 `approve` 需要 `--code` 和指纹前八位；多用户时请在页面用自己的会话批准（两人）。 | 不支持 |
 | `score` | 账户评分：数值、等级、趋势、各部分、覆盖率以及按仓库的细分；`--compare` 将其与窗口内的历史记录比较 | 不支持 |
 | `compare` | 将当前时段与上一时段对比：各项数值及其变化与方向，哪些变差或变好；`--window 7\|30d`、`--days all\|workdays\|weekend`、`--baseline previous\|year_ago`、`--format table\|json\|ndjson\|csv`；某项数据不足时退出码为 4，使用 `--fail-on` 且有数值变差时为 5；其他命令使用 `--format csv` 属于误用（退出码 1） | 不支持 |
 | `api` | 面向客户端的只读 API:`api openapi` 输出每条已冻结路由的 OpenAPI 文档(可重定向到文件),`api me` 说明监视器如何看待此客户端(模式、用户、角色、会话可做的事、契约版本);`api.v1_enabled` 关闭的监视器会如实告知;`api contract-check` 对其运行面向客户端的契约套件(有检查失败时退出码为 4) | 不支持 |
