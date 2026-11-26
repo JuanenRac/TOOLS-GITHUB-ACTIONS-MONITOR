@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6015_passing-brightgreen.svg" alt="6015 tests">
+  <img src="https://img.shields.io/badge/Tests-6028_passing-brightgreen.svg" alt="6028 tests">
 </p>
 
 > Controlla i workflow di tutti i tuoi repository e ti dice, su una pagina locale, cosa è rosso, cosa è bloccato e cosa ti aspetta.
@@ -98,8 +98,8 @@ Metodo, ipotesi e come misurarlo nel proprio uso: [`monitor/docs/PRODUCTIVITY_it
 | | |
 |---|---|
 | **Maturità** | functional |
-| **Test** | 6015 metodi di test (`python -m unittest discover -s monitor/tests`) |
-| **Impostazioni** | 934 impostazioni, tutte con aiuto |
+| **Test** | 6028 metodi di test (`python -m unittest discover -s monitor/tests`) |
+| **Impostazioni** | 950 impostazioni, tutte con aiuto |
 | **Lingue** | 8 (inglese, spagnolo, tedesco, francese, italiano, giapponese, cinese e portoghese) |
 | **Provato nel CI su** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -353,6 +353,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/QUOTAS_ita.md`](monitor/docs/QUOTAS_ita.md): quote e piani di GitHub
 - [`monitor/docs/MODES_ita.md`](monitor/docs/MODES_ita.md): modalità di lavoro: normale, veloce e turbo
 - [`monitor/docs/EXTERNAL_CI_ita.md`](monitor/docs/EXTERNAL_CI_ita.md): Fonti CI esterne, sola lettura: Buildbot, GitLab CI, Jenkins, Azure Pipelines
+- [`monitor/docs/POSTURE_ita.md`](monitor/docs/POSTURE_ita.md): Postura di repository e organizzazione, sola lettura
 - [`monitor/docs/AI_CONNECTION_ita.md`](monitor/docs/AI_CONNECTION_ita.md): Collegare uno strumento di IA: tutto ciò che dice il monitor, come segnali, nel riepilogo, nell'endpoint, negli strumenti MCP e nell'hook
 - [`monitor/docs/AI_SETUP_PROMPT_ita.md`](monitor/docs/AI_SETUP_PROMPT_ita.md): Configurare il monitor con un'IA: un prompt da incollare nel tuo assistente IA che lo installa, ti chiede cosa vuoi e scrive la configurazione
 - [`monitor/docs/QUOTA_ita.md`](monitor/docs/QUOTA_ita.md): Più quota, meno spesa: modalità risparmio, il pannello centrale, una GitHub App e come condividere la quota
