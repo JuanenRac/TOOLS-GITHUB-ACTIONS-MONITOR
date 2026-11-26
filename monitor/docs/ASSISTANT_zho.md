@@ -34,3 +34,21 @@
 ## 检查
 
 `GET /api/assistant` 说明它是什么及其限制；`POST /api/assistant/ask` 接收 `action`，并按需接收 `alert` 或 `repo`。关闭期间两者都返回 404。问题会记入操作日志（不含其文本）；开启 `ai.prompt_log.enabled` 后，清理过的提示词保存在本地记录中，您可在设置里查看和清空。
+
+## 由人批准的提议
+
+AI 提议的每条命令（`ai.actions.enabled`）都标记为来自 AI，带有将要执行内容的指纹（SHA-256），并保留到过期，重启后依然保留。绝不会自行执行。批准是人的决定：两个及以上用户时需要两人（向 AI 提问的人算作一人，且不能批准自己的提议）；单用户时需输入指纹前八位。一人即可拒绝。开启 `ai.assistant.can_propose`（默认关闭）后，聊天回答也可能成为提议。它们显示在告警页。
+
+## 自由聊天
+
+`ai.chat.enabled`（默认关闭）在告警页增加聊天。AI 只能用上面四个工具读取；由它请求，监视器决定。预算、脱敏和数据标记相同；每个回答列出读取内容。没有任何写入工具。
+
+## 用本地模型查找相似告警
+
+开启 `ai.rag.enabled`（默认关闭）并设置 `ai.rag.model` 后，“解释此告警”按本机模型的嵌入排序（Ollama 接口；仅限回环地址）。索引只保存向量和哈希，不存文本，上限 `ai.rag.max_mb`；删除 `ai_rag_index.json` 不丢失任何内容。没有模型时使用词语比较。仅用模拟服务器测试过。
+
+## 仓库报告
+
+开启 `ui.copy_report.enabled` 后，告警页可复制仓库的 Markdown 报告或分诊草稿供手动粘贴。不用 AI、不请求 GitHub、不发布任何内容。
+
+路由：`GET /api/assistant/extras`, `GET /api/assistant/repo-report?repo=`, `POST /api/assistant/chat`。MCP 客户端还可将摘要作为资源读取：`resources/list`, `resources/read`, `monitor://briefs/index`, `monitor://briefs/<tab>`。

@@ -53,7 +53,9 @@ class ReviewRoute(unittest.TestCase):
 
     def test_approve_over_http_lets_the_proposal_run(self):
         self.assertEqual(self.post("/api/ai/actions/confirm", {"id": self.ident, "command": self.command})[1]["reason"], "not_approved")
-        code, answer = self.post("/api/ai/actions/review", {"id": self.ident, "decision": "approve", "by": "cli"})
+        self.assertEqual(self.post("/api/ai/actions/review", {"id": self.ident, "decision": "approve", "by": "cli"})[1]["reason"], "confirm")      # alone: the code of the proposal is typed
+        typed = self.actions.listing(self.CONFIG)[0]["hash"][:8]
+        code, answer = self.post("/api/ai/actions/review", {"id": self.ident, "decision": "approve", "by": "cli", "confirm": typed})
         self.assertEqual((code, answer), (200, {"ok": True, "reason": "ok", "status": "approved"}))
         self.assertEqual([r["status"] for r in self.actions.listing(self.CONFIG)], ["approved"])
 
@@ -68,7 +70,8 @@ class ReviewRoute(unittest.TestCase):
         self.assertEqual(answer["reason"], "bad_decision")
 
     def test_the_person_with_a_session_is_the_reviewer(self):
-        done = actions_monitor.handle_action_post("/api/ai/actions/review", {"id": self.ident, "decision": "approve", "by": "bob"}, "ana")
+        typed = self.actions.listing(self.CONFIG)[0]["hash"][:8]
+        done = actions_monitor.handle_action_post("/api/ai/actions/review", {"id": self.ident, "decision": "approve", "by": "bob", "confirm": typed}, "ana")
         self.assertTrue(done["ok"])
         self.assertEqual(self.actions.listing(self.CONFIG)[0]["by"], "ana")
 

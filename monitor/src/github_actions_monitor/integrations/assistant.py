@@ -169,7 +169,7 @@ def _lines(value, nonce, limit, indent=""):
     return rows
 
 
-def similar_lines(found, toolbox, history, count, nonce, limit):
+def similar_lines(found, toolbox, history, count, nonce, limit, ranker=None):
     """The lines of "alerts that look like this one": the open alerts of the account and the resolved ones the feed remembers; each one cited by its id. Says so when there is none."""
     try:
         pool = list(toolbox.call("alerts")["alerts"])
@@ -181,7 +181,10 @@ def similar_lines(found, toolbox, history, count, nonce, limit):
         pool += list(history() if callable(history) else [])
     except Exception:   # noqa: BLE001 - the history is a help: without it the open alerts still answer
         pass
-    like = similar_alerts.find(found, pool, count)
+    try:      # a local embedding model (ai.rag) ranks them when it is on; without it, or when it does not answer, the deterministic similarity
+        like = ranker(found, pool, count) if ranker else similar_alerts.find(found, pool, count)
+    except Exception:   # noqa: BLE001
+        like = similar_alerts.find(found, pool, count)
     toolbox.sources.append({"tool": "similar", "repo": "", "items": [a.get("id") for a in like]})
     if not like:
         return ["SIMILAR ALERTS: none"]
@@ -192,7 +195,7 @@ def similar_lines(found, toolbox, history, count, nonce, limit):
     return rows
 
 
-def build_context(action, args, toolbox, nonce, limit, similar=None, history=None):
+def build_context(action, args, toolbox, nonce, limit, similar=None, history=None, ranker=None):
     """(text, sources) for one fixed action: the question, then what the tools read. Raises AssistantError for a wrong argument or a refused tool."""
     if action not in ACTIONS:
         raise AssistantError("action")
@@ -209,8 +212,8 @@ def build_context(action, args, toolbox, nonce, limit, similar=None, history=Non
             parts.append("The alert is not among the open alerts the monitor holds.")
         else:
             parts += ["ALERT:"] + _lines(found, nonce, limit, "  ")
-            if similar and similar["enabled"]:
-                parts += similar_lines(found, toolbox, history, similar["max"], nonce, limit)
+            if similar and (similar["enabled"] or ranker):
+                parts += similar_lines(found, toolbox, history, similar["max"], nonce, limit, ranker)
             if found.get("repo") and "runs" in toolbox.allowed:
                 try:
                     parts += ["CI OF ITS REPOSITORY:"] + _lines(toolbox.call("runs", repo=found["repo"]), nonce, limit, "  ")
@@ -283,7 +286,7 @@ def ask(action, args, ai_cfg, reader, explain, role="viewer", nonce=None):
     nonce = nonce or hmac.new(PROCESS_KEY, repr((action, args.get("repo"), args.get("alert"))).encode("utf-8", "replace"), hashlib.sha256).hexdigest()[:12]      # the same question gives the same words, so the cache of the AI still answers it
     toolbox = Toolbox(reader, cfg["tools"], cfg["max_tool_calls"], role)
     try:
-        text, sources = build_context(action, args, toolbox, nonce, cfg["untrusted_text_max"], cfg["similar"], reader.get("history"))
+        text, sources = build_context(action, args, toolbox, nonce, cfg["untrusted_text_max"], cfg["similar"], reader.get("history"), reader.get("ranker"))
     except AssistantError as error:
         return {**base, "error": error.code, "sources": toolbox.sources, "tool_calls": toolbox.calls}
     text = redactor.redact(text)
@@ -297,9 +300,9 @@ def ask(action, args, ai_cfg, reader, explain, role="viewer", nonce=None):
     return {**base, "ok": True, "text": answer.get("text", ""), "cached": bool(answer.get("cached")), "provider": answer.get("provider", ""), "model": answer.get("model", "")}
 
 
-def describe(ai_cfg):
+def describe(ai_cfg, free_chat=False):
     """What GET /api/assistant says (it spends nothing): the switch, the actions, the tools, the limits and the fixed rules the page shows next to the answer."""
     cfg = settings(ai_cfg)
     return {"schema": "monitor_assistant/1", "enabled": cfg["enabled"], "provider": ai_cfg.get("provider", "none"), "actions": list(ACTIONS), "tools": cfg["tools"], "all_tools": list(TOOLS),
             "max_context": cfg["max_context"], "max_tool_calls": cfg["max_tool_calls"], "untrusted_text_max": cfg["untrusted_text_max"], "read_only": True, "shows_sources": True,
-            "free_chat": False}
+            "free_chat": bool(free_chat)}

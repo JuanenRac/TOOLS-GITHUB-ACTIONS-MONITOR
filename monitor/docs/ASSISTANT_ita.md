@@ -34,3 +34,21 @@ Non scrive nulla e non tocca nulla su GitHub. Ciò che un repository ha scritto 
 ## Verificarlo
 
 `GET /api/assistant` dice cos'è e i suoi limiti; `POST /api/assistant/ask` prende `action` e, secondo il caso, `alert` o `repo`. Entrambe rispondono 404 finché è spento. La domanda finisce nel registro delle azioni (mai il testo); con `ai.prompt_log.enabled` i prompt ripuliti si conservano in un registro locale che puoi vedere e svuotare in Impostazioni.
+
+## Proposte approvate da persone
+
+Ogni comando proposto da un'IA (`ai.actions.enabled`) è marcato come proveniente da un'IA, porta l'impronta (SHA-256) di ciò che verrebbe eseguito e resta fino alla scadenza, anche dopo un riavvio. Non parte mai da solo. Approvarlo è una decisione di persone: con due o più utenti servono due persone (chi ha chiesto all'IA conta come una e non può approvare la propria); da solo digiti i primi otto caratteri dell'impronta. Per rifiutare basta una persona. Con `ai.assistant.can_propose` (spento) anche una risposta della chat può diventare proposta. Si vedono nella scheda Avvisi.
+
+## Chat libera
+
+`ai.chat.enabled` (spento) aggiunge una chat nella scheda Avvisi. L'IA può solo leggere, con i quattro strumenti sopra; li chiede e il monitor decide. Stesso budget, stesso filtro, stessi marcatori; ogni risposta elenca ciò che è stato letto. Nessuno strumento scrive.
+
+## Avvisi simili con un modello locale
+
+Con `ai.rag.enabled` (spento) e `ai.rag.model`, «spiega questo avviso» ordina con gli embedding di un modello su questo computer (API di Ollama; solo indirizzo locale). L'indice conserva vettori e impronte, mai il testo, fino a `ai.rag.max_mb`; cancellare `ai_rag_index.json` non fa perdere nulla. Senza modello si usa il confronto di parole. Provato solo con un server finto.
+
+## Rapporto di un repository
+
+Con `ui.copy_report.enabled` la scheda Avvisi copia il rapporto di un repository in Markdown, o una bozza di triage, da incollare a mano. Senza IA, senza richieste a GitHub, nulla viene pubblicato.
+
+Rotte: `GET /api/assistant/extras`, `GET /api/assistant/repo-report?repo=`, `POST /api/assistant/chat`. Per i client MCP i riepiloghi sono anche risorse: `resources/list`, `resources/read`, `monitor://briefs/index`, `monitor://briefs/<tab>`.

@@ -1,0 +1,8 @@
+/* Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+   GPL-3.0-or-later - see LICENSE */
+#assistant-proposals ul,#assistant-chat ul{padding-left:1.1em}
+#assistant-proposals li{margin:0 0 .8em;overflow-wrap:anywhere}
+#assistant-proposals button,#assistant-chat button,#assistant-report button{min-height:32px}
+#assistant-chat input,#assistant-report input,#assistant-proposals input{display:block;max-width:100%}
+#assistant-log p{white-space:pre-wrap;overflow-wrap:anywhere}
+#assistant-report textarea{width:100%;box-sizing:border-box}

@@ -11,6 +11,9 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Hinzugefügt
 
+- **KI-Vorschläge werden von Menschen entschieden**: als KI markiert, mit Fingerabdruck, überstehen einen Neustart, brauchen zwei Personen bei mehreren Benutzern oder den getippten Code bei einem, und stehen im Reiter Meldungen; mit `ai.assistant.can_propose` entstehen sie auch im Chat.
+- **Freier Chat mit nur lesenden Werkzeugen** (`ai.chat.enabled`, aus), **ähnliche Meldungen per lokalem Embedding-Modell** (`ai.rag.enabled`, aus), **Repository-Bericht und Triage-Entwurf zum Kopieren** und **die Kurzberichte als MCP-Ressourcen**.
+- Ein Link mit Port und `@` im Pfad wird nicht mehr wie Benutzer und Passwort maskiert.
 - Prüfungen der Sicherheitslage, nur lesend und standardmäßig aus: Webhooks, Actions-Einstellungen, Scans, Schutz von Branches und Release-Branches, Deploy-Schlüssel, Alter von Secrets, Apps, Audit-Log der Organisation, Härtung der ausgeführten Läufe und geänderte Releases, jeweils mit OWASP-CI/CD- und CIS-Bezug. Verweigertes erscheint als nicht geprüft. Reife je Repository, Verlauf und `posture` in der Befehlszeile.
 - **Ein Fenster kündigt eine neuere Version an**: mit der Zusammenfassung der Änderungen in Ihrer Sprache, einer Schaltfläche zur Seite Updates, „Später“ und „Diese Version nicht mehr melden“; standardmäßig ein und auf Wand- und Kioskbildschirmen stumm.
 - **Neue Befehle**: zur netzlosen Prüfung eines heruntergeladenen Releases und zur Verwaltung der öffentlichen Schlüssel.
