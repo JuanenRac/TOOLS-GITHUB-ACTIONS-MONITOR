@@ -30,6 +30,8 @@
 | `briefs` | AI 工具读取的各标签页摘要:`briefs index`、`briefs show TAB`、`briefs all` | 支持 |
 | `docs` | 此版本的指南，直接从安装目录读取（无需监视器）：`docs list` 列出名称和标题，`docs show NAME` 按 `--lang` 的语言显示其中一份 | 否 |
 | `screens` | 页面的“屏幕”菜单:`screens list`(每种屏幕及其能否打开)和 `screens urls`(可直接用于展台命令的完整地址) | 不支持 |
+| `keyring` | 可以签名的公钥：`keyring list`、`add`（`--key-id`、`--public-key`、`--key-scope`、`--expires`）、`revoke --key-id`、`verify --document FILE`；无需监视器，私钥会被拒绝 | 否 |
+| `verify-release` | 无网络时按 SHA256SUMS 及其签名校验下载的发布文件夹：`verify-release --folder DIR`；不可信时退出码为 4 另有 `--installed`（本安装对照物料清单）、`--attestations`、`--fetch`（需要 `ops.verify_release.fetch`）；`doctor --verify-release DIR` 校验安装；`keyring check-rotation --document FILE` 校验新密钥公告。 | 否 |
 | `toolbox` | 无需运行监视器、在本机上工作的运维小工具：`toolbox limits [N]`（配置与其上限的对比）、`toolbox workspaces`（工作区及正在使用的工作区）、`toolbox ledger [--force]`（已发送通知的台账；`--force` 将其清除）、`toolbox summary`（按类型、仓库和日期统计事件）以及 `toolbox export-events FILE`（按文件名结尾把事件写成 jsonl、csv、parquet 或 duckdb；parquet 和 duckdb 需要各自的包，文件必须是新的） | 否 |
 | `credential` | 在一切运行时为某个账户更换 GitHub 登录:`credential replace\|reload [--account ID] [--new-token-file FILE\|-]`;从不打印令牌 | 不支持 |
 | `install-skill` | 把监视器的一个技能(`internal` 或 `external`)复制到 AI 工具读取技能的文件夹:`install-skill external --dest FOLDER`;无需监视器正在运行 | 不支持 |

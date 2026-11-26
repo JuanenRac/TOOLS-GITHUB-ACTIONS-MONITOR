@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.2.0",
  "previous": "2.1.8",
- "digest": "4095d2c86125777971dd828cc85a48a37276c336c869a5b5752ab1dae7c8a990",
+ "digest": "2850c66351ccc47183e77dc902645372fdd2bc1d1232c2e0b6f69111caa337fb",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -142,6 +142,11 @@
     "default": 15
    },
    {
+    "key": "ops.verify_release.fetch",
+    "kind": "bool",
+    "default": false
+   },
+   {
     "key": "posture.alerts",
     "kind": "bool",
     "default": true
@@ -264,6 +269,11 @@
      "re": "^[A-Za-z0-9._*?-]{1,100}=(standard|library|internal|sandbox)\\Z"
     },
     "default": []
+   },
+   {
+    "key": "updates.notify_window",
+    "kind": "bool",
+    "default": true
    }
   ],
   "removed": [],

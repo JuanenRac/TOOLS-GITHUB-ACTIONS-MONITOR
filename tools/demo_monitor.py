@@ -332,6 +332,8 @@ def main():
         am.ANALYTICS["summary"] = demo_analytics(runs)
     am.ETAG["cache"] = etagcache.EtagCache(Path(tempfile.mkdtemp()) / "e.json")
     am.update_info = lambda read=True: {"enabled": True, "newer": True, "latest": "9.9.9", "current": am.TOOL_VERSION, "url": "https://example.invalid/release", "changelog": "https://example.invalid/changelog", "airgapped": False, "checked_at": 0, "offline": False}   # an invented newer version, for the picture of the badge
+    from github_actions_monitor.families.supply import notice
+    notice.state = lambda request: {"show": False}      # the window that announces it would cover the page of the demo (tools/make_screenshots.py draws it on purpose)
     am.LIVE_CONFIG.update({"account": {"plan": "free"}, "session_guard": False})
     if rich and not lite:
         rich_tabs(am.LIVE_CONFIG, snap, now)

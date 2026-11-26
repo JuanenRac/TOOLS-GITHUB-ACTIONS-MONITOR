@@ -79,7 +79,7 @@ PRODUCT_ROOT_SUFFIXES = (".bat", ".sh", ".command", ".txt", ".md")
 PRODUCT_ROOT_NAMES = ("LICENSE", "NOTICE", "AUTHORS", "CHANGELOG.md", "README.txt")
 #: the same table as util/paths.py (kind of file by name): config, ai, logs, data. A test keeps both in step.
 USER_RULES = (
-    ("config", r"actions_monitor\.json|targets\.json|ecosystems\.json|profiles\.json|quotas\.json|lessons\.json|lessons_rules\.json|ai_models\.json|config_backups|paths\.json"),
+    ("config", r"actions_monitor\.json|targets\.json|ecosystems\.json|profiles\.json|quotas\.json|lessons\.json|lessons_rules\.json|ai_models\.json|keyring\.json|config_backups|paths\.json"),
     ("ai", r"ALERTS_BRIEF\.md|ai_alerts\.jsonl|ai_alerts_state\.json|ai_heartbeat\.json|ai_hook_state\.json|ai_notify\.jsonl|ai_notify_state\.json|ci_red\.json|INDEX\.json|LESSONS\.md"),
     ("logs", r"actions_monitor_log\.txt|ai_actions_log\.jsonl|github_actions_log\.jsonl|auth_audit\.jsonl|ai_prompts\.jsonl|loop\.log"),
     ("data", r"etag_cache\.json|events_monitor\.jsonl|events_state\.json|eventos_monitor\.jsonl|eventos_estado\.json|analytics_history\.json|sentinel_cache\.json|sentinel_history\.json|"
@@ -672,7 +672,7 @@ def release_from_api(item):
     assets = {}
     for asset in item.get("assets") or []:
         assets[asset.get("name", "")] = {"url": asset.get("browser_download_url", ""), "size": int(asset.get("size") or 0)}
-    return {"tag": tag, "version": tag.lstrip("vV"), "name": item.get("name") or tag, "published": item.get("published_at") or "", "body": item.get("body") or "",
+    return {"tag": tag, "version": tag.lstrip("vV"), "name": item.get("name") or tag, "published": item.get("published_at") or "", "body": re.sub(r"<!--\s*whats-new:.*?-->\s*", "", str(item.get("body") or ""), flags=re.S),
             "prerelease": bool(item.get("prerelease")), "draft": bool(item.get("draft")), "assets": assets}
 
 

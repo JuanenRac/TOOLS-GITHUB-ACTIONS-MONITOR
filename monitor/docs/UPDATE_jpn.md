@@ -32,6 +32,14 @@
 
 リリースには zip のほかに `monitor_updater.py`、2 種類の部品表（CycloneDX の `github_actions_monitor.cdx.json` と SPDX の `github_actions_monitor.spdx.json`）、各ファイルの署名、そして GitHub によるビルドの証明（アテステーション）があり、`gh attestation verify github_actions_monitor.zip --repo JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR` で確認できます。署名は鍵の保持者を、アテステーションはファイルをビルドしたワークフローを証明します。両者は別々の確認です。
 
+**鍵のローテーション。** 新しい鍵は、重複期間中に新旧両方を持つリリースで配布されます。信頼しなくなった鍵は後のリリースで削除（または失効扱い）します。cosign バンドル（`github_actions_monitor.zip.cosign.bundle`）はワークフローの鍵なし署名の記録で、`cosign verify-blob --bundle github_actions_monitor.zip.cosign.bundle --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/.github/workflows/release-build.yml@refs/heads/main github_actions_monitor.zip` で確認します。
+
+## 新しいバージョンの通知とコマンド
+
+更新確認（`updates.check`）で新しいバージョンが見つかると、完全版ではウィンドウが変更の要約をあなたの言語で表示し、変更履歴へのリンクと更新ページへのボタンを出します（設定 `updates.notify_window`、既定でオン）。「後で」はこのブラウザーセッションの間だけ閉じ、「このバージョンは通知しない」はそのバージョンだけを非表示にします。壁面やキオスク画面には表示されません。ルートは `/api/supply/update-notice` と `/api/supply/update-dismiss` です。
+
+`monitor_cli.py verify-release --folder DIR` は、ダウンロードしたリリースファイルのフォルダーをネットワークなしで SHA256SUMS と署名により確認します。`monitor_cli.py keyring list|add|revoke|verify` は公開鍵を管理します（`--key-id`、`--public-key`、`--key-scope`、`--expires`、`--document`）。自分の鍵は設定フォルダーの `keyring.json` に保存され、秘密鍵は拒否され、プロジェクトのリリース鍵は変更できません。
+
 ## 処理の流れ これを支えるルートは `/api/updates/status`、`/api/updates/progress`、`/api/updates/history`、`/api/updates/log`（プロセスのログの最後の行。token や secret の後の値は隠されます）、`/api/updates/copies` (読み取り専用) と `/api/updates/check`、`/api/updates/plan`、`/api/updates/apply`、`/api/updates/rollback`、`/api/updates/discard` (管理者、このコンピューターからのみ) です。 進行状況は `/api/updates/stream` でサーバー送信イベントとしても配信されます（更新中はページがこれを使い、ブラウザーや接続が対応しない場合は 1.5 秒ごとの問い合わせに戻ります）。
 
 1. インストールを検出します：フォルダー、バージョン、エディション（Complete または Lite）、設定、データ、ポート、モニターが動作中か、コンテナーかサービスか。
