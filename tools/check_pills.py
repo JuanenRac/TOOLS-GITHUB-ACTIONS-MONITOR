@@ -19,6 +19,7 @@ import socket
 import subprocess
 import sys
 import time
+import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -75,6 +76,17 @@ def run(langs=LANGS, sizes=("desktop", "mobile"), quiet=False):
                 time.sleep(0.5)
         else:
             raise RuntimeError("the demo monitor did not start")
+        # the demo answers before its first sentinel round is done: wait for the data, or the page is measured with empty panels
+        for _ in range(240):
+            try:
+                with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/sentinel?lang=en", timeout=10) as reply:
+                    if json.load(reply).get("data"):
+                        break
+            except (OSError, ValueError):
+                pass
+            time.sleep(0.5)
+        else:
+            raise RuntimeError("the demo monitor gave no sentinel data")
         server = co.relay(port, probe=PROBE)
         base = f"http://127.0.0.1:{server.server_address[1]}/"
         from concurrent.futures import ThreadPoolExecutor
