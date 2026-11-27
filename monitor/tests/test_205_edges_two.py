@@ -74,7 +74,7 @@ class AppriseLeftoversAndAddresses(unittest.TestCase):
         def run(args, **kw):
             named = os.path.realpath(args[2])
             if not named.startswith(os.path.join(os.path.realpath(tempfile.gettempdir()), "")):
-                self.fail("the file of the addresses is not in the temporary folder")
+                raise AssertionError("the file of the addresses is not in the temporary folder")
             written["text"] = Path(named).read_text(encoding="utf-8")
             return mock.Mock(returncode=0)
         with mock.patch.dict(os.environ, {"AP_URLS": "json://host/path:"}), mock.patch.object(notifiers.shutil, "which", return_value="apprise"):

@@ -63,7 +63,7 @@ class Channel(unittest.TestCase):
             seen["args"], seen["env"] = list(args), dict(kw.get("env") or {})
             named = os.path.realpath(args[args.index("-c") + 1])
             if not named.startswith(os.path.join(os.path.realpath(tempfile.gettempdir()), "")):
-                self.fail("the file of the addresses is not in the temporary folder")
+                raise AssertionError("the file of the addresses is not in the temporary folder")
             config = Path(named)
             seen["file"] = config.read_text(encoding="utf-8")
             seen["path"] = config
