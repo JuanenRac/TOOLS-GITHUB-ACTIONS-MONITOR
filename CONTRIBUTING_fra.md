@@ -28,3 +28,15 @@
 - **Test de fumée des sources externes** : le workflow `sources-smoke.yml` (hebdomadaire) lance `tools/smoke_sources.py` contre la vraie page d'état, les avis de sécurité, la description de l'API REST et la dernière release, et échoue quand l'une a changé de format.
 - **Limites** : `tools/limits_check.py` fait tourner le moniteur avec un compte de 120 workflows dans un conteneur d'un processeur et 512 Mo.
 - **Ordre de la release** : créez la release GitHub en BROUILLON et poussez l'étiquette `vX.Y.Z` ; `release-image.yml` construit et publie l'image et ne publie le brouillon que lorsqu'elle répond sous son étiquette pour les deux plateformes. L'outil qui la publie crée la release en BROUILLON, téléverse `github_actions_monitor.zip`, `SHA256SUMS` et `monitor_updater.py`, vérifie que tout y est et seulement alors publie (les releases immuables n'acceptent plus de fichier ensuite) ; avec l'image d'abord, il pousse l'étiquette et `release-image.yml` publie le brouillon.
+
+## Travailler avec un assistant IA
+
+Un changement écrit avec un assistant IA suit les mêmes règles, et la personne qui l'envoie en répond : lisez chaque ligne, lancez les tests et ne collez jamais dans l'assistant un jeton, un journal avec des noms privés ou le contenu de `actions_monitor.json`. Les deux skills livrées avec le moniteur (`monitor/skills/external/SKILL.md` pour un outil qui parle à un moniteur en marche, `monitor/skills/internal/SKILL.md` pour l'IA intégrée) font partie du produit : un nouveau réglage, une nouvelle route ou commande les met à jour (`python tools/make_skill_refs.py`). À quoi sert le produit et ce qu'il ne doit jamais faire figure dans `PRODUCT_fra.md`.
+
+## macOS : la marque de quarantaine
+
+Les fichiers ne sont pas signés avec un certificat Apple. Un zip téléchargé avec un navigateur porte la marque de quarantaine et macOS peut refuser d'ouvrir les lanceurs `.command`. Vérifiez d'abord la version (voir `monitor/docs/UPDATE_fra.md`), puis retirez la marque du dossier décompressé. macOS n'est pas testé pour le moment.
+
+```sh
+xattr -dr com.apple.quarantine /path/to/github_actions_monitor
+```

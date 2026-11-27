@@ -60,16 +60,14 @@ def _posture(iso, now):
     from github_actions_monitor.families.posture import posture_catalogue as catalogue
     from github_actions_monitor.families.posture import posture_engine as engine
     stamp = time.time()
-    by_group = {}
-    for check, row in catalogue.CHECKS.items():
-        by_group.setdefault(row[2], []).append(check)
+    by_group = {row[2] for row in catalogue.CHECKS.values()}
 
-    def entry(wanted, items, unread=None):
+    def entry(found, unread=None):
         checked = sorted(g for g in by_group if g not in (unread or {}))
-        return {"at": stamp, "kind": "standard", "findings": [{"check": by_group[g][0], "item": item, "detail": ""} for g, item in zip(wanted, items) if g in by_group], "unread": unread or {}, "checked": checked, "skipped": ""}
-    groups = [g for g in sorted(by_group) if g not in ("org", "upstream")]
-    repos = {"demo-alpha-app": entry(groups[:3], ["main", "deploy.yml", ""]), "demo-gamma-api": entry(groups[3:5], ["demo-key", ""], {groups[0]: "forbidden"}), "demo-beta-fw": entry([], [])}
-    org = entry(["org"], [""]) if "org" in by_group else entry([], [])
+        return {"at": stamp, "kind": "standard", "findings": [{"check": check, "item": item, "detail": ""} for check, item in found], "unread": unread or {}, "checked": checked, "skipped": ""}
+    repos = {"demo-alpha-app": entry([("actions.token_write", ""), ("actions.fork_approval", ""), ("repo.no_update_tool", "")]),
+             "demo-gamma-api": entry([("branch.unprotected", "main"), ("deploy.write", "demo-key")], {"webhook": "forbidden"}), "demo-beta-fw": entry([])}
+    org = entry([("org.no_two_factor", "")])
     org["kind"] = "organization"
     history = [{"day": time.strftime("%Y-%m-%d", time.gmtime(stamp - 86400 * (9 - i))), "error": [3, 3, 3, 2, 2, 2, 1, 1, 1, 1][i], "warning": [6, 6, 5, 5, 5, 4, 4, 3, 3, 3][i], "info": 2, "repos": 3} for i in range(10)]
     data = {"repos": repos, "org": org, "history": history}
