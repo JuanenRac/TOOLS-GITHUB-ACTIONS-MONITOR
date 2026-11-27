@@ -102,6 +102,18 @@ class TheDemoWithTheParts(unittest.TestCase):
         self.assertIn("demo-badges", {p["name"] for p in self.get("/api/plugins/catalog")["plugins"]})
         self.assertTrue(self.get("/api/fleet/columns")["rows"])
         self.assertEqual(self.get("/api/fleet/group?slug=alpha")["state"], "red")
+        traffic = self.get("/api/traffic")
+        self.assertTrue(traffic["enabled"])
+        self.assertEqual([r["traffic_status"] for r in traffic["repos"]], ["ok", "no_permission", "pending"])
+
+    def test_no_picture_of_about_can_carry_a_folder_of_this_computer(self):
+        paths = self.get("/api/about")["paths"]
+        self.assertTrue(paths)
+        for name, path in paths.items():
+            self.assertTrue(path.startswith("~/github-actions-monitor"), name)
+        support = self.get("/api/about")["support"]
+        self.assertNotIn(self.folder.name, support)
+        self.assertNotIn("ghamon_", support)
 
 
 if __name__ == "__main__":

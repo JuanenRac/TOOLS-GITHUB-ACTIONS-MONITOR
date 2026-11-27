@@ -15,7 +15,7 @@ Switch on `traffic.enabled` (Settings > Downloads and traffic) and write the rep
 
 ## What is read, and what it costs
 
-Only GET requests, after a cycle: each chosen repository at most once a day (UTC), `traffic.repos_per_cycle` of them per cycle. One repository costs from one to five requests of your GitHub allowance (releases, up to 300 of them; visits; clones). If the allowance is over, it stops and tries again later. `traffic.views_clones` switches the visits and clones off. Air-gapped installations read nothing.
+Only GET requests, after a cycle: each chosen repository at most once a day (UTC), `traffic.repos_per_cycle` of them per cycle. One repository costs from one to five requests of your GitHub allowance (releases, up to 300 of them; visits; clones). If the allowance is over, it stops and tries again later. `traffic.views_clones` switches the visits and clones off. Air-gapped installations read nothing. It also waits while the connection is lost, while the first reading is under way, and while no more than twice `min_rate_remaining` requests are left.
 
 ## Permissions
 

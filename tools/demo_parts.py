@@ -5,7 +5,7 @@
 # GPL-3.0-or-later - see LICENSE
 # =============================================================================
 """Invented data for the boxes of the optional parts (`python tools/demo_monitor.py PORT --parts`): extensions, proposals of the AI, the chat, the collaboration views, the fleet by role and group,
-the posture report, the external CI sources and the compliance report. Everything is made up, nothing is read from GitHub or from a model, and what would be kept in a file of the monitor lives in the memory of the demo process.
+the posture report, the external CI sources, the compliance report and the history of downloads and traffic. Everything is made up, nothing is read from GitHub or from a model, and what would be kept in a file of the monitor lives in the memory of the demo process.
 
 `settings(cfg)` is applied to the configuration of the demo before it is written and `fill(...)` after the runs were made."""
 import hashlib
@@ -16,7 +16,8 @@ from pathlib import Path
 #: the blocks the demo switches on (every one of them is off by default in the monitor)
 ON = {"teamwork": {"enabled": True, "inactive_workflows": True, "keep_alive_days": 45, "dismissed_alerts": True, "dismiss_allowed": ["demo-lead"]}, "posture": {"enabled": True},
       "plugins": {"enabled": True, "third_party": {"enabled": True}, "official": {"discussions": {"enabled": True}}},
-      "external_ci": {"enabled": True, "sources": ["gitlab;repo=demo-alpha-app;url=https://gitlab.example.org;project=demo-group/alpha"]}}
+      "external_ci": {"enabled": True, "sources": ["gitlab;repo=demo-alpha-app;url=https://gitlab.example.org;project=demo-group/alpha"]},
+      "traffic": {"enabled": True, "repos": ["demo-alpha-app", "demo-beta-fw", "demo-gamma-api"]}}
 
 
 def settings(cfg):
@@ -75,6 +76,31 @@ def _posture(iso, now):
     engine.load = lambda account="": data
 
 
+def _traffic():
+    """Thirty days of downloads, visits and clones, one repository without the permission for visits and one not read yet."""
+    from github_actions_monitor.families.traffic import traffic_engine as engine
+    stamp = time.time()
+
+    def day(ago):
+        return time.strftime("%Y-%m-%d", time.gmtime(stamp - 86400 * ago))
+
+    def days(base, visits=True):
+        rows, total = {}, base * 40
+        for ago in range(29, -1, -1):
+            new = base + (29 - ago) % 7 * 3 + (base if ago == 12 else 0)
+            total += new
+            row = rows[day(ago)] = {"downloads": total, "new": new, "assets": {"v1.4.0/demo-app-windows.zip": total}}
+            if visits and ago != 20:      # one day that was never read: a gap, not a zero
+                row.update(views=new * 5, views_unique=new * 2, clones=new, clones_unique=max(1, new // 2))
+        return rows, {"v1.4.0/demo-app-windows.zip": total}
+    alpha, alpha_latest = days(12)
+    beta, beta_latest = days(4, visits=False)
+    data = {"repos": {"demo-owner/demo-alpha-app": {"day": day(0), "days": alpha, "latest": alpha_latest, "releases_status": "ok", "traffic_status": "ok"},
+                      "demo-owner/demo-beta-fw": {"day": day(0), "days": beta, "latest": beta_latest, "releases_status": "ok", "traffic_status": "no_permission"}}}
+    engine.load = lambda account="": data
+    engine.tick = lambda config, account="", data=None: None      # the demo never asks GitHub
+
+
 def _assistant(config_runs):
     from github_actions_monitor.integrations import ai_actions, ai_chat
     store = ai_actions.Actions(log_file=Path(tempfile.mkdtemp(prefix="ghamon_demo_ai_")) / "ai_actions.jsonl", persist=False)
@@ -127,4 +153,5 @@ def fill(repos, runs, iso, now):
     _assistant(runs)
     _extensions()
     _external_ci(iso, now)
+    _traffic()
     fleet_views.remember(runs, repos)

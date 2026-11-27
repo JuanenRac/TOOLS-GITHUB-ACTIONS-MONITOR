@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6249_passing-brightgreen.svg" alt="6249 tests">
+  <img src="https://img.shields.io/badge/Tests-6255_passing-brightgreen.svg" alt="6255 tests">
 </p>
 
 > Watches the workflows of every repository you own and tells you, on one local page, what is red, what is stuck and what is waiting for you.
@@ -100,7 +100,7 @@ Method, assumptions and how to measure it in your own use: [`monitor/docs/PRODUC
 | | |
 |---|---|
 | **Maturity** | functional |
-| **Tests** | 6249 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 6255 test methods (`python -m unittest discover -s monitor/tests`) |
 | **Settings** | 1035 settings, all with help |
 | **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
 | **Tested in the CI on** | ubuntu, windows, Python 3.11, 3.13 |

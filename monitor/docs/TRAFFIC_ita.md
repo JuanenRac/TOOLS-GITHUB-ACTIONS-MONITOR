@@ -15,7 +15,7 @@ Accendere `traffic.enabled` (Impostazioni > Download e traffico) e scrivere i re
 
 ## Cosa si legge e quanto costa
 
-Solo richieste GET, dopo un ciclo: ogni repository scelto al massimo una volta al giorno (UTC), `traffic.repos_per_cycle` per ciclo. Un repository costa da una a cinque richieste della quota di GitHub (release, fino a 300; visite; clonazioni). Se la quota finisce, si ferma e riprova più tardi. `traffic.views_clones` spegne visite e clonazioni. Le installazioni senza rete non leggono nulla.
+Solo richieste GET, dopo un ciclo: ogni repository scelto al massimo una volta al giorno (UTC), `traffic.repos_per_cycle` per ciclo. Un repository costa da una a cinque richieste della quota di GitHub (release, fino a 300; visite; clonazioni). Se la quota finisce, si ferma e riprova più tardi. `traffic.views_clones` spegne visite e clonazioni. Le installazioni senza rete non leggono nulla. Attende anche se la connessione è persa, durante la prima lettura e quando restano non più del doppio di `min_rate_remaining` richieste.
 
 ## Permessi
 

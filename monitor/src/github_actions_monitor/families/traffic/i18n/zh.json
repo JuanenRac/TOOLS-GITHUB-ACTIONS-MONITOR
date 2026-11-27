@@ -4,7 +4,7 @@
  "ui.cfg_g_traffic": "下载与流量",
  "ui.cfg_b_traffic": "下载、访问和克隆历史 (只读)",
  "cfg.f.traffic.enabled": "保存下载与流量历史",
- "cfg.h.traffic.enabled": "每天一次读取所选仓库的发布文件下载次数以及访问和克隆数据, 保存在本机。仅发送 GET 请求, 数据不会离开本机。下载次数是匿名的, 包含机器人, 且不计 \"Source code\" 压缩包。默认关闭。",
+ "cfg.h.traffic.enabled": "每天一次读取所选仓库的发布文件下载次数以及访问和克隆数据, 保存在本机。只向 GitHub 发送 GET 请求, 历史记录只保存在本机, 不会发送到任何地方。连接中断或请求配额不足时会等待。下载次数是匿名的, 包含机器人, 且不计 \"Source code\" 压缩包。默认关闭。",
  "cfg.f.traffic.repos": "要跟踪的仓库",
  "cfg.h.traffic.repos": "每行一个: 名称 (所监视账户的) 或 所有者/名称。留空则不读取任何内容。最多 50 个。",
  "cfg.f.traffic.views_clones": "同时读取访问和克隆",

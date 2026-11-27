@@ -4,7 +4,7 @@
  "ui.cfg_g_traffic": "Téléchargements et trafic",
  "ui.cfg_b_traffic": "Historique des téléchargements, visites et clonages (lecture seule)",
  "cfg.f.traffic.enabled": "Garder un historique des téléchargements et du trafic",
- "cfg.h.traffic.enabled": "Lit une fois par jour les nombres de téléchargements des fichiers des versions, ainsi que les visites et clonages, des dépôts que vous choisissez, et les garde sur cet ordinateur. Requêtes GET seulement ; rien ne quitte l'ordinateur. Les téléchargements sont anonymes, comptent les robots et ne comptent pas les archives \"Source code\". Désactivé par défaut.",
+ "cfg.h.traffic.enabled": "Lit une fois par jour les nombres de téléchargements des fichiers des versions, ainsi que les visites et clonages, des dépôts que vous choisissez, et les garde sur cet ordinateur. Requêtes GET vers GitHub seulement ; l'historique reste sur cet ordinateur et n'est envoyé nulle part. La lecture attend si la connexion est perdue ou si le quota de requêtes est bas. Les téléchargements sont anonymes, comptent les robots et ne comptent pas les archives \"Source code\". Désactivé par défaut.",
  "cfg.f.traffic.repos": "Dépôts à suivre",
  "cfg.h.traffic.repos": "Un par ligne : nom (du compte surveillé) ou propriétaire/nom. Vide : rien n'est lu. 50 au maximum.",
  "cfg.f.traffic.views_clones": "Aussi les visites et clonages",

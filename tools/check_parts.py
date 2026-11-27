@@ -4,7 +4,7 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D)
 # GPL-3.0-or-later - see LICENSE
 """The boxes of the optional parts in a real browser: extensions, proposals and chat, collaboration and the choice of an environment, roles and groups, the screen of a group (/g/), posture,
-compliance, external CI sources and the window of a newer version; and the page itself: every main tab can be seen, the figures of the header are folded on a phone and the groups of Settings are a list on the left.
+compliance, external CI sources, the history of downloads and traffic, the About window and the window of a newer version; and the page itself: every main tab can be seen, the figures of the header are folded on a phone and the groups of Settings are a list on the left.
 
     python tools/check_parts.py [--lang en de ...] [--size phone land780 land844 land915 desktop wall wall4k] [--shots DIR] [--json]
 
@@ -40,7 +40,7 @@ PICTURE = {"main_tabs": "document.querySelector('main>.tab.on').scrollIntoView()
            "settings_list": "showTab('cfg');cfgShowTab('interface');document.getElementById('cfg-panels').scrollIntoView({block:'center'});1"}
 PAGE_STEPS = tuple(PICTURE)
 STEPS = ("extensions", "extensions_install", "proposals", "chat", "repo_report", "collaboration", "environment", "environment_confirm", "roles_groups", "posture", "compliance",
-         "external_ci", "external_ci_test", "external_ci_about", "update_notice",
+         "external_ci", "external_ci_test", "external_ci_about", "update_notice", "traffic", "about_use",
          "main_tabs", "header_fold", "settings_list")
 
 #: before any script of the page: it records the errors and answers, with invented data, what would write or needs a model or another server
@@ -166,6 +166,9 @@ LIB = r"""
     async external_ci_about(){await tab("now");openAbout();return until(()=>$id("extci-about")&&$id("extci-about").querySelector("li")&&$id("extci-about"))},
     async update_notice(){await tab("now");if(!window.supplyNotice)return null;
       window.supplyNotice.show({version:"9.9.9",current:"2.2.0",notes:window.__notes||"",changelog:"https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/blob/main/monitor/CHANGELOG.md"});return until(dialog)},
+    async traffic(){await tab("repos");const box=await until(()=>$id("traffic-box")&&$id("traffic-box").querySelector("details")&&$id("traffic-box"),20000);if(!box)return null;
+      open(box);return box},
+    async about_use(){await tab("now");openAbout();const note=await until(()=>$id("about-i-use-it-note"));return note&&note.closest(".dlg-box")},
     async group(){return until(()=>document.querySelector("#list li")&&document.body)}
   };
   /* the page itself: these answer with their own findings */

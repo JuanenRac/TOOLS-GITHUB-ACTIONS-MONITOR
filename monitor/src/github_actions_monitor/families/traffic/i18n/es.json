@@ -4,7 +4,7 @@
  "ui.cfg_g_traffic": "Descargas y tráfico",
  "ui.cfg_b_traffic": "Historial de descargas, visitas y clonados (solo lectura)",
  "cfg.f.traffic.enabled": "Guardar un historial de descargas y tráfico",
- "cfg.h.traffic.enabled": "Una vez al día lee las descargas de los ficheros de las releases, y las visitas y clonados, de los repositorios que elijas, y los guarda en este equipo. Solo peticiones GET; nada sale del equipo. Las descargas son anónimas, incluyen robots y no cuentan los archivos \"Source code\". Apagado por defecto.",
+ "cfg.h.traffic.enabled": "Una vez al día lee las descargas de los ficheros de las releases, y las visitas y clonados, de los repositorios que elijas, y los guarda en este equipo. Solo peticiones GET a GitHub; el historial se queda en este equipo y no se envía a ningún sitio. Espera si no hay conexión o queda poca cuota de peticiones. Las descargas son anónimas, incluyen robots y no cuentan los archivos \"Source code\". Apagado por defecto.",
  "cfg.f.traffic.repos": "Repositorios a seguir",
  "cfg.h.traffic.repos": "Uno por línea: nombre (de la cuenta que vigilas) o dueño/nombre. Vacío: no se lee nada. Como máximo 50.",
  "cfg.f.traffic.views_clones": "También visitas y clonados",

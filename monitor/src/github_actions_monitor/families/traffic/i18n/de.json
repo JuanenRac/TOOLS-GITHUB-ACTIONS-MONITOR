@@ -4,7 +4,7 @@
  "ui.cfg_g_traffic": "Downloads und Zugriffe",
  "ui.cfg_b_traffic": "Verlauf der Downloads, Besuche und Klone (nur lesend)",
  "cfg.f.traffic.enabled": "Verlauf der Downloads und Zugriffe speichern",
- "cfg.h.traffic.enabled": "Liest einmal am Tag die Downloadzahlen der Release-Dateien sowie Besuche und Klone der von Ihnen gewählten Repositorys und speichert sie auf diesem Rechner. Nur GET-Anfragen; nichts verlässt den Rechner. Downloadzahlen sind anonym, enthalten Roboter und zählen die Archive \"Source code\" nicht. Standardmäßig aus.",
+ "cfg.h.traffic.enabled": "Liest einmal am Tag die Downloadzahlen der Release-Dateien sowie Besuche und Klone der von Ihnen gewählten Repositorys und speichert sie auf diesem Rechner. Nur GET-Anfragen an GitHub; der Verlauf bleibt auf diesem Rechner und wird nirgendwohin gesendet. Ohne Verbindung oder bei knappem Anfragekontingent wird gewartet. Downloadzahlen sind anonym, enthalten Roboter und zählen die Archive \"Source code\" nicht. Standardmäßig aus.",
  "cfg.f.traffic.repos": "Beobachtete Repositorys",
  "cfg.h.traffic.repos": "Eines pro Zeile: Name (des beobachteten Kontos) oder Eigentümer/Name. Leer: nichts wird gelesen. Höchstens 50.",
  "cfg.f.traffic.views_clones": "Auch Besuche und Klone",

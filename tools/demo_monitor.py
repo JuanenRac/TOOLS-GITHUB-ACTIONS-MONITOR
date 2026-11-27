@@ -281,7 +281,19 @@ def rich_setup(snap, now):
     am.LIVE_CONFIG.setdefault("compare", {})["enabled"] = True
 
 
+#: what the About panel of the demo shows instead of the temporary folders it really uses: a picture never carries a path of the computer that took it
+DEMO_PATHS = {"config": "~/github-actions-monitor/monitor/config/actions_monitor.json", "log": "~/github-actions-monitor/monitor/logs/actions_monitor_log.txt",
+              "etag_cache": "~/github-actions-monitor/monitor/data/cache/etag_cache.json", "package_folder": "~/github-actions-monitor/monitor"}
+
+
+def generic_paths():
+    from github_actions_monitor.ui import about
+    real = about.info
+    about.info = lambda lite, health, paths, update, language: real(lite, health, {name: DEMO_PATHS.get(name, "~/github-actions-monitor") for name in paths}, update, language)
+
+
 def main():
+    generic_paths()
     lite = "--lite" in sys.argv
     rich = "--rich" in sys.argv      # the pictures of the newest tabs: findings for the Delivery and Supply chain sentinels, a daily trend and a comparison of periods
     numbers = [a for a in sys.argv[1:] if a.isdigit()]

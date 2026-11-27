@@ -4,7 +4,7 @@
  "ui.cfg_g_traffic": "Download e traffico",
  "ui.cfg_b_traffic": "Storico di download, visite e clonazioni (sola lettura)",
  "cfg.f.traffic.enabled": "Conserva uno storico di download e traffico",
- "cfg.h.traffic.enabled": "Una volta al giorno legge i download dei file delle release, e le visite e le clonazioni, dei repository scelti, e li conserva su questo computer. Solo richieste GET; nulla esce dal computer. I download sono anonimi, includono i robot e non contano gli archivi \"Source code\". Spento all'inizio.",
+ "cfg.h.traffic.enabled": "Una volta al giorno legge i download dei file delle release, e le visite e le clonazioni, dei repository scelti, e li conserva su questo computer. Solo richieste GET a GitHub; lo storico resta su questo computer e non viene inviato da nessuna parte. Attende se manca la connessione o la quota di richieste è bassa. I download sono anonimi, includono i robot e non contano gli archivi \"Source code\". Spento all'inizio.",
  "cfg.f.traffic.repos": "Repository da seguire",
  "cfg.h.traffic.repos": "Uno per riga: nome (dell'account sorvegliato) o proprietario/nome. Vuoto: non si legge nulla. Al massimo 50.",
  "cfg.f.traffic.views_clones": "Anche visite e clonazioni",

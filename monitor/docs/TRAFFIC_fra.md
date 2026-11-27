@@ -15,7 +15,7 @@ Activez `traffic.enabled` (Réglages > Téléchargements et trafic) et écrivez 
 
 ## Ce qui est lu et ce que cela coûte
 
-Requêtes GET seulement, après un cycle : chaque dépôt choisi au plus une fois par jour (UTC), `traffic.repos_per_cycle` par cycle. Un dépôt coûte d'une à cinq requêtes de votre quota GitHub (versions, jusqu'à 300 ; visites ; clonages). Quand le quota est épuisé, la lecture s'arrête et reprend plus tard. `traffic.views_clones` désactive les visites et clonages. Les installations sans réseau ne lisent rien.
+Requêtes GET seulement, après un cycle : chaque dépôt choisi au plus une fois par jour (UTC), `traffic.repos_per_cycle` par cycle. Un dépôt coûte d'une à cinq requêtes de votre quota GitHub (versions, jusqu'à 300 ; visites ; clonages). Quand le quota est épuisé, la lecture s'arrête et reprend plus tard. `traffic.views_clones` désactive les visites et clonages. Les installations sans réseau ne lisent rien. La lecture attend aussi tant que la connexion est perdue, pendant la première lecture et quand il ne reste pas plus du double de `min_rate_remaining` requêtes.
 
 ## Permissions
 

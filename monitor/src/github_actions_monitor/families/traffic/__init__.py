@@ -49,7 +49,7 @@ def _cli(ctx):
 
 
 def _tick(config, data):
-    _engine().tick(config, _account())
+    _engine().tick(config, _account(), data)
 
 
 def _s(key, kind, bounds=None, secure=False, unit=None):

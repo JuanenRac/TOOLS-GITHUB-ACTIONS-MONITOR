@@ -15,7 +15,7 @@ Enciende `traffic.enabled` (Ajustes > Descargas y tráfico) y escribe los reposi
 
 ## Qué se lee y cuánto cuesta
 
-Solo peticiones GET, después de un ciclo: cada repositorio elegido como máximo una vez al día (UTC), `traffic.repos_per_cycle` por ciclo. Un repositorio cuesta de una a cinco peticiones de tu cuota de GitHub (releases, hasta 300; visitas; clonados). Si la cuota se acaba, para y lo intenta más tarde. `traffic.views_clones` apaga las visitas y clonados. Las instalaciones sin red no leen nada.
+Solo peticiones GET, después de un ciclo: cada repositorio elegido como máximo una vez al día (UTC), `traffic.repos_per_cycle` por ciclo. Un repositorio cuesta de una a cinco peticiones de tu cuota de GitHub (releases, hasta 300; visitas; clonados). Si la cuota se acaba, para y lo intenta más tarde. `traffic.views_clones` apaga las visitas y clonados. Las instalaciones sin red no leen nada. También espera si se ha perdido la conexión, mientras se hace la primera lectura y cuando no quedan más del doble de `min_rate_remaining` peticiones.
 
 ## Permisos
 

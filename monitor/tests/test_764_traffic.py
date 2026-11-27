@@ -98,6 +98,44 @@ class Traffic(unittest.TestCase):
         self.assertEqual(engine.reason_of("HTTP 403: API rate limit exceeded"), "rate_limited")
         self.assertEqual(engine.reason_of("HTTP 404: Not Found"), "missing")
 
+    def test_a_read_cut_by_the_rate_limit_keeps_the_new_downloads_for_the_next_one(self):
+        cfg = config(repos=["a", "app"])
+        engine.refresh(cfg, "demo-owner", get=FakeGitHub({"v1/app.zip": 10}), now=NOW)
+        later = FakeGitHub({"v1/app.zip": 25})
+        real = later.__call__
+
+        def cut(endpoint):      # the releases of the second repository are read, its visits are not
+            if "/app/traffic/" in endpoint:
+                raise engine.Refused("rate_limited")
+            return real(endpoint)
+        self.assertEqual(engine.refresh(cfg, "demo-owner", get=cut, now=NOW + DAY), ["demo-owner/a"])
+        engine.refresh(cfg, "demo-owner", get=FakeGitHub({"v1/app.zip": 25}), now=NOW + DAY)
+        repo = engine.report(cfg, "demo-owner")["repos"][1]
+        self.assertEqual([d["new"] for d in repo["days"] if d["date"] == "2027-01-16"], [15])
+
+    def test_it_waits_without_connection_while_loading_and_with_little_allowance_left(self):
+        for data in ({"loading": "1/6"}, {"offline": {"offline": True}}, {"rate": {"remaining": 1600}}):
+            self.assertFalse(engine.room(config(), data), data)
+            self.assertIsNone(engine.tick(config(), data=data))
+        for data in (None, {}, {"loading": "", "offline": {"offline": False}, "rate": {"remaining": 1601}}, {"rate": {"remaining": None}}):
+            self.assertTrue(engine.room(config(), data), data)
+        self.assertTrue(engine.room({"min_rate_remaining": 10}, {"rate": {"remaining": 21}}))
+
+    def test_a_value_written_by_hand_never_breaks_a_reading(self):
+        self.assertEqual(engine.selected(config(repos="app"), "demo-owner"), [])
+        self.assertEqual(engine.refresh(config(repos_per_cycle="3", keep_days=None), "demo-owner", get=FakeGitHub(), now=NOW), ["demo-owner/app"])
+
+    def test_a_name_with_404_in_it_is_not_read_as_missing(self):
+        self.assertEqual(engine.reason_of("HTTP 403: Forbidden (repos/demo-owner/app404/traffic/views)"), "no_permission")
+        self.assertEqual(engine.reason_of("something else about app4030"), "failed")
+
+    def test_a_cell_of_the_csv_is_one_line_and_never_a_formula(self):
+        for value in ("=1+1", "+1", "-1", "@a", "\t=1", "\r=1", "\n=1", "\uff1d1"):
+            self.assertTrue(engine.cell(value).startswith("'"), ascii(value))
+        for value in ("a\n=1", "a\r=1"):
+            self.assertEqual(engine.cell(value), "a =1")
+        self.assertEqual((engine.cell(None), engine.cell(0), engine.cell("v1.0-beta")), ("", "0", "v1.0-beta"))
+
     def test_visits_and_clones_can_be_switched_off(self):
         github = FakeGitHub()
         engine.refresh(config(views_clones=False), "demo-owner", get=github, now=NOW)

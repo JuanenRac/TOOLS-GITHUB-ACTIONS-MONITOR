@@ -32,6 +32,7 @@
     if(!j.ok||(!j.enabled&&!document.getElementById("traffic-box")))return;
     const body=FAM.panel("repos","traffic-box","ui.traffic.title");
     if(!body)return;
+    const opened=new Set([...body.querySelectorAll("details[open]")].map(d=>d.dataset.repo));      // what the person unfolded stays unfolded when the box is drawn again
     body.textContent="";
     if(!j.enabled){body.append(el("p",T("ui.traffic.off")));return}
     body.append(el("p",T("ui.traffic.note")));
@@ -44,9 +45,11 @@
       });
       if(!r.days.length)return;
       body.append(bars(r.days,"new",T("ui.traffic.col_new")),bars(r.days,"views",T("ui.traffic.col_views")),bars(r.days,"clones",T("ui.traffic.col_clones")));
-      const more=el("details");
-      more.append(el("summary",T("ui.traffic.days")),table([T("ui.traffic.col_date"),T("ui.traffic.col_downloads"),T("ui.traffic.col_new"),T("ui.traffic.col_views"),T("ui.traffic.col_views_unique"),T("ui.traffic.col_clones"),T("ui.traffic.col_clones_unique")],
+      const more=el("details"),wide=el("div");
+      more.dataset.repo=r.repo;more.open=opened.has(r.repo);wide.className="traffic-wide";
+      wide.append(table([T("ui.traffic.col_date"),T("ui.traffic.col_downloads"),T("ui.traffic.col_new"),T("ui.traffic.col_views"),T("ui.traffic.col_views_unique"),T("ui.traffic.col_clones"),T("ui.traffic.col_clones_unique")],
         r.days.slice().reverse().map(d=>[d.date,shown(d.downloads),shown(d["new"]),shown(d.views),shown(d.views_unique),shown(d.clones),shown(d.clones_unique)])));
+      more.append(el("summary",T("ui.traffic.days")),wide);
       body.append(more);
     });
     const out=el("p");out.append(link("days","ui.traffic.export_days")," · ",link("assets","ui.traffic.export_assets"));body.append(out);
