@@ -90,6 +90,13 @@ class Egress:
 
 
 @dataclass(frozen=True)
+class Raw:
+    """An answer of a route that is not JSON: its content type and its bytes (a feed for another tool)."""
+    content_type: str
+    body: bytes
+
+
+@dataclass(frozen=True)
 class Check:
     """A check of `monitor_cli doctor` (complete edition): `run(config)` returns (ok | warn | fail, detail). Its texts are doctor.t.<id> and doctor.f.<id> in the i18n of the part; `fix` is the command shown
     when it is not ok."""
@@ -109,3 +116,4 @@ class Family:
     ticks: tuple = ()             # tick(config, data): after each cycle of the complete edition; a failure is noted and never stops the loop
     egress: tuple = ()            # Egress
     checks: tuple = ()            # Check
+    alerts: object = None         # alerts(config, account) -> alerts in the shape of those of the sentinels (complete edition); it reads only what the part keeps

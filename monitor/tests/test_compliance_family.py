@@ -93,8 +93,56 @@ class Doctor(unittest.TestCase):
         with mock.patch.object(updatecheck, "_load", return_value={"release": {"tag": "v99.0.0"}}):
             self.assertEqual(self.checks()["compliance_support"].run({})[0], "warn")
 
+    def test_an_export_that_lags_is_an_alert(self):
+        from unittest import mock
+        from github_actions_monitor.integrations import compliance_audit_export as export
+        config = {"audit_export": {"enabled": True, "path": "x"}}
+        state = {"cursor": "", "sent": 0, "lost": 1, "backlog_bytes": 0, "last_error": "", "at": NOW}
+        with mock.patch.object(export, "load_state", return_value=state):
+            alerts = family().alerts(config, "")
+            self.assertEqual([a["code"] for a in alerts], ["system.audit_export_lag"])
+            self.assertEqual(family().alerts({}, ""), [])
+
     def test_the_commands_are_there(self):
         self.assertTrue({"compliance", "audit"} <= set(monitor_cli.COMMANDS))
+
+
+class StrictRoutes(unittest.TestCase):
+    def setUp(self):
+        import threading
+        from unittest import mock
+        from github_actions_monitor.app import actions_monitor
+        self.monitor, self.config = actions_monitor, {"security": {"read_only_strict": True}}
+        server = actions_monitor.QuietServer(("127.0.0.1", 0), actions_monitor.Handler)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        self.addCleanup(server.server_close)
+        self.addCleanup(server.shutdown)
+        for patch in (mock.patch.object(actions_monitor.toolconfig, "raw_config", side_effect=lambda: self.config), mock.patch.object(actions_monitor, "audit_action")):
+            patch.start()
+            self.addCleanup(patch.stop)
+        self.base = f"http://127.0.0.1:{server.server_address[1]}"
+
+    def post(self, path):
+        import urllib.error
+        import urllib.request
+        try:
+            with urllib.request.urlopen(urllib.request.Request(self.base + path, data=b"{}", headers={"Content-Type": "application/json"}), timeout=10) as answer:
+                return answer.status, json.loads(answer.read() or b"{}")
+        except urllib.error.HTTPError as error:
+            raw = error.read()
+            return error.code, json.loads(raw) if raw else {}
+
+    def test_every_route_that_writes_answers_403_with_the_reason(self):
+        from github_actions_monitor.security import audited_posts, compliance_guard
+        for route in compliance_guard.WRITE_ROUTES:
+            self.assertIn(route, audited_posts.AUDITED, route)
+            status, answer = self.post(route)
+            self.assertEqual((status, answer.get("code")), (403, "read_only_strict"), route)
+
+    def test_without_the_mode_the_route_is_not_refused_for_that_reason(self):
+        self.config = {}
+        for route in ("/api/gh-action/confirm", "/api/webhook/redeliver"):
+            self.assertNotEqual(self.post(route)[1].get("code"), "read_only_strict", route)
 
 
 class ListsAndGuides(unittest.TestCase):

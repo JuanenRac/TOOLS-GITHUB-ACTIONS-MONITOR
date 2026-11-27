@@ -9,7 +9,7 @@ import copy
 import importlib
 from pathlib import Path
 
-from github_actions_monitor.families.declare import Check, Command, Egress, Family, Option, Request, Route, Setting  # noqa: F401 - the one place to import them from
+from github_actions_monitor.families.declare import Check, Command, Egress, Family, Option, Raw, Request, Route, Setting  # noqa: F401 - the one place to import them from
 
 NAMES = ("supply", "plugins", "assistant", "extci", "compliance", "actions", "fleet", "posture")      # the order in which their settings, commands and pages are added
 FOLDER = Path(__file__).resolve().parent
@@ -140,6 +140,20 @@ def commands():
 
 def checks():
     return [check for family in all_families() for check in family.checks]
+
+
+# --- the alerts ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+def alerts(config, account, failed):
+    """The alerts of every part that has some; one that raises is handed to `failed(name, error)`."""
+    out = []
+    for family in all_families():
+        if family.alerts:
+            try:
+                out.extend(family.alerts(config, account))
+            except Exception as error:      # noqa: BLE001 - the list of alerts must still answer
+                failed(f"family.{family.name}", error)
+    return out
 
 
 # --- the loop and the network ----------------------------------------------------------------------------------------------------------------------------------------------------------

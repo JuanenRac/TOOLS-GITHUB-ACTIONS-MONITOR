@@ -24,7 +24,7 @@
 | コードと依存関係 | scan.no_code scan.no_credentials scan.no_push_protection scan.no_dependency_alerts repo.no_policy repo.no_update_tool |
 | ブランチ | branch.unprotected branch.no_review branch.bypass branch.release_unprotected branch.merged_unreviewed |
 | 鍵とシークレット | deploy.write deploy.old stored.old |
-| 組織 | org.no_two_factor org.default_write org.public_creation org.app_broad org.settings_changed |
+| 組織 | org.no_two_factor org.default_write org.public_creation org.app_broad org.settings_changed org.pat_broad |
 | ランナー | runner.not_hardened runner.coverage_lost |
 | リリース | release.asset_replaced release.asset_removed release.tag_moved release.outside_window |
 
@@ -44,8 +44,13 @@ GitHubが拒否・無応答のものは**未確認**と表示し、正常とは�
 posture status
 posture matrix
 posture check --repo-name my-repo
+posture report
 ```
 
 ## 制限
 
-メンバーの詳細権限トークンは読みません(GitHubはGitHub Appにのみ一覧を提供)。書き込み用の2つ目のアプリは管理しません。組織の確認は架空の応答でのみ検証しています。
+未対応：書き込み用の2つ目の GitHub App（読み取りと書き込みは2つの App に分かれていません）。`org.pat_broad` には個人アクセストークンの権限を持つ GitHub App が必要で、個人トークンでは未確認になります。組織の確認は架空の応答でのみテストしています。
+
+## 準拠レポートと権限
+
+`posture report`（および `GET /api/posture` の `compliance`）は、指摘を OWASP の CI/CD リスク10項目と対応する CIS の節に照らして示します。指摘あり、指摘なし、一部のみ読取、未確認の区分と、各リスクの意味の短い説明、1週間前との傾向を出します。読解の補助であり認証ではありません。CIS の節番号は公式文書と照合していません。`original.weak`（`posture.upstream`、既定はオフ）は、公開元にセキュリティポリシーや更新ツールがないフォークを記録します。権限の表は各グループを解放する GitHub App の権限と、App 設定時は付与の有無を示します。

@@ -108,5 +108,7 @@
  "ui.compliance.line_runs_as_root": "root で実行",
  "ui.compliance.line_profile": "プロファイル",
  "egress.use.audit_export": "操作ログのエクスポート先",
- "egress.fail.audit_export": "行はログで待機し、doctor がバイト数を示します"
+ "egress.fail.audit_export": "行はログで待機し、doctor がバイト数を示します",
+ "ui.compliance.refused": "拒否しました: 厳格な読み取り専用モードが有効です (security.read_only_strict)。",
+ "ui.compliance.alert_lag": "操作ログのエクスポートが遅れています: 待機 {waiting} バイト、行の損失 {lost} 回"
 }

@@ -108,5 +108,7 @@
  "ui.compliance.line_runs_as_root": "Runs as root",
  "ui.compliance.line_profile": "Profile",
  "egress.use.audit_export": "the receiver of the export of the log of actions",
- "egress.fail.audit_export": "the lines wait in the log; the doctor says how many bytes"
+ "egress.fail.audit_export": "the lines wait in the log; the doctor says how many bytes",
+ "ui.compliance.refused": "Refused: the strict read-only mode is on (security.read_only_strict).",
+ "ui.compliance.alert_lag": "The export of the log of actions is behind: {waiting} bytes waiting, {lost} times lines were lost"
 }

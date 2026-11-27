@@ -67,6 +67,17 @@ def _audit_cli(ctx):
     return found, [i18n.t(key, entries=found["entries"], checkpoints=found["checkpoints"], gaps=found["gaps"], bad=len(found["bad_checkpoints"]))], 0 if found["ok"] else 1
 
 
+def _alerts(config, account):
+    from github_actions_monitor import i18n
+    from github_actions_monitor.integrations import compliance_audit_export as export
+    state = export.load_state()
+    if not export.active(config) or not export.lagging(config, state):
+        return []
+    stamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(state["at"] or 0))
+    return [{"id": export.ALERT_CODE, "code": export.ALERT_CODE, "level": "warning", "sentinel": "ci", "account_id": account, "repo": "", "title": i18n.t("ui.compliance.alert_lag", waiting=state["backlog_bytes"], lost=state["lost"]),
+             "details": {"backlog_bytes": state["backlog_bytes"], "lost": state["lost"]}, "created_at": stamp}]
+
+
 def _tick(config, data):
     from github_actions_monitor.integrations import compliance_audit_export
     from github_actions_monitor.security import compliance_guard
@@ -162,6 +173,7 @@ FAMILY = Family(
                       options=(Option("--audit-from", "cli.compliance.help_from", {"type": int, "default": 1, "metavar": "N"}),
                                Option("--older-than-days", "cli.compliance.help_older", {"type": int, "default": 0, "metavar": "DAYS"})))),
     ticks=(_tick,),
+    alerts=_alerts,
     egress=(Egress("audit_export", (), "audit_export.enabled", hosts_from=_hosts),),
     checks=(Check("compliance_strict", _check_strict, "python bin/monitor_cli.py compliance report"), Check("compliance_egress", _check_egress, "python bin/monitor_cli.py doctor --egress"),
             Check("compliance_support", _check_support, "python bin/monitor_cli.py update check"), Check("compliance_retention", _check_retention, "python bin/monitor_cli.py compliance report"),

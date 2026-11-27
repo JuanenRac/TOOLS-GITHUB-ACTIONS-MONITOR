@@ -108,5 +108,7 @@
  "ui.compliance.line_runs_as_root": "以 root 运行",
  "ui.compliance.line_profile": "配置档案",
  "egress.use.audit_export": "操作日志导出的接收方",
- "egress.fail.audit_export": "行在日志中等待; doctor 显示字节数"
+ "egress.fail.audit_export": "行在日志中等待; doctor 显示字节数",
+ "ui.compliance.refused": "已拒绝: 严格只读模式已开启 (security.read_only_strict)。",
+ "ui.compliance.alert_lag": "操作日志导出滞后: 等待 {waiting} 字节, 丢失行 {lost} 次"
 }

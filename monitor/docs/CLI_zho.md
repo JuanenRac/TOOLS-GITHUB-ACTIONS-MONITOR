@@ -112,3 +112,12 @@ python bin/monitor_cli.py identity plan
 ## 合规与操作日志
 
 `compliance report` 说明本安装提供哪些保证; `audit verify|checkpoint|purge|export` 处理操作日志链。见 [COMPLIANCE_zho.md](COMPLIANCE_zho.md)。
+
+## 命令: actions, runner-hook
+
+```
+python bin/monitor_cli.py actions proposals
+python bin/monitor_cli.py runner-hook started
+```
+
+[COLLABORATION_zho.md](COLLABORATION_zho.md)

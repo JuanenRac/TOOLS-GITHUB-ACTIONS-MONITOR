@@ -41,6 +41,8 @@
 
 `github_actions.enabled` をオンにすると、失敗した実行の再実行(`rerun_failed`、`rerun_run`、`rerun_job`)、実行のキャンセル(`cancel`)、Issue やプルリクエストのクローズ(`close_issue`、`close_pr`)、マージ(`merge_pr`、`github_actions.merge_method` を使用)ができます。使えるのは `github_actions.allowed` にある名前だけです(既定は `rerun_failed` と `cancel`)。**各操作は個別に確認されます**。ページは送信内容(メソッドとエンドポイント)を正確に表示し、そのプランを使い捨てトークンで確認するまで何も送りません。GitHub トークンには権限が必要です(実行には `workflow`、Issue とプルリクエストには `repo`。なければ GitHub の拒否が表示されます)。すべての試行は `github_actions_log.jsonl` に記録されます。AIアシスタントはこれらを開始できません。
 
+共同作業の表示で追加: `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch` ([COLLABORATION_jpn.md](COLLABORATION_jpn.md)).
+
 ## act でここでワークフローを実行
 
 `act.enabled` をオンにし、`act.allowed` に `リポジトリ:ファイル.yml:イベント` の項目(3つとも完全一致)を入れると、正確なコマンドラインを確認した後、ボタンでローカルクローンに対して `act` を実行します。実際のシークレットは渡されません(シークレット・変数・環境・入力のファイルは空、トークンのない最小限の環境)。出力は逐次表示され、一度に1回だけ実行され、`act.timeout_seconds` の時間制限があり、停止もできます。

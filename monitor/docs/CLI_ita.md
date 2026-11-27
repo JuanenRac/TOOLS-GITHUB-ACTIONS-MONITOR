@@ -112,3 +112,12 @@ python bin/monitor_cli.py identity plan
 ## Conformità e registro delle azioni
 
 `compliance report` dice quali garanzie offre questa installazione; `audit verify|checkpoint|purge|export` lavora sulla catena del registro delle azioni. Vedi [COMPLIANCE_ita.md](COMPLIANCE_ita.md).
+
+## Comandi: actions, runner-hook
+
+```
+python bin/monitor_cli.py actions proposals
+python bin/monitor_cli.py runner-hook started
+```
+
+[COLLABORATION_ita.md](COLLABORATION_ita.md)

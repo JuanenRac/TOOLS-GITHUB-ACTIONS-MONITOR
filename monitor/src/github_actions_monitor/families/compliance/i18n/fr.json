@@ -108,5 +108,7 @@
  "ui.compliance.line_runs_as_root": "Exécuté en root",
  "ui.compliance.line_profile": "Profil",
  "egress.use.audit_export": "le récepteur de l'export du journal des actions",
- "egress.fail.audit_export": "les lignes attendent dans le journal ; le doctor indique les octets"
+ "egress.fail.audit_export": "les lignes attendent dans le journal ; le doctor indique les octets",
+ "ui.compliance.refused": "Refusé : le mode lecture seule strict est activé (security.read_only_strict).",
+ "ui.compliance.alert_lag": "L'export du journal des actions est en retard : {waiting} octets en attente, {lost} fois des lignes perdues"
 }

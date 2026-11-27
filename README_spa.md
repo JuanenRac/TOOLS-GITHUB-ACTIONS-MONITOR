@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6080_passing-brightgreen.svg" alt="6080 tests">
+  <img src="https://img.shields.io/badge/Tests-6165_passing-brightgreen.svg" alt="6165 tests">
 </p>
 
 > Vigila los workflows de todos tus repositorios y te dice, en una página local, qué está en rojo, qué está atascado y qué te espera.
@@ -98,8 +98,8 @@ Método, supuestos y cómo medirlo en tu propio uso: [`monitor/docs/PRODUCTIVITY
 | | |
 |---|---|
 | **Madurez** | functional |
-| **Tests** | 6080 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Ajustes** | 985 ajustes, todos con ayuda |
+| **Tests** | 6165 métodos de test (`python -m unittest discover -s monitor/tests`) |
+| **Ajustes** | 1029 ajustes, todos con ayuda |
 | **Idiomas** | 8 (inglés, español, alemán, francés, italiano, japonés, chino y portugués) |
 | **Probado en el CI en** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -358,6 +358,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COMPLIANCE_spa.md`](monitor/docs/COMPLIANCE_spa.md): Cumplimiento: solo lectura estricto, política de red, informe, retención y retención legal, registro de acciones firmado y exportado
 - [`monitor/docs/ECOSYSTEM_TOOLS_spa.md`](monitor/docs/ECOSYSTEM_TOOLS_spa.md): Las herramientas que rodean al monitor y hasta dónde se soporta cada una
 - [`monitor/docs/EDITIONS_spa.md`](monitor/docs/EDITIONS_spa.md): Completa y Lite: qué hay en cada edición
+- [`monitor/docs/COLLABORATION_spa.md`](monitor/docs/COLLABORATION_spa.md): Vistas de colaboración y acciones opcionales en GitHub
+- [`monitor/docs/FLEET_APIS_spa.md`](monitor/docs/FLEET_APIS_spa.md): Flota por rol y grupo, APIs CCTray y de seguridad, huella de informes, sitio de demostración
 - [`monitor/docs/AI_CONNECTION_spa.md`](monitor/docs/AI_CONNECTION_spa.md): Conectar una herramienta de IA: todo lo que dice el monitor, como señales, en el resumen, el endpoint, las herramientas MCP y el hook
 - [`monitor/docs/AI_SETUP_PROMPT_spa.md`](monitor/docs/AI_SETUP_PROMPT_spa.md): Configurar el monitor con una IA: un prompt para pegar en tu asistente de IA que lo instala, te pregunta qué quieres y escribe la configuración
 - [`monitor/docs/QUOTA_spa.md`](monitor/docs/QUOTA_spa.md): Más cuota, menos gasto: modo Bajo, el panel central, una GitHub App y cómo compartir la cuota

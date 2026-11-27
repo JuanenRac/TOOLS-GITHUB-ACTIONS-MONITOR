@@ -174,7 +174,16 @@ def live_boards(gh):
     return out, None
 
 
-def build(defs, defs_error, live, live_error, runs, last_any, runs_error, defs_age, now_ts=None):
+def clone_behind(gh, profile_dir):
+    """True when the clone of the profile repository does not have the commit its default branch has on GitHub (nothing was fetched since): its definitions may be old. False when it cannot be told."""
+    try:
+        head = (gh("api", f"repos/{profile_repo()}/{profile_repo()}/commits/HEAD") or {}).get("sha")
+    except Exception:   # noqa: BLE001 - not knowing is not a warning
+        return False
+    return bool(mainsource.behind_note(profile_dir, head))
+
+
+def build(defs, defs_error, live, live_error, runs, last_any, runs_error, defs_age, now_ts=None, behind=False):
     """One row per board plus a level: warn when a board was never reconciled or not within STALE_DAYS, or the definitions changed after the last good run."""
     rows, warn = [], False
     for key, title in BOARDS:
@@ -199,6 +208,8 @@ def build(defs, defs_error, live, live_error, runs, last_any, runs_error, defs_a
             drift = dict(board_live["status"]) != dict(d["status"])
             if drift:
                 problems.append(("drift", {}))
+        if behind:      # the definitions compared are those of an old fetch: a "drift" or "not applied" below may only be that
+            problems.insert(0, ("clone_behind", {}))
         warn = warn or bool(problems)
         rows.append({"key": key, "title": d.get("title") or title, "defs": d or None, "live": board_live, "drift": drift, "run": run, "problems_raw": problems, "problems": render_problems(problems),
                      "url": (board_live or {}).get("url")})
@@ -243,7 +254,7 @@ class Watcher:
         defs, defs_error = defs_summary(self.profile_dir)
         live, live_error = live_boards(self.gh)
         runs, last_any, runs_error = last_runs(self.gh, now)
-        value = build(defs, defs_error, live, live_error, runs, last_any, runs_error, defs_age_days(self.profile_dir, now))
+        value = build(defs, defs_error, live, live_error, runs, last_any, runs_error, defs_age_days(self.profile_dir, now), behind=clone_behind(self.gh, self.profile_dir))
         with self.lock:
             self.value, self.at, self.busy = value, time.time(), False
 

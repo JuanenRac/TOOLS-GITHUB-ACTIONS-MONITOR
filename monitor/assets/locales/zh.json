@@ -6,6 +6,7 @@
  "a9.defs_not_json": "定义没有返回 JSON",
  "a9.no_defs_file": "在个人资料仓库的克隆中找不到 tools/roadmap_defs.py",
  "a9.no_status": "无状态",
+ "a9.p.clone_behind": "个人资料仓库的本地克隆落后于 origin：请执行 fetch，当前对比内容可能过时",
  "a9.p.defs_newer": "定义在最近一次运行之后发生了变化：尚未应用",
  "a9.p.drift": "GitHub 看板与定义不一致",
  "a9.p.last_failed": "最近一次运行以 {conclusion} 结束",

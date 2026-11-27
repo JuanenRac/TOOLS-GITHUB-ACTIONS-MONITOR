@@ -3,6 +3,7 @@
 """The content of a report, as plain data: the score of the account, the team's repositories that need a person, the open alerts and what changed since the last report. Pure functions: the data go in, a document comes out; nothing is read or written here. No secret can be in it, because none of the inputs holds one (it takes the snapshots and the lists the page already shows) and every text is cut to a fixed length."""
 from datetime import datetime, timezone
 
+from github_actions_monitor.reporting import report_digest
 from github_actions_monitor.security.redactor import redact
 
 LEVELS = ("critical", "error", "warning", "info")
@@ -79,6 +80,7 @@ def build(account, snapshot, alerts, team, now, previous=None, top=10, compare=N
     part = compare_part(compare)
     if part is not None:      # only when the person asked for it (compare.include_in_report): a report without it is the same as before
         doc["compare"] = part
+    doc["report_digest"] = report_digest.digest(doc, verdict=score.get("score") if isinstance(score, dict) else None)
     return doc
 
 

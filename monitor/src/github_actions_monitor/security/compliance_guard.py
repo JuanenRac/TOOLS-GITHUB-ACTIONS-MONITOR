@@ -34,6 +34,8 @@ GH_READS = {"auth": ("status", "token"), "run": ("list", "view", "download", "wa
             "search": None, "status": None, "version": None, "help": None}
 EVENTS = frozenset({"subprocess.Popen", "os.system", "socket.getaddrinfo", "socket.gethostbyname", "socket.connect", "socket.sendto", "urllib.Request"})
 MUTATION_RE = re.compile(r"\bmutation\b")
+#: the POST routes of the page whose effect is a write on GitHub or a program that runs: in strict read-only mode they answer 403 with the reason, before anything is prepared
+WRITE_ROUTES = ("/api/gh-action/confirm", "/api/ai/actions/confirm", "/api/act/confirm", "/api/webhook/redeliver")
 
 STATE = {"installed": False, "strict": False, "policy": "default", "allow": (), "ghe": "", "addresses": set(), "blocked": 0, "last": ""}
 
@@ -67,6 +69,11 @@ def configure(config):
         STATE["allow"] = allow if was == "default" else tuple(a for a in STATE["allow"] if a in allow)
     STATE["ghe"] = STATE["ghe"] or ghe
     return STATE["strict"] or STATE["policy"] != "default"
+
+
+def route_refused(path, config=None):
+    """True when a POST to `path` must be refused because of the strict read-only mode (in force in this process, or already set in the configuration)."""
+    return path in WRITE_ROUTES and (STATE["strict"] or wanted(config)[0])
 
 
 def restricted():

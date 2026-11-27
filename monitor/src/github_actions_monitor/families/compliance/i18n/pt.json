@@ -108,5 +108,7 @@
  "ui.compliance.line_runs_as_root": "Corre como root",
  "ui.compliance.line_profile": "Perfil",
  "egress.use.audit_export": "o recetor da exportação do registo de ações",
- "egress.fail.audit_export": "as linhas esperam no registo; o doctor indica os bytes"
+ "egress.fail.audit_export": "as linhas esperam no registo; o doctor indica os bytes",
+ "ui.compliance.refused": "Recusado: o modo estrito só de leitura está ativo (security.read_only_strict).",
+ "ui.compliance.alert_lag": "A exportação do registo de ações está atrasada: {waiting} bytes em espera, {lost} vezes se perderam linhas"
 }

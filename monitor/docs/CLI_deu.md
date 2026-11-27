@@ -112,3 +112,12 @@ python bin/monitor_cli.py identity plan
 ## Compliance und Aktionsprotokoll
 
 `compliance report` nennt die Zusicherungen dieser Installation; `audit verify|checkpoint|purge|export` arbeitet an der Kette des Aktionsprotokolls. Siehe [COMPLIANCE_deu.md](COMPLIANCE_deu.md).
+
+## Befehle: actions, runner-hook
+
+```
+python bin/monitor_cli.py actions proposals
+python bin/monitor_cli.py runner-hook started
+```
+
+[COLLABORATION_deu.md](COLLABORATION_deu.md)

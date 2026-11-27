@@ -108,5 +108,7 @@
  "ui.compliance.line_runs_as_root": "Eseguito come root",
  "ui.compliance.line_profile": "Profilo",
  "egress.use.audit_export": "il ricevitore dell'esportazione del registro delle azioni",
- "egress.fail.audit_export": "le righe attendono nel registro; il doctor indica i byte"
+ "egress.fail.audit_export": "le righe attendono nel registro; il doctor indica i byte",
+ "ui.compliance.refused": "Rifiutato: la modalità di sola lettura rigorosa è attiva (security.read_only_strict).",
+ "ui.compliance.alert_lag": "L'esportazione del registro delle azioni è in ritardo: {waiting} byte in attesa, {lost} volte righe perse"
 }

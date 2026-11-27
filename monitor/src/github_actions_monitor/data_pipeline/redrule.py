@@ -24,6 +24,7 @@ from datetime import datetime
 
 from github_actions_monitor import i18n
 from github_actions_monitor.data_pipeline import expected_red
+from github_actions_monitor.data_pipeline import run_dismiss
 
 BAD = ("failure", "timed_out", "startup_failure")      # `action_required` is not a failure: it is a run that waits for a person to approve it (see is_awaiting)
 IGNORED = ("cancelled", "skipped", "neutral", "stale")
@@ -294,7 +295,7 @@ def classify(runs, branch, now=None, policy=None):
         elif policy["inactive_days"] and quiet_since and now - quiet_since > policy["inactive_days"] * 86400:
             out["inactive"].append(item)
         else:
-            mark = expected_red.lookup(last.get("repo"), key) or expected_red.lookup(last.get("repo"), last.get("name"))
+            mark = expected_red.lookup(last.get("repo"), key) or expected_red.lookup(last.get("repo"), last.get("name")) or run_dismiss.lookup(last)      # or this very run was set aside by a person
             if mark:      # a workflow that is known to be red for a while, with a reason, an owner and an end: listed apart, neither red nor alerted until the mark runs out
                 out["expected"].append({**item, "mark": mark})
             else:

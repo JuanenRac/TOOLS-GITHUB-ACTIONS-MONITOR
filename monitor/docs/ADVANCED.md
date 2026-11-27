@@ -41,6 +41,8 @@ The default stays your own `gh` login. With `github_token.enabled` on you can pa
 
 With `github_actions.enabled` on, the monitor can run again a failed run (`rerun_failed`, `rerun_run`, `rerun_job`), cancel a run (`cancel`), close an issue or a pull request (`close_issue`, `close_pr`) and merge one (`merge_pr`, with `github_actions.merge_method`). Only the names in `github_actions.allowed` can be used (by default `rerun_failed` and `cancel`). **Each action is confirmed on its own**: the page shows exactly what will be sent (method and endpoint) and sends nothing until you confirm that plan with the one-use token. The token of GitHub needs the permission (`workflow` for runs, `repo` for issues and pull requests; GitHub's own refusal is shown otherwise). Every attempt is written to `github_actions_log.jsonl`. The AI assistant has no way to start any of these.
 
+Added by the collaboration views: `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch` ([COLLABORATION.md](COLLABORATION.md)).
+
 ## Run a workflow here with act
 
 With `act.enabled` on and the entries `repository:file.yml:event` in `act.allowed` (all three exact), a button runs `act` on the local clone after you confirm the exact command line. No real secrets are given (empty secret, variable, environment and input files, and a minimal environment without any token), the output is shown as it comes, one run at a time, with the time limit `act.timeout_seconds`, and you can stop it.

@@ -108,5 +108,7 @@
  "ui.compliance.line_runs_as_root": "Läuft als root",
  "ui.compliance.line_profile": "Profil",
  "egress.use.audit_export": "der Empfänger des Exports des Aktionsprotokolls",
- "egress.fail.audit_export": "die Zeilen warten im Protokoll; der Doctor nennt die Bytes"
+ "egress.fail.audit_export": "die Zeilen warten im Protokoll; der Doctor nennt die Bytes",
+ "ui.compliance.refused": "Abgelehnt: der strikte Nur-Lese-Modus ist aktiv (security.read_only_strict).",
+ "ui.compliance.alert_lag": "Der Export des Aktionsprotokolls hängt zurück: {waiting} Bytes warten, {lost}-mal gingen Zeilen verloren"
 }

@@ -6,6 +6,7 @@
  "a9.defs_not_json": "定義が JSON を返しませんでした",
  "a9.no_defs_file": "プロフィール用リポジトリのクローンに tools/roadmap_defs.py が見つかりません",
  "a9.no_status": "状態なし",
+ "a9.p.clone_behind": "プロフィールリポジトリのクローンが origin より遅れています。fetch してください。比較内容が古い可能性があります",
  "a9.p.defs_newer": "最後の実行後に定義が変更されました。まだ適用されていません",
  "a9.p.drift": "GitHub のボードが定義と一致しません",
  "a9.p.last_failed": "直近の実行は {conclusion} で終了しました",
