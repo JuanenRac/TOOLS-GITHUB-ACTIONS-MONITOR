@@ -9,7 +9,7 @@ FOLDER of --old holds the files of the published release (github_actions_monitor
 there and nowhere else. The signed cases use an Ed25519 key made here with openssl, thrown away with the folder, and anchored ONLY in copies built for the rehearsal; no real key is read.
 
 It starts and stops monitors on this computer, so it runs on a runner of GitHub Actions (or with --allow-local on a machine where nothing else listens on the ports it uses).
-No call leaves the machine: gh and the monitor get a token that is not one and a proxy that does not answer. Exit codes: 0 all passed, 1 something failed, 2 usage.
+No call leaves the machine: every `gh` a monitor starts is the stand-in of the container test (deploy/test/fake_gh.py), and any other call meets a proxy that does not answer. Exit codes: 0 all passed, 1 something failed, 2 usage.
 """
 import argparse
 import base64
@@ -54,8 +54,26 @@ def need(name, passed, detail=""):
         raise RuntimeError("cannot go on: " + name)
 
 
+#: loaded by every Python process of the rehearsal (it is on PYTHONPATH): `gh` becomes the stand-in, on Windows and Linux alike
+STAND_IN = """import os, subprocess, sys
+_start = subprocess.Popen.__init__
+def _with_stand_in(self, args, *rest, **kw):
+    if isinstance(args, (list, tuple)) and args and os.path.basename(str(args[0])).lower() in ("gh", "gh.exe"):
+        args = [sys.executable, os.environ["REHEARSAL_GH"], *args[1:]]
+        kw.pop("executable", None)
+    _start(self, args, *rest, **kw)
+subprocess.Popen.__init__ = _with_stand_in
+"""
+
+
 def isolated_env(work):
     env = {k: v for k, v in os.environ.items() if not k.startswith(("MONITOR_", "JUANENRAC_", "GH_", "GITHUB_TOKEN")) and k.upper() not in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "NO_PROXY", "PYTHONPATH")}
+    shim = work / "shim"
+    shim.mkdir(parents=True, exist_ok=True)
+    (shim / "sitecustomize.py").write_text(STAND_IN, encoding="utf-8")
+    shutil.copyfile(REPO / "deploy" / "test" / "fake_gh.py", shim / "fake_gh.py")
+    (shim / "good").write_text("rehearsal-not-a-token\n", encoding="ascii")
+    env.update(PYTHONPATH=str(shim), REHEARSAL_GH=str(shim / "fake_gh.py"), FAKE_GH_GOOD=str(shim / "good"), FAKE_GH_LOGIN="rehearsal-owner")
     env.update(GH_TOKEN="rehearsal-not-a-token", GH_CONFIG_DIR=str(work / "gh-config"), HTTPS_PROXY=NOWHERE, HTTP_PROXY=NOWHERE, NO_PROXY="127.0.0.1,localhost", PYTHONDONTWRITEBYTECODE="1")
     return env
 
@@ -166,7 +184,7 @@ class Install:
         module = "github_actions_monitor.lite" if self.lite else "github_actions_monitor"
         logs = self.base / "run.log"
         with open(logs, "ab") as log:
-            self.proc = subprocess.Popen([sys.executable, "-m", module, "--no-browser", "--port", str(self.port)], cwd=str(self.root), env=dict(self.env, PYTHONPATH=str(self.root / "src")),
+            self.proc = subprocess.Popen([sys.executable, "-m", module, "--no-browser", "--port", str(self.port)], cwd=str(self.root), env=dict(self.env, PYTHONPATH=str(self.root / "src") + os.pathsep + self.env["PYTHONPATH"]),
                                          stdout=log, stderr=log, stdin=subprocess.DEVNULL, creationflags=(0x00000200 | 0x08000000) if os.name == "nt" else 0, start_new_session=os.name != "nt")
 
     def health(self, seconds=90):
@@ -391,9 +409,6 @@ def download_apply(install, work, version, folder):
         server.close()
 
 
-def blocked(report):
-    return [c["code"] for c in (report.get("plan") or {}).get("checks", []) if c.get("severity") == "block"]
-
 
 # --- the scenarios ---------------------------------------------------------------------------------------------------------------------------------
 def go_back(install, old_version, before, label, restore="auto", areas=("product", "config")):
@@ -544,8 +559,10 @@ def scenario_broken_candidate(ctx):
 
 def refused(install, tool, release, code_wanted, label, extra=()):
     before = install.snapshot(("product", "config"))
+    _status, plan, _said = install.updater("--json", "--zip", release / ZIP, *extra, "plan", tool=tool)
+    blocks = [c["code"] for c in plan.get("checks", []) if c.get("severity") == "block"]      # the report of `apply --json` does not carry the plan
     status, report, said = install.updater("--yes", "--json", "--zip", release / ZIP, *extra, "apply", tool=tool)
-    check(f"{label}: refused ({code_wanted})", status != 0 and not report.get("ok") and code_wanted in blocked(report), f"status {status}, blocks {blocked(report)}, {said[-600:]}")
+    check(f"{label}: refused ({code_wanted})", status != 0 and not report.get("ok") and code_wanted in blocks, f"status {status}, blocks {blocks}, {said[-600:]}")
     check(f"{label}: nothing changed", not differences(before, install.snapshot(("product", "config"))), differences(before, install.snapshot(("product", "config"))))
 
 
