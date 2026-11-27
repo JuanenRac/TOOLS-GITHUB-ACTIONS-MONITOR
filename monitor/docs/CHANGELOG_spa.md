@@ -45,6 +45,11 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Seguridad
 
+- **Los plugins de otras personas obedecen las restricciones**: con el modo de solo lectura estricto o la política de red en vigor, uno solo se ejecuta si su proceso no tiene red.
+- **Tokens de las fuentes de CI externas y de la exportación del registro**: no pueden nombrar un secreto del sistema o del monitor y nunca se envían sin TLS a una dirección pública.
+- Una descarga sin firma ofrecida con un número anterior se rechaza cuando contiene una versión que debe ir firmada.
+- Un fichero de estado dañado de la exportación del registro ya no detiene sus comprobaciones, y la única repetición automática no se envía si no se puede anotar.
+- Las guías dicen dos límites conocidos (carpetas que ve un viewer en el propio equipo; repetición de eventos sin hora) y el valor por defecto correcto de `webhook.reject_stale`.
 - El limpiador de texto para las IA ahora quita entero un nombre largo de equipo interno acabado en `.local` y los trozos de una clave privada que perdió su cabecera (una línea cortada o un registro que empieza a mitad de la clave).
 - Solo se soporta la última versión publicada (política de seguridad).
 

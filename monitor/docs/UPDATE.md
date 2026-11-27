@@ -26,7 +26,7 @@ Under a service manager the page does not apply updates by default. If the monit
 
 ## Signed releases
 
-From version 2.2.0 every release is signed: SHA256SUMS has a detached Ed25519 signature, the file `SHA256SUMS.ed25519.sig`, made with the key of the project, whose public half travels inside the updater. The updater checks it before it unpacks anything. A release from 2.2.0 on without a valid signature is refused, and so is a signed zip offered under another version. Going back to an older version, published without a signature, is allowed with a warning. For a zip you downloaded by hand, put `SHA256SUMS` and `SHA256SUMS.ed25519.sig` next to it (with `--zip`).
+From version 2.2.0 every release is signed: SHA256SUMS has a detached Ed25519 signature, the file `SHA256SUMS.ed25519.sig`, made with the key of the project, whose public half travels inside the updater. The updater checks it before it unpacks anything. A release from 2.2.0 on without a valid signature is refused, and so is a signed zip offered under another version. Going back to an older version, published without a signature, is allowed with a warning. For a zip you downloaded by hand, put `SHA256SUMS` and `SHA256SUMS.ed25519.sig` next to it (with `--zip`). The number a download is offered under does not decide alone: a zip without a signature that holds 2.2.0 or later is refused too.
 
 Public key (Ed25519, hex): `380c75210e444f71bc4fe4b9aa7cb451aad5ef2592711f7dc6ba2fd7adc3d272`. Its SHA-256 fingerprint: `6d6b995655147955a1c2fb8a84a02d828606de29b36583799ada6ca5524b5d1a`.
 

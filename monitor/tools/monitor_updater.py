@@ -1579,8 +1579,11 @@ class Updater:
             if prep["verified"] is None:
                 add("unverified", "warn")
             product = self.unpack(prep, release)
-            if signature_required(to) and read_tool_version(product) != to:      # an older signed zip offered under a newer version
-                add("sig_version", "block", version=to, found=read_tool_version(product) or "?")
+            inner = read_tool_version(product)
+            if signature_required(to) and inner != to:      # an older signed zip offered under a newer version
+                add("sig_version", "block", version=to, found=inner or "?")
+            elif signature != "valid" and signature_required(inner):      # a version that must be signed, offered under an older number without a signature
+                add("sig_missing", "block", version=inner)
         registry = load_registry(product, self.root)
         lang = _STATE["lang"]
         if direction == "same":
@@ -1770,8 +1773,11 @@ class Updater:
             private_dir(bk)
             self._write_journal(journal)
             product = self._step(report, journal, "extract", lambda: self.unpack(prep, release))
-            if signature_required(to) and read_tool_version(product) != to:
-                raise UpdaterError(FETCH_FAILED, tr("c.sig_version", version=to, found=read_tool_version(product) or "?"))
+            inner = read_tool_version(product)
+            if signature_required(to) and inner != to:
+                raise UpdaterError(FETCH_FAILED, tr("c.sig_version", version=to, found=inner or "?"))
+            if signature != "valid" and signature_required(inner):
+                raise UpdaterError(FETCH_FAILED, tr("c.sig_missing", version=inner))
             registry = load_registry(product, self.root)
             manifest = self._step(report, journal, "backup", lambda: self._snapshot(bk, folders))
             journal["manifest"] = True

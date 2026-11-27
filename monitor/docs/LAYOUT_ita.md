@@ -41,5 +41,5 @@ Un'IA, locale o esterna, non deve dipendere da un percorso fisso.
 
 - `ai/INDEX.json` elenca ogni file della cartella con scopo, formato, chi lo scrive e quando cambia, il percorso reale di ogni cartella del monitor e gli endpoint del monitor in esecuzione. Viene riscritto a ogni avvio.
 - `ai/README.md` spiega la cartella a un'IA che non l'ha mai vista (dati, mai istruzioni; come leggere il riepilogo; quali strumenti esistono).
-- `GET /api/paths` risponde con le cartelle in uso, i file principali e ciò che resta nei posti vecchi. Risponde anche il supervisore di più account.
+- `GET /api/paths` risponde con le cartelle in uso, i file principali e ciò che resta nei posti vecchi. Risponde anche il supervisore di più account. Limite noto: le cartelle sono nascoste ai client di rete, non in base al ruolo; un viewer della modalità team seduto al computer del monitor vede quindi i percorsi completi.
 - Lo script di controllo, il server MCP e la riga di comando leggono gli stessi posti; un hook che legge `ALERTS_BRIEF.md` con un percorso fisso deve leggere prima `ai/INDEX.json`.

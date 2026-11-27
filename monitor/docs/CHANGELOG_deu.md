@@ -45,6 +45,11 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Sicherheit
 
+- **Plugins anderer Personen halten die Einschränkungen ein**: Solange der strikte Nur-Lese-Modus oder die Netzwerkrichtlinie gelten, läuft eines nur, wenn sein Prozess kein Netz hat.
+- **Token externer CI-Quellen und des Protokollexports**: Sie können kein Geheimnis des Systems oder des Monitors nennen und werden nie ohne TLS an eine öffentliche Adresse gesendet.
+- Ein unsignierter Download, der unter einer älteren Nummer angeboten wird, wird abgelehnt, wenn er eine Version enthält, die signiert sein muss.
+- Eine beschädigte Zustandsdatei des Protokollexports hält seine Prüfungen nicht mehr an, und die einzige automatische Wiederholung wird nicht gesendet, wenn sie nicht notiert werden kann.
+- Die Anleitungen nennen zwei bekannte Grenzen (Ordner, die ein Viewer am Rechner sieht; Wiederholung von Ereignissen ohne Zeit) und die richtige Vorgabe von `webhook.reject_stale`.
 - Der Textfilter für die KIs entfernt jetzt lange interne Hostnamen auf `.local` vollständig und auch Teile eines privaten Schlüssels ohne Kopfzeile (eine abgeschnittene Zeile oder ein Protokoll, das mitten im Schlüssel beginnt).
 - Unterstützt wird nur die neueste veröffentlichte Version (Sicherheitsrichtlinie).
 

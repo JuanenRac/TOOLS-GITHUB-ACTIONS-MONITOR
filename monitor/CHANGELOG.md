@@ -47,6 +47,11 @@ when this file and `tool_version.py` disagree.
 
 ### Security
 
+- **Plugins of other people obey the restrictions**: while strict read-only mode or the network policy is in force, one is run only when its process has no network.
+- **Tokens of external CI sources and of the export of the log**: they cannot name a secret of the system or of the monitor, and are never sent without TLS to a public address.
+- An unsigned download offered under an older number is refused when it holds a version that must be signed.
+- A damaged state file of the export of the log no longer stops its checks, and the single automatic re-run is not sent when it cannot be written down.
+- The guides state two known limits (folders seen by a viewer at the computer; replay of events that carry no time) and the right default of `webhook.reject_stale`.
 - The cleaner of text for the AIs now removes the whole of a long internal host name that ends in `.local`, and the pieces of a private key that lost its header (a line cut short, or a log that begins in the middle of the key).
 - Only the latest published version is supported (security policy).
 

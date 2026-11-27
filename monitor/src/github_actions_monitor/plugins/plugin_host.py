@@ -15,7 +15,7 @@ from github_actions_monitor import families, i18n
 from github_actions_monitor.plugins import plugin_manifest as manifests
 from github_actions_monitor.plugins import plugin_package as packages
 from github_actions_monitor.plugins import plugin_worker
-from github_actions_monitor.security import keyring, private_io, redactor
+from github_actions_monitor.security import compliance_guard, keyring, private_io, redactor
 from github_actions_monitor.sentinels.sentinel_base import LEVELS, BaseSentinel
 from github_actions_monitor.util import paths
 
@@ -257,8 +257,10 @@ def third_party_runner(config, name, gh, owner, repos):
         reads = Reads(manifest, gh, owner, repos)
         with tempfile.TemporaryDirectory(prefix="plugin_code_", ignore_cleanup_errors=True) as folder:
             packages.extract(files, folder)
+            strict, policy = compliance_guard.wanted(config)[:2]      # a restriction written a moment ago counts before the next cycle arms it
+            needs = compliance_guard.restricted() or strict or policy != "default"
             return plugin_worker.run(folder, manifest, reads.broker, owner=owner, timeout_s=worker.get("timeout_s", 20), max_output_kb=worker.get("max_output_kb", 256),
-                                     memory_mb=worker.get("memory_mb", 256), platforms_ok=tuple(worker.get("platforms_ok") or ()))
+                                     memory_mb=worker.get("memory_mb", 256), platforms_ok=tuple(worker.get("platforms_ok") or ()), require_isolation=needs)
     return runner
 
 

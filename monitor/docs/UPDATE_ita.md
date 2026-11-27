@@ -26,7 +26,7 @@ Sotto un gestore di servizi la pagina non applica gli aggiornamenti per impostaz
 
 ## Release firmate
 
-Dalla versione 2.2.0 ogni release è firmata: SHA256SUMS ha una firma Ed25519 separata, il file `SHA256SUMS.ed25519.sig`, fatta con la chiave del progetto, la cui parte pubblica viaggia dentro l'aggiornatore. L'aggiornatore la controlla prima di scompattare qualsiasi cosa. Una release dalla 2.2.0 senza firma valida viene rifiutata, così come uno zip firmato offerto con un'altra versione. Tornare a una versione precedente, pubblicata senza firma, è consentito con un avviso. Per uno zip scaricato a mano, metti `SHA256SUMS` e `SHA256SUMS.ed25519.sig` accanto ad esso (con `--zip`).
+Dalla versione 2.2.0 ogni release è firmata: SHA256SUMS ha una firma Ed25519 separata, il file `SHA256SUMS.ed25519.sig`, fatta con la chiave del progetto, la cui parte pubblica viaggia dentro l'aggiornatore. L'aggiornatore la controlla prima di scompattare qualsiasi cosa. Una release dalla 2.2.0 senza firma valida viene rifiutata, così come uno zip firmato offerto con un'altra versione. Tornare a una versione precedente, pubblicata senza firma, è consentito con un avviso. Per uno zip scaricato a mano, metti `SHA256SUMS` e `SHA256SUMS.ed25519.sig` accanto ad esso (con `--zip`). Il numero con cui un download viene proposto non decide da solo: anche uno zip senza firma che contiene la 2.2.0 o successiva viene rifiutato.
 
 Chiave pubblica (Ed25519, hex): `380c75210e444f71bc4fe4b9aa7cb451aad5ef2592711f7dc6ba2fd7adc3d272`. La sua impronta SHA-256: `6d6b995655147955a1c2fb8a84a02d828606de29b36583799ada6ca5524b5d1a`.
 

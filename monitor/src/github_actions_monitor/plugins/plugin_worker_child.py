@@ -70,7 +70,10 @@ def main():
 
     start = receive()
     limit_resources(start.get("memory_mb", 256), start.get("timeout_s", 20))
-    send({"ready": True, "network_isolated": isolate_network()})
+    isolated = isolate_network()
+    send({"ready": True, "network_isolated": isolated})
+    if start.get("require_network_isolation") and not isolated:
+        return      # a restriction of the monitor is in force and the network is still there: the code of the plugin is never loaded
 
     def ask(method, args):
         send({"call": method, "args": args})

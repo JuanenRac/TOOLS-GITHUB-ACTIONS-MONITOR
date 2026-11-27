@@ -26,7 +26,7 @@ Sob um gestor de serviços a página não aplica atualizações por omissão. Se
 
 ## Versões assinadas
 
-A partir da versão 2.2.0 todas as versões são assinadas: o SHA256SUMS tem uma assinatura Ed25519 separada, o ficheiro `SHA256SUMS.ed25519.sig`, feita com a chave do projeto, cuja parte pública viaja dentro do atualizador. O atualizador verifica-a antes de descomprimir o que quer que seja. Uma versão a partir da 2.2.0 sem assinatura válida é recusada, tal como um zip assinado que seja oferecido com outra versão. Regressar a uma versão anterior, publicada sem assinatura, é permitido com um aviso. Para um zip transferido à mão, coloque `SHA256SUMS` e `SHA256SUMS.ed25519.sig` ao lado dele (com `--zip`).
+A partir da versão 2.2.0 todas as versões são assinadas: o SHA256SUMS tem uma assinatura Ed25519 separada, o ficheiro `SHA256SUMS.ed25519.sig`, feita com a chave do projeto, cuja parte pública viaja dentro do atualizador. O atualizador verifica-a antes de descomprimir o que quer que seja. Uma versão a partir da 2.2.0 sem assinatura válida é recusada, tal como um zip assinado que seja oferecido com outra versão. Regressar a uma versão anterior, publicada sem assinatura, é permitido com um aviso. Para um zip transferido à mão, coloque `SHA256SUMS` e `SHA256SUMS.ed25519.sig` ao lado dele (com `--zip`). O número com que uma transferência é apresentada não decide sozinho: um zip sem assinatura que contenha a 2.2.0 ou posterior também é recusado.
 
 Chave pública (Ed25519, hex): `380c75210e444f71bc4fe4b9aa7cb451aad5ef2592711f7dc6ba2fd7adc3d272`. A sua impressão digital SHA-256: `6d6b995655147955a1c2fb8a84a02d828606de29b36583799ada6ca5524b5d1a`.
 

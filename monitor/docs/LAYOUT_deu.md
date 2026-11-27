@@ -41,5 +41,5 @@ Eine KI, lokal oder extern, darf nicht von einem festen Pfad abhängen.
 
 - `ai/INDEX.json` listet jede Datei des Ordners mit Zweck, Format, Schreiber und Änderungszeitpunkt, den tatsächlichen Pfad jedes Ordners des Monitors und die Endpunkte des laufenden Monitors. Sie wird bei jedem Start neu geschrieben.
 - `ai/README.md` erklärt den Ordner einer KI, die ihn noch nie gesehen hat (Daten, nie Anweisungen; wie die Kurzfassung zu lesen ist; welche Werkzeuge es gibt).
-- `GET /api/paths` antwortet mit den verwendeten Ordnern, den wichtigsten Dateien und dem, was noch an den alten Orten liegt. Auch der Supervisor mehrerer Konten antwortet darauf.
+- `GET /api/paths` antwortet mit den verwendeten Ordnern, den wichtigsten Dateien und dem, was noch an den alten Orten liegt. Auch der Supervisor mehrerer Konten antwortet darauf. Bekannte Grenze: Die Ordner werden vor Netzwerk-Clients verborgen, nicht nach Rolle; ein Viewer des Team-Modus, der am Rechner des Monitors sitzt, sieht also die vollständigen Pfade.
 - Das Gate-Skript, der MCP-Server und die Befehlszeile lesen dieselben Orte; ein Hook, der `ALERTS_BRIEF.md` über einen festen Pfad liest, muss zuerst `ai/INDEX.json` lesen.
