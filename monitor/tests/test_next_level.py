@@ -405,7 +405,7 @@ class Page(unittest.TestCase):
         node = shutil.which("node")
         if not node:
             self.skipTest("node is not installed")
-        script = re.findall(r"<script>(.*?)</script>", self.HTML, re.S)[-1]
+        script = re.findall(r"<script>(.*?)</script[^>]*>", self.HTML, re.S | re.I)[-1]
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "page.js"
             path.write_text(script, encoding="utf-8")

@@ -23,8 +23,18 @@ MAX_BYTES = 8192
 VALUE_MAX = 60
 NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 ._-]{0,23}\Z")
 PATH_RE = re.compile(r"^[A-Za-z0-9_.][A-Za-z0-9_. /+-]{0,118}\Z")
-RISKY = re.compile(r"\([^)]*[+*][^)]*\)[+*{]|\\[1-9]|\(\?[=!<]")      # a repeat of a repeat, a back reference and look-around: the shapes that can take exponential time
+RISKY = re.compile(r"\\[1-9]|\(\?[=!<]")      # a back reference and look-around: with a repeat of a repeat (below), the shapes that can take exponential time
 DEFAULTS = {"per_call": 20, "ttl_hours": 6}
+
+
+def repeat_of_repeat(text):
+    """True when a group that holds a `+` or `*` is itself repeated. Read in one pass: between two `)`, a `(` followed by `+` or `*`, and the `)` followed by `+`, `*` or `{`."""
+    pieces = text.split(")")
+    for piece, after in zip(pieces[:-1], pieces[1:], strict=True):
+        _before, opened, inner = piece.partition("(")
+        if opened and ("+" in inner or "*" in inner) and after[:1] in ("+", "*", "{"):
+            return True
+    return False
 
 
 def column_id(name):
@@ -42,7 +52,7 @@ def valid_column(item):
         return None, "bad_path"
     if not isinstance(regex, str) or not 0 < len(regex) <= 120:
         return None, "bad_regex"
-    if RISKY.search(regex):
+    if RISKY.search(regex) or repeat_of_repeat(regex):
         return None, "risky_regex"
     try:
         re.compile(regex)

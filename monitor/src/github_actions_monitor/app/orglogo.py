@@ -25,7 +25,7 @@ LOCK = threading.Lock()
 _SVG_BAD = (re.compile(rb"<\s*script", re.I), re.compile(rb"<\s*foreignObject", re.I), re.compile(rb"<\s*(iframe|object|embed|audio|video|canvas|link|meta|base|form|input|image\b[^>]*(href|src))", re.I),
             re.compile(rb"\bon[a-z]+\s*=", re.I), re.compile(rb"javascript\s*:", re.I), re.compile(rb"data\s*:\s*text/html", re.I), re.compile(rb"<!\s*(DOCTYPE|ENTITY)", re.I),
             re.compile(rb"<\?xml-stylesheet", re.I), re.compile(rb"@import", re.I), re.compile(rb"url\s*\(\s*(?!['\"]?\s*#)", re.I), re.compile(rb"expression\s*\(", re.I))
-_HREF = re.compile(rb"(?:xlink:)?href\s*=\s*([\"'])(.*?)\1", re.I | re.S)
+_HREF = re.compile(rb"href\s*=\s*[\"']\s*", re.I)      # up to the first character of the value (also xlink:href): that is all the check needs
 
 
 def kind_of(data):
@@ -52,7 +52,7 @@ def svg_problem(data):
         if bad.search(raw):
             return "active"
     for found in _HREF.finditer(raw):
-        if not found.group(2).strip().startswith(b"#"):
+        if raw[found.end():found.end() + 1] != b"#":
             return "link"      # a picture that points at another file or address would load something the person never uploaded
     if not re.search(rb"<svg[\s>]", raw, re.I) or not re.search(rb"</svg\s*>\s*\Z", raw.rstrip() + b"\n", re.I | re.S):
         return "not_svg"

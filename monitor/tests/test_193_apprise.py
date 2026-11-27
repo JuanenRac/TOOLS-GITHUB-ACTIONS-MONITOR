@@ -4,6 +4,7 @@
 import json
 import os
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -60,7 +61,10 @@ class Channel(unittest.TestCase):
 
         def fake(args, **kw):
             seen["args"], seen["env"] = list(args), dict(kw.get("env") or {})
-            config = Path(args[args.index("-c") + 1])
+            named = os.path.realpath(args[args.index("-c") + 1])
+            if not named.startswith(os.path.join(os.path.realpath(tempfile.gettempdir()), "")):
+                raise AssertionError("the file of the addresses is not in the temporary folder")
+            config = Path(named)
             seen["file"] = config.read_text(encoding="utf-8")
             seen["path"] = config
             if os.name != "nt":

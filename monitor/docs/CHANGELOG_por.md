@@ -60,6 +60,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Segurança
 
+- **Um token no endereço só passa a ser o cookie da sessão quando está certo por si mesmo** (`listen.query_access`): um pedido já admitido pelo cookie ou pelo cabeçalho podia introduzir outro texto na resposta. Os ficheiros de segredos, relatórios e workflows têm de ficar na respetiva pasta, com as ligações resolvidas, o HTTPS de saída exige TLS 1.2 ou posterior e um comando do Porta-chaves demasiado longo é recusado.
 - **Os plugins de outras pessoas respeitam as restrições**: enquanto o modo estrito só de leitura ou a política de rede estiverem em vigor, um só é executado quando o seu processo não tem rede.
 - **Tokens das fontes de CI externas e da exportação do registo**: não podem indicar um segredo do sistema ou do monitor e nunca são enviados sem TLS para um endereço público.
 - Uma transferência sem assinatura apresentada com um número anterior é recusada quando contém uma versão que tem de ser assinada.

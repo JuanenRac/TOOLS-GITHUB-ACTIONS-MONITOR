@@ -60,6 +60,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Sécurité
 
+- **Un jeton dans l'adresse ne devient le cookie de session que s'il est juste par lui-même** (`listen.query_access`) : une requête déjà admise par son cookie ou son en-tête pouvait placer un autre texte dans la réponse. Les fichiers des secrets, des rapports et des workflows doivent rester dans leur dossier, liens résolus ; le HTTPS sortant exige TLS 1.2 ou plus récent ; une commande de trousseau trop longue est refusée.
 - **Les extensions d'autres personnes respectent les restrictions** : tant que le mode lecture seule strict ou la politique réseau s'appliquent, l'une d'elles ne s'exécute que si son processus n'a pas de réseau.
 - **Jetons des sources CI externes et de l'export du journal** : ils ne peuvent pas nommer un secret du système ou du moniteur et ne sont jamais envoyés sans TLS à une adresse publique.
 - Un téléchargement sans signature proposé sous un numéro plus ancien est refusé lorsqu'il contient une version qui doit être signée.

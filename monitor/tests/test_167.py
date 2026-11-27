@@ -161,6 +161,7 @@ class HttpsProxyInFront(unittest.TestCase):
         self.addCleanup(live.__exit__, None, None, None)
         self.proxy = http.server.ThreadingHTTPServer(("127.0.0.1", 0), _forwarder(self.live.server.server_address[1], self.PROXY_NAME))
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        context.minimum_version = ssl.TLSVersion.TLSv1_2
         context.load_cert_chain(certfile=cert, keyfile=key)
         self.proxy.socket = context.wrap_socket(self.proxy.socket, server_side=True)
         threading.Thread(target=self.proxy.serve_forever, daemon=True).start()

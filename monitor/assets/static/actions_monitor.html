@@ -736,7 +736,7 @@ function applyStatic(){
   document.querySelectorAll("[data-i18n-title]").forEach(e=>{e.title=T(e.dataset.i18nTitle)});
   document.querySelectorAll("[data-i18n-aria]").forEach(e=>{e.setAttribute("aria-label",T(e.dataset.i18nAria))});
   document.querySelectorAll("[data-i18n-ph]").forEach(e=>{e.placeholder=T(e.dataset.i18nPh)});
-  const lq="?lang="+LANG;$("lnk-txt").href="/api/sentinel/parte.txt"+lq;$("lnk-md").href="/api/sentinel/parte.txt?fmt=md&lang="+LANG;
+  const lq="?lang="+encodeURIComponent(LANG);$("lnk-txt").href="/api/sentinel/parte.txt"+lq;$("lnk-md").href="/api/sentinel/parte.txt?fmt=md&lang="+encodeURIComponent(LANG);
   try{fsSync();renderBar()}catch(e){}      // the texts of the bar and of the full screen button follow the language
 }
 var DATA=null;

@@ -83,6 +83,13 @@ def _connect(connection, allow_private, resolver):
     return socket.create_connection((ip, connection.port), connection.timeout, connection.source_address)
 
 
+def tls_context():
+    """The context of an outgoing HTTPS connection: certificate and name checked, nothing older than TLS 1.2 whatever the Python or the system would still allow."""
+    context = ssl.create_default_context()
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    return context
+
+
 def _handlers(allow_private, resolver, use_proxy=False):
     class Plain(http.client.HTTPConnection):
         def connect(self):
@@ -101,7 +108,7 @@ def _handlers(allow_private, resolver, use_proxy=False):
                     raise
                 sock = self.sock
                 name = self._tunnel_host
-            self.sock = ssl.create_default_context().wrap_socket(sock, server_hostname=name)      # the certificate is checked against the NAME, the socket goes to the checked address
+            self.sock = tls_context().wrap_socket(sock, server_hostname=name)      # the certificate is checked against the NAME, the socket goes to the checked address
 
     class HttpHandler(urllib.request.HTTPHandler):
         def http_open(self, req):

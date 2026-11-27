@@ -2,6 +2,7 @@
 # GPL-3.0-or-later - see LICENSE
 """The scheduled report as a service: the settings (`report_schedule.*`, all off by default), the schedule that asks whether a report is owed, the files it writes under `data/reports/`, their retention and a safe way to list and read them. One report is written at most once for a scheduled minute (the memory of the last run is a small file next to them), a failure is noted and never stops the monitor, and the first report waits for the first scheduled minute after the setting was switched on."""
 import json
+import os
 import re
 import time
 from pathlib import Path
@@ -215,8 +216,11 @@ def read_file(account, name, base=None):
     found = NAME_RE.match(str(name or ""))
     if not found or found.group(1) != _account(account):
         return None
-    path = folder(base) / name
+    root = os.path.join(os.path.realpath(str(folder(base))), "")
+    path = os.path.realpath(os.path.join(root, found.group(0)))
+    if not path.startswith(root):      # a report that is a link to a file elsewhere is not served
+        return None
     try:
-        return path.read_bytes(), ("text/html; charset=utf-8" if found.group(3) == "html" else "text/markdown; charset=utf-8")
+        return Path(path).read_bytes(), ("text/html; charset=utf-8" if found.group(3) == "html" else "text/markdown; charset=utf-8")
     except OSError:
         return None

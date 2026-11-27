@@ -79,7 +79,7 @@ class TheThemeOfEachScreen(unittest.TestCase):
         for number, line in enumerate(SCREENS.split("\n"), 1):
             if re.match(r"\s*:root", line) or number < 12:
                 continue
-            body = re.sub(r"<!--.*?-->", "", line)
+            body = re.sub(r"<!--.*?--!?>", "", line, flags=re.S)
             self.assertNotRegex(body, r"#[0-9a-fA-F]{3,8}\b(?![^<]*</)", f"screens.html line {number} writes a colour: use a variable of the theme")
             self.assertNotRegex(body, r"rgba?\(|hsla?\(", f"screens.html line {number}")
 
