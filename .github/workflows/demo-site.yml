@@ -67,7 +67,7 @@ jobs:
         env:
           PYTHONUTF8: "1"
         run: >-
-          python tools/make_screenshots.py --web --only web_extensions web_proposals web_assistant_chat web_collaboration web_roles_groups web_posture web_screen_group web_sentinel_security
+          python tools/make_screenshots.py --web --only web_extensions web_proposals web_assistant_chat web_collaboration web_roles_groups web_posture web_screen_group web_sentinel_security web_compliance web_external_ci
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: pictures
@@ -78,6 +78,8 @@ jobs:
             docs/screenshots/web_collaboration_*.png
             docs/screenshots/web_roles_groups_*.png
             docs/screenshots/web_posture_*.png
+            docs/screenshots/web_compliance_*.png
+            docs/screenshots/web_external_ci_*.png
             docs/screenshots/web_screen_group.png
             docs/screenshots/web_sentinel_security_*.png
           if-no-files-found: error

@@ -40,11 +40,17 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Corrigido
 
+- **Acabaram os falsos avisos de «definição desconhecida» ao atualizar**: o atualizador já não assinala como desconhecidas as definições presentes na configuração de exemplo da versão de destino mas não descritas pela página de definições.
 - Os nomes de passos guardados por workflow têm um limite.
 - Os lançadores do Windows usam `python` quando o lançador `py` não está instalado.
 
 ### Segurança
 
+- **Os plugins de outras pessoas respeitam as restrições**: enquanto o modo estrito só de leitura ou a política de rede estiverem em vigor, um só é executado quando o seu processo não tem rede.
+- **Tokens das fontes de CI externas e da exportação do registo**: não podem indicar um segredo do sistema ou do monitor e nunca são enviados sem TLS para um endereço público.
+- Uma transferência sem assinatura apresentada com um número anterior é recusada quando contém uma versão que tem de ser assinada.
+- Um ficheiro de estado danificado da exportação do registo já não para as suas verificações, e a única repetição automática não é enviada se não puder ser anotada.
+- Os guias indicam dois limites conhecidos (pastas vistas por um viewer no computador; repetição de eventos sem hora) e o valor por omissão correto de `webhook.reject_stale`.
 - O limpador de texto para as IA passa a retirar por inteiro um nome longo de máquina interna terminado em `.local` e os pedaços de uma chave privada sem cabeçalho (uma linha cortada ou um registo que começa a meio da chave).
 - Só é suportada a última versão publicada (política de segurança).
 

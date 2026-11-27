@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6182_passing-brightgreen.svg" alt="6182 tests">
+  <img src="https://img.shields.io/badge/Tests-6196_passing-brightgreen.svg" alt="6196 tests">
 </p>
 
 > Surveille les workflows de tous vos dépôts et vous dit, sur une page locale, ce qui est rouge, ce qui est bloqué et ce qui vous attend.
@@ -98,7 +98,7 @@ Méthode, hypothèses et comment le mesurer dans votre propre usage: [`monitor/d
 | | |
 |---|---|
 | **Maturité** | functional |
-| **Tests** | 6182 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 6196 méthodes de test (`python -m unittest discover -s monitor/tests`) |
 | **Réglages** | 1030 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, Python 3.11, 3.13 |
@@ -173,11 +173,13 @@ Un second produit, plus simple, dans le même paquet : la page de ce qui tourne 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_menu_groups_light.png"><img src="docs/screenshots/web_menu_groups_dark.png" alt="Le menu en groupes : Surveiller, Sentinelles, Équipe, Rapports et apprentissage" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_palette_light.png"><img src="docs/screenshots/web_palette_dark.png" alt="La palette Ctrl+K : une zone de recherche pour tout onglet, dépôt ou action" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_ci_light.png"><img src="docs/screenshots/web_sentinel_ci_dark.png" alt="Sentinelle : CI" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_external_ci_light.png"><img src="docs/screenshots/web_external_ci_dark.png" alt="Sources CI externes : ce que dit chacune et pourquoi l'une n'a pas pu être lue" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_collab_light.png"><img src="docs/screenshots/web_sentinel_collab_dark.png" alt="Sentinelle : collaboration" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_delivery_light.png"><img src="docs/screenshots/web_sentinel_delivery_dark.png" alt="Sentinelle de livraison : ce qui est construit mais pas encore livré" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_supply_light.png"><img src="docs/screenshots/web_sentinel_supply_dark.png" alt="Sentinelle de la chaîne d'approvisionnement : actions non épinglées et permissions larges" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_security_light.png"><img src="docs/screenshots/web_sentinel_security_dark.png" alt="Sentinelle de sécurité avec des constats" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_posture_light.png"><img src="docs/screenshots/web_posture_dark.png" alt="Rapport de posture des dépôts et de l'organisation face à OWASP et CIS" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_compliance_light.png"><img src="docs/screenshots/web_compliance_dark.png" alt="Rapport de conformité de l'installation : chaque ligne vérifiée ou déclarée" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_collaboration_light.png"><img src="docs/screenshots/web_collaboration_dark.png" alt="Vues de collaboration : ce qui attend une personne et ce qui pourrait être fait" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_roles_groups_light.png"><img src="docs/screenshots/web_roles_groups_dark.png" alt="Flotte par rôle de workflow et par groupe" width="92%"></picture></p>
 <p align="center"><img src="docs/screenshots/web_screen_group.png" alt="Écran mural d'un groupe" width="92%"></p>

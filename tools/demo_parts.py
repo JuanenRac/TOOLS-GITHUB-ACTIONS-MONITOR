@@ -4,8 +4,8 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D)
 # GPL-3.0-or-later - see LICENSE
 # =============================================================================
-"""Invented data for the boxes of the optional parts (`python tools/demo_monitor.py PORT --parts`): extensions, proposals of the AI, the chat, the collaboration views, the fleet by role and group
-and the posture report. Everything is made up, nothing is read from GitHub or from a model, and what would be kept in a file of the monitor lives in the memory of the demo process.
+"""Invented data for the boxes of the optional parts (`python tools/demo_monitor.py PORT --parts`): extensions, proposals of the AI, the chat, the collaboration views, the fleet by role and group,
+the posture report, the external CI sources and the compliance report. Everything is made up, nothing is read from GitHub or from a model, and what would be kept in a file of the monitor lives in the memory of the demo process.
 
 `settings(cfg)` is applied to the configuration of the demo before it is written and `fill(...)` after the runs were made."""
 import hashlib
@@ -15,7 +15,8 @@ from pathlib import Path
 
 #: the blocks the demo switches on (every one of them is off by default in the monitor)
 ON = {"teamwork": {"enabled": True, "inactive_workflows": True, "keep_alive_days": 45, "dismissed_alerts": True, "dismiss_allowed": ["demo-lead"]}, "posture": {"enabled": True},
-      "plugins": {"enabled": True, "third_party": {"enabled": True}, "official": {"discussions": {"enabled": True}}}}
+      "plugins": {"enabled": True, "third_party": {"enabled": True}, "official": {"discussions": {"enabled": True}}},
+      "external_ci": {"enabled": True, "sources": ["gitlab;repo=demo-alpha-app;url=https://gitlab.example.org;project=demo-group/alpha"]}}
 
 
 def settings(cfg):
@@ -102,6 +103,19 @@ def _extensions():
     host.catalogue = catalogue
 
 
+def _external_ci(iso, now):
+    from github_actions_monitor.integrations.external_ci import extci_engine as engine
+
+    def source(kind, repo, state, reason="", red=(), experimental=False):
+        return {"id": f"{kind}:{repo}", "kind": kind, "repo": repo, "state": state, "reason": reason, "experimental": experimental, "last_ok": iso(now), "next_try": iso(now),
+                "red": [{"workflow": f"{name} ({kind})", "branch": "main", "url": "https://ci.example.org/builds/31", "run_id": 31} for name in red], "logs": []}
+    rows = [source("gitlab", "demo-alpha-app", "red", red=("pipeline",)), source("buildbot", "demo-beta-fw", "ok"), source("jenkins", "demo-gamma-api", "degraded", "timeout", experimental=True)]
+    engine.status = lambda config: {"ok": True, "enabled": True, "active": True, "sources": rows, "invalid": []}
+    engine.tick = lambda config, data=None: None      # the demo never reads a server
+    engine.red_rows = engine.runs = lambda config: []
+    engine.alerts = lambda config, account="": []
+
+
 def fill(repos, runs, iso, now):
     """The invented answers behind the boxes. Only the functions that read a file, a model or GitHub are replaced: the code that turns them into the page is the one of the monitor."""
     from github_actions_monitor.app import toolconfig
@@ -111,4 +125,5 @@ def fill(repos, runs, iso, now):
     _posture(iso, now)
     _assistant(runs)
     _extensions()
+    _external_ci(iso, now)
     fleet_views.remember(runs, repos)

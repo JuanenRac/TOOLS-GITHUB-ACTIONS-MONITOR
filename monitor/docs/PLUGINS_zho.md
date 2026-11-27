@@ -48,7 +48,7 @@ python bin/monitor_cli.py plugin uninstall --name my-plugin
 | Windows | 是 | **否**：标记**无网络隔离** | 作业对象：内存限制、禁止子进程 |
 | macOS | 是 | **否**：标记**无网络隔离** | CPU 限制；不保证内存限制 |
 
-任何系统上都不会对此类插件隐藏您的文件：它以您的用户身份运行。`plugins.worker.platforms_ok` 留空则永不运行第三方插件。读取 GitHub 须经监视器，仅允许清单中的 `get_paths` 且限于受监视仓库。`plugins.worker.timeout_s`、`max_output_kb`、`memory_mb` 限制每次运行。
+任何系统上都不会对此类插件隐藏您的文件：它以您的用户身份运行。`plugins.worker.platforms_ok` 留空则永不运行第三方插件。读取 GitHub 须经监视器，仅允许清单中的 `get_paths` 且限于受监视仓库。`plugins.worker.timeout_s`、`max_output_kb`、`memory_mb` 限制每次运行。当 `security.read_only_strict` 或 `security.egress_policy` 限制监视器时,这些限制无法在另一个程序内部强制执行,因此他人的插件只有在其进程确实没有网络时(支持用户命名空间的 Linux)才运行;否则不运行,原因显示为 `restricted`。
 
 ## 不可信输出与健康
 

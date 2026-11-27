@@ -389,6 +389,21 @@ class ConfigMigration(Base):
         self.assertIn(("type", "open_browser"), codes)
         self.assertNotIn(("unknown_key", "ports.complete"), codes)
 
+    def test_a_setting_of_the_example_of_the_target_is_not_unknown(self):
+        schema = real_registry().schema_at("2.0.8")
+        example = {"sentinel": {"notify_command": []}, "modes": {"fast": {"refresh_seconds": 30}}}
+        cfg = {"sentinel": {"notify_command": ["x"]}, "modes": {"fast": {"refresh_seconds": 20}}, "bogus": 1}
+        self.assertIn("sentinel.notify_command", [p["key"] for c, _s, p in mu.check_config(cfg, schema, "2.0.8") if c == "unknown_key"])
+        self.assertEqual([p["key"] for c, _s, p in mu.check_config(cfg, schema, "2.0.8", example) if c == "unknown_key"], ["bogus"])
+
+    def test_the_plan_reads_the_example_that_the_target_ships(self):
+        product = Path(tempfile.mkdtemp(prefix="mon_example_"))
+        self.addCleanup(shutil.rmtree, product, True)
+        self.assertIsNone(mu.example_config(None))
+        self.assertIsNone(mu.example_config(product))
+        write_tree(product, {"assets/examples/actions_monitor.example.json": b'{"modes": {"fast": {}}}'})
+        self.assertEqual(mu.example_config(product), {"modes": {"fast": {}}})
+
     def test_duplicate_keys_and_broken_json_are_detected(self):
         path = self.tmp / "c.json"
         path.write_text('{"a": 1, "a": 2}', encoding="utf-8")

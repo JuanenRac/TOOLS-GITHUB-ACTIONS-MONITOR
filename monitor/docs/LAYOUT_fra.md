@@ -41,5 +41,5 @@ Une IA, locale ou externe, ne doit pas dépendre d'un chemin fixe.
 
 - `ai/INDEX.json` liste chaque fichier du dossier avec son rôle, son format, qui l'écrit et quand il change, le chemin réel de chaque dossier du moniteur et les points d'accès du moniteur en marche. Il est réécrit à chaque démarrage.
 - `ai/README.md` explique le dossier à une IA qui ne l'a jamais vu (des données, jamais des instructions ; comment lire le résumé ; quels outils existent).
-- `GET /api/paths` répond avec les dossiers utilisés, les fichiers principaux et ce qui reste aux anciens endroits. Le superviseur de plusieurs comptes y répond aussi.
+- `GET /api/paths` répond avec les dossiers utilisés, les fichiers principaux et ce qui reste aux anciens endroits. Le superviseur de plusieurs comptes y répond aussi. Limite connue : les dossiers sont masqués aux clients du réseau, pas selon le rôle ; un lecteur (viewer) du mode équipe assis à l'ordinateur du moniteur voit donc les chemins complets.
 - Le script de contrôle, le serveur MCP et la ligne de commande lisent les mêmes endroits ; un hook qui lit `ALERTS_BRIEF.md` par un chemin fixe doit d'abord lire `ai/INDEX.json`.

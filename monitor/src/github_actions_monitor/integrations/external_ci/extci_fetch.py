@@ -44,8 +44,8 @@ class Reader:
         value = os.environ.get(name, "").strip()      # only the NAME of the variable is in the configuration file
         if not value:
             raise Failed("token_missing")
-        if not url.startswith("https://") and not self.cfg["allow_private_targets"]:
-            raise Failed("token_clear")      # a token never travels without TLS to a public address
+        if not url.startswith("https://") and not (self.cfg["allow_private_targets"] and netguard.only_private(url)):
+            raise Failed("token_clear")      # without TLS a token only goes to this computer or to the local network, and only when that is allowed
         kind = self.source["kind"]
         if kind == "gitlab":
             headers["PRIVATE-TOKEN"] = value

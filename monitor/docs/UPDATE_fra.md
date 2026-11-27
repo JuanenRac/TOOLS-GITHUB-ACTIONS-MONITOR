@@ -26,7 +26,7 @@ Sous un gestionnaire de services, la page n'applique pas les mises à jour par d
 
 ## Versions signées
 
-À partir de la version 2.2.0, chaque version est signée : SHA256SUMS a une signature Ed25519 détachée, le fichier `SHA256SUMS.ed25519.sig`, faite avec la clé du projet, dont la partie publique voyage dans le programme de mise à jour. Celui-ci la vérifie avant de décompresser quoi que ce soit. Une version à partir de la 2.2.0 sans signature valide est refusée, de même qu'un zip signé proposé sous une autre version. Revenir à une version plus ancienne, publiée sans signature, est permis avec un avertissement. Pour un zip téléchargé à la main, placez `SHA256SUMS` et `SHA256SUMS.ed25519.sig` à côté (avec `--zip`).
+À partir de la version 2.2.0, chaque version est signée : SHA256SUMS a une signature Ed25519 détachée, le fichier `SHA256SUMS.ed25519.sig`, faite avec la clé du projet, dont la partie publique voyage dans le programme de mise à jour. Celui-ci la vérifie avant de décompresser quoi que ce soit. Une version à partir de la 2.2.0 sans signature valide est refusée, de même qu'un zip signé proposé sous une autre version. Revenir à une version plus ancienne, publiée sans signature, est permis avec un avertissement. Pour un zip téléchargé à la main, placez `SHA256SUMS` et `SHA256SUMS.ed25519.sig` à côté (avec `--zip`). Le numéro sous lequel un téléchargement est proposé ne décide pas seul : un zip sans signature contenant la 2.2.0 ou plus récent est également refusé.
 
 Clé publique (Ed25519, hex) : `380c75210e444f71bc4fe4b9aa7cb451aad5ef2592711f7dc6ba2fd7adc3d272`. Son empreinte SHA-256 : `6d6b995655147955a1c2fb8a84a02d828606de29b36583799ada6ca5524b5d1a`.
 

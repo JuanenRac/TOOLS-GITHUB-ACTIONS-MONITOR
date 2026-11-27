@@ -26,7 +26,7 @@ Unter einem Dienstmanager spielt die Seite standardmäßig keine Updates ein. L�
 
 ## Signierte Releases
 
-Ab Version 2.2.0 ist jedes Release signiert: SHA256SUMS hat eine separate Ed25519-Signatur, die Datei `SHA256SUMS.ed25519.sig`, erstellt mit dem Schlüssel des Projekts, dessen öffentlicher Teil im Updater mitreist. Der Updater prüft sie, bevor er etwas entpackt. Ein Release ab 2.2.0 ohne gültige Signatur wird abgelehnt, ebenso ein signiertes Zip, das unter einer anderen Version angeboten wird. Die Rückkehr zu einer älteren, ohne Signatur veröffentlichten Version ist mit einer Warnung erlaubt. Bei einem selbst heruntergeladenen Zip legen Sie `SHA256SUMS` und `SHA256SUMS.ed25519.sig` daneben (mit `--zip`).
+Ab Version 2.2.0 ist jedes Release signiert: SHA256SUMS hat eine separate Ed25519-Signatur, die Datei `SHA256SUMS.ed25519.sig`, erstellt mit dem Schlüssel des Projekts, dessen öffentlicher Teil im Updater mitreist. Der Updater prüft sie, bevor er etwas entpackt. Ein Release ab 2.2.0 ohne gültige Signatur wird abgelehnt, ebenso ein signiertes Zip, das unter einer anderen Version angeboten wird. Die Rückkehr zu einer älteren, ohne Signatur veröffentlichten Version ist mit einer Warnung erlaubt. Bei einem selbst heruntergeladenen Zip legen Sie `SHA256SUMS` und `SHA256SUMS.ed25519.sig` daneben (mit `--zip`). Die Nummer, unter der ein Download angeboten wird, entscheidet nicht allein: Ein Zip ohne Signatur, das 2.2.0 oder neuer enthält, wird ebenfalls abgelehnt.
 
 Öffentlicher Schlüssel (Ed25519, hex): `380c75210e444f71bc4fe4b9aa7cb451aad5ef2592711f7dc6ba2fd7adc3d272`. Sein SHA-256-Fingerabdruck: `6d6b995655147955a1c2fb8a84a02d828606de29b36583799ada6ca5524b5d1a`.
 
