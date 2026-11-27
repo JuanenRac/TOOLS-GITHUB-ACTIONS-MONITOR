@@ -194,7 +194,7 @@ cosign verify ghcr.io/juanenrac/tools-github-actions-monitor:2.2.0 \
   --certificate-identity-regexp '^https://github\.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/\.github/workflows/release-image\.yml@refs/tags/v'
 ```
 
-**在哪里测试什么**: 容器 (非 root 用户、只读文件系统、卷、密钥、代理后的 webhook) 由 Docker audit 工作流测试; 真实 systemd 上的服务单元和超过 1 GB 的数据库由 Cross-cutting 工作流测试。网络文件系统 (NFS) 和其他硬件架构未测试。
+**在哪里测试什么**: 容器 (非 root 用户、只读文件系统、卷、密钥、代理后的 webhook) 由 Docker audit 工作流测试; 真实 systemd 上的服务单元和超过 1 GB 的数据库由 Cross-cutting 工作流测试, 它还会恢复一个备份, 并用 GitHub 替身运行一个账户的一个周期。网络文件系统 (NFS) 和其他硬件架构未测试。
 
 ## 置于反向代理之后
 

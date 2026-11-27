@@ -45,6 +45,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Sécurité
 
+- Le nettoyeur de texte pour les IA retire désormais en entier un long nom d'hôte interne en `.local`, et les morceaux d'une clé privée sans son en-tête (ligne coupée court ou journal qui commence au milieu de la clé).
 - Seule la dernière version publiée est prise en charge (politique de sécurité).
 
 ### Greffons

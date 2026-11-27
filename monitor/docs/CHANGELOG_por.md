@@ -45,6 +45,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Segurança
 
+- O limpador de texto para as IA passa a retirar por inteiro um nome longo de máquina interna terminado em `.local` e os pedaços de uma chave privada sem cabeçalho (uma linha cortada ou um registo que começa a meio da chave).
 - Só é suportada a última versão publicada (política de segurança).
 
 ### Plugins

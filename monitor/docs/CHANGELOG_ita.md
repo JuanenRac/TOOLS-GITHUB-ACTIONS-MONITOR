@@ -45,6 +45,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Sicurezza
 
+- Il filtro del testo per le IA ora toglie per intero un lungo nome host interno che finisce in `.local` e i pezzi di una chiave privata senza intestazione (una riga troncata o un log che comincia a metà della chiave).
 - È supportata solo l'ultima versione pubblicata (politica di sicurezza).
 
 ### Plugin

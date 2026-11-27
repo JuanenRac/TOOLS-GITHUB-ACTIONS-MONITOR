@@ -194,7 +194,7 @@ cosign verify ghcr.io/juanenrac/tools-github-actions-monitor:2.2.0 \
   --certificate-identity-regexp '^https://github\.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/\.github/workflows/release-image\.yml@refs/tags/v'
 ```
 
-**どこで何を試験しているか**: コンテナー (root でないユーザー、読み取り専用ファイルシステム、ボリューム、シークレット、プロキシ背後の webhook) は Docker audit ワークフロー、実際の systemd 上のサービスユニットと 1 GB を超えるデータベースは Cross-cutting ワークフローです。ネットワークファイルシステム (NFS) と他のハードウェア構成は未試験です。
+**どこで何を試験しているか**: コンテナー (root でないユーザー、読み取り専用ファイルシステム、ボリューム、シークレット、プロキシ背後の webhook) は Docker audit ワークフロー、実際の systemd 上のサービスユニットと 1 GB を超えるデータベースは Cross-cutting ワークフローです。同じワークフローは、バックアップを復元し、GitHub の代役を使ってアカウントのサイクルを 1 回実行します。ネットワークファイルシステム (NFS) と他のハードウェア構成は未試験です。
 
 ## リバースプロキシの背後で
 
