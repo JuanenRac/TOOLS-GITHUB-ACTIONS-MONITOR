@@ -112,6 +112,10 @@ LIB = r"""
       const p=a.getBoundingClientRect(),q=b.getBoundingClientRect();
       if(Math.min(p.right,q.right)-Math.max(p.left,q.left)>2&&Math.min(p.bottom,q.bottom)-Math.max(p.top,q.top)>2)add("controls-overlap",a,"with "+name(b));
     }
+    let top=Math.max(box.top,0),bottom=Math.min(box.bottom,window.innerHeight);
+    for(let a=region.parentElement;a&&a!==document.body&&a!==document.documentElement;a=a.parentElement){if(css(a).overflowY!=="visible"){const q=a.getBoundingClientRect();top=Math.max(top,q.top);bottom=Math.min(bottom,q.bottom)}}
+    if(bottom-top<Math.min(150,box.height)-1){const h=s=>{const n=document.querySelector(s);return n?Math.round(n.getBoundingClientRect().height):"-"};
+      add("hidden-from-the-eye",region,Math.max(0,Math.round(bottom-top))+"px of "+Math.round(box.height)+" can be seen (stage "+h(".stage")+", main "+h("main")+", tab "+h(".tab.on")+", header "+h("header")+")")}
     const words=region.innerText||"";
     const raw=words.match(/(?:^|\s)(?:ui|cfg|egress|cli)\.[a-z0-9_]+[._][a-z0-9_.]+/);
     if(raw)add("text-key-shown",region,raw[0].trim());
