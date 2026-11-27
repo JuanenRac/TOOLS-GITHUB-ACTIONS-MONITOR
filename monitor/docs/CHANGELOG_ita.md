@@ -40,6 +40,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Corretto
 
+- **Niente più falsi avvisi «impostazione sconosciuta» durante l'aggiornamento**: l'aggiornamento non segnala più come sconosciute le impostazioni presenti nella configurazione di esempio della versione di destinazione ma non descritte dalla pagina delle impostazioni.
 - I nomi dei passi conservati per workflow hanno un limite.
 - I lanciatori di Windows usano `python` quando il lanciatore `py` non è installato.
 - **Controlli di postura che rispondevano male**: gli avvisi sulle dipendenze potevano essere letti male con le letture condizionali; una protezione non leggibile risultava assente; la politica di sicurezza condivisa dall'account non veniva vista; i controlli disattivati o filtrati contavano come «nessun rilievo» e come superati; un'organizzazione rifiutata fermava la lettura di tutti i repository; gli elenchi lunghi erano letti solo in parte; un digest comparso dopo contava come file sostituito.

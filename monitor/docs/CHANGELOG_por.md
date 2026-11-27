@@ -40,6 +40,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Corrigido
 
+- **Acabaram os falsos avisos de «definição desconhecida» ao atualizar**: o atualizador já não assinala como desconhecidas as definições presentes na configuração de exemplo da versão de destino mas não descritas pela página de definições.
 - Os nomes de passos guardados por workflow têm um limite.
 - Os lançadores do Windows usam `python` quando o lançador `py` não está instalado.
 - **Verificações de postura que respondiam mal**: os alertas de dependências podiam ser mal lidos com as leituras condicionais; uma proteção que não se pode ler era dada como inexistente; não se via a política de segurança partilhada pela conta; verificações desligadas ou filtradas contavam como «sem achados» e como aprovadas; uma organização recusada parava a leitura de todos os repositórios; listas longas eram lidas em parte; um resumo de ficheiro surgido depois contava como ficheiro substituído.
