@@ -42,6 +42,8 @@ when this file and `tool_version.py` disagree.
 
 ### Fixed
 
+- **A branch protected by a ruleset is no longer called unprotected after an update**: the three reads of the protection only send their ETag while the answer is still held, and what an older version judged is read again in full. `security.branch_unprotected` could stay for ever on a protected repository.
+- **Posture findings and alerts follow the language of the page** (`?lang=` and the language selector), not the one of the configuration.
 - **On a phone the content of every tab can be seen again**: under a tall header the open tab was left with no height, so its panels could not be reached by scrolling.
 - **The boxes of the optional parts keep their full height** on computers and wall displays instead of being squeezed to a few lines, their tables keep whole words, buttons of the compact view are at least 44 px wide, and the large charts no longer write an error to the browser console. A workflow measures every box in eight languages, on a phone, a computer and wall displays.
 - **No more false "unknown setting" warnings when updating**: the updater no longer reports as unknown the settings that the example configuration of the target version carries but the settings page does not describe.

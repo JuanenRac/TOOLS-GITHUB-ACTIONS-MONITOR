@@ -1,7 +1,7 @@
 /* Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
    GPL-3.0-or-later - see LICENSE */
 (function(){
-  let at=0;
+  let at=0,drawn="";
   function el(tag,text){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n}
   function table(head,rows){
     const t=el("table"),h=el("tr");
@@ -11,10 +11,10 @@
   }
   function fold(title,node){const d=el("details");d.append(el("summary",title),node);return d}
   async function draw(){
-    if(Date.now()-at<30000)return;
-    at=Date.now();
+    if(Date.now()-at<30000&&drawn===LANG)return;      // the titles of the findings come translated from the monitor: another language is read again at once
+    at=Date.now();drawn=LANG;
     let j;
-    try{j=await (await fetch("/api/posture")).json()}catch(e){return}
+    try{j=await (await fetch("/api/posture?"+qlang())).json()}catch(e){return}
     if(!j.ok||(!j.enabled&&!document.getElementById("posture-box")))return;
     const body=FAM.panel("ssec","posture-box","ui.posture.title");
     if(!body)return;

@@ -172,6 +172,11 @@ LIB = r"""
       if(!region){out.missing=true;return out}
       region.scrollIntoView({block:"start"});await wait(350);
       Object.assign(out,measure(region,phone));
+      if(step==="posture"&&LANG!=="en"){      // the titles of the findings come from the monitor: they must be in the language of the page, not in the one of the configuration
+        const en=I18N.catalogues.en,mine=I18N.catalogues[LANG],words=region.textContent;
+        const left=Object.keys(en).filter(k=>(k.indexOf("ui.posture.c.")===0||k.indexOf("ui.posture.learn_")===0)&&mine[k]!==en[k]&&words.indexOf(en[k])>=0);
+        if(left.length)out.found.push({kind:"english-text",at:step,text:en[left[0]].slice(0,60),detail:left.length+" texts"});
+      }
     }catch(e){out.found.push({kind:"script",at:step,text:"",detail:String(e&&e.stack||e).slice(0,300)})}
     return out;
   };

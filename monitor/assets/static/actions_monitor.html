@@ -803,7 +803,7 @@ function fillEco(){
 function refreshLanguage(){
   applyStatic();fillThemes();applyTheme(theme);applySide();applyGroups();setViewTitle();applyDense(DENSE);fillEco();if(typeof authRender==='function')authRender();
   if(DATA)render(DATA);
-  sentTick();diffTick();if(CFG.groups.length)cfgBuild({groups:CFG.groups.map(g=>({id:g.id,fields:g.fields,blocks:g.blocks.map(b=>({...b,fields:b.fields.map(f=>({...f,value:f.type==="status"?f.value:CFG.cur[f.key]}))}))})),restart_pending:CFG.restart,backups:parseInt(($("cfg-backups").textContent.match(/\d+/)||[0])[0])});
+  sentTick();diffTick();alertsTick();if(CFG.groups.length)cfgBuild({groups:CFG.groups.map(g=>({id:g.id,fields:g.fields,blocks:g.blocks.map(b=>({...b,fields:b.fields.map(f=>({...f,value:f.type==="status"?f.value:CFG.cur[f.key]}))}))})),restart_pending:CFG.restart,backups:parseInt(($("cfg-backups").textContent.match(/\d+/)||[0])[0])});
 }
 
 /* tabs */
@@ -1873,7 +1873,7 @@ $("t-sent").addEventListener("click",async e=>{
 });
 /* the Alerts tab: the alerts of every sentinel in one list, a filter by origin and level, and local silences with an end (the monitor never writes to GitHub) */
 var ALERTS=null;const ALF={s:QS.get("sentinel")||store.get("am-al-s")||"",l:"",c:"",m:store.get("am-al-m")==="1"};
-async function alertsTick(){if(LITE)return;try{const r=await fetch("/api/alerts",{cache:"no-store"});if(r.ok)ALERTS=await r.json()}catch(e){}try{renderAlerts()}catch(e){}try{soundAlerts(ALERTS)}catch(e){}try{assistantTick()}catch(e){}lessonsTick()}
+async function alertsTick(){if(LITE)return;try{const r=await fetch("/api/alerts?"+qlang(),{cache:"no-store"});if(r.ok)ALERTS=await r.json()}catch(e){}try{renderAlerts()}catch(e){}try{soundAlerts(ALERTS)}catch(e){}try{assistantTick()}catch(e){}lessonsTick()}
 /* the assistant (assistant.py): a panel of fixed questions, drawn only when ai.assistant.enabled answers; it reads, never acts, and always shows its sources and what it sent */
 var ASST=null;
 async function assistantTick(){
@@ -2142,7 +2142,7 @@ async function repoHealthOpen(repo){
   if(LITE)return;
   const owner=repo.includes("/")?repo.split("/")[0]:((ACC&&ACC.owner)||(DATA&&DATA.owner)||OWNER),name=repo.includes("/")?repo.split("/")[1]:repo;
   let doc=null;
-  try{const r=await fetch("/api/repos/"+encodeURIComponent(owner)+"/"+encodeURIComponent(name)+"/health",{cache:"no-store"});doc=r.ok?(await r.json()).health:null}catch(e){doc=null}
+  try{const r=await fetch("/api/repos/"+encodeURIComponent(owner)+"/"+encodeURIComponent(name)+"/health?"+qlang(),{cache:"no-store"});doc=r.ok?(await r.json()).health:null}catch(e){doc=null}
   $("rh-h").textContent=T("ui.rh_title")+": "+repo;
   $("rh-body").innerHTML=doc?repoHealthHtml(doc):`<span class="mut">${esc(T("ui.rh_none"))}</span>`;
   dlgOpen("rh")}
