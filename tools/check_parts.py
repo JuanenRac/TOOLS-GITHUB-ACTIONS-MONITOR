@@ -98,8 +98,12 @@ LIB = r"""
     }
     for(const e of all)if(e.matches("section>.body")&&e.clientHeight<Math.min(160,e.scrollHeight)-1)add("squeezed",e,e.clientHeight+"px of "+e.scrollHeight);
     const walker=document.createTreeWalker(region,NodeFilter.SHOW_TEXT);
+    const WORD=/(^|\s)([A-Za-zÀ-ÿ]{3,18})(?=$|[\s.,:;!?)])/g;
+    const broken=(node)=>{const text=node.nodeValue;let m;WORD.lastIndex=0;while((m=WORD.exec(text))){const r=document.createRange(),at=m.index+m[1].length;r.setStart(node,at);r.setEnd(node,at+m[2].length);
+      if(new Set([...r.getClientRects()].filter(q=>q.width>0).map(q=>Math.round(q.top))).size>1)return m[2]}return ""};
     for(let t=walker.nextNode();t;t=walker.nextNode()){
       const el=t.parentElement;if(!t.nodeValue.trim()||!el||el.closest("svg,script,style,option,textarea")||!shown(el))continue;
+      const half=broken(t);if(half)add("word-broken",el,half);
       if(scroller(el,region)||/(auto|scroll)/.test(css(el).overflowX))continue;
       const range=document.createRange();range.selectNodeContents(t);const rr=[...range.getClientRects()].filter(r=>r.width>0);if(!rr.length)continue;
       const left=Math.min(...rr.map(r=>r.left)),right=Math.max(...rr.map(r=>r.right));
