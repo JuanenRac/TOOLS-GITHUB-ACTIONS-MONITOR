@@ -24,7 +24,7 @@ window.FAM=(function(){
       if(!host)return null;
       let box=document.getElementById(id);
       if(!box){
-        box=document.createElement("section");box.id=id;
+        box=document.createElement("section");box.id=id;box.className="fam";
         const title=document.createElement("h2");title.setAttribute("data-i18n",titleKey);title.textContent=T(titleKey);
         const body=document.createElement("div");body.className="body";
         box.append(title,body);host.appendChild(box);

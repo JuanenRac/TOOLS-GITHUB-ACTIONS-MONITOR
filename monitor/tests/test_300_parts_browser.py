@@ -33,6 +33,7 @@ class TheBoxesOfTheOptionalParts(unittest.TestCase):
         self.assertIn("did not appear", check_parts.problems({"step": "chat", "missing": True})[0])
         lines = check_parts.problems({"step": "chat", "found": [{"kind": "under-44px", "at": "button", "detail": "30x20", "text": "Send"}], "errors": ["console.error: no"]})
         self.assertTrue("under-44px" in lines[0] and "console.error" in lines[1], lines)
+        self.assertEqual(check_parts.problems({"step": "chat", "found": [], "errors": list(check_parts.EXPECTED)}), [], "the assistant that is off answers 404 on purpose")
 
     @LOCAL_ONLY
     def test_every_box_fits_on_a_phone_and_on_a_computer_without_errors(self):

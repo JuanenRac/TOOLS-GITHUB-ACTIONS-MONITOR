@@ -180,7 +180,7 @@ def browser_here():
 
 
 #: an answer the page expects: the assistant that is off does not exist (404), and the browser writes that to its console
-EXPECTED = ("status of 404 (Not Found) /api/assistant",)
+EXPECTED = ("console: status of 404 (Not Found) /api/assistant",)
 
 
 def problems(report):
