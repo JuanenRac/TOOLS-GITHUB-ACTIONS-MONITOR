@@ -12,6 +12,7 @@
  "ui.actions.approve": "Freigeben",
  "ui.actions.facts": "Fakten",
  "ui.actions.facts_line": "{author}: Konto {age} Tage alt, hier schon {merged} gemergt, berührte Workflow-Dateien: {files}",
+ "ui.actions.choose_environment": "Dieser Lauf wartet auf mehrere Umgebungen. Wählen Sie eine:",
  "ui.actions.confirm": "Dies an GitHub senden? {what}",
  "ui.actions.done": "Erledigt.",
  "ui.actions.refused": "Nicht erledigt: {why}",

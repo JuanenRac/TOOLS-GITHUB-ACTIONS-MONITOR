@@ -30,7 +30,7 @@ L'indirizzo è controllato alla connessione: questo computer, reti private e met
 
 ## Log di una build fallita
 
-Disattivato di default (`external_ci.logs.enabled`). Si chiede solo la fine, limitata da `external_ci.logs.max_kb` e `external_ci.logs.tail_lines`, senza sequenze di terminale né caratteri di controllo, depurata, tenuta in memoria per `external_ci.logs.keep_hours`. È testo non affidabile, mai dato a un'IA come istruzione. La depurazione non riconosce ogni segreto.
+Disattivato di default (`external_ci.logs.enabled`). Si chiede solo la fine, limitata da `external_ci.logs.max_kb` e `external_ci.logs.tail_lines`, senza sequenze di terminale né caratteri di controllo, depurata, tenuta in memoria per `external_ci.logs.keep_hours`. È testo non affidabile, mai dato a un'IA come istruzione. La depurazione non riconosce ogni segreto. Se un server ignora la richiesta della sola fine e il log supera `external_ci.max_bytes`, non viene conservato alcun log: non sarebbe la sua fine.
 
 ## Prova, stato, riga di comando
 

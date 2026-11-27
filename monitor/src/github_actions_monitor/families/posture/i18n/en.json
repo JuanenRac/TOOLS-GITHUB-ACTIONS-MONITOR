@@ -97,7 +97,7 @@
  "ui.posture.report_note": "A reading aid built from the checks of the monitor. It is not a certification and does not say that a standard is met; the CIS section numbers have not been checked against the official document.",
  "ui.posture.status_findings": "With findings",
  "ui.posture.status_no_findings": "No findings",
- "ui.posture.status_partly": "Partly read",
+ "ui.posture.status_partly": "Partly checked",
  "ui.posture.status_not_checked": "Not checked",
  "ui.posture.trend_better": "Better than on {since} ({delta})",
  "ui.posture.trend_worse": "Worse than on {since} (+{delta})",

@@ -97,6 +97,7 @@ def read_groups(get, base, groups, ctx, wanted_groups):
             if error.reason == "rate_limited":
                 raise
             unread[name] = error.reason
+            findings.extend(error.partial)
         except (AttributeError, KeyError, TypeError, ValueError):
             unread[name] = "failed"
     return findings, unread
@@ -107,7 +108,19 @@ def _filtered(findings, cfg, kind):
 
 
 def _groups(cfg, kind, available):
-    return {name for name in available if name == "releases" and cfg["releases"] or name != "releases" and any(v[2] == name and catalogue.wanted(c, cfg["profile"], kind, cfg.get("skip") or ()) for c, v in catalogue.CHECKS.items())}
+    off = _switched_off(cfg)
+    return {name for name in available if name not in off and any(v[2] == name and catalogue.wanted(c, cfg["profile"], kind, cfg.get("skip") or ()) for c, v in catalogue.CHECKS.items())}
+
+
+def _switched_off(cfg):
+    """Groups whose own setting says "do not look": they are not read, so they are never reported as looked at."""
+    switches = {"releases": cfg.get("releases"), "reviews": cfg.get("review_sample"), "runner": cfg.get("runner_runs"), "audit": cfg.get("audit_log")}
+    return {name for name, on in switches.items() if not on}
+
+
+def _evaluated(cfg, kind, checked):
+    """The checks that were really looked at: their group was read and neither the profile, the kind of project nor posture.skip leaves them out."""
+    return sorted(c for c, v in catalogue.CHECKS.items() if v[2] in checked and catalogue.wanted(c, cfg["profile"], kind, cfg.get("skip") or ()))
 
 
 def check_repo(get, owner, repo, cfg, entry, now):
@@ -118,17 +131,20 @@ def check_repo(get, owner, repo, cfg, entry, now):
     if info.get("fork") is True and info.get("archived") is not True and cfg.get("upstream") is True:      # a fork is not judged itself; with posture.upstream its original is looked at
         ctx = {"cfg": cfg, "now": now, "repo_info": info, "memory": entry.setdefault("memory", {})}
         findings, unread = read_groups(get, base, {"upstream": posture_checks.upstream}, ctx, {"upstream"})
-        entry.update(at=now, kind=kind, findings=_filtered(findings, cfg, kind), unread=unread, checked=sorted({"upstream"} - set(unread)), skipped="fork")
+        checked = sorted({"upstream"} - set(unread))
+        entry.update(at=now, kind=kind, findings=_filtered(findings, cfg, kind), unread=unread, checked=checked, evaluated=_evaluated(cfg, kind, checked), skipped="fork")
         return entry
     if info.get("archived") is True or info.get("fork") is True:
-        entry.update(at=now, kind=kind, findings=[], unread={}, skipped="archived" if info.get("archived") else "fork")
+        entry.update(at=now, kind=kind, findings=[], unread={}, checked=[], evaluated=[], skipped="archived" if info.get("archived") else "fork")
         return entry
     ctx = {"cfg": cfg, "now": now, "repo_info": info, "memory": entry.setdefault("memory", {})}
     groups = _groups(cfg, kind, REPO_GROUPS)
     findings, unread = read_groups(get, base, REPO_GROUPS, ctx, groups)
     for name in unread:      # what could not be read now is not taken as solved
-        findings.extend(f for f in entry.get("findings", []) if catalogue.CHECKS.get(f["check"], ("", "", ""))[2] == name)
-    entry.update(at=now, kind=kind, findings=_filtered(findings, cfg, kind), unread=unread, checked=sorted(groups - set(unread)), skipped="")
+        have = {(f["check"], f["item"]) for f in findings}
+        findings.extend(f for f in entry.get("findings", []) if catalogue.CHECKS.get(f["check"], ("", "", ""))[2] == name and (f["check"], f["item"]) not in have)
+    checked = sorted(groups - set(unread))
+    entry.update(at=now, kind=kind, findings=_filtered(findings, cfg, kind), unread=unread, checked=checked, evaluated=_evaluated(cfg, kind, checked), skipped="")
     return entry
 
 
@@ -138,11 +154,13 @@ def check_org(get, owner, cfg, entry, now):
         get(f"orgs/{owner}")
     except Unread as error:
         if error.reason == "missing":      # a personal account: there is no organization to look at
-            entry.update(at=now, kind="user", findings=[], unread={}, checked=[])
+            entry.update(at=now, kind="user", findings=[], unread={}, checked=[], evaluated=[])
             return entry
         raise
-    findings, unread = read_groups(get, f"orgs/{owner}", ORG_GROUPS, ctx, set(ORG_GROUPS))
-    entry.update(at=now, kind="organization", findings=_filtered(findings, cfg, "standard"), unread=unread, checked=sorted(set(ORG_GROUPS) - set(unread)))
+    groups = set(ORG_GROUPS) - _switched_off(cfg)
+    findings, unread = read_groups(get, f"orgs/{owner}", ORG_GROUPS, ctx, groups)
+    checked = sorted(groups - set(unread))
+    entry.update(at=now, kind="organization", findings=_filtered(findings, cfg, "standard"), unread=unread, checked=checked, evaluated=_evaluated(cfg, "standard", checked))
     return entry
 
 
@@ -172,8 +190,15 @@ def refresh(config, owner, repos, get=None, now=None, account=""):
                 del data["repos"][gone]
         due = sorted((r for r in repos if now - data["repos"].get(r, {}).get("at", 0) >= every), key=lambda r: data["repos"].get(r, {}).get("at", 0))
         try:
-            if cfg["org_checks"] and now - data["org"].get("at", 0) >= every:
-                check_org(get, owner, cfg, data["org"], now)
+            if not cfg["org_checks"]:
+                data["org"] = {}
+            elif now - data["org"].get("at", 0) >= every:
+                try:
+                    check_org(get, owner, cfg, data["org"], now)
+                except Unread as error:      # a refused organization (single sign-on, no rights) never stops the repositories
+                    if error.reason == "rate_limited":
+                        raise
+                    data["org"].update(at=now, unread={"organization": error.reason}, checked=[], evaluated=[])
             for repo in due[:cfg["repos_per_cycle"]]:
                 entry = data["repos"].get(repo, {})
                 try:
@@ -189,6 +214,8 @@ def refresh(config, owner, repos, get=None, now=None, account=""):
         granted = app_permissions(config)
         if granted is not None:
             data["app_permissions"] = granted
+        if repos:
+            data["pending"] = sum(1 for repo in repos if not data["repos"].get(repo, {}).get("at"))
         _history(data, now)
         save(data, account)
     return done
@@ -217,11 +244,17 @@ def _history(data, now):
     data["history"] = [h for h in data["history"] if h.get("day") != day][-(HISTORY_DAYS - 1):] + [counts]
 
 
+def _looked_at(entry):
+    if "evaluated" in entry:
+        return set(entry["evaluated"])
+    return {c for c, v in catalogue.CHECKS.items() if v[2] in (entry.get("checked") or [])}      # a state kept by an earlier build
+
+
 def maturity(entry):
     """How much of the security pipeline of a repository is in place: passed / checked of six things, None when none of them could be looked at."""
-    checked = set(entry.get("checked") or [])
+    looked = _looked_at(entry)
     found = {f["check"] for f in entry.get("findings", [])}
-    rows = [check for check, group in MATURITY if group in checked]
+    rows = [check for check, _group in MATURITY if check in looked]
     if not rows:
         return None
     return {"passed": sum(1 for check in rows if check not in found), "checked": len(rows), "missing": [check for check in rows if check in found]}
@@ -229,16 +262,23 @@ def maturity(entry):
 
 def compliance(data):
     """What was found against each risk of the OWASP Top 10 CI/CD and each section of the CIS Software Supply Chain guide that the checks map to. status: "findings", "no_findings" (everything it maps
-    to was read and nothing was found), "partly" (nothing found but some of it could not be read) or "not_checked". It is a reading aid: not a certification, and not a statement that a standard is met."""
+    to was looked at and nothing was found), "partly" (nothing found but some of it was not looked at: refused, switched off, left out by the profile, or repositories still waiting) or
+    "not_checked". It is a reading aid: not a certification, and not a statement that a standard is met."""
     entries = list(data["repos"].values()) + [data["org"]]
-    read = {group for entry in entries for group in entry.get("checked") or []}
+    looked = set().union(*(_looked_at(entry) for entry in entries))
+    refused = {group for entry in entries for group in (entry.get("unread") or {})}
+    waiting = bool(data.get("pending")) or bool(refused & {"repository", "organization"})
+    # what does not apply is not "missing": an account that is a person has no organization, and the original of a fork is only looked at when asked
+    absent = {c for c, v in catalogue.CHECKS.items() if c not in looked and (v[2] == "upstream" or data["org"].get("kind") == "user" and c.startswith("org."))}
     found = [f["check"] for entry in entries for f in entry.get("findings", []) if f["check"] in catalogue.CHECKS]
 
     def row(ident, name, checks):
         groups = {catalogue.CHECKS[c][2] for c in checks}
         count = sum(1 for c in found if c in checks)
-        status = "findings" if count else "not_checked" if not groups & read else "partly" if groups - read else "no_findings"
-        return {"id": ident, "name": name, "findings": count, "checks": sorted(checks), "not_read": sorted(groups - read), "status": status}
+        missing = checks - looked - absent
+        not_read = {catalogue.CHECKS[c][2] for c in missing} | groups & refused
+        status = "findings" if count else "not_checked" if not checks & looked else "partly" if not_read or waiting else "no_findings"
+        return {"id": ident, "name": name, "findings": count, "checks": sorted(checks), "not_read": sorted(not_read), "status": status}
     owasp = [row(f"CICD-SEC-{n}", name, {c for c, v in catalogue.CHECKS.items() if v[3] == n}) for n, name in sorted(catalogue.OWASP.items())]
     sections = sorted({v[4] for v in catalogue.CHECKS.values()})
     cis = [row(section, "", {c for c, v in catalogue.CHECKS.items() if v[4] == section}) for section in sections]

@@ -30,7 +30,7 @@ Cada hallazgo indica su lugar en los riesgos OWASP Top 10 CI/CD y en la guía CI
 
 ## Cobertura honesta
 
-Lo que GitHub deniega o no responde aparece como **sin comprobar**, nunca como correcto, y los hallazgos anteriores de esa zona se mantienen. Muchos ajustes requieren permisos de lectura de administración: el informe lista el permiso de cada grupo y cuáles se denegaron. De un webhook solo se guarda el host; de un secreto, nombre y fechas. Las versiones se comparan con lo visto antes, así que la primera lectura solo recuerda. Se omiten repositorios archivados y forks.
+Lo que GitHub deniega o no responde aparece como **sin comprobar**, nunca como correcto, y los hallazgos anteriores de esa zona se mantienen. Muchos ajustes requieren permisos de lectura de administración: el informe lista el permiso de cada grupo y cuáles se denegaron. De un webhook solo se guarda el host; de un secreto, nombre y fechas. Las versiones se comparan con lo visto antes, así que la primera lectura solo recuerda. Se omiten repositorios archivados y forks. Una comprobación apagada, excluida por el perfil o el tipo de proyecto, o repositorios que aún esperan turno dejan la norma «comprobada en parte», nunca «sin hallazgos». La política de seguridad del repositorio público `.github` de la cuenta cuenta para los repositorios que no tienen una.
 
 ## Línea base y opciones
 

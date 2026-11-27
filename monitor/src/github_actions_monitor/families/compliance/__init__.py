@@ -89,6 +89,8 @@ def _tick(config, data):
 
 def _check_strict(config):
     from github_actions_monitor.security import compliance_guard
+    if compliance_guard.status()["config_unreadable"]:
+        return ("fail", "the configuration file could not be understood: restricted until it is repaired and the monitor restarted")
     strict = compliance_guard.wanted(config)[0]
     return ("ok", "enforced" if compliance_guard.status()["read_only_strict"] else "set, applies when the process starts") if strict else ("ok", "off")
 

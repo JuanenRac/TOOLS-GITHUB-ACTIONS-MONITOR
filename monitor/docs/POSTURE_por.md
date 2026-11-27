@@ -30,7 +30,7 @@ Cada constatação indica o seu lugar nos riscos OWASP Top 10 CI/CD e no guia CI
 
 ## Cobertura honesta
 
-O que o GitHub recusa ou não responde aparece como **por verificar**, nunca como correto, e as constatações anteriores dessa área mantêm-se. Muitas definições exigem leitura de administração: o relatório indica a permissão de cada grupo e as recusadas. De um webhook só se guarda o anfitrião; de um segredo, o nome e as datas. As versões são comparadas com o visto antes, por isso a primeira leitura apenas memoriza. Repositórios arquivados e forks são ignorados.
+O que o GitHub recusa ou não responde aparece como **por verificar**, nunca como correto, e as constatações anteriores dessa área mantêm-se. Muitas definições exigem leitura de administração: o relatório indica a permissão de cada grupo e as recusadas. De um webhook só se guarda o anfitrião; de um segredo, o nome e as datas. As versões são comparadas com o visto antes, por isso a primeira leitura apenas memoriza. Repositórios arquivados e forks são ignorados. Uma verificação desligada, excluída pelo perfil ou pelo tipo de projeto, ou repositórios ainda à espera deixam a norma «verificada em parte», nunca «sem achados». A política de segurança do repositório público `.github` da conta vale para os repositórios sem uma própria.
 
 ## Referência e opções
 

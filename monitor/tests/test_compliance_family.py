@@ -60,7 +60,7 @@ class Report(unittest.TestCase):
 
     def test_it_holds_no_secret_no_path_and_no_name(self):
         config = {"github_owner": "SomebodyPrivate", "repos": ["secret-repo"], "audit_export": {"enabled": True, "target": "http", "url": "https://u.example/s3cr3t", "path": "C:/Users/person/x"},
-                  "github_token": {"enabled": True}, "listen": {"tls_cert": "/home/person/cert.pem"}, "notify": {"channels": {"ntfy": {"enabled": True, "topic": "private-topic"}}}}
+                  "github_token": {"enabled": True}, "listen": {"tls_cert_file": "/home/person/cert.pem"}, "notify": {"channels": {"ntfy": {"enabled": True, "topic": "private-topic"}}}}
         text = json.dumps(compliance_report.report(config, NOW, SOURCES))
         for needle in ("SomebodyPrivate", "secret-repo", "s3cr3t", "person", "private-topic", "u.example"):
             self.assertNotIn(needle, text, needle)

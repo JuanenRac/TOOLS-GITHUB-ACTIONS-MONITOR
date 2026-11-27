@@ -12,6 +12,7 @@
  "ui.actions.approve": "承認",
  "ui.actions.facts": "情報",
  "ui.actions.facts_line": "{author}：アカウント {age} 日、ここでのマージ {merged} 件、変更ワークフロー: {files}",
+ "ui.actions.choose_environment": "この実行は複数の環境の承認を待っています。1つ選んでください：",
  "ui.actions.confirm": "GitHub に送信しますか？ {what}",
  "ui.actions.done": "完了しました。",
  "ui.actions.refused": "実行されませんでした: {why}",

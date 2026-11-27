@@ -10,11 +10,29 @@ import urllib.parse
 
 
 class Unread(Exception):
-    """A read without an answer. `reason`: missing (404), forbidden (403), rate_limited, failed."""
+    """A read without an answer. `reason`: missing (404), forbidden (403), rate_limited, too_many, failed. `partial`: what the group had already found."""
 
-    def __init__(self, reason):
+    def __init__(self, reason, partial=()):
         super().__init__(reason)
         self.reason = reason
+        self.partial = list(partial)
+
+
+PAGES = 10
+
+
+def _pages(get, endpoint, key=None, partial=()):
+    """Every row of a list, 100 at a time. More than PAGES pages is "too_many": the rest was not looked at."""
+    rows = []
+    for number in range(1, PAGES + 1):
+        answer = get(f"{endpoint}?per_page=100" + (f"&page={number}" if number > 1 else ""))
+        if key is not None:
+            answer = _dict(answer).get(key)
+        found = _dicts(answer)
+        rows.extend(found)
+        if len(found) < 100:
+            return rows
+    raise Unread("too_many", partial)
 
 
 def finding(check, item="", detail=""):
@@ -99,9 +117,12 @@ def scan(get, base, ctx):
         if error.reason != "missing":
             raise
         out.append(finding("scan.no_dependency_alerts"))
-    setup = _optional(get, f"{base}/code-scanning/default-setup")
-    if _dict(setup).get("state") != "configured" and not _optional(get, f"{base}/code-scanning/analyses?per_page=1"):
-        out.append(finding("scan.no_code"))
+    try:
+        setup = _optional(get, f"{base}/code-scanning/default-setup")
+        if _dict(setup).get("state") != "configured" and not _optional(get, f"{base}/code-scanning/analyses?per_page=1"):
+            out.append(finding("scan.no_code"))
+    except Unread as error:      # refused for a private repository without code security: what was seen of the rest stays
+        raise Unread(error.reason, out) from None
     return out
 
 
@@ -109,13 +130,25 @@ def _exists(get, base, paths_):
     return any(_optional(get, f"{base}/contents/{path}") is not None for path in paths_)
 
 
+POLICY_FILES = ("SECURITY.md", ".github/SECURITY.md", "docs/SECURITY.md")
+
+
+def _account_policy(get, base):
+    """GitHub shows the policy of the PUBLIC repository `.github` of the account in every repository that has none of its own."""
+    owner, _sep, repo = base.partition("/")[2].partition("/")
+    shared = f"repos/{owner}/.github"
+    if repo == ".github" or _dict(_optional(get, shared)).get("private") is not False:
+        return False
+    return _exists(get, shared, POLICY_FILES)
+
+
 def files(get, base, ctx):
     out = []
     profile = _dict(_optional(get, f"{base}/community/profile"))
     listed = _dict(profile.get("files"))
-    if not listed.get("security") and not _exists(get, base, ("SECURITY.md", ".github/SECURITY.md", "docs/SECURITY.md")):
+    if not listed.get("security") and not _exists(get, base, POLICY_FILES) and not _account_policy(get, base):
         out.append(finding("repo.no_policy"))
-    if not _exists(get, base, (".github/dependabot.yml", ".github/dependabot.yaml", "renovate.json", ".github/renovate.json", ".renovaterc.json")):
+    if not _exists(get, base, (".github/dependabot.yml", ".github/dependabot.yaml", "renovate.json", ".github/renovate.json", ".renovaterc.json", "renovate.json5", ".github/renovate.json5", ".renovaterc")):
         out.append(finding("repo.no_update_tool"))
     return out
 
@@ -145,6 +178,8 @@ def _protection(get, base, branch):
             bypass.append("reviews: " + ", ".join(skippers))
         if required and _dict(classic.get("enforce_admins")).get("enabled") is False:
             bypass.append("administrators")
+    elif not protected and _dict(_optional(get, f"{base}/branches/{name}")).get("protected") is True:
+        raise Unread("forbidden")      # GitHub answers 404 for the protection to who may not read it: the branch IS protected, how is not known
     return protected, reviews, bypass
 
 
@@ -161,7 +196,7 @@ def branch(get, base, ctx):
             out.append(finding("branch.bypass", default, "; ".join(bypass)))
     patterns = ctx["cfg"].get("release_branches") or []
     if patterns:
-        names = [b.get("name") for b in _dicts(get(f"{base}/branches?per_page=100"))]
+        names = [b.get("name") for b in _pages(get, f"{base}/branches", partial=out)]
         for name in [n for n in names if isinstance(n, str) and n != default and any(fnmatch.fnmatchcase(n, p) for p in patterns)][:10]:
             if not _protection(get, base, name)[0]:
                 out.append(finding("branch.release_unprotected", name))
@@ -176,7 +211,7 @@ def reviews(get, base, ctx):
     default = urllib.parse.quote(ctx["repo_info"].get("default_branch") or "main", safe="")
     pulls = _dicts(get(f"{base}/pulls?state=closed&base={default}&sort=updated&direction=desc&per_page={min(100, sample * 2)}"))
     for pull in [p for p in pulls if p.get("merged_at")][:sample]:
-        found = _dicts(get(f"{base}/pulls/{int(pull.get('number') or 0)}/reviews?per_page=50"))
+        found = _dicts(get(f"{base}/pulls/{int(pull.get('number') or 0)}/reviews?per_page=100"))
         if not any(r.get("state") == "APPROVED" for r in found):
             out.append(finding("branch.merged_unreviewed", f"#{pull.get('number')}"))
     return out
@@ -199,7 +234,7 @@ def _old_names(answer, ctx, scope):
     """Names and dates only: GitHub never gives a value and none is asked for."""
     limit = ctx["cfg"]["stored_max_days"] * 86400
     out = []
-    for row in _dicts(_dict(answer).get("secrets")):
+    for row in answer:
         changed = epoch(row.get("updated_at") or row.get("created_at"))
         if changed and ctx["now"] - changed > limit:
             out.append(finding("stored.old", f"{scope}{row.get('name')}", f"{int((ctx['now'] - changed) / 86400)} d"))
@@ -207,7 +242,13 @@ def _old_names(answer, ctx, scope):
 
 
 def stored(get, base, ctx):
-    return _old_names(get(f"{base}/actions/secrets?per_page=100"), ctx, "")
+    return _old_names(_pages(get, f"{base}/actions/secrets", "secrets"), ctx, "")
+
+
+def _changed(before, after):
+    """Marks "id:size:digest". A digest that was not given yet is not a change of the file."""
+    old, new = before.split(":", 2), after.split(":", 2)
+    return old[:2] != new[:2] or bool(old[2] and new[2] and old[2] != new[2])
 
 
 def releases(get, base, ctx):
@@ -224,12 +265,14 @@ def releases(get, base, ctx):
         assets = {str(a.get("name")): f"{a.get('id')}:{a.get('size')}:{a.get('digest') or ''}" for a in _dicts(release.get("assets"))}
         before = seen.get(tag)
         if before:
+            if sha and not before["sha"]:
+                before["sha"] = sha      # the tag could not be read the first time
             if sha and before["sha"] and sha != before["sha"]:
                 before["moved"] = sha[:12]
             for name, mark in before["assets"].items():
                 if name not in assets:
                     before.setdefault("removed", {})[name] = True
-                elif assets[name] != mark:
+                elif _changed(mark, assets[name]):
                     before.setdefault("replaced", {})[name] = True
             before["assets"].update(assets)
         else:
@@ -279,7 +322,8 @@ def runner(get, base, ctx):
     for name, yes in covered.items():
         if not yes:
             out.append(finding("runner.coverage_lost" if before.get(name) else "runner.not_hardened", name))
-    ctx["memory"]["hardened"] = {name: yes or bool(before.get(name)) for name, yes in covered.items()}
+    now = {name: yes or bool(before.get(name)) for name, yes in covered.items()}
+    ctx["memory"]["hardened"] = dict(list({**before, **now}.items())[-200:])      # a workflow that did not run lately is not forgotten
     return out
 
 
@@ -289,7 +333,7 @@ REPO_GROUPS = {"hooks": hooks, "actions": actions, "scan": scan, "files": files,
 def org_settings(get, base, ctx):
     info = _dict(get(base))
     out = []
-    if "two_factor_requirement_enabled" not in info:
+    if info.get("two_factor_requirement_enabled") is None:      # only an owner is told
         raise Unread("forbidden")
     if info.get("two_factor_requirement_enabled") is False:
         out.append(finding("org.no_two_factor"))
@@ -305,7 +349,7 @@ def org_hooks(get, base, ctx):
 
 
 def org_stored(get, base, ctx):
-    return _old_names(get(f"{base}/actions/secrets?per_page=100"), ctx, "org: ")
+    return _old_names(_pages(get, f"{base}/actions/secrets", "secrets"), ctx, "org: ")
 
 
 BROAD = ("administration", "contents", "workflows", "secrets", "organization_administration", "members")
@@ -318,11 +362,13 @@ def _writes(permissions):
 def pats(get, base, ctx):
     """Fine-grained personal access tokens with access to the organization that can write to the organization or to all its repositories. GitHub only answers this to a GitHub App; with a personal
     token the group is listed as not checked. Names and permissions only: a token itself is never in the answer."""
-    answer = get(f"{base}/personal-access-tokens?per_page=100")
-    if not isinstance(answer, list):
-        raise Unread("failed")
+    def listed(endpoint):
+        answer = get(endpoint)
+        if not isinstance(answer, list):
+            raise Unread("failed")
+        return answer
     out = []
-    for row in _dicts(answer):
+    for row in _pages(listed, f"{base}/personal-access-tokens"):
         if row.get("token_expired") is True:
             continue
         granted = _dict(row.get("permissions"))
@@ -349,7 +395,7 @@ def upstream(get, base, ctx):
 def apps(get, base, ctx):
     """Apps of the organization that can WRITE something sensitive in all its repositories."""
     out = []
-    for app in _dicts(_dict(get(f"{base}/installations?per_page=100")).get("installations")):
+    for app in _pages(get, f"{base}/installations", "installations"):
         writes = sorted(k for k, v in _dict(app.get("permissions")).items() if k in BROAD and v in ("write", "admin"))
         if writes and app.get("repository_selection") == "all":
             out.append(finding("org.app_broad", app.get("app_slug"), ", ".join(writes)))

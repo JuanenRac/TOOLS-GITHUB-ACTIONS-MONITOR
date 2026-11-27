@@ -97,7 +97,7 @@
  "ui.posture.report_note": "Une aide à la lecture construite à partir des vérifications du moniteur. Ce n'est pas une certification et cela ne dit pas qu'une norme est respectée ; les numéros de section CIS n'ont pas été vérifiés avec le document officiel.",
  "ui.posture.status_findings": "Avec constats",
  "ui.posture.status_no_findings": "Aucun constat",
- "ui.posture.status_partly": "Lu en partie",
+ "ui.posture.status_partly": "Vérifié en partie",
  "ui.posture.status_not_checked": "Non vérifié",
  "ui.posture.trend_better": "Mieux que le {since} ({delta})",
  "ui.posture.trend_worse": "Moins bien que le {since} (+{delta})",

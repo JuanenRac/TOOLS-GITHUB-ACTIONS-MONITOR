@@ -19,7 +19,7 @@
 
 ## GitHub への書き込み
 
-`github_actions.enabled` がオンで、操作が `github_actions.allowed` にあり、送信内容を示す計画を確認した場合だけ書き込みます。新しい操作：`update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch`。表示は提案のみです：失敗したボット更新、遅れたブランチ、長時間の待機や実行（`teamwork.queued_hours`、`teamwork.stuck_hours`）、`teamwork.cancel_policy` に一致する実行、非アクティブで無効化されたワークフロー（`teamwork.inactive_workflows`）。手動ワークフローのフォームは入力を読み取って検査します。`teamwork.forks_help` はフォーク実行の作者の事実を示し、判定はしません。
+`github_actions.enabled` がオンで、操作が `github_actions.allowed` にあり、送信内容を示す計画を確認した場合だけ書き込みます。新しい操作：`update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch`。表示は提案のみです：失敗したボット更新、遅れたブランチ、長時間の待機や実行（`teamwork.queued_hours`、`teamwork.stuck_hours`）、`teamwork.cancel_policy` に一致する実行、非アクティブで無効化されたワークフロー（`teamwork.inactive_workflows`）。手動ワークフローのフォームは入力を読み取って検査します。`teamwork.forks_help` はフォーク実行の作者の事実を示し、判定はしません。デプロイの承認は一度に 1 つの環境だけで、確認画面に名前が表示されます。実行が複数の環境を待っている場合は、ページがどれかを尋ねます。
 
 ## 唯一の自動操作
 

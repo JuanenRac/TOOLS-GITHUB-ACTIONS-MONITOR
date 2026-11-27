@@ -30,7 +30,7 @@ Actionsと同様に、各ビルダー・パイプライン・ジョブのブラ�
 
 ## 失敗ビルドのログ
 
-既定はオフ(`external_ci.logs.enabled`)。末尾のみを取得し、`external_ci.logs.max_kb` と `external_ci.logs.tail_lines` で制限、端末制御文字を除去して伏せ字処理し、`external_ci.logs.keep_hours` の間メモリに保持します。信頼できないテキストであり、AIへの指示にはしません。伏せ字処理はすべての秘密を認識できるわけではありません。
+既定はオフ(`external_ci.logs.enabled`)。末尾のみを取得し、`external_ci.logs.max_kb` と `external_ci.logs.tail_lines` で制限、端末制御文字を除去して伏せ字処理し、`external_ci.logs.keep_hours` の間メモリに保持します。信頼できないテキストであり、AIへの指示にはしません。伏せ字処理はすべての秘密を認識できるわけではありません。サーバーが末尾だけの要求を無視し、ログが `external_ci.max_bytes` より長い場合は、ログを保持しません。末尾ではないためです。
 
 ## テスト、状態、コマンドライン
 

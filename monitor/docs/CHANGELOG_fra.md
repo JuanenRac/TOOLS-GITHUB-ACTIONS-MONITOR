@@ -42,6 +42,9 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - Les noms d'étapes gardés par workflow ont un plafond.
 - Les lanceurs Windows se rabattent sur `python` quand le lanceur `py` n'est pas installé.
+- **Contrôles de posture qui répondaient mal** : les alertes de dépendances pouvaient être mal lues avec les lectures conditionnelles ; une protection illisible était déclarée absente ; la politique de sécurité partagée par le compte n'était pas vue ; les contrôles désactivés ou filtrés comptaient comme « sans constat » et comme réussis ; une organisation refusée arrêtait la lecture de tous les dépôts ; les longues listes n'étaient lues qu'en partie ; une empreinte apparue plus tard comptait comme un fichier remplacé.
+- **Rapport de conformité** : un certificat TLS n'était jamais vu ; une version publiée plus ancienne était annoncée comme plus récente ; un journal d'actions vidé ou illisible, un dossier de sauvegardes illisible et un stockage inconnu étaient marqués vérifiés ; une exportation sans destination le dit désormais.
+- **Journaux de CI externe** : Azure Pipelines donnait l'étape de clôture au lieu de celle en échec, Buildbot gardait ses lettres de canal, GitLab pouvait choisir une tâche autorisée à échouer, un jeton Azure refusé était signalé comme une réponse illisible et un journal très long pouvait être coupé avant sa fin. Les pipelines GitLab en cours d'annulation comptent comme en cours.
 
 ### Sécurité
 
@@ -52,6 +55,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 - Les guides indiquent deux limites connues (dossiers vus par un viewer à l'ordinateur ; rejeu d'événements sans heure) et la bonne valeur par défaut de `webhook.reject_stale`.
 - Le nettoyeur de texte pour les IA retire désormais en entier un long nom d'hôte interne en `.local`, et les morceaux d'une clé privée sans son en-tête (ligne coupée court ou journal qui commence au milieu de la clé).
 - Seule la dernière version publiée est prise en charge (politique de sécurité).
+- **Les restrictions tiennent dans plus de cas** : `sops` et `bws` ne démarrent pas sous une politique réseau, le mot `version` n'importe où dans une commande ne la laisse plus passer, un fichier de configuration illisible restreint et `security.*` du fichier de l'édition lite s'applique à elle.
+- **Un déploiement est approuvé un environnement à la fois**, nommé dans la confirmation, au lieu de tous ceux que la personne peut approuver d'un coup.
 
 ### Greffons
 
