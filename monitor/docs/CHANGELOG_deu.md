@@ -44,6 +44,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Sicherheit
 
+- Der Textfilter für die KIs entfernt jetzt lange interne Hostnamen auf `.local` vollständig und auch Teile eines privaten Schlüssels ohne Kopfzeile (eine abgeschnittene Zeile oder ein Protokoll, das mitten im Schlüssel beginnt).
 - Unterstützt wird nur die neueste veröffentlichte Version (Sicherheitsrichtlinie).
 
 ### Plugins

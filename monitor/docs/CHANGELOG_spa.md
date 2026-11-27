@@ -44,6 +44,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Seguridad
 
+- El limpiador de texto para las IA ahora quita entero un nombre largo de equipo interno acabado en `.local` y los trozos de una clave privada que perdió su cabecera (una línea cortada o un registro que empieza a mitad de la clave).
 - Solo se soporta la última versión publicada (política de seguridad).
 
 ### Complementos

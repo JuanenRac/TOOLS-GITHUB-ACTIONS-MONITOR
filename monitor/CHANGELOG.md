@@ -46,6 +46,7 @@ when this file and `tool_version.py` disagree.
 
 ### Security
 
+- The cleaner of text for the AIs now removes the whole of a long internal host name that ends in `.local`, and the pieces of a private key that lost its header (a line cut short, or a log that begins in the middle of the key).
 - Only the latest published version is supported (security policy).
 
 ### Plugins

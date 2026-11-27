@@ -194,7 +194,7 @@ cosign verify ghcr.io/juanenrac/tools-github-actions-monitor:2.2.0 \
   --certificate-identity-regexp '^https://github\.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/\.github/workflows/release-image\.yml@refs/tags/v'
 ```
 
-**O que se testa e onde**: o contentor (utilizador que não é root, sistema de ficheiros só de leitura, volumes, segredos, webhook atrás de um proxy) no workflow Docker audit; a unidade do serviço num systemd real e uma base de dados com mais de 1 GB no workflow Cross-cutting. Os sistemas de ficheiros de rede (NFS) e outras arquiteturas de hardware não são testados.
+**O que se testa e onde**: o contentor (utilizador que não é root, sistema de ficheiros só de leitura, volumes, segredos, webhook atrás de um proxy) no workflow Docker audit; a unidade do serviço num systemd real e uma base de dados com mais de 1 GB no workflow Cross-cutting, que também repõe uma cópia de segurança e executa um ciclo de uma conta com um substituto do GitHub. Os sistemas de ficheiros de rede (NFS) e outras arquiteturas de hardware não são testados.
 
 ## Atrás de um proxy inverso
 
