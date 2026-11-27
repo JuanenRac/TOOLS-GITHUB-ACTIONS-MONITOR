@@ -199,6 +199,37 @@ jobs:
           MONITOR_SCREENS_MATRIX: ${{ matrix.size }}
         run: python -m unittest discover -s monitor/tests -p "test_763_screens_fit.py" -v
 
+  parts:
+    name: The boxes of the optional parts (eight languages, phone, computer and wall displays)
+    runs-on: windows-latest      # the quality gate of a release runs on Windows with Edge: measured the same way here; a failure turns the CI red
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: The package of the browser protocol, pinned
+        run: python -m pip install websockets==15.0.1
+      - name: The test of the boxes
+        env:
+          MONITOR_BROWSER_TESTS: "1"
+          MONITOR_REQUIRE_BROWSER: "1"
+          PYTHONUTF8: "1"
+        run: python -m unittest discover -s monitor/tests -p "test_300_parts_browser.py" -v
+      - name: Every box in every language and size
+        env:
+          PYTHONUTF8: "1"
+        run: python tools/check_parts.py --shots "$env:RUNNER_TEMP/parts-pictures"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: parts-pictures
+          path: ${{ runner.temp }}/parts-pictures
+          if-no-files-found: ignore
+          retention-days: 7
+
   container:
     name: The image builds, runs read-only without root and survives a revoked login
     runs-on: ubuntu-24.04      # the runner image is fixed: the test starts a container and reads the logs of a service

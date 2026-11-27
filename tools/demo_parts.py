@@ -110,6 +110,7 @@ def _external_ci(iso, now):
         return {"id": f"{kind}:{repo}", "kind": kind, "repo": repo, "state": state, "reason": reason, "experimental": experimental, "last_ok": iso(now), "next_try": iso(now),
                 "red": [{"workflow": f"{name} ({kind})", "branch": "main", "url": "https://ci.example.org/builds/31", "run_id": 31} for name in red], "logs": []}
     rows = [source("gitlab", "demo-alpha-app", "red", red=("pipeline",)), source("buildbot", "demo-beta-fw", "ok"), source("jenkins", "demo-gamma-api", "degraded", "timeout", experimental=True)]
+    rows[0]["logs"] = ["pipeline#31"]      # the log of the red build can be opened
     engine.status = lambda config: {"ok": True, "enabled": True, "active": True, "sources": rows, "invalid": []}
     engine.tick = lambda config, data=None: None      # the demo never reads a server
     engine.red_rows = engine.runs = lambda config: []
