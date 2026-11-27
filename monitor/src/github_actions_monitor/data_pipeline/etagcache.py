@@ -192,6 +192,10 @@ class EtagCache:
                 self.saved += 1
                 self.dirty = True
                 return entry["data"], "304"
+        if code == 0 and status == 204:      # an answer without a body ("yes, it is on")
+            with self.lock:
+                self.denied.pop(key, None)
+            return None, "plain"
         if code != 0 or status not in (200, 0):
             message = (err or out or "gh failed").strip()[:300]
             with self.lock:

@@ -30,7 +30,7 @@ O endereço é verificado na ligação: este computador, redes privadas e metada
 
 ## Registos de uma build falhada
 
-Desligado por predefinição (`external_ci.logs.enabled`). Só é pedido o fim, limitado por `external_ci.logs.max_kb` e `external_ci.logs.tail_lines`, sem sequências de terminal nem caracteres de controlo, expurgado, mantido em memória durante `external_ci.logs.keep_hours`. É texto não fiável e nunca é dado a uma IA como instrução. A expurgação não reconhece todos os segredos.
+Desligado por predefinição (`external_ci.logs.enabled`). Só é pedido o fim, limitado por `external_ci.logs.max_kb` e `external_ci.logs.tail_lines`, sem sequências de terminal nem caracteres de controlo, expurgado, mantido em memória durante `external_ci.logs.keep_hours`. É texto não fiável e nunca é dado a uma IA como instrução. A expurgação não reconhece todos os segredos. Se um servidor ignorar o pedido só do fim e o registo for maior do que `external_ci.max_bytes`, nenhum registo é guardado: não seria o seu fim.
 
 ## Teste, estado, linha de comandos
 

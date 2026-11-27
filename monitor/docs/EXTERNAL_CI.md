@@ -30,7 +30,7 @@ The address is checked when connecting: this computer, private networks and clou
 
 ## Logs of a failed build
 
-Off by default (`external_ci.logs.enabled`). Only the end of the log is asked for, limited by `external_ci.logs.max_kb` and `external_ci.logs.tail_lines`, without terminal sequences or control characters, redacted, kept in memory for `external_ci.logs.keep_hours`. It is untrusted text and is never given to an AI as an instruction. Redaction cannot recognise every secret.
+Off by default (`external_ci.logs.enabled`). Only the end of the log is asked for, limited by `external_ci.logs.max_kb` and `external_ci.logs.tail_lines`, without terminal sequences or control characters, redacted, kept in memory for `external_ci.logs.keep_hours`. It is untrusted text and is never given to an AI as an instruction. Redaction cannot recognise every secret. When a server ignores the request for the end only and the log is longer than `external_ci.max_bytes`, no log is kept: it would not be its end.
 
 ## Test, status, command line
 

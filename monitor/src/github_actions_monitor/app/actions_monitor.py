@@ -240,6 +240,8 @@ def enable_lite():
     CONFIG_FILE = paths.place("actions_monitor_lite.json")
     LOG_FILE = paths.place("actions_monitor_log_lite.txt")
     settings_api.CONFIG_FILE = toolconfig.CONFIG_FILE = CONFIG_FILE
+    from github_actions_monitor.security import compliance_guard
+    compliance_guard.arm_from_file(CONFIG_FILE)      # security.* written in the file of the lite edition holds for it too
     settings_api.BACKUP_DIR = paths.place("config_backups_lite")
     etagcache.CACHE_FILE = paths.place("etag_cache_lite.json")
 

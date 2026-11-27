@@ -19,7 +19,7 @@ En attente d'une personne (approbation d'environnement, workflow d'un fork, acti
 
 ## Écrire sur GitHub
 
-Rien n'est écrit sauf si `github_actions.enabled` est activé, l'action figure dans `github_actions.allowed` et vous confirmez le plan, qui montre exactement l'envoi. Nouvelles actions : `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch`. Les vues ne font que PROPOSER : mises à jour de bots en échec, branches en retard, exécutions trop longtemps en file ou en cours (`teamwork.queued_hours`, `teamwork.stuck_hours`), celles visées par `teamwork.cancel_policy`, workflows désactivés pour inactivité (`teamwork.inactive_workflows`). Le formulaire d'un workflow manuel lit et vérifie ses entrées. Avec `teamwork.forks_help`, des faits sur l'auteur d'une exécution de fork ; sans verdict.
+Rien n'est écrit sauf si `github_actions.enabled` est activé, l'action figure dans `github_actions.allowed` et vous confirmez le plan, qui montre exactement l'envoi. Nouvelles actions : `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch`. Les vues ne font que PROPOSER : mises à jour de bots en échec, branches en retard, exécutions trop longtemps en file ou en cours (`teamwork.queued_hours`, `teamwork.stuck_hours`), celles visées par `teamwork.cancel_policy`, workflows désactivés pour inactivité (`teamwork.inactive_workflows`). Le formulaire d'un workflow manuel lit et vérifie ses entrées. Avec `teamwork.forks_help`, des faits sur l'auteur d'une exécution de fork ; sans verdict. Un déploiement est approuvé pour un seul environnement à la fois, nommé dans la confirmation ; si une exécution en attend plusieurs, la page demande lequel.
 
 ## La seule action automatique
 

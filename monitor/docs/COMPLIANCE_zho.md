@@ -15,11 +15,11 @@
 
 ## 网络策略
 
-`security.egress_policy`: `default`、`github_only` 或 `none`; `security.egress_allow` 增加主机 (`名称`、`*.名称`、地址) 或 `program:名称`。`github_only` 时监控器进程只能访问 `api.github.com`、`uploads.github.com`、`GH_HOST` 指定的主机 (GitHub Enterprise) 以及你允许的目标; `none` 时只能访问本机, 且不启动 `gh`。自行联网的程序 (联网的 `git` 命令、`apprise`、`curl`、`docker`、密钥库工具) 不会启动。被拒绝的连接会以指明设置项的错误失败。当已配置的目标超出策略时 `python bin/monitor_cli.py doctor` 会失败, `doctor --egress` 列出所有目标。它不是防火墙, 不管理本机其他程序。
+`security.egress_policy`: `default`、`github_only` 或 `none`; `security.egress_allow` 增加主机 (`名称`、`*.名称`、地址) 或 `program:名称`。`github_only` 时监控器进程只能访问 `api.github.com`、`uploads.github.com`、`GH_HOST` 指定的主机 (GitHub Enterprise) 以及你允许的目标; `none` 时只能访问本机, 且不启动 `gh`。自行联网的程序 (联网的 `git` 命令、`apprise`、`curl`、`docker`、密钥库工具) 不会启动。被拒绝的连接会以指明设置项的错误失败。当已配置的目标超出策略时 `python bin/monitor_cli.py doctor` 会失败, `doctor --egress` 列出所有目标。它不是防火墙, 不管理本机其他程序。密钥库工具包括 `sops` 和 `bws`：如果你的工具不需要网络，请把 `program:sops` 加入 `security.egress_allow`。存在但无法读取或理解的配置文件会收紧限制而不是放开：启用严格只读模式和 `github_only`（若其文本要求则为 `none`），直到修复并重启监视器；doctor 会指出。写在 `actions_monitor_lite.json` 中的 `security.*` 对精简版同样有效，并与主文件叠加。
 
 ## 合规报告
 
-`python bin/monitor_cli.py compliance report` (可加 `--json`)、`GET /api/compliance/report` (管理员) 以及「安全」标签页末尾的方框。每行标明是**已检查** (监控器实际查看过) 还是**仅声明** (配置如此): 版本与支持、版型、认证与身份提供方、网络模式与 TLS、两项限制与目标、保留与法律保留、操作日志及其链、备份及其加密、静态加密 (无)、存储、插件、部署形式和配置档案。不含任何密钥、路径或姓名。`GET /api/compliance/state` 返回限制、保留表和导出状态。
+`python bin/monitor_cli.py compliance report` (可加 `--json`)、`GET /api/compliance/report` (管理员) 以及「安全」标签页末尾的方框。每行标明是**已检查** (监控器实际查看过) 还是**仅声明** (配置如此): 版本与支持、版型、认证与身份提供方、网络模式与 TLS、两项限制与目标、保留与法律保留、操作日志及其链、备份及其加密、静态加密 (无)、存储、插件、部署形式和配置档案。不含任何密钥、路径或姓名。`GET /api/compliance/state` 返回限制、保留表和导出状态。仍在生效的限制即使文件不再要求也会报告，无法查看的内容显示为 `unknown`。
 
 ## 保留与法律保留
 

@@ -30,7 +30,7 @@ azure;repo=my-mirror;url=https://dev.azure.com/my-org;project=my-project
 
 ## 失败构建的日志
 
-默认关闭(`external_ci.logs.enabled`)。只请求末尾部分,受 `external_ci.logs.max_kb` 和 `external_ci.logs.tail_lines` 限制,去除终端序列和控制字符,经脱敏后在内存保留 `external_ci.logs.keep_hours`。它是不可信文本,绝不作为指令交给 AI。脱敏无法识别所有密钥。
+默认关闭(`external_ci.logs.enabled`)。只请求末尾部分,受 `external_ci.logs.max_kb` 和 `external_ci.logs.tail_lines` 限制,去除终端序列和控制字符,经脱敏后在内存保留 `external_ci.logs.keep_hours`。它是不可信文本,绝不作为指令交给 AI。脱敏无法识别所有密钥。如果服务器忽略只取末尾的请求且日志长于 `external_ci.max_bytes`，则不保留日志：那并不是它的末尾。
 
 ## 测试、状态、命令行
 

@@ -30,7 +30,7 @@ Jeder Befund nennt seinen Platz in den OWASP-Top-10-CI/CD-Risiken und im CIS-Lei
 
 ## Ehrliche Abdeckung
 
-Was GitHub verweigert oder nicht beantwortet, erscheint als **nicht geprüft**, nie als in Ordnung; frühere Befunde dieses Bereichs bleiben. Viele Einstellungen brauchen administratives Leserecht: Der Bericht nennt die Berechtigung je Gruppe und die verweigerten. Von einem Webhook wird nur der Host gespeichert, von einem Secret nur Name und Daten. Releases werden mit früher Gesehenem verglichen, die erste Abfrage merkt sich nur. Archivierte Repositorys und Forks werden übersprungen.
+Was GitHub verweigert oder nicht beantwortet, erscheint als **nicht geprüft**, nie als in Ordnung; frühere Befunde dieses Bereichs bleiben. Viele Einstellungen brauchen administratives Leserecht: Der Bericht nennt die Berechtigung je Gruppe und die verweigerten. Von einem Webhook wird nur der Host gespeichert, von einem Secret nur Name und Daten. Releases werden mit früher Gesehenem verglichen, die erste Abfrage merkt sich nur. Archivierte Repositorys und Forks werden übersprungen. Eine abgeschaltete, durch Profil oder Projektart ausgelassene Prüfung oder noch wartende Repositories machen eine Norm "teilweise geprüft", nie "ohne Befund". Die Sicherheitsrichtlinie des öffentlichen Repositories `.github` des Kontos zählt für Repositories ohne eigene.
 
 ## Grundlinie und Optionen
 

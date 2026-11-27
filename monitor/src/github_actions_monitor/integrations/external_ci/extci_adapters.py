@@ -71,7 +71,8 @@ def _project(source):
 
 def gitlab(reader, source, cfg):
     table = {"success": ("completed", "success"), "failed": ("completed", "failure"), "canceled": ("completed", "cancelled"), "skipped": ("completed", "skipped"), "manual": ("waiting", None),
-             "created": ("queued", None), "pending": ("queued", None), "waiting_for_resource": ("queued", None), "preparing": ("queued", None), "scheduled": ("queued", None), "running": ("in_progress", None)}
+             "created": ("queued", None), "pending": ("queued", None), "waiting_for_resource": ("queued", None), "preparing": ("queued", None), "scheduled": ("queued", None), "running": ("in_progress", None),
+             "canceling": ("in_progress", None), "waiting_for_callback": ("in_progress", None)}
     events = {"push": "push", "schedule": "schedule", "web": "workflow_dispatch", "api": "workflow_dispatch", "trigger": "workflow_dispatch", "pipeline": "workflow_run", "parent_pipeline": "workflow_run",
               "merge_request_event": "pull_request", "external_pull_request_event": "pull_request"}
     ref = "&ref=" + urllib.parse.quote(source["branch"], safe="") if source.get("branch") else ""
@@ -125,6 +126,19 @@ def azure(reader, source, cfg):
 ADAPTERS = {"buildbot": buildbot, "gitlab": gitlab, "jenkins": jenkins, "azure": azure}
 
 
+def _azure_failed_log(reader, build):
+    """The log of the first step that failed, from the timeline of the build; 0 when it does not say (the last log is the closing of the job, not the failure)."""
+    try:
+        records = _rows(reader.json(f"{build}/timeline?api-version=7.0"), "records")
+    except Failed:
+        return 0
+    for row in records:
+        log = row.get("log")
+        if row.get("type") == "Task" and row.get("result") == "failed" and isinstance(log, dict) and _id(log.get("id")):
+            return _id(log.get("id"))
+    return 0
+
+
 def log_tail(reader, source, run_row, keep):
     """(text, cut) of the end of the log of a failed build. Only asked for when external_ci.logs.enabled."""
     kind, ref = source["kind"], _id(run_row.get("ref"))
@@ -134,19 +148,27 @@ def log_tail(reader, source, run_row, keep):
         jobs = _rows(reader.json(f"/api/v4/projects/{_project(source)}/pipelines/{ref}/jobs?scope%5B%5D=failed&per_page=5"))
         if not jobs:
             return "", False
-        return reader.tail(f"/api/v4/projects/{_project(source)}/jobs/{_id(jobs[0].get('id'))}/trace", keep)
+        job = next((j for j in jobs if j.get("allow_failure") is not True), jobs[0])      # a job that may fail is not why the pipeline is red
+        return reader.tail(f"/api/v4/projects/{_project(source)}/jobs/{_id(job.get('id'))}/trace", keep)
     if kind == "azure":
-        logs = _rows(reader.json(f"/{_project(source)}/_apis/build/builds/{ref}/logs?api-version=7.0"), "value")
-        if not logs:
-            return "", False
-        return reader.tail(f"/{_project(source)}/_apis/build/builds/{ref}/logs/{_id(logs[-1].get('id'))}?api-version=7.0", keep)
+        build = f"/{_project(source)}/_apis/build/builds/{ref}"
+        number = _azure_failed_log(reader, build)
+        if not number:
+            logs = _rows(reader.json(f"{build}/logs?api-version=7.0"), "value")
+            if not logs:
+                return "", False
+            number = _id(logs[-1].get("id"))
+        return reader.tail(f"{build}/logs/{number}?api-version=7.0", keep)
     failed = [s for s in _rows(reader.json(f"/api/v2/builds/{ref}/steps"), "steps") if s.get("results") in (2, 4)]
     if not failed:
         return "", False
     logs = _rows(reader.json(f"/api/v2/steps/{_id(failed[0].get('stepid'))}/logs"), "logs")
     if not logs:
         return "", False
-    lines = _id(logs[0].get("num_lines"))
-    chunks = _rows(reader.json(f"/api/v2/logs/{_id(logs[0].get('logid'))}/contents?offset={max(0, lines - 400)}&limit=400"), "logchunks")
+    log = next((row for row in logs if row.get("slug") == "stdio"), logs[0])
+    lines = _id(log.get("num_lines"))
+    chunks = _rows(reader.json(f"/api/v2/logs/{_id(log.get('logid'))}/contents?offset={max(0, lines - 400)}&limit=400"), "logchunks")
     text = "".join(str(c.get("content") or "") for c in chunks)
+    if log.get("type") == "s":      # in a stdio log every line starts with the letter of its channel (o, e, h)
+        text = "".join(line[1:] for line in text.splitlines(True))
     return text[-keep:], lines > 400 or len(text) > keep

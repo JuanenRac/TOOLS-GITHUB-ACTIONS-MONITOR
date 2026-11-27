@@ -30,7 +30,7 @@ Die Adresse wird beim Verbinden geprüft: dieser Computer, private Netze und Clo
 
 ## Logs eines fehlgeschlagenen Builds
 
-Standardmäßig aus (`external_ci.logs.enabled`). Nur das Ende wird geholt, begrenzt durch `external_ci.logs.max_kb` und `external_ci.logs.tail_lines`, ohne Terminalsequenzen und Steuerzeichen, bereinigt, `external_ci.logs.keep_hours` im Speicher. Es ist nicht vertrauenswürdiger Text und wird einer KI nie als Anweisung gegeben. Die Bereinigung erkennt nicht jedes Geheimnis.
+Standardmäßig aus (`external_ci.logs.enabled`). Nur das Ende wird geholt, begrenzt durch `external_ci.logs.max_kb` und `external_ci.logs.tail_lines`, ohne Terminalsequenzen und Steuerzeichen, bereinigt, `external_ci.logs.keep_hours` im Speicher. Es ist nicht vertrauenswürdiger Text und wird einer KI nie als Anweisung gegeben. Die Bereinigung erkennt nicht jedes Geheimnis. Ignoriert ein Server die Anfrage nach nur dem Ende und ist das Protokoll länger als `external_ci.max_bytes`, wird kein Protokoll behalten: es wäre nicht sein Ende.
 
 ## Test, Status, Befehlszeile
 

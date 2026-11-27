@@ -12,6 +12,7 @@
  "ui.actions.approve": "Approva",
  "ui.actions.facts": "Dati",
  "ui.actions.facts_line": "{author}: account di {age} giorni, {merged} già unite qui, file di workflow toccati: {files}",
+ "ui.actions.choose_environment": "Questa esecuzione attende diversi ambienti. Scegline uno:",
  "ui.actions.confirm": "Inviare questo a GitHub? {what}",
  "ui.actions.done": "Fatto.",
  "ui.actions.refused": "Non fatto: {why}",

@@ -30,7 +30,7 @@ L'adresse est contrôlée à la connexion : cet ordinateur, les réseaux privés
 
 ## Journaux d'un build en échec
 
-Désactivé par défaut (`external_ci.logs.enabled`). Seule la fin est demandée, limitée par `external_ci.logs.max_kb` et `external_ci.logs.tail_lines`, sans séquences de terminal ni caractères de contrôle, expurgée, gardée en mémoire pendant `external_ci.logs.keep_hours`. C'est un texte non fiable, jamais donné à une IA comme instruction. L'expurgation ne peut pas reconnaître tous les secrets.
+Désactivé par défaut (`external_ci.logs.enabled`). Seule la fin est demandée, limitée par `external_ci.logs.max_kb` et `external_ci.logs.tail_lines`, sans séquences de terminal ni caractères de contrôle, expurgée, gardée en mémoire pendant `external_ci.logs.keep_hours`. C'est un texte non fiable, jamais donné à une IA comme instruction. L'expurgation ne peut pas reconnaître tous les secrets. Quand un serveur ignore la demande de la seule fin et que le journal dépasse `external_ci.max_bytes`, aucun journal n'est gardé : ce ne serait pas sa fin.
 
 ## Test, état, ligne de commande
 

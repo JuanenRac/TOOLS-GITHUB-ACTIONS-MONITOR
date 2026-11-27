@@ -30,7 +30,7 @@ Ogni rilievo indica il suo posto nei rischi OWASP Top 10 CI/CD e nella guida CIS
 
 ## Copertura onesta
 
-Ciò che GitHub rifiuta o non risponde è elencato come **non verificato**, mai come corretto, e i rilievi precedenti di quell'area restano. Molte impostazioni richiedono diritti di lettura di amministrazione: il report elenca il permesso di ogni gruppo e quelli negati. Di un webhook si conserva solo l'host; di un segreto nome e date. Le release si confrontano con quanto visto prima: la prima lettura memorizza soltanto. Repository archiviati e fork sono saltati.
+Ciò che GitHub rifiuta o non risponde è elencato come **non verificato**, mai come corretto, e i rilievi precedenti di quell'area restano. Molte impostazioni richiedono diritti di lettura di amministrazione: il report elenca il permesso di ogni gruppo e quelli negati. Di un webhook si conserva solo l'host; di un segreto nome e date. Le release si confrontano con quanto visto prima: la prima lettura memorizza soltanto. Repository archiviati e fork sono saltati. Un controllo disattivato, escluso dal profilo o dal tipo di progetto, o repository ancora in attesa del loro turno rendono la norma «controllata in parte», mai «nessun rilievo». La politica di sicurezza del repository pubblico `.github` dell'account vale per i repository che non ne hanno una.
 
 ## Linea di base e opzioni
 

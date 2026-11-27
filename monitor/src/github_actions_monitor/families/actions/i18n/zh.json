@@ -12,6 +12,7 @@
  "ui.actions.approve": "批准",
  "ui.actions.facts": "信息",
  "ui.actions.facts_line": "{author}：账户 {age} 天，此前合并 {merged} 个，触及的工作流文件：{files}",
+ "ui.actions.choose_environment": "该运行在等待多个环境的批准。请选择一个：",
  "ui.actions.confirm": "要发送到 GitHub 吗？{what}",
  "ui.actions.done": "已完成。",
  "ui.actions.refused": "未执行：{why}",

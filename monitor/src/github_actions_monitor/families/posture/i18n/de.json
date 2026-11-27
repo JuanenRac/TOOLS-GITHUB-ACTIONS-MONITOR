@@ -97,7 +97,7 @@
  "ui.posture.report_note": "Eine Lesehilfe aus den Prüfungen des Monitors. Keine Zertifizierung und keine Aussage, dass eine Norm erfüllt ist; die CIS-Abschnittsnummern wurden nicht mit dem offiziellen Dokument abgeglichen.",
  "ui.posture.status_findings": "Mit Befunden",
  "ui.posture.status_no_findings": "Keine Befunde",
- "ui.posture.status_partly": "Teilweise gelesen",
+ "ui.posture.status_partly": "Teilweise geprüft",
  "ui.posture.status_not_checked": "Nicht geprüft",
  "ui.posture.trend_better": "Besser als am {since} ({delta})",
  "ui.posture.trend_worse": "Schlechter als am {since} (+{delta})",

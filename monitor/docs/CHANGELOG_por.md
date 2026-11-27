@@ -42,6 +42,9 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - Os nomes de passos guardados por workflow têm um limite.
 - Os lançadores do Windows usam `python` quando o lançador `py` não está instalado.
+- **Verificações de postura que respondiam mal**: os alertas de dependências podiam ser mal lidos com as leituras condicionais; uma proteção que não se pode ler era dada como inexistente; não se via a política de segurança partilhada pela conta; verificações desligadas ou filtradas contavam como «sem achados» e como aprovadas; uma organização recusada parava a leitura de todos os repositórios; listas longas eram lidas em parte; um resumo de ficheiro surgido depois contava como ficheiro substituído.
+- **Relatório de conformidade**: nunca via um certificado TLS; anunciava como mais recente uma versão publicada mais antiga; um registo de ações esvaziado ou ilegível, uma pasta de cópias ilegível e um armazenamento desconhecido surgiam como verificados; uma exportação sem destino agora di-lo.
+- **Registos de CI externa**: o Azure Pipelines dava o passo de fecho em vez do falhado, o Buildbot mantinha as letras de canal, o GitLab podia escolher um trabalho autorizado a falhar, um token Azure recusado era indicado como resposta ilegível e um registo muito longo podia ser cortado antes do fim. As pipelines GitLab a serem canceladas contam como em curso.
 
 ### Segurança
 
@@ -52,6 +55,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 - Os guias indicam dois limites conhecidos (pastas vistas por um viewer no computador; repetição de eventos sem hora) e o valor por omissão correto de `webhook.reject_stale`.
 - O limpador de texto para as IA passa a retirar por inteiro um nome longo de máquina interna terminado em `.local` e os pedaços de uma chave privada sem cabeçalho (uma linha cortada ou um registo que começa a meio da chave).
 - Só é suportada a última versão publicada (política de segurança).
+- **As restrições valem em mais casos**: `sops` e `bws` não arrancam com uma política de rede, a palavra `version` em qualquer ponto de um comando já não o deixa passar, um ficheiro de configuração ilegível restringe e `security.*` do ficheiro da edição lite aplica-se-lhe.
+- **Uma implementação é aprovada um ambiente de cada vez**, nomeado na confirmação, em vez de todos os que a pessoa pode aprovar de uma vez.
 
 ### Plugins
 

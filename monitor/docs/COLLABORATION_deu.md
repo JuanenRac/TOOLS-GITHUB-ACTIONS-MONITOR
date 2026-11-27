@@ -19,7 +19,7 @@ Warten auf eine Person (Umgebungsfreigabe, Workflow eines Forks, Aktion erforder
 
 ## Auf GitHub schreiben
 
-Es wird nur geschrieben, wenn `github_actions.enabled` an ist, die Aktion in `github_actions.allowed` steht und Sie den Plan bestätigen, der genau zeigt, was gesendet wird. Neue Aktionen: `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch`. Die Ansichten SCHLAGEN nur vor: Bot-Updates mit roten Prüfungen, veraltete Branches, zu lange wartende oder laufende Läufe (`teamwork.queued_hours`, `teamwork.stuck_hours`), Treffer von `teamwork.cancel_policy`, wegen Inaktivität abgeschaltete Workflows (`teamwork.inactive_workflows`). Das Formular eines manuellen Workflows liest und prüft seine Eingaben. Mit `teamwork.forks_help` Fakten zum Autor eines Fork-Laufs; ohne Urteil.
+Es wird nur geschrieben, wenn `github_actions.enabled` an ist, die Aktion in `github_actions.allowed` steht und Sie den Plan bestätigen, der genau zeigt, was gesendet wird. Neue Aktionen: `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch`. Die Ansichten SCHLAGEN nur vor: Bot-Updates mit roten Prüfungen, veraltete Branches, zu lange wartende oder laufende Läufe (`teamwork.queued_hours`, `teamwork.stuck_hours`), Treffer von `teamwork.cancel_policy`, wegen Inaktivität abgeschaltete Workflows (`teamwork.inactive_workflows`). Das Formular eines manuellen Workflows liest und prüft seine Eingaben. Mit `teamwork.forks_help` Fakten zum Autor eines Fork-Laufs; ohne Urteil. Ein Deployment wird für jeweils eine Umgebung genehmigt, die in der Bestätigung genannt wird; wartet ein Lauf auf mehrere, fragt die Seite, welche.
 
 ## Die einzige automatische Aktion
 

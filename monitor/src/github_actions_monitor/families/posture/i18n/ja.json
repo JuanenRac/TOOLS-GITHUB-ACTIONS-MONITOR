@@ -97,7 +97,7 @@
  "ui.posture.report_note": "モニターの確認項目から作る読解の補助です。認証ではなく、規格を満たすことを示すものでもありません。CIS の節番号は公式文書と照合していません。",
  "ui.posture.status_findings": "指摘あり",
  "ui.posture.status_no_findings": "指摘なし",
- "ui.posture.status_partly": "一部のみ読取",
+ "ui.posture.status_partly": "一部のみ確認",
  "ui.posture.status_not_checked": "未確認",
  "ui.posture.trend_better": "{since} より改善 ({delta})",
  "ui.posture.trend_worse": "{since} より悪化 (+{delta})",

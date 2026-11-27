@@ -44,6 +44,9 @@ when this file and `tool_version.py` disagree.
 
 - The names of the steps kept per workflow have a ceiling.
 - The Windows launchers fall back to `python` where the `py` launcher is not installed.
+- **Posture checks that gave a wrong answer**: dependency alerts could be misread while conditional reads were on; a protection that may not be read was reported as no protection; a security policy shared by the account was not seen; switched-off or filtered checks counted as "no findings" and as passed; a refused organization stopped the reading of every repository; long lists were read only in part; a file digest that appeared later counted as a replaced file.
+- **Compliance report**: a TLS certificate was never seen; an older published version was announced as newer; an emptied or unreadable log of actions, an unreadable backup folder and an unknown storage were marked as checked; an export without destination now says so.
+- **External CI logs**: Azure Pipelines gave the closing step instead of the failed one, Buildbot kept its channel letters, GitLab could pick a job that is allowed to fail, a refused Azure token was reported as an unreadable answer and a very long log could be cut away from its end. Cancelling GitLab pipelines count as running.
 
 ### Security
 
@@ -54,6 +57,8 @@ when this file and `tool_version.py` disagree.
 - The guides state two known limits (folders seen by a viewer at the computer; replay of events that carry no time) and the right default of `webhook.reject_stale`.
 - The cleaner of text for the AIs now removes the whole of a long internal host name that ends in `.local`, and the pieces of a private key that lost its header (a line cut short, or a log that begins in the middle of the key).
 - Only the latest published version is supported (security policy).
+- **Restrictions hold in more cases**: `sops` and `bws` do not start under a network policy, the word `version` anywhere in a command no longer lets it through, an unreadable configuration file restricts, and `security.*` of the lite edition's file applies to it.
+- **A deployment is approved one environment at a time**, named in the confirmation, instead of every environment the person may approve at once.
 
 ### Plugins
 
