@@ -2408,6 +2408,8 @@
  "ui.about_health": "Estado de salud",
  "ui.about_installed": "instalada",
  "ui.about_issues": "Incidencias",
+ "ui.about_i_use_it": "Di que lo usas (público)",
+ "ui.about_i_use_it_note": "Abre una página de GitHub en tu navegador, solo cuando haces clic. Lo que escribas allí será público. El monitor no envía nada.",
  "ui.about_license": "Licencia",
  "ui.about_links": "Enlaces",
  "ui.about_not_installed": "no instalada",

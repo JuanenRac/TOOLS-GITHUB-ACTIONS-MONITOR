@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6236_passing-brightgreen.svg" alt="6236 tests">
+  <img src="https://img.shields.io/badge/Tests-6249_passing-brightgreen.svg" alt="6249 tests">
 </p>
 
 > Überwacht die Workflows aller deiner Repositories und zeigt dir auf einer lokalen Seite, was rot ist, was hängt und was auf dich wartet.
@@ -99,8 +99,8 @@ Methode, Annahmen und wie Sie es in Ihrer eigenen Nutzung messen: [`monitor/docs
 | | |
 |---|---|
 | **Reifegrad** | functional |
-| **Tests** | 6236 Testmethoden (`python -m unittest discover -s monitor/tests`) |
-| **Einstellungen** | 1030 Einstellungen, alle mit Hilfe |
+| **Tests** | 6249 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Einstellungen** | 1035 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -368,6 +368,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/PLUGINS_deu.md`](monitor/docs/PLUGINS_deu.md): Plugins (standardmäßig aus), ihre Pakete, die Isolierung und das Token aus einem Geheimnisspeicher
 - [`monitor/docs/POSTURE_deu.md`](monitor/docs/POSTURE_deu.md): Sicherheitslage von Repositorys und Organisation, nur lesend
 - [`monitor/docs/COMPLIANCE_deu.md`](monitor/docs/COMPLIANCE_deu.md): Compliance: strikter Nur-Lese-Modus, Netzwerkrichtlinie, Bericht, Aufbewahrung und Sperre, signiertes und exportiertes Aktionsprotokoll
+- [`monitor/docs/TRAFFIC_deu.md`](monitor/docs/TRAFFIC_deu.md): Downloads und Zugriffe
 - [`monitor/docs/ECOSYSTEM_TOOLS_deu.md`](monitor/docs/ECOSYSTEM_TOOLS_deu.md): Die Werkzeuge rund um den Monitor und ihre Unterstützung
 - [`monitor/docs/EDITIONS_deu.md`](monitor/docs/EDITIONS_deu.md): Vollständig und Lite: was in jeder Edition steckt
 - [`monitor/docs/COLLABORATION_deu.md`](monitor/docs/COLLABORATION_deu.md): Ansichten der Zusammenarbeit und optionale GitHub-Aktionen

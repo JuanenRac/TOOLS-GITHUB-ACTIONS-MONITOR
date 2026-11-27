@@ -2408,6 +2408,8 @@
  "ui.about_health": "動作状況",
  "ui.about_installed": "インストール済み",
  "ui.about_issues": "課題",
+ "ui.about_i_use_it": "使っていることを伝える（公開）",
+ "ui.about_i_use_it_note": "クリックしたときだけ、ブラウザーで GitHub のページを開きます。そこに書いた内容は公開されます。モニターは何も送信しません。",
  "ui.about_license": "ライセンス",
  "ui.about_links": "リンク",
  "ui.about_not_installed": "未インストール",

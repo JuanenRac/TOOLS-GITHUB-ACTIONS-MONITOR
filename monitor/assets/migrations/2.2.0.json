@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.2.0",
  "previous": "2.1.8",
- "digest": "2c11d4f06fd538c538b5d5226db9e4f2fa9a00d09ba70b94a4c9432e6186f2e0",
+ "digest": "96ecdd2dd2812491bee33cc4a5112262dae3af0b9127c6778aa7257a562027c7",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -880,6 +880,42 @@
      720
     ],
     "default": 6
+   },
+   {
+    "key": "traffic.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "traffic.keep_days",
+    "kind": "int",
+    "bounds": [
+     30,
+     3650
+    ],
+    "default": 400
+   },
+   {
+    "key": "traffic.repos",
+    "kind": "names",
+    "bounds": {
+     "re": "^(?:[A-Za-z0-9-]{1,39}/)?[A-Za-z0-9._-]{1,100}\\Z"
+    },
+    "default": []
+   },
+   {
+    "key": "traffic.repos_per_cycle",
+    "kind": "int",
+    "bounds": [
+     1,
+     10
+    ],
+    "default": 2
+   },
+   {
+    "key": "traffic.views_clones",
+    "kind": "bool",
+    "default": true
    },
    {
     "key": "ui.copy_report.enabled",

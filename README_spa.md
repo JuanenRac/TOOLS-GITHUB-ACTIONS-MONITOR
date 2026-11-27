@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6236_passing-brightgreen.svg" alt="6236 tests">
+  <img src="https://img.shields.io/badge/Tests-6249_passing-brightgreen.svg" alt="6249 tests">
 </p>
 
 > Vigila los workflows de todos tus repositorios y te dice, en una página local, qué está en rojo, qué está atascado y qué te espera.
@@ -99,8 +99,8 @@ Método, supuestos y cómo medirlo en tu propio uso: [`monitor/docs/PRODUCTIVITY
 | | |
 |---|---|
 | **Madurez** | functional |
-| **Tests** | 6236 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Ajustes** | 1030 ajustes, todos con ayuda |
+| **Tests** | 6249 métodos de test (`python -m unittest discover -s monitor/tests`) |
+| **Ajustes** | 1035 ajustes, todos con ayuda |
 | **Idiomas** | 8 (inglés, español, alemán, francés, italiano, japonés, chino y portugués) |
 | **Probado en el CI en** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -368,6 +368,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/PLUGINS_spa.md`](monitor/docs/PLUGINS_spa.md): Complementos (apagados por defecto), sus paquetes, el aislamiento y leer el token de un almacén de secretos
 - [`monitor/docs/POSTURE_spa.md`](monitor/docs/POSTURE_spa.md): Postura de repositorios y organización, solo lectura
 - [`monitor/docs/COMPLIANCE_spa.md`](monitor/docs/COMPLIANCE_spa.md): Cumplimiento: solo lectura estricto, política de red, informe, retención y retención legal, registro de acciones firmado y exportado
+- [`monitor/docs/TRAFFIC_spa.md`](monitor/docs/TRAFFIC_spa.md): Descargas y tráfico
 - [`monitor/docs/ECOSYSTEM_TOOLS_spa.md`](monitor/docs/ECOSYSTEM_TOOLS_spa.md): Las herramientas que rodean al monitor y hasta dónde se soporta cada una
 - [`monitor/docs/EDITIONS_spa.md`](monitor/docs/EDITIONS_spa.md): Completa y Lite: qué hay en cada edición
 - [`monitor/docs/COLLABORATION_spa.md`](monitor/docs/COLLABORATION_spa.md): Vistas de colaboración y acciones opcionales en GitHub

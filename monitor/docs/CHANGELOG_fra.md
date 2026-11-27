@@ -13,6 +13,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Historique des téléchargements et du trafic**, gardé sur cet ordinateur (`traffic.enabled`, désactivé ; Complete) : une fois par jour les téléchargements des fichiers des versions et, si le jeton le peut, les visites et clonages des dépôts choisis, avec un panneau dans Dépôts, l'export CSV et la commande `traffic`. Requêtes GET seulement. `TRAFFIC.md`.
+- **Dites que vous l'utilisez** : À propos contient un lien qui ouvre un formulaire sur GitHub, seulement au clic ; ce que vous y écrivez est public. Le moniteur n'envoie et ne remplit rien.
 - **Maintenir une planification avant que GitHub la coupe** : avec `teamwork.keep_alive_days` (désactivé), il est proposé de réactiver les workflows planifiés d'un dépôt public calme, avec les jours restants. La démo statique et la vérification de workflows dans le navigateur sont désormais ouvertes par la CI dans un vrai navigateur.
 - **Mode lecture seule strict et politique réseau** (`security.read_only_strict`, `security.egress_policy`, désactivés) : appliqués sous toutes les parties ; une commande ou connexion refusée échoue en nommant le réglage, et le doctor liste les destinations hors politique.
 - **Rapport de conformité** (`compliance report`, `/api/compliance/report`, un encadré dans l'onglet Sécurité) : chaque ligne vérifiée ou seulement déclarée.

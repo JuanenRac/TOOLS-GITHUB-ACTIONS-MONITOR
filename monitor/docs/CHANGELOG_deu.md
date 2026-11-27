@@ -13,6 +13,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Hinzugefügt
 
+- **Verlauf der Downloads und Zugriffe**, auf diesem Rechner gespeichert (`traffic.enabled`, aus; Complete): einmal am Tag die Downloadzahlen der Release-Dateien und, wenn das Token darf, Besuche und Klone der gewählten Repositorys, mit Tafel unter Repositorys, CSV-Export und dem Befehl `traffic`. Nur GET-Anfragen. `TRAFFIC.md`.
+- **Sagen Sie, dass Sie ihn nutzen**: Über enthält einen Link, der nur beim Klicken ein Formular auf GitHub öffnet; was Sie dort schreiben, ist öffentlich. Der Monitor sendet und füllt nichts aus.
 - **Einen Zeitplan wachhalten, bevor GitHub ihn abschaltet**: mit `teamwork.keep_alive_days` (aus) wird vorgeschlagen, die geplanten Workflows eines ruhigen öffentlichen Repositorys erneut zu aktivieren, mit den verbleibenden Tagen. Die statische Demo und die Workflow-Prüfung im Browser öffnet die CI jetzt in einem echten Browser.
 - **Strikter Nur-Lese-Modus und Netzwerkrichtlinie** (`security.read_only_strict`, `security.egress_policy`, beide aus): unterhalb aller Teile durchgesetzt; ein abgelehnter Befehl oder eine Verbindung scheitert mit Nennung der Einstellung, und der Doctor listet Ziele außerhalb der Richtlinie.
 - **Compliance-Bericht** (`compliance report`, `/api/compliance/report`, ein Kasten im Tab Sicherheit): jede Zeile geprüft oder nur angegeben.

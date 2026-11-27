@@ -13,6 +13,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Adicionado
 
+- **Histórico de transferências e tráfego**, guardado neste computador (`traffic.enabled`, desligado; Complete): uma vez por dia as transferências dos ficheiros das releases e, se o token puder, as visitas e clonagens dos repositórios escolhidos, com um painel em Repositórios, exportação CSV e o comando `traffic`. Apenas pedidos GET. `TRAFFIC.md`.
+- **Diga que o utiliza**: Acerca tem uma ligação que abre um formulário no GitHub, apenas quando clica; o que lá escrever é público. O monitor não envia nem preenche nada.
 - **Manter vivo um agendamento antes de o GitHub o desligar**: com `teamwork.keep_alive_days` (desligado) é proposto voltar a ativar os workflows agendados de um repositório público parado, com os dias que faltam. A demonstração estática e a verificação de workflows no navegador passam a ser abertas pela CI num navegador real.
 - **Modo estrito só de leitura e política de rede** (`security.read_only_strict`, `security.egress_policy`, desligados): impostos por baixo de todas as partes; um comando ou ligação recusada falha indicando a definição, e o doctor lista os destinos fora da política.
 - **Relatório de conformidade** (`compliance report`, `/api/compliance/report`, uma caixa no separador Segurança): cada linha verificada ou só declarada.
