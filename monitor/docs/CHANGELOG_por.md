@@ -12,6 +12,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 ### Adicionado
 
 - **Manter vivo um agendamento antes de o GitHub o desligar**: com `teamwork.keep_alive_days` (desligado) é proposto voltar a ativar os workflows agendados de um repositório público parado, com os dias que faltam. A demonstração estática e a verificação de workflows no navegador passam a ser abertas pela CI num navegador real.
+- **Modo estrito só de leitura e política de rede** (`security.read_only_strict`, `security.egress_policy`, desligados): impostos por baixo de todas as partes; um comando ou ligação recusada falha indicando a definição, e o doctor lista os destinos fora da política.
+- **Relatório de conformidade** (`compliance report`, `/api/compliance/report`, uma caixa no separador Segurança): cada linha verificada ou só declarada.
+- **Retenção de cada categoria e retenção legal**, **pontos de controlo assinados e limpeza do registo de ações** (`audit verify|checkpoint|purge`) e **exportação desse registo** para ficheiro, syslog sobre TLS ou HTTP; tudo desligado de fábrica.
+- Guias novos: conformidade, as ferramentas à volta do monitor e o que tem cada edição. Um workflow corre as verificações transversais por área, uma base de dados com mais de 1 GB e o serviço num systemd real. `COMPLIANCE.md`, `ECOSYSTEM_TOOLS.md`, `EDITIONS.md`.
 - **Frota por papel e grupo**: uma coluna por papel de workflow, o pior estado de cada grupo com ecrã próprio `/g/<chave>`, repositórios e grupos desativáveis sem reiniciar; fonte CCTray e APIs de alertas de segredos e de código (desligadas), `report_digest` em relatórios e briefs, e um sítio de demonstração estático com verificação de workflows no navegador (construído pela CI, nunca publicado sozinho). O painel dos roadmaps avisa agora quando o clone do repositório de perfil está atrasado. (FLEET_APIS)
 - **Vistas de colaboração e ações opcionais** (tudo desligado de fábrica): espera por uma pessoa separada da espera por um executor, última execução de cada via com vermelhos postos de parte por um tempo, pull requests de dependências e atrasados, repositórios vulneráveis e não lidos, alertas de segurança descartados, propostas (limpeza, política de cancelamento, execuções presas, workflows inativos), workflows manuais com formulário tipado, dados para aprovar forks e hooks de executores. As novas ações no GitHub são planeadas e confirmadas uma a uma; a única automática é uma única repetição após falha de infraestrutura.
 - **As propostas da IA são decididas por pessoas**: marcadas como IA, com impressão digital, sobrevivem a um reinício, exigem duas pessoas quando há vários utilizadores ou o código escrito quando há um, e veem-se no separador Alertas; com `ai.assistant.can_propose` também nascem da conversa.
@@ -33,6 +37,15 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 ### Alterado
 
 - **O atualizador avulso publicado com uma versão passa a trazer o registo de migrações**, e o SHA256SUMS nomeia-o juntamente com o zip e as duas listas de materiais.
+
+### Corrigido
+
+- Os nomes de passos guardados por workflow têm um limite.
+- Os lançadores do Windows usam `python` quando o lançador `py` não está instalado.
+
+### Segurança
+
+- Só é suportada a última versão publicada (política de segurança).
 
 ### Plugins
 

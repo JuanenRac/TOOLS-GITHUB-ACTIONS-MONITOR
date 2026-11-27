@@ -109,6 +109,10 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python bin/monitor
 python bin/monitor_cli.py identity plan
 ```
 
+## コンプライアンスと操作ログ
+
+`compliance report` はこのインストールの保証を表示します。`audit verify|checkpoint|purge|export` は操作ログの連鎖を扱います。[COMPLIANCE_jpn.md](COMPLIANCE_jpn.md) を参照してください。
+
 ## コマンド: actions, runner-hook
 
 ```

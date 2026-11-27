@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6122_passing-brightgreen.svg" alt="6122 tests">
+  <img src="https://img.shields.io/badge/Tests-6172_passing-brightgreen.svg" alt="6172 tests">
 </p>
 
 > Controlla i workflow di tutti i tuoi repository e ti dice, su una pagina locale, cosa è rosso, cosa è bloccato e cosa ti aspetta.
@@ -98,8 +98,8 @@ Metodo, ipotesi e come misurarlo nel proprio uso: [`monitor/docs/PRODUCTIVITY_it
 | | |
 |---|---|
 | **Maturità** | functional |
-| **Test** | 6122 metodi di test (`python -m unittest discover -s monitor/tests`) |
-| **Impostazioni** | 1008 impostazioni, tutte con aiuto |
+| **Test** | 6172 metodi di test (`python -m unittest discover -s monitor/tests`) |
+| **Impostazioni** | 1030 impostazioni, tutte con aiuto |
 | **Lingue** | 8 (inglese, spagnolo, tedesco, francese, italiano, giapponese, cinese e portoghese) |
 | **Provato nel CI su** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -363,6 +363,9 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/EXTERNAL_CI_ita.md`](monitor/docs/EXTERNAL_CI_ita.md): Fonti CI esterne, sola lettura: Buildbot, GitLab CI, Jenkins, Azure Pipelines
 - [`monitor/docs/PLUGINS_ita.md`](monitor/docs/PLUGINS_ita.md): Plugin (spenti per impostazione predefinita), pacchetti, isolamento e token da un archivio di segreti
 - [`monitor/docs/POSTURE_ita.md`](monitor/docs/POSTURE_ita.md): Postura di repository e organizzazione, sola lettura
+- [`monitor/docs/COMPLIANCE_ita.md`](monitor/docs/COMPLIANCE_ita.md): Conformità: sola lettura rigorosa, criterio di rete, rapporto, conservazione e blocco legale, registro delle azioni firmato ed esportato
+- [`monitor/docs/ECOSYSTEM_TOOLS_ita.md`](monitor/docs/ECOSYSTEM_TOOLS_ita.md): Gli strumenti attorno al monitor e il loro livello di supporto
+- [`monitor/docs/EDITIONS_ita.md`](monitor/docs/EDITIONS_ita.md): Completa e Lite: cosa c'è in ciascuna edizione
 - [`monitor/docs/COLLABORATION_ita.md`](monitor/docs/COLLABORATION_ita.md): Viste di collaborazione e azioni facoltative su GitHub
 - [`monitor/docs/FLEET_APIS_ita.md`](monitor/docs/FLEET_APIS_ita.md): Flotta per ruolo e gruppo, API CCTray e di sicurezza, impronta dei rapporti, sito dimostrativo
 - [`monitor/docs/AI_CONNECTION_ita.md`](monitor/docs/AI_CONNECTION_ita.md): Collegare uno strumento di IA: tutto ciò che dice il monitor, come segnali, nel riepilogo, nell'endpoint, negli strumenti MCP e nell'hook

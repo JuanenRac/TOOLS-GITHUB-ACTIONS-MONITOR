@@ -109,6 +109,10 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python bin/monitor
 python bin/monitor_cli.py identity plan
 ```
 
+## 合规与操作日志
+
+`compliance report` 说明本安装提供哪些保证; `audit verify|checkpoint|purge|export` 处理操作日志链。见 [COMPLIANCE_zho.md](COMPLIANCE_zho.md)。
+
 ## 命令: actions, runner-hook
 
 ```

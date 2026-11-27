@@ -62,7 +62,10 @@ def record(ai, kind, used, system, user, reply="", reason="", now=None):
 
 
 def _trim(path, keep):
-    """Keeps the last `keep` lines once the file has a quarter more than that."""
+    """Keeps the last `keep` lines once the file has a quarter more than that (all of them under a legal hold)."""
+    from github_actions_monitor.storage import retention
+    if retention.held():
+        return
     try:
         lines = Path(path).read_text(encoding="utf-8").splitlines()
     except OSError:
@@ -94,7 +97,10 @@ def read(ai, limit=50):
 
 def clear():
     """Empties the record (the file goes; the next line creates it again). Returns how many lines it had."""
+    from github_actions_monitor.storage import retention
     path = Path(LOG_FILE)
+    if retention.held():
+        return 0
     try:
         with locks.os_lock(path, 5.0):
             count = len(path.read_text(encoding="utf-8").splitlines()) if path.is_file() else 0

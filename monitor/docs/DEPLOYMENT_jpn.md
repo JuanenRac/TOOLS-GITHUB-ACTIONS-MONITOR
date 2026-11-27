@@ -186,6 +186,16 @@ docker compose pull && docker compose up -d
 gh attestation verify oci://ghcr.io/juanenrac/tools-github-actions-monitor:2.1.0 --owner JuanenRac
 ```
 
+2.2.0 からイメージは Cosign の鍵なし署名 (リリースワークフローの ID) も持ちます。
+
+```sh
+cosign verify ghcr.io/juanenrac/tools-github-actions-monitor:2.2.0 \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --certificate-identity-regexp '^https://github\.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/\.github/workflows/release-image\.yml@refs/tags/v'
+```
+
+**どこで何を試験しているか**: コンテナー (root でないユーザー、読み取り専用ファイルシステム、ボリューム、シークレット、プロキシ背後の webhook) は Docker audit ワークフロー、実際の systemd 上のサービスユニットと 1 GB を超えるデータベースは Cross-cutting ワークフローです。ネットワークファイルシステム (NFS) と他のハードウェア構成は未試験です。
+
 ## リバースプロキシの背後で
 
 既定では、モニターは `127.0.0.1` だけで待ち受けます。別のマシンから接続する必要がある場合は、TLS 付きのリバースプロキシを前段に置き、ネットワークモードをオンにし(`listen.network`:すべてのリクエストがアクセストークンを持つ必要があります)、プロキシを宣言してください(公開名を指定した `listen.proxy_public_host`、`listen.secure_cookie`、または `listen.trusted_proxy`)。モニターは `Host` が自身のアドレスでもその公開名でもないリクエストを拒否します。そのためプロキシは `Host` を送り、さらにクライアントの実際のアドレスを追加する必要があります。

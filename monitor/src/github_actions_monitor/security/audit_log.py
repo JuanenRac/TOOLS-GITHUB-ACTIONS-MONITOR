@@ -11,8 +11,8 @@ import threading
 import time
 from pathlib import Path
 
-from github_actions_monitor.security import private_io
-from github_actions_monitor.storage import locks
+from github_actions_monitor.security import compliance_checkpoints, private_io
+from github_actions_monitor.storage import locks, retention
 
 DEFAULTS = {"enabled": True, "max_mb": 10, "maintainers_can_read": False, "required": False, "keep_generations": 5}
 FILE_NAME = "audit_actions.jsonl"
@@ -124,10 +124,13 @@ def anchor_path(where):
     return where.with_name(where.name + ".anchor")
 
 
-def _write_anchor(where, last):
+def _write_anchor(where, last, mac=""):
     """Keeps the hash of the last line next to the log: `verify` compares it with the end of the chain. When it cannot be written it is removed (an old anchor would call a good log cut)."""
     try:
-        private_io.write_private(anchor_path(where), json.dumps({"hash": last, "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}, separators=(",", ":")))
+        found = {"hash": last, "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+        if mac:
+            found["mac"] = mac
+        private_io.write_private(anchor_path(where), json.dumps(found, separators=(",", ":")))
     except OSError:
         try:
             anchor_path(where).unlink()
@@ -206,16 +209,23 @@ def record(config, action, user="", role="", account="", target="", result="ok",
             private_io.private_dir(where.parent)
             with locks.os_lock(where):      # the supervisor and the accounts may append to the same file: one at a time, each one chained to the line that is really last
                 try:
-                    if where.exists() and where.stat().st_size > cfg["max_mb"] * 1_000_000:
+                    if where.exists() and where.stat().st_size > cfg["max_mb"] * 1_000_000 and not retention.held(config):      # a legal hold keeps every line: the file grows
                         rotate(where, cfg.get("keep_generations", DEFAULTS["keep_generations"]))
                 except OSError as error:      # a reader keeps the file open (Windows): the action is still written to the current file and the rotation is tried again at the next one
                     STATS["rotation_failures"] += 1
                     degraded_note("audit_log.rotation", error)
                 entry["prev"] = _tail_hash(where)
+                signed = compliance_checkpoints.enabled(config)
+                if signed:      # a tail that was cut off since the last line stays written in the chain, not only in the anchor that follows
+                    expected = _read_anchor(where)
+                    if expected is not None and expected != entry["prev"]:
+                        entry["gap_after"] = expected
                 entry["hash"] = _digest(entry["prev"], {k: v for k, v in entry.items() if k != "hash"})
                 with private_io.open_append(where) as handle:
                     handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
-                _write_anchor(where, entry["hash"])
+                _write_anchor(where, entry["hash"], compliance_checkpoints.anchor_mac(entry["hash"]) if signed else "")
+                if signed:
+                    compliance_checkpoints.after_write(where, entry["hash"], now)
                 _last.update(path=str(where), hash=entry["hash"])
         return entry
     except OSError as error:      # includes the timeout of the lock between processes

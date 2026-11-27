@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6122_passing-brightgreen.svg" alt="6122 tests">
+  <img src="https://img.shields.io/badge/Tests-6172_passing-brightgreen.svg" alt="6172 tests">
 </p>
 
 > Surveille les workflows de tous vos dépôts et vous dit, sur une page locale, ce qui est rouge, ce qui est bloqué et ce qui vous attend.
@@ -98,8 +98,8 @@ Méthode, hypothèses et comment le mesurer dans votre propre usage: [`monitor/d
 | | |
 |---|---|
 | **Maturité** | functional |
-| **Tests** | 6122 méthodes de test (`python -m unittest discover -s monitor/tests`) |
-| **Réglages** | 1008 réglages, tous avec aide |
+| **Tests** | 6172 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Réglages** | 1030 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -363,6 +363,9 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/EXTERNAL_CI_fra.md`](monitor/docs/EXTERNAL_CI_fra.md): Sources CI externes, lecture seule : Buildbot, GitLab CI, Jenkins, Azure Pipelines
 - [`monitor/docs/PLUGINS_fra.md`](monitor/docs/PLUGINS_fra.md): Greffons (désactivés par défaut), leurs paquets, l'isolation et la lecture du jeton dans un coffre
 - [`monitor/docs/POSTURE_fra.md`](monitor/docs/POSTURE_fra.md): Posture des dépôts et de l'organisation, lecture seule
+- [`monitor/docs/COMPLIANCE_fra.md`](monitor/docs/COMPLIANCE_fra.md): Conformité : lecture seule stricte, politique réseau, rapport, conservation et conservation légale, journal des actions signé et exporté
+- [`monitor/docs/ECOSYSTEM_TOOLS_fra.md`](monitor/docs/ECOSYSTEM_TOOLS_fra.md): Les outils autour du moniteur et leur niveau de prise en charge
+- [`monitor/docs/EDITIONS_fra.md`](monitor/docs/EDITIONS_fra.md): Complète et Lite : le contenu de chaque édition
 - [`monitor/docs/COLLABORATION_fra.md`](monitor/docs/COLLABORATION_fra.md): Vues de collaboration et actions GitHub facultatives
 - [`monitor/docs/FLEET_APIS_fra.md`](monitor/docs/FLEET_APIS_fra.md): Flotte par rôle et groupe, API CCTray et de sécurité, empreinte des rapports, site de démonstration
 - [`monitor/docs/AI_CONNECTION_fra.md`](monitor/docs/AI_CONNECTION_fra.md): Connecter un outil d'IA : tout ce que dit le moniteur, en signaux, dans le résumé, le point d'accès, les outils MCP et le hook

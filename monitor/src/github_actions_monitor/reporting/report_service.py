@@ -147,7 +147,10 @@ def clear_summary(account, base=None):
 
 
 def prune(directory, key, keep):
-    """Keeps the newest `keep` runs of one account (a run is the set of files with the same stamp); the older ones go."""
+    """Keeps the newest `keep` runs of one account (a run is the set of files with the same stamp); the older ones go. Under a legal hold all of them stay."""
+    from github_actions_monitor.storage import retention
+    if retention.held():
+        return
     stamps = {}
     for path in directory.glob(f"report_{key}_*"):
         found = NAME_RE.match(path.name)

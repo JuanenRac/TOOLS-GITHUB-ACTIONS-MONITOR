@@ -50,5 +50,5 @@ FAMILY = Family(
                          Option("--fetch", "cli.supply_help_fetch", {"action": "store_true"}),
                          Option("--verify-release", "cli.supply_help_doctor", {"metavar": "DIR", "default": "", "dest": "doctor_release"}))),
     ),
-    egress=(Egress("supply_verify", ("api.github.com", "github.com", "objects.githubusercontent.com"), "ops.verify_release.fetch"),),
+    egress=(Egress("supply_verify", ("api.github.com", "github.com", "objects.githubusercontent.com", "release-assets.githubusercontent.com"), "ops.verify_release.fetch"),),
 )

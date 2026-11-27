@@ -26,3 +26,7 @@ Un administrador (y la persona en el equipo cuando no hay modo equipo). Un mante
 Ajustes, pestaña Centinela, bloque **Registro de acciones**: `audit_log.enabled` (encendido), `audit_log.max_mb` (10) y `audit_log.maintainers_can_read` (apagado). `audit_log.keep_generations` (5) es cuántos ficheros rotados se conservan. `audit_log.required` (apagado) rechaza con un 503 las acciones que deben quedar registradas (las confirmaciones de acciones en GitHub, el modo, los silencios, las credenciales...) mientras el registro no se pueda escribir; los ajustes siguen abiertos para poder arreglarlo.
 
 Una copia hecha ahora (`POST /api/ops/backup`) y la purga bajo demanda (`POST /api/ops/purge`, también un ensayo) se registran como `backup_run` y `purge_run`: la línea dice quién lo pidió y el resultado, nunca el contenido de la copia.
+
+## Puntos de control firmados, purga y exportación
+
+Con `audit_checkpoints.enabled` la cadena se firma con una clave de la instalación, y el registro se puede purgar y copiar a otro sitio: ver [COMPLIANCE_spa.md](COMPLIANCE_spa.md). Con `retention.legal_hold` el registro no se rota ni se purga.

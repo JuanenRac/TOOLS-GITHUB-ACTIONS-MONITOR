@@ -13,6 +13,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 ### Added
 
 - **Keep a schedule alive before GitHub switches it off**: with `teamwork.keep_alive_days` (off) the scheduled workflows of a quiet public repository are proposed to be enabled again, with the days left. The static demo and the workflow check in the browser are now opened in a real browser by CI.
+- **Strict read-only mode and network policy** (`security.read_only_strict`, `security.egress_policy`, both off): enforced below every part of the monitor; a refused command or connection fails naming the setting, and the doctor lists destinations outside the policy.
+- **Compliance report** (`compliance report`, `/api/compliance/report`, a box in the Security tab): each line checked or only declared.
+- **Retention of every category and legal hold**, **signed checkpoints and purge of the log of actions** (`audit verify|checkpoint|purge`), and **export of that log** to a file, syslog over TLS or HTTP; all off by default.
+- New guides: compliance, the tools around the monitor, and what each edition has. A workflow runs the cross-cutting checks by area, a database of more than 1 GB and the service on a real systemd. `COMPLIANCE.md`, `ECOSYSTEM_TOOLS.md`, `EDITIONS.md`.
 - **Fleet by role and group**: a column per role of workflow, the worst state of each group with its own screen `/g/<key>`, repositories and groups switched off without restarting; CCTray feed and secret and code scanning APIs (off), `report_digest` on reports and briefs, and a static demo site with a workflow check in the browser (built by CI, never published by itself). The roadmap panel now says when the clone of the profile repository is behind. (FLEET_APIS)
 - **Collaboration views and optional actions** (all off by default): waiting for a person apart from waiting for a runner, last run of each lane with red runs set aside for a while, dependency pull requests, pull requests behind their base, vulnerable and unread repositories, dismissed security alerts, proposals (clean-up, cancel policy, stuck runs, inactive workflows), manual workflows with a typed form, fork approval facts and runner hooks. New actions on GitHub are planned and confirmed one by one; the only automatic one is a single re-run after an infrastructure failure.
 - **Proposals of the AI are decided by people**: they are marked as AI, carry a fingerprint, survive a restart, need two persons when there are two or more users, or the typed code when there is one, and are shown in the Alerts tab with `ai.assistant.can_propose` for those born in the chat.
@@ -34,6 +38,15 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 ### Changed
 
 - **The stand-alone updater published with a release now carries the registry of migrations inside**, and SHA256SUMS names it together with the zip and the two bills of materials.
+
+### Fixed
+
+- The names of the steps kept per workflow have a ceiling.
+- The Windows launchers fall back to `python` where the `py` launcher is not installed.
+
+### Security
+
+- Only the latest published version is supported (security policy).
 
 ### Plugins
 

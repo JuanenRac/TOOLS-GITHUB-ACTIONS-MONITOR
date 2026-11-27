@@ -12,6 +12,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 ### Aggiunto
 
 - **Tenere viva una pianificazione prima che GitHub la spenga**: con `teamwork.keep_alive_days` (disattivato) si propone di riattivare i workflow pianificati di un repository pubblico fermo, con i giorni rimasti. La demo statica e il controllo dei workflow nel browser ora vengono aperti dalla CI in un browser vero.
+- **Modalità di sola lettura rigorosa e criterio di rete** (`security.read_only_strict`, `security.egress_policy`, spenti): applicati sotto tutte le parti; un comando o una connessione rifiutata fallisce nominando l'impostazione, e il doctor elenca le destinazioni fuori criterio.
+- **Rapporto di conformità** (`compliance report`, `/api/compliance/report`, un riquadro nella scheda Sicurezza): ogni riga verificata o solo dichiarata.
+- **Conservazione di ogni categoria e blocco legale**, **punti di controllo firmati e pulizia del registro delle azioni** (`audit verify|checkpoint|purge`) ed **esportazione del registro** su file, syslog su TLS o HTTP; tutto spento di fabbrica.
+- Nuove guide: conformità, gli strumenti attorno al monitor e il contenuto di ogni edizione. Un workflow esegue i controlli trasversali per area, un database di oltre 1 GB e il servizio su un vero systemd. `COMPLIANCE.md`, `ECOSYSTEM_TOOLS.md`, `EDITIONS.md`.
 - **Flotta per ruolo e gruppo**: una colonna per ruolo di workflow, il peggior stato di ogni gruppo con schermo proprio `/g/<chiave>`, repository e gruppi disattivabili senza riavvio; feed CCTray e API degli avvisi di segreti e codice (spenti), `report_digest` in rapporti e brief, e un sito dimostrativo statico con controllo dei workflow nel browser (costruito dalla CI, mai pubblicato da solo). Il pannello delle roadmap ora avvisa quando il clone del repository del profilo è indietro. (FLEET_APIS)
 - **Viste di collaborazione e azioni facoltative** (tutto spento di fabbrica): attesa di una persona separata dall'attesa di un runner, ultima esecuzione di ogni corsia con rossi accantonati per un periodo, pull request di dipendenze e arretrate, repository vulnerabili e non letti, avvisi di sicurezza scartati, proposte (pulizia, regola di annullamento, esecuzioni bloccate, workflow inattivi), workflow manuali con modulo tipizzato, dati per approvare i fork e hook dei runner. Le nuove azioni su GitHub si pianificano e confermano una a una; l'unica automatica è un solo rilancio dopo un guasto dell'infrastruttura.
 - **Le proposte dell'IA le decidono le persone**: marcate IA, con impronta, sopravvivono al riavvio, richiedono due persone con più utenti o il codice digitato con uno, e si vedono nella scheda Avvisi; con `ai.assistant.can_propose` nascono anche dalla chat.
@@ -33,6 +37,15 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 ### Modificato
 
 - **L'aggiornatore autonomo pubblicato con una release contiene ora il registro delle migrazioni**, e SHA256SUMS lo nomina insieme allo zip e alle due distinte.
+
+### Corretto
+
+- I nomi dei passi conservati per workflow hanno un limite.
+- I lanciatori di Windows usano `python` quando il lanciatore `py` non è installato.
+
+### Sicurezza
+
+- È supportata solo l'ultima versione pubblicata (politica di sicurezza).
 
 ### Plugin
 

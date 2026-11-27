@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6122_passing-brightgreen.svg" alt="6122 tests">
+  <img src="https://img.shields.io/badge/Tests-6172_passing-brightgreen.svg" alt="6172 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -98,8 +98,8 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 6122 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **设置** | 1008 个设置,均有帮助 |
+| **测试** | 6172 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **设置** | 1030 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
 
@@ -363,6 +363,9 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/EXTERNAL_CI_zho.md`](monitor/docs/EXTERNAL_CI_zho.md): 外部 CI 来源(只读):Buildbot、GitLab CI、Jenkins、Azure Pipelines
 - [`monitor/docs/PLUGINS_zho.md`](monitor/docs/PLUGINS_zho.md): 插件（默认关闭）、软件包、隔离以及从密钥存储读取令牌
 - [`monitor/docs/POSTURE_zho.md`](monitor/docs/POSTURE_zho.md): 仓库与组织的安全态势(只读)
+- [`monitor/docs/COMPLIANCE_zho.md`](monitor/docs/COMPLIANCE_zho.md): 合规: 严格只读、网络策略、报告、保留与法律保留、签名并导出的操作日志
+- [`monitor/docs/ECOSYSTEM_TOOLS_zho.md`](monitor/docs/ECOSYSTEM_TOOLS_zho.md): 监控器周边工具及其支持程度
+- [`monitor/docs/EDITIONS_zho.md`](monitor/docs/EDITIONS_zho.md): 完整版与 Lite: 各版型包含什么
 - [`monitor/docs/COLLABORATION_zho.md`](monitor/docs/COLLABORATION_zho.md): 协作视图与可选的 GitHub 操作
 - [`monitor/docs/FLEET_APIS_zho.md`](monitor/docs/FLEET_APIS_zho.md): 按角色与分组查看机群、CCTray 与安全 API、报告摘要值、演示站点
 - [`monitor/docs/AI_CONNECTION_zho.md`](monitor/docs/AI_CONNECTION_zho.md): 连接 AI 工具:监视器说的一切,以信号形式出现在简报、端点、MCP 工具和钩子中

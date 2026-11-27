@@ -12,6 +12,10 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 ### Añadido
 
 - **Mantener viva una programación antes de que GitHub la apague**: con `teamwork.keep_alive_days` (apagado) se propone volver a activar los workflows programados de un repositorio público sin actividad, con los días que quedan. La demo estática y la comprobación de workflows en el navegador ahora las abre el CI en un navegador real.
+- **Modo de solo lectura estricto y política de red** (`security.read_only_strict`, `security.egress_policy`, apagados): se aplican por debajo de todas las partes; una orden o conexión rechazada falla nombrando el ajuste, y el doctor lista los destinos fuera de la política.
+- **Informe de cumplimiento** (`compliance report`, `/api/compliance/report`, una caja en la pestaña Seguridad): cada línea comprobada o solo declarada.
+- **Retención de cada categoría y retención legal**, **puntos de control firmados y purga del registro de acciones** (`audit verify|checkpoint|purge`) y **exportación de ese registro** a fichero, syslog sobre TLS o HTTP; todo apagado de fábrica.
+- Guías nuevas: cumplimiento, las herramientas que rodean al monitor y qué tiene cada edición. Un workflow pasa las comprobaciones transversales por área, una base de datos de más de 1 GB y el servicio en un systemd real. `COMPLIANCE.md`, `ECOSYSTEM_TOOLS.md`, `EDITIONS.md`.
 - **Flota por rol y grupo**: una columna por rol de workflow, el peor estado de cada grupo con pantalla propia `/g/<clave>`, repositorios y grupos desactivables sin reiniciar; fuente CCTray y APIs de alertas de secretos y de código (apagadas), `report_digest` en informes y briefs, y un sitio de demostración estático con comprobación de workflows en el navegador (lo construye el CI, nunca se publica solo). El panel de roadmaps avisa ahora cuando el clon del repositorio de perfil está atrasado. (FLEET_APIS)
 - **Vistas de colaboración y acciones opcionales** (todo apagado de fábrica): esperando a una persona aparte de esperando un ejecutor, última ejecución de cada carril con rojos apartados un tiempo, pull requests de dependencias y atrasadas, repositorios vulnerables y no leídos, alertas de seguridad descartadas, propuestas (limpieza, política de cancelación, ejecuciones atascadas, workflows inactivos), workflows manuales con formulario tipado, datos para aprobar forks y hooks de ejecutores. Las acciones nuevas en GitHub se planifican y confirman una a una; la única automática es un reintento único tras un fallo de infraestructura.
 - **Las propuestas de la IA las deciden personas**: van marcadas como IA, llevan huella, sobreviven a un reinicio, exigen dos personas con dos o más usuarios, o el código tecleado con uno, y se ven en la pestaña Alertas; con `ai.assistant.can_propose` también nacen del chat.
@@ -33,6 +37,15 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 ### Cambiado
 
 - **El actualizador suelto que se publica con una release lleva ahora dentro el registro de migraciones**, y SHA256SUMS lo nombra junto con el zip y las dos listas de materiales.
+
+### Corregido
+
+- Los nombres de paso guardados por workflow tienen tope.
+- Los lanzadores de Windows usan `python` cuando no está instalado el lanzador `py`.
+
+### Seguridad
+
+- Solo se soporta la última versión publicada (política de seguridad).
 
 ### Complementos
 
