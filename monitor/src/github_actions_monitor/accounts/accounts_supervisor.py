@@ -444,7 +444,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(payload)))
             self.send_header("Cache-Control", "no-store")
             for name, value in (extra or {}).items():
-                self.send_header(name, value)
+                self.send_header(name, str(value).replace("\r", "").replace("\n", ""))      # a header never carries a line break, whoever built the value
             self.end_headers()
             self.wfile.write(payload)
         except (ConnectionError, OSError):

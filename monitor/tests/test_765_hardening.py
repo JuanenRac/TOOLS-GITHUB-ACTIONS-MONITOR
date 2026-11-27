@@ -16,6 +16,7 @@ sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
+from github_actions_monitor.accounts import accounts_supervisor  # noqa: E402
 from github_actions_monitor.app import orglogo  # noqa: E402
 from github_actions_monitor.data_pipeline import meta_columns  # noqa: E402
 from github_actions_monitor.integrations import actlocal  # noqa: E402
@@ -30,7 +31,7 @@ def link(test, target, name):
     try:
         os.symlink(target, name)
     except (OSError, NotImplementedError):
-        test.skipTest("this computer does not let a test make a link")
+        test.skipTest("symbolic links are not available here")
 
 
 class TheCookieOnlyTakesARightToken(unittest.TestCase):
@@ -55,6 +56,14 @@ class TheCookieOnlyTakesARightToken(unittest.TestCase):
         status, headers = self.ask(f"/?access={ACCESS}", {})
         self.assertEqual(status, 302)
         self.assertIn(f"{localguard.COOKIE}={ACCESS};", headers.get("Set-Cookie", ""))
+
+    def test_an_extra_header_of_the_supervisor_never_carries_a_line_break(self):
+        handler = accounts_supervisor.Handler.__new__(accounts_supervisor.Handler)
+        sent = []
+        handler.send_header = lambda name, value: sent.append((name, value))
+        handler.send_response, handler.end_headers, handler.wfile = (lambda code: None), (lambda: None), mock.Mock()
+        handler.reply(302, b"", "text/plain", {"Location": "/page\r\nX-Injected: yes"})
+        self.assertIn(("Location", "/pageX-Injected: yes"), sent)
 
     def test_a_value_that_would_add_to_the_answer_is_refused(self):
         for value in ("a\r\nX: y", "a\nb", "a; Domain=example.org", "a\x00"):
