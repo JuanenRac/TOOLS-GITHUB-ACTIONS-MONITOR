@@ -40,6 +40,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Corrigido
 
+- **No telemóvel volta a ver-se o conteúdo de todos os separadores**: sob um cabeçalho alto, o separador aberto ficava sem altura e os painéis não se alcançavam ao deslizar.
+- **As caixas das partes opcionais mantêm toda a altura** em computadores e ecrãs de parede em vez de ficarem esmagadas em poucas linhas, as tabelas não partem as palavras, os botões da vista compacta têm pelo menos 44 px de largura e os gráficos grandes já não escrevem um erro na consola do navegador. Um workflow mede cada caixa em oito idiomas, em telemóvel, computador e ecrãs de parede.
 - **Acabaram os falsos avisos de «definição desconhecida» ao atualizar**: o atualizador já não assinala como desconhecidas as definições presentes na configuração de exemplo da versão de destino mas não descritas pela página de definições.
 - Os nomes de passos guardados por workflow têm um limite.
 - Os lançadores do Windows usam `python` quando o lançador `py` não está instalado.
