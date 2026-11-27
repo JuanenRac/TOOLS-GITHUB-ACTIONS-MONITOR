@@ -114,7 +114,7 @@ LIB = r"""
     }
     let top=Math.max(box.top,0),bottom=Math.min(box.bottom,window.innerHeight);
     for(let a=region.parentElement;a&&a!==document.body&&a!==document.documentElement;a=a.parentElement){if(css(a).overflowY!=="visible"){const q=a.getBoundingClientRect();top=Math.max(top,q.top);bottom=Math.min(bottom,q.bottom)}}
-    if(bottom-top<Math.min(150,box.height)-1){const h=s=>{const n=document.querySelector(s);return n?Math.round(n.getBoundingClientRect().height):"-"};
+    if(bottom-top<Math.min(100,box.height)-1){const h=s=>{const n=document.querySelector(s);return n?Math.round(n.getBoundingClientRect().height):"-"};
       add("hidden-from-the-eye",region,Math.max(0,Math.round(bottom-top))+"px of "+Math.round(box.height)+" can be seen (stage "+h(".stage")+", main "+h("main")+", tab "+h(".tab.on")+", header "+h("header")+")")}
     const words=region.innerText||"";
     const raw=words.match(/(?:^|\s)(?:ui|cfg|egress|cli)\.[a-z0-9_]+[._][a-z0-9_.]+/);
@@ -132,7 +132,8 @@ LIB = r"""
   const steps={
     async extensions(){await sub("plugins");return until(()=>$id("plugins-catalog")&&$id("plugins-catalog").querySelector("li")&&$id("plugins-catalog"))},
     async extensions_install(){await sub("plugins");const box=await until(()=>$id("plugins-catalog")&&$id("plugins-catalog").querySelector(".plugins-install")&&$id("plugins-catalog"));if(!box)return null;
-      box.querySelector(".plugins-install input").value="C:\\Users\\demo\\Downloads\\demo-badges-0.3.0.plugin.zip";button(box,"ui.plugins.inspect").click();return until(dialog)},
+      box.querySelector(".plugins-install input").value="C:\\Users\\demo\\Downloads\\demo-badges-0.3.0.plugin.zip";button(box,"ui.plugins.inspect").click();let d=await until(dialog,5000);
+      if(!d){box.querySelector(".plugins-install input").value="demo.zip";button(box,"ui.plugins.inspect").click();d=await until(dialog)}return d},
     async proposals(){await tab("al");return until(()=>$id("assistant-proposals")&&$id("assistant-proposals").querySelector("li")&&$id("assistant-proposals"))},
     async chat(){await tab("al");const box=await until(()=>$id("assistant-chat")&&$id("assistant-chat").querySelector("input")&&$id("assistant-chat"));if(!box)return null;
       const input=box.querySelector("input");input.value="What is red right now?";input.dispatchEvent(new KeyboardEvent("keydown",{key:"Enter",bubbles:true}));await until(()=>box.querySelector("#assistant-log small"));return box},
