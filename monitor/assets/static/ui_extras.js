@@ -14,9 +14,26 @@
     const q=new URLSearchParams(location.search).get("compact"),m=q==="1"?"on":q==="0"?"off":(SC.compact||"auto");
     return m==="on"||(m==="auto"&&window.matchMedia("(max-width: 700px)").matches);
   }
-  function compactApply(){root.classList.toggle("compact",compactNow())}
+  function phoneNow(){
+    const q=new URLSearchParams(location.search).get("compact"),m=q==="1"?"on":q==="0"?"off":(SC.compact||"auto");
+    return m!=="off"&&(compactNow()||window.matchMedia("(orientation: landscape) and (max-height: 500px) and (max-width: 1000px)").matches);
+  }
+  function compactApply(){root.classList.toggle("compact",compactNow());root.classList.toggle("phone",phoneNow())}
   compactApply();
   window.addEventListener("resize",compactApply);
+
+  /* ---- the figures of the header on a phone: folded until asked for, and the choice is remembered in this browser ---- */
+  const fold=document.getElementById("tiles-fold");
+  if(fold){
+    const figure=id=>{const e=document.getElementById(id);return e?e.textContent.trim():""};
+    const label=()=>{const open=root.classList.contains("tiles-open"),text=open?tx("ui.tiles_hide"):tx("ui.tiles_show",{running:figure("k-active"),repos:figure("tv-repos")});
+      fold.setAttribute("aria-expanded",String(open));if(fold.textContent!==text)fold.textContent=text};
+    try{root.classList.toggle("tiles-open",localStorage.getItem("am-tiles-open")==="1")}catch(e){}
+    fold.addEventListener("click",()=>{const open=root.classList.toggle("tiles-open");try{localStorage.setItem("am-tiles-open",open?"1":"0")}catch(e){}label()});
+    const watch=new MutationObserver(label);
+    for(const id of ["k-active","tv-repos"]){const e=document.getElementById(id);if(e)watch.observe(e,{childList:true,characterData:true,subtree:true})}
+    label();
+  }
   /* the virtual keyboard: the height that is really free goes to a variable the dialogs use, and the field being typed in is brought into view */
   if(window.visualViewport){
     const vv=window.visualViewport,set=()=>root.style.setProperty("--vvh",Math.round(vv.height)+"px");
