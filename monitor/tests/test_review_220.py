@@ -123,6 +123,15 @@ class OneAutomaticReRun(unittest.TestCase):
             self.assertEqual(actions_engine.auto_rerun(config, "me", runs, lambda *a: (0, "", ""), now), [])
 
 
+class TheReleaseWorkflow(unittest.TestCase):
+    def test_an_incomplete_draft_is_never_published(self):
+        path = HERE.parent / ".github" / "workflows" / "release-image.yml"
+        if not path.is_file():
+            self.skipTest("the workflows are not part of the package")
+        step = path.read_text(encoding="utf-8").replace("\r\n", "\n")
+        self.assertIn("SHA256SUMS.ed25519.sig", step.split("--draft=false", 1)[0])
+
+
 class UnsignedRelease(signing.base.Base):
     def test_an_unsigned_release_with_an_older_number_cannot_carry_a_signed_version(self):
         root = signing.base.make_install(self.tmp / "i", "2.0.4", signing.base.config_from_defaults("2.0.8"))
