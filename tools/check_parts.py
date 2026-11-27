@@ -178,7 +178,7 @@ LIB = r"""
     async main_tabs(out){
       const ids=[...document.querySelectorAll(".sidebar nav button[role=tab]")].filter(b=>!b.hidden).map(b=>b.dataset.tab);
       if(ids.length<10)bad(out,"few-tabs","nav",ids.length);
-      const tall=[...document.querySelectorAll(".sidebar nav button[role=tab]")].filter(b=>b.getBoundingClientRect().height>90);
+      const tall=innerWidth>800?[]:[...document.querySelectorAll(".sidebar nav button[role=tab]")].filter(b=>b.getBoundingClientRect().height>90);      // the menu is a row there: a name broken letter by letter makes it tall
       if(tall.length)bad(out,"menu-squeezed",tall[0].id,tall.length+" buttons, the first "+Math.round(tall[0].getBoundingClientRect().height)+"px high");
       for(const id of ids){await tab(id);const e=$id("t-"+id);if(!e){bad(out,"no-tab",id);continue}
         e.scrollIntoView({block:"start"});await wait(120);const h=seen(e);if(h<100)bad(out,"tab-without-height","t-"+id,h+"px");
