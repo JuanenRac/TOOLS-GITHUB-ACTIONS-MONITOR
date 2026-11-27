@@ -41,6 +41,8 @@
 
 开启 `github_actions.enabled` 后,监视器可以重新运行失败的运行(`rerun_failed`、`rerun_run`、`rerun_job`)、取消运行(`cancel`)、关闭 issue 或 pull request(`close_issue`、`close_pr`)并合并(`merge_pr`,使用 `github_actions.merge_method`)。只能使用 `github_actions.allowed` 中的名称(默认 `rerun_failed` 和 `cancel`)。**每个操作都单独确认**:页面会精确显示将发送的内容(方法和端点),在你用一次性令牌确认该计划之前不发送任何东西。GitHub 令牌需要相应权限(运行需 `workflow`,issue 和 pull request 需 `repo`;否则显示 GitHub 的拒绝)。每次尝试都会写入 `github_actions_log.jsonl`。AI 助手无法启动其中任何一个。
 
+协作视图新增: `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch` ([COLLABORATION_zho.md](COLLABORATION_zho.md)).
+
 ## 用 act 在本机运行工作流
 
 开启 `act.enabled` 并在 `act.allowed` 中写入 `仓库:文件.yml:事件` 条目(三者都需精确)后,确认确切的命令行,按钮就会在本地克隆上运行 `act`。不提供真实密钥(密钥、变量、环境和输入文件均为空,环境最小化且没有任何令牌),输出实时显示,一次只运行一个,有时间上限 `act.timeout_seconds`,你也可以停止它。

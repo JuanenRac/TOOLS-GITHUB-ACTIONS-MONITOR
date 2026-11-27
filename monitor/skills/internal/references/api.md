@@ -19,6 +19,12 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/act/plan` | POST | admin | plan a local run of a workflow; nothing runs until it is confirmed (this computer only) |
 | `/api/act/status` | GET | viewer | progress of the local run |
 | `/api/act/stop` | POST | admin | stop the local run (this computer only) |
+| `/api/actions/dismiss` | POST | maintainer | set a red run aside for a while or restore it (kept by the monitor, nothing on GitHub) |
+| `/api/actions/dispatch-form` | GET | maintainer | the inputs of a workflow fired by hand; ?repo=&workflow=file.yml |
+| `/api/actions/environments` | GET | maintainer | the environments a run waits for; ?repo=&run= |
+| `/api/actions/fork-facts` | GET | maintainer | facts about the author of a fork run that waits for approval (teamwork.forks_help); ?repo=&run= |
+| `/api/actions/plan` | POST | admin | the plan of an action on GitHub (nothing is sent); confirmed with /api/gh-action/confirm |
+| `/api/actions/state` | GET | viewer | collaboration views: what waits for a person or a runner, last run of each lane, set aside runs, dependency pull requests, vulnerable repositories (and the ones not read), proposals |
 | `/api/advanced` | GET | admin | state of the opt-in features (token store, mirror, OpenTelemetry, runners) |
 | `/api/ai` | GET | viewer | prefix of the routes for AIs (see the routes below) |
 | `/api/ai/ack` | POST | maintainer | acknowledge an alert of the feed: changes only the local state, never GitHub (this computer only) |
@@ -83,6 +89,8 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/external-ci/log` | GET | maintainer | the bounded and redacted end of the log of a failed external build (external_ci.logs.enabled); ?source=&build= |
 | `/api/external-ci/probe` | POST | admin | one read of a source line, nothing is saved |
 | `/api/external-ci/status` | GET | viewer | state of the external CI sources, what each says and why one could not be read |
+| `/api/fleet/columns` | GET | viewer | the fleet with one column per role of workflow and the worst state of each group |
+| `/api/fleet/group` | GET | viewer | the repositories of one group, worst first (the screen /g/<slug> shows it); ?slug= |
 | `/api/gh-action` | POST | admin | prefix of the actions on GitHub (plan and confirm, see below) |
 | `/api/gh-action/confirm` | POST | admin | confirm an action on GitHub (this computer only) |
 | `/api/gh-action/plan` | POST | admin | plan an action on GitHub; nothing is sent until it is confirmed (this computer only) |
@@ -140,6 +148,8 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/screens/logo/info` | GET | viewer | whether a logo was uploaded: `present`, `kind`, `bytes` and the `tag` that goes in the address of the image |
 | `/api/screens/logo/remove` | POST | admin | removes the logo of the organization (an administrator) |
 | `/api/screens/menu` | GET | viewer | the Screens menu of the page: every kind of screen (the page, kiosks, tab screens, the wall screens, the TV, a set of monitors) with its address, the parameters it accepts and whether it can be opened here; navigation only |
+| `/api/security/code-scanning` | GET | viewer | open code scanning alerts per repository (fleet.security_api) |
+| `/api/security/secrets` | GET | viewer | open secret scanning alerts per repository, counts only (fleet.security_api) |
 | `/api/sentinel` | GET | viewer | the snapshot of the Sentinel (checks A1-A13) |
 | `/api/sentinel/ai` | GET | viewer | the AI explanation of a failed build or a CodeQL alert (a person asks; cached) |
 | `/api/sentinel/collab` | GET | viewer | issues and pull requests that need a person |

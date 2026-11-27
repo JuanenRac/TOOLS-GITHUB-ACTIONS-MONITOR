@@ -41,6 +41,8 @@ Il predefinito resta il tuo login `gh`. Con `github_token.enabled` attivo puoi i
 
 Con `github_actions.enabled` attivo, il monitor può rilanciare un'esecuzione fallita (`rerun_failed`, `rerun_run`, `rerun_job`), annullare un'esecuzione (`cancel`), chiudere una issue o una pull request (`close_issue`, `close_pr`) e unirne una (`merge_pr`, con `github_actions.merge_method`). Si possono usare solo i nomi in `github_actions.allowed` (di default `rerun_failed` e `cancel`). **Ogni azione è confermata a parte**: la pagina mostra esattamente cosa sarà inviato (metodo ed endpoint) e non invia nulla finché non confermi quel piano con il token monouso. Il token di GitHub richiede il permesso (`workflow` per le esecuzioni, `repo` per issue e pull request; altrimenti si mostra il rifiuto di GitHub). Ogni tentativo è scritto in `github_actions_log.jsonl`. L'assistente IA non ha modo di avviarne alcuna.
 
+Aggiunte dalle viste di collaborazione: `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch` ([COLLABORATION_ita.md](COLLABORATION_ita.md)).
+
 ## Eseguire un workflow qui con act
 
 Con `act.enabled` attivo e voci `repository:file.yml:evento` in `act.allowed` (tutte e tre esatte), un pulsante esegue `act` sul clone locale dopo la conferma della riga di comando esatta. Non vengono forniti segreti reali (file di segreti, variabili, ambiente e input vuoti, e un ambiente minimo senza token), l'output compare man mano, un'esecuzione alla volta, con il limite di tempo `act.timeout_seconds`, e puoi fermarla.

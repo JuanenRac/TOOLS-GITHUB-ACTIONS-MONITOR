@@ -108,3 +108,12 @@ Ligne de commande : `identity status`, `identity plan`, `identity apply`.
 ```
 python bin/monitor_cli.py identity plan
 ```
+
+## Commandes: actions, runner-hook
+
+```
+python bin/monitor_cli.py actions proposals
+python bin/monitor_cli.py runner-hook started
+```
+
+[COLLABORATION_fra.md](COLLABORATION_fra.md)

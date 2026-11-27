@@ -678,6 +678,17 @@ def read_visibility(config, force=False):
     VISIBILITY["known"] = {item["name"] for item in data if isinstance(item, dict) and isinstance(item.get("name"), str) and "isPrivate" in item}
 
 
+def switched_on(names):
+    """The repositories that `fleet.disabled` does not name (complete edition). Read from the file each time: switching one off needs no restart."""
+    if LITE["on"]:
+        return names
+    disabled = families.block(toolconfig.raw_config(), "fleet").get("disabled")
+    if not disabled:
+        return names
+    from github_actions_monitor.families.fleet import fleet_views
+    return [n for n in names if not fleet_views.switched_off(n, disabled)]
+
+
 def watched_repos(config, force=False):
     """The list from the config file or, with "repos": "all", the repositories of the account (one call, cached)."""
     wanted = config["repos"]
@@ -740,7 +751,7 @@ def watched_repos(config, force=False):
     for n in names:
         if not NAME_RE.match(n):
             print(i18n.t("mon.bad_repo_name", name=repr(n)[:60]))
-    return valid
+    return switched_on(valid)
 
 
 RUN_SUMMARY = {"by_repo": {}}      # repo -> counts over ALL the runs of the last cycle (health/repo_view.summarize_runs): the page only receives the 600 newest ones, the health must not
@@ -2060,8 +2071,20 @@ def external_ci(call, *args):
         return []
 
 
+def part_alerts():
+    """The alerts the parts declare (families/), [] in the lite edition; never raises."""
+    if LITE["on"]:
+        return []
+    return families.alerts(toolconfig.raw_config(), CHILD["account"] or "", degraded.note)
+
+
 def posture_alerts():
-    """The alerts of the posture checks (families/posture/), [] in the lite edition and while they are off. Reads only the file the checks keep; never raises."""
+    """The alerts of the posture checks (families/posture/) and of the parts that declare some, [] in the lite edition. Reads only the files they keep; never raises."""
+    return posture_only_alerts() + part_alerts()
+
+
+def posture_only_alerts():
+    """The alerts of the posture checks, [] while they are off."""
     if LITE["on"]:
         return []
     try:
@@ -3737,6 +3760,9 @@ class Handler(BaseHTTPRequestHandler):
             degraded.note("family.route", error)
             self.json_reply({"ok": False, "error": "server"}, 500)
             return True
+        if isinstance(answer, families.Raw):
+            self.reply(answer.body.decode("utf-8"), answer.content_type)
+            return True
         status, payload = answer if isinstance(answer, tuple) else (200, answer)
         self.json_reply(payload, status)
         return True
@@ -4712,6 +4738,10 @@ class Handler(BaseHTTPRequestHandler):
                 self.reply(kiosk_profile.redact(picture, screens.Names(data.get("repos"), data.get("repo_meta"), screens.settings(raw)["show_repo_names"])), "application/json; charset=utf-8")
                 return
             self.reply(json.dumps(picture), "application/json; charset=utf-8")
+        elif re.fullmatch(r"/g/[a-z0-9_-]{1,40}/?", path) and not LITE["on"]:      # the screen of one group (families/fleet)
+            if not self.guard():
+                return
+            self.reply((families.FOLDER / "fleet" / "group.html").read_text(encoding="utf-8"), "text/html; charset=utf-8")
         elif path in ("/", "/index.html") or re.fullmatch(r"/screen/[1-3]/?", path):
             if not self.guard():      # the page checks the Host like the API does (a rebinding page gets a 403, not the monitor)
                 return

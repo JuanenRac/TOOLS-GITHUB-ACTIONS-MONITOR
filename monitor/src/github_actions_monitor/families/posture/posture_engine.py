@@ -10,6 +10,7 @@ import time
 
 from github_actions_monitor import families, i18n
 from github_actions_monitor.families.posture import posture_catalogue as catalogue
+from github_actions_monitor.families.posture import posture_checks
 from github_actions_monitor.families.posture.posture_checks import ORG_GROUPS, REPO_GROUPS, Unread
 from github_actions_monitor.storage import state_io
 from github_actions_monitor.util import paths
@@ -114,6 +115,11 @@ def check_repo(get, owner, repo, cfg, entry, now):
     base = f"repos/{owner}/{repo}"
     info = get(base)
     info = info if isinstance(info, dict) else {}
+    if info.get("fork") is True and info.get("archived") is not True and cfg.get("upstream") is True:      # a fork is not judged itself; with posture.upstream its original is looked at
+        ctx = {"cfg": cfg, "now": now, "repo_info": info, "memory": entry.setdefault("memory", {})}
+        findings, unread = read_groups(get, base, {"upstream": posture_checks.upstream}, ctx, {"upstream"})
+        entry.update(at=now, kind=kind, findings=_filtered(findings, cfg, kind), unread=unread, checked=sorted({"upstream"} - set(unread)), skipped="fork")
+        return entry
     if info.get("archived") is True or info.get("fork") is True:
         entry.update(at=now, kind=kind, findings=[], unread={}, skipped="archived" if info.get("archived") else "fork")
         return entry
@@ -180,9 +186,26 @@ def refresh(config, owner, repos, get=None, now=None, account=""):
                 done += 1
         except Unread:
             pass      # the allowance is gone: what was not read waits for the next cycle
+        granted = app_permissions(config)
+        if granted is not None:
+            data["app_permissions"] = granted
         _history(data, now)
         save(data, account)
     return done
+
+
+def app_permissions(config):
+    """The permissions the installed GitHub App has (names and levels only), or None when no App is configured or it cannot be asked."""
+    block = config.get("github_app") if isinstance(config.get("github_app"), dict) else {}
+    if block.get("enabled") is not True:
+        return None
+    try:
+        from github_actions_monitor.integrations import github_app
+        found = github_app.status(config)
+    except Exception:      # noqa: BLE001 - the matrix then says "unknown"
+        return None
+    granted = found.get("permissions") if isinstance(found, dict) and found.get("ok") else None
+    return {str(k): str(v) for k, v in granted.items()} if isinstance(granted, dict) else None
 
 
 def _history(data, now):
@@ -202,6 +225,55 @@ def maturity(entry):
     if not rows:
         return None
     return {"passed": sum(1 for check in rows if check not in found), "checked": len(rows), "missing": [check for check in rows if check in found]}
+
+
+def compliance(data):
+    """What was found against each risk of the OWASP Top 10 CI/CD and each section of the CIS Software Supply Chain guide that the checks map to. status: "findings", "no_findings" (everything it maps
+    to was read and nothing was found), "partly" (nothing found but some of it could not be read) or "not_checked". It is a reading aid: not a certification, and not a statement that a standard is met."""
+    entries = list(data["repos"].values()) + [data["org"]]
+    read = {group for entry in entries for group in entry.get("checked") or []}
+    found = [f["check"] for entry in entries for f in entry.get("findings", []) if f["check"] in catalogue.CHECKS]
+
+    def row(ident, name, checks):
+        groups = {catalogue.CHECKS[c][2] for c in checks}
+        count = sum(1 for c in found if c in checks)
+        status = "findings" if count else "not_checked" if not groups & read else "partly" if groups - read else "no_findings"
+        return {"id": ident, "name": name, "findings": count, "checks": sorted(checks), "not_read": sorted(groups - read), "status": status}
+    owasp = [row(f"CICD-SEC-{n}", name, {c for c, v in catalogue.CHECKS.items() if v[3] == n}) for n, name in sorted(catalogue.OWASP.items())]
+    sections = sorted({v[4] for v in catalogue.CHECKS.values()})
+    cis = [row(section, "", {c for c, v in catalogue.CHECKS.items() if v[4] == section}) for section in sections]
+    return {"owasp": owasp, "cis": cis}
+
+
+def trend(history):
+    """Errors and warnings of the newest day against the newest day at least a week older: "better", "worse", "same" or "unknown" (not a week of history yet)."""
+    if not history:
+        return {"direction": "unknown", "since": "", "delta": 0}
+    newest = history[-1]
+    week = time.strftime("%Y-%m-%d", time.gmtime(checks_epoch(newest["day"]) - 7 * 86400))
+    older = [h for h in history if h["day"] <= week]
+    if not older:
+        return {"direction": "unknown", "since": "", "delta": 0}
+    delta = newest["error"] + newest["warning"] - older[-1]["error"] - older[-1]["warning"]
+    return {"direction": "better" if delta < 0 else "worse" if delta > 0 else "same", "since": older[-1]["day"], "delta": delta}
+
+
+def checks_epoch(day):
+    return posture_checks.epoch(day + "T12:00:00")
+
+
+def markdown(out):
+    """The compliance report as a Markdown document (`posture report`)."""
+    lines = ["# " + i18n.t("ui.posture.report_title"), "", i18n.t("ui.posture.report_note"), ""]
+    for title, rows in (("OWASP Top 10 CI/CD", out["compliance"]["owasp"]), ("CIS Software Supply Chain", out["compliance"]["cis"])):
+        lines += [f"## {title}", "", f"| id | {i18n.t('ui.posture.col_finding')} | {i18n.t('ui.posture.col_level')} |", "|---|---|---|"]
+        lines += [f"| {r['id']} {r['name']} | {r['findings']} | {i18n.t('ui.posture.status_' + r['status'])} |" for r in rows]
+        lines.append("")
+    lines += [f"## {i18n.t('ui.posture.learn_title')}", ""]
+    for r in out["compliance"]["owasp"]:
+        if r["findings"]:
+            lines += [f"- **{r['id']}**: " + i18n.t("ui.posture.learn_" + r["id"].rsplit("-", 1)[1])]
+    return lines
 
 
 def describe(item):
@@ -225,7 +297,8 @@ def report(config, account=""):
         row = by_owasp.setdefault(item["owasp"], {"id": item["owasp"], "name": catalogue.OWASP[int(item["owasp"].rsplit("-", 1)[1])], "findings": 0})
         row["findings"] += 1
     return {"ok": True, "enabled": cfg["enabled"] is True, "profile": cfg["profile"], "repos": repos, "org": organization, "history": data["history"][-90:],
-            "owasp": sorted(by_owasp.values(), key=lambda r: int(r["id"].rsplit("-", 1)[1])), "permissions": catalogue.matrix(refused),
+            "owasp": sorted(by_owasp.values(), key=lambda r: int(r["id"].rsplit("-", 1)[1])), "permissions": catalogue.matrix(refused, data.get("app_permissions")),
+            "compliance": compliance(data), "trend": trend(data["history"]), "learn": {f"CICD-SEC-{n}": i18n.t(f"ui.posture.learn_{n}") for n in catalogue.OWASP},
             "not_checked": sum(len(r["unread"]) for r in repos) + len(organization["unread"])}
 
 

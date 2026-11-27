@@ -24,7 +24,7 @@ Ogni rilievo indica il suo posto nei rischi OWASP Top 10 CI/CD e nella guida CIS
 | Codice e dipendenze | scan.no_code scan.no_credentials scan.no_push_protection scan.no_dependency_alerts repo.no_policy repo.no_update_tool |
 | Rami | branch.unprotected branch.no_review branch.bypass branch.release_unprotected branch.merged_unreviewed |
 | Chiavi e segreti | deploy.write deploy.old stored.old |
-| Organizzazione | org.no_two_factor org.default_write org.public_creation org.app_broad org.settings_changed |
+| Organizzazione | org.no_two_factor org.default_write org.public_creation org.app_broad org.settings_changed org.pat_broad |
 | Esecutori | runner.not_hardened runner.coverage_lost |
 | Release pubblicate | release.asset_replaced release.asset_removed release.tag_moved release.outside_window |
 
@@ -44,8 +44,13 @@ La scheda Sicurezza delle sentinelle mostra i rilievi, la maturità della catena
 posture status
 posture matrix
 posture check --repo-name my-repo
+posture report
 ```
 
 ## Limiti
 
-I token granulari dei membri non si leggono (GitHub li elenca solo a una GitHub App) e non si gestisce una seconda app di scrittura. I controlli di organizzazione sono stati provati solo con risposte inventate.
+Non fatto: una seconda GitHub App di scrittura (lettura e scrittura non sono divise tra due App). `org.pat_broad` richiede una GitHub App con il permesso sui token di accesso personale; con un token personale non è controllato. I controlli dell'organizzazione sono stati provati solo con risposte inventate.
+
+## Rapporto di conformità e permessi
+
+`posture report` (e `compliance` in `GET /api/posture`) legge i rilievi rispetto ai dieci rischi OWASP CI/CD e alle sezioni CIS corrispondenti: con rilievi, senza rilievi, letto in parte o non controllato, con un breve testo sul significato di ogni rischio e l'andamento rispetto a una settimana prima. Un aiuto alla lettura, non una certificazione; i numeri di sezione CIS non sono stati verificati sul documento ufficiale. `original.weak` (`posture.upstream`, spento) segnala un fork il cui originale pubblico non ha politica di sicurezza o strumento di aggiornamento. La tabella dei permessi dice quale permesso di GitHub App sblocca ogni gruppo e, con un'App configurata, se è concesso.

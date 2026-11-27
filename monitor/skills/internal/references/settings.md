@@ -310,6 +310,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `finops.co2_grams_per_kwh` | `400` | advanced | Grams of CO2 per kWh of the grid (for the carbon estimate) |
 | `finops.co2_watts` | `40` | advanced | Watts of a runner (for the carbon estimate) |
 | `finops.jobs_per_cycle` | `0` | advanced | Jobs read per cycle for their system |
+| `fleet.cctray` (secure) | `false` | fleetapi | CCTray feed (read only) |
+| `fleet.disabled` | `[]` | fleetapi | Repositories and groups switched off |
 | `fleet.fork_behind` | `false` | general | Show how far a fork is behind its original |
 | `fleet.fork_behind_per_call` | `5` | general | Forks read per round for the column behind the original |
 | `fleet.group_by` | `"ecosystem"` | general | Group the fleet by |
@@ -318,7 +320,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `fleet.meta_per_call` | `20` | general | Files read per round for the metadata columns |
 | `fleet.meta_ttl_hours` | `6` | general | Hours before a metadata value is read again |
 | `fleet.page_size` | `50` | general | Repositories per page |
+| `fleet.roles` | `["release=*release*|*publish*", "nightly=*nightly*|*schedule*", "benchmark=*bench*", "docs=*doc*|*pages*", "build=*build*|*firmware*|*package*", "test=*test*|*ci*|*check*"]` | fleetapi | Columns by role of workflow |
 | `fleet.saved_filters` | `[]` | general | Saved filters |
+| `fleet.security_api` (secure) | `false` | fleetapi | API of secret and code scanning alerts |
 | `fleet.show_all_active` | `true` | general | Every run that is going |
 | `fleet.sort` | `"risk"` | general | Order inside a group |
 | `github_actions.allowed` (secure) | `["rerun_failed", "cancel"]` | advanced | Actions that can be planned |
@@ -555,6 +559,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `posture.skip` | `[]` | posture | Checks not asked for |
 | `posture.stored_max_days` | `365` | posture | Age limit of stored secrets |
 | `posture.types` | `[]` | posture | Kinds of project |
+| `posture.upstream` | `false` | posture | Look at the original of forks |
 | `productivity.enabled` | `-` | analytics | Time saved (estimate) |
 | `productivity.saving_percent` | `-` | analytics | Assumed saving when nothing was timed |
 | `productivity.team_hours_per_week` | `-` | analytics | Hours worked in a week (team) |
@@ -936,6 +941,23 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `startup.resume_max_age_hours` | `12` | basic | Show the last picture after a restart (hours) |
 | `stuck_minutes` | `120` | polling | A build is stuck after |
 | `targets_file` | `-` | paths | Build targets file |
+| `teamwork.auto_rerun` (secure) | `false` | teamwork | Re-run once by itself after an infrastructure failure |
+| `teamwork.bot_authors` | `["dependabot[bot]", "renovate[bot]"]` | teamwork | Bot accounts of dependency updates |
+| `teamwork.bot_branches` | `["dependabot/*", "renovate/*"]` | teamwork | Branch patterns of dependency updates |
+| `teamwork.bot_labels` | `["dependencies"]` | teamwork | Labels of dependency updates |
+| `teamwork.cancel_policy` (secure) | `[]` | teamwork | Runs that should not run (repository:workflow:branch) |
+| `teamwork.dismiss_allowed` (secure) | `[]` | teamwork | People allowed to dismiss alerts |
+| `teamwork.dismiss_days` | `30` | teamwork | Days a red run stays set aside |
+| `teamwork.dismissed_alerts` | `false` | teamwork | Watch dismissed security alerts |
+| `teamwork.enabled` (secure) | `false` | teamwork | Collaboration views and actions |
+| `teamwork.forks_help` | `false` | teamwork | Facts about authors of fork runs |
+| `teamwork.hide_workflows` | `["Dependabot Updates"]` | teamwork | Workflows hidden from these views |
+| `teamwork.inactive_workflows` | `false` | teamwork | Find workflows switched off for inactivity |
+| `teamwork.queued_hours` | `6` | teamwork | Hours queued before proposing to cancel |
+| `teamwork.refresh_hours` | `6` | teamwork | Hours between reads of a repository |
+| `teamwork.repos_per_cycle` | `3` | teamwork | Repositories read per cycle |
+| `teamwork.runner_hooks` (secure) | `false` | teamwork | Accept events of self-hosted runner hooks |
+| `teamwork.stuck_hours` | `6` | teamwork | Hours running before proposing a forced cancel |
 | `tools_dir` | `-` | paths | Folder of the local signing tools |
 | `tui.refresh_seconds` | `-` | console | Refresh |
 | `tui.theme` | `-` | console | Colours |

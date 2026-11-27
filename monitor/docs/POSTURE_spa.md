@@ -24,7 +24,7 @@ Cada hallazgo indica su lugar en los riesgos OWASP Top 10 CI/CD y en la guía CI
 | Código y dependencias | scan.no_code scan.no_credentials scan.no_push_protection scan.no_dependency_alerts repo.no_policy repo.no_update_tool |
 | Ramas | branch.unprotected branch.no_review branch.bypass branch.release_unprotected branch.merged_unreviewed |
 | Claves y secretos | deploy.write deploy.old stored.old |
-| Organización | org.no_two_factor org.default_write org.public_creation org.app_broad org.settings_changed |
+| Organización | org.no_two_factor org.default_write org.public_creation org.app_broad org.settings_changed org.pat_broad |
 | Ejecutores | runner.not_hardened runner.coverage_lost |
 | Versiones | release.asset_replaced release.asset_removed release.tag_moved release.outside_window |
 
@@ -44,8 +44,13 @@ La pestaña de Seguridad de los centinelas muestra los hallazgos, la madurez de 
 posture status
 posture matrix
 posture check --repo-name my-repo
+posture report
 ```
 
 ## Límites
 
-No se leen los tokens finos de los miembros (GitHub solo los lista a una GitHub App) ni se gestiona una segunda aplicación de escritura. Las comprobaciones de organización solo se han probado con respuestas inventadas.
+Sin hacer: una segunda GitHub App de escritura (lectura y escritura no se reparten entre dos Apps). `org.pat_broad` necesita una GitHub App con el permiso de tokens de acceso personal; con un token personal queda sin comprobar. Las comprobaciones de organización solo se han probado con respuestas inventadas.
+
+## Informe de cumplimiento y permisos
+
+`posture report` (y `compliance` en `GET /api/posture`) lee los hallazgos frente a los diez riesgos OWASP de CI/CD y las secciones CIS a las que corresponden: con hallazgos, sin hallazgos, leído en parte o no comprobado, con un texto corto sobre lo que significa cada riesgo y la tendencia respecto a una semana antes. Es una ayuda de lectura, no una certificación; los números de sección CIS no se han contrastado con el documento oficial. `original.weak` (`posture.upstream`, apagado) señala un fork cuyo original público no tiene política de seguridad o herramienta de actualización. La tabla de permisos dice qué permiso de GitHub App desbloquea cada grupo y, con una App configurada, si está concedido.

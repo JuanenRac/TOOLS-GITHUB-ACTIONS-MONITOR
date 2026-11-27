@@ -108,3 +108,12 @@ Command line: `identity status`, `identity plan`, `identity apply`.
 ```
 python bin/monitor_cli.py identity plan
 ```
+
+## Commands: actions, runner-hook
+
+```
+python bin/monitor_cli.py actions proposals
+python bin/monitor_cli.py runner-hook started
+```
+
+[COLLABORATION.md](COLLABORATION.md)

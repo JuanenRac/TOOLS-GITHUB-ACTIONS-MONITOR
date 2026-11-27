@@ -41,6 +41,8 @@ Standard bleibt deine eigene `gh`-Anmeldung. Mit `github_token.enabled` an kanns
 
 Mit `github_actions.enabled` an kann der Monitor einen fehlgeschlagenen Lauf wiederholen (`rerun_failed`, `rerun_run`, `rerun_job`), einen Lauf abbrechen (`cancel`), ein Issue oder einen Pull Request schließen (`close_issue`, `close_pr`) und einen mergen (`merge_pr`, mit `github_actions.merge_method`). Nur die Namen in `github_actions.allowed` sind nutzbar (standardmäßig `rerun_failed` und `cancel`). **Jede Aktion wird einzeln bestätigt**: Die Seite zeigt genau, was gesendet wird (Methode und Endpunkt), und sendet nichts, bis du diesen Plan mit dem Einmal-Token bestätigst. Das GitHub-Token braucht die Berechtigung (`workflow` für Läufe, `repo` für Issues und Pull Requests; sonst wird die Ablehnung von GitHub angezeigt). Jeder Versuch wird in `github_actions_log.jsonl` protokolliert. Der KI-Assistent hat keine Möglichkeit, eine davon zu starten.
 
+Durch die Ansichten der Zusammenarbeit hinzugekommen: `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch` ([COLLABORATION_deu.md](COLLABORATION_deu.md)).
+
 ## Einen Workflow hier mit act ausführen
 
 Mit `act.enabled` an und den Einträgen `repository:datei.yml:ereignis` in `act.allowed` (alle drei exakt) führt eine Schaltfläche `act` auf dem lokalen Klon aus, nachdem du die genaue Befehlszeile bestätigt hast. Es werden keine echten Secrets übergeben (leere Secret-, Variablen-, Umgebungs- und Eingabedateien sowie eine minimale Umgebung ohne Token), die Ausgabe erscheint laufend, jeweils ein Lauf, mit dem Zeitlimit `act.timeout_seconds`, und du kannst ihn stoppen.

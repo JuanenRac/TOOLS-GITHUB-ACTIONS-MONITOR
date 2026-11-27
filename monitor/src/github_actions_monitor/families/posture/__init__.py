@@ -9,7 +9,7 @@ import re
 from github_actions_monitor.families.declare import Command, Family, Option, Route, Setting
 
 TYPE_RE = re.compile(r"^[A-Za-z0-9._*?-]{1,100}=(standard|library|internal|sandbox)\Z")
-CHECK_RE = re.compile(r"^(webhook|actions|scan|repo|branch|deploy|stored|org|runner|release)\.[a-z_]{2,30}\Z")
+CHECK_RE = re.compile(r"^(webhook|actions|scan|repo|branch|deploy|stored|org|runner|release|original)\.[a-z_]{2,30}\Z")
 BRANCH_RE = re.compile(r"^[A-Za-z0-9._/*?-]{1,100}\Z")
 WINDOW_RE = re.compile(r"^(?:[1-7]-[1-7] (?:[01]\d|2[0-4])-(?:[01]\d|2[0-4]))?\Z")
 
@@ -42,6 +42,8 @@ def _cli(ctx):
         if repo:
             engine.refresh(dict(config, posture=dict(engine.settings(config), enabled=True, refresh_hours=0, org_checks=False)), toolconfig.github_owner(config), [repo])
     out = engine.report(config, _account())
+    if ctx["action"] == "report":
+        return {"ok": True, "compliance": out["compliance"], "trend": out["trend"]}, engine.markdown(out), 0
     if ctx["action"] == "check" and ctx["args"].repo_name:
         out["repos"] = [r for r in out["repos"] if r["repo"] == ctx["args"].repo_name]
     lines = engine.text_lines(out) or [i18n.t("cli.posture.none")]
@@ -61,13 +63,13 @@ FAMILY = Family(
     "posture",
     defaults={"posture": {"enabled": False, "alerts": True, "profile": "basic", "types": [], "skip": [], "repos_per_cycle": 3, "refresh_hours": 24, "org_checks": True, "audit_log": False,
                           "review_sample": 0, "runner_runs": 0, "releases": True, "release_window": "", "release_branches": ["release/*", "release-*", "hotfix/*"], "deploy_max_days": 365,
-                          "stored_max_days": 365}},
+                          "stored_max_days": 365, "upstream": False}},
     settings=(_s("enabled", "bool", secure=True), _s("alerts", "bool"), _s("profile", "enum", ("basic", "strict")), _s("types", "names", TYPE_RE), _s("skip", "names", CHECK_RE),
               _s("repos_per_cycle", "int", (1, 50)), _s("refresh_hours", "int", (1, 720), unit="h"), _s("org_checks", "bool"), _s("audit_log", "bool"), _s("review_sample", "int", (0, 30)),
               _s("runner_runs", "int", (0, 20)), _s("releases", "bool"), _s("release_window", "text", WINDOW_RE), _s("release_branches", "names", BRANCH_RE), _s("deploy_max_days", "int", (30, 3650), unit="d"),
-              _s("stored_max_days", "int", (30, 3650), unit="d")),
+              _s("stored_max_days", "int", (30, 3650), unit="d"), _s("upstream", "bool")),
     settings_tabs=(("posture", "extci"),),
     routes=(Route("GET", "/api/posture", _report, "posture of the repositories and the organization: findings, what could not be checked, OWASP and CIS references, permissions needed, history"),),
-    commands=(Command("posture", _cli, "cli.posture.help", words=("status", "matrix", "check"), options=(Option("--repo-name", "cli.posture.help_repo", {"default": ""}),)),),
+    commands=(Command("posture", _cli, "cli.posture.help", words=("status", "matrix", "check", "report"), options=(Option("--repo-name", "cli.posture.help_repo", {"default": ""}),)),),
     ticks=(_tick,),
 )

@@ -1,0 +1,22 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "ui.cfg_g_fleetapi": "フリートと API",
+ "ui.cfg_b_fleet_apis": "フリート表示と読み取り API",
+ "cfg.f.fleet.disabled": "無効にするリポジトリとグループ",
+ "cfg.h.fleet.disabled": "1行に名前かパターン、または group:<キー>。再起動せず次のサイクルから反映します。",
+ "cfg.f.fleet.roles": "ワークフローの役割別の列",
+ "cfg.h.fleet.roles": "1行に 役割=パターン|パターン。名前とファイル名に照合し、最初の一致を使います。",
+ "cfg.f.fleet.cctray": "CCTray フィード（読み取り専用）",
+ "cfg.h.fleet.cctray": "CCMenu などに /api/cctray.xml と /api/cctray.json を同じアクセス確認の下で提供します。既定はオフ。",
+ "cfg.f.fleet.security_api": "シークレットとコードのアラート API",
+ "cfg.h.fleet.security_api": "セキュリティセンチネルが読んだ内容からリポジトリごとの件数を提供します（シークレット自体は含みません）。既定はオフ。",
+ "ui.fleet.title": "役割とグループ",
+ "ui.fleet.group_counts": "{repos} 件中 {red} 件が赤",
+ "ui.fleet.by_role": "ワークフローの役割別",
+ "ui.fleet.col_repo": "リポジトリ",
+ "ui.fleet.state_red": "失敗",
+ "ui.fleet.state_running": "実行中",
+ "ui.fleet.state_ok": "正常",
+ "ui.fleet.state_unknown": "不明"
+}

@@ -32,6 +32,8 @@ CHECKS = {
     "org.public_creation": ("info", "strict", "org", 2, "1.2"),
     "org.app_broad": ("warning", "basic", "apps", 8, "1.4"),
     "org.settings_changed": ("warning", "basic", "audit", 10, "5.2"),
+    "org.pat_broad": ("warning", "basic", "pats", 2, "1.4"),
+    "original.weak": ("info", "basic", "upstream", 3, "3.1"),
     "runner.not_hardened": ("info", "strict", "runner", 7, "2.2"),
     "runner.coverage_lost": ("warning", "basic", "runner", 7, "2.2"),
     "release.asset_replaced": ("error", "basic", "releases", 9, "4.1"),
@@ -46,7 +48,7 @@ OWASP = {1: "Insufficient Flow Control Mechanisms", 2: "Inadequate Identity and 
 #: the permission of a fine-grained token or of a GitHub App that each group of reads needs (read only in every case)
 PERMISSIONS = {"hooks": "Webhooks: read", "actions": "Administration: read", "scan": "Administration: read; Code scanning alerts: read", "files": "Contents: read", "branch": "Administration: read; Metadata: read",
                "reviews": "Pull requests: read", "deploy": "Administration: read", "stored": "Secrets: read (names and dates only)", "org": "Organization administration: read", "apps": "Organization administration: read",
-               "audit": "Organization administration: read (audit log, GitHub Enterprise)", "runner": "Actions: read", "releases": "Contents: read"}
+               "audit": "Organization administration: read (audit log, GitHub Enterprise)", "pats": "Organization personal access tokens: read (only a GitHub App can ask)", "upstream": "Contents: read (the public original of a fork)", "runner": "Actions: read", "releases": "Contents: read"}
 
 #: the kinds of project and the checks each one does not ask for
 TYPES = {"standard": (), "library": ("runner.not_hardened",), "internal": ("repo.no_policy", "scan.no_code", "org.public_creation"),
@@ -60,9 +62,16 @@ def wanted(check, profile="basic", kind="standard", skip=()):
     return profile == "strict" or level_of[1] == "basic"
 
 
-def matrix(unread=()):
+#: group of reads -> the permission of a GitHub App that unlocks it (its name in the answer of the installation)
+APP_PERMISSIONS = {"hooks": "repository_hooks", "actions": "administration", "scan": "administration", "files": "contents", "branch": "administration", "reviews": "pull_requests", "deploy": "administration",
+                   "stored": "secrets", "org": "organization_administration", "apps": "organization_administration", "audit": "organization_administration",
+                   "pats": "organization_personal_access_tokens", "runner": "actions", "releases": "contents", "upstream": "contents"}
+
+
+def matrix(unread=(), granted=None):
     """permission -> the checks that need it; `unread` is the set of groups GitHub refused to answer."""
     rows = []
     for group, permission in PERMISSIONS.items():
-        rows.append({"group": group, "permission": permission, "checks": [c for c, v in CHECKS.items() if v[2] == group], "refused": group in unread})
+        rows.append({"group": group, "permission": permission, "checks": [c for c, v in CHECKS.items() if v[2] == group], "refused": group in unread,
+                     "app_permission": APP_PERMISSIONS[group], "granted": "unknown" if granted is None else str(granted.get(APP_PERMISSIONS[group]) or "unknown")})
     return rows
