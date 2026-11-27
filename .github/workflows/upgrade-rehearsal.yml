@@ -70,3 +70,4 @@ jobs:
           path: ${{ runner.temp }}/logs/
           if-no-files-found: ignore
           retention-days: 7
+# temporary rehearsal of the quality gate
