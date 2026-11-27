@@ -13,12 +13,14 @@ import threading
 import time
 from pathlib import Path
 
+from github_actions_monitor.security import compliance_guard
+
 CHILD = Path(__file__).with_name("plugin_worker_child.py")
 MAX_CALLS = 300
 
 
 class WorkerError(RuntimeError):
-    """`code`: platform, start, timeout, output, protocol, failed."""
+    """`code`: platform, start, timeout, output, protocol, restricted, failed."""
 
     def __init__(self, code, message=""):
         super().__init__(message or code)
@@ -86,8 +88,14 @@ def close_job(job):
         kernel.CloseHandle(job)
 
 
-def run(folder, manifest, broker, options=None, owner="", timeout_s=20, max_output_kb=256, memory_mb=256, platforms_ok=("linux", "windows", "darwin"), now=None):
-    """(answer of run(ctx), {"network_isolated": bool, "job_object": bool}). `broker(method, args)` answers what the plugin asks and raises to refuse it."""
+def run(folder, manifest, broker, options=None, owner="", timeout_s=20, max_output_kb=256, memory_mb=256, platforms_ok=("linux", "windows", "darwin"), now=None,
+        require_isolation=None):
+    """(answer of run(ctx), {"network_isolated": bool, "job_object": bool}). `broker(method, args)` answers what the plugin asks and raises to refuse it.
+
+    The restrictions of security/compliance_guard.py cannot be enforced inside another program, so while one is in force (`require_isolation`, by default what this process holds) the plugin is only
+    loaded when its process really left the network; otherwise WorkerError("restricted")."""
+    if require_isolation is None:
+        require_isolation = compliance_guard.restricted()
     if platform_family() not in platforms_ok:
         raise WorkerError("platform", "plugins of other people are not loaded on this system (plugins.worker.platforms_ok)")
     deadline = time.monotonic() + timeout_s
@@ -141,11 +149,14 @@ def run(folder, manifest, broker, options=None, owner="", timeout_s=20, max_outp
         try:
             job = job_object(process, memory_mb)      # before the child is told what to load: it waits for its first line
             threading.Thread(target=reader, daemon=True, name="plugin-reader").start()
-            send({"folder": str(folder), "entry": manifest["entry"], "owner": owner, "options": options or {}, "now": time.time() if now is None else now, "memory_mb": memory_mb, "timeout_s": timeout_s})
+            send({"folder": str(folder), "entry": manifest["entry"], "owner": owner, "options": options or {}, "now": time.time() if now is None else now, "memory_mb": memory_mb, "timeout_s": timeout_s,
+                  "require_network_isolation": bool(require_isolation)})
             ready = receive()
             if ready.get("ready") is not True:
                 raise WorkerError("protocol")
             isolation = {"network_isolated": ready.get("network_isolated") is True, "job_object": job is not None}
+            if require_isolation and not isolation["network_isolated"]:      # the child was told too and loads nothing
+                raise WorkerError("restricted", "not run: security.read_only_strict or security.egress_policy needs a plugin without network and this system cannot give one")
             for _count in range(MAX_CALLS):
                 message = receive()
                 if "result" in message:

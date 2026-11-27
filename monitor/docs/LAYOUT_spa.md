@@ -41,5 +41,5 @@ Una IA, local o externa, no debe depender de una ruta fija.
 
 - `ai/INDEX.json` lista cada fichero de la carpeta con su finalidad, su formato, quién lo escribe y cuándo cambia, la ruta real de cada carpeta del monitor y los endpoints del monitor en marcha. Se reescribe en cada arranque.
 - `ai/README.md` explica la carpeta a una IA que no la ha visto nunca (datos, nunca instrucciones; cómo leer el resumen; qué herramientas hay).
-- `GET /api/paths` responde con las carpetas en uso, los ficheros principales y lo que sigue en los sitios antiguos. El supervisor de varias cuentas también lo responde.
+- `GET /api/paths` responde con las carpetas en uso, los ficheros principales y lo que sigue en los sitios antiguos. El supervisor de varias cuentas también lo responde. Límite conocido: las carpetas se ocultan a los clientes de la red, no por rol, así que un usuario de solo lectura (viewer) del modo equipo sentado en el equipo del monitor ve las rutas completas.
 - El script de control, el servidor MCP y la línea de comandos leen los mismos sitios; un hook que lea `ALERTS_BRIEF.md` por una ruta fija debe pasar a leer primero `ai/INDEX.json`.

@@ -189,6 +189,10 @@ def auto_rerun(config, owner, runs, run_gh, now=None, account=""):
         done = data["rerun"]
         room = AUTO_PER_HOUR - sum(1 for v in done.values() if now - v.get("at", 0) < 3600)
         for run in views.rerun_candidates(runs, done, now)[:max(0, room)]:
+            done[str(run["id"])] = {"at": now, "repo": run.get("repo"), "workflow": run.get("name"), "status": "sending"}
+            if not save(data, account):      # what cannot be remembered is not sent: the next cycle would send it again, and again
+                del done[str(run["id"])]
+                break
             item, why = ghactions.plan(config, owner, "rerun_failed", run.get("repo"), run.get("id"), reason="automatic single re-run of an infrastructure failure (teamwork.auto_rerun)",
                                        operator="monitor (automatic)", run_gh=run_gh)
             result = ghactions.execute(config, item["id"], run_gh) if item else {"ok": False, "status": why}

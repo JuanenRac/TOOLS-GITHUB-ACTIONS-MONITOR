@@ -26,7 +26,7 @@ Le dernier build terminé de chaque builder, pipeline ou job sur sa branche déc
 
 ## Sécurité
 
-L'adresse est contrôlée à la connexion : cet ordinateur, les réseaux privés et les métadonnées cloud sont refusés sauf avec `external_ci.allow_private_targets`. Aucune redirection ni aucun lien des réponses n'est suivi. Les réponses sont limitées par `external_ci.max_bytes` et `external_ci.timeout_s`. Aucun identifiant n'est écrit dans la configuration : `token_env` contient seulement le NOM d'une variable d'environnement (GitLab : jeton en lecture ; Jenkins : `utilisateur:jeton` ; Azure : jeton personnel avec lecture Build), jamais envoyé sans TLS vers une adresse publique. Le quota GitHub n'est pas utilisé. En mode hors ligne (`airgapped`) rien n'est lu ; `doctor --egress` liste les hôtes.
+L'adresse est contrôlée à la connexion : cet ordinateur, les réseaux privés et les métadonnées cloud sont refusés sauf avec `external_ci.allow_private_targets`. Aucune redirection ni aucun lien des réponses n'est suivi. Les réponses sont limitées par `external_ci.max_bytes` et `external_ci.timeout_s`. Aucun identifiant n'est écrit dans la configuration : `token_env` contient seulement le NOM d'une variable d'environnement (GitLab : jeton en lecture ; Jenkins : `utilisateur:jeton` ; Azure : jeton personnel avec lecture Build), jamais envoyé sans TLS vers une adresse publique. Le quota GitHub n'est pas utilisé. En mode hors ligne (`airgapped`) rien n'est lu ; `doctor --egress` liste les hôtes. `token_env` ne peut pas nommer une variable du système ou de votre connexion à GitHub, un secret du moniteur ni une variable nommée par un autre réglage.
 
 ## Journaux d'un build en échec
 

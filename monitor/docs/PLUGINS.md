@@ -48,7 +48,7 @@ python bin/monitor_cli.py plugin uninstall --name my-plugin
 | Windows | yes | **no**: labelled **no network isolation** | Job Object: memory limit, no child processes |
 | macOS | yes | **no**: labelled **no network isolation** | CPU limit; memory not guaranteed |
 
-On no system are your files hidden from such a plugin: it runs with your user. `plugins.worker.platforms_ok` empty means plugins of other people never run. Reads of GitHub are asked to the monitor, which only allows the `get_paths` of the manifest on watched repositories. `plugins.worker.timeout_s`, `max_output_kb` and `memory_mb` bound each run.
+On no system are your files hidden from such a plugin: it runs with your user. `plugins.worker.platforms_ok` empty means plugins of other people never run. Reads of GitHub are asked to the monitor, which only allows the `get_paths` of the manifest on watched repositories. `plugins.worker.timeout_s`, `max_output_kb` and `memory_mb` bound each run. While `security.read_only_strict` or `security.egress_policy` restricts the monitor, those limits cannot be enforced inside another program, so a plugin of another person runs only when its process really has no network (Linux with user namespaces); otherwise it is not run and its reason says `restricted`.
 
 ## Untrusted output and health
 

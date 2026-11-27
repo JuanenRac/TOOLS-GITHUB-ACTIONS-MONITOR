@@ -26,7 +26,7 @@ Der letzte beendete Build jedes Builders, jeder Pipeline oder jedes Jobs auf sei
 
 ## Sicherheit
 
-Die Adresse wird beim Verbinden geprüft: dieser Computer, private Netze und Cloud-Metadaten werden ohne `external_ci.allow_private_targets` abgewiesen. Weiterleitungen und Links aus Antworten werden nicht verfolgt. Antworten sind durch `external_ci.max_bytes` und `external_ci.timeout_s` begrenzt. Zugangsdaten stehen nie in der Konfiguration: `token_env` enthält nur den NAMEN einer Umgebungsvariablen (GitLab: Lese-Token; Jenkins: `benutzer:token`; Azure: persönliches Token mit Build-Leserecht), ohne TLS nie an eine öffentliche Adresse. Das GitHub-Kontingent wird nicht verbraucht. Im Offline-Modus (`airgapped`) wird nichts gelesen; `doctor --egress` nennt die Hosts.
+Die Adresse wird beim Verbinden geprüft: dieser Computer, private Netze und Cloud-Metadaten werden ohne `external_ci.allow_private_targets` abgewiesen. Weiterleitungen und Links aus Antworten werden nicht verfolgt. Antworten sind durch `external_ci.max_bytes` und `external_ci.timeout_s` begrenzt. Zugangsdaten stehen nie in der Konfiguration: `token_env` enthält nur den NAMEN einer Umgebungsvariablen (GitLab: Lese-Token; Jenkins: `benutzer:token`; Azure: persönliches Token mit Build-Leserecht), ohne TLS nie an eine öffentliche Adresse. Das GitHub-Kontingent wird nicht verbraucht. Im Offline-Modus (`airgapped`) wird nichts gelesen; `doctor --egress` nennt die Hosts. `token_env` darf keine Variable des Systems oder Ihrer GitHub-Anmeldung, kein Geheimnis des Monitors und keine Variable nennen, die eine andere Einstellung nennt.
 
 ## Logs eines fehlgeschlagenen Builds
 

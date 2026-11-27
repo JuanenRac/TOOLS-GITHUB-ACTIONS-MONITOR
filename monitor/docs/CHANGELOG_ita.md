@@ -45,6 +45,11 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Sicurezza
 
+- **I plugin di altri rispettano le restrizioni**: finché sono in vigore la sola lettura rigorosa o il criterio di rete, uno viene eseguito solo se il suo processo è senza rete.
+- **Token delle fonti CI esterne e dell'esportazione del registro**: non possono indicare un segreto del sistema o del monitor e non vengono mai inviati senza TLS a un indirizzo pubblico.
+- Un download senza firma proposto con un numero precedente viene rifiutato quando contiene una versione che deve essere firmata.
+- Un file di stato danneggiato dell'esportazione del registro non ferma più i suoi controlli, e l'unica riesecuzione automatica non viene inviata se non si può annotare.
+- Le guide indicano due limiti noti (cartelle viste da un viewer al computer; ripetizione di eventi senza orario) e il valore predefinito corretto di `webhook.reject_stale`.
 - È supportata solo l'ultima versione pubblicata (politica di sicurezza).
 
 ### Plugin

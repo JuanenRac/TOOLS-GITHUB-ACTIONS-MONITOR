@@ -62,8 +62,10 @@ def only_box(ident, before=""):
 
 ASK = 'var i=b.querySelector("input");if(!i)return "missing";i.value="What is red right now?";i.dispatchEvent(new KeyboardEvent("keydown",{key:"Enter",bubbles:true}));'
 EXTENSIONS = '(function(){var b=document.getElementById("plugins-catalog");if(!b)return "missing";b.scrollIntoView({block:"start"});return "ok"})()'
+SHOW = 'var s=b.querySelector("button");if(!s)return "missing";s.click();'
 PARTS_WEB = [("extensions", "tab=cfg&cfgtab=plugins", V, EXTENSIONS), ("proposals", "tab=al", V, only_box("assistant-proposals")), ("assistant_chat", "tab=al", V, only_box("assistant-chat", ASK)),
-             ("collaboration", "tab=scol", V, only_box("actions-box")), ("roles_groups", "tab=fleet", V, only_box("fleet-columns")), ("posture", "tab=ssec", V, only_box("posture-box"))]
+             ("collaboration", "tab=scol", V, only_box("actions-box")), ("roles_groups", "tab=fleet", V, only_box("fleet-columns")), ("posture", "tab=ssec", V, only_box("posture-box")),
+             ("compliance", "tab=ssec", V, only_box("compliance-box", SHOW)), ("external_ci", "tab=sci", V, only_box("extci-box"))]
 
 
 LITE_WEB = [("lite_about", "tab=now&dlg=about", V), ("lite_basic", "tab=cfg&cfgtab=basic", V), ("lite_now", "tab=now", V), ("lite_charts", "tab=charts", V), ("lite_history", "tab=hist", V), ("lite_settings", "tab=cfg&cfgtab=general", V)]

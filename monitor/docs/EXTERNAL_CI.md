@@ -26,7 +26,7 @@ The last finished build of each builder, pipeline or job on its branch decides, 
 
 ## Safety
 
-The address is checked when connecting: this computer, private networks and cloud metadata are refused unless `external_ci.allow_private_targets` is on. No redirect is followed; links in answers are never followed. Answers are limited by `external_ci.max_bytes` and `external_ci.timeout_s`. A credential is never written in the configuration: `token_env` holds only the NAME of an environment variable (GitLab: access token with read scope; Jenkins: `user:token`; Azure: personal access token with Build read), and it is not sent without TLS to a public address. Requests do not use the GitHub allowance. Offline mode (`airgapped`) reads nothing; `doctor --egress` lists the hosts.
+The address is checked when connecting: this computer, private networks and cloud metadata are refused unless `external_ci.allow_private_targets` is on. No redirect is followed; links in answers are never followed. Answers are limited by `external_ci.max_bytes` and `external_ci.timeout_s`. A credential is never written in the configuration: `token_env` holds only the NAME of an environment variable (GitLab: access token with read scope; Jenkins: `user:token`; Azure: personal access token with Build read), and it is not sent without TLS to a public address. Requests do not use the GitHub allowance. Offline mode (`airgapped`) reads nothing; `doctor --egress` lists the hosts. `token_env` cannot name a variable of the system or of your login to GitHub, a secret of the monitor or a variable that another setting names.
 
 ## Logs of a failed build
 

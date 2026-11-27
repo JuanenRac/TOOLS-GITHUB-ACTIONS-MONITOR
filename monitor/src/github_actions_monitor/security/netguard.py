@@ -69,6 +69,15 @@ def check_host(host, port=443, allow_private=False, resolver=None):
     return addresses[0]
 
 
+def only_private(url, resolver=None):
+    """True when every address of the host of `url` is of this computer or of a private network: the only places a secret may go without TLS. False when it cannot be known."""
+    try:
+        parts = urllib.parse.urlsplit(url)
+        return bool(parts.hostname) and all(blocked_ip(a) for a in resolve(parts.hostname, parts.port or 80, resolver))
+    except (OSError, ValueError):
+        return False
+
+
 def _connect(connection, allow_private, resolver):
     ip = check_host(connection.host, connection.port, allow_private, resolver)
     return socket.create_connection((ip, connection.port), connection.timeout, connection.source_address)

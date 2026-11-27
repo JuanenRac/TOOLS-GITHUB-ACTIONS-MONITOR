@@ -48,7 +48,7 @@ python bin/monitor_cli.py plugin uninstall --name my-plugin
 | Windows | ja | **nein**: **ohne Netzisolierung** | Job-Objekt: Speichergrenze, keine Kindprozesse |
 | macOS | ja | **nein**: **ohne Netzisolierung** | CPU-Grenze; Speicher nicht garantiert |
 
-Auf keinem System sind Ihre Dateien vor einem solchen Plugin verborgen: es läuft mit Ihrem Benutzer. Leeres `plugins.worker.platforms_ok` heißt: Fremd-Plugins laufen nie. GitHub-Lesezugriffe gehen über den Monitor, der nur die `get_paths` des Manifests auf beobachteten Repositorys erlaubt. `plugins.worker.timeout_s`, `max_output_kb` und `memory_mb` begrenzen jeden Lauf.
+Auf keinem System sind Ihre Dateien vor einem solchen Plugin verborgen: es läuft mit Ihrem Benutzer. Leeres `plugins.worker.platforms_ok` heißt: Fremd-Plugins laufen nie. GitHub-Lesezugriffe gehen über den Monitor, der nur die `get_paths` des Manifests auf beobachteten Repositorys erlaubt. `plugins.worker.timeout_s`, `max_output_kb` und `memory_mb` begrenzen jeden Lauf. Solange `security.read_only_strict` oder `security.egress_policy` den Monitor einschränken, lassen sich diese Grenzen in einem anderen Programm nicht durchsetzen; ein Plugin anderer Personen läuft daher nur, wenn sein Prozess wirklich kein Netz hat (Linux mit User-Namespaces), sonst läuft es nicht und sein Grund lautet `restricted`.
 
 ## Nicht vertrauenswürdige Ausgabe und Zustand
 

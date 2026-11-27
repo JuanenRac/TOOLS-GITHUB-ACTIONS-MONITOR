@@ -26,7 +26,7 @@ azure;repo=my-mirror;url=https://dev.azure.com/my-org;project=my-project
 
 ## 安全
 
-连接时检查地址:除非开启 `external_ci.allow_private_targets`,否则拒绝本机、私有网络和云元数据地址。不跟随重定向,也不跟随响应中的链接。响应受 `external_ci.max_bytes` 和 `external_ci.timeout_s` 限制。配置中从不写入凭据:`token_env` 只填环境变量名(GitLab:只读令牌;Jenkins:`user:token`;Azure:具有 Build 读取权限的个人令牌),且不会在无 TLS 时发往公网地址。不消耗 GitHub 配额。离线模式(`airgapped`)下不读取;`doctor --egress` 列出主机。
+连接时检查地址:除非开启 `external_ci.allow_private_targets`,否则拒绝本机、私有网络和云元数据地址。不跟随重定向,也不跟随响应中的链接。响应受 `external_ci.max_bytes` 和 `external_ci.timeout_s` 限制。配置中从不写入凭据:`token_env` 只填环境变量名(GitLab:只读令牌;Jenkins:`user:token`;Azure:具有 Build 读取权限的个人令牌),且不会在无 TLS 时发往公网地址。不消耗 GitHub 配额。离线模式(`airgapped`)下不读取;`doctor --egress` 列出主机。`token_env` 不能指定系统变量、GitHub 登录变量、监视器自身的密钥,也不能指定其他设置已指定的变量。
 
 ## 失败构建的日志
 

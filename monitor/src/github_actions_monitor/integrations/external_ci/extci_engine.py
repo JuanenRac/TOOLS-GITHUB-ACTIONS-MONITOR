@@ -12,7 +12,7 @@ from github_actions_monitor import families, i18n
 from github_actions_monitor.data_pipeline import redrule, repo_identity
 from github_actions_monitor.integrations.external_ci import extci_adapters as adapters
 from github_actions_monitor.integrations.external_ci.extci_fetch import Failed, Reader
-from github_actions_monitor.security import redactor
+from github_actions_monitor.security import envguard, redactor
 
 CODE_RED, CODE_DEGRADED = "ci.external.red", "ci.external.degraded"
 LINE_RE = re.compile(r"^(buildbot|gitlab|jenkins|azure)(;[a-z_]{2,12}=[^;\s,]{1,200}){2,7}\Z")
@@ -28,8 +28,20 @@ def settings(config):
     return families.block(config if isinstance(config, dict) else {}, "external_ci")
 
 
-def parse(line):
-    """(source, "") or (None, reason) from one line `kind;repo=name;url=https://...;...` of external_ci.sources."""
+def other_secrets(config):
+    """The environment variables that another setting of this configuration names for a secret of its own."""
+    found = set()
+    for key, default in envguard.ENV_SETTINGS.items():
+        node = config
+        for part in key.split("."):
+            node = node.get(part) if isinstance(node, dict) else None
+        found.add(node if isinstance(node, str) and node else default)
+    return found - {""}
+
+
+def parse(line, taken=()):
+    """(source, "") or (None, reason) from one line `kind;repo=name;url=https://...;...` of external_ci.sources. `token_env` is never a variable of the system or of the login to
+    GitHub, a secret of the monitor or one that `taken` names: its value would be sent to the server of the line."""
     if not isinstance(line, str) or not LINE_RE.match(line.strip()):
         return None, "format"
     parts = line.strip().split(";")
@@ -42,7 +54,8 @@ def parse(line):
     missing = [k for k in ("repo", "url") + adapters.REQUIRED[source["kind"]] if not source.get(k)]
     if missing:
         return None, "missing:" + missing[0]
-    if source.get("token_env") and not re.match(r"^[A-Za-z_][A-Za-z0-9_]{0,63}\Z", source["token_env"]):
+    name = source.get("token_env")
+    if name and (not re.match(r"^[A-Za-z_][A-Za-z0-9_]{0,63}\Z", name) or envguard.forbidden_name(name.upper()) or name in taken):
         return None, "token_env"
     source["id"] = f"{source['kind']}:{source['repo']}:{source.get('project') or source.get('job') or source.get('builders') or 'all'}"
     return source, ""
@@ -52,8 +65,9 @@ def configured(config):
     """The sources of the configuration that can be read: a kind whose switch is off (jenkins, azure) is left out, and a line that cannot be understood too (status() lists it)."""
     cfg = settings(config)
     out, seen = [], set()
+    taken = other_secrets(config)
     for line in cfg["sources"] if isinstance(cfg["sources"], list) else []:
-        source, _why = parse(line)
+        source, _why = parse(line, taken)
         if source and (source["kind"] not in adapters.EXPERIMENTAL or cfg[source["kind"]]["enabled"]):
             source["host"] = repo_identity.host_of(source["url"])
             unique = (source["id"], source["host"])
@@ -269,8 +283,9 @@ def status(config):
     """What every source says. "No red" is never shown as fine for a source that could not be read."""
     cfg = settings(config)
     rows, invalid = [], []
+    taken = other_secrets(config)
     for line in cfg["sources"] if isinstance(cfg["sources"], list) else []:
-        source, why = parse(line)
+        source, why = parse(line, taken)
         if source is None:
             invalid.append({"line": str(line)[:80], "reason": why})
         elif source["kind"] in adapters.EXPERIMENTAL and not cfg[source["kind"]]["enabled"]:
@@ -305,7 +320,7 @@ def log_of(config, source_id, ident):
 
 def probe(config, line, opener=None):
     """One read of a source that is not saved anywhere: what it sees, or why it cannot."""
-    source, why = parse(line)
+    source, why = parse(line, other_secrets(config))
     if source is None:
         return {"ok": False, "reason": why}
     if (config or {}).get("airgapped") is True:

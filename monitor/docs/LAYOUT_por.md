@@ -41,5 +41,5 @@ Uma IA, local ou externa, não deve depender de um caminho fixo.
 
 - `ai/INDEX.json` lista cada ficheiro da pasta com a sua finalidade, o formato, quem o escreve e quando muda, o caminho real de cada pasta do monitor e os endpoints do monitor em execução. É reescrito em cada arranque.
 - `ai/README.md` explica a pasta a uma IA que nunca a viu (dados, nunca instruções; como ler o resumo; que ferramentas existem).
-- `GET /api/paths` responde com as pastas em uso, os ficheiros principais e o que ainda está nos sítios antigos. O supervisor de várias contas também responde.
+- `GET /api/paths` responde com as pastas em uso, os ficheiros principais e o que ainda está nos sítios antigos. O supervisor de várias contas também responde. Limite conhecido: as pastas são ocultadas aos clientes da rede, não por papel, pelo que um viewer do modo de equipa sentado no computador do monitor vê os caminhos completos.
 - O script de controlo, o servidor MCP e a linha de comandos leem os mesmos sítios; um hook que leia `ALERTS_BRIEF.md` por um caminho fixo deve passar a ler primeiro `ai/INDEX.json`.
