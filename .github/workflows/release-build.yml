@@ -97,7 +97,6 @@ jobs:
 
   gate:
     name: The quality gate (Windows)
-    if: github.event_name == 'workflow_dispatch'
     runs-on: windows-latest
     timeout-minutes: 350
     permissions:
