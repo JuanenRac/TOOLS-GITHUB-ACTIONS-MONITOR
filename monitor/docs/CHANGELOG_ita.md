@@ -60,6 +60,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Sicurezza
 
+- **Un token nell'indirizzo diventa il cookie di sessione solo se è corretto di per sé** (`listen.query_access`): una richiesta già ammessa dal cookie o dall'intestazione poteva inserire altro testo nella risposta. I file di segreti, rapporti e workflow devono restare nella loro cartella anche con i collegamenti risolti, l'HTTPS in uscita richiede TLS 1.2 o successivo e un comando del Portachiavi troppo lungo viene rifiutato.
 - **I plugin di altri rispettano le restrizioni**: finché sono in vigore la sola lettura rigorosa o il criterio di rete, uno viene eseguito solo se il suo processo è senza rete.
 - **Token delle fonti CI esterne e dell'esportazione del registro**: non possono indicare un segreto del sistema o del monitor e non vengono mai inviati senza TLS a un indirizzo pubblico.
 - Un download senza firma proposto con un numero precedente viene rifiutato quando contiene una versione che deve essere firmata.

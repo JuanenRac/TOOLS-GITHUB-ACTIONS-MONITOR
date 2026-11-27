@@ -3565,7 +3565,8 @@ class Handler(BaseHTTPRequestHandler):
             self.json_reply({"error": "access"}, 401)
             return False
         self.deprecated_access = bool(query_token) and not localguard.presented(self.headers)      # the token came in the address: every answer says that way is deprecated
-        if query_token and self.command == "GET" and "text/html" in (self.headers.get("Accept") or "text/html"):
+        # the token of the ADDRESS must be right by itself: a request that is let in by its cookie or header must not put whatever the address says into the cookie
+        if query_token and localguard.access_ok({}, query_token) and self.command == "GET" and "text/html" in (self.headers.get("Accept") or "text/html"):
             self.send_response(302)
             self.send_header("Set-Cookie", localguard.cookie_header(query_token, secure=False if self.local_door else None))
             self.send_header("Referrer-Policy", "no-referrer")       # the clean address follows at once: the token must not travel on in a Referer header

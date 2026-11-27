@@ -60,6 +60,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Seguridad
 
+- **Un token en la dirección solo pasa a ser la cookie de sesión cuando es correcto por sí mismo** (`listen.query_access`): una petición ya admitida por su cookie o cabecera podía meter otro texto en la respuesta. Los ficheros de secretos, informes y workflows deben quedar dentro de su carpeta con los enlaces resueltos, el HTTPS saliente exige TLS 1.2 o posterior y se rechaza una orden del llavero demasiado larga.
 - **Los plugins de otras personas obedecen las restricciones**: con el modo de solo lectura estricto o la política de red en vigor, uno solo se ejecuta si su proceso no tiene red.
 - **Tokens de las fuentes de CI externas y de la exportación del registro**: no pueden nombrar un secreto del sistema o del monitor y nunca se envían sin TLS a una dirección pública.
 - Una descarga sin firma ofrecida con un número anterior se rechaza cuando contiene una versión que debe ir firmada.

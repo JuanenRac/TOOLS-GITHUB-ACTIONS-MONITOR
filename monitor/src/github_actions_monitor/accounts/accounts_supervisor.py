@@ -476,7 +476,8 @@ class Handler(BaseHTTPRequestHandler):
                 localguard.note_proxy_failure(self.client_address, self.headers, localguard.max_failed(config))
             self.json({"error": "access"}, 401)
             return False
-        if query_token and self.command == "GET" and "text/html" in (self.headers.get("Accept") or "text/html"):
+        # the token of the ADDRESS must be right by itself (a right cookie or header does not make a wrong address token one that may become the cookie)
+        if query_token and localguard.access_ok({}, query_token) and self.command == "GET" and "text/html" in (self.headers.get("Accept") or "text/html"):
             self.reply(302, b"", "text/plain", {"Set-Cookie": localguard.cookie_header(query_token, secure=False if self.door else None), "Referrer-Policy": "no-referrer", "Location": self.path.split("?")[0]})      # the token must not stay in the address
             return False
         return True

@@ -60,6 +60,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Sicherheit
 
+- **Ein Token in der Adresse wird nur dann zum Sitzungs-Cookie, wenn es selbst richtig ist** (`listen.query_access`): Eine schon durch Cookie oder Header zugelassene Anfrage konnte anderen Text in die Antwort bringen. Dateien von Geheimnissen, Berichten und Workflows müssen auch nach Auflösung der Verknüpfungen in ihrem Ordner bleiben, ausgehendes HTTPS verlangt TLS 1.2 oder neuer, und ein zu langer Schlüsselbund-Befehl wird abgelehnt.
 - **Plugins anderer Personen halten die Einschränkungen ein**: Solange der strikte Nur-Lese-Modus oder die Netzwerkrichtlinie gelten, läuft eines nur, wenn sein Prozess kein Netz hat.
 - **Token externer CI-Quellen und des Protokollexports**: Sie können kein Geheimnis des Systems oder des Monitors nennen und werden nie ohne TLS an eine öffentliche Adresse gesendet.
 - Ein unsignierter Download, der unter einer älteren Nummer angeboten wird, wird abgelehnt, wenn er eine Version enthält, die signiert sein muss.

@@ -11,12 +11,14 @@ import os
 import re
 import shutil
 import sys
+from pathlib import Path
 
 from github_actions_monitor.security import secretstore
 
 NAME_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,79}\Z")
 MAX_LENGTH = 2000
 SERVICE = "github-actions-monitor-notify"
+KEYCHAIN_LINE = 4000      # bytes of one command given to `security -i`: a longer line could be cut and its rest read as another command
 
 
 def _account(name):
@@ -24,7 +26,12 @@ def _account(name):
 
 
 def _file(name, suffix):
-    return secretstore.folder() / f"notify-{name}.{suffix}"
+    """The file of one secret. OSError when, with every link resolved, it is not inside the folder of the secrets."""
+    base = os.path.join(os.path.realpath(str(secretstore.folder())), "")
+    path = os.path.realpath(os.path.join(base, f"notify-{name}.{suffix}"))
+    if not path.startswith(base):
+        raise OSError("outside the folder of the secrets")
+    return Path(path)
 
 
 def backend(platform=None):
@@ -61,7 +68,10 @@ def put(name, value, runner=None, platform=None):
             secretstore._private_file(_file(name, "dpapi"), base64.b64encode(secretstore._dpapi(value.encode("utf-8"), True)))
         elif kind == "keychain":
             safe = value.replace("\\", "\\\\").replace('"', '\\"')
-            code, _out = secretstore._run(["security", "-i"], f'add-generic-password -U -s "{SERVICE}" -a "{_account(name)}" -w "{safe}"\n', runner)
+            line = f'add-generic-password -U -s "{SERVICE}" -a "{_account(name)}" -w "{safe}"\n'
+            if len(line.encode("utf-8")) > KEYCHAIN_LINE:
+                return False, "format"
+            code, _out = secretstore._run(["security", "-i"], line, runner)
             if code:
                 return False, "keychain"
         elif kind == "secret-service":

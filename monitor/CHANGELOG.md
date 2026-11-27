@@ -62,6 +62,7 @@ when this file and `tool_version.py` disagree.
 
 ### Security
 
+- **A token in the address only becomes the session cookie when it is right by itself** (`listen.query_access`): a request already let in by its cookie or header could put other text into the answer. Files of secrets, reports and workflows must stay in their folder with links resolved, outgoing HTTPS needs TLS 1.2 or later, and a too long Keychain command is refused.
 - **Plugins of other people obey the restrictions**: while strict read-only mode or the network policy is in force, one is run only when its process has no network.
 - **Tokens of external CI sources and of the export of the log**: they cannot name a secret of the system or of the monitor, and are never sent without TLS to a public address.
 - An unsigned download offered under an older number is refused when it holds a version that must be signed.
