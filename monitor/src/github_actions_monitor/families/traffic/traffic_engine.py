@@ -2,6 +2,7 @@
 # GPL-3.0-or-later - see LICENSE
 """Downloads of release files, visits and clones: which chosen repositories are read (each at most once a day, a few per cycle), what is kept (data/state/traffic.json) and what comes out (the report and
 the CSV). Only GET requests to GitHub; nothing is ever sent anywhere else. GitHub keeps visits and clones for 14 days only, so a day that was never read is lost: a gap stays a gap, never a zero."""
+import copy
 import csv
 import io
 import json
@@ -45,7 +46,8 @@ def active(config):
 def selected(config, owner):
     """[owner/name] of the repositories the user chose: a name alone belongs to the account that is watched."""
     out = []
-    for entry in settings(config).get("repos") or []:
+    chosen = settings(config).get("repos")
+    for entry in chosen if isinstance(chosen, list) else []:      # a hand-written text is not a list of names
         first, slash, rest = str(entry).partition("/")
         who, name = (first, rest) if slash else (str(owner or ""), first)
         if OWNER_RE.match(who) and NAME_RE.match(name) and name not in (".", "..") and f"{who}/{name}" not in out:
@@ -94,9 +96,9 @@ def reason_of(message):
     text = message.lower()
     if "rate limit" in text:
         return "rate_limited"
-    if "404" in text:
+    if re.search(r"\b404\b", text):
         return "missing"
-    if "403" in text or "401" in text or "push access" in text:
+    if re.search(r"\b40[13]\b", text) or "push access" in text:
         return "no_permission"
     return "failed"
 
@@ -178,6 +180,21 @@ def prune(entry, keep_days, now):
     entry["days"] = {date: row for date, row in (entry.get("days") or {}).items() if date >= limit}
 
 
+def _number(value, default, low, high):
+    """A number of the configuration file; anything else written there by hand is the default."""
+    return min(high, max(low, value)) if isinstance(value, int) and not isinstance(value, bool) else default
+
+
+def room(config, data):
+    """True when this cycle can spend requests: not while the connection is lost or the first reading is under way, nor with no more than twice `min_rate_remaining` left (like the other optional reads)."""
+    if not isinstance(data, dict):
+        return True
+    if data.get("loading") or (data.get("offline") or {}).get("offline"):
+        return False
+    remaining = (data.get("rate") or {}).get("remaining")
+    return remaining is None or remaining > 2 * _number(config.get("min_rate_remaining"), 800, 0, 100000)
+
+
 def refresh(config, owner, account="", get=None, now=None):
     """Reads the chosen repositories not yet read today (UTC), at most traffic.repos_per_cycle of them. Returns the names read."""
     if not active(config):
@@ -190,21 +207,22 @@ def refresh(config, owner, account="", get=None, now=None):
     with LOCK:
         data = load(account)
         due = [full for full in selected(config, owner) if (data["repos"].get(full) or {}).get("day") != today]
-        for full in due[:cfg["repos_per_cycle"]]:
-            entry = data["repos"].setdefault(full, {})
+        for full in due[:_number(cfg.get("repos_per_cycle"), 2, 1, 10)]:
+            entry = copy.deepcopy(data["repos"].get(full) or {})      # a read cut half way leaves what was kept as it was, so its new downloads are still counted next time
             try:
                 read_one(get, full, entry, cfg, today)
             except Refused:      # the allowance is over: stop, and try again in a later cycle
                 break
-            prune(entry, cfg["keep_days"], now)
+            prune(entry, _number(cfg.get("keep_days"), 400, 30, 3650), now)
+            data["repos"][full] = entry
             done.append(full)
         if done:
             save(data, account)
     return done
 
 
-def tick(config, account=""):
-    if not active(config) or RUNNING["on"]:
+def tick(config, account="", data=None):
+    if not active(config) or RUNNING["on"] or not room(config, data):
         return None
     from github_actions_monitor.app import toolconfig
     owner = toolconfig.github_owner(config)
@@ -234,11 +252,13 @@ def report(config, owner, account=""):
 
 
 def cell(value):
-    """A value of the CSV: a text that a spreadsheet would run as a formula gets a quote in front."""
+    """A value of the CSV: a text that a spreadsheet would run as a formula gets a quote in front, and a line break never starts a row of its own."""
     if value is None:
         return ""
     text = str(value)
-    return "'" + text if text[:1] in ("=", "+", "-", "@", "\t", "\r") else text
+    risky = text[:1] in ("=", "+", "-", "@", "\t", "\r", "\n", "\uff1d", "\uff0b", "\uff0d", "\uff20")
+    text = text.replace("\r", " ").replace("\n", " ")
+    return "'" + text if risky else text
 
 
 def csv_text(what="days", account=""):

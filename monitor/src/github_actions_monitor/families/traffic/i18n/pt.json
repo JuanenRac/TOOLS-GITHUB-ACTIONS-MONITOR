@@ -4,7 +4,7 @@
  "ui.cfg_g_traffic": "Transferências e tráfego",
  "ui.cfg_b_traffic": "Histórico de transferências, visitas e clonagens (só de leitura)",
  "cfg.f.traffic.enabled": "Guardar um histórico de transferências e tráfego",
- "cfg.h.traffic.enabled": "Uma vez por dia lê as transferências dos ficheiros das releases, e as visitas e clonagens, dos repositórios escolhidos, e guarda-as neste computador. Apenas pedidos GET; nada sai do computador. As transferências são anónimas, incluem robôs e não contam os ficheiros comprimidos \"Source code\". Desligado por omissão.",
+ "cfg.h.traffic.enabled": "Uma vez por dia lê as transferências dos ficheiros das releases, e as visitas e clonagens, dos repositórios escolhidos, e guarda-as neste computador. Apenas pedidos GET ao GitHub; o histórico fica neste computador e não é enviado para lado nenhum. Espera quando não há ligação ou a quota de pedidos está baixa. As transferências são anónimas, incluem robôs e não contam os ficheiros comprimidos \"Source code\". Desligado por omissão.",
  "cfg.f.traffic.repos": "Repositórios a seguir",
  "cfg.h.traffic.repos": "Um por linha: nome (da conta vigiada) ou dono/nome. Vazio: nada é lido. No máximo 50.",
  "cfg.f.traffic.views_clones": "Também visitas e clonagens",

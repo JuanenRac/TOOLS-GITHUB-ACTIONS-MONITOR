@@ -4,7 +4,7 @@
  "ui.cfg_g_traffic": "Downloads and traffic",
  "ui.cfg_b_traffic": "History of downloads, visits and clones (read only)",
  "cfg.f.traffic.enabled": "Keep a history of downloads and traffic",
- "cfg.h.traffic.enabled": "Once a day reads the download counts of the release files, and the visits and clones, of the repositories you choose, and keeps them on this computer. GET requests only; nothing leaves the computer. Download counts are anonymous, include robots and do not count the \"Source code\" archives. Off by default.",
+ "cfg.h.traffic.enabled": "Once a day reads the download counts of the release files, and the visits and clones, of the repositories you choose, and keeps them on this computer. Only GET requests to GitHub; the history stays on this computer and is sent nowhere. It waits while the connection is lost or the request allowance is low. Download counts are anonymous, include robots and do not count the \"Source code\" archives. Off by default.",
  "cfg.f.traffic.repos": "Repositories to follow",
  "cfg.h.traffic.repos": "One per line: name (of the account you watch) or owner/name. Empty: nothing is read. At most 50.",
  "cfg.f.traffic.views_clones": "Visits and clones too",

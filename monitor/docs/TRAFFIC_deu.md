@@ -15,7 +15,7 @@ Schalten Sie `traffic.enabled` ein (Einstellungen > Downloads und Zugriffe) und 
 
 ## Was gelesen wird und was es kostet
 
-Nur GET-Anfragen, nach einem Zyklus: jedes gewählte Repository höchstens einmal am Tag (UTC), `traffic.repos_per_cycle` davon pro Zyklus. Ein Repository kostet eine bis fünf Anfragen Ihres GitHub-Kontingents (Releases, bis zu 300; Besuche; Klone). Ist das Kontingent erschöpft, wird angehalten und später erneut versucht. `traffic.views_clones` schaltet Besuche und Klone aus. Installationen ohne Netz lesen nichts.
+Nur GET-Anfragen, nach einem Zyklus: jedes gewählte Repository höchstens einmal am Tag (UTC), `traffic.repos_per_cycle` davon pro Zyklus. Ein Repository kostet eine bis fünf Anfragen Ihres GitHub-Kontingents (Releases, bis zu 300; Besuche; Klone). Ist das Kontingent erschöpft, wird angehalten und später erneut versucht. `traffic.views_clones` schaltet Besuche und Klone aus. Installationen ohne Netz lesen nichts. Gewartet wird auch, solange die Verbindung fehlt, die erste Lesung läuft oder höchstens doppelt so viele Anfragen wie `min_rate_remaining` übrig sind.
 
 ## Berechtigungen
 
