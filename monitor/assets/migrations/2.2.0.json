@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.2.0",
  "previous": "2.1.8",
- "digest": "c1a202a9db9f0b47667aa9200eea993df613661ee952c98e01cb6df4d795cffc",
+ "digest": "c55f0a39a6d49990bc133a591102919cb9a4cbb7066b7e895ddfac07ed5c2fb0",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -660,6 +660,15 @@
     "key": "teamwork.inactive_workflows",
     "kind": "bool",
     "default": false
+   },
+   {
+    "key": "teamwork.keep_alive_days",
+    "kind": "int",
+    "bounds": [
+     0,
+     59
+    ],
+    "default": 0
    },
    {
     "key": "teamwork.queued_hours",

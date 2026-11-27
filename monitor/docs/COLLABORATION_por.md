@@ -25,6 +25,10 @@ Nada é escrito a menos que `github_actions.enabled` esteja ativo, a ação este
 
 `teamwork.auto_rerun` (desligado) repete uma vez os trabalhos falhados de uma execução que não arrancou ou expirou, com as mesmas verificações. Nunca uma segunda vez; se voltar a falhar é gerado um alerta.
 
+## Manter vivo um agendamento
+
+O GitHub desliga os workflows agendados de um repositório público ao fim de 60 dias sem atividade. Com `teamwork.keep_alive_days` (0 = desligado; por exemplo 45), um repositório público sem nenhum push durante esse tempo e com workflows executados por agendamento aparece nas propostas como `enable_workflow`, com os dias que faltam. É uma proposta como as outras: nada é enviado até a confirmar. O GitHub não documenta que ativar um workflow já ativo reinicie a contagem, e isto não foi experimentado num repositório real: o caminho seguro é um novo commit.
+
 ## Hooks de executores próprios
 
 Com `teamwork.runner_hooks`, um hook de um executor deste computador regista o início e o fim:
@@ -53,4 +57,4 @@ Leituras e escritas só foram testadas com respostas inventadas; nenhuma das aç
 
 ## Todas as definições
 
-`teamwork.enabled` `teamwork.repos_per_cycle` `teamwork.refresh_hours` `teamwork.dismiss_days` `teamwork.hide_workflows` `teamwork.bot_authors` `teamwork.bot_branches` `teamwork.bot_labels` `teamwork.dismissed_alerts` `teamwork.dismiss_allowed` `teamwork.auto_rerun` `teamwork.cancel_policy` `teamwork.queued_hours` `teamwork.stuck_hours` `teamwork.forks_help` `teamwork.inactive_workflows` `teamwork.runner_hooks`
+`teamwork.enabled` `teamwork.repos_per_cycle` `teamwork.refresh_hours` `teamwork.dismiss_days` `teamwork.hide_workflows` `teamwork.bot_authors` `teamwork.bot_branches` `teamwork.bot_labels` `teamwork.dismissed_alerts` `teamwork.dismiss_allowed` `teamwork.auto_rerun` `teamwork.cancel_policy` `teamwork.queued_hours` `teamwork.stuck_hours` `teamwork.forks_help` `teamwork.inactive_workflows` `teamwork.keep_alive_days` `teamwork.runner_hooks`

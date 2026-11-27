@@ -9,6 +9,8 @@
 
 Une seconde sentinelle à côté de celle de la CI. Elle regarde les **issues et pull requests ouvertes** de vos dépôts et vous dit ce qui demande une personne : issues oubliées, étiquettes critiques, revues que personne ne fait, brouillons sans fin, conflits qui restent. Elle a sa propre horloge, ne change jamais ce que décide la sentinelle CI et **n'écrit jamais sur GitHub**. Elle fait partie de l'édition complète ; l'édition lite ne la charge pas.
 
+L'onglet Collaboration et l'onglet Alertes portent aussi des cadres facultatifs avec leur propre guide : [vues de collaboration et actions](COLLABORATION_fra.md) et [propositions, discussion et rapport d'un dépôt](ASSISTANT_fra.md).
+
 ## L'activer
 
 Elle est désactivée par défaut. Réglages > Sentinelle > Issues et pull requests, ou dans `actions_monitor.json` :

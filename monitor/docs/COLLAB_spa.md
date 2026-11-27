@@ -9,6 +9,8 @@
 
 Un segundo centinela junto al de CI. Mira las **incidencias (issues) y pull requests abiertas** de tus repositorios y te dice lo que necesita a una persona: incidencias olvidadas, etiquetas críticas, revisiones que nadie hace, borradores que no acaban, conflictos que se quedan. Tiene su propio reloj, nunca cambia lo que decide el centinela de CI y **nunca escribe en GitHub**. Es de la edición completa; la edición lite no lo carga.
 
+La pestaña Colaboración y la pestaña Alertas llevan además cajas opcionales con su propia guía: [vistas de colaboración y acciones](COLLABORATION_spa.md) y [propuestas, chat e informe de un repositorio](ASSISTANT_spa.md).
+
 ## Actívalo
 
 Viene apagado. Ajustes > Centinela > Incidencias y pull requests, o en `actions_monitor.json`:

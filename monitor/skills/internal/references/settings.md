@@ -953,6 +953,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `teamwork.forks_help` | `false` | teamwork | Facts about authors of fork runs |
 | `teamwork.hide_workflows` | `["Dependabot Updates"]` | teamwork | Workflows hidden from these views |
 | `teamwork.inactive_workflows` | `false` | teamwork | Find workflows switched off for inactivity |
+| `teamwork.keep_alive_days` | `0` | teamwork | Quiet days before proposing to keep a schedule alive |
 | `teamwork.queued_hours` | `6` | teamwork | Hours queued before proposing to cancel |
 | `teamwork.refresh_hours` | `6` | teamwork | Hours between reads of a repository |
 | `teamwork.repos_per_cycle` | `3` | teamwork | Repositories read per cycle |

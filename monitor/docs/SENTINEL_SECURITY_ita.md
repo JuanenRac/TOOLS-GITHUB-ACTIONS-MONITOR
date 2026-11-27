@@ -9,6 +9,8 @@
 
 La terza sentinella, accanto a quella della CI e a Collab. Legge, senza scrivere nulla su GitHub, ciò che GitHub stesso dice essere aperto o mancante in materia di sicurezza per ogni repository, e lo trasforma in avvisi della scheda Avvisi (origine Sicurezza). È nell'edizione Complete, spenta per impostazione predefinita (`sentinels.security.enabled`); Lite non ha sentinelle.
 
+La stessa scheda ha un riquadro facoltativo con la [postura di repository e organizzazione rispetto a OWASP e CIS](POSTURE_ita.md).
+
 ## Cosa legge e cosa segnala
 
 | Segnale | Avviso | Livello | Attivo per impostazione predefinita |

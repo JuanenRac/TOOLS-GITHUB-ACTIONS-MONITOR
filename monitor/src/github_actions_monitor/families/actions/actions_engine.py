@@ -70,9 +70,9 @@ def _list(answer):
 
 
 def read_repo(get, owner, repo, cfg, now):
-    """What one repository shows: {"at", "pulls", "vulnerable", "dismissals", "workflows", "quiet_days", "unread": {part: reason}}."""
+    """What one repository shows: {"at", "pulls", "vulnerable", "dismissals", "workflows", "ageing", "unread": {part: reason}}."""
     base = f"repos/{owner}/{repo}"
-    out = {"at": now, "pulls": [], "vulnerable": None, "dismissals": [], "workflows": [], "unread": {}}
+    out = {"at": now, "pulls": [], "vulnerable": None, "dismissals": [], "workflows": [], "ageing": [], "unread": {}}
 
     def part(name, function):
         try:
@@ -111,12 +111,28 @@ def read_repo(get, owner, repo, cfg, now):
         answer = get(f"{base}/actions/workflows?per_page=100")
         out["workflows"] = [{"repo": repo, "id": w["id"], "name": str(w.get("name") or "")[:100]} for w in answer.get("workflows") or [] if w.get("state") == "disabled_inactivity" and isinstance(w.get("id"), int)]
 
+    def ageing():
+        info = get(base)
+        if info.get("private") is not False or info.get("archived") is True or info.get("fork") is True:      # GitHub switches off scheduled workflows of public repositories only
+            return
+        pushed = views.epoch(info.get("pushed_at"))
+        quiet = int((now - pushed) // 86400) if pushed else 0
+        if quiet < cfg["keep_alive_days"]:
+            return
+        scheduled = {r.get("workflow_id") for r in get(f"{base}/actions/runs?event=schedule&per_page=50").get("workflow_runs") or []}
+        if scheduled:
+            answer = get(f"{base}/actions/workflows?per_page=100")
+            out["ageing"] = [{"repo": repo, "id": w["id"], "name": str(w.get("name") or "")[:100], "quiet_days": quiet, "days_left": max(0, views.INACTIVITY_DAYS - quiet)}
+                             for w in answer.get("workflows") or [] if w.get("state") == "active" and isinstance(w.get("id"), int) and w["id"] in scheduled]
+
     part("pulls", pulls)
     part("vulnerabilities", vulnerabilities)
     if cfg["dismissed_alerts"]:
         part("dismissals", dismissals)
     if cfg["inactive_workflows"]:
         part("workflows", workflows)
+    if cfg["keep_alive_days"]:
+        part("keep_alive", ageing)
     return out
 
 
@@ -192,12 +208,13 @@ def report(config, account="", now=None):
     repos = data["repos"]
     pulls = [p for entry in repos.values() for p in entry.get("pulls", [])]
     workflows = [w for entry in repos.values() for w in entry.get("workflows", [])]
+    ageing = [w for entry in repos.values() for w in entry.get("ageing", [])] if cfg["keep_alive_days"] else []
     unread = [{"repo": name, "part": part, "reason": why} for name, entry in sorted(repos.items()) for part, why in (entry.get("unread") or {}).items()]
     vulnerable = sorted((e["vulnerable"] for e in repos.values() if e.get("vulnerable")), key=lambda v: (-v["critical"], -(v["oldest_days"] or 0), v["repo"]))
     return {"ok": True, "enabled": cfg["enabled"] is True, "waiting": view.get("waiting") or {"person": [], "machine": []}, "lanes": view.get("lanes") or [], "dismissed": run_dismiss.rows(now),
             "pulls": sorted(pulls, key=lambda p: (not p["bot"], p["group"], p["repo"], p["number"] or 0)), "vulnerable": vulnerable, "unread": unread,
-            "not_read_yet": view.get("repos_waiting") or [], "dismissals": [d for e in repos.values() for d in e.get("dismissals", [])], "workflows": workflows,
-            "proposals": views.proposals(view.get("all_runs") or [], pulls, view.get("policy") or [], workflows, cfg, now),
+            "not_read_yet": view.get("repos_waiting") or [], "dismissals": [d for e in repos.values() for d in e.get("dismissals", [])], "workflows": workflows, "ageing": ageing,
+            "proposals": views.proposals(view.get("all_runs") or [], pulls, view.get("policy") or [], workflows, cfg, now, ageing),
             "auto_reruns": [dict(v, run=int(k)) for k, v in data["rerun"].items() if k.isdigit()][-30:], "runner_events": data["hooks"][-50:]}
 
 

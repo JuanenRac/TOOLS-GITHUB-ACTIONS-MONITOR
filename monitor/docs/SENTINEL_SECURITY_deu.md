@@ -9,6 +9,8 @@
 
 Der dritte Wächter, neben dem CI-Wächter und Collab. Er liest, ohne etwas auf GitHub zu schreiben, was GitHub selbst zur Sicherheit jedes Repositorys als offen oder fehlend meldet, und macht daraus Warnungen im Reiter Warnungen (Herkunft Sicherheit). Er gehört zur Ausgabe Complete und ist standardmäßig aus (`sentinels.security.enabled`); Lite hat keine Wächter.
 
+Dieselbe Registerkarte hat einen optionalen Kasten mit der [Sicherheitslage von Repositorys und Organisation nach OWASP und CIS](POSTURE_deu.md).
+
 ## Was er liest und was er meldet
 
 | Signal | Warnung | Stufe | Standardmäßig an |
