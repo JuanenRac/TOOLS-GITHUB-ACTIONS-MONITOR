@@ -26,7 +26,7 @@ Decide a última build concluída de cada builder, pipeline ou job no seu ramo, 
 
 ## Segurança
 
-O endereço é verificado na ligação: este computador, redes privadas e metadados da nuvem são recusados salvo com `external_ci.allow_private_targets`. Não se seguem redirecionamentos nem ligações das respostas. As respostas são limitadas por `external_ci.max_bytes` e `external_ci.timeout_s`. Nenhuma credencial é escrita na configuração: `token_env` contém apenas o NOME de uma variável de ambiente (GitLab: token de leitura; Jenkins: `utilizador:token`; Azure: token pessoal com leitura de Build) e não é enviada sem TLS para um endereço público. Não consome a quota do GitHub. Em modo sem ligação (`airgapped`) nada é lido; `doctor --egress` lista os anfitriões.
+O endereço é verificado na ligação: este computador, redes privadas e metadados da nuvem são recusados salvo com `external_ci.allow_private_targets`. Não se seguem redirecionamentos nem ligações das respostas. As respostas são limitadas por `external_ci.max_bytes` e `external_ci.timeout_s`. Nenhuma credencial é escrita na configuração: `token_env` contém apenas o NOME de uma variável de ambiente (GitLab: token de leitura; Jenkins: `utilizador:token`; Azure: token pessoal com leitura de Build) e não é enviada sem TLS para um endereço público. Não consome a quota do GitHub. Em modo sem ligação (`airgapped`) nada é lido; `doctor --egress` lista os anfitriões. `token_env` não pode indicar uma variável do sistema ou do seu início de sessão no GitHub, um segredo do monitor nem uma variável indicada por outra definição.
 
 ## Registos de uma build falhada
 

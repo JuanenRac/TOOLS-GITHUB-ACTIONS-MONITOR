@@ -73,8 +73,12 @@ def load_state(where=None):
     except (OSError, ValueError):
         data = {}
     data = data if isinstance(data, dict) else {}
-    return {"cursor": str(data.get("cursor") or ""), "sent": int(data.get("sent") or 0), "lost": int(data.get("lost") or 0), "backlog_bytes": int(data.get("backlog_bytes") or 0),
-            "last_error": str(data.get("last_error") or ""), "at": data.get("at") or 0}
+
+    def number(key):      # a damaged file is read as far as it can be, never raised
+        value = data.get(key)
+        return int(value) if isinstance(value, (int, float)) and not isinstance(value, bool) and 0 <= value < 2 ** 53 else 0
+    return {"cursor": str(data.get("cursor") or ""), "sent": number("sent"), "lost": number("lost"), "backlog_bytes": number("backlog_bytes"), "last_error": str(data.get("last_error") or "")[:200],
+            "at": number("at")}
 
 
 def pending(cursor, target=None):
@@ -129,7 +133,7 @@ def send_http(cfg, rows, env=None):
     headers = {"Content-Type": "application/x-ndjson", "User-Agent": "github-actions-monitor"}
     secret = env.get(cfg["token_env"], "") if envguard.NamePattern().match(cfg["token_env"]) else ""
     if secret:
-        if cfg["url"].startswith("http://") and not cfg["allow_private_targets"]:
+        if cfg["url"].startswith("http://") and not (cfg["allow_private_targets"] and netguard.only_private(cfg["url"])):
             raise ValueError("a token is not sent without TLS")
         headers["Authorization"] = "Bearer " + secret
     request = urllib.request.Request(cfg["url"], data=("\n".join(line_of(r) for r in rows) + "\n").encode("utf-8"), headers=headers, method="POST")

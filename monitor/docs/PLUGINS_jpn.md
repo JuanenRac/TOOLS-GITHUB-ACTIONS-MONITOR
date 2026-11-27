@@ -48,7 +48,7 @@ python bin/monitor_cli.py plugin uninstall --name my-plugin
 | Windows | はい | **不可**: **ネットワーク分離なし** | ジョブオブジェクト: メモリ上限、子プロセス不可 |
 | macOS | はい | **不可**: **ネットワーク分離なし** | CPU 上限。メモリは保証しません |
 
-どの OS でもファイルは隠されません。プラグインはあなたのユーザーで動きます。`plugins.worker.platforms_ok` が空なら第三者プラグインは動きません。GitHub の読み取りはモニター経由で、監視中リポジトリに対するマニフェストの `get_paths` のみ許可します。`plugins.worker.timeout_s`、`max_output_kb`、`memory_mb` が各実行を制限します。
+どの OS でもファイルは隠されません。プラグインはあなたのユーザーで動きます。`plugins.worker.platforms_ok` が空なら第三者プラグインは動きません。GitHub の読み取りはモニター経由で、監視中リポジトリに対するマニフェストの `get_paths` のみ許可します。`plugins.worker.timeout_s`、`max_output_kb`、`memory_mb` が各実行を制限します。`security.read_only_strict` または `security.egress_policy` で制限している間は、その制限を別のプログラムの中で強制できません。そのため他者のプラグインは、プロセスが本当にネットワークを持たない場合(ユーザー名前空間のある Linux)にだけ実行されます。それ以外は実行されず、理由は `restricted` になります。
 
 ## 信頼しない出力と状態
 

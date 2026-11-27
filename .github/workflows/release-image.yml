@@ -145,7 +145,13 @@ jobs:
         run: |
           draft="$(gh release view "$TAG" --json isDraft --jq .isDraft 2>/dev/null || echo missing)"
           case "$draft" in
-            true) gh release edit "$TAG" --draft=false --latest; echo "published ${TAG} after the image" ;;
+            true)
+              # from 2.2.0 on the updater refuses a release without a signature, and a published release may not be changeable: an incomplete draft stays a draft
+              assets="$(gh release view "$TAG" --json assets --jq '.assets[].name')"
+              for name in github_actions_monitor.zip SHA256SUMS SHA256SUMS.ed25519.sig monitor_updater.py; do
+                printf '%s\n' "$assets" | grep -qxF "$name" || { echo "the draft ${TAG} lacks ${name}: it stays a draft"; exit 1; }
+              done
+              gh release edit "$TAG" --draft=false --latest; echo "published ${TAG} after the image" ;;
             false) echo "${TAG} was already public: nothing to do" ;;
             *) echo "there is no release ${TAG} yet: create it as a draft and the next run of this workflow publishes it" ;;
           esac

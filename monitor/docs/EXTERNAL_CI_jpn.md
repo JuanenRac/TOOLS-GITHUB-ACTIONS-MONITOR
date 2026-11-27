@@ -26,7 +26,7 @@ Actionsと同様に、各ビルダー・パイプライン・ジョブのブラ�
 
 ## 安全性
 
-接続時にアドレスを確認し、`external_ci.allow_private_targets` がオフならこのPC、プライベートネットワーク、クラウドメタデータを拒否します。リダイレクトや応答内のリンクは追いません。応答は `external_ci.max_bytes` と `external_ci.timeout_s` で制限します。認証情報は設定に書きません。`token_env` は環境変数の名前だけです(GitLab: 読み取りトークン、Jenkins: `user:token`、Azure: Build読み取りの個人トークン)。TLSなしで公開アドレスには送りません。GitHubの利用枠は使いません。オフラインモード(`airgapped`)では何も読みません。`doctor --egress` がホストを表示します。
+接続時にアドレスを確認し、`external_ci.allow_private_targets` がオフならこのPC、プライベートネットワーク、クラウドメタデータを拒否します。リダイレクトや応答内のリンクは追いません。応答は `external_ci.max_bytes` と `external_ci.timeout_s` で制限します。認証情報は設定に書きません。`token_env` は環境変数の名前だけです(GitLab: 読み取りトークン、Jenkins: `user:token`、Azure: Build読み取りの個人トークン)。TLSなしで公開アドレスには送りません。GitHubの利用枠は使いません。オフラインモード(`airgapped`)では何も読みません。`doctor --egress` がホストを表示します。`token_env` には、システムや GitHub ログインの変数、モニター自身のシークレット、他の設定が指定している変数は指定できません。
 
 ## 失敗ビルドのログ
 

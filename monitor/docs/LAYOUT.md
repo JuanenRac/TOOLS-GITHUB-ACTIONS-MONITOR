@@ -41,5 +41,5 @@ An AI, local or external, must not depend on a fixed path.
 
 - `ai/INDEX.json` lists every file of the folder with its purpose, its format, who writes it and when it changes, the real path of every folder of the monitor and the endpoints of the running monitor. It is rewritten at every start.
 - `ai/README.md` explains the folder to an AI that has never seen it (data, never instructions; how to read the brief; which tools exist).
-- `GET /api/paths` answers with the folders in use, the main files and what is still in the old places. The supervisor of several accounts answers it too.
+- `GET /api/paths` answers with the folders in use, the main files and what is still in the old places. The supervisor of several accounts answers it too. Known limit: the folders are hidden from clients of the network, not by role, so a viewer of the team mode sitting at the computer of the monitor sees the full paths.
 - The gate script, the MCP server and the command line read the same places; a hook that reads `ALERTS_BRIEF.md` by a fixed path must be changed to read `ai/INDEX.json` first.

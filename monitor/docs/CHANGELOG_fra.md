@@ -46,6 +46,11 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Sécurité
 
+- **Les extensions d'autres personnes respectent les restrictions** : tant que le mode lecture seule strict ou la politique réseau s'appliquent, l'une d'elles ne s'exécute que si son processus n'a pas de réseau.
+- **Jetons des sources CI externes et de l'export du journal** : ils ne peuvent pas nommer un secret du système ou du moniteur et ne sont jamais envoyés sans TLS à une adresse publique.
+- Un téléchargement sans signature proposé sous un numéro plus ancien est refusé lorsqu'il contient une version qui doit être signée.
+- Un fichier d'état abîmé de l'export du journal n'arrête plus ses contrôles, et l'unique relance automatique n'est pas envoyée si elle ne peut pas être notée.
+- Les guides indiquent deux limites connues (dossiers vus par un viewer à l'ordinateur ; rejeu d'événements sans heure) et la bonne valeur par défaut de `webhook.reject_stale`.
 - Le nettoyeur de texte pour les IA retire désormais en entier un long nom d'hôte interne en `.local`, et les morceaux d'une clé privée sans son en-tête (ligne coupée court ou journal qui commence au milieu de la clé).
 - Seule la dernière version publiée est prise en charge (politique de sécurité).
 

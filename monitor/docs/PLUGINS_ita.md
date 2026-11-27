@@ -48,7 +48,7 @@ python bin/monitor_cli.py plugin uninstall --name my-plugin
 | Windows | sì | **no**: **senza isolamento di rete** | Job Object: limite di memoria, nessun processo figlio |
 | macOS | sì | **no**: **senza isolamento di rete** | limite di CPU; memoria non garantita |
 
-Su nessun sistema i tuoi file sono nascosti a un tale plugin: gira con il tuo utente. `plugins.worker.platforms_ok` vuoto: i plugin di terzi non girano mai. Le letture di GitHub passano dal monitor, che consente solo le `get_paths` del manifesto sui repository osservati. `plugins.worker.timeout_s`, `max_output_kb` e `memory_mb` limitano ogni esecuzione.
+Su nessun sistema i tuoi file sono nascosti a un tale plugin: gira con il tuo utente. `plugins.worker.platforms_ok` vuoto: i plugin di terzi non girano mai. Le letture di GitHub passano dal monitor, che consente solo le `get_paths` del manifesto sui repository osservati. `plugins.worker.timeout_s`, `max_output_kb` e `memory_mb` limitano ogni esecuzione. Finché `security.read_only_strict` o `security.egress_policy` limitano il monitor, quei limiti non si possono imporre dentro un altro programma: un plugin di altri viene eseguito solo se il suo processo è davvero senza rete (Linux con spazi dei nomi utente); altrimenti non viene eseguito e il motivo dice `restricted`.
 
 ## Output non affidabile e salute
 
