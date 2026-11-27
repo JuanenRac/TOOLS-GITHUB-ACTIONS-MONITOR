@@ -38,6 +38,8 @@ when this file and `tool_version.py` disagree.
 
 ### Changed
 
+- **The groups of Settings are a list on the left** of their panel instead of several rows of tabs above it, so the panel has more room (a window narrower than 701 pixels and the compact view keep them above).
+- **On a phone the figures of the header are folded** behind one button, upright and sideways; it opens them and this browser remembers the choice.
 - **The stand-alone updater published with a release now carries the registry of migrations inside**, and SHA256SUMS names it together with the zip and the two bills of materials.
 
 ### Fixed
@@ -45,6 +47,7 @@ when this file and `tool_version.py` disagree.
 - **A branch protected by a ruleset is no longer called unprotected after an update**: the three reads of the protection only send their ETag while the answer is still held, and what an older version judged is read again in full. `security.branch_unprotected` could stay for ever on a protected repository.
 - **Posture findings and alerts follow the language of the page** (`?lang=` and the language selector), not the one of the configuration.
 - **On a phone the content of every tab can be seen again**: under a tall header the open tab was left with no height, so its panels could not be reached by scrolling.
+- **The tabs can be seen on a phone held sideways and in short windows**: from 701 pixels of width the header took the whole height and the open tab was left with none; now the page scrolls to it. Up to 800 pixels of width the menu stays one row that scrolls sideways instead of breaking its names letter by letter. Wall screens are not changed.
 - **The boxes of the optional parts keep their full height** on computers and wall displays instead of being squeezed to a few lines, their tables keep whole words, buttons of the compact view are at least 44 px wide, and the large charts no longer write an error to the browser console. A workflow measures every box in eight languages, on a phone, a computer and wall displays.
 - **No more false "unknown setting" warnings when updating**: the updater no longer reports as unknown the settings that the example configuration of the target version carries but the settings page does not describe.
 - The names of the steps kept per workflow have a ceiling.

@@ -4,9 +4,9 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D)
 # GPL-3.0-or-later - see LICENSE
 """The boxes of the optional parts in a real browser: extensions, proposals and chat, collaboration and the choice of an environment, roles and groups, the screen of a group (/g/), posture,
-compliance, external CI sources and the window of a newer version.
+compliance, external CI sources and the window of a newer version; and the page itself: every main tab can be seen, the figures of the header are folded on a phone and the groups of Settings are a list on the left.
 
-    python tools/check_parts.py [--lang en de ...] [--size phone desktop wall wall4k] [--shots DIR] [--json]
+    python tools/check_parts.py [--lang en de ...] [--size phone land780 land844 land915 desktop wall wall4k] [--shots DIR] [--json]
 
 The demo monitor with the optional parts (tools/demo_monitor.py --parts, invented data) is opened through the DevTools protocol at the exact size of a phone, a computer and two wall displays.
 Every box is opened with everything unfolded and measured: nothing leaves it or the window, no text is cut, no control covers another, on a phone every control is at least 44 x 44 px, no text key
@@ -32,10 +32,16 @@ import check_overflow as co  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 LANGS = co.LANGS
-SIZES = {"phone": (360, 780), "desktop": (1400, 900), "wall": (1920, 1080), "wall4k": (3840, 2160)}
+#: land*: phones held sideways
+SIZES = {"phone": (360, 780), "land780": (780, 360), "land844": (844, 390), "land915": (915, 412), "desktop": (1400, 900), "wall": (1920, 1080), "wall4k": (3840, 2160)}
 GROUP = "group"
+#: the checks of the page itself, and what is on the window when their picture is taken
+PICTURE = {"main_tabs": "document.querySelector('main>.tab.on').scrollIntoView();1", "header_fold": "showTab('now');document.querySelectorAll('.shell,.stage,body').forEach(n=>n.scrollTop=0);window.scrollTo(0,0);1",
+           "settings_list": "showTab('cfg');cfgShowTab('interface');document.getElementById('cfg-panels').scrollIntoView({block:'center'});1"}
+PAGE_STEPS = tuple(PICTURE)
 STEPS = ("extensions", "extensions_install", "proposals", "chat", "repo_report", "collaboration", "environment", "environment_confirm", "roles_groups", "posture", "compliance",
-         "external_ci", "external_ci_test", "external_ci_about", "update_notice")
+         "external_ci", "external_ci_test", "external_ci_about", "update_notice",
+         "main_tabs", "header_fold", "settings_list")
 
 #: before any script of the page: it records the errors and answers, with invented data, what would write or needs a model or another server
 HEAD = r"""
@@ -162,12 +168,63 @@ LIB = r"""
       window.supplyNotice.show({version:"9.9.9",current:"2.2.0",notes:window.__notes||"",changelog:"https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/blob/main/monitor/CHANGELOG.md"});return until(dialog)},
     async group(){return until(()=>document.querySelector("#list li")&&document.body)}
   };
+  /* the page itself: these answer with their own findings */
+  const seen=e=>{const b=e.getBoundingClientRect();let top=Math.max(b.top,0),bottom=Math.min(b.bottom,window.innerHeight);
+    for(let a=e.parentElement;a&&a!==document.body&&a!==document.documentElement;a=a.parentElement)if(css(a).overflowY!=="visible"){const q=a.getBoundingClientRect();top=Math.max(top,q.top);bottom=Math.min(bottom,q.bottom)}
+    return Math.max(0,Math.round(bottom-top))};
+  const bad=(out,kind,at,detail)=>out.found.push({kind,at,text:"",detail:String(detail||"")});
+  const aPhone=()=>innerWidth<=700||(innerHeight<=500&&innerWidth<=1000&&innerWidth>innerHeight);
+  const checks={
+    async main_tabs(out){
+      const ids=[...document.querySelectorAll(".sidebar nav button[role=tab]")].filter(b=>!b.hidden).map(b=>b.dataset.tab);
+      if(ids.length<10)bad(out,"few-tabs","nav",ids.length);
+      const tall=innerWidth>800?[]:[...document.querySelectorAll(".sidebar nav button[role=tab]")].filter(b=>b.getBoundingClientRect().height>90);      // the menu is a row there: a name broken letter by letter makes it tall
+      if(tall.length)bad(out,"menu-squeezed",tall[0].id,tall.length+" buttons, the first "+Math.round(tall[0].getBoundingClientRect().height)+"px high");
+      for(const id of ids){await tab(id);const e=$id("t-"+id);if(!e){bad(out,"no-tab",id);continue}
+        e.scrollIntoView({block:"start"});await wait(120);const h=seen(e);if(h<100)bad(out,"tab-without-height","t-"+id,h+"px");
+        if(document.documentElement.scrollWidth>document.documentElement.clientWidth+1)bad(out,"page-scrolls-sideways","t-"+id,document.documentElement.scrollWidth)}
+      await tab("now");
+    },
+    async header_fold(out){
+      await tab("now");const b=$id("tiles-fold"),tiles=$id("tiles1"),visible=e=>!!e&&e.getClientRects().length>0,root=document.documentElement;
+      if(!aPhone()){if(visible(b))bad(out,"fold-button-shown","#tiles-fold");if(!visible(tiles))bad(out,"figures-hidden","#tiles1");return}
+      if(!visible(b)){bad(out,"no-fold-button","#tiles-fold");return}
+      if(root.classList.contains("tiles-open"))b.click();
+      if(visible(tiles)||b.getAttribute("aria-expanded")!=="false")bad(out,"figures-not-folded","#tiles1");
+      const r=b.getBoundingClientRect();if(r.height<43.5||r.right>innerWidth+1)bad(out,"fold-button-size","#tiles-fold",Math.round(r.width)+"x"+Math.round(r.height));
+      if(b.scrollWidth>b.clientWidth+1)bad(out,"cut","#tiles-fold",b.scrollWidth+">"+b.clientWidth);
+      if(/\{|ui\./.test(b.textContent)||!/\d/.test(b.textContent))bad(out,"fold-text","#tiles-fold",b.textContent);
+      b.click();await wait(150);
+      if(!visible(tiles)||b.getAttribute("aria-expanded")!=="true"||localStorage.getItem("am-tiles-open")!=="1")bad(out,"figures-do-not-open","#tiles-fold",localStorage.getItem("am-tiles-open"));
+      b.click();await wait(150);
+      if(visible(tiles)||localStorage.getItem("am-tiles-open")!=="0")bad(out,"figures-do-not-close","#tiles-fold",localStorage.getItem("am-tiles-open"));
+      localStorage.removeItem("am-tiles-open");
+    },
+    async settings_list(out){
+      await sub("interface");const bar=$id("cfg-tabs"),panels=$id("cfg-panels"),buttons=[...bar.querySelectorAll("button")];
+      if(buttons.length<10){bad(out,"few-groups","#cfg-tabs",buttons.length);return}
+      panels.scrollIntoView({block:"start"});await wait(200);
+      const left=innerWidth>700&&!document.documentElement.classList.contains("compact"),b=bar.getBoundingClientRect(),p=panels.getBoundingClientRect();
+      if(bar.getAttribute("aria-orientation")!==(left?"vertical":"horizontal"))bad(out,"orientation","#cfg-tabs",bar.getAttribute("aria-orientation"));
+      if(!left){if(b.top>p.top)bad(out,"groups-not-above","#cfg-tabs");return}
+      if(b.right>p.left+1)bad(out,"groups-not-on-the-left","#cfg-tabs",Math.round(b.right)+">"+Math.round(p.left));
+      if(new Set(buttons.map(x=>Math.round(x.getBoundingClientRect().left))).size!==1)bad(out,"not-one-column","#cfg-tabs");
+      for(const x of buttons)if(x.scrollWidth>x.clientWidth+1)bad(out,"cut",x.id,x.scrollWidth+">"+x.clientWidth);
+      if(seen(panels)<100)bad(out,"panel-without-height","#cfg-panels",seen(panels)+"px");
+      const last=buttons[buttons.length-1];cfgShowTab(last.id.slice(4),true);await wait(250);
+      const l=last.getBoundingClientRect(),q=bar.getBoundingClientRect();
+      if(l.top<q.top-1||l.bottom>q.bottom+1)bad(out,"chosen-group-out-of-sight",last.id,Math.round(l.top)+" of "+Math.round(q.top)+".."+Math.round(q.bottom));
+      const shownPanel=document.getElementById("cfp-"+last.id.slice(4));if(!shownPanel||shownPanel.hidden)bad(out,"panel-not-shown",last.id);
+      cfgShowTab("interface");bar.scrollTop=0;
+    }
+  };
   window.__run=async function(step,phone){
     const out={step,found:[]};
     try{
       if(step!=="group")await until(()=>typeof TABS!=="undefined"&&typeof DATA!=="undefined"&&DATA&&window.FAM);
       document.querySelectorAll(".dlg:not([hidden])").forEach(d=>{const no=d.querySelector("#ask-no,#updn-later,.ib");if(no)no.click()});
       await wait(150);
+      if(checks[step]){await checks[step](out);return out}
       const region=await steps[step]();
       if(!region){out.missing=true;return out}
       region.scrollIntoView({block:"start"});await wait(350);
@@ -304,6 +361,16 @@ class Session:
         shutil.rmtree(self.profile, ignore_errors=True)
 
 
+async def _remembered(session, url):
+    """The figures opened on a phone are still open when the page is opened again."""
+    await session.open(url, "")
+    await session.evaluate("localStorage.removeItem('am-tiles-open');document.getElementById('tiles-fold').click();1")
+    await session.open(url, "")
+    kept = await session.evaluate("document.documentElement.classList.contains('tiles-open')&&document.getElementById('tiles1').getClientRects().length>0")
+    await session.evaluate("localStorage.removeItem('am-tiles-open');1")
+    return [] if kept else ["header_fold_remembered: the opened figures were folded again after reloading"]
+
+
 async def _run(browser, base, jobs, shots, quiet):
     summaries = json.loads((ROOT / "monitor" / "assets" / "release_summaries" / "2.2.0.json").read_text(encoding="utf-8"))
     results = {}
@@ -325,8 +392,13 @@ async def _run(browser, base, jobs, shots, quiet):
                     if name != GROUP and report.get("width") not in (None, width):
                         found.append(f"{name}: the window is {report.get('width')} px wide, not {width}")
                     results[(lang, size, name)] = found
+                    if name in PAGE_STEPS and shots:
+                        await session.evaluate(PICTURE[name])
+                        await asyncio.sleep(0.4)
                     if shots and not report.get("missing"):
                         await session.picture(Path(shots) / f"{name}_{lang}_{size}.png")
+            if lang == jobs[0][0] and (phone or size.startswith("land")):
+                results[(lang, size, "header_fold_remembered")] = await _remembered(session, f"{base}/?lang={lang}&theme={theme}&nowizard=1")
             if not quiet:
                 print(lang, size, sum(len(v) for k, v in results.items() if k[:2] == (lang, size)), "problems", flush=True)
     finally:
