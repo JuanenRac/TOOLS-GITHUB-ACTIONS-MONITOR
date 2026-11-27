@@ -3,7 +3,7 @@
 # GPL-3.0-or-later - see LICENSE
 """Checks that need a machine more than a test needs: a large database. Run by the workflow cross-cutting.yml; data is invented and everything lives in a temporary folder.
 
-  py -3 tools/env_checks.py sqlite [--events N]"""
+  py -3 tools/env_large_database.py sqlite [--events N]"""
 import argparse
 import sys
 import tempfile

@@ -10,7 +10,7 @@ on:
       - "monitor/tests/**"
       - "deploy/**"
       - "tools/cross_cutting.py"
-      - "tools/env_checks.py"
+      - "tools/env_large_database.py"
       - ".github/workflows/cross-cutting.yml"
   schedule:
     - cron: "17 5 * * 2"
@@ -56,7 +56,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Write, count and purge
-        run: python tools/env_checks.py sqlite --events 1500000
+        run: python tools/env_large_database.py sqlite --events 1500000
 
   systemd:
     name: The service unit on a real systemd
