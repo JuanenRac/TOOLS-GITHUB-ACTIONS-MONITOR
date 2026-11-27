@@ -65,6 +65,7 @@
 - **Outils par lots** : planifient et lancent plusieurs builds à la fois ; rien n'est lancé sans `--go`.
 - **À propos et Aide dans la page** : le bouton **i** montre la version, l'édition, les liens, les fichiers, l'état de santé et un bouton qui copie les informations pour le support ; le bouton **?** (ou la touche `?`) ouvre toute la documentation, avec recherche et dans votre langue, sans Internet. La console offre `--about` et `--help-topics`, et une application interactive de terminal par onglets (`textual` facultatif).
 - **Avis de nouvelle version** : un badge discret quand une version plus récente est publiée ; il ne lit la page publique des versions qu'une fois par jour, n'installe jamais rien et peut être désactivé (toujours désactivé sur une installation isolée).
+- **Releases signées et parties optionnelles pour les grandes installations** : chaque release porte une signature détachée que la mise à jour vérifie, et une fenêtre dit ce qu'apporte une nouvelle version ; extensions, coffres de secrets, sources de CI externes (lecture seule), contrôles de posture, vues de collaboration et de flotte, mode lecture seule strict, politique réseau et rapport de conformité sont désactivés tant que vous ne les activez pas.
 - **Quotas pour tout compte** : offre, minutes facturables (les dépôts publics ne coûtent rien), quota de l'API lu dans les en-têtes de GitHub, concurrence et jobs proches de la limite de 6 heures ; les chiffres sont dans un fichier modifiable.
 
 ## Ce qu'il fait gagner
@@ -85,7 +86,7 @@ Méthode, hypothèses et comment le mesurer dans votre propre usage: [`monitor/d
 
 | | |
 |---|---|
-| **Version** | **2.1.8** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **2.2.0** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Prérequis** | Python 3.11+ et la CLI GitHub (`gh auth login`) ; rien d'autre (la vue console utilise le paquet optionnel `rich`) |
 | **S'ouvre** | sur une page `127.0.0.1` uniquement, en huit langues |
 | **Écrit sur GitHub** | jamais seul : seulement les commandes par lots que vous lancez avec un `--go` explicite |
@@ -93,7 +94,7 @@ Méthode, hypothèses et comment le mesurer dans votre propre usage: [`monitor/d
 
 <!-- glance:begin -->
 
-**Mesuré aujourd'hui** (v2.1.8)
+**Mesuré aujourd'hui** (v2.2.0)
 
 | | |
 |---|---|

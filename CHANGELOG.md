@@ -10,6 +10,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+## [2.2.0]
+
 ### Added
 
 - **Keep a schedule alive before GitHub switches it off**: with `teamwork.keep_alive_days` (off) the scheduled workflows of a quiet public repository are proposed to be enabled again, with the days left. The static demo and the workflow check in the browser are now opened in a real browser by CI.

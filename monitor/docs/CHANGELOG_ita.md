@@ -9,6 +9,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+## [2.2.0]
+
 ### Aggiunto
 
 - **Tenere viva una pianificazione prima che GitHub la spenga**: con `teamwork.keep_alive_days` (disattivato) si propone di riattivare i workflow pianificati di un repository pubblico fermo, con i giorni rimasti. La demo statica e il controllo dei workflow nel browser ora vengono aperti dalla CI in un browser vero.
@@ -36,6 +38,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Modificato
 
+- **I gruppi delle Impostazioni sono un elenco a sinistra** del loro pannello invece di più righe di schede in alto, così il pannello ha più spazio (una finestra sotto i 701 pixel e la vista compatta li tengono in alto).
+- **Sul telefono le cifre dell'intestazione sono ripiegate** dietro un pulsante, in verticale e in orizzontale; il pulsante le apre e questo browser ricorda la scelta.
 - **L'aggiornatore autonomo pubblicato con una release contiene ora il registro delle migrazioni**, e SHA256SUMS lo nomina insieme allo zip e alle due distinte.
 
 ### Corretto
@@ -43,6 +47,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 - **Un ramo protetto da un ruleset non viene più dato per non protetto dopo un aggiornamento**: le tre letture della protezione inviano il loro ETag solo finché la risposta è conservata, e ciò che una versione precedente aveva giudicato viene riletto per intero. `security.branch_unprotected` poteva restare per sempre su un repository protetto.
 - **I rilievi di postura e gli avvisi seguono la lingua della pagina** (`?lang=` e il selettore della lingua), non quella della configurazione.
 - **Sul telefono il contenuto di ogni scheda è di nuovo visibile**: sotto un'intestazione alta la scheda aperta restava senza altezza e i riquadri non si raggiungevano scorrendo.
+- **Le schede si vedono su un telefono tenuto in orizzontale e nelle finestre basse**: da 701 pixel di larghezza l'intestazione prendeva tutta l'altezza e alla scheda aperta non ne restava; ora la pagina scorre fino a essa. Fino a 800 pixel di larghezza il menu resta su una riga che scorre di lato invece di spezzare i nomi lettera per lettera. Gli schermi a parete non cambiano.
 - **I riquadri delle parti facoltative mantengono tutta la loro altezza** su computer e schermi a parete invece di ridursi a poche righe, le loro tabelle non spezzano le parole, i pulsanti della vista compatta sono larghi almeno 44 px e i grafici grandi non scrivono più errori nella console del browser. Un workflow misura ogni riquadro in otto lingue, su telefono, computer e schermi a parete.
 - **Niente più falsi avvisi «impostazione sconosciuta» durante l'aggiornamento**: l'aggiornamento non segnala più come sconosciute le impostazioni presenti nella configurazione di esempio della versione di destinazione ma non descritte dalla pagina delle impostazioni.
 - I nomi dei passi conservati per workflow hanno un limite.

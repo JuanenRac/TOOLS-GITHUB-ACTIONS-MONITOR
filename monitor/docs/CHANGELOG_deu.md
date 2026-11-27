@@ -9,6 +9,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+## [2.2.0]
+
 ### Hinzugefügt
 
 - **Einen Zeitplan wachhalten, bevor GitHub ihn abschaltet**: mit `teamwork.keep_alive_days` (aus) wird vorgeschlagen, die geplanten Workflows eines ruhigen öffentlichen Repositorys erneut zu aktivieren, mit den verbleibenden Tagen. Die statische Demo und die Workflow-Prüfung im Browser öffnet die CI jetzt in einem echten Browser.
@@ -36,6 +38,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Geändert
 
+- **Die Gruppen der Einstellungen stehen als Liste links** in ihrem Bereich statt in mehreren Reiterzeilen darüber, so hat der Bereich mehr Platz (ein Fenster unter 701 Pixeln und die Kompaktansicht behalten sie oben).
+- **Auf dem Telefon sind die Zahlen der Kopfzeile eingeklappt**, hinter einem Knopf, hochkant und quer; er öffnet sie und dieser Browser merkt sich die Wahl.
 - **Der einzeln veröffentlichte Updater eines Releases enthält nun das Migrationsregister**, und SHA256SUMS nennt ihn zusammen mit dem Zip und den zwei Stücklisten.
 
 ### Behoben
@@ -43,6 +47,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 - **Ein durch ein Ruleset geschützter Branch gilt nach einer Aktualisierung nicht mehr als ungeschützt**: Die drei Abfragen des Schutzes senden ihr ETag nur, solange die Antwort noch vorliegt, und was eine ältere Version beurteilt hat, wird vollständig neu gelesen. `security.branch_unprotected` konnte bei einem geschützten Repository für immer stehen bleiben.
 - **Befunde der Sicherheitslage und Warnungen folgen der Sprache der Seite** (`?lang=` und die Sprachauswahl), nicht der der Konfiguration.
 - **Auf dem Telefon ist der Inhalt jedes Reiters wieder sichtbar**: Unter einem hohen Kopf blieb dem offenen Reiter keine Höhe, seine Felder waren durch Scrollen nicht erreichbar.
+- **Die Reiter sind auf einem quer gehaltenen Telefon und in niedrigen Fenstern sichtbar**: ab 701 Pixeln Breite nahm die Kopfzeile die ganze Höhe ein und der offene Reiter bekam keine; jetzt scrollt die Seite bis zu ihm. Bis 800 Pixel Breite bleibt das Menü eine seitlich scrollbare Zeile, statt die Namen Buchstabe für Buchstabe umzubrechen. Wandbildschirme sind unverändert.
 - **Die Kästen der optionalen Teile behalten ihre volle Höhe** auf Rechnern und Wandanzeigen, statt auf wenige Zeilen gedrückt zu werden, ihre Tabellen trennen keine Wörter, Schaltflächen der kompakten Ansicht sind mindestens 44 px breit, und die großen Diagramme schreiben keinen Fehler mehr in die Browserkonsole. Ein Workflow misst jeden Kasten in acht Sprachen auf Telefon, Rechner und Wandanzeigen.
 - **Keine falschen Warnungen "unbekannte Einstellung" mehr beim Aktualisieren**: Der Updater meldet Einstellungen nicht mehr als unbekannt, die in der Beispielkonfiguration der Zielversion stehen, aber nicht auf der Einstellungsseite beschrieben sind.
 - Die je Workflow gespeicherten Schrittnamen haben eine Obergrenze.

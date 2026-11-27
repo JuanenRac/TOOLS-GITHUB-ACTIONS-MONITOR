@@ -4,19 +4,23 @@ Was erschienen ist, was als Nächstes kommt und was nur eine Idee ist, in dieser
 
 ## Wo der Monitor jetzt steht
 
-Version 2.0.2. Die Lite-Ausgabe zeigt, was läuft und was fehlgeschlagen ist. Die vollständige Ausgabe fügt drei Wächter (CI, Collab und Security), eine Liste der Warnungen, mehrere Konten und ein Team mit Rollen, die Bewertung jedes Kontos, die Gesundheit jedes Repositorys und des Teams, geplante Berichte, ein Aktionsprotokoll, Benachrichtigungen (ntfy, Teams, E-Mail und Apprise), einen optionalen KI-Assistenten mit Voreinstellungen kompatibler Dienste, den Dienstmodus mit Docker und eine Seite für jede Bildschirmgröße vom Telefon bis 4K hinzu.
+Version 2.2.0. Die Lite-Ausgabe zeigt, was läuft und was fehlgeschlagen ist. Die vollständige Ausgabe fügt drei Wächter (CI, Collab und Security), eine Liste der Warnungen, mehrere Konten und ein Team mit Rollen, die Bewertung jedes Kontos, die Gesundheit jedes Repositorys und des Teams, geplante Berichte, ein Aktionsprotokoll, Benachrichtigungen (ntfy, Teams, E-Mail und Apprise), einen optionalen KI-Assistenten mit Voreinstellungen kompatibler Dienste, den Dienstmodus mit Docker und eine Seite für jede Bildschirmgröße vom Telefon bis 4K hinzu. Ab dieser Version sind die Releases signiert, und Plugins, externe CI-Quellen, Absicherungsprüfungen, Zusammenarbeits- und Flottenansichten, ein strikter Nur-Lese-Modus und ein Compliance-Bericht sind vorhanden, alles aus, bis Sie es einschalten.
 
 ## Geplant, in dieser Reihenfolge
 
 Jede Version enthält nur echten Inhalt: Eine Version ohne echten Inhalt wird übersprungen und nie leer veröffentlicht. Nichts davon gilt als an echten Diensten bewiesen, außer die Anleitung sagt es.
 
-### 2.0.2 bis 2.0.9 - Nach dem Einfrieren
+### 2.2.1 - Nur Korrekturen
 
-Was sich nur im langen echten Einsatz zeigt: die Migration von 1.8 und 1.9, das Wachstum der Ereignisse und der Datenbank über Monate, Sitzungen nach einem Upgrade, Docker-Volumes, viele Konten mit drei Wächtern und dem Teammodus zugleich und alles, was die Vertragssuite findet. Nichts aus der vierten Phase (Plugins, breite Automatisierung, fortgeschrittene KI) kommt in diese Versionen; eine Version ohne echten Inhalt wird übersprungen.
+Eine Korrekturversion nach einer Durchsicht der 2.2.0, ohne neue Funktion. Wogegen die neuen optionalen Teile noch nicht erprobt wurden (echte externe CI-Server, echte Organisationen, echte KI-Anbieter, Signatur und Bescheinigungen über mehrere Releases), wird hier und in den folgenden Versionen belegt oder korrigiert.
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 2.1.8
+## Erledigt in 1.8.2 bis 2.2.0
+
+### 2.2.0 - Signierte Releases, optionale Teile für größere Umgebungen und eine Seite, die besser aufs Telefon passt
+
+Version 2.2.0 bringt alles zusammen, was für 2.1.9 und 2.2.0 geplant war. Die Releases sind signiert und der Updater prüft die Signatur; ein Fenster meldet neue Versionen; jedes Release hat zwei Stücklisten und Bescheinigungen. Alles aus, bis Sie es einschalten: signierte Plugins und Geheimnisspeicher, KI-Vorschläge, über die Menschen entscheiden, externe CI-Quellen nur lesend, Absicherungsprüfungen, Zusammenarbeit mit bestätigten Aktionen, Flottenansichten und APIs, ein strikter Nur-Lese-Modus und eine Netzwerkrichtlinie, Compliance-Bericht, Aufbewahrung mit Sperre und ein signiertes Aktionsprotokoll. Ein Repository wird nach Quelle, Eigentümer und Name unterschieden, die Einstellungsgruppen stehen als Liste links und die Seite funktioniert wieder auf einem quer gehaltenen Telefon.
 
 ### 2.1.8 - Überprüfung von 2.1.7: ehrliche Wächter, funktionierende Freigaben von KI-Vorschlägen, strengerer Netzzugriff, Proxy-Tunnel und ein sichereres Release-Image
 
@@ -206,19 +210,18 @@ Isolationstests der Lite-Edition und der Demo, keinerlei Netzwerkanfrage, wenn d
 
 Was 1.6.4 nicht erreicht hat, und warum:
 
-- **Mehrere Eigentümer in einem Prozess und einer Seite**: Seit 1.7.0 ist jedes Konto ein eigener Monitor und die Seite zeigt sie nebeneinander, aber innerhalb eines Monitors wird ein Repository weiterhin nur über seinen Namen identifiziert, sodass zwei Eigentümer im selben Monitor sich vermischen würden. Sie in einen Prozess zu bringen, verlangt den Eigentümer in jedem Bezeichner (die Abfragen, die Alarm-Kennungen, die Listen der Einstellungen, die Wächter und die Seite); ohne Repositories zweier echter Eigentümer ließ es sich nicht belegen, daher bleiben die Konten von 1.7.0 der Weg, sie getrennt zu halten.
+- **Mehrere Eigentümer in einem Prozess und auf einer Seite**: seit 2.2.0 wird ein Repository nach Quelle, Eigentümer und Name erkannt, und `sources.multi_owner` (aus) lässt einen Monitor mehr als einen Eigentümer beobachten; mit Repositorys zweier echter Eigentümer ist das nicht belegt, daher bleiben die getrennten Konten der 1.7.0 der sichere Weg.
 - **Der Abrechnungsbericht mit einem Login, der ihn lesen darf**: Die echte Antwort für einen Login ohne den Scope `user` ist „nicht gefunden“, und der Monitor fällt auf die Schätzung zurück (geprüft); die Zahlen selbst wurden nicht mit einem Abrechnungskonto verglichen.
 - **Die Preise größerer Runner** in `quotas.json` stammen aus dem Gedächtnis der öffentlichen Preisliste und sind als ungeprüft markiert; vergleiche sie mit der Abrechnungsseite von GitHub und bearbeite die Datei.
 - **`gh copilot`**: Seine Optionen werden mit `gh copilot -- --help` geprüft, was die Copilot-Kommandozeile braucht; sie ist hier nicht installiert, die Optionen bleiben ungeprüft.
 - **Benachrichtigungen, Webhook, Enterprise Server und die Dienstbeispiele** gegen echte Dienste: `tools/manual_check_live.py` prüft sie von Hand; sie brauchen deine Kanäle und Hosts und wurden hier nicht ausgeführt.
 - **Die Terminal-Anwendung** bearbeitet die einfachen Einstellungen, Listen und Zahlen-Maps und zeigt den KI-Status; die Erklärung eines einzelnen roten Workflows bleibt auf der Seite.
 - **Nur der Eigentümer kann sie an einer echten Installation belegen**: mehrere Konten mit dem Collab-Wächter auf echten Repositories, eine GitHub App und ein zweites Nur-Lese-Konto mit echten Schlüsseln sowie der HTTPS-Proxy mit einem echten Zertifikat. Sie werden von Hand geprüft (`tools/manual_check_live.py`) und nicht als erledigt ausgegeben.
-- **Eine Prüfung auf neue Versionen, die herunterlädt oder installiert**: niemals; der Monitor sagt es nur.
+- **Eine neue Version, die sich selbst installiert**: niemals; der Monitor meldet sie und ein Mensch entscheidet.
 
 ## Später
 
 - **Hardware-Telemetrie der Runner** über einen Agenten: heute wird nur ein optionaler Node-Exporter-Endpunkt gelesen.
-- **Eine vierte Phase** (Plugins, breitere Automatisierung, fortgeschrittene KI) erst nach mehreren Wochen stabilem 2.0.x und einer ausdrücklichen Entscheidung.
 
 ## Ideen, die zuerst eine Entscheidung brauchen
 

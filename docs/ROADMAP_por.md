@@ -4,19 +4,23 @@ O que já foi publicado, o que vem a seguir e o que é apenas uma ideia, por ess
 
 ## Onde está o monitor agora
 
-Versão 2.0.2. A edição lite mostra o que corre e o que falhou. A edição completa acrescenta três sentinelas (CI, Collab e Security), uma lista de alertas, várias contas e uma equipa com funções, a pontuação de cada conta, a saúde de cada repositório e da equipa, relatórios agendados, um registo de ações, notificações (ntfy, Teams, correio eletrónico e Apprise), um assistente de IA opcional com predefinições de serviços compatíveis, o modo de serviço com Docker e uma página para todos os tamanhos de ecrã, do telemóvel ao 4K.
+Versão 2.2.0. A edição lite mostra o que corre e o que falhou. A edição completa acrescenta três sentinelas (CI, Collab e Security), uma lista de alertas, várias contas e uma equipa com funções, a pontuação de cada conta, a saúde de cada repositório e da equipa, relatórios agendados, um registo de ações, notificações (ntfy, Teams, correio eletrónico e Apprise), um assistente de IA opcional com predefinições de serviços compatíveis, o modo de serviço com Docker e uma página para todos os tamanhos de ecrã, do telemóvel ao 4K. A partir desta versão as releases são assinadas, e as extensões, as fontes de CI externas, as verificações de postura, as vistas de colaboração e de frota, um modo estrito só de leitura e um relatório de conformidade existem, todos desligados até os ligar.
 
 ## Previsto, por esta ordem
 
 Cada versão leva apenas conteúdo real: uma versão sem nada de real a acrescentar é saltada e nunca publicada vazia. Nada disto é dado como provado em serviços reais, salvo se o seu guia o disser.
 
-### 2.0.2 a 2.0.9 - Depois do congelamento
+### 2.2.1 - Apenas correções
 
-O que só aparece com uso real prolongado: a migração desde a 1.8 e a 1.9, o crescimento dos eventos e da base de dados ao longo de meses, as sessões após uma atualização, os volumes do Docker, muitas contas com três sentinelas e o modo equipa em simultâneo, e o que a bateria de contrato encontrar. Nada da quarta fase (plugins, automação alargada, IA avançada) entra nestas versões; uma versão sem conteúdo real é saltada.
+Uma versão de correções após uma revisão da 2.2.0, sem funções novas. Aquilo contra que as novas partes opcionais não foram experimentadas (servidores de CI externos reais, organizações reais, fornecedores de IA reais, assinatura e atestações ao longo de várias releases) demonstra-se ou corrige-se aqui e nas versões seguintes.
 
 Os workflows do próprio monitor cumprem o que a sentinela de higiene pedirá aos outros: ações fixadas a um commit, as permissões mínimas e um limite de tempo em cada job.
 
-## Feito da 1.8.2 à 2.1.8
+## Feito da 1.8.2 à 2.2.0
+
+### 2.2.0 - Releases assinadas, partes opcionais para instalações maiores e uma página que se adapta melhor ao telemóvel
+
+A versão 2.2.0 reúne tudo o que estava planeado para a 2.1.9 e a 2.2.0. As releases são assinadas e o atualizador verifica a assinatura; uma janela anuncia versões novas; cada release leva duas listas de materiais e atestações. Tudo desligado até o ligar: extensões assinadas e cofres de segredos, propostas da IA decididas por pessoas, fontes de CI externas só de leitura, verificações de postura, vistas de colaboração com ações confirmadas, vistas de frota e APIs, modo estrito só de leitura e política de rede, relatório de conformidade, retenção com retenção legal e um registo de ações assinado. Um repositório distingue-se por fonte, dono e nome, os grupos das Definições são uma lista à esquerda e a página volta a funcionar num telemóvel na horizontal.
 
 ### 2.1.8 - Revisão da 2.1.7: sentinelas honestas, aprovações de propostas da IA que funcionam, acesso de rede mais rigoroso, túnel de proxy e imagem de release mais segura
 
@@ -206,19 +210,18 @@ Testes de isolamento da edição lite e da demonstração, nenhum pedido de rede
 
 O que a 1.6.4 não alcançou, e porquê:
 
-- **Vários proprietários num processo e numa página**: desde a 1.7.0 cada conta é um monitor próprio e a página mostra-as lado a lado, mas dentro de um monitor um repositório continua a ser identificado só pelo nome, pelo que dois proprietários no mesmo monitor se misturariam. Trazê-los para um só processo exige o proprietário em cada identificador (as leituras, os identificadores de alerta, as listas das definições, as sentinelas e a página); não foi possível demonstrá-lo sem repositórios de dois proprietários reais, por isso as contas da 1.7.0 continuam a ser a forma de os manter separados.
+- **Vários donos num processo e numa página**: desde a 2.2.0 um repositório é identificado por fonte, dono e nome, e `sources.multi_owner` (desligado) permite que um monitor vigie mais do que um dono; não está demonstrado com repositórios de dois donos reais, por isso as contas separadas da 1.7.0 continuam a ser a via segura.
 - **O relatório de faturação com um login que o possa ler**: a resposta real de um login sem o âmbito `user` é «não encontrado» e o monitor volta à estimativa (verificado); os valores em si não foram comparados com uma conta de faturação.
 - **Os preços dos runners grandes** em `quotas.json` vêm da memória da tabela pública de preços e estão marcados como não verificados; compare-os com a página de faturação do GitHub e edite o ficheiro.
 - **`gh copilot`**: as suas opções verificam-se com `gh copilot -- --help`, que precisa da linha de comandos do Copilot; aqui não está instalada, por isso continuam por verificar.
 - **Notificações, webhook, Enterprise Server e exemplos de serviço** contra serviços reais: `tools/manual_check_live.py` verifica-os à mão; precisam dos seus canais e máquinas, por isso não foram executados aqui.
 - **A aplicação de terminal** edita as definições simples, as listas e os mapas de números e mostra o estado da IA; a explicação de um workflow vermelho concreto fica na página.
 - **Só o proprietário o pode demonstrar numa instalação real**: várias contas com a sentinela Collab em repositórios reais, uma GitHub App e uma segunda conta só de leitura com chaves reais, e o proxy HTTPS com um certificado real. Verificam-se à mão (`tools/manual_check_live.py`) e não se dão por feitos.
-- **Uma verificação de nova versão que descarregue ou instale**: nunca; o monitor apenas avisa.
+- **Uma versão nova que se instale sozinha**: nunca; o monitor avisa e uma pessoa decide atualizar.
 
 ## Mais adiante
 
 - **Telemetria de hardware dos runners** através de um agente: hoje só se lê um ponto de acesso opcional do node exporter.
-- **Uma quarta fase** (plugins, automatização mais ampla, IA avançada) só depois de várias semanas de 2.0.x estável e de uma decisão explícita.
 
 ## Ideias que precisam primeiro de uma decisão
 

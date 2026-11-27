@@ -65,6 +65,7 @@
 - **Herramientas por lotes**: planifican y lanzan muchas compilaciones a la vez; nada se lanza sin `--go`.
 - **Acerca de y Ayuda en la página**: el botón **i** muestra la versión, la edición, los enlaces, los archivos, el estado de salud y un botón que copia la información para soporte; el botón **?** (o la tecla `?`) abre toda la documentación, con búsqueda y en tu idioma, sin Internet. La consola tiene `--about` y `--help-topics`, y una aplicación interactiva de terminal por pestañas (`textual` opcional).
 - **Aviso de versión nueva**: una insignia discreta cuando se publica una versión más nueva; solo lee la página pública de versiones una vez al día, nunca instala nada y se puede apagar (siempre apagado en una instalación aislada).
+- **Releases firmadas y partes opcionales para instalaciones mayores**: cada release lleva una firma separada que comprueba el actualizador, y una ventana cuenta qué trae una versión nueva; complementos, almacenes de secretos, fuentes de CI externas (solo lectura), comprobaciones de postura, vistas de colaboración y de flota, un modo estricto de solo lectura, una política de red y un informe de cumplimiento están apagados hasta que los enciendas.
 - **Cuotas para cualquier cuenta**: plan, minutos facturables (los repositorios públicos no cuestan), cuota de la API leída de las cabeceras de GitHub, concurrencia y jobs cerca del límite de 6 horas; las cifras están en un archivo editable.
 
 ## Qué ahorra
@@ -85,7 +86,7 @@ Método, supuestos y cómo medirlo en tu propio uso: [`monitor/docs/PRODUCTIVITY
 
 | | |
 |---|---|
-| **Versión** | **2.1.8** · [todas las versiones](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versión** | **2.2.0** · [todas las versiones](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Necesita** | Python 3.11+ y la CLI de GitHub (`gh auth login`); nada más (la vista de consola usa el paquete opcional `rich`) |
 | **Se abre** | en una página de `127.0.0.1` solamente, en ocho idiomas |
 | **Escribe en GitHub** | nunca por sí solo: solo las órdenes por lotes que lances con un `--go` explícito |
@@ -93,7 +94,7 @@ Método, supuestos y cómo medirlo en tu propio uso: [`monitor/docs/PRODUCTIVITY
 
 <!-- glance:begin -->
 
-**Medido hoy** (v2.1.8)
+**Medido hoy** (v2.2.0)
 
 | | |
 |---|---|

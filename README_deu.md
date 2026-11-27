@@ -65,6 +65,7 @@
 - **Stapelwerkzeuge**: viele Builds auf einmal planen und starten; ohne `--go` wird nichts ausgelöst.
 - **Über und Hilfe in der Seite**: die **i**-Taste zeigt Version, Ausgabe, Links, Dateien, Zustand und eine Taste, die die Informationen für den Support kopiert; die **?**-Taste (oder die Taste `?`) öffnet die gesamte Dokumentation, durchsuchbar und in Ihrer Sprache, ohne Internet. Die Konsole kennt `--about` und `--help-topics` und eine interaktive Terminalanwendung mit Reitern (optional `textual`).
 - **Hinweis auf eine neuere Version**: ein dezentes Abzeichen, wenn eine neuere Version erscheint; es liest nur einmal am Tag die öffentliche Release-Seite, installiert nie etwas und lässt sich abschalten (bei netzgetrennter Installation immer aus).
+- **Signierte Releases und optionale Teile für größere Umgebungen**: ein Release trägt eine abgetrennte Signatur, die der Updater prüft, und ein Fenster sagt, was eine neue Version bringt; Plugins, Geheimnisspeicher, externe CI-Quellen (nur lesend), Absicherungsprüfungen, Zusammenarbeits- und Flottenansichten, ein strikter Nur-Lese-Modus, eine Netzwerkrichtlinie und ein Compliance-Bericht sind aus, bis Sie sie einschalten.
 - **Kontingente für jedes Konto**: Tarif, abrechenbare Minuten (öffentliche Repositorys kosten nichts), API-Kontingent aus den Headern von GitHub, Parallelität und Jobs nahe dem 6-Stunden-Limit; die Zahlen stehen in einer bearbeitbaren Datei.
 
 ## Was es spart
@@ -85,7 +86,7 @@ Methode, Annahmen und wie Sie es in Ihrer eigenen Nutzung messen: [`monitor/docs
 
 | | |
 |---|---|
-| **Version** | **2.1.8** · [alle Releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **2.2.0** · [alle Releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Voraussetzung** | Python 3.11+ und die GitHub-CLI (`gh auth login`); sonst nichts (die Konsolenansicht nutzt das optionale Paket `rich`) |
 | **Öffnet** | eine Seite nur auf `127.0.0.1`, in acht Sprachen |
 | **Schreibt auf GitHub** | nie von selbst: nur Stapelbefehle, die du mit ausdrücklichem `--go` startest |
@@ -93,7 +94,7 @@ Methode, Annahmen und wie Sie es in Ihrer eigenen Nutzung messen: [`monitor/docs
 
 <!-- glance:begin -->
 
-**Heute gemessen** (v2.1.8)
+**Heute gemessen** (v2.2.0)
 
 | | |
 |---|---|

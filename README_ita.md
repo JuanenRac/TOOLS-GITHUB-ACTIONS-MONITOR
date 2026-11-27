@@ -65,6 +65,7 @@
 - **Strumenti a lotti**: pianificano e avviano molte build insieme; nulla parte senza `--go`.
 - **Informazioni e Guida nella pagina**: il pulsante **i** mostra versione, edizione, collegamenti, file, stato di salute e un pulsante che copia le informazioni per l'assistenza; il pulsante **?** (o il tasto `?`) apre tutta la documentazione, con ricerca e nella tua lingua, senza Internet. La console ha `--about` e `--help-topics`, e un'applicazione interattiva da terminale a schede (`textual` opzionale).
 - **Avviso di nuova versione**: un badge discreto quando esce una versione più recente; legge la pagina pubblica dei rilasci una volta al giorno, non installa mai nulla e si può spegnere (sempre spento in un'installazione isolata).
+- **Release firmate e parti facoltative per installazioni più grandi**: ogni release porta una firma separata che l'aggiornamento controlla, e una finestra dice cosa porta una versione nuova; plugin, depositi di segreti, fonti di CI esterne (sola lettura), controlli di postura, viste di collaborazione e di flotta, sola lettura rigorosa, criterio di rete e rapporto di conformità restano spenti finché non li si accende.
 - **Quote per ogni account**: piano, minuti fatturabili (i repository pubblici non costano), quota dell'API letta dalle intestazioni di GitHub, concorrenza e job vicini al limite di 6 ore; le cifre stanno in un file modificabile.
 
 ## Cosa fa risparmiare
@@ -85,7 +86,7 @@ Metodo, ipotesi e come misurarlo nel proprio uso: [`monitor/docs/PRODUCTIVITY_it
 
 | | |
 |---|---|
-| **Versione** | **2.1.8** · [tutte le release](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versione** | **2.2.0** · [tutte le release](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Richiede** | Python 3.11+ e la CLI di GitHub (`gh auth login`); nient'altro (la vista console usa il pacchetto facoltativo `rich`) |
 | **Si apre** | su una pagina di `127.0.0.1` soltanto, in otto lingue |
 | **Scrive su GitHub** | mai da solo: solo i comandi a lotti che avvii con un `--go` esplicito |
@@ -93,7 +94,7 @@ Metodo, ipotesi e come misurarlo nel proprio uso: [`monitor/docs/PRODUCTIVITY_it
 
 <!-- glance:begin -->
 
-**Misurato oggi** (v2.1.8)
+**Misurato oggi** (v2.2.0)
 
 | | |
 |---|---|

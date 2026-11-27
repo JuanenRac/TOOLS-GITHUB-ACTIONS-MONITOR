@@ -65,6 +65,7 @@
 - **Batch tools**: plan and dispatch many builds at once; nothing is fired without `--go`.
 - **About and Help in the page**: the **i** button shows the version, the edition, the links, the files, the health and a button that copies the information for support; the **?** button (or the key `?`) opens the whole documentation, searchable and in your language, with no Internet. The console has `--about` and `--help-topics`, and a tab-by-tab interactive terminal application (optional `textual`).
 - **Notice of a newer version**: a discreet badge when a newer release is published; it only reads the public releases page once a day, never installs anything and can be switched off (always off when air-gapped).
+- **Signed releases and optional parts for larger setups**: a release carries a detached signature that the updater checks, and a window tells what a newer version brings; plugins, secret stores, external CI sources (read only), posture checks, collaboration and fleet views, a strict read-only mode, a network policy and a compliance report are all off until you switch them on.
 - **Quotas for every account**: plan, billable minutes (public repositories cost none), allowance of the API read from GitHub's headers, concurrency and jobs near the 6-hour limit; the figures are in an editable file.
 
 ## What it saves
@@ -85,7 +86,7 @@ Method, assumptions and how to measure it in your own use: [`monitor/docs/PRODUC
 
 | | |
 |---|---|
-| **Version** | **2.1.8** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **2.2.0** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Needs** | Python 3.11+ and the GitHub CLI (`gh auth login`); nothing else (the terminal view uses the optional package `rich`) |
 | **Opens** | a page on `127.0.0.1` only, in eight languages |
 | **Writes to GitHub** | never by itself: only batch commands you run with an explicit `--go` |
@@ -93,7 +94,7 @@ Method, assumptions and how to measure it in your own use: [`monitor/docs/PRODUC
 
 <!-- glance:begin -->
 
-**Measured today** (v2.1.8)
+**Measured today** (v2.2.0)
 
 | | |
 |---|---|

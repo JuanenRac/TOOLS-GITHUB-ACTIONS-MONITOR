@@ -65,6 +65,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 - **Ferramentas por lotes**: planeiam e lançam várias compilações de uma vez; nada é lançado sem `--go`.
 - **Acerca de e Ajuda na página**: o botão **i** mostra a versão, a edição, as ligações, os ficheiros, o estado de saúde e um botão que copia a informação para o suporte; o botão **?** (ou a tecla `?`) abre toda a documentação, com pesquisa e no seu idioma, sem Internet. A consola tem `--about` e `--help-topics`, e uma aplicação interativa de terminal por separadores (`textual` opcional).
 - **Aviso de versão nova**: um emblema discreto quando sai uma versão mais recente; só lê a página pública de versões uma vez por dia, nunca instala nada e pode ser desligado (sempre desligado numa instalação isolada).
+- **Releases assinadas e partes opcionais para instalações maiores**: cada release leva uma assinatura separada que o atualizador verifica, e uma janela diz o que traz uma versão nova; extensões, cofres de segredos, fontes de CI externas (só de leitura), verificações de postura, vistas de colaboração e de frota, um modo estrito só de leitura, uma política de rede e um relatório de conformidade estão desligados até os ligar.
 - **Quotas para qualquer conta**: plano, minutos faturáveis (os repositórios públicos não custam), quota da API lida dos cabeçalhos do GitHub, concorrência e jobs perto do limite de 6 horas; os valores estão num ficheiro editável.
 
 ## O que poupa
@@ -85,7 +86,7 @@ Método, pressupostos e como medi-lo na sua própria utilização: [`monitor/doc
 
 | | |
 |---|---|
-| **Versão** | **2.1.8** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versão** | **2.2.0** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Requisitos** | Python 3.11+ e a CLI do GitHub (`gh auth login`); mais nada (a vista de consola usa o pacote opcional `rich`) |
 | **Abre** | uma página só em `127.0.0.1`, em oito idiomas |
 | **Escreve no GitHub** | nunca sozinho: apenas os comandos por lotes que lançar com um `--go` explícito |
@@ -93,7 +94,7 @@ Método, pressupostos e como medi-lo na sua própria utilização: [`monitor/doc
 
 <!-- glance:begin -->
 
-**Medido hoje** (v2.1.8)
+**Medido hoje** (v2.2.0)
 
 | | |
 |---|---|
