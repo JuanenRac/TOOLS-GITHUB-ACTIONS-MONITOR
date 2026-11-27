@@ -35,7 +35,7 @@ LANGS = co.LANGS
 SIZES = {"phone": (360, 780), "desktop": (1400, 900), "wall": (1920, 1080), "wall4k": (3840, 2160)}
 GROUP = "group"
 STEPS = ("extensions", "extensions_install", "proposals", "chat", "repo_report", "collaboration", "environment", "environment_confirm", "roles_groups", "posture", "compliance",
-         "external_ci", "external_ci_test", "update_notice")
+         "external_ci", "external_ci_test", "external_ci_about", "update_notice")
 
 #: before any script of the page: it records the errors and answers, with invented data, what would write or needs a model or another server
 HEAD = r"""
@@ -148,6 +148,7 @@ LIB = r"""
       const log=button(box,"ui.extci.log");if(log){log.click();await until(()=>box.querySelector(".extci-log").textContent)}return box},
     async external_ci_test(){await sub("extci");const box=await until(()=>$id("extci-test"));if(!box)return null;
       box.querySelector("input").value="gitlab;repo=demo-alpha-app;url=https://gitlab.example.org;project=demo-group/alpha";box.querySelector("button").click();await until(()=>box.querySelector("[role=status]").textContent.length>4);return box},
+    async external_ci_about(){await tab("now");openAbout();return until(()=>$id("extci-about")&&$id("extci-about").querySelector("li")&&$id("extci-about"))},
     async update_notice(){await tab("now");if(!window.supplyNotice)return null;
       window.supplyNotice.show({version:"9.9.9",current:"2.2.0",notes:window.__notes||"",changelog:"https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/blob/main/monitor/CHANGELOG.md"});return until(dialog)},
     async group(){return until(()=>document.querySelector("#list li")&&document.body)}
