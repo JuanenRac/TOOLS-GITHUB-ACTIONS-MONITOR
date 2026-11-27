@@ -22,6 +22,8 @@
 
 哨兵一次 tick 的调用(`sentinel.max_calls_per_tick`)对其所有阶段是同一个计数;读取连续失败三次的仓库会被搁置 30 秒(翻倍,最多 10 分钟),期间读取其他仓库。
 
+机群标签页还有一个按[工作流角色和分组的可选区块，每个分组都有自己的屏幕](FLEET_APIS_zho.md)。
+
 ## 读取队列、限制和一次读取供大家共用
 
 - **背压**（`backpressure.enabled`，默认关闭）：一个周期的读取经过一个有界队列（先是有红色工作流的仓库，然后是热点仓库、从未读取的仓库和最久未读取的）。`backpressure.max_reads_per_cycle` 设置固定数量（0 = 无）；当一个周期超过周期间隔的 `backpressure.shed_percent` 百分比时，允许的读取数减半（不低于 `backpressure.min_reads`），每个较快的周期之后恢复十分之一。等待的仓库保留最后的画面，并在下一个周期最先读取。`/metrics` 显示 `ghamon_read_queue_*`。

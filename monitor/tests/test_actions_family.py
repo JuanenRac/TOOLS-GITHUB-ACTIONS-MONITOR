@@ -175,5 +175,33 @@ class Declared(unittest.TestCase):
         json.dumps(engine.report({}))
 
 
+class KeepAlive(unittest.TestCase):
+    """A quiet public repository with scheduled runs: the enable of each scheduled workflow is PROPOSED before GitHub switches it off. Off by default."""
+
+    def answers(self, private=False, pushed="2026-11-20T00:00:00Z"):
+        return {"repos/me/app": {"private": private, "pushed_at": pushed},
+                "repos/me/app/pulls": [], "repos/me/app/dependabot/alerts": [],
+                "repos/me/app/actions/runs": {"workflow_runs": [{"workflow_id": 7}]},
+                "repos/me/app/actions/workflows": {"workflows": [{"id": 7, "name": "Nightly", "state": "active"}, {"id": 8, "name": "CI", "state": "active"}]}}
+
+    def read(self, days, **kind):
+        cfg = engine.settings({"teamwork": {"enabled": True, "keep_alive_days": days}})
+        return engine.read_repo(get_from(self.answers(**kind)), "me", "app", cfg, NOW), cfg
+
+    def test_only_the_scheduled_workflow_of_a_quiet_public_repository_is_proposed(self):
+        out, cfg = self.read(45)
+        quiet = int((NOW - views.epoch("2026-11-20T00:00:00Z")) // 86400)
+        self.assertEqual(out["ageing"], [{"repo": "app", "id": 7, "name": "Nightly", "quiet_days": quiet, "days_left": max(0, 60 - quiet)}])
+        found = views.proposals([], [], [], [], cfg, NOW, out["ageing"])
+        self.assertEqual([(p["action"], p["number"], p["why"]) for p in found], [("enable_workflow", 7, "keep_alive")])
+
+    def test_private_recent_or_off_proposes_nothing(self):
+        for days, kind in ((45, {"private": True}), (45, {"pushed": RECENT}), (0, {})):
+            self.assertEqual(self.read(days, **kind)[0]["ageing"], [], (days, kind))
+
+    def test_it_is_off_by_default(self):
+        self.assertEqual(family.FAMILY.defaults["teamwork"]["keep_alive_days"], 0)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -11,6 +11,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Añadido
 
+- **Mantener viva una programación antes de que GitHub la apague**: con `teamwork.keep_alive_days` (apagado) se propone volver a activar los workflows programados de un repositorio público sin actividad, con los días que quedan. La demo estática y la comprobación de workflows en el navegador ahora las abre el CI en un navegador real.
 - **Modo de solo lectura estricto y política de red** (`security.read_only_strict`, `security.egress_policy`, apagados): se aplican por debajo de todas las partes; una orden o conexión rechazada falla nombrando el ajuste, y el doctor lista los destinos fuera de la política.
 - **Informe de cumplimiento** (`compliance report`, `/api/compliance/report`, una caja en la pestaña Seguridad): cada línea comprobada o solo declarada.
 - **Retención de cada categoría y retención legal**, **puntos de control firmados y purga del registro de acciones** (`audit verify|checkpoint|purge`) y **exportación de ese registro** a fichero, syslog sobre TLS o HTTP; todo apagado de fábrica.

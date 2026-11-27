@@ -22,6 +22,7 @@
  "ui.actions.why_stuck": "Läuft zu lange:",
  "ui.actions.why_policy": "Verstößt gegen die Abbruchregel:",
  "ui.actions.why_inactive_workflow": "Wegen Inaktivität abgeschaltet:",
+ "ui.actions.why_keep_alive": "Ruhiges Repository, verbleibende Tage, bis GitHub den Zeitplan abschaltet:",
  "ui.actions.waiting_person": "Wartet auf eine Person",
  "ui.actions.waiting_machine": "Wartet auf einen Runner",
  "ui.actions.kind_environment": "Umgebungsfreigabe",
@@ -91,6 +92,8 @@
  "cfg.h.teamwork.forks_help": "Vor der Freigabe: Kontoalter, hier gemergte Änderungen und berührte Workflow-Dateien. Einige Abfragen mehr je Anfrage.",
  "cfg.f.teamwork.inactive_workflows": "Wegen Inaktivität abgeschaltete Workflows finden",
  "cfg.h.teamwork.inactive_workflows": "Schlägt vor, sie wieder einzuschalten.",
+ "cfg.f.teamwork.keep_alive_days": "Ruhige Tage, bevor das Wachhalten eines Zeitplans vorgeschlagen wird",
+ "cfg.h.teamwork.keep_alive_days": "In einem öffentlichen Repository ohne Push seit so vielen Tagen wird vorgeschlagen, die geplanten Workflows erneut zu aktivieren, bevor GitHub sie nach 60 Tagen abschaltet (GitHub dokumentiert nicht, dass dies die Zählung neu startet; ein neuer Commit tut es). 0 = aus.",
  "cfg.f.teamwork.runner_hooks": "Ereignisse eigener Runner-Hooks annehmen",
  "cfg.h.teamwork.runner_hooks": "Der Befehl runner-hook, vom Hook auf diesem Rechner ausgeführt, hält Start und Ende fest."
 }

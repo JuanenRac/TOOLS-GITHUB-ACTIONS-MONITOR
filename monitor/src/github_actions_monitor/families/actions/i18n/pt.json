@@ -22,6 +22,7 @@
  "ui.actions.why_stuck": "Em execução há demasiado:",
  "ui.actions.why_policy": "Viola a política de cancelamento:",
  "ui.actions.why_inactive_workflow": "Desativado por inatividade:",
+ "ui.actions.why_keep_alive": "Repositório parado, dias que faltam até o GitHub desligar o agendamento:",
  "ui.actions.waiting_person": "À espera de uma pessoa",
  "ui.actions.waiting_machine": "À espera de um executor",
  "ui.actions.kind_environment": "Aprovação de ambiente",
@@ -91,6 +92,8 @@
  "cfg.h.teamwork.forks_help": "Antes de aprovar: idade da conta, alterações integradas aqui e ficheiros de workflow tocados. Algumas leituras a mais por pedido.",
  "cfg.f.teamwork.inactive_workflows": "Encontrar workflows desativados por inatividade",
  "cfg.h.teamwork.inactive_workflows": "Propõe voltar a ativá-los.",
+ "cfg.f.teamwork.keep_alive_days": "Dias sem atividade antes de propor manter vivo um agendamento",
+ "cfg.h.teamwork.keep_alive_days": "Num repositório público sem nenhum push durante estes dias, propõe voltar a ativar os workflows agendados antes de o GitHub os desligar aos 60 dias (o GitHub não documenta que isto reinicie a contagem; um novo commit sim). 0 = desligado.",
  "cfg.f.teamwork.runner_hooks": "Aceitar eventos dos hooks de executores próprios",
  "cfg.h.teamwork.runner_hooks": "O comando runner-hook, executado pelo hook neste computador, regista início e fim."
 }

@@ -9,6 +9,8 @@
 
 O terceiro sentinela, ao lado do da CI e do Collab. Lê, sem escrever nada no GitHub, o que o próprio GitHub diz estar aberto ou em falta na segurança de cada repositório, e transforma-o em alertas do separador de Alertas (origem Segurança). Existe na edição Complete, desligado por predefinição (`sentinels.security.enabled`); o Lite não tem sentinelas.
 
+O mesmo separador tem uma caixa opcional com a [postura dos repositórios e da organização face a OWASP e CIS](POSTURE_por.md).
+
 ## O que lê e o que assinala
 
 | Sinal | Alerta | Nível | Ativo por predefinição |

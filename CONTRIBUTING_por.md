@@ -28,3 +28,15 @@
 - **Teste de fumo das fontes externas**: o workflow `sources-smoke.yml` (semanal) executa `tools/smoke_sources.py` contra a página de estado real, os avisos de segurança, a descrição da API REST e a última versão, e falha quando uma mudou de formato.
 - **Limites**: `tools/limits_check.py` executa o monitor com uma conta de 120 workflows num contentor de um processador e 512 MB.
 - **Ordem da versão**: crie a release do GitHub como RASCUNHO e envie a etiqueta `vX.Y.Z`; `release-image.yml` constrói e publica a imagem e só publica o rascunho quando ela responde pela sua etiqueta nas duas plataformas. A ferramenta que a publica cria a release como RASCUNHO, envia `github_actions_monitor.zip`, `SHA256SUMS` e `monitor_updater.py`, verifica que estão todos e só então publica (as releases imutáveis não aceitam ficheiros depois); com a imagem primeiro, envia a etiqueta e `release-image.yml` publica o rascunho.
+
+## Trabalhar com um assistente de IA
+
+Uma alteração escrita com um assistente de IA segue as mesmas regras, e quem a envia responde por ela: leia cada linha, execute os testes e nunca cole no assistente um token, um registo com nomes privados ou o conteúdo de `actions_monitor.json`. As duas skills que acompanham o monitor (`monitor/skills/external/SKILL.md` para uma ferramenta que fala com um monitor em funcionamento, `monitor/skills/internal/SKILL.md` para a IA integrada) fazem parte do produto: uma definição, rota ou comando novos atualizam-nas (`python tools/make_skill_refs.py`). Para que serve o produto e o que nunca deve fazer está em `PRODUCT_por.md`.
+
+## macOS: a marca de quarentena
+
+Os ficheiros não estão assinados com um certificado da Apple. Um zip transferido com um navegador leva a marca de quarentena e o macOS pode recusar abrir os lançadores `.command`. Verifique primeiro a versão (ver `monitor/docs/UPDATE_por.md`) e depois retire a marca da pasta descompactada. O macOS não é testado de momento.
+
+```sh
+xattr -dr com.apple.quarantine /path/to/github_actions_monitor
+```

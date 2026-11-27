@@ -25,6 +25,10 @@ No se escribe nada salvo que `github_actions.enabled` esté activado, la acción
 
 `teamwork.auto_rerun` (apagado) relanza una vez los trabajos fallidos de una ejecución que no arrancó o agotó el tiempo, con las mismas comprobaciones (no hace nada con las acciones apagadas o sin `rerun_failed` permitido). Nunca lo intenta dos veces; si vuelve a fallar se genera una alerta.
 
+## Mantener viva una programación
+
+GitHub apaga los workflows programados de un repositorio público tras 60 días sin actividad. Con `teamwork.keep_alive_days` (0 = apagado; por ejemplo 45), un repositorio público sin ningún push durante ese tiempo y con workflows que se han ejecutado por programación aparece entre las propuestas como `enable_workflow`, con los días que quedan. Es una propuesta como las demás: no se envía nada hasta que la confirmas. GitHub no documenta que activar un workflow ya activo reinicie su cuenta, y esto no se ha probado en un repositorio real: lo seguro es un commit nuevo.
+
 ## Hooks de ejecutores propios
 
 Con `teamwork.runner_hooks`, un hook de un ejecutor de este equipo anota el inicio y el fin de cada trabajo:
@@ -53,4 +57,4 @@ Las lecturas y escrituras solo se han probado con respuestas inventadas; ninguna
 
 ## Todos los ajustes
 
-`teamwork.enabled` `teamwork.repos_per_cycle` `teamwork.refresh_hours` `teamwork.dismiss_days` `teamwork.hide_workflows` `teamwork.bot_authors` `teamwork.bot_branches` `teamwork.bot_labels` `teamwork.dismissed_alerts` `teamwork.dismiss_allowed` `teamwork.auto_rerun` `teamwork.cancel_policy` `teamwork.queued_hours` `teamwork.stuck_hours` `teamwork.forks_help` `teamwork.inactive_workflows` `teamwork.runner_hooks`
+`teamwork.enabled` `teamwork.repos_per_cycle` `teamwork.refresh_hours` `teamwork.dismiss_days` `teamwork.hide_workflows` `teamwork.bot_authors` `teamwork.bot_branches` `teamwork.bot_labels` `teamwork.dismissed_alerts` `teamwork.dismiss_allowed` `teamwork.auto_rerun` `teamwork.cancel_policy` `teamwork.queued_hours` `teamwork.stuck_hours` `teamwork.forks_help` `teamwork.inactive_workflows` `teamwork.keep_alive_days` `teamwork.runner_hooks`

@@ -22,6 +22,8 @@ O acompanhamento dos originais dos forks (`upstream.enabled`) diz no seu painel 
 
 As chamadas de um tick do Sentinela (`sentinel.max_calls_per_tick`) são uma única contagem para todas as suas fases, e um repositório cujas leituras falham três vezes seguidas é deixado em paz 30 segundos, duplicando até 10 minutos, enquanto se leem os outros.
 
+O separador Frota tem ainda uma caixa opcional por [função do workflow e grupo, com um ecrã para cada grupo](FLEET_APIS_por.md).
+
 ## Fila de leituras, limites e uma leitura para todos
 
 - **Contrapressão** (`backpressure.enabled`, desligada por predefinição): as leituras de um ciclo passam por uma fila limitada (primeiro os repositórios com um workflow vermelho, depois os quentes, os nunca lidos e os lidos há mais tempo). `backpressure.max_reads_per_cycle` fixa um número (0 = nenhum); quando um ciclo dura mais de `backpressure.shed_percent` por cento da pausa entre ciclos, o número permitido reduz-se para metade (nunca abaixo de `backpressure.min_reads`) e volta a crescer um décimo após cada ciclo rápido. O que espera mantém a sua última imagem e vai primeiro no ciclo seguinte. `/metrics` mostra `ghamon_read_queue_*`.

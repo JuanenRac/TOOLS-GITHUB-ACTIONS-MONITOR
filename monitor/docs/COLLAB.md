@@ -9,6 +9,8 @@
 
 A second sentinel next to the CI one. It looks at the **open issues and pull requests** of your repositories and tells you what needs a person: forgotten issues, critical labels, reviews that nobody does, drafts that never end, conflicts that stay. It runs on a clock of its own, never changes what the CI sentinel decides, and **never writes to GitHub**. It belongs to the complete edition; the lite edition does not load it.
 
+The Collaboration tab and the Alerts tab also carry optional boxes with their own guides: [collaboration views and actions](COLLABORATION.md) and [proposals, chat and report of a repository](ASSISTANT.md).
+
 ## Switch it on
 
 It is off by default. Settings > Sentinel > Issues and pull requests, or in `actions_monitor.json`:

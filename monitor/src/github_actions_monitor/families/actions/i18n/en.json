@@ -22,6 +22,7 @@
  "ui.actions.why_stuck": "Running too long:",
  "ui.actions.why_policy": "Breaks the cancel policy:",
  "ui.actions.why_inactive_workflow": "Switched off for inactivity:",
+ "ui.actions.why_keep_alive": "Quiet repository, days left before GitHub switches the schedule off:",
  "ui.actions.waiting_person": "Waiting for a person",
  "ui.actions.waiting_machine": "Waiting for a runner",
  "ui.actions.kind_environment": "Environment approval",
@@ -91,6 +92,8 @@
  "cfg.h.teamwork.forks_help": "Before approving: age of the account, merged changes here and workflow files touched. A few extra reads each time you ask.",
  "cfg.f.teamwork.inactive_workflows": "Find workflows switched off for inactivity",
  "cfg.h.teamwork.inactive_workflows": "Proposes to enable them again.",
+ "cfg.f.teamwork.keep_alive_days": "Quiet days before proposing to keep a schedule alive",
+ "cfg.h.teamwork.keep_alive_days": "In a public repository with no push for this many days, proposes enabling its scheduled workflows again before GitHub switches them off at 60 days (GitHub does not document that this restarts its count; a new commit does). 0 = off.",
  "cfg.f.teamwork.runner_hooks": "Accept events of self-hosted runner hooks",
  "cfg.h.teamwork.runner_hooks": "The command runner-hook, run by the hook on this computer, records job start and end."
 }

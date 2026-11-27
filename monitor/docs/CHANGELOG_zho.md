@@ -11,6 +11,7 @@
 
 ### 新增
 
+- **在 GitHub 关闭之前保持定时任务**：启用 `teamwork.keep_alive_days`（默认关闭）后，会建议重新启用长期无活动的公开仓库中的定时工作流，并显示剩余天数。静态演示和浏览器中的工作流检查现在由 CI 在真实浏览器中打开验证。
 - **严格只读模式与网络策略** (`security.read_only_strict`、`security.egress_policy`, 均关闭): 在所有部件之下强制执行; 被拒绝的命令或连接会指明设置项而失败, doctor 列出超出策略的目标。
 - **合规报告** (`compliance report`、`/api/compliance/report`、安全标签页中的方框): 每行标明已检查或仅声明。
 - **各类别的保留与法律保留**、**操作日志的签名检查点与清除** (`audit verify|checkpoint|purge`) 以及**该日志的导出** (文件、基于 TLS 的 syslog 或 HTTP); 默认全部关闭。

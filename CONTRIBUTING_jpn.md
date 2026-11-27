@@ -28,3 +28,15 @@
 - **外部ソースのスモークテスト**：週次のワークフロー `sources-smoke.yml` が `tools/smoke_sources.py` で本物のステータスページ、アドバイザリ、REST API の記述、最新リリースを読み、形式が変わると失敗します。
 - **制限**：`tools/limits_check.py` は 1 プロセッサ・512 MB のコンテナーで 120 ワークフローのアカウントを使ってモニターを動かします。
 - **リリースの順序**：GitHub のリリースを下書きとして作り、タグ `vX.Y.Z` をプッシュします。`release-image.yml` がイメージをビルドして公開し、両方のプラットフォームでタグ指定で応答したときだけ下書きを公開します。 公開用のツールは、リリースを下書きとして作り、`github_actions_monitor.zip`、`SHA256SUMS`、`monitor_updater.py` をアップロードし、すべてあることを確認してから公開します（不変リリースは公開後にファイルを受け付けません）。イメージ優先の場合はタグをプッシュし、`release-image.yml` が下書きを公開します。
+
+## AI アシスタントを使うとき
+
+AI アシスタントで書いた変更にも同じ規則が適用され、送った人が責任を持ちます。すべての行を読み、テストを実行し、トークン、非公開の名前を含むログ、`actions_monitor.json` の内容をアシスタントに貼り付けないでください。モニターに同梱される 2 つのスキル（実行中のモニターと話すツール向けの `monitor/skills/external/SKILL.md` と、内蔵 AI 向けの `monitor/skills/internal/SKILL.md`）は製品の一部です。新しい設定、ルート、コマンドを加えたら更新します（`python tools/make_skill_refs.py`）。製品の目的と、してはならないことは `PRODUCT_jpn.md` にあります。
+
+## macOS：隔離属性
+
+ファイルは Apple の証明書で署名されていません。ブラウザーでダウンロードした zip には隔離属性が付き、macOS が `.command` の起動ファイルを開かないことがあります。先にリリースを確認し（`monitor/docs/UPDATE_jpn.md` を参照）、展開したフォルダーから属性を外してください。現在 macOS はテストしていません。
+
+```sh
+xattr -dr com.apple.quarantine /path/to/github_actions_monitor
+```

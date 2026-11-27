@@ -25,6 +25,10 @@
 
 `teamwork.auto_rerun`（默认关闭）会在同样的检查下，将未能启动或超时运行的失败任务重跑一次。绝不重试第二次；若再次失败则触发告警。
 
+## 保持定时任务
+
+公开仓库连续 60 天没有活动时，GitHub 会关闭其定时工作流。设置 `teamwork.keep_alive_days`（0 = 关闭；例如 45）后，这段时间内没有 push 且有按定时运行过的工作流的公开仓库，会以 `enable_workflow` 出现在建议中，并显示剩余天数。它和其他建议一样：在你确认之前不会发送任何内容。GitHub 没有说明启用一个已启用的工作流会重新计时，这一点也没有在真实仓库上试过：可靠的办法是提交一次新的 commit。
+
 ## 自托管运行器钩子
 
 开启 `teamwork.runner_hooks` 后，本机运行器的钩子记录任务开始与结束：
@@ -53,4 +57,4 @@ python bin/monitor_cli.py runner-hook completed
 
 ## 全部设置
 
-`teamwork.enabled` `teamwork.repos_per_cycle` `teamwork.refresh_hours` `teamwork.dismiss_days` `teamwork.hide_workflows` `teamwork.bot_authors` `teamwork.bot_branches` `teamwork.bot_labels` `teamwork.dismissed_alerts` `teamwork.dismiss_allowed` `teamwork.auto_rerun` `teamwork.cancel_policy` `teamwork.queued_hours` `teamwork.stuck_hours` `teamwork.forks_help` `teamwork.inactive_workflows` `teamwork.runner_hooks`
+`teamwork.enabled` `teamwork.repos_per_cycle` `teamwork.refresh_hours` `teamwork.dismiss_days` `teamwork.hide_workflows` `teamwork.bot_authors` `teamwork.bot_branches` `teamwork.bot_labels` `teamwork.dismissed_alerts` `teamwork.dismiss_allowed` `teamwork.auto_rerun` `teamwork.cancel_policy` `teamwork.queued_hours` `teamwork.stuck_hours` `teamwork.forks_help` `teamwork.inactive_workflows` `teamwork.keep_alive_days` `teamwork.runner_hooks`

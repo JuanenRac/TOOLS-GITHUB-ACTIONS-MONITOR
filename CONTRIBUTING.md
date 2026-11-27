@@ -28,3 +28,15 @@
 - **Smoke of external sources**: the workflow `sources-smoke.yml` (weekly) runs `tools/smoke_sources.py` against the real status page, the advisories, the description of the REST API and the last release, and fails when one changed its format.
 - **Limits**: `tools/limits_check.py` runs the monitor with an account of 120 workflows in a container of one processor and 512 MB.
 - **Release order**: create the release of GitHub as a DRAFT and push the tag `vX.Y.Z`; `release-image.yml` builds and publishes the image and, only when it answers by its tag for both platforms, publishes the draft. The tool that publishes it creates the release as a DRAFT, uploads `github_actions_monitor.zip`, `SHA256SUMS` and `monitor_updater.py`, checks that all are there and only then publishes (immutable releases accept no file afterwards); with the image first, it pushes the tag and `release-image.yml` publishes the draft.
+
+## Working with an AI assistant
+
+A change written with an AI assistant follows the same guidelines, and the person who sends it answers for it: read every line, run the tests, and never paste a token, a log with private names or the contents of `actions_monitor.json` into the assistant. The two skills that travel with the monitor (`monitor/skills/external/SKILL.md` for a tool that talks to a running monitor, `monitor/skills/internal/SKILL.md` for the AI built into it) are part of the product: a new setting, route or command updates them (`python tools/make_skill_refs.py`). What the product is for and what it must never do is in `PRODUCT.md`.
+
+## macOS: the quarantine mark
+
+The files are not signed with an Apple certificate. A zip downloaded with a browser carries the quarantine mark, and macOS may refuse to open the `.command` launchers. Check the release first (see `monitor/docs/UPDATE.md`) and then remove the mark from the folder you unpacked. macOS is not tested at the moment.
+
+```sh
+xattr -dr com.apple.quarantine /path/to/github_actions_monitor
+```

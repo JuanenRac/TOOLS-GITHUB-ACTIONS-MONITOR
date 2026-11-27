@@ -22,6 +22,7 @@
  "ui.actions.why_stuck": "Corriendo demasiado tiempo:",
  "ui.actions.why_policy": "Incumple la política de cancelación:",
  "ui.actions.why_inactive_workflow": "Desactivado por inactividad:",
+ "ui.actions.why_keep_alive": "Repositorio sin actividad, días que quedan antes de que GitHub apague la programación:",
  "ui.actions.waiting_person": "Esperando a una persona",
  "ui.actions.waiting_machine": "Esperando un ejecutor",
  "ui.actions.kind_environment": "Aprobación de entorno",
@@ -91,6 +92,8 @@
  "cfg.h.teamwork.forks_help": "Antes de aprobar: antigüedad de la cuenta, cambios fusionados aquí y ficheros de workflow tocados. Unas lecturas más cada vez que lo pidas.",
  "cfg.f.teamwork.inactive_workflows": "Buscar workflows desactivados por inactividad",
  "cfg.h.teamwork.inactive_workflows": "Propone volver a activarlos.",
+ "cfg.f.teamwork.keep_alive_days": "Días sin actividad antes de proponer mantener viva una programación",
+ "cfg.h.teamwork.keep_alive_days": "En un repositorio público sin ningún push durante estos días, propone volver a activar sus workflows programados antes de que GitHub los apague a los 60 días (GitHub no documenta que esto reinicie su cuenta; un commit nuevo sí). 0 = apagado.",
  "cfg.f.teamwork.runner_hooks": "Aceptar eventos de hooks de ejecutores propios",
  "cfg.h.teamwork.runner_hooks": "La orden runner-hook, lanzada por el hook en este equipo, anota inicio y fin de cada trabajo."
 }

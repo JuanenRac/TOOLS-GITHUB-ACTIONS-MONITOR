@@ -12,6 +12,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- **Keep a schedule alive before GitHub switches it off**: with `teamwork.keep_alive_days` (off) the scheduled workflows of a quiet public repository are proposed to be enabled again, with the days left. The static demo and the workflow check in the browser are now opened in a real browser by CI.
 - **Strict read-only mode and network policy** (`security.read_only_strict`, `security.egress_policy`, both off): enforced below every part of the monitor; a refused command or connection fails naming the setting, and the doctor lists destinations outside the policy.
 - **Compliance report** (`compliance report`, `/api/compliance/report`, a box in the Security tab): each line checked or only declared.
 - **Retention of every category and legal hold**, **signed checkpoints and purge of the log of actions** (`audit verify|checkpoint|purge`), and **export of that log** to a file, syslog over TLS or HTTP; all off by default.

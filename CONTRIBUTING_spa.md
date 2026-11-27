@@ -28,3 +28,15 @@
 - **Humo de fuentes externas**: el workflow `sources-smoke.yml` (semanal) ejecuta `tools/smoke_sources.py` contra la página de estado real, los avisos de seguridad, la descripción de la API REST y la última release, y falla cuando una cambió de formato.
 - **Límites**: `tools/limits_check.py` ejecuta el monitor con una cuenta de 120 workflows en un contenedor de un procesador y 512 MB.
 - **Orden de la release**: crea la release de GitHub como BORRADOR y empuja la etiqueta `vX.Y.Z`; `release-image.yml` construye y publica la imagen y, solo cuando responde por su etiqueta en las dos plataformas, publica el borrador. La herramienta que la publica crea la release como BORRADOR, sube `github_actions_monitor.zip`, `SHA256SUMS` y `monitor_updater.py`, comprueba que están todos y solo entonces publica (las releases inmutables no admiten ficheros después); con la imagen primero, empuja la etiqueta y `release-image.yml` publica el borrador.
+
+## Trabajar con un asistente de IA
+
+Un cambio escrito con un asistente de IA sigue las mismas normas, y quien lo envía responde de él: lee cada línea, ejecuta las pruebas y no pegues nunca en el asistente un token, un registro con nombres privados ni el contenido de `actions_monitor.json`. Las dos skills que viajan con el monitor (`monitor/skills/external/SKILL.md` para una herramienta que habla con un monitor en marcha, `monitor/skills/internal/SKILL.md` para la IA que lleva dentro) son parte del producto: un ajuste, una ruta o una orden nuevos las actualizan (`python tools/make_skill_refs.py`). Para qué sirve el producto y qué no debe hacer nunca está en `PRODUCT_spa.md`.
+
+## macOS: la marca de cuarentena
+
+Los ficheros no están firmados con un certificado de Apple. Un zip descargado con un navegador lleva la marca de cuarentena y macOS puede negarse a abrir los lanzadores `.command`. Comprueba antes la release (ver `monitor/docs/UPDATE_spa.md`) y después quita la marca de la carpeta que has descomprimido. macOS no se prueba por ahora.
+
+```sh
+xattr -dr com.apple.quarantine /path/to/github_actions_monitor
+```

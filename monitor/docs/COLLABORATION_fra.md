@@ -25,6 +25,10 @@ Rien n'est écrit sauf si `github_actions.enabled` est activé, l'action figure 
 
 `teamwork.auto_rerun` (désactivé) relance une fois les jobs en échec d'une exécution non démarrée ou expirée, avec les mêmes contrôles. Jamais une seconde fois ; en cas de nouvel échec, une alerte est levée.
 
+## Maintenir une planification active
+
+GitHub coupe les workflows planifiés d'un dépôt public après 60 jours sans activité. Avec `teamwork.keep_alive_days` (0 = désactivé ; par exemple 45), un dépôt public sans push depuis ce temps et dont des workflows ont tourné selon une planification apparaît dans les propositions comme `enable_workflow`, avec les jours restants. C'est une proposition comme les autres : rien n'est envoyé avant votre confirmation. GitHub ne documente pas qu'activer un workflow déjà actif relance son décompte, et ceci n'a pas été essayé sur un dépôt réel : le moyen sûr est un nouveau commit.
+
 ## Hooks des runners auto-hébergés
 
 Avec `teamwork.runner_hooks`, un hook d'un runner de cet ordinateur note le début et la fin :
@@ -53,4 +57,4 @@ Lectures et écritures testées uniquement avec des réponses inventées ; aucun
 
 ## Tous les réglages
 
-`teamwork.enabled` `teamwork.repos_per_cycle` `teamwork.refresh_hours` `teamwork.dismiss_days` `teamwork.hide_workflows` `teamwork.bot_authors` `teamwork.bot_branches` `teamwork.bot_labels` `teamwork.dismissed_alerts` `teamwork.dismiss_allowed` `teamwork.auto_rerun` `teamwork.cancel_policy` `teamwork.queued_hours` `teamwork.stuck_hours` `teamwork.forks_help` `teamwork.inactive_workflows` `teamwork.runner_hooks`
+`teamwork.enabled` `teamwork.repos_per_cycle` `teamwork.refresh_hours` `teamwork.dismiss_days` `teamwork.hide_workflows` `teamwork.bot_authors` `teamwork.bot_branches` `teamwork.bot_labels` `teamwork.dismissed_alerts` `teamwork.dismiss_allowed` `teamwork.auto_rerun` `teamwork.cancel_policy` `teamwork.queued_hours` `teamwork.stuck_hours` `teamwork.forks_help` `teamwork.inactive_workflows` `teamwork.keep_alive_days` `teamwork.runner_hooks`

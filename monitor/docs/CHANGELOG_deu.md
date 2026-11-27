@@ -11,6 +11,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Hinzugefügt
 
+- **Einen Zeitplan wachhalten, bevor GitHub ihn abschaltet**: mit `teamwork.keep_alive_days` (aus) wird vorgeschlagen, die geplanten Workflows eines ruhigen öffentlichen Repositorys erneut zu aktivieren, mit den verbleibenden Tagen. Die statische Demo und die Workflow-Prüfung im Browser öffnet die CI jetzt in einem echten Browser.
 - **Strikter Nur-Lese-Modus und Netzwerkrichtlinie** (`security.read_only_strict`, `security.egress_policy`, beide aus): unterhalb aller Teile durchgesetzt; ein abgelehnter Befehl oder eine Verbindung scheitert mit Nennung der Einstellung, und der Doctor listet Ziele außerhalb der Richtlinie.
 - **Compliance-Bericht** (`compliance report`, `/api/compliance/report`, ein Kasten im Tab Sicherheit): jede Zeile geprüft oder nur angegeben.
 - **Aufbewahrung jeder Kategorie und Aufbewahrungssperre**, **signierte Prüfpunkte und Bereinigung des Aktionsprotokolls** (`audit verify|checkpoint|purge`) und **Export dieses Protokolls** in eine Datei, per Syslog über TLS oder HTTP; alles ab Werk aus.

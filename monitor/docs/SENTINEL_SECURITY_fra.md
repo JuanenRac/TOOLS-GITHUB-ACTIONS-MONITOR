@@ -9,6 +9,8 @@
 
 La troisième sentinelle, à côté de celle de la CI et de Collab. Elle lit, sans rien écrire sur GitHub, ce que GitHub lui-même dit d'ouvert ou de manquant en matière de sécurité pour chaque dépôt, et en fait des alertes de l'onglet Alertes (origine Sécurité). Elle existe dans l'édition Complete, désactivée par défaut (`sentinels.security.enabled`) ; Lite n'a pas de sentinelles.
 
+Le même onglet porte un cadre facultatif avec la [posture des dépôts et de l'organisation face à OWASP et CIS](POSTURE_fra.md).
+
 ## Ce qu'elle lit et ce qu'elle signale
 
 | Signal | Alerte | Niveau | Actif par défaut |

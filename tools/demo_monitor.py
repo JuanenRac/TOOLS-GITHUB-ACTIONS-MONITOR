@@ -6,10 +6,12 @@
 # =============================================================================
 """A demo monitor with invented data (the demo-* repositories of the demo-owner account) for the screenshots of the documentation.
 
-    python tools/demo_monitor.py [PORT] [--lite] [--network] [--rich] [--kiosk]   # default 18765; runs until it is stopped
+    python tools/demo_monitor.py [PORT] [--lite] [--network] [--rich] [--parts] [--kiosk]   # default 18765; runs until it is stopped
 
 It starts the real web server of the monitor on 127.0.0.1 with a temporary configuration and made-up runs, alerts, a signing queue, analytics and linter findings, so the page can be
 photographed without touching your own configuration or GitHub. Nothing is read from GitHub and nothing is written outside a temporary folder.
+
+`--parts` switches on the optional parts (extensions, proposals and chat, collaboration, fleet by role and group, posture) with the invented data of tools/demo_parts.py.
 
 `--network` shows the page as it looks in the network mode (the persistent red bar and, in Settings, the warning for every interface) so that it can be photographed: the page only
 shows them, the demo still listens on 127.0.0.1 only and no access token is needed. It exists for the pictures and is never the real network mode.
@@ -23,6 +25,7 @@ from http.server import ThreadingHTTPServer
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent / "monitor"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "tests"))
 from github_actions_monitor.app import actions_monitor as am  # noqa: E402
@@ -54,6 +57,9 @@ def setup(now):
     cfg.update({"github_owner": OWNER, "workspace_root": "", "signed_dir": "", "audit_dir": "", "screens": {**cfg.get("screens", {}), "enabled": True}})      # the wall screens are off by default; the demo shows them
     if "--kiosk" in sys.argv:      # the kiosk profile is off by default too: the measuring tool of the screens asks for it
         cfg["kiosk"] = {**cfg.get("kiosk", {}), "enabled": True}
+    if "--parts" in sys.argv:
+        import demo_parts
+        demo_parts.settings(cfg)
     (tmp / "actions_monitor.json").write_text(json.dumps(cfg), encoding="utf-8")
     am.CONFIG_FILE = settings_api.CONFIG_FILE = toolconfig.CONFIG_FILE = tmp / "actions_monitor.json"
     settings_api.BACKUP_DIR = tmp / "backups"
@@ -340,6 +346,9 @@ def main():
     if "--network" in sys.argv:      # only what the page shows: the server below still listens on 127.0.0.1 and localguard stays off
         real_state = am.localguard.public_state
         am.localguard.public_state = lambda: {**real_state(), "network": True, "host": "0.0.0.0", "token_required": True, "secure": True}
+    if "--parts" in sys.argv and not lite:
+        import demo_parts
+        demo_parts.fill(REPOS, runs, iso, now)
     server = ThreadingHTTPServer(("127.0.0.1", port), am.Handler)
     print("demo on", port, flush=True)
     try:
