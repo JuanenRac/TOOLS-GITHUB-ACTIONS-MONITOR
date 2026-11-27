@@ -174,9 +174,21 @@ def shot(url, target, size, tries=3, flags=()):
     return False
 
 
-def cdp_shot(url, target, size, script="", wait=10.0):
+def cdp_shot(url, target, size, script="", wait=10.0, tries=3):
     """A screenshot through the DevTools protocol (the optional package `websockets`): the page is loaded at exactly `size`, a small script runs (scroll to a section, fold the menu) and the picture is taken.
-    Only the browser started here is ended."""
+    A browser that stops answering is ended after a time limit and the picture is tried again with a new one."""
+    for attempt in range(tries):
+        done = _cdp_try(url, target, size, script, wait)
+        if done:
+            return True
+        print(f"no picture (try {attempt + 1} of {tries}):", target, flush=True)
+    print("FAILED:", target, flush=True)
+    FAILED.append(str(target))
+    return False
+
+
+def _cdp_try(url, target, size, script, wait):
+    """One try with its own browser and profile; only the browser started here is ended."""
     import asyncio
     import base64
     import urllib.request
@@ -218,12 +230,14 @@ def cdp_shot(url, target, size, script="", wait=10.0):
             except OSError:
                 pass
             time.sleep(0.5)
-        data = asyncio.run(go(ws_url)) if ws_url else b""
+        try:      # every answer of the browser has to come in time: waiting for one that never comes held the whole job until it was cancelled
+            data = asyncio.run(asyncio.wait_for(go(ws_url), wait + 60)) if ws_url else b""
+        except (OSError, TimeoutError, websockets.WebSocketException) as error:
+            print("browser:", type(error).__name__, flush=True)
+            data = b""
         if len(data) > 2000:
             Path(target).write_bytes(data)
             return True
-        print("FAILED:", target, flush=True)
-        FAILED.append(str(target))
         return False
     finally:
         child.kill()

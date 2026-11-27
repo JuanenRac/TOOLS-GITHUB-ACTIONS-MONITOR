@@ -67,7 +67,7 @@ jobs:
         env:
           PYTHONUTF8: "1"
         run: >-
-          python tools/make_screenshots.py --web --only web_extensions web_proposals web_assistant_chat web_collaboration web_roles_groups web_posture web_screen_group web_sentinel_security web_compliance web_external_ci
+          python -u tools/make_screenshots.py --web --only web_extensions web_proposals web_assistant_chat web_collaboration web_roles_groups web_posture web_screen_group web_sentinel_security web_compliance web_external_ci
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: pictures
