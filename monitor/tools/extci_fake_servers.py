@@ -27,20 +27,22 @@ def answers():
         "/api/v2/builders/1/builds": (j, {"builds": _builds()}),
         "/api/v2/builders/2/builds": (j, {"builds": [{"buildid": 911, "number": 3, "complete": True, "results": 0, "started_at": 1760000000, "complete_at": 1760000050, "properties": {"branch": ["main", "x"]}}]}),
         "/api/v2/builds/902/steps": (j, {"steps": [{"stepid": 5, "results": 2}]}),
-        "/api/v2/steps/5/logs": (j, {"logs": [{"logid": 6, "num_lines": 3}]}),
-        "/api/v2/logs/6/contents": (j, {"logchunks": [{"content": LOG}]}),
+        "/api/v2/steps/5/logs": (j, {"logs": [{"logid": 6, "num_lines": 3, "slug": "stdio", "type": "s"}]}),
+        "/api/v2/logs/6/contents": (j, {"logchunks": [{"content": "".join("o" + line for line in LOG.splitlines(True))}]}),
         "/api/v4/projects/group%2Fapp/pipelines": (j, [{"id": 31, "status": "failed", "ref": "main", "source": "push", "sha": "abc", "created_at": "2026-01-02T10:00:00Z", "updated_at": "2026-01-02T10:05:00Z"},
                                                        {"id": 30, "status": "failed", "ref": "topic", "source": "merge_request_event", "created_at": "2026-01-02T09:00:00Z"},
                                                        {"id": 29, "status": "success", "ref": "main", "source": "push", "created_at": "2026-01-01T10:00:00Z"},
                                                        {"id": 28, "status": "somethingnew", "ref": "main", "source": "push", "created_at": "2026-01-03T10:00:00Z"}]),
-        "/api/v4/projects/group%2Fapp/pipelines/31/jobs": (j, [{"id": 77}]),
+        "/api/v4/projects/group%2Fapp/pipelines/31/jobs": (j, [{"id": 76, "allow_failure": True}, {"id": 77, "allow_failure": False}]),
         "/api/v4/projects/group%2Fapp/jobs/77/trace": ("text/plain", LOG),
         "/job/folder/job/app/api/json": (j, {"builds": [{"number": 12, "result": "FAILURE", "building": False, "timestamp": 1760000000000, "duration": 60000}, {"number": 11, "result": "SUCCESS", "timestamp": 1759990000000}]}),
         "/job/folder/job/app/12/consoleText": ("text/plain", LOG),
         "/proj/_apis/build/builds": (j, {"value": [{"id": 55, "status": "completed", "result": "failed", "sourceBranch": "refs/heads/main", "reason": "individualCI", "definition": {"name": "ci"},
                                                     "startTime": "2026-01-02T10:00:00Z", "finishTime": "2026-01-02T10:03:00Z"}]}),
         "/proj/_apis/build/builds/55/logs": (j, {"value": [{"id": 1}, {"id": 2}]}),
-        "/proj/_apis/build/builds/55/logs/2": ("text/plain", LOG),
+        "/proj/_apis/build/builds/55/logs/2": ("text/plain", "Finishing the job\n"),
+        "/proj/_apis/build/builds/55/timeline": (j, {"records": [{"type": "Job", "result": "failed", "log": {"id": 2}}, {"type": "Task", "result": "failed", "log": {"id": 1}}]}),
+        "/proj/_apis/build/builds/55/logs/1": ("text/plain", LOG),
     }
 
 
@@ -72,6 +74,9 @@ class Handler(BaseHTTPRequestHandler):
                 self.send(200, body=b"[" + b"1," * 200000 + b"1]")
             else:
                 self.send(200, body=b"{not json")
+            return
+        if path == "/signin":      # Azure DevOps answers a refused token with 203 and a sign-in page
+            self.send(203, "text/html", b"<html></html>")
             return
         found = answers().get(path) or answers().get(unquote(path))
         if found is None:

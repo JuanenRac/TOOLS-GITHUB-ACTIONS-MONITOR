@@ -19,7 +19,7 @@
 
 ## 写入 GitHub
 
-只有当 `github_actions.enabled` 开启、操作位于 `github_actions.allowed` 且你确认显示完整发送内容的计划时才写入。新操作：`update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch`。视图只做提议：检查失败的机器人更新、落后的分支、排队或运行过久的运行（`teamwork.queued_hours`、`teamwork.stuck_hours`）、匹配 `teamwork.cancel_policy` 的运行、因不活跃停用的工作流（`teamwork.inactive_workflows`）。手动工作流表单会读取并校验输入。开启 `teamwork.forks_help` 时显示分叉运行作者的事实信息，不给结论。
+只有当 `github_actions.enabled` 开启、操作位于 `github_actions.allowed` 且你确认显示完整发送内容的计划时才写入。新操作：`update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch`。视图只做提议：检查失败的机器人更新、落后的分支、排队或运行过久的运行（`teamwork.queued_hours`、`teamwork.stuck_hours`）、匹配 `teamwork.cancel_policy` 的运行、因不活跃停用的工作流（`teamwork.inactive_workflows`）。手动工作流表单会读取并校验输入。开启 `teamwork.forks_help` 时显示分叉运行作者的事实信息，不给结论。部署一次只批准一个环境，确认框中写明其名称；当一次运行等待多个环境时，页面会询问是哪一个。
 
 ## 唯一的自动操作
 

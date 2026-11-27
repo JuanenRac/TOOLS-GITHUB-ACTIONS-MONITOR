@@ -30,7 +30,7 @@ Each finding carries its place in the OWASP Top 10 CI/CD risks and in the CIS So
 
 ## Honest coverage
 
-What GitHub refuses or does not answer is listed as **not checked**, never as fine, and earlier findings of that area stay. Many settings need administrator read rights: the report lists the permission each group of checks needs and which were refused. Of a webhook only the host is kept; of a secret only name and dates. Releases are compared with what the monitor saw before, so the first read only remembers. Archived repositories and forks are skipped.
+What GitHub refuses or does not answer is listed as **not checked**, never as fine, and earlier findings of that area stay. Many settings need administrator read rights: the report lists the permission each group of checks needs and which were refused. Of a webhook only the host is kept; of a secret only name and dates. Releases are compared with what the monitor saw before, so the first read only remembers. Archived repositories and forks are skipped. A check that is switched off, left out by the profile or the kind of project, or repositories still waiting their turn make a standard "partly checked", never "no findings". The security policy of the public `.github` repository of the account counts for the repositories without one.
 
 ## Baseline and options
 

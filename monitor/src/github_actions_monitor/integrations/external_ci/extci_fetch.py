@@ -84,6 +84,8 @@ class Reader:
             extra["If-Modified-Since"] = kept[1]
         try:
             with self._open(url, extra) as answer:
+                if getattr(answer, "status", 200) == 203:      # Azure DevOps: a refused token gets a sign-in page, not an error
+                    raise Failed("http_203")
                 kind = str(answer.headers.get("Content-Type") or "").lower()
                 raw = answer.read(self.cfg["max_bytes"] + 1)
                 etag, modified = answer.headers.get("ETag"), answer.headers.get("Last-Modified")
@@ -106,7 +108,7 @@ class Reader:
         return data
 
     def tail(self, path, keep, total=None):
-        """The END of a text (a log): at most `keep` bytes, reading at most `total` (external_ci.max_bytes). (text, cut)."""
+        """The END of a text (a log): at most `keep` bytes, reading at most `total` (external_ci.max_bytes); a longer log from a server that ignores the range is "too_big". (text, cut)."""
         total = total or self.cfg["max_bytes"]
         seen, kept, cut = 0, b"", False
         try:
@@ -122,7 +124,10 @@ class Reader:
                     kept += piece
                     if len(kept) > keep:
                         kept, cut = kept[-keep:], True
-                cut = cut or seen >= total or getattr(answer, "status", 200) == 206
+                partial = getattr(answer, "status", 200) == 206
+                if seen >= total and not partial and answer.read(1):      # the server ignored the range and the log is longer than the limit: this is not its end
+                    raise Failed("too_big")
+                cut = cut or partial
         except urllib.error.HTTPError:
             raise Failed("http_304") from None
         except OSError:

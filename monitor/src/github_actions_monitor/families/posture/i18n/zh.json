@@ -97,7 +97,7 @@
  "ui.posture.report_note": "基于监视器检查项的阅读辅助。它不是认证，也不表示已满足某项标准；CIS 章节编号未与官方文件核对。",
  "ui.posture.status_findings": "有发现",
  "ui.posture.status_no_findings": "无发现",
- "ui.posture.status_partly": "部分读取",
+ "ui.posture.status_partly": "部分检查",
  "ui.posture.status_not_checked": "未检查",
  "ui.posture.trend_better": "比 {since} 好（{delta}）",
  "ui.posture.trend_worse": "比 {since} 差（+{delta}）",

@@ -43,6 +43,9 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 - **Keine falschen Warnungen "unbekannte Einstellung" mehr beim Aktualisieren**: Der Updater meldet Einstellungen nicht mehr als unbekannt, die in der Beispielkonfiguration der Zielversion stehen, aber nicht auf der Einstellungsseite beschrieben sind.
 - Die je Workflow gespeicherten Schrittnamen haben eine Obergrenze.
 - Die Windows-Starter nehmen `python`, wenn der Starter `py` nicht installiert ist.
+- **Haltungsprüfungen mit falscher Antwort**: Abhängigkeitswarnungen konnten bei bedingten Abfragen falsch gelesen werden; ein nicht lesbarer Schutz galt als fehlend; die vom Konto geteilte Sicherheitsrichtlinie wurde nicht gesehen; abgeschaltete oder gefilterte Prüfungen zählten als "ohne Befund" und als bestanden; eine abgewiesene Organisation stoppte das Lesen aller Repositories; lange Listen wurden nur teilweise gelesen; eine später erschienene Prüfsumme galt als ersetzte Datei.
+- **Compliance-Bericht**: ein TLS-Zertifikat wurde nie gesehen; eine ältere veröffentlichte Version wurde als neuer gemeldet; ein geleertes oder unlesbares Aktionsprotokoll, ein unlesbarer Sicherungsordner und ein unbekannter Speicher galten als geprüft; ein Export ohne Ziel sagt es jetzt.
+- **Protokolle externer CI**: Azure Pipelines lieferte den Abschlussschritt statt des fehlgeschlagenen, Buildbot behielt seine Kanalbuchstaben, GitLab konnte einen Job wählen, der fehlschlagen darf, ein abgewiesenes Azure-Token wurde als unlesbare Antwort gemeldet und ein sehr langes Protokoll konnte vor seinem Ende abgeschnitten werden. Abbrechende GitLab-Pipelines zählen als laufend.
 
 ### Sicherheit
 
@@ -53,6 +56,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 - Die Anleitungen nennen zwei bekannte Grenzen (Ordner, die ein Viewer am Rechner sieht; Wiederholung von Ereignissen ohne Zeit) und die richtige Vorgabe von `webhook.reject_stale`.
 - Der Textfilter für die KIs entfernt jetzt lange interne Hostnamen auf `.local` vollständig und auch Teile eines privaten Schlüssels ohne Kopfzeile (eine abgeschnittene Zeile oder ein Protokoll, das mitten im Schlüssel beginnt).
 - Unterstützt wird nur die neueste veröffentlichte Version (Sicherheitsrichtlinie).
+- **Einschränkungen greifen in mehr Fällen**: `sops` und `bws` starten unter einer Netzrichtlinie nicht, das Wort `version` irgendwo im Befehl lässt ihn nicht mehr durch, eine unlesbare Konfigurationsdatei schränkt ein, und `security.*` der Datei der Lite-Ausgabe gilt für sie.
+- **Ein Deployment wird eine Umgebung nach der anderen genehmigt**, in der Bestätigung genannt, statt aller genehmigbaren auf einmal.
 
 ### Plugins
 

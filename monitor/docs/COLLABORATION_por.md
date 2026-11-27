@@ -19,7 +19,7 @@ Ative `teamwork.enabled` (Definições > Colaboração). As vistas de execuçõe
 
 ## Escrever no GitHub
 
-Nada é escrito a menos que `github_actions.enabled` esteja ativo, a ação esteja em `github_actions.allowed` e confirme o plano, que mostra exatamente o que é enviado. Ações novas: `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch`. As vistas apenas PROPÕEM: atualizações de bots com verificações falhadas, ramos atrasados, execuções demasiado tempo em fila ou a correr (`teamwork.queued_hours`, `teamwork.stuck_hours`), as que correspondem a `teamwork.cancel_policy`, workflows desativados por inatividade (`teamwork.inactive_workflows`). O formulário de um workflow manual lê e verifica as entradas. Com `teamwork.forks_help`, dados sobre o autor de uma execução de fork; sem veredito.
+Nada é escrito a menos que `github_actions.enabled` esteja ativo, a ação esteja em `github_actions.allowed` e confirme o plano, que mostra exatamente o que é enviado. Ações novas: `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch`. As vistas apenas PROPÕEM: atualizações de bots com verificações falhadas, ramos atrasados, execuções demasiado tempo em fila ou a correr (`teamwork.queued_hours`, `teamwork.stuck_hours`), as que correspondem a `teamwork.cancel_policy`, workflows desativados por inatividade (`teamwork.inactive_workflows`). O formulário de um workflow manual lê e verifica as entradas. Com `teamwork.forks_help`, dados sobre o autor de uma execução de fork; sem veredito. Uma implementação é aprovada um ambiente de cada vez, nomeado na confirmação; se uma execução esperar por vários, a página pergunta qual.
 
 ## A única ação automática
 

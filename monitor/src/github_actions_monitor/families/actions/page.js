@@ -25,12 +25,20 @@
   function act(form,body){
     return async()=>{
       const p=await post("/api/actions/plan",Object.assign({reason:form.reason.value.trim(),operator:form.who.value.trim()},body));
+      if(p.status==="choose_environment"){choose(form,body,p.environments||[]);return}
       if(!p.ok){show(T("ui.actions.refused",{why:(p.status||p.error||"?")+(p.detail?" - "+p.detail:"")}));return}
       const q=p.plan;
-      if(!await askConfirm(T("ui.actions.confirm",{what:q.method+" "+q.endpoint+" "+JSON.stringify(q.fields)}),{danger:true}))return;
+      const where=q.environments?" ["+q.environments.join(", ")+"]":"";
+      if(!await askConfirm(T("ui.actions.confirm",{what:q.method+" "+q.endpoint+" "+JSON.stringify(q.fields)+where}),{danger:true}))return;
       const done=await post("/api/gh-action/confirm",{plan:q.id});
       show(done.ok?T("ui.actions.done"):T("ui.actions.refused",{why:done.status||done.error||"?"}));
     };
+  }
+  /* a run that waits for several environments: one button for each, each with its own plan and confirmation */
+  function choose(form,body,names){
+    show(T("ui.actions.choose_environment"));
+    const o=document.getElementById("actions-msg");
+    if(o)names.forEach(n=>o.append(document.createTextNode(" "),button(n,act(form,Object.assign({},body,{environment:n})))));
   }
   function show(text){msg=text;const o=document.getElementById("actions-msg");if(o)o.textContent=text}
   async function draw(force){

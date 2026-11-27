@@ -43,6 +43,9 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 - **Niente più falsi avvisi «impostazione sconosciuta» durante l'aggiornamento**: l'aggiornamento non segnala più come sconosciute le impostazioni presenti nella configurazione di esempio della versione di destinazione ma non descritte dalla pagina delle impostazioni.
 - I nomi dei passi conservati per workflow hanno un limite.
 - I lanciatori di Windows usano `python` quando il lanciatore `py` non è installato.
+- **Controlli di postura che rispondevano male**: gli avvisi sulle dipendenze potevano essere letti male con le letture condizionali; una protezione non leggibile risultava assente; la politica di sicurezza condivisa dall'account non veniva vista; i controlli disattivati o filtrati contavano come «nessun rilievo» e come superati; un'organizzazione rifiutata fermava la lettura di tutti i repository; gli elenchi lunghi erano letti solo in parte; un digest comparso dopo contava come file sostituito.
+- **Rapporto di conformità**: un certificato TLS non veniva mai visto; una versione pubblicata più vecchia era annunciata come più nuova; un registro delle azioni svuotato o illeggibile, una cartella delle copie illeggibile e un archivio sconosciuto risultavano controllati; un'esportazione senza destinazione ora lo dice.
+- **Log di CI esterna**: Azure Pipelines dava il passo di chiusura invece di quello fallito, Buildbot teneva le lettere di canale, GitLab poteva scegliere un job autorizzato a fallire, un token Azure rifiutato era segnalato come risposta illeggibile e un log molto lungo poteva essere troncato prima della fine. Le pipeline GitLab in annullamento contano come in corso.
 
 ### Sicurezza
 
@@ -53,6 +56,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 - Le guide indicano due limiti noti (cartelle viste da un viewer al computer; ripetizione di eventi senza orario) e il valore predefinito corretto di `webhook.reject_stale`.
 - Il filtro del testo per le IA ora toglie per intero un lungo nome host interno che finisce in `.local` e i pezzi di una chiave privata senza intestazione (una riga troncata o un log che comincia a metà della chiave).
 - È supportata solo l'ultima versione pubblicata (politica di sicurezza).
+- **Le restrizioni valgono in più casi**: `sops` e `bws` non si avviano con una politica di rete, la parola `version` in un punto qualsiasi di un comando non lo lascia più passare, un file di configurazione illeggibile restringe e `security.*` del file dell'edizione lite si applica a essa.
+- **Un deployment si approva un ambiente alla volta**, indicato nella conferma, invece di tutti quelli che la persona può approvare insieme.
 
 ### Plugin
 

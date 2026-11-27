@@ -30,7 +30,7 @@ La dirección se comprueba al conectar: este equipo, redes privadas y metadatos 
 
 ## Logs de una build fallida
 
-Apagado de fábrica (`external_ci.logs.enabled`). Solo se pide el final, limitado por `external_ci.logs.max_kb` y `external_ci.logs.tail_lines`, sin secuencias de terminal ni caracteres de control, depurado, en memoria durante `external_ci.logs.keep_hours`. Es texto no fiable y nunca se entrega a una IA como instrucción. La depuración no puede reconocer todos los secretos.
+Apagado de fábrica (`external_ci.logs.enabled`). Solo se pide el final, limitado por `external_ci.logs.max_kb` y `external_ci.logs.tail_lines`, sin secuencias de terminal ni caracteres de control, depurado, en memoria durante `external_ci.logs.keep_hours`. Es texto no fiable y nunca se entrega a una IA como instrucción. La depuración no puede reconocer todos los secretos. Si un servidor ignora la petición de solo el final y el registro es más largo que `external_ci.max_bytes`, no se guarda ningún registro: no sería su final.
 
 ## Prueba, estado y consola
 

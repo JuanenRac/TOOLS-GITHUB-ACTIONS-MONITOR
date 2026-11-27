@@ -10,6 +10,9 @@ be removed once added. With both settings at their defaults the hook is not even
   egress_policy      default | github_only | none. `github_only` lets the process reach the API of GitHub (and the GitHub Enterprise host that is configured) and what `security.egress_allow` names;
                      `none` lets it reach this computer only. Programs that open the network on their own (git, apprise, curl, docker...) are not started; `gh` is not started with `none`.
 
+A configuration file that is there but cannot be read or understood restricts (`arm_from_file`): strict read-only, and `github_only`, or `none` when its text asks for a policy that is
+neither of the two open ones. Nobody can say what it asked for, and the monitor on its default values only needs GitHub.
+
 A refusal is an OSError (`Blocked`) whose text says which setting refused it, so the part that asked fails like a network that is down, with a reason. The restrictions are only ever tightened while
 the process runs: relaxing them needs a restart, and neither can be changed from the network. This is not a firewall: it covers this process and the programs it starts by name, not what those
 programs do on their own."""
@@ -20,11 +23,12 @@ import re
 import socket
 import sys
 from fnmatch import fnmatchcase
+from pathlib import Path
 from urllib.parse import urlsplit
 
 POLICIES = ("default", "github_only", "none")
 GITHUB_HOSTS = ("api.github.com", "uploads.github.com")
-NETWORK_PROGRAMS = frozenset({"git", "apprise", "curl", "wget", "ssh", "scp", "sftp", "docker", "podman", "act", "vault", "bw", "aws", "az", "gcloud", "cosign", "pip", "pip3", "npm", "claude"})
+NETWORK_PROGRAMS = frozenset({"git", "apprise", "curl", "wget", "ssh", "scp", "sftp", "docker", "podman", "act", "vault", "bw", "bws", "sops", "aws", "az", "gcloud", "cosign", "pip", "pip3", "npm", "claude"})
 GIT_NETWORK = frozenset({"fetch", "pull", "push", "clone", "ls-remote", "remote", "submodule", "archive"})
 #: gh subcommand -> the words after it that only read (None = every word reads)
 GH_READS = {"auth": ("status", "token"), "run": ("list", "view", "download", "watch"), "workflow": ("list", "view"), "pr": ("list", "view", "status", "checks", "diff"),
@@ -37,7 +41,7 @@ MUTATION_RE = re.compile(r"\bmutation\b")
 #: the POST routes of the page whose effect is a write on GitHub or a program that runs: in strict read-only mode they answer 403 with the reason, before anything is prepared
 WRITE_ROUTES = ("/api/gh-action/confirm", "/api/ai/actions/confirm", "/api/act/confirm", "/api/webhook/redeliver")
 
-STATE = {"installed": False, "strict": False, "policy": "default", "allow": (), "ghe": "", "addresses": set(), "blocked": 0, "last": ""}
+STATE = {"installed": False, "strict": False, "policy": "default", "allow": (), "ghe": "", "addresses": set(), "blocked": 0, "last": "", "unreadable": False}
 
 
 class Blocked(PermissionError):
@@ -88,19 +92,39 @@ def arm(config):
     return False
 
 
-def arm_from_file():
-    """At the start of every process of the monitor (the import of the package): the restrictions of the configuration file."""
-    from github_actions_monitor.util import paths
+def floor_of(text):
+    """The restrictions taken for a configuration file that cannot be understood; `text` is whatever could be read of it."""
+    strict_policy = re.search(r'"egress_policy"\s*:\s*"(?!(?:default|github_only)")', text)
+    return {"security": {"read_only_strict": True, "egress_policy": "none" if strict_policy else "github_only"}}
+
+
+def arm_from_file(path=None):
+    """At the start of every process of the monitor (the import of the package): the restrictions of the configuration file. No file restricts nothing; one that cannot be understood restricts
+    (`floor_of`). The lite edition calls it again with its own file: restrictions only add up."""
+    if path is None:
+        from github_actions_monitor.util import paths
+        path = paths.config_file()
     try:
-        config = json.loads(paths.config_file().read_text(encoding="utf-8"))
-    except (OSError, ValueError):
+        raw = Path(path).read_bytes()
+    except FileNotFoundError:
         return False
+    except OSError:
+        raw = None
+    config = None
+    if raw is not None:
+        try:
+            config = json.loads(raw.decode("utf-8"))
+        except (ValueError, RecursionError):
+            config = None
+    if not isinstance(config, dict) or not isinstance(config.get("security", {}), dict):
+        STATE["unreadable"] = True
+        return arm(floor_of((raw or b"").decode("utf-8", "replace").replace("\x00", "")))
     return arm(config)
 
 
 def reset():
     """Tests only (a hook cannot be removed: with nothing restricted it returns at once)."""
-    STATE.update(strict=False, policy="default", allow=(), ghe="", blocked=0, last="")
+    STATE.update(strict=False, policy="default", allow=(), ghe="", blocked=0, last="", unreadable=False)
     STATE["addresses"].clear()
 
 
@@ -267,7 +291,7 @@ def command_refusal(argv):
             return "egress_policy"
         if program == "git" and not GIT_NETWORK.intersection(rest):
             return ""
-        if program in NETWORK_PROGRAMS and not any(a in ("--version", "version") for a in rest) and f"program:{program}" not in STATE["allow"]:
+        if program in NETWORK_PROGRAMS and rest[:1] not in (["--version"], ["version"]) and f"program:{program}" not in STATE["allow"]:
             return "egress_policy"
     return ""
 
@@ -362,7 +386,7 @@ def install():
 
 
 def status():
-    return {"read_only_strict": STATE["strict"], "egress_policy": STATE["policy"], "egress_allow": len(STATE["allow"]), "blocked": STATE["blocked"], "last_blocked": STATE["last"], "enforced": STATE["installed"] and restricted()}
+    return {"read_only_strict": STATE["strict"], "egress_policy": STATE["policy"], "egress_allow": len(STATE["allow"]), "blocked": STATE["blocked"], "last_blocked": STATE["last"], "enforced": STATE["installed"] and restricted(), "config_unreadable": STATE["unreadable"]}
 
 
 def violations(config, rows):

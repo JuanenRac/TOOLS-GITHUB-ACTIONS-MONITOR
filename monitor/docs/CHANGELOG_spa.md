@@ -43,6 +43,9 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 - **Se acabaron los falsos avisos de «ajuste desconocido» al actualizar**: el actualizador ya no marca como desconocidos los ajustes que trae la configuración de ejemplo de la versión de destino pero que la página de ajustes no describe.
 - Los nombres de paso guardados por workflow tienen tope.
 - Los lanzadores de Windows usan `python` cuando no está instalado el lanzador `py`.
+- **Comprobaciones de postura que respondían mal**: las alertas de dependencias podían leerse mal con las lecturas condicionales activas; una protección que no se puede leer se daba como inexistente; no se veía la política de seguridad compartida por la cuenta; las comprobaciones apagadas o filtradas contaban como «sin hallazgos» y como superadas; una organización rechazada detenía la lectura de todos los repositorios; las listas largas se leían en parte; un resumen de fichero aparecido después contaba como fichero sustituido.
+- **Informe de cumplimiento**: nunca veía un certificado TLS; anunciaba como más nueva una versión publicada más antigua; un registro de acciones vaciado o ilegible, una carpeta de copias ilegible y un almacenamiento desconocido salían como comprobados; una exportación sin destino ahora lo dice.
+- **Registros de CI externa**: Azure Pipelines daba el paso de cierre en vez del fallido, Buildbot conservaba sus letras de canal, GitLab podía elegir un trabajo al que se le permite fallar, un token de Azure rechazado se informaba como respuesta ilegible y un registro muy largo podía cortarse antes de su final. Las canalizaciones de GitLab que se están cancelando cuentan como en curso.
 
 ### Seguridad
 
@@ -53,6 +56,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 - Las guías dicen dos límites conocidos (carpetas que ve un viewer en el propio equipo; repetición de eventos sin hora) y el valor por defecto correcto de `webhook.reject_stale`.
 - El limpiador de texto para las IA ahora quita entero un nombre largo de equipo interno acabado en `.local` y los trozos de una clave privada que perdió su cabecera (una línea cortada o un registro que empieza a mitad de la clave).
 - Solo se soporta la última versión publicada (política de seguridad).
+- **Las restricciones valen en más casos**: `sops` y `bws` no arrancan con una política de red, la palabra `version` en cualquier sitio de una orden ya no la deja pasar, un fichero de configuración ilegible restringe y `security.*` del fichero de la edición lite se le aplica.
+- **Un despliegue se aprueba de un entorno cada vez**, nombrado en la confirmación, en lugar de todos los que la persona puede aprobar a la vez.
 
 ### Complementos
 

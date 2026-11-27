@@ -15,11 +15,11 @@
 
 ## ネットワークポリシー
 
-`security.egress_policy`: `default`、`github_only`、`none`。`security.egress_allow` でホスト (`名前`、`*.名前`、アドレス) または `program:名前` を追加します。`github_only` ではモニターのプロセスは `api.github.com`、`uploads.github.com`、`GH_HOST` のホスト (GitHub Enterprise)、許可した先だけに接続します。`none` ではこのコンピューターのみで、`gh` も起動しません。自分でネットワークを使うプログラム (ネットワーク系の `git`、`apprise`、`curl`、`docker`、シークレット保管ツール) は起動しません。拒否された接続は設定名を含むエラーになります。設定済みの宛先がポリシー外だと `python bin/monitor_cli.py doctor` が失敗し、`doctor --egress` は全宛先を一覧します。ファイアウォールではなく、他のプログラムの動作は制御しません。
+`security.egress_policy`: `default`、`github_only`、`none`。`security.egress_allow` でホスト (`名前`、`*.名前`、アドレス) または `program:名前` を追加します。`github_only` ではモニターのプロセスは `api.github.com`、`uploads.github.com`、`GH_HOST` のホスト (GitHub Enterprise)、許可した先だけに接続します。`none` ではこのコンピューターのみで、`gh` も起動しません。自分でネットワークを使うプログラム (ネットワーク系の `git`、`apprise`、`curl`、`docker`、シークレット保管ツール) は起動しません。拒否された接続は設定名を含むエラーになります。設定済みの宛先がポリシー外だと `python bin/monitor_cli.py doctor` が失敗し、`doctor --egress` は全宛先を一覧します。ファイアウォールではなく、他のプログラムの動作は制御しません。シークレットストアのツールには `sops` と `bws` も含まれます。ネットワークが不要な場合は `security.egress_allow` に `program:sops` を追加してください。存在するのに読めない、または理解できない設定ファイルは、開放ではなく制限になります。修復してモニターを再起動するまで、厳格な読み取り専用モードと `github_only`（テキストがそう求める場合は `none`）になり、doctor が知らせます。`actions_monitor_lite.json` の `security.*` は、メインのファイルに加えてライト版にも適用されます。
 
 ## コンプライアンスレポート
 
-`python bin/monitor_cli.py compliance report` (`--json` も可)、`GET /api/compliance/report` (管理者)、セキュリティタブ末尾の枠で表示します。各行は**確認済み** (モニターが実物を確認) か**設定値** (設定がそう述べている) かを示します。内容はバージョンとサポート、エディション、認証と ID プロバイダー、ネットワークモードと TLS、二つの制限と送信先、保持と訴訟ホールド、操作ログと連鎖、バックアップと暗号化、保存データの暗号化 (なし)、ストレージ、プラグイン、配置形態、プロファイルです。秘密、パス、名前は含みません。`GET /api/compliance/state` は制限、保持の表、エクスポート状態を返します。
+`python bin/monitor_cli.py compliance report` (`--json` も可)、`GET /api/compliance/report` (管理者)、セキュリティタブ末尾の枠で表示します。各行は**確認済み** (モニターが実物を確認) か**設定値** (設定がそう述べている) かを示します。内容はバージョンとサポート、エディション、認証と ID プロバイダー、ネットワークモードと TLS、二つの制限と送信先、保持と訴訟ホールド、操作ログと連鎖、バックアップと暗号化、保存データの暗号化 (なし)、ストレージ、プラグイン、配置形態、プロファイルです。秘密、パス、名前は含みません。`GET /api/compliance/state` は制限、保持の表、エクスポート状態を返します。ファイルが求めなくなっても有効なままの制限は報告され、確認できなかった項目は `unknown` になります。
 
 ## 保持と訴訟ホールド
 

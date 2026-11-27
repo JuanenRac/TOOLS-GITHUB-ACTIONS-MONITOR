@@ -65,7 +65,7 @@ def _plan(request):
     from github_actions_monitor.security import audit_log
     body, config = request.body, request.config
     action, repo, number = body.get("action"), body.get("repo"), body.get("number")
-    fields, owner = None, _owner(config)
+    fields, owner, named = None, _owner(config), None
     audit_log.note(f"{str(action)[:30]} {str(repo)[:100]}")
     if action == "dispatch":
         form = _engine().dispatch_form(config, owner, repo, body.get("workflow"))
@@ -81,11 +81,20 @@ def _plan(request):
         fields = {"ref": ref, **{f"inputs[{k}]": v for k, v in values.items()}}
     elif action == "approve_deployment":
         found = _engine().environments_of(owner, repo, number)
-        allowed = [e["id"] for e in found.get("environments", []) if e["can_approve"]]
-        if not allowed:
+        open_ones = [e for e in found.get("environments", []) if e["can_approve"]]
+        if not open_ones:
             return 400, {"ok": False, "status": "nothing_to_approve"}
-        fields = {"environment_ids[]": allowed, "state": "approved", "comment": ghactions.clean_text(body.get("reason"), 200) or "approved from the monitor"}
+        wanted = body.get("environment")      # the name of ONE environment: never several approved by one click
+        chosen = [e for e in open_ones if e["name"] == wanted] if wanted is not None else open_ones
+        if wanted is not None and len(chosen) != 1:
+            return 400, {"ok": False, "status": "environment"}
+        if len(chosen) > 1:
+            return 400, {"ok": False, "status": "choose_environment", "environments": [e["name"] for e in chosen]}
+        named = [chosen[0]["name"]]
+        fields = {"environment_ids[]": [chosen[0]["id"]], "state": "approved", "comment": ghactions.clean_text(body.get("reason"), 200) or "approved from the monitor"}
     item, why = ghactions.plan(config, owner, action, repo, number, reason=body.get("reason"), operator=request.user or body.get("operator"), run_gh=_monitor().run_gh_checked, fields=fields)
+    if item is not None and named:
+        item["environments"] = named      # shown in the confirmation; what is sent carries the number
     return {"ok": item is not None, "status": why, "plan": item}
 
 

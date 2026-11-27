@@ -30,7 +30,7 @@ Chaque constat indique sa place dans les risques OWASP Top 10 CI/CD et dans le g
 
 ## Couverture honnête
 
-Ce que GitHub refuse ou ne répond pas est listé comme **non vérifié**, jamais comme correct, et les constats antérieurs de cette zone restent. Beaucoup de réglages exigent un droit de lecture d'administration : le rapport donne l'autorisation de chaque groupe et ceux refusés. D'un webhook seul l'hôte est gardé ; d'un secret, le nom et les dates. Les versions sont comparées à ce qui a été vu avant : la première lecture ne fait que mémoriser. Dépôts archivés et forks sont ignorés.
+Ce que GitHub refuse ou ne répond pas est listé comme **non vérifié**, jamais comme correct, et les constats antérieurs de cette zone restent. Beaucoup de réglages exigent un droit de lecture d'administration : le rapport donne l'autorisation de chaque groupe et ceux refusés. D'un webhook seul l'hôte est gardé ; d'un secret, le nom et les dates. Les versions sont comparées à ce qui a été vu avant : la première lecture ne fait que mémoriser. Dépôts archivés et forks sont ignorés. Un contrôle désactivé, écarté par le profil ou le type de projet, ou des dépôts attendant leur tour rendent une norme « vérifiée en partie », jamais « sans constat ». La politique de sécurité du dépôt public `.github` du compte vaut pour les dépôts qui n'en ont pas.
 
 ## Référence et options
 
