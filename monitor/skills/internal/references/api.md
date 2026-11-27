@@ -77,6 +77,8 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/chatops/slack` | POST | public | a slash command of Slack, read only (signed with the v0 HMAC of Slack, off by default) |
 | `/api/clone-anomalies` | GET | maintainer | the users who cloned more different repositories than the threshold in the window, read from the audit log of the organization (maintainer; `audit_feed.clone_alert.enabled`; `available` is false when the plan has no git events) |
 | `/api/compare` | GET | viewer | this period against the one before, read only, from the ledger and the snapshots of the score (`?window=`, `?days=`, `?baseline=`, `?from=`/`?to=`, `?format=json|ndjson|csv`): every figure with its change, direction and state (`insufficient_data`, `baseline_unavailable` instead of a made-up number), and what changed (Complete only, off by default) |
+| `/api/compliance/report` | GET | admin | which guarantees this installation offers, each line checked or only declared; not a certification, no secret and no path |
+| `/api/compliance/state` | GET | admin | the restrictions in force (strict read-only, network policy), the retention of each category and the state of the export of the log of actions |
 | `/api/credential` | POST | admin | replace the GitHub login without restarting (this computer only) |
 | `/api/credential/probe` | POST | admin | does the login (and the GitHub App) work: who it is, classic or fine-grained, scopes it lacks, repositories seen, allowance left, installations of the App (this computer only; at most one real check every 10 seconds) |
 | `/api/data` | GET | viewer | the main picture: repositories, runs, failing, active, rate |

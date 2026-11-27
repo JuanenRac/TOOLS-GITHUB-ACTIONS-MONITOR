@@ -21,7 +21,7 @@ SECRET_NAMES = (SUPERVISOR_KEY_ENV, ACCESS_TOKEN_ENV, WEBHOOK_SECRET_ENV, SLACK_
 ENV_SETTINGS = {"webhook.secret_env": WEBHOOK_SECRET_ENV, "listen.token_env": ACCESS_TOKEN_ENV, "ai.api_key_env": "", "ops.backup.key_env": "", "notify.channels.telegram.token_env": "", "notify.channels.discord.url_env": "",
                 "notify.channels.slack.url_env": "", "notify.channels.apprise.urls_env": "", "notify.channels.matrix.token_env": "",
                 "chatops.slack.signing_secret_env": SLACK_SIGNING_ENV, "chatops.discord.public_key_env": DISCORD_KEY_ENV, "heartbeat.url_env": HEARTBEAT_URL_ENV,
-                "secrets.vault.token_env": ""}
+                "secrets.vault.token_env": "", "audit_export.token_env": ""}
 HELD = {}            # name -> value, taken out of the environment
 NAMES = {SUPERVISOR_KEY_ENV, ACCESS_TOKEN_ENV}      # the names that never go to a program of the user (the variable that holds the access token can be renamed: see hold)
 

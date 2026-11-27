@@ -1,0 +1,95 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "levels": [
+  "recommended",
+  "exportable",
+  "experimental"
+ ],
+ "tools": [
+  {
+   "id": "workflow_lint",
+   "level": "recommended",
+   "doc": "SENTINEL.md"
+  },
+  {
+   "id": "lessons",
+   "level": "recommended",
+   "doc": "LESSONS.md"
+  },
+  {
+   "id": "mcp_server",
+   "level": "recommended",
+   "doc": "AI_CONNECTION.md"
+  },
+  {
+   "id": "webhook_receiver",
+   "level": "recommended",
+   "doc": "WEBHOOK.md"
+  },
+  {
+   "id": "csv_ndjson",
+   "level": "exportable",
+   "doc": "COMPARE.md"
+  },
+  {
+   "id": "siem_sinks",
+   "level": "exportable",
+   "doc": "OUTPUTS.md"
+  },
+  {
+   "id": "otlp",
+   "level": "exportable",
+   "doc": "OUTPUTS.md"
+  },
+  {
+   "id": "audit_export",
+   "level": "exportable",
+   "doc": "COMPLIANCE.md"
+  },
+  {
+   "id": "apprise",
+   "level": "experimental",
+   "doc": "NOTIFICATIONS.md"
+  },
+  {
+   "id": "external_ci_buildbot_gitlab",
+   "level": "experimental",
+   "doc": "EXTERNAL_CI.md"
+  },
+  {
+   "id": "external_ci_jenkins_azure",
+   "level": "experimental",
+   "doc": "EXTERNAL_CI.md"
+  },
+  {
+   "id": "plugins",
+   "level": "experimental",
+   "doc": "PLUGINS.md"
+  },
+  {
+   "id": "secret_stores",
+   "level": "experimental",
+   "doc": "PLUGINS.md"
+  },
+  {
+   "id": "ai_providers",
+   "level": "experimental",
+   "doc": "AI.md"
+  }
+ ],
+ "scripts": [
+  "api_contract_suite",
+  "backup_storage",
+  "check_api_contract",
+  "extci_fake_servers",
+  "make_migrations",
+  "make_release",
+  "migrate_layout",
+  "migrate_storage",
+  "monitor_updater",
+  "release_summary",
+  "sbom",
+  "sign_release"
+ ]
+}

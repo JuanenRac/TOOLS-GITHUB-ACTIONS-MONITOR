@@ -26,3 +26,7 @@ An administrator (and the person at the computer when there is no team mode). A 
 Settings, Sentinel tab, block **Log of actions**: `audit_log.enabled` (on), `audit_log.max_mb` (10) and `audit_log.maintainers_can_read` (off). `audit_log.keep_generations` (5) is how many rotated files are kept. `audit_log.required` (off) refuses the actions that must be recorded (the confirmations of actions on GitHub, the mode, the silences, the credentials...) with a 503 while the log cannot be written; the settings stay open so that it can be put right.
 
 A backup written now (`POST /api/ops/backup`) and the purge on demand (`POST /api/ops/purge`, a dry run too) are recorded as `backup_run` and `purge_run`: the line says who asked and the result, never the content of the copy.
+
+## Signed checkpoints, purge and export
+
+With `audit_checkpoints.enabled` the chain is signed with a key of the installation, and the log can be purged and copied elsewhere: see [COMPLIANCE.md](COMPLIANCE.md). Under `retention.legal_hold` the log is not rotated or purged.

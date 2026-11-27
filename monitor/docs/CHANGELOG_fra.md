@@ -11,6 +11,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Mode lecture seule strict et politique réseau** (`security.read_only_strict`, `security.egress_policy`, désactivés) : appliqués sous toutes les parties ; une commande ou connexion refusée échoue en nommant le réglage, et le doctor liste les destinations hors politique.
+- **Rapport de conformité** (`compliance report`, `/api/compliance/report`, un encadré dans l'onglet Sécurité) : chaque ligne vérifiée ou seulement déclarée.
+- **Conservation de chaque catégorie et conservation légale**, **points de contrôle signés et purge du journal des actions** (`audit verify|checkpoint|purge`) et **export de ce journal** vers un fichier, syslog sur TLS ou HTTP ; tout désactivé par défaut.
+- Nouveaux guides : conformité, les outils autour du moniteur et le contenu de chaque édition. Un workflow exécute les contrôles transversaux par domaine, une base de plus de 1 Go et le service sur un vrai systemd. `COMPLIANCE.md`, `ECOSYSTEM_TOOLS.md`, `EDITIONS.md`.
 - **Flotte par rôle et groupe** : une colonne par rôle de workflow, le pire état de chaque groupe avec son écran `/g/<clé>`, dépôts et groupes désactivables sans redémarrer ; flux CCTray et API des alertes de secrets et de code (désactivés), `report_digest` sur les rapports et briefs, et un site de démonstration statique avec vérification de workflow dans le navigateur (construit par la CI, jamais publié tout seul). Le panneau des feuilles de route signale désormais un clone du dépôt de profil en retard. (FLEET_APIS)
 - **Vues de collaboration et actions facultatives** (tout désactivé par défaut) : attente d'une personne distincte de l'attente d'un runner, dernière exécution de chaque voie avec rouges mis de côté un temps, pull requests de dépendances et en retard, dépôts vulnérables et non lus, alertes de sécurité écartées, propositions (nettoyage, règle d'annulation, exécutions bloquées, workflows inactifs), workflows manuels avec formulaire typé, faits pour approuver les forks et hooks de runners. Les nouvelles actions GitHub sont planifiées et confirmées une par une ; la seule automatique est une relance unique après une panne d'infrastructure.
 - **Les propositions de l'IA sont décidées par des personnes** : marquées IA, avec empreinte, conservées après redémarrage, deux personnes quand il y a plusieurs utilisateurs ou le code saisi quand il n'y en a qu'un, visibles dans l'onglet Alertes ; avec `ai.assistant.can_propose` elles naissent aussi de la discussion.
@@ -32,6 +36,15 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 ### Modifié
 
 - **Le programme de mise à jour autonome publié avec une version contient désormais le registre des migrations**, et SHA256SUMS le nomme avec le zip et les deux nomenclatures.
+
+### Corrigé
+
+- Les noms d'étapes gardés par workflow ont un plafond.
+- Les lanceurs Windows se rabattent sur `python` quand le lanceur `py` n'est pas installé.
+
+### Sécurité
+
+- Seule la dernière version publiée est prise en charge (politique de sécurité).
 
 ### Greffons
 

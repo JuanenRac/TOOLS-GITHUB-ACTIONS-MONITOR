@@ -11,6 +11,8 @@ Settings (the `retention` block of the configuration; every one is read through 
     retention.events_max_kb   512    the ceiling in bytes of the feed FILE (the file backend): the feed is cut to its newest half beyond it, as it always was
     retention.interval_hours  24     how often the purge runs (a tick of maintenance checks the clock; the purge itself is one short pass)
     retention.warn_events_mb  20     `--doctor` warns when the events of an account are bigger than this
+    retention.legal_hold      false  true = NOTHING is removed by age or by number: no purge of events, analytics or scores (scheduled or on demand), no pruning of reports or of backups, no trimming of
+                                     the feed or of the record of prompts, no rotation of the log of actions (it grows) and no purge of it. The other categories are in storage/compliance_retention.py.
 
 A retention shorter than the longest window that reads it (the comparison of periods for the events, `analytics.keep_days` for the analytics) is raised to that window when the purge runs
 (`effective`) and the doctor says so: nothing is purged that a window still needs.
@@ -77,6 +79,18 @@ def effective(config):
     return out
 
 
+def held(config=None):
+    """True while `retention.legal_hold` is on: every place that removes old data asks here first. Without `config` the configuration file is read (cached a few seconds)."""
+    if config is None:
+        try:
+            from github_actions_monitor.app import toolconfig
+            config = toolconfig.raw_config()
+        except Exception:   # noqa: BLE001
+            return False
+    block = config.get("retention") if isinstance(config, dict) and isinstance(config.get("retention"), dict) else {}
+    return block.get("legal_hold") is True
+
+
 def configured(config):
     """True when the configuration carries a `retention` block of its own (the doctor asks this of a monitor that runs as a service)."""
     return isinstance(config, dict) and isinstance(config.get("retention"), dict) and bool(config["retention"])
@@ -107,19 +121,27 @@ def audit(storage, account_id):
     return doc if isinstance(doc, dict) and isinstance(doc.get("runs"), list) else {"last_run": "", "last_run_epoch": 0, "runs": []}
 
 
-def run(storage, account_id, cfg, now=None):
-    """One pass for one account with the settings `cfg` (from `settings`). Returns the audit line it wrote. A failure is recorded in the line (`error`) and never raised."""
+def run(storage, account_id, cfg, now=None, config=None):
+    """One pass for one account with the settings `cfg` (from `settings`). Returns the audit line it wrote. A failure is recorded in the line (`error`) and never raised. Under a legal hold nothing is
+    removed and the line says so (`error`: legal_hold). A pass that removes something also leaves a line in the log of actions."""
     now = time.time() if now is None else now
     events_before, analytics_before = cutoffs(cfg, now)
     line = {"at": _stamp(datetime.fromtimestamp(now, timezone.utc)), "mode": cfg["mode"], "events_removed": 0, "events_kept": 0, "archived": "", "analytics_removed": 0, "scores_removed": 0, "error": ""}
     try:
+        if held(config):
+            raise PermissionError("legal_hold")
         archive_dir = storage.archive_dir(account_id) if cfg["mode"] == "archive" else None
         result = storage.purge_events(account_id, events_before, archive_dir=archive_dir)
         line.update(events_removed=result["removed"], events_kept=result["kept"], archived=Path(result["archived"]).name if result["archived"] else "")
         line["analytics_removed"] = storage.purge_analytics(account_id, analytics_before)["removed"]
         line["scores_removed"] = storage.purge_score_snapshots(account_id, analytics_before + "T00")["removed"]
     except Exception as error:      # noqa: BLE001 - a purge that cannot run is said in the audit; the monitor goes on
-        line["error"] = f"{type(error).__name__}: {str(error)[:120]}"
+        line["error"] = "legal_hold" if str(error) == "legal_hold" else f"{type(error).__name__}: {str(error)[:120]}"
+    removed = line["events_removed"] + line["analytics_removed"] + line["scores_removed"]
+    if removed:
+        from github_actions_monitor.security import audit_log
+        audit_log.record(config if isinstance(config, dict) else {}, "retention_purge", account=str(account_id), target="events",
+                         details={"events": line["events_removed"], "analytics_days": line["analytics_removed"], "scores": line["scores_removed"], "mode": cfg["mode"]})
     doc = audit(storage, account_id)
     doc.update(last_run=line["at"], last_run_epoch=now, runs=(doc["runs"] + [line])[-AUDIT_KEEP:])
     try:
@@ -140,7 +162,7 @@ def tick(storage, account_id, config, now=None):
     cfg = effective(config)
     if not due(storage, account_id, cfg, now):
         return None
-    return run(storage, account_id, cfg, now)
+    return run(storage, account_id, cfg, now, config=config)
 
 
 def report(storage, account_id, config):

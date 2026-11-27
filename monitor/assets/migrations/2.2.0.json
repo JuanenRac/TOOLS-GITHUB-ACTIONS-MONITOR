@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.2.0",
  "previous": "2.1.8",
- "digest": "c1a202a9db9f0b47667aa9200eea993df613661ee952c98e01cb6df4d795cffc",
+ "digest": "9b7d82476938c2ee6d73a85b66de09fd0aac6efde376d5ad490148c7b9c70987",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -47,6 +47,112 @@
      "re": "^http://(127\\.0\\.0\\.1|localhost|\\[::1\\]):\\d{2,5}\\Z"
     },
     "default": "http://127.0.0.1:11434"
+   },
+   {
+    "key": "audit_checkpoints.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "audit_export.allow_private_targets",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "audit_export.batch",
+    "kind": "int",
+    "bounds": [
+     1,
+     1000
+    ],
+    "default": 100
+   },
+   {
+    "key": "audit_export.ca_file",
+    "kind": "text",
+    "bounds": {
+     "re": "^[^\\x00-\\x1f]{0,400}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "audit_export.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "audit_export.host",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9.:-]{0,200}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "audit_export.max_mb",
+    "kind": "int",
+    "bounds": [
+     1,
+     1000
+    ],
+    "default": 50
+   },
+   {
+    "key": "audit_export.path",
+    "kind": "text",
+    "bounds": {
+     "re": "^[^\\x00-\\x1f]{0,400}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "audit_export.port",
+    "kind": "int",
+    "bounds": [
+     1,
+     65535
+    ],
+    "default": 6514
+   },
+   {
+    "key": "audit_export.spool_mb",
+    "kind": "int",
+    "bounds": [
+     1,
+     10000
+    ],
+    "default": 50
+   },
+   {
+    "key": "audit_export.target",
+    "kind": "enum",
+    "bounds": [
+     "file",
+     "syslog",
+     "http"
+    ],
+    "default": "file"
+   },
+   {
+    "key": "audit_export.tls",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "audit_export.token_env",
+    "kind": "text",
+    "bounds": {
+     "re": "^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|PATHEXT|COMSPEC|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|SSH_AUTH_SOCK|MONITOR_SUPERVISOR_KEY|MONITOR_ACCESS_TOKEN|MONITOR_WEBHOOK_SECRET|MONITOR_SLACK_SIGNING_SECRET|MONITOR_DISCORD_PUBLIC_KEY|MONITOR_HEARTBEAT_URL)\\Z)(?:[A-Z_][A-Z0-9_]{0,63})?\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "audit_export.url",
+    "kind": "text",
+    "bounds": {
+     "re": "^(https?://[^\\s@]{1,400})?\\Z"
+    },
+    "default": ""
    },
    {
     "key": "external_ci.alert.enabled",
@@ -473,6 +579,47 @@
     "default": false
    },
    {
+    "key": "retention.ai_log_days",
+    "kind": "int",
+    "bounds": [
+     0,
+     3650
+    ],
+    "default": 0
+   },
+   {
+    "key": "retention.audit_days",
+    "kind": "int",
+    "bounds": [
+     0,
+     3650
+    ],
+    "default": 0
+   },
+   {
+    "key": "retention.backups_days",
+    "kind": "int",
+    "bounds": [
+     0,
+     3650
+    ],
+    "default": 0
+   },
+   {
+    "key": "retention.legal_hold",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "retention.reports_days",
+    "kind": "int",
+    "bounds": [
+     0,
+     3650
+    ],
+    "default": 0
+   },
+   {
     "key": "secrets.backend",
     "kind": "enum",
     "bounds": [
@@ -563,6 +710,29 @@
      "re": "^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|PATHEXT|COMSPEC|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|SSH_AUTH_SOCK|MONITOR_SUPERVISOR_KEY|MONITOR_ACCESS_TOKEN|MONITOR_WEBHOOK_SECRET|MONITOR_SLACK_SIGNING_SECRET|MONITOR_DISCORD_PUBLIC_KEY|MONITOR_HEARTBEAT_URL)\\Z)(?:[A-Z_][A-Z0-9_]{0,63})?\\Z"
     },
     "default": "VAULT_TOKEN"
+   },
+   {
+    "key": "security.egress_allow",
+    "kind": "names",
+    "bounds": {
+     "re": "^(program:[a-z0-9_.-]{1,40}|(\\*\\.)?[a-z0-9.-]{1,200}|[0-9a-f:.]{2,45})\\Z"
+    },
+    "default": []
+   },
+   {
+    "key": "security.egress_policy",
+    "kind": "enum",
+    "bounds": [
+     "default",
+     "github_only",
+     "none"
+    ],
+    "default": "default"
+   },
+   {
+    "key": "security.read_only_strict",
+    "kind": "bool",
+    "default": false
    },
    {
     "key": "sources.multi_owner",

@@ -11,13 +11,16 @@ goto ppdone
 :nopp
 set "PYTHONPATH=%~dp0src"
 :ppdone
+set "PY=py -3"
+where py >nul 2>nul
+if errorlevel 1 set "PY=python"
 where gh >nul 2>nul
 if errorlevel 1 (
-  py -3 -m github_actions_monitor.cli.launcher_msg gh_missing 2>nul || echo GitHub CLI ^(gh^) not found. Install it and run: gh auth login
+  %PY% -m github_actions_monitor.cli.launcher_msg gh_missing 2>nul || echo GitHub CLI ^(gh^) not found. Install it and run: gh auth login
   pause
   exit /b 1
 )
-py -3 -m github_actions_monitor.lite %*
+%PY% -m github_actions_monitor.lite %*
 echo.
-py -3 -m github_actions_monitor.cli.launcher_msg stopped 2>nul || echo The monitor has stopped.
+%PY% -m github_actions_monitor.cli.launcher_msg stopped 2>nul || echo The monitor has stopped.
 pause

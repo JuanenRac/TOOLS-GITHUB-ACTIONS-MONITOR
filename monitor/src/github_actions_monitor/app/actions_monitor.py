@@ -3699,11 +3699,15 @@ class Handler(BaseHTTPRequestHandler):
                 self.json_reply({"ok": False, "error": "audit_log_required", "code": "audit_unwritable"}, 503)
                 return
             with i18n.use_language(self.request_language()):
-                try:
-                    self.handle_post()
-                except Exception as error:      # noqa: BLE001 - see storage_failure
-                    if not self.storage_failure(error):
-                        raise
+                from github_actions_monitor.security import compliance_guard
+                if compliance_guard.route_refused(route, toolconfig.raw_config()):      # security.read_only_strict: nothing that writes is even prepared
+                    self.json_reply({"ok": False, "error": "forbidden", "code": "read_only_strict", "message": i18n.t("ui.compliance.refused")}, 403)
+                else:
+                    try:
+                        self.handle_post()
+                    except Exception as error:      # noqa: BLE001 - see storage_failure
+                        if not self.storage_failure(error):
+                            raise
             self.audit_post(self.path.split("?")[0])
         finally:
             self.drain_body(counted)

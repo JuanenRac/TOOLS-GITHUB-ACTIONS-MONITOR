@@ -5,7 +5,7 @@
   * `ops.purge.enabled` (off by default): while it is off the route does not exist and this module refuses.
   * a good copy newer than `ops.purge.require_backup_hours` (24 by default; 0 = not asked): a purge that removes data is refused without one.
 
-A request is a DRY RUN unless it says otherwise: it returns the policy in force and how many events would be removed or archived, and changes nothing. A real purge writes the same line in the audit
+A request is a DRY RUN unless it says otherwise: it returns the policy in force and how many events would be removed or archived, and changes nothing. Under `retention.legal_hold` it is refused (legal_hold). A real purge writes the same line in the audit
 document of the retention (`retention_audit`) as the scheduled one, and the route leaves its line in the log of actions.
 """
 import time
@@ -41,7 +41,9 @@ def run(config, storage, account_id, folder=None, now=None, dry_run=True):
     found = plan(config, storage, account_id, folder, now)
     if dry_run:
         return {"dry_run": True, **found}
+    if retention.held(config):
+        raise OpsError("legal_hold")
     if not found["backup_ok"]:
         raise OpsError("purge_no_backup")
-    line = retention.run(storage, account_id, retention.effective(config), now)
+    line = retention.run(storage, account_id, retention.effective(config), now, config=config)
     return {"dry_run": False, **found, "line": line}
