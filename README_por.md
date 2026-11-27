@@ -355,6 +355,9 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/EXTERNAL_CI_por.md`](monitor/docs/EXTERNAL_CI_por.md): Fontes de CI externas, só de leitura: Buildbot, GitLab CI, Jenkins, Azure Pipelines
 - [`monitor/docs/PLUGINS_por.md`](monitor/docs/PLUGINS_por.md): Plugins (desligados por predefinição), os pacotes, o isolamento e ler o token de um cofre de segredos
 - [`monitor/docs/POSTURE_por.md`](monitor/docs/POSTURE_por.md): Postura dos repositórios e da organização, só de leitura
+- [`monitor/docs/COMPLIANCE_por.md`](monitor/docs/COMPLIANCE_por.md): Conformidade: só leitura estrita, política de rede, relatório, retenção e retenção legal, registo de ações assinado e exportado
+- [`monitor/docs/ECOSYSTEM_TOOLS_por.md`](monitor/docs/ECOSYSTEM_TOOLS_por.md): As ferramentas à volta do monitor e até onde cada uma é suportada
+- [`monitor/docs/EDITIONS_por.md`](monitor/docs/EDITIONS_por.md): Completa e Lite: o que há em cada edição
 - [`monitor/docs/AI_CONNECTION_por.md`](monitor/docs/AI_CONNECTION_por.md): Ligar uma ferramenta de IA: tudo o que o monitor diz, como sinais, no resumo, no endpoint, nas ferramentas MCP e no hook
 - [`monitor/docs/AI_SETUP_PROMPT_por.md`](monitor/docs/AI_SETUP_PROMPT_por.md): Configurar o monitor com uma IA: um prompt para colar no teu assistente de IA que o instala, pergunta o que queres e escreve a configuração
 - [`monitor/docs/QUOTA_por.md`](monitor/docs/QUOTA_por.md): Mais quota, menos gasto: modo poupança, o painel central, uma GitHub App e como partilhar a quota

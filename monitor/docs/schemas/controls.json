@@ -1,0 +1,81 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "controls": [
+  {
+   "id": "sqlite_contention",
+   "status": "IMP",
+   "tests": [
+    "test_compliance_records",
+    "test_storage_sqlite"
+   ]
+  },
+  {
+   "id": "storage_migrations",
+   "status": "IMP",
+   "tests": [
+    "test_storage_migrate"
+   ]
+  },
+  {
+   "id": "retention_by_category",
+   "status": "IMP",
+   "tests": [
+    "test_compliance_records",
+    "test_storage_retention"
+   ]
+  },
+  {
+   "id": "incoming_webhook",
+   "status": "IMP",
+   "tests": [
+    "test_215_webhook_skew",
+    "test_289_webhook_size_first",
+    "test_famf_webhook_receiver"
+   ]
+  },
+  {
+   "id": "metrics_labels",
+   "status": "IMP",
+   "tests": [
+    "test_g1_metrics"
+   ]
+  },
+  {
+   "id": "timezone",
+   "status": "IMP",
+   "tests": [
+    "test_timezone"
+   ]
+  },
+  {
+   "id": "read_only_strict",
+   "status": "IMP",
+   "tests": [
+    "test_compliance_guard"
+   ]
+  },
+  {
+   "id": "egress_policy",
+   "status": "IMP",
+   "tests": [
+    "test_compliance_guard"
+   ]
+  },
+  {
+   "id": "audit_chain",
+   "status": "IMP",
+   "tests": [
+    "test_compliance_records",
+    "test_218_audit_anchor"
+   ]
+  },
+  {
+   "id": "service_and_volume",
+   "status": "PAR",
+   "tests": [
+    "test_182_service"
+   ]
+  }
+ ]
+}

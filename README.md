@@ -359,6 +359,9 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/EXTERNAL_CI.md`](monitor/docs/EXTERNAL_CI.md): External CI sources, read only: Buildbot, GitLab CI, Jenkins, Azure Pipelines
 - [`monitor/docs/PLUGINS.md`](monitor/docs/PLUGINS.md): Plugins (off by default), their packages, isolation, and reading the token from a secret store
 - [`monitor/docs/POSTURE.md`](monitor/docs/POSTURE.md): Posture of repositories and organization, read only
+- [`monitor/docs/COMPLIANCE.md`](monitor/docs/COMPLIANCE.md): Compliance: strict read-only mode, network policy, report, retention and legal hold, signed and exported log of actions
+- [`monitor/docs/ECOSYSTEM_TOOLS.md`](monitor/docs/ECOSYSTEM_TOOLS.md): The tools around the monitor and how far each is supported
+- [`monitor/docs/EDITIONS.md`](monitor/docs/EDITIONS.md): Complete and Lite: what is in each edition
 - [`monitor/docs/AI_CONNECTION.md`](monitor/docs/AI_CONNECTION.md): Connect an AI tool: everything the monitor says, as signals, in the brief, the endpoint, the MCP tools and the hook
 - [`monitor/docs/AI_SETUP_PROMPT.md`](monitor/docs/AI_SETUP_PROMPT.md): Set up the monitor with an AI: a prompt to paste into your AI assistant that installs it, asks what you want and writes the configuration
 - [`monitor/docs/QUOTA.md`](monitor/docs/QUOTA.md): More quota, less spending: Low mode, the central panel, a GitHub App and how to share the allowance

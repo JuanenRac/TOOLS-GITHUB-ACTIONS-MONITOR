@@ -108,3 +108,7 @@ Linha de comandos: `identity status`, `identity plan`, `identity apply`.
 ```
 python bin/monitor_cli.py identity plan
 ```
+
+## Conformidade e registo de ações
+
+`compliance report` diz que garantias oferece esta instalação; `audit verify|checkpoint|purge|export` trabalha sobre a cadeia do registo de ações. Ver [COMPLIANCE_por.md](COMPLIANCE_por.md).

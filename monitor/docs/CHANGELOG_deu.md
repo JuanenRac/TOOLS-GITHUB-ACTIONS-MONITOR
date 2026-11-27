@@ -11,6 +11,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Hinzugefügt
 
+- **Strikter Nur-Lese-Modus und Netzwerkrichtlinie** (`security.read_only_strict`, `security.egress_policy`, beide aus): unterhalb aller Teile durchgesetzt; ein abgelehnter Befehl oder eine Verbindung scheitert mit Nennung der Einstellung, und der Doctor listet Ziele außerhalb der Richtlinie.
+- **Compliance-Bericht** (`compliance report`, `/api/compliance/report`, ein Kasten im Tab Sicherheit): jede Zeile geprüft oder nur angegeben.
+- **Aufbewahrung jeder Kategorie und Aufbewahrungssperre**, **signierte Prüfpunkte und Bereinigung des Aktionsprotokolls** (`audit verify|checkpoint|purge`) und **Export dieses Protokolls** in eine Datei, per Syslog über TLS oder HTTP; alles ab Werk aus.
+- Neue Anleitungen: Compliance, die Werkzeuge rund um den Monitor und der Inhalt jeder Edition. Ein Workflow führt die übergreifenden Prüfungen je Bereich aus, eine Datenbank über 1 GB und den Dienst unter echtem systemd.
 - **KI-Vorschläge werden von Menschen entschieden**: als KI markiert, mit Fingerabdruck, überstehen einen Neustart, brauchen zwei Personen bei mehreren Benutzern oder den getippten Code bei einem, und stehen im Reiter Meldungen; mit `ai.assistant.can_propose` entstehen sie auch im Chat.
 - **Freier Chat mit nur lesenden Werkzeugen** (`ai.chat.enabled`, aus), **ähnliche Meldungen per lokalem Embedding-Modell** (`ai.rag.enabled`, aus), **Repository-Bericht und Triage-Entwurf zum Kopieren** und **die Kurzberichte als MCP-Ressourcen**.
 - Ein Link mit Port und `@` im Pfad wird nicht mehr wie Benutzer und Passwort maskiert.
@@ -29,6 +33,15 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 ### Geändert
 
 - **Der einzeln veröffentlichte Updater eines Releases enthält nun das Migrationsregister**, und SHA256SUMS nennt ihn zusammen mit dem Zip und den zwei Stücklisten.
+
+### Behoben
+
+- Die je Workflow gespeicherten Schrittnamen haben eine Obergrenze.
+- Die Windows-Starter nehmen `python`, wenn der Starter `py` nicht installiert ist.
+
+### Sicherheit
+
+- Unterstützt wird nur die neueste veröffentlichte Version (Sicherheitsrichtlinie).
 
 ### Plugins
 

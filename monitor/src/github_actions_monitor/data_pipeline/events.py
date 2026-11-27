@@ -238,7 +238,8 @@ class Feed:
         """Keeps the newest half of the feed once it is past MAX_BYTES. Tolerant: a byte that is not UTF-8 (a cut of power, a bad disk) is read as a replacement character and never raises,
         and a failure here is never allowed to stop the notifications that come after the write."""
         try:
-            if self.events_file.stat().st_size <= MAX_BYTES:
+            from github_actions_monitor.storage import retention
+            if self.events_file.stat().st_size <= MAX_BYTES or retention.held():
                 return
             lines = self.events_file.read_bytes().decode("utf-8", errors="replace").splitlines()
             private_io.write_private(self.events_file, "\n".join(lines[len(lines) // 2:]) + "\n")

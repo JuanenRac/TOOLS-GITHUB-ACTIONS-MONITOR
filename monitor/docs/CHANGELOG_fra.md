@@ -11,6 +11,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Mode lecture seule strict et politique réseau** (`security.read_only_strict`, `security.egress_policy`, désactivés) : appliqués sous toutes les parties ; une commande ou connexion refusée échoue en nommant le réglage, et le doctor liste les destinations hors politique.
+- **Rapport de conformité** (`compliance report`, `/api/compliance/report`, un encadré dans l'onglet Sécurité) : chaque ligne vérifiée ou seulement déclarée.
+- **Conservation de chaque catégorie et conservation légale**, **points de contrôle signés et purge du journal des actions** (`audit verify|checkpoint|purge`) et **export de ce journal** vers un fichier, syslog sur TLS ou HTTP ; tout désactivé par défaut.
+- Nouveaux guides : conformité, les outils autour du moniteur et le contenu de chaque édition. Un workflow exécute les contrôles transversaux par domaine, une base de plus de 1 Go et le service sur un vrai systemd.
 - **Les propositions de l'IA sont décidées par des personnes** : marquées IA, avec empreinte, conservées après redémarrage, deux personnes quand il y a plusieurs utilisateurs ou le code saisi quand il n'y en a qu'un, visibles dans l'onglet Alertes ; avec `ai.assistant.can_propose` elles naissent aussi de la discussion.
 - **Discussion libre avec outils en lecture seule** (`ai.chat.enabled`, désactivée), **alertes similaires par un modèle d'embedding local** (`ai.rag.enabled`, désactivé), **rapport d'un dépôt et brouillon de triage à copier** et **les résumés comme ressources MCP**.
 - Un lien avec port et `@` dans le chemin n'est plus masqué comme un utilisateur et un mot de passe.
@@ -29,6 +33,15 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 ### Modifié
 
 - **Le programme de mise à jour autonome publié avec une version contient désormais le registre des migrations**, et SHA256SUMS le nomme avec le zip et les deux nomenclatures.
+
+### Corrigé
+
+- Les noms d'étapes gardés par workflow ont un plafond.
+- Les lanceurs Windows se rabattent sur `python` quand le lanceur `py` n'est pas installé.
+
+### Sécurité
+
+- Seule la dernière version publiée est prise en charge (politique de sécurité).
 
 ### Greffons
 

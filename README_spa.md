@@ -355,6 +355,9 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/EXTERNAL_CI_spa.md`](monitor/docs/EXTERNAL_CI_spa.md): Fuentes de CI externas, solo lectura: Buildbot, GitLab CI, Jenkins, Azure Pipelines
 - [`monitor/docs/PLUGINS_spa.md`](monitor/docs/PLUGINS_spa.md): Complementos (apagados por defecto), sus paquetes, el aislamiento y leer el token de un almacén de secretos
 - [`monitor/docs/POSTURE_spa.md`](monitor/docs/POSTURE_spa.md): Postura de repositorios y organización, solo lectura
+- [`monitor/docs/COMPLIANCE_spa.md`](monitor/docs/COMPLIANCE_spa.md): Cumplimiento: solo lectura estricto, política de red, informe, retención y retención legal, registro de acciones firmado y exportado
+- [`monitor/docs/ECOSYSTEM_TOOLS_spa.md`](monitor/docs/ECOSYSTEM_TOOLS_spa.md): Las herramientas que rodean al monitor y hasta dónde se soporta cada una
+- [`monitor/docs/EDITIONS_spa.md`](monitor/docs/EDITIONS_spa.md): Completa y Lite: qué hay en cada edición
 - [`monitor/docs/AI_CONNECTION_spa.md`](monitor/docs/AI_CONNECTION_spa.md): Conectar una herramienta de IA: todo lo que dice el monitor, como señales, en el resumen, el endpoint, las herramientas MCP y el hook
 - [`monitor/docs/AI_SETUP_PROMPT_spa.md`](monitor/docs/AI_SETUP_PROMPT_spa.md): Configurar el monitor con una IA: un prompt para pegar en tu asistente de IA que lo instala, te pregunta qué quieres y escribe la configuración
 - [`monitor/docs/QUOTA_spa.md`](monitor/docs/QUOTA_spa.md): Más cuota, menos gasto: modo Bajo, el panel central, una GitHub App y cómo compartir la cuota

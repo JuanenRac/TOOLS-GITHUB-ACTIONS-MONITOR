@@ -6,6 +6,10 @@ Segnala i problemi di sicurezza in privato a `electrohobby3d@gmail.com` (o con u
 Segnalazioni utili sono: un modo di raggiungere la pagina web locale da un'altra macchina, un modo di far scrivere il monitor fuori dalla propria cartella, un modo di leggere un token
 o un file privato tramite la pagina o l'endpoint delle metriche, o un'iniezione tramite il nome di un repository, di un workflow o una riga di log.
 
+## Versioni supportate
+
+È supportata solo l'ultima versione pubblicata. Le correzioni di sicurezza escono in una nuova versione; le versioni e i rami precedenti non ne ricevono. Aggiorna prima di segnalare un problema e controlla se c'è ancora.
+
 ## Punti di progetto su cui puoi contare
 - La pagina web e l'endpoint opzionale delle metriche ascoltano solo su `127.0.0.1` e rifiutano richieste il cui `Host` o `Origin` non sia locale. La modalità rete opzionale (spenta di default) aggiunge un token di accesso per ogni richiesta, un elenco di nomi host accettati e un avviso persistente.
 - Per impostazione predefinita il monitor non conserva né mostra token; chiama il tuo client `gh` autenticato. Il token opzionale conservato dal monitor vive nell'archivio sicuro del sistema e non viene mai scritto in un'impostazione, un log o una risposta.

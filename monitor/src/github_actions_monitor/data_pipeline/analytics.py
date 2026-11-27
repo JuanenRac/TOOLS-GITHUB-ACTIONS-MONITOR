@@ -29,6 +29,9 @@ BAD = ("failure", "timed_out", "startup_failure")
 DEFAULTS = {"enabled": True, "keep_days": 30, "min_samples": 5, "max_samples": 200, "slow_factor": 1.5, "jobs_per_cycle": 3, "steps": True, "flaky": True, "query_timeout_s": 120}
 
 
+MAX_STEP_NAMES = 200      # step names kept per workflow
+
+
 def percentile(values, q):
     """Nearest-rank percentile (q in 0..100) of a list of numbers; None for an empty list."""
     data = sorted(v for v in values if isinstance(v, (int, float)) and not isinstance(v, bool))
@@ -130,7 +133,9 @@ class Store:
                 if with_steps:
                     for name, seconds in steps.items():
                         slot = self.data["steps"].setdefault(key, {})
-                        slot[name] = (slot.get(name, []) + [seconds])[-self.max_samples:]
+                        slot[name] = (slot.pop(name, []) + [seconds])[-self.max_samples:]      # put back at the end: the least recently seen name is the first one
+                        while len(slot) > MAX_STEP_NAMES:      # a matrix that puts an id in the name of a step would grow the file for ever
+                            del slot[next(iter(slot))]
             self.dirty = True
             return True
 

@@ -13,6 +13,10 @@ when this file and `tool_version.py` disagree.
 
 ### Added
 
+- **Strict read-only mode and network policy** (`security.read_only_strict`, `security.egress_policy`, both off): enforced below every part of the monitor; a refused command or connection fails naming the setting, and the doctor lists destinations outside the policy.
+- **Compliance report** (`compliance report`, `/api/compliance/report`, a box in the Security tab): each line checked or only declared.
+- **Retention of every category and legal hold**, **signed checkpoints and purge of the log of actions** (`audit verify|checkpoint|purge`), and **export of that log** to a file, syslog over TLS or HTTP; all off by default.
+- New guides: compliance, the tools around the monitor, and what each edition has. A workflow runs the cross-cutting checks by area, a database of more than 1 GB and the service on a real systemd.
 - **Proposals of the AI are decided by people**: they are marked as AI, carry a fingerprint, survive a restart, need two persons when there are two or more users, or the typed code when there is one, and are shown in the Alerts tab with `ai.assistant.can_propose` for those born in the chat.
 - **Free chat with read-only tools** (`ai.chat.enabled`, off), **similar alerts by a local embedding model** (`ai.rag.enabled`, off), **report of a repository and triage draft to copy**, and **the briefs as MCP resources**.
 - A link with a port and an `@` in its path is no longer cleaned as if it were a user and a password.
@@ -31,6 +35,15 @@ when this file and `tool_version.py` disagree.
 ### Changed
 
 - **The stand-alone updater published with a release now carries the registry of migrations inside**, and SHA256SUMS names it together with the zip and the two bills of materials.
+
+### Fixed
+
+- The names of the steps kept per workflow have a ceiling.
+- The Windows launchers fall back to `python` where the `py` launcher is not installed.
+
+### Security
+
+- Only the latest published version is supported (security policy).
 
 ### Plugins
 

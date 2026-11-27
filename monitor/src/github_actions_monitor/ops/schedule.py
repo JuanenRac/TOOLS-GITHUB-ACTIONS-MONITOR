@@ -58,8 +58,11 @@ def list_backups(config=None, folder=None):
 
 def rotate(config=None, folder=None):
     """Removes the oldest copies beyond `ops.backup.keep` (only files with the name of a copy). Returns the names removed."""
+    from github_actions_monitor.storage import retention
     keep = opsconf.settings(config)["backup"]["keep"]
     removed = []
+    if retention.held(config):
+        return removed
     for row in list_backups(config, folder)[keep:]:
         try:
             (opsconf.backup_dir(config, folder) / row["name"]).unlink()

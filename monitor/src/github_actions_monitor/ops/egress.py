@@ -14,7 +14,7 @@ from github_actions_monitor import families
 #: id -> (hosts that do not depend on the configuration, setting that makes the row active (None = always), kind of the consequence text)
 ROWS = (
     ("github_api", ("api.github.com",), None),
-    ("github_download", ("github.com", "objects.githubusercontent.com"), "updates.check"),
+    ("github_download", ("github.com", "objects.githubusercontent.com", "release-assets.githubusercontent.com"), "updates.check"),
     ("github_raw", ("raw.githubusercontent.com",), "lint.anonymous_public"),
     ("github_status", ("www.githubstatus.com",), "github_status.enabled"),
     ("ntfy", ("ntfy.sh",), "notify.channels.ntfy.enabled"),

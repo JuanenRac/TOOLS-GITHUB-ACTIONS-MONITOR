@@ -186,6 +186,16 @@ docker compose pull && docker compose up -d
 gh attestation verify oci://ghcr.io/juanenrac/tools-github-actions-monitor:2.1.0 --owner JuanenRac
 ```
 
+A partir da 2.2.0 a imagem é também assinada com Cosign sem chave (identidade do workflow de publicação):
+
+```sh
+cosign verify ghcr.io/juanenrac/tools-github-actions-monitor:2.2.0 \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --certificate-identity-regexp '^https://github\.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/\.github/workflows/release-image\.yml@refs/tags/v'
+```
+
+**O que se testa e onde**: o contentor (utilizador que não é root, sistema de ficheiros só de leitura, volumes, segredos, webhook atrás de um proxy) no workflow Docker audit; a unidade do serviço num systemd real e uma base de dados com mais de 1 GB no workflow Cross-cutting. Os sistemas de ficheiros de rede (NFS) e outras arquiteturas de hardware não são testados.
+
 ## Atrás de um proxy inverso
 
 Por defeito, o monitor só escuta em `127.0.0.1`. Se precisar de lhe chegar a partir de outra máquina, ponha à frente um proxy inverso com TLS, ative o modo de rede (`listen.network`: então todos os pedidos têm de levar o token de acesso) e DECLARE o proxy (`listen.proxy_public_host` com o seu nome público, `listen.secure_cookie` ou `listen.trusted_proxy`). O monitor recusa qualquer pedido cujo `Host` não seja o seu próprio endereço nem esse nome público; por isso o proxy tem de o enviar e tem de acrescentar o endereço real do cliente:

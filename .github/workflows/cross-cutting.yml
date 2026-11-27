@@ -1,0 +1,88 @@
+name: Cross-cutting
+
+# The checks that cut across the whole monitor, one job for each area, so that a red one says which area it belongs to (tools/cross_cutting.py has the list), and the checks that need a
+# machine: a real systemd and a large database. It does not replace the suite of ci.yml.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "monitor/src/**"
+      - "monitor/tests/**"
+      - "deploy/**"
+      - "tools/cross_cutting.py"
+      - "tools/env_checks.py"
+      - ".github/workflows/cross-cutting.yml"
+  schedule:
+    - cron: "17 5 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cross-cutting-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  area:
+    name: Area ${{ matrix.area }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        area: [isolation, network, webhook, export, storage, full]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: The checks of the area
+        env:
+          AREA: ${{ matrix.area }}
+        run: python tools/cross_cutting.py "$AREA"
+
+  large-database:
+    name: A database of more than 1 GB
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Write, count and purge
+        run: python tools/env_checks.py sqlite --events 1500000
+
+  systemd:
+    name: The service unit on a real systemd
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install as the comments of the unit say, with a gh that is not logged in
+        run: |
+          sudo useradd --system --home-dir /var/lib/github-actions-monitor --create-home --shell /usr/sbin/nologin monitor
+          sudo install -d -o monitor -g monitor -m 700 /var/lib/github-actions-monitor /etc/github-actions-monitor
+          sudo mkdir -p /opt/github_actions_monitor
+          sudo cp -r monitor/. /opt/github_actions_monitor/
+          sed 's/^MONITOR_GITHUB_OWNER=.*/MONITOR_GITHUB_OWNER=nobody-here/;/^GH_TOKEN_FILE=/d' deploy/github-actions-monitor.env > "$RUNNER_TEMP/env"
+          sudo install -m 600 -o monitor "$RUNNER_TEMP/env" /etc/github-actions-monitor/env
+          sudo install -m 644 deploy/github-actions-monitor.service /etc/systemd/system/
+          systemd-analyze verify /etc/systemd/system/github-actions-monitor.service
+      - name: Start, health, reload, stop
+        run: |
+          sudo systemctl daemon-reload
+          sudo systemctl start github-actions-monitor || { sudo journalctl -u github-actions-monitor --no-pager | tail -n 80; exit 1; }
+          systemctl is-active github-actions-monitor
+          sudo systemctl reload github-actions-monitor
+          sleep 3
+          systemctl is-active github-actions-monitor
+          sudo systemctl stop github-actions-monitor
+          sudo journalctl -u github-actions-monitor --no-pager | tail -n 40

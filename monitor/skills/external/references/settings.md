@@ -147,7 +147,21 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `api.gzip_min_bytes` | `1024` | advanced | Smallest answer to compress (bytes) |
 | `api.max_limit` | `200` | advanced | Most items per page |
 | `api.v1_enabled` | `"auto"` | advanced | Read API under /api/v1/ |
+| `audit_checkpoints.enabled` (secure) | `false` | compliance | Signed checkpoints of the log of actions |
 | `audit_dir` | `""` | paths | Folder of audit files |
+| `audit_export.allow_private_targets` (secure) | `false` | compliance | Allow private addresses |
+| `audit_export.batch` (secure) | `100` | compliance | Lines per send |
+| `audit_export.ca_file` (secure) | `""` | compliance | Certificate authority file |
+| `audit_export.enabled` (secure) | `false` | compliance | Export the log of actions |
+| `audit_export.host` (secure) | `""` | compliance | Syslog server |
+| `audit_export.max_mb` (secure) | `50` | compliance | Size of the export file |
+| `audit_export.path` (secure) | `""` | compliance | File of the export |
+| `audit_export.port` (secure) | `6514` | compliance | Syslog port |
+| `audit_export.spool_mb` (secure) | `50` | compliance | Waiting limit before the alert |
+| `audit_export.target` (secure) | `"file"` | compliance | Destination kind |
+| `audit_export.tls` (secure) | `true` | compliance | Syslog with TLS |
+| `audit_export.token_env` (secure) | `""` | compliance | Variable with the token |
+| `audit_export.url` (secure) | `""` | compliance | Address of the HTTP receiver |
 | `audit_feed.clone_alert.bot_patterns` | `["-bot", "_bot", "deploy", "guardian"]` | sentinel | Names that are robots |
 | `audit_feed.clone_alert.check_minutes` | `30` | sentinel | Minutes between two reads of the audit log |
 | `audit_feed.clone_alert.enabled` | `false` | sentinel | Warn about abnormal clones |
@@ -605,12 +619,17 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `reports.supply_chain.enabled` (secure) | `false` | sentinel | Report on the supply chain of releases |
 | `reports.workflow_hygiene.enabled` (secure) | `false` | sentinel | Report on workflow files |
 | `repos` | `"all"` | general | Repositories |
+| `retention.ai_log_days` (secure) | `0` | compliance | Days of the record of prompts |
 | `retention.analytics_days` | `-` | paths | Keep analytics history for |
+| `retention.audit_days` (secure) | `0` | compliance | Days of the log of actions |
+| `retention.backups_days` (secure) | `0` | compliance | Days of the copies |
 | `retention.enabled` (secure) | `-` | paths | Purge old events and analytics |
 | `retention.events_days` | `-` | paths | Keep events for |
 | `retention.events_max_kb` | `-` | paths | Largest size of the feed file |
 | `retention.interval_hours` | `-` | paths | Purge every |
+| `retention.legal_hold` (secure) | `false` | compliance | Legal hold |
 | `retention.mode` (secure) | `-` | paths | What to do with old events |
+| `retention.reports_days` (secure) | `0` | compliance | Days of the report files |
 | `retention.warn_events_mb` | `-` | paths | Warn when the events are bigger than |
 | `runners.enabled` | `false` | advanced | Watch self-hosted runners |
 | `runners.group_by` | `"none"` | advanced | Group the runners by |
@@ -712,6 +731,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `secrets.vault.field` (secure) | `"token"` | plugins | Vault: name of the value |
 | `secrets.vault.path` (secure) | `""` | plugins | Vault: path of the secret |
 | `secrets.vault.token_env` (secure) | `"VAULT_TOKEN"` | plugins | Vault: environment variable of its token |
+| `security.egress_allow` (secure) | `[]` | compliance | Allowed hosts |
+| `security.egress_policy` (secure) | `"default"` | compliance | Network policy (outgoing) |
+| `security.read_only_strict` (secure) | `false` | compliance | Strict read-only mode |
 | `selfwatch.enabled` | `true` | paths | The monitor watches itself |
 | `selfwatch.interval_seconds` | `60` | paths | Seconds between two readings |
 | `selfwatch.rss_warn_mb` | `1024` | paths | Warn when its memory is above |

@@ -355,6 +355,9 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/EXTERNAL_CI_fra.md`](monitor/docs/EXTERNAL_CI_fra.md): Sources CI externes, lecture seule : Buildbot, GitLab CI, Jenkins, Azure Pipelines
 - [`monitor/docs/PLUGINS_fra.md`](monitor/docs/PLUGINS_fra.md): Greffons (désactivés par défaut), leurs paquets, l'isolation et la lecture du jeton dans un coffre
 - [`monitor/docs/POSTURE_fra.md`](monitor/docs/POSTURE_fra.md): Posture des dépôts et de l'organisation, lecture seule
+- [`monitor/docs/COMPLIANCE_fra.md`](monitor/docs/COMPLIANCE_fra.md): Conformité : lecture seule stricte, politique réseau, rapport, conservation et conservation légale, journal des actions signé et exporté
+- [`monitor/docs/ECOSYSTEM_TOOLS_fra.md`](monitor/docs/ECOSYSTEM_TOOLS_fra.md): Les outils autour du moniteur et leur niveau de prise en charge
+- [`monitor/docs/EDITIONS_fra.md`](monitor/docs/EDITIONS_fra.md): Complète et Lite : le contenu de chaque édition
 - [`monitor/docs/AI_CONNECTION_fra.md`](monitor/docs/AI_CONNECTION_fra.md): Connecter un outil d'IA : tout ce que dit le moniteur, en signaux, dans le résumé, le point d'accès, les outils MCP et le hook
 - [`monitor/docs/AI_SETUP_PROMPT_fra.md`](monitor/docs/AI_SETUP_PROMPT_fra.md): Configurer le moniteur avec une IA : un prompt à coller dans votre assistant IA qui l'installe, vous demande ce que vous voulez et écrit la configuration
 - [`monitor/docs/QUOTA_fra.md`](monitor/docs/QUOTA_fra.md): Plus de quota, moins de dépense : mode économe, le panneau central, une GitHub App et comment partager le quota

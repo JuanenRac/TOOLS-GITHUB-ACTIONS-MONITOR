@@ -11,6 +11,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Aggiunto
 
+- **Modalità di sola lettura rigorosa e criterio di rete** (`security.read_only_strict`, `security.egress_policy`, spenti): applicati sotto tutte le parti; un comando o una connessione rifiutata fallisce nominando l'impostazione, e il doctor elenca le destinazioni fuori criterio.
+- **Rapporto di conformità** (`compliance report`, `/api/compliance/report`, un riquadro nella scheda Sicurezza): ogni riga verificata o solo dichiarata.
+- **Conservazione di ogni categoria e blocco legale**, **punti di controllo firmati e pulizia del registro delle azioni** (`audit verify|checkpoint|purge`) ed **esportazione del registro** su file, syslog su TLS o HTTP; tutto spento di fabbrica.
+- Nuove guide: conformità, gli strumenti attorno al monitor e il contenuto di ogni edizione. Un workflow esegue i controlli trasversali per area, un database di oltre 1 GB e il servizio su un vero systemd.
 - **Le proposte dell'IA le decidono le persone**: marcate IA, con impronta, sopravvivono al riavvio, richiedono due persone con più utenti o il codice digitato con uno, e si vedono nella scheda Avvisi; con `ai.assistant.can_propose` nascono anche dalla chat.
 - **Chat libera con strumenti di sola lettura** (`ai.chat.enabled`, spenta), **avvisi simili con un modello di embedding locale** (`ai.rag.enabled`, spento), **rapporto di un repository e bozza di triage da copiare** e **i riepiloghi come risorse MCP**.
 - Un link con porta e `@` nel percorso non viene più oscurato come utente e password.
@@ -29,6 +33,15 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 ### Modificato
 
 - **L'aggiornatore autonomo pubblicato con una release contiene ora il registro delle migrazioni**, e SHA256SUMS lo nomina insieme allo zip e alle due distinte.
+
+### Corretto
+
+- I nomi dei passi conservati per workflow hanno un limite.
+- I lanciatori di Windows usano `python` quando il lanciatore `py` non è installato.
+
+### Sicurezza
+
+- È supportata solo l'ultima versione pubblicata (politica di sicurezza).
 
 ### Plugin
 

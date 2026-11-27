@@ -11,6 +11,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Adicionado
 
+- **Modo estrito só de leitura e política de rede** (`security.read_only_strict`, `security.egress_policy`, desligados): impostos por baixo de todas as partes; um comando ou ligação recusada falha indicando a definição, e o doctor lista os destinos fora da política.
+- **Relatório de conformidade** (`compliance report`, `/api/compliance/report`, uma caixa no separador Segurança): cada linha verificada ou só declarada.
+- **Retenção de cada categoria e retenção legal**, **pontos de controlo assinados e limpeza do registo de ações** (`audit verify|checkpoint|purge`) e **exportação desse registo** para ficheiro, syslog sobre TLS ou HTTP; tudo desligado de fábrica.
+- Guias novos: conformidade, as ferramentas à volta do monitor e o que tem cada edição. Um workflow corre as verificações transversais por área, uma base de dados com mais de 1 GB e o serviço num systemd real.
 - **As propostas da IA são decididas por pessoas**: marcadas como IA, com impressão digital, sobrevivem a um reinício, exigem duas pessoas quando há vários utilizadores ou o código escrito quando há um, e veem-se no separador Alertas; com `ai.assistant.can_propose` também nascem da conversa.
 - **Conversa livre com ferramentas só de leitura** (`ai.chat.enabled`, desligada), **alertas parecidos com um modelo local de embeddings** (`ai.rag.enabled`, desligado), **relatório de um repositório e rascunho de triagem para copiar** e **os resumos como recursos MCP**.
 - Uma ligação com porta e um `@` no caminho já não é limpa como se fosse utilizador e palavra-passe.
@@ -29,6 +33,15 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 ### Alterado
 
 - **O atualizador avulso publicado com uma versão passa a trazer o registo de migrações**, e o SHA256SUMS nomeia-o juntamente com o zip e as duas listas de materiais.
+
+### Corrigido
+
+- Os nomes de passos guardados por workflow têm um limite.
+- Os lançadores do Windows usam `python` quando o lançador `py` não está instalado.
+
+### Segurança
+
+- Só é suportada a última versão publicada (política de segurança).
 
 ### Plugins
 

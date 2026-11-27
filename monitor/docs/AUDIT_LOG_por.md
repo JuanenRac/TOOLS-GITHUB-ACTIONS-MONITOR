@@ -26,3 +26,7 @@ Um administrador (e a pessoa no computador quando não há modo equipa). Um mant
 Definições, separador Sentinela, bloco **Registo de ações**: `audit_log.enabled` (ligado), `audit_log.max_mb` (10) e `audit_log.maintainers_can_read` (desligado). `audit_log.keep_generations` (5) é o número de ficheiros rodados que se guardam. `audit_log.required` (desligado) recusa com um 503 as ações que têm de ficar registadas (as confirmações de ações no GitHub, o modo, os silêncios, as credenciais...) enquanto o registo não puder ser escrito; as definições continuam abertas para o poder corrigir.
 
 Uma cópia feita agora (`POST /api/ops/backup`) e a purga a pedido (`POST /api/ops/purge`, também um ensaio) ficam registadas como `backup_run` e `purge_run`: a linha diz quem a pediu e o resultado, nunca o conteúdo da cópia.
+
+## Pontos de controlo assinados, limpeza e exportação
+
+Com `audit_checkpoints.enabled` a cadeia é assinada com uma chave da instalação, e o registo pode ser limpo e copiado para outro lado: ver [COMPLIANCE_por.md](COMPLIANCE_por.md). Com `retention.legal_hold` o registo não é rodado nem limpo.

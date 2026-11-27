@@ -108,3 +108,7 @@ Befehlszeile: `identity status`, `identity plan`, `identity apply`.
 ```
 python bin/monitor_cli.py identity plan
 ```
+
+## Compliance und Aktionsprotokoll
+
+`compliance report` nennt die Zusicherungen dieser Installation; `audit verify|checkpoint|purge|export` arbeitet an der Kette des Aktionsprotokolls. Siehe [COMPLIANCE_deu.md](COMPLIANCE_deu.md).

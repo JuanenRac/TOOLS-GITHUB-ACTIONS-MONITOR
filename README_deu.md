@@ -355,6 +355,9 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/EXTERNAL_CI_deu.md`](monitor/docs/EXTERNAL_CI_deu.md): Externe CI-Quellen, nur lesend: Buildbot, GitLab CI, Jenkins, Azure Pipelines
 - [`monitor/docs/PLUGINS_deu.md`](monitor/docs/PLUGINS_deu.md): Plugins (standardmäßig aus), ihre Pakete, die Isolierung und das Token aus einem Geheimnisspeicher
 - [`monitor/docs/POSTURE_deu.md`](monitor/docs/POSTURE_deu.md): Sicherheitslage von Repositorys und Organisation, nur lesend
+- [`monitor/docs/COMPLIANCE_deu.md`](monitor/docs/COMPLIANCE_deu.md): Compliance: strikter Nur-Lese-Modus, Netzwerkrichtlinie, Bericht, Aufbewahrung und Sperre, signiertes und exportiertes Aktionsprotokoll
+- [`monitor/docs/ECOSYSTEM_TOOLS_deu.md`](monitor/docs/ECOSYSTEM_TOOLS_deu.md): Die Werkzeuge rund um den Monitor und ihre Unterstützung
+- [`monitor/docs/EDITIONS_deu.md`](monitor/docs/EDITIONS_deu.md): Vollständig und Lite: was in jeder Edition steckt
 - [`monitor/docs/AI_CONNECTION_deu.md`](monitor/docs/AI_CONNECTION_deu.md): Ein KI-Werkzeug verbinden: alles, was der Monitor sagt, als Signale, in der Zusammenfassung, im Endpunkt, in den MCP-Werkzeugen und im Hook
 - [`monitor/docs/AI_SETUP_PROMPT_deu.md`](monitor/docs/AI_SETUP_PROMPT_deu.md): Den Monitor mit einer KI einrichten: ein Prompt für deinen KI-Assistenten, der ihn installiert, dich fragt, was du möchtest, und die Konfiguration schreibt
 - [`monitor/docs/QUOTA_deu.md`](monitor/docs/QUOTA_deu.md): Mehr Kontingent, weniger Verbrauch: Sparmodus, das zentrale Panel, eine GitHub-App und wie man das Kontingent teilt

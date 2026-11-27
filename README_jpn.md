@@ -355,6 +355,9 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/EXTERNAL_CI_jpn.md`](monitor/docs/EXTERNAL_CI_jpn.md): 外部CIソース(読み取り専用): Buildbot、GitLab CI、Jenkins、Azure Pipelines
 - [`monitor/docs/PLUGINS_jpn.md`](monitor/docs/PLUGINS_jpn.md): プラグイン（既定でオフ）、パッケージ、分離、シークレット保管庫からのトークン読み取り
 - [`monitor/docs/POSTURE_jpn.md`](monitor/docs/POSTURE_jpn.md): リポジトリと組織のセキュリティ体制(読み取り専用)
+- [`monitor/docs/COMPLIANCE_jpn.md`](monitor/docs/COMPLIANCE_jpn.md): コンプライアンス: 厳格な読み取り専用、ネットワークポリシー、レポート、保持と訴訟ホールド、署名とエクスポートされる操作ログ
+- [`monitor/docs/ECOSYSTEM_TOOLS_jpn.md`](monitor/docs/ECOSYSTEM_TOOLS_jpn.md): モニター周辺のツールとサポート水準
+- [`monitor/docs/EDITIONS_jpn.md`](monitor/docs/EDITIONS_jpn.md): 完全版と Lite: 各エディションの内容
 - [`monitor/docs/AI_CONNECTION_jpn.md`](monitor/docs/AI_CONNECTION_jpn.md): AI ツールを接続する:モニターが伝えるすべてをシグナルとして、ブリーフ、エンドポイント、MCP ツール、フックで提供
 - [`monitor/docs/AI_SETUP_PROMPT_jpn.md`](monitor/docs/AI_SETUP_PROMPT_jpn.md): AI でモニターをセットアップする:AI アシスタントに貼り付けると、インストールし、希望を尋ね、設定を書き込むプロンプト
 - [`monitor/docs/QUOTA_jpn.md`](monitor/docs/QUOTA_jpn.md): クォータを増やし、消費を減らす:節約モード、中央パネル、GitHub App、クォータの共有方法

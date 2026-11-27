@@ -355,6 +355,9 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/EXTERNAL_CI_zho.md`](monitor/docs/EXTERNAL_CI_zho.md): 外部 CI 来源(只读):Buildbot、GitLab CI、Jenkins、Azure Pipelines
 - [`monitor/docs/PLUGINS_zho.md`](monitor/docs/PLUGINS_zho.md): 插件（默认关闭）、软件包、隔离以及从密钥存储读取令牌
 - [`monitor/docs/POSTURE_zho.md`](monitor/docs/POSTURE_zho.md): 仓库与组织的安全态势(只读)
+- [`monitor/docs/COMPLIANCE_zho.md`](monitor/docs/COMPLIANCE_zho.md): 合规: 严格只读、网络策略、报告、保留与法律保留、签名并导出的操作日志
+- [`monitor/docs/ECOSYSTEM_TOOLS_zho.md`](monitor/docs/ECOSYSTEM_TOOLS_zho.md): 监控器周边工具及其支持程度
+- [`monitor/docs/EDITIONS_zho.md`](monitor/docs/EDITIONS_zho.md): 完整版与 Lite: 各版型包含什么
 - [`monitor/docs/AI_CONNECTION_zho.md`](monitor/docs/AI_CONNECTION_zho.md): 连接 AI 工具:监视器说的一切,以信号形式出现在简报、端点、MCP 工具和钩子中
 - [`monitor/docs/AI_SETUP_PROMPT_zho.md`](monitor/docs/AI_SETUP_PROMPT_zho.md): 用 AI 设置监视器:粘贴到你的 AI 助手中,它会安装监视器、询问你的需求并写好配置的提示词
 - [`monitor/docs/QUOTA_zho.md`](monitor/docs/QUOTA_zho.md): 更多配额,更少消耗:节省模式、中央面板、GitHub App 以及如何共享配额

@@ -355,6 +355,9 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/EXTERNAL_CI_ita.md`](monitor/docs/EXTERNAL_CI_ita.md): Fonti CI esterne, sola lettura: Buildbot, GitLab CI, Jenkins, Azure Pipelines
 - [`monitor/docs/PLUGINS_ita.md`](monitor/docs/PLUGINS_ita.md): Plugin (spenti per impostazione predefinita), pacchetti, isolamento e token da un archivio di segreti
 - [`monitor/docs/POSTURE_ita.md`](monitor/docs/POSTURE_ita.md): Postura di repository e organizzazione, sola lettura
+- [`monitor/docs/COMPLIANCE_ita.md`](monitor/docs/COMPLIANCE_ita.md): Conformità: sola lettura rigorosa, criterio di rete, rapporto, conservazione e blocco legale, registro delle azioni firmato ed esportato
+- [`monitor/docs/ECOSYSTEM_TOOLS_ita.md`](monitor/docs/ECOSYSTEM_TOOLS_ita.md): Gli strumenti attorno al monitor e il loro livello di supporto
+- [`monitor/docs/EDITIONS_ita.md`](monitor/docs/EDITIONS_ita.md): Completa e Lite: cosa c'è in ciascuna edizione
 - [`monitor/docs/AI_CONNECTION_ita.md`](monitor/docs/AI_CONNECTION_ita.md): Collegare uno strumento di IA: tutto ciò che dice il monitor, come segnali, nel riepilogo, nell'endpoint, negli strumenti MCP e nell'hook
 - [`monitor/docs/AI_SETUP_PROMPT_ita.md`](monitor/docs/AI_SETUP_PROMPT_ita.md): Configurare il monitor con un'IA: un prompt da incollare nel tuo assistente IA che lo installa, ti chiede cosa vuoi e scrive la configurazione
 - [`monitor/docs/QUOTA_ita.md`](monitor/docs/QUOTA_ita.md): Più quota, meno spesa: modalità risparmio, il pannello centrale, una GitHub App e come condividere la quota
