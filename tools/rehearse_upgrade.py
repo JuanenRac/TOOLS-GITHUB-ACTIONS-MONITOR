@@ -615,7 +615,7 @@ def scenario_signed_next(ctx):
         install.serving(NEXT, "signed next version")
         install.stop()
         check("signed next version: every setting is kept", not lost_settings(had, install.config()), lost_settings(had, install.config())[:20])
-        status, said_cli, errors = run([sys.executable, install.root / "bin" / "monitor_cli.py", "verify-release", signed], install.env, cwd=install.root)
+        status, said_cli, errors = run([sys.executable, install.root / "bin" / "monitor_cli.py", "verify-release", "--folder", signed], install.env, cwd=install.root)
         check("verify-release of the installed version accepts the signed set", status == 0, (said_cli + errors)[-900:])
         go_back(install, NEW, before, "way back from the signed version")
 

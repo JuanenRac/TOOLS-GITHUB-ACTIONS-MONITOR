@@ -40,6 +40,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Corrigé
 
+- **Plus de faux avertissements « réglage inconnu » lors d'une mise à jour** : la mise à jour ne signale plus comme inconnus les réglages présents dans la configuration d'exemple de la version visée mais non décrits par la page des réglages.
 - Les noms d'étapes gardés par workflow ont un plafond.
 - Les lanceurs Windows se rabattent sur `python` quand le lanceur `py` n'est pas installé.
 

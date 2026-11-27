@@ -1220,8 +1220,15 @@ def check_value(entry, value):
     return None
 
 
-def check_config(cfg, schema, version_label):
-    """Incoherences of a configuration against a schema ({key: entry}); [] when it fits. Each: (code, severity, params)."""
+def example_config(product):
+    """The example configuration a version ships, or None: the settings it carries are known even when the registry (the settings of the page) does not describe them."""
+    path = Path(product) / "assets" / "examples" / "actions_monitor.example.json" if product else None
+    data = load_json_strict(path)[0] if path and path.is_file() else None
+    return data if isinstance(data, dict) else None
+
+
+def check_config(cfg, schema, version_label, example=None):
+    """Incoherences of a configuration against a schema ({key: entry}); [] when it fits. Each: (code, severity, params). A key of `example` is never unknown."""
     issues = []
     if not schema:
         return issues
@@ -1242,7 +1249,7 @@ def check_config(cfg, schema, version_label):
                     issues.append((problem[0], "warn", dict(problem[1], key=path, to=version_label)))
             elif isinstance(value, dict) and (path in known_prefixes or any(k.startswith(path + ".") for k in schema)):
                 walk(value, path + ".")
-            elif path in known_prefixes:
+            elif path in known_prefixes or (example is not None and _has(example, path)):
                 continue
             else:
                 issues.append(("unknown_key", "warn", {"key": path, "to": version_label}))
@@ -1643,7 +1650,7 @@ class Updater:
                 add("dup", "warn", key=key, file=path.name)
             migrated, changes, notes = (migrate_config(data, docs, policy) if docs else (data, [], []))
             entry["changes"] = changes
-            for code, severity, params in check_config(migrated, schema_to, to):
+            for code, severity, params in check_config(migrated, schema_to, to, example_config(product)):
                 add(code, severity, **params)
                 entry["issues"].append(code)
             for note in notes:
@@ -2172,7 +2179,7 @@ class Updater:
             if not error and isinstance(data, dict):
                 migrated, changes, notes = migrate_config(data, docs, policy)
                 entry["changes"] = changes
-                entry["issues"] = [{"code": c, "severity": s, "params": p, "text": tr("c." + c, **p)} for c, s, p in check_config(migrated, schema_to, to)]
+                entry["issues"] = [{"code": c, "severity": s, "params": p, "text": tr("c." + c, **p)} for c, s, p in check_config(migrated, schema_to, to, example_config(self.root))]
                 for n in notes:
                     report["notices"][n["id"]] = dict(n, rendered=notice_text(n))
                 if apply and migrated != data:

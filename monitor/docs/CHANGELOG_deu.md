@@ -40,6 +40,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Behoben
 
+- **Keine falschen Warnungen "unbekannte Einstellung" mehr beim Aktualisieren**: Der Updater meldet Einstellungen nicht mehr als unbekannt, die in der Beispielkonfiguration der Zielversion stehen, aber nicht auf der Einstellungsseite beschrieben sind.
 - Die je Workflow gespeicherten Schrittnamen haben eine Obergrenze.
 - Die Windows-Starter nehmen `python`, wenn der Starter `py` nicht installiert ist.
 

@@ -40,6 +40,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Corregido
 
+- **Se acabaron los falsos avisos de «ajuste desconocido» al actualizar**: el actualizador ya no marca como desconocidos los ajustes que trae la configuración de ejemplo de la versión de destino pero que la página de ajustes no describe.
 - Los nombres de paso guardados por workflow tienen tope.
 - Los lanzadores de Windows usan `python` cuando no está instalado el lanzador `py`.
 
