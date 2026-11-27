@@ -1,0 +1,15 @@
+name: I use it
+description: Say that you use the monitor. Optional and public.
+title: "[I use it]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. **Everything you write here is public.** Do not include tokens, private repository names, addresses or anything you would not publish. No field is required to be detailed: one line is enough.
+  - type: textarea
+    id: use
+    attributes:
+      label: How do you use it?
+      description: For example the edition, the kind of repositories and what you find useful or missing.
+    validations:
+      required: true

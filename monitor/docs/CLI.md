@@ -41,6 +41,7 @@
 | `kiosk` | the address of the monitor for a TV or a wall (`ops`, `team`, `release`, `quiet`); see [KIOSK.md](KIOSK.md) | no |
 | `metrics` | the figures as `name=value` lines for cron and mail; with `--if-problem` it writes nothing when all is well; see [CLI_OPERATOR.md](CLI_OPERATOR.md) | no |
 | `posture` | Posture of repositories and organization, read only (`posture status|matrix|check --repo-name`); see [POSTURE.md](POSTURE.md) | no |
+| `traffic` | History of downloads and traffic kept on this computer (`traffic status|export`); see [TRAFFIC.md](TRAFFIC.md) | no |
 | `external-ci` | External CI sources, read only (`external-ci list|status|probe --source`); see [EXTERNAL_CI.md](EXTERNAL_CI.md) | no |
 | `plugin` | Plugins: `plugin list|validate|pack|verify|init|install|enable|disable|uninstall|audit`; see [PLUGINS.md](PLUGINS.md) | no |
 

@@ -982,6 +982,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `teamwork.runner_hooks` (secure) | `false` | teamwork | Accept events of self-hosted runner hooks |
 | `teamwork.stuck_hours` | `6` | teamwork | Hours running before proposing a forced cancel |
 | `tools_dir` | `-` | paths | Folder of the local signing tools |
+| `traffic.enabled` (secure) | `false` | traffic | Keep a history of downloads and traffic |
+| `traffic.keep_days` | `400` | traffic | Days to keep |
+| `traffic.repos` | `[]` | traffic | Repositories to follow |
+| `traffic.repos_per_cycle` | `2` | traffic | Repositories per cycle |
+| `traffic.views_clones` | `true` | traffic | Visits and clones too |
 | `tui.refresh_seconds` | `-` | console | Refresh |
 | `tui.theme` | `-` | console | Colours |
 | `ui.about_org_logo` | `false` | general | Organization logo in About |

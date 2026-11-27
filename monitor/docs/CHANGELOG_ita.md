@@ -13,6 +13,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Aggiunto
 
+- **Storico di download e traffico**, conservato su questo computer (`traffic.enabled`, spento; Complete): una volta al giorno i download dei file delle release e, se il token può, visite e clonazioni dei repository scelti, con un pannello in Repository, esportazione CSV e il comando `traffic`. Solo richieste GET. `TRAFFIC.md`.
+- **Di' che lo usi**: Informazioni ha un link che apre un modulo su GitHub, solo quando si fa clic; ciò che vi si scrive è pubblico. Il monitor non invia né compila nulla.
 - **Tenere viva una pianificazione prima che GitHub la spenga**: con `teamwork.keep_alive_days` (disattivato) si propone di riattivare i workflow pianificati di un repository pubblico fermo, con i giorni rimasti. La demo statica e il controllo dei workflow nel browser ora vengono aperti dalla CI in un browser vero.
 - **Modalità di sola lettura rigorosa e criterio di rete** (`security.read_only_strict`, `security.egress_policy`, spenti): applicati sotto tutte le parti; un comando o una connessione rifiutata fallisce nominando l'impostazione, e il doctor elenca le destinazioni fuori criterio.
 - **Rapporto di conformità** (`compliance report`, `/api/compliance/report`, un riquadro nella scheda Sicurezza): ogni riga verificata o solo dichiarata.

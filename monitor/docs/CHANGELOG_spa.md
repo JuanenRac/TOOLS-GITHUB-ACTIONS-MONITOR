@@ -13,6 +13,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Añadido
 
+- **Historial de descargas y tráfico**, guardado en este equipo (`traffic.enabled`, apagado; Complete): una vez al día las descargas de los ficheros de las releases y, si el token puede, las visitas y clonados de los repositorios que elijas, con un panel en Repositorios, exportación CSV y la orden `traffic`. Solo peticiones GET. `TRAFFIC.md`.
+- **Di que lo usas**: Acerca de tiene un enlace que abre un formulario en GitHub, solo cuando haces clic; lo que escribas allí es público. El monitor no envía ni rellena nada.
 - **Mantener viva una programación antes de que GitHub la apague**: con `teamwork.keep_alive_days` (apagado) se propone volver a activar los workflows programados de un repositorio público sin actividad, con los días que quedan. La demo estática y la comprobación de workflows en el navegador ahora las abre el CI en un navegador real.
 - **Modo de solo lectura estricto y política de red** (`security.read_only_strict`, `security.egress_policy`, apagados): se aplican por debajo de todas las partes; una orden o conexión rechazada falla nombrando el ajuste, y el doctor lista los destinos fuera de la política.
 - **Informe de cumplimiento** (`compliance report`, `/api/compliance/report`, una caja en la pestaña Seguridad): cada línea comprobada o solo declarada.

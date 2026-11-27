@@ -41,6 +41,7 @@
 | `kiosk` | la dirección del monitor para una TV o una pared (`ops`, `team`, `release`, `quiet`); véase [KIOSK_spa.md](KIOSK_spa.md) | no |
 | `metrics` | las cifras como líneas `nombre=valor` para cron y el correo; con `--if-problem` no escribe nada cuando todo va bien; véase [CLI_OPERATOR.md](CLI_OPERATOR.md) | no |
 | `posture` | Postura de repositorios y organización, solo lectura (`posture status|matrix|check --repo-name`); véase [POSTURE.md](POSTURE_spa.md) | no |
+| `traffic` | Historial de descargas y tráfico guardado en este equipo (`traffic status|export`); ver [TRAFFIC_spa.md](TRAFFIC_spa.md) | no |
 | `external-ci` | Fuentes de CI externas, solo lectura (`external-ci list|status|probe --source`); véase [EXTERNAL_CI.md](EXTERNAL_CI_spa.md) | no |
 | `plugin` | Complementos: `plugin list|validate|pack|verify|init|install|enable|disable|uninstall|audit`; véase [PLUGINS.md](PLUGINS_spa.md) | no |
 

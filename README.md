@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6236_passing-brightgreen.svg" alt="6236 tests">
+  <img src="https://img.shields.io/badge/Tests-6249_passing-brightgreen.svg" alt="6249 tests">
 </p>
 
 > Watches the workflows of every repository you own and tells you, on one local page, what is red, what is stuck and what is waiting for you.
@@ -66,6 +66,7 @@
 - **About and Help in the page**: the **i** button shows the version, the edition, the links, the files, the health and a button that copies the information for support; the **?** button (or the key `?`) opens the whole documentation, searchable and in your language, with no Internet. The console has `--about` and `--help-topics`, and a tab-by-tab interactive terminal application (optional `textual`).
 - **Notice of a newer version**: a discreet badge when a newer release is published; it only reads the public releases page once a day, never installs anything and can be switched off (always off when air-gapped).
 - **Signed releases and optional parts for larger setups**: a release carries a detached signature that the updater checks, and a window tells what a newer version brings; plugins, secret stores, external CI sources (read only), posture checks, collaboration and fleet views, a strict read-only mode, a network policy and a compliance report are all off until you switch them on.
+- **Downloads and traffic, kept by you (off by default)**: once a day the download counts of your release files and, with push access, the visits and clones of the repositories you choose, saved on your computer, with charts and CSV (`monitor/docs/TRAFFIC.md`). About also has a voluntary link to say publicly that you use the monitor; nothing is sent unless you write it on GitHub yourself.
 - **Quotas for every account**: plan, billable minutes (public repositories cost none), allowance of the API read from GitHub's headers, concurrency and jobs near the 6-hour limit; the figures are in an editable file.
 
 ## What it saves
@@ -99,8 +100,8 @@ Method, assumptions and how to measure it in your own use: [`monitor/docs/PRODUC
 | | |
 |---|---|
 | **Maturity** | functional |
-| **Tests** | 6236 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Settings** | 1030 settings, all with help |
+| **Tests** | 6249 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Settings** | 1035 settings, all with help |
 | **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
 | **Tested in the CI on** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -173,6 +174,7 @@ A second, simpler product in the same package: the page of what is running and w
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="Now" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_menu_groups_light.png"><img src="docs/screenshots/web_menu_groups_dark.png" alt="The menu in titled groups: Watch, Sentinels, Team, Reports and learning" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_palette_light.png"><img src="docs/screenshots/web_palette_dark.png" alt="The palette on Ctrl+K: a search box for any tab, repository or action" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_update_notice_light.png"><img src="docs/screenshots/web_update_notice_dark.png" alt="The window that announces a newer version" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_ci_light.png"><img src="docs/screenshots/web_sentinel_ci_dark.png" alt="Sentinel: CI" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_external_ci_light.png"><img src="docs/screenshots/web_external_ci_dark.png" alt="External CI sources: what each one says and why one could not be read" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_collab_light.png"><img src="docs/screenshots/web_sentinel_collab_dark.png" alt="Sentinel: collaboration" width="92%"></picture></p>
@@ -371,6 +373,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/PLUGINS.md`](monitor/docs/PLUGINS.md): Plugins (off by default), their packages, isolation, and reading the token from a secret store
 - [`monitor/docs/POSTURE.md`](monitor/docs/POSTURE.md): Posture of repositories and organization, read only
 - [`monitor/docs/COMPLIANCE.md`](monitor/docs/COMPLIANCE.md): Compliance: strict read-only mode, network policy, report, retention and legal hold, signed and exported log of actions
+- [`monitor/docs/TRAFFIC.md`](monitor/docs/TRAFFIC.md): Downloads and traffic
 - [`monitor/docs/ECOSYSTEM_TOOLS.md`](monitor/docs/ECOSYSTEM_TOOLS.md): The tools around the monitor and how far each is supported
 - [`monitor/docs/EDITIONS.md`](monitor/docs/EDITIONS.md): Complete and Lite: what is in each edition
 - [`monitor/docs/COLLABORATION.md`](monitor/docs/COLLABORATION.md): Collaboration views and optional actions on GitHub
