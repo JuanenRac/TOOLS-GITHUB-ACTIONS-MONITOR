@@ -5,7 +5,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Group</title>
+<title>GitHub Actions Monitor</title>
 <style>
 :root{color-scheme:dark}
 body{margin:0;padding:2vmin;background:#0d1117;color:#e6edf3;font-family:system-ui,sans-serif;min-height:100vh;box-sizing:border-box}
@@ -30,9 +30,10 @@ async function draw(){
     const j=await r.json();
     if(!j.ok){title.textContent=slug+" ?";list.textContent="";return}
     title.textContent=MARK[j.state]+" "+j.key+" - "+j.red+" / "+j.repos;
+    document.title=j.key+" - GitHub Actions Monitor";
     list.textContent="";
     j.rows.forEach(row=>{const li=document.createElement("li");li.className=row.state;li.textContent=MARK[row.state]+" "+row.repo;list.append(li)});
-  }catch(e){title.textContent=slug+" - offline"}
+  }catch(e){title.textContent="⚠ "+slug}
 }
 draw();setInterval(draw,30000);
 </script>

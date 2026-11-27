@@ -40,6 +40,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Corrigé
 
+- **Sur téléphone, le contenu de chaque onglet est de nouveau visible** : sous un en-tête haut, l'onglet ouvert n'avait plus de hauteur et ses panneaux étaient inaccessibles au défilement.
+- **Les cadres des parties facultatives gardent toute leur hauteur** sur ordinateur et écran mural au lieu d'être écrasés en quelques lignes, leurs tableaux gardent les mots entiers, les boutons de la vue compacte font au moins 44 px de large et les grands graphiques n'écrivent plus d'erreur dans la console du navigateur. Un workflow mesure chaque cadre en huit langues, sur téléphone, ordinateur et écran mural.
 - **Plus de faux avertissements « réglage inconnu » lors d'une mise à jour** : la mise à jour ne signale plus comme inconnus les réglages présents dans la configuration d'exemple de la version visée mais non décrits par la page des réglages.
 - Les noms d'étapes gardés par workflow ont un plafond.
 - Les lanceurs Windows se rabattent sur `python` quand le lanceur `py` n'est pas installé.

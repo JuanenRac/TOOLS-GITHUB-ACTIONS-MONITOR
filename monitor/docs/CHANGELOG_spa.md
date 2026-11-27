@@ -40,6 +40,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Corregido
 
+- **En el teléfono vuelve a verse el contenido de todas las pestañas**: bajo una cabecera alta, la pestaña abierta se quedaba sin altura y sus paneles no se alcanzaban al desplazarse.
+- **Las cajas de las partes opcionales conservan toda su altura** en ordenadores y pantallas de pared en vez de quedar aplastadas en pocas líneas, sus tablas respetan las palabras enteras, los botones de la vista compacta miden al menos 44 px de ancho y las gráficas grandes ya no escriben un error en la consola del navegador. Un workflow mide cada caja en ocho idiomas, en teléfono, ordenador y pantallas de pared.
 - **Se acabaron los falsos avisos de «ajuste desconocido» al actualizar**: el actualizador ya no marca como desconocidos los ajustes que trae la configuración de ejemplo de la versión de destino pero que la página de ajustes no describe.
 - Los nombres de paso guardados por workflow tienen tope.
 - Los lanzadores de Windows usan `python` cuando no está instalado el lanzador `py`.

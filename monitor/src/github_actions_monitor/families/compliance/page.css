@@ -1,6 +1,6 @@
 /* Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
    GPL-3.0-or-later - see LICENSE */
-#compliance-box button{min-height:44px;min-width:44px}
+#compliance-box button{min-height:44px;min-width:44px;align-self:flex-start}
 .compliance-lines{list-style:none;padding:0;margin:0}
 .compliance-lines li{display:flex;flex-wrap:wrap;gap:.2em .8em;padding:.25em 0;border-bottom:1px solid var(--line,#8884)}
 .compliance-lines code{word-break:break-word;white-space:pre-wrap}

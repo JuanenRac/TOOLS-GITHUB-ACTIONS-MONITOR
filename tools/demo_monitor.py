@@ -349,6 +349,7 @@ def main():
     if "--parts" in sys.argv and not lite:
         import demo_parts
         demo_parts.fill(REPOS, runs, iso, now)
+    ThreadingHTTPServer.request_queue_size = 64      # a page asks for many things at once: a short queue refuses some of them on Windows
     server = ThreadingHTTPServer(("127.0.0.1", port), am.Handler)
     print("demo on", port, flush=True)
     try:

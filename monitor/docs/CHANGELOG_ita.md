@@ -40,6 +40,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Corretto
 
+- **Sul telefono il contenuto di ogni scheda è di nuovo visibile**: sotto un'intestazione alta la scheda aperta restava senza altezza e i riquadri non si raggiungevano scorrendo.
+- **I riquadri delle parti facoltative mantengono tutta la loro altezza** su computer e schermi a parete invece di ridursi a poche righe, le loro tabelle non spezzano le parole, i pulsanti della vista compatta sono larghi almeno 44 px e i grafici grandi non scrivono più errori nella console del browser. Un workflow misura ogni riquadro in otto lingue, su telefono, computer e schermi a parete.
 - **Niente più falsi avvisi «impostazione sconosciuta» durante l'aggiornamento**: l'aggiornamento non segnala più come sconosciute le impostazioni presenti nella configurazione di esempio della versione di destinazione ma non descritte dalla pagina delle impostazioni.
 - I nomi dei passi conservati per workflow hanno un limite.
 - I lanciatori di Windows usano `python` quando il lanciatore `py` non è installato.
