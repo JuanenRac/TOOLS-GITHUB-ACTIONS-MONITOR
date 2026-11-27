@@ -9,6 +9,8 @@
 
 The third sentinel, next to the CI one and Collab. It reads, without writing anything to GitHub, what GitHub itself says is open or missing about the security of each repository, and turns it into alerts of the Alerts tab (origin Security). It is in the Complete edition, off by default (`sentinels.security.enabled`); Lite has no sentinels.
 
+The same tab has an optional box with the [posture of repositories and organization against OWASP and CIS](POSTURE.md).
+
 ## What it reads and what it flags
 
 | Signal | Alert | Level | On by default |

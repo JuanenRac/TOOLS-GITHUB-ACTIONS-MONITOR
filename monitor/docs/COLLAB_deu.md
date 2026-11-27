@@ -9,6 +9,8 @@
 
 Ein zweiter Wächter neben dem CI-Wächter. Er sieht sich die **offenen Issues und Pull Requests** deiner Repositories an und sagt dir, was einen Menschen braucht: vergessene Issues, kritische Labels, Reviews, die niemand macht, Entwürfe ohne Ende, Konflikte, die bleiben. Er hat eine eigene Uhr, ändert nie, was der CI-Wächter entscheidet, und **schreibt nie nach GitHub**. Er gehört zur vollständigen Ausgabe; die Lite-Ausgabe lädt ihn nicht.
 
+Die Registerkarte Zusammenarbeit und die Registerkarte Warnungen haben außerdem optionale Kästen mit eigener Anleitung: [Ansichten der Zusammenarbeit und Aktionen](COLLABORATION_deu.md) und [Vorschläge, Chat und Bericht eines Repositorys](ASSISTANT_deu.md).
+
 ## Einschalten
 
 Er ist standardmäßig aus. Einstellungen > Wächter > Issues und Pull Requests, oder in `actions_monitor.json`:

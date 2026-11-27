@@ -25,6 +25,10 @@ Es wird nur geschrieben, wenn `github_actions.enabled` an ist, die Aktion in `gi
 
 `teamwork.auto_rerun` (aus) startet die fehlgeschlagenen Jobs eines nicht gestarteten oder abgelaufenen Laufs einmal neu, mit denselben Prüfungen. Nie ein zweites Mal; schlägt er erneut fehl, wird gewarnt.
 
+## Einen Zeitplan wachhalten
+
+GitHub schaltet die geplanten Workflows eines öffentlichen Repositorys nach 60 Tagen ohne Aktivität ab. Mit `teamwork.keep_alive_days` (0 = aus; zum Beispiel 45) erscheint ein öffentliches Repository ohne Push in dieser Zeit, dessen Workflows nach Zeitplan gelaufen sind, unter den Vorschlägen als `enable_workflow`, mit den verbleibenden Tagen. Es ist ein Vorschlag wie jeder andere: Nichts wird gesendet, bevor du ihn bestätigst. GitHub dokumentiert nicht, dass das Aktivieren eines aktiven Workflows die Zählung neu startet, und dies wurde nicht an einem echten Repository erprobt: Sicher ist ein neuer Commit.
+
 ## Hooks eigener Runner
 
 Mit `teamwork.runner_hooks` hält ein Hook eines Runners auf diesem Rechner Start und Ende fest:
@@ -53,4 +57,4 @@ Lesen und Schreiben wurden nur mit erfundenen Antworten getestet; keine der neue
 
 ## Alle Einstellungen
 
-`teamwork.enabled` `teamwork.repos_per_cycle` `teamwork.refresh_hours` `teamwork.dismiss_days` `teamwork.hide_workflows` `teamwork.bot_authors` `teamwork.bot_branches` `teamwork.bot_labels` `teamwork.dismissed_alerts` `teamwork.dismiss_allowed` `teamwork.auto_rerun` `teamwork.cancel_policy` `teamwork.queued_hours` `teamwork.stuck_hours` `teamwork.forks_help` `teamwork.inactive_workflows` `teamwork.runner_hooks`
+`teamwork.enabled` `teamwork.repos_per_cycle` `teamwork.refresh_hours` `teamwork.dismiss_days` `teamwork.hide_workflows` `teamwork.bot_authors` `teamwork.bot_branches` `teamwork.bot_labels` `teamwork.dismissed_alerts` `teamwork.dismiss_allowed` `teamwork.auto_rerun` `teamwork.cancel_policy` `teamwork.queued_hours` `teamwork.stuck_hours` `teamwork.forks_help` `teamwork.inactive_workflows` `teamwork.keep_alive_days` `teamwork.runner_hooks`

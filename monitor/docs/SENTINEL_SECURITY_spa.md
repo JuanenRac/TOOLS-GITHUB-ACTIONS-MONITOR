@@ -9,6 +9,8 @@
 
 El tercer centinela, junto al de CI y Collab. Lee, sin escribir nada en GitHub, lo que el propio GitHub dice que está abierto o falta en la seguridad de cada repositorio, y lo convierte en alertas de la pestaña de Alertas (origen Seguridad). Está en la edición Complete, apagado por defecto (`sentinels.security.enabled`); Lite no tiene centinelas.
 
+La misma pestaña tiene una caja opcional con la [postura de repositorios y organización frente a OWASP y CIS](POSTURE_spa.md).
+
 ## Qué lee y qué señala
 
 | Señal | Alerta | Nivel | Activa por defecto |

@@ -9,6 +9,8 @@
 
 Uma segunda sentinela ao lado da de CI. Olha para as **issues e pull requests abertas** dos seus repositórios e diz-lhe o que precisa de uma pessoa: issues esquecidas, etiquetas críticas, revisões que ninguém faz, rascunhos sem fim, conflitos que ficam. Tem um relógio próprio, nunca altera o que a sentinela de CI decide e **nunca escreve no GitHub**. Pertence à edição completa; a edição lite não a carrega.
 
+O separador Colaboração e o separador Alertas têm ainda caixas opcionais com guia próprio: [vistas de colaboração e ações](COLLABORATION_por.md) e [propostas, conversa e relatório de um repositório](ASSISTANT_por.md).
+
 ## Ativá-la
 
 Vem desligada. Definições > Sentinela > Issues e pull requests, ou em `actions_monitor.json`:

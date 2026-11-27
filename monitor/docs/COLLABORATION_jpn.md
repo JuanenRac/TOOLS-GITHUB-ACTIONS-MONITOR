@@ -25,6 +25,10 @@
 
 `teamwork.auto_rerun`（既定はオフ）は、開始できなかった、または時間切れの実行の失敗ジョブを同じ検査のもとで1回だけ再実行します。2回目は行わず、再び失敗するとアラートになります。
 
+## スケジュールを維持する
+
+GitHub は 60 日間活動のない公開リポジトリのスケジュール実行ワークフローを停止します。`teamwork.keep_alive_days`（0 = オフ。例: 45）を設定すると、その期間 push がなく、スケジュールで実行されたワークフローがある公開リポジトリが、残り日数とともに `enable_workflow` の提案として表示されます。ほかの提案と同じく、確認するまで何も送られません。有効なワークフローを有効化すると日数が数え直されることは GitHub の文書にはなく、実際のリポジトリでは試していません。確実な方法は新しいコミットです。
+
 ## 自己ホストランナーのフック
 
 `teamwork.runner_hooks` を有効にすると、このコンピューター上のランナーのフックがジョブの開始と終了を記録します。
@@ -53,4 +57,4 @@ python bin/monitor_cli.py runner-hook completed
 
 ## すべての設定
 
-`teamwork.enabled` `teamwork.repos_per_cycle` `teamwork.refresh_hours` `teamwork.dismiss_days` `teamwork.hide_workflows` `teamwork.bot_authors` `teamwork.bot_branches` `teamwork.bot_labels` `teamwork.dismissed_alerts` `teamwork.dismiss_allowed` `teamwork.auto_rerun` `teamwork.cancel_policy` `teamwork.queued_hours` `teamwork.stuck_hours` `teamwork.forks_help` `teamwork.inactive_workflows` `teamwork.runner_hooks`
+`teamwork.enabled` `teamwork.repos_per_cycle` `teamwork.refresh_hours` `teamwork.dismiss_days` `teamwork.hide_workflows` `teamwork.bot_authors` `teamwork.bot_branches` `teamwork.bot_labels` `teamwork.dismissed_alerts` `teamwork.dismiss_allowed` `teamwork.auto_rerun` `teamwork.cancel_policy` `teamwork.queued_hours` `teamwork.stuck_hours` `teamwork.forks_help` `teamwork.inactive_workflows` `teamwork.keep_alive_days` `teamwork.runner_hooks`

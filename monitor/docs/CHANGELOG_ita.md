@@ -11,6 +11,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Aggiunto
 
+- **Tenere viva una pianificazione prima che GitHub la spenga**: con `teamwork.keep_alive_days` (disattivato) si propone di riattivare i workflow pianificati di un repository pubblico fermo, con i giorni rimasti. La demo statica e il controllo dei workflow nel browser ora vengono aperti dalla CI in un browser vero.
 - **Modalità di sola lettura rigorosa e criterio di rete** (`security.read_only_strict`, `security.egress_policy`, spenti): applicati sotto tutte le parti; un comando o una connessione rifiutata fallisce nominando l'impostazione, e il doctor elenca le destinazioni fuori criterio.
 - **Rapporto di conformità** (`compliance report`, `/api/compliance/report`, un riquadro nella scheda Sicurezza): ogni riga verificata o solo dichiarata.
 - **Conservazione di ogni categoria e blocco legale**, **punti di controllo firmati e pulizia del registro delle azioni** (`audit verify|checkpoint|purge`) ed **esportazione del registro** su file, syslog su TLS o HTTP; tutto spento di fabbrica.

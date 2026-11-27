@@ -28,3 +28,15 @@
 - **外部来源冒烟测试**：每周运行的工作流 `sources-smoke.yml` 用 `tools/smoke_sources.py` 访问真实的状态页、安全公告、REST API 描述和最新发布，任何一个改变格式都会失败。
 - **限制**：`tools/limits_check.py` 在一个处理器、512 MB 的容器中用 120 个工作流的账户运行监视器。
 - **发布顺序**：先把 GitHub 发布创建为草稿并推送标签 `vX.Y.Z`；`release-image.yml` 构建并发布镜像，只有当两个平台都能按标签响应时才发布草稿。 发布工具先把发布创建为草稿，上传 `github_actions_monitor.zip`、`SHA256SUMS` 和 `monitor_updater.py`，确认齐全后才公开（不可变发布之后不再接受文件）；镜像优先时则推送标签，由 `release-image.yml` 公开草稿。
+
+## 使用 AI 助手时
+
+用 AI 助手写的改动遵循同样的规则，提交人对其负责：逐行阅读、运行测试，绝不要把令牌、含私有名称的日志或 `actions_monitor.json` 的内容粘贴给助手。随监视器发布的两个技能（供与运行中的监视器对话的工具使用的 `monitor/skills/external/SKILL.md`，以及供内置 AI 使用的 `monitor/skills/internal/SKILL.md`）是产品的一部分：新增设置、路由或命令时要更新它们（`python tools/make_skill_refs.py`）。产品的用途以及绝不能做的事见 `PRODUCT_zho.md`。
+
+## macOS：隔离标记
+
+这些文件没有用 Apple 证书签名。用浏览器下载的 zip 带有隔离标记，macOS 可能拒绝打开 `.command` 启动脚本。请先校验发布版本（见 `monitor/docs/UPDATE_zho.md`），再从解压后的文件夹中移除该标记。目前没有在 macOS 上测试。
+
+```sh
+xattr -dr com.apple.quarantine /path/to/github_actions_monitor
+```

@@ -124,5 +124,5 @@ scrape_configs:
 - `prometheus.example.yml` 和 `docker-compose.observability.yml` 在监视器所在的计算机上启动 Prometheus、Alertmanager 和 Grafana，用于试用该包（容器共享主机网络，端口在 `127.0.0.1` 上，Grafana 密码来自你的 shell，绝不来自文件）。
 ## 监视器会访问哪里，以及发送到 SIEM 的事件
 
-- **网络目标表**：`monitor_cli.py doctor --egress`（也可加 `--json`）列出当前配置可能访问的每个主机、用途、使其成为目标的设置，以及被阻止时会失败的内容：`api.github.com`、`github.com` 和 `objects.githubusercontent.com`（更新）、`raw.githubusercontent.com`（`lint.anonymous_public`）、ntfy、Telegram、聊天 Webhook、你选择的 AI 提供商、OTLP 收集器和 SIEM 目标。启用 `airgapped` 时不使用任何一个。测试保证该表与代码中出现的主机一致。
+- **网络目标表**：`monitor_cli.py doctor --egress`（也可加 `--json`）列出当前配置可能访问的每个主机、用途、使其成为目标的设置，以及被阻止时会失败的内容：`api.github.com`、`github.com`、`objects.githubusercontent.com` 和 `release-assets.githubusercontent.com`（更新）、`raw.githubusercontent.com`（`lint.anonymous_public`）、ntfy、Telegram、聊天 Webhook、你选择的 AI 提供商、OTLP 收集器和 SIEM 目标。启用 `airgapped` 时不使用任何一个。测试保证该表与代码中出现的主机一致。
 - **SIEM**（关闭）：文件中的 `siem.sinks` 列出各目标，要使用的需设 `enabled: true`：`elasticsearch`（bulk）、`splunk_hec`、`loki`、`sentinel`（Log Analytics，用共享密钥签名）、`bigquery`（`insertAll`）或 `http`（JSON 行）。令牌或密钥从 `token_env` 指定的环境变量读取，绝不从文件读取。每个目标用 `from_minutes`（5）、`levels` 和 `repos_filter` 过滤；事件的字段是固定的（没有令牌和日志文本）；私有地址上的接收端会被拒绝，除非该目标设有 `allow_private`；接收端宕机时，事件在 `siem.queue_max`（500）的队列中等待，最旧的先被丢弃。离线模式下不发送任何内容。

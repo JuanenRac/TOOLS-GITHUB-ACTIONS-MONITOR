@@ -22,6 +22,7 @@
  "ui.actions.why_stuck": "実行時間が長すぎる:",
  "ui.actions.why_policy": "取消ポリシー違反:",
  "ui.actions.why_inactive_workflow": "非アクティブで無効:",
+ "ui.actions.why_keep_alive": "活動のないリポジトリ。GitHub がスケジュールを停止するまでの残り日数:",
  "ui.actions.waiting_person": "人の対応待ち",
  "ui.actions.waiting_machine": "ランナー待ち",
  "ui.actions.kind_environment": "環境の承認",
@@ -91,6 +92,8 @@
  "cfg.h.teamwork.forks_help": "承認の前に、アカウントの年数、ここでマージされた変更、変更されたワークフローファイルを示します。依頼のたびに読み取りが少し増えます。",
  "cfg.f.teamwork.inactive_workflows": "非アクティブで無効化されたワークフローを検出",
  "cfg.h.teamwork.inactive_workflows": "再有効化を提案します。",
+ "cfg.f.teamwork.keep_alive_days": "スケジュール維持を提案するまでの無活動日数",
+ "cfg.h.teamwork.keep_alive_days": "公開リポジトリでこの日数のあいだ push がない場合、60 日で GitHub が停止する前に、スケジュール実行のワークフローを再度有効にすることを提案します（これで GitHub の日数が数え直されるとは文書化されていません。新しいコミットなら数え直されます）。0 = オフ。",
  "cfg.f.teamwork.runner_hooks": "自己ホストランナーのフックを受け付ける",
  "cfg.h.teamwork.runner_hooks": "このコンピューターのフックから runner-hook コマンドで開始と終了を記録します。"
 }

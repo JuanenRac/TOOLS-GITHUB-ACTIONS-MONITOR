@@ -11,6 +11,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Maintenir une planification avant que GitHub la coupe** : avec `teamwork.keep_alive_days` (désactivé), il est proposé de réactiver les workflows planifiés d'un dépôt public calme, avec les jours restants. La démo statique et la vérification de workflows dans le navigateur sont désormais ouvertes par la CI dans un vrai navigateur.
 - **Mode lecture seule strict et politique réseau** (`security.read_only_strict`, `security.egress_policy`, désactivés) : appliqués sous toutes les parties ; une commande ou connexion refusée échoue en nommant le réglage, et le doctor liste les destinations hors politique.
 - **Rapport de conformité** (`compliance report`, `/api/compliance/report`, un encadré dans l'onglet Sécurité) : chaque ligne vérifiée ou seulement déclarée.
 - **Conservation de chaque catégorie et conservation légale**, **points de contrôle signés et purge du journal des actions** (`audit verify|checkpoint|purge`) et **export de ce journal** vers un fichier, syslog sur TLS ou HTTP ; tout désactivé par défaut.

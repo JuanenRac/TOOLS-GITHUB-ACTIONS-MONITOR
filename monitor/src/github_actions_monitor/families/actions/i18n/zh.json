@@ -22,6 +22,7 @@
  "ui.actions.why_stuck": "运行过久：",
  "ui.actions.why_policy": "违反取消策略：",
  "ui.actions.why_inactive_workflow": "因不活跃停用：",
+ "ui.actions.why_keep_alive": "仓库长期无活动，距 GitHub 关闭定时任务还剩天数：",
  "ui.actions.waiting_person": "等待人工处理",
  "ui.actions.waiting_machine": "等待运行器",
  "ui.actions.kind_environment": "环境审批",
@@ -91,6 +92,8 @@
  "cfg.h.teamwork.forks_help": "批准前显示：账户年龄、在此合并过的更改和触及的工作流文件。每次查询多几次读取。",
  "cfg.f.teamwork.inactive_workflows": "查找因不活跃而停用的工作流",
  "cfg.h.teamwork.inactive_workflows": "提议重新启用。",
+ "cfg.f.teamwork.keep_alive_days": "无活动多少天后建议保持定时任务",
+ "cfg.h.teamwork.keep_alive_days": "公开仓库在这么多天内没有任何 push 时，建议在 GitHub 于第 60 天关闭之前重新启用其定时工作流（GitHub 没有说明这样会重新计时；新的提交可以）。0 = 关闭。",
  "cfg.f.teamwork.runner_hooks": "接收自托管运行器钩子事件",
  "cfg.h.teamwork.runner_hooks": "本机钩子运行 runner-hook 命令记录任务开始与结束。"
 }

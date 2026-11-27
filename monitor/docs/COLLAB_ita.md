@@ -9,6 +9,8 @@
 
 Una seconda sentinella accanto a quella della CI. Guarda le **issue e le pull request aperte** dei tuoi repository e ti dice cosa richiede una persona: issue dimenticate, etichette critiche, revisioni che nessuno fa, bozze senza fine, conflitti che restano. Ha un orologio proprio, non cambia mai ciò che decide la sentinella CI e **non scrive mai su GitHub**. Fa parte dell'edizione completa; l'edizione lite non la carica.
 
+La scheda Collaborazione e la scheda Avvisi hanno anche riquadri facoltativi con la propria guida: [viste di collaborazione e azioni](COLLABORATION_ita.md) e [proposte, chat e rapporto di un repository](ASSISTANT_ita.md).
+
 ## Attivarla
 
 È disattivata di default. Impostazioni > Sentinella > Issue e pull request, oppure in `actions_monitor.json`:

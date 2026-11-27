@@ -22,6 +22,7 @@
  "ui.actions.why_stuck": "In esecuzione da troppo:",
  "ui.actions.why_policy": "Viola la regola di annullamento:",
  "ui.actions.why_inactive_workflow": "Disattivato per inattività:",
+ "ui.actions.why_keep_alive": "Repository fermo, giorni rimasti prima che GitHub spenga la pianificazione:",
  "ui.actions.waiting_person": "In attesa di una persona",
  "ui.actions.waiting_machine": "In attesa di un runner",
  "ui.actions.kind_environment": "Approvazione di ambiente",
@@ -91,6 +92,8 @@
  "cfg.h.teamwork.forks_help": "Prima di approvare: età dell'account, modifiche unite qui e file di workflow toccati. Qualche lettura in più a ogni richiesta.",
  "cfg.f.teamwork.inactive_workflows": "Trovare i workflow disattivati per inattività",
  "cfg.h.teamwork.inactive_workflows": "Propone di riattivarli.",
+ "cfg.f.teamwork.keep_alive_days": "Giorni di inattività prima di proporre di tenere viva una pianificazione",
+ "cfg.h.teamwork.keep_alive_days": "In un repository pubblico senza push da questo numero di giorni, propone di riattivare i workflow pianificati prima che GitHub li spenga a 60 giorni (GitHub non documenta che questo riavvii il conteggio; un nuovo commit sì). 0 = disattivato.",
  "cfg.f.teamwork.runner_hooks": "Accettare gli eventi degli hook dei runner",
  "cfg.h.teamwork.runner_hooks": "Il comando runner-hook, eseguito dall'hook su questo computer, registra inizio e fine."
 }

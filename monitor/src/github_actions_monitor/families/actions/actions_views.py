@@ -11,6 +11,7 @@ QUEUED = ("queued", "pending", "requested")
 RUNNING = ("in_progress",)
 BAD = ("failure", "timed_out", "startup_failure")
 INFRASTRUCTURE = ("startup_failure", "timed_out")      # what a re-run once may cure by itself
+INACTIVITY_DAYS = 60      # after this quiet time GitHub switches off the scheduled workflows of a public repository
 
 
 def epoch(text):
@@ -141,9 +142,9 @@ def proposal(action, repo, number, why, detail=""):
     return {"action": action, "repo": repo, "number": number, "why": why, "detail": str(detail)[:160]}
 
 
-def proposals(runs, pulls, policy, workflows, cfg, now):
+def proposals(runs, pulls, policy, workflows, cfg, now, ageing=()):
     """What a person could confirm: close the update of a bot whose checks fail, cancel what waits too long or breaks the policy, force the cancel of what runs for too long, update a branch that is
-    behind and enable a workflow GitHub switched off for inactivity."""
+    behind, enable a workflow GitHub switched off for inactivity and enable again, before that happens, a scheduled workflow of a repository that has been quiet for a long time."""
     out = []
     for row in pulls:
         if row["bot"] and row["failing"]:
@@ -154,6 +155,7 @@ def proposals(runs, pulls, policy, workflows, cfg, now):
     out += [proposal("force_cancel", r["repo"], r["run"], "stuck", r["workflow"]) for r in old_runs(runs, RUNNING, cfg["stuck_hours"], now)]
     out += [proposal("cancel", r["repo"], r["run"], "policy", f"{r['workflow']} ({r['rule']})") for r in policy]
     out += [proposal("enable_workflow", w["repo"], w["id"], "inactive_workflow", w["name"]) for w in workflows]
+    out += [proposal("enable_workflow", w["repo"], w["id"], "keep_alive", f"{w['days_left']} - {w['name']}") for w in sorted(ageing, key=lambda w: (w["days_left"], w["repo"]))]
     seen, unique = set(), []
     for item in out:
         key = (item["action"], item["repo"], item["number"])

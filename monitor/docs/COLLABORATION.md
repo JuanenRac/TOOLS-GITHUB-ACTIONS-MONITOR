@@ -19,11 +19,15 @@ Waiting for a person (environment approval, workflow of a fork, action required)
 
 ## Writing on GitHub
 
-Nothing is written unless `github_actions.enabled` is on, the action is in `github_actions.allowed`, and you confirm the plan, which shows exactly what is sent. New actions: `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch`. The views only PROPOSE: bot updates with failing checks, branches behind, runs queued or running too long (`teamwork.queued_hours`, `teamwork.stuck_hours`), runs that match `teamwork.cancel_policy`, workflows switched off for inactivity (`teamwork.inactive_workflows`). The form of a manual workflow reads its inputs and checks them. With `teamwork.forks_help`, facts about the author of a fork run (age of the account, merged changes here, workflow files touched); no verdict is given.
+Nothing is written unless `github_actions.enabled` is on, the action is in `github_actions.allowed`, and you confirm the plan, which shows exactly what is sent. New actions: `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch`. The views only PROPOSE: bot updates with failing checks, branches behind, runs queued or running too long (`teamwork.queued_hours`, `teamwork.stuck_hours`), runs that match `teamwork.cancel_policy`, workflows switched off for inactivity (`teamwork.inactive_workflows`) or about to be (below). The form of a manual workflow reads its inputs and checks them. With `teamwork.forks_help`, facts about the author of a fork run (age of the account, merged changes here, workflow files touched); no verdict is given.
 
 ## The one automatic action
 
 `teamwork.auto_rerun` (off) re-runs once the failed jobs of a run that did not start or timed out, through the same checks (it does nothing while the actions are off or `rerun_failed` is not allowed). It never tries a second time; if the run fails again an alert is raised.
+
+## Keeping a schedule alive
+
+GitHub switches off the scheduled workflows of a public repository after 60 days without activity. With `teamwork.keep_alive_days` (0 = off; for example 45), a public repository with no push for that long and workflows that ran on a schedule appears among the proposals as `enable_workflow`, with the days left. It is a proposal like any other: nothing is sent until you confirm it. GitHub does not document that enabling an active workflow restarts its count, and this has not been tried on a real repository: the sure way is a new commit.
 
 ## Hooks of self-hosted runners
 
@@ -53,4 +57,4 @@ The reads and the writes have been tested against made-up answers only; none of 
 
 ## All settings
 
-`teamwork.enabled` `teamwork.repos_per_cycle` `teamwork.refresh_hours` `teamwork.dismiss_days` `teamwork.hide_workflows` `teamwork.bot_authors` `teamwork.bot_branches` `teamwork.bot_labels` `teamwork.dismissed_alerts` `teamwork.dismiss_allowed` `teamwork.auto_rerun` `teamwork.cancel_policy` `teamwork.queued_hours` `teamwork.stuck_hours` `teamwork.forks_help` `teamwork.inactive_workflows` `teamwork.runner_hooks`
+`teamwork.enabled` `teamwork.repos_per_cycle` `teamwork.refresh_hours` `teamwork.dismiss_days` `teamwork.hide_workflows` `teamwork.bot_authors` `teamwork.bot_branches` `teamwork.bot_labels` `teamwork.dismissed_alerts` `teamwork.dismiss_allowed` `teamwork.auto_rerun` `teamwork.cancel_policy` `teamwork.queued_hours` `teamwork.stuck_hours` `teamwork.forks_help` `teamwork.inactive_workflows` `teamwork.keep_alive_days` `teamwork.runner_hooks`
