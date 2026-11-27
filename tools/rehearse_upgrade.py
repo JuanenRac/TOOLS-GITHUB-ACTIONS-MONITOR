@@ -438,7 +438,9 @@ def scenario_fresh(ctx):
         before = install.snapshot()
         status, plan, said = install.updater("--json", "--zip", ctx["rel"] / ZIP, "plan")
         need("plan: nothing blocks", status == 0 and not plan.get("blocked"), said)
-        check("plan: no problem with the configuration", not any(f.get("issues") for f in plan.get("config", [])), plan.get("config"))
+        # the published updater calls "unknown" the keys of its own template that the settings page does not describe (fixed in the updater of the candidate); any other problem is one
+        odd = [i for f in plan.get("config", []) for i in f.get("issues", []) if i != "unknown_key"]
+        check("plan: no problem with the configuration beyond the known warnings", not odd, plan.get("config"))
         upgrade(install, ctx["rel"], "upgrade")
         install.serving(NEW, "after the upgrade")
         install.stop()
@@ -611,6 +613,7 @@ def scenario_signed_next(ctx):
         before = install.snapshot()
         status, plan, said = install.updater("--json", "--zip", signed / ZIP, "plan")
         need("signed next version: the plan says the signature is valid and nothing blocks", status == 0 and plan.get("signature") == "valid" and not plan.get("blocked"), said)
+        check("the updater of the candidate finds no problem in a configuration made from its own example", not any(f.get("issues") for f in plan.get("config", [])), plan.get("config"))
         upgrade(install, signed, "signed next version")
         install.serving(NEXT, "signed next version")
         install.stop()
