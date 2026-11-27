@@ -89,12 +89,13 @@ LIB = r"""
       const r=e.getBoundingClientRect(),s=css(e),inScroll=scroller(e,region);
       if(!inScroll&&(r.right>Math.min(box.right,vw)+1.5||r.left<Math.max(box.left,0)-1.5))add("leaves-box",e,Math.round(r.left)+".."+Math.round(r.right)+" of "+Math.round(box.left)+".."+Math.round(box.right));
       if(s.display!=="inline"&&e.clientWidth>0&&e.scrollWidth>e.clientWidth+1&&!/^(INPUT|TEXTAREA|SELECT)$/.test(e.tagName)){
-        if(/(auto|scroll)/.test(s.overflowX)){if(!phone&&e.tagName!=="PRE"&&e!==tab)add("needs-sideways-scroll",e,e.scrollWidth+">"+e.clientWidth)}
+        if(/(auto|scroll)/.test(s.overflowX)){const own=e.tagName==="PRE"||(phone&&e.tagName==="TABLE")||(e.children.length===1&&e.firstElementChild.tagName==="TABLE");if(!own&&e!==tab)add("needs-sideways-scroll",e,e.scrollWidth+">"+e.clientWidth)}
         else if(s.overflowX!=="visible"){if(!(s.textOverflow==="ellipsis"&&(e.title||e.getAttribute("aria-label"))))add("cut",e,e.scrollWidth+">"+e.clientWidth)}
         else if(!inScroll)add("wider-than-itself",e,e.scrollWidth+">"+e.clientWidth);
       }
       if(e.tagName==="INPUT"&&e.placeholder&&!e.value){const room=e.clientWidth-parseFloat(s.paddingLeft)-parseFloat(s.paddingRight);if(width(e,e.placeholder)>room+2&&!e.title)add("placeholder-cut",e,Math.round(width(e,e.placeholder))+">"+Math.round(room)+" "+e.placeholder)}
     }
+    for(const e of all)if(e.matches("section>.body")&&e.clientHeight<Math.min(160,e.scrollHeight)-1)add("squeezed",e,e.clientHeight+"px of "+e.scrollHeight);
     const walker=document.createTreeWalker(region,NodeFilter.SHOW_TEXT);
     for(let t=walker.nextNode();t;t=walker.nextNode()){
       const el=t.parentElement;if(!t.nodeValue.trim()||!el||el.closest("svg,script,style,option,textarea")||!shown(el))continue;
