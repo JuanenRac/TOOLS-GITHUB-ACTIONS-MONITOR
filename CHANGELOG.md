@@ -41,6 +41,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Fixed
 
+- **No more false "unknown setting" warnings when updating**: the updater no longer reports as unknown the settings that the example configuration of the target version carries but the settings page does not describe.
 - The names of the steps kept per workflow have a ceiling.
 - The Windows launchers fall back to `python` where the `py` launcher is not installed.
 - **Posture checks that gave a wrong answer**: dependency alerts could be misread while conditional reads were on; a protection that may not be read was reported as no protection; a security policy shared by the account was not seen; switched-off or filtered checks counted as "no findings" and as passed; a refused organization stopped the reading of every repository; long lists were read only in part; a file digest that appeared later counted as a replaced file.

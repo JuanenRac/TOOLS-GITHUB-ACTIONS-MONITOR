@@ -40,6 +40,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Corrigé
 
+- **Plus de faux avertissements « réglage inconnu » lors d'une mise à jour** : la mise à jour ne signale plus comme inconnus les réglages présents dans la configuration d'exemple de la version visée mais non décrits par la page des réglages.
 - Les noms d'étapes gardés par workflow ont un plafond.
 - Les lanceurs Windows se rabattent sur `python` quand le lanceur `py` n'est pas installé.
 - **Contrôles de posture qui répondaient mal** : les alertes de dépendances pouvaient être mal lues avec les lectures conditionnelles ; une protection illisible était déclarée absente ; la politique de sécurité partagée par le compte n'était pas vue ; les contrôles désactivés ou filtrés comptaient comme « sans constat » et comme réussis ; une organisation refusée arrêtait la lecture de tous les dépôts ; les longues listes n'étaient lues qu'en partie ; une empreinte apparue plus tard comptait comme un fichier remplacé.
