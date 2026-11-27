@@ -50,6 +50,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 - Un download senza firma proposto con un numero precedente viene rifiutato quando contiene una versione che deve essere firmata.
 - Un file di stato danneggiato dell'esportazione del registro non ferma più i suoi controlli, e l'unica riesecuzione automatica non viene inviata se non si può annotare.
 - Le guide indicano due limiti noti (cartelle viste da un viewer al computer; ripetizione di eventi senza orario) e il valore predefinito corretto di `webhook.reject_stale`.
+- Il filtro del testo per le IA ora toglie per intero un lungo nome host interno che finisce in `.local` e i pezzi di una chiave privata senza intestazione (una riga troncata o un log che comincia a metà della chiave).
 - È supportata solo l'ultima versione pubblicata (politica di sicurezza).
 
 ### Plugin

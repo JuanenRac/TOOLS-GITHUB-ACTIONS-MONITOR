@@ -50,6 +50,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 - Una descarga sin firma ofrecida con un número anterior se rechaza cuando contiene una versión que debe ir firmada.
 - Un fichero de estado dañado de la exportación del registro ya no detiene sus comprobaciones, y la única repetición automática no se envía si no se puede anotar.
 - Las guías dicen dos límites conocidos (carpetas que ve un viewer en el propio equipo; repetición de eventos sin hora) y el valor por defecto correcto de `webhook.reject_stale`.
+- El limpiador de texto para las IA ahora quita entero un nombre largo de equipo interno acabado en `.local` y los trozos de una clave privada que perdió su cabecera (una línea cortada o un registro que empieza a mitad de la clave).
 - Solo se soporta la última versión publicada (política de seguridad).
 
 ### Complementos

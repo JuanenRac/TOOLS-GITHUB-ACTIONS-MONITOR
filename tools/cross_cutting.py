@@ -18,7 +18,7 @@ AREAS = {
     "network": ("test_netguard", "test_180_network", "test_178_proxy", "test_218_proxy_tunnel", "test_i551_552_egress_siem"),
     "webhook": ("test_215_webhook_skew", "test_289_webhook_size_first", "test_287_webhook_sender", "test_famf_webhook_receiver"),
     "export": ("test_compliance_export", "test_g3_export_workspaces", "test_g1_metrics"),
-    "storage": ("test_compliance_records", "test_storage_sqlite", "test_storage_migrate", "test_storage_retention", "test_timezone"),
+    "storage": ("test_compliance_records", "test_compliance_restore_tick", "test_storage_sqlite", "test_storage_migrate", "test_storage_retention", "test_timezone"),
     "full": ("test_compliance_guard", "test_182_service", "test_compliance_family"),
 }
 

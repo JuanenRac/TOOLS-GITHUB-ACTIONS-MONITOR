@@ -229,7 +229,8 @@ def diagnose(owner, repo, url, runner, count=10, max_bytes=1500):
         code, log, _err = runner(["run", "view", str(run), "--repo", f"{owner}/{repo}", "--log-failed"], 90)
     except (ValueError, OSError, subprocess.SubprocessError, AttributeError):
         return {"run": run, "unavailable": True}
-    lines = [redact(line) for line in relevant_lines(log if code == 0 else "", count)]
+    found = relevant_lines(log if code == 0 else "", count)
+    lines = redact("\n".join(found)).split("\n") if found else []      # cleaned as ONE text: a key cut into several lines is only seen as a key when its lines are together
     step = " ".join(CONTROL_RE.sub(" ", ANSI_RE.sub("", step)).split())      # the name of a job or a step is text of whoever writes the workflow: one line, no control characters
     result = {"run": run, "step": redact(step, 160), "lines": lines}
     if code != 0:      # the jobs were read but the log was not (not there yet, expired, a 5xx): an answer without lines that must not be kept as if it were the log

@@ -50,6 +50,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 - Uma transferência sem assinatura apresentada com um número anterior é recusada quando contém uma versão que tem de ser assinada.
 - Um ficheiro de estado danificado da exportação do registo já não para as suas verificações, e a única repetição automática não é enviada se não puder ser anotada.
 - Os guias indicam dois limites conhecidos (pastas vistas por um viewer no computador; repetição de eventos sem hora) e o valor por omissão correto de `webhook.reject_stale`.
+- O limpador de texto para as IA passa a retirar por inteiro um nome longo de máquina interna terminado em `.local` e os pedaços de uma chave privada sem cabeçalho (uma linha cortada ou um registo que começa a meio da chave).
 - Só é suportada a última versão publicada (política de segurança).
 
 ### Plugins
