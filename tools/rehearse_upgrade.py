@@ -351,7 +351,7 @@ def customised_config(install):
         "open_browser": False, "ports": {"complete": install.ports[0], "lite": install.ports[1]}, "startup": {"resume_max_age_hours": 24},
         "sentinel": {"enabled": True, "refresh_seconds": 1200}, "sentinels": {"security": {"enabled": True, "refresh_seconds": 3600}},
         "ai": {"daily_limit": 5}, "kiosk": {"font_scale_percent": 175}, "report_history_days": 60, "sound": {"enabled": False, "volume": 10},
-        "retention": {"events_days": 30}, "audit_log": {"max_mb": 20}, "updates": {"check": False}, "display": {"density": "compact"},
+        "retention": {"events_days": 30}, "audit_log": {"max_mb": 20}, "updates": {"check": False}, "display": {"density": "dense"},
     })
     write_json(install.root / "config" / "actions_monitor.json", cfg)
     shutil.copyfile(install.root / "assets" / "examples" / "targets.example.json", install.root / "config" / "targets.json")
