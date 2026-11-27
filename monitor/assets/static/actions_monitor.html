@@ -1573,7 +1573,7 @@ function trChart(items,dates,events,o){
     events.forEach(e=>{const ex=x(e.i);g+=`<line x1="${ex.toFixed(1)}" x2="${ex.toFixed(1)}" y1="${Tp}" y2="${H-B}" class="trev ${e.kind}"/><text x="${ex.toFixed(1)}" y="${Tp-1}" text-anchor="middle" class="trevm ${e.kind}">${e.kind==="update"?"\u25B2":(e.kind==="release"?"\u25C6":(e.kind==="workflow"?"\u25A0":"!"))}<title>${esc(dates[e.i]+": "+e.text)}</title></text>`});
     g+=`<line class="trcur" x1="0" x2="0" y1="${Tp}" y2="${H-B}" visibility="hidden"/>`}
   if(!k)g+=`<text x="${L}" y="${H/2}" class="trax">${esc(T("ui.tr_nodata"))}</text>`;
-  return `<svg viewBox="0 0 ${W} ${H}" ${big?'class="trsvg" tabindex="0"':'preserveAspectRatio="none"'} width="100%" height="${big?"":H}" role="img" aria-label="${esc(o.label)}" data-n="${n}" data-l="${L}" data-r="${R}" data-w="${W}"><defs>${defs}</defs>${g}</svg>`}
+  return `<svg viewBox="0 0 ${W} ${H}" ${big?'class="trsvg" tabindex="0"':'preserveAspectRatio="none"'} width="100%"${big?"":` height="${H}"`} role="img" aria-label="${esc(o.label)}" data-n="${n}" data-l="${L}" data-r="${R}" data-w="${W}"><defs>${defs}</defs>${g}</svg>`}
 function renderTrend(){
   const box=$("s-trend"),tr=TRLAST;if(!box||!tr||!tr.red)return;
   const dates=trData(tr,"red").d,ev=trEvents(tr),defs=trDefs(tr),sel=trDef(TRSEL)&&tr[TRSEL]?TRSEL:"red",cmp=TRCMP&&TRCMP!==sel&&tr[TRCMP]?TRCMP:"";

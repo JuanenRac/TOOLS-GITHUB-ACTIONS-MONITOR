@@ -1,0 +1,5 @@
+/* Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+   GPL-3.0-or-later - see LICENSE */
+/* the cells of these tables hold titles, reasons and commands: they wrap instead of pushing the box sideways */
+#actions-box td,#actions-box th{white-space:normal;overflow-wrap:anywhere;vertical-align:top}
+#actions-box input,#actions-box select{max-width:100%}

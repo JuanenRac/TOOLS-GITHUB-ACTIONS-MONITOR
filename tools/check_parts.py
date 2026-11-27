@@ -24,6 +24,7 @@ import sys
 import tempfile
 import time
 import urllib.request
+from urllib.parse import urlsplit
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -177,13 +178,17 @@ def browser_here():
     return co.edge()
 
 
+#: an answer the page expects: the assistant that is off does not exist (404), and the browser writes that to its console
+EXPECTED = ("status of 404 (Not Found) /api/assistant",)
+
+
 def problems(report):
     """The lines of what is wrong in the report of one step (empty = fine)."""
     step = report.get("step")
     if report.get("missing"):
         return [f"{step}: the box did not appear"]
     lines = [f"{step}: {f['kind']} {f['at']} ({f['detail']}) {f['text']!r}" for f in report.get("found", [])]
-    return lines + [f"{step}: {e}" for e in report.get("errors", [])]
+    return lines + [f"{step}: {e}" for e in report.get("errors", []) if e not in EXPECTED]
 
 
 class Session:
@@ -225,7 +230,8 @@ class Session:
             self.errors.append("console.error: " + " ".join(str(a.get("value", a.get("description", ""))) for a in params.get("args", []))[:200])
         elif method == "Log.entryAdded" and params.get("entry", {}).get("level") == "error":
             entry = params["entry"]
-            self.errors.append(f"console: {entry.get('text', '')[:160]} {entry.get('url', '')[:120]}")
+            url = urlsplit(entry.get("url", ""))
+            self.errors.append(f"console: {entry.get('text', '')[:160].replace('Failed to load resource: the server responded with a ', '')} {url.path[:120]}")
 
     async def call(self, method, **params):
         self.counter += 1
