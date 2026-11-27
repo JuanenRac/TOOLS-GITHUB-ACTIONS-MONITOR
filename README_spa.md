@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6236_passing-brightgreen.svg" alt="6236 tests">
+  <img src="https://img.shields.io/badge/Tests-6249_passing-brightgreen.svg" alt="6249 tests">
 </p>
 
 > Vigila los workflows de todos tus repositorios y te dice, en una página local, qué está en rojo, qué está atascado y qué te espera.
@@ -65,6 +65,8 @@
 - **Herramientas por lotes**: planifican y lanzan muchas compilaciones a la vez; nada se lanza sin `--go`.
 - **Acerca de y Ayuda en la página**: el botón **i** muestra la versión, la edición, los enlaces, los archivos, el estado de salud y un botón que copia la información para soporte; el botón **?** (o la tecla `?`) abre toda la documentación, con búsqueda y en tu idioma, sin Internet. La consola tiene `--about` y `--help-topics`, y una aplicación interactiva de terminal por pestañas (`textual` opcional).
 - **Aviso de versión nueva**: una insignia discreta cuando se publica una versión más nueva; solo lee la página pública de versiones una vez al día, nunca instala nada y se puede apagar (siempre apagado en una instalación aislada).
+- **Releases firmadas y partes opcionales para instalaciones mayores**: cada release lleva una firma separada que comprueba el actualizador, y una ventana cuenta qué trae una versión nueva; complementos, almacenes de secretos, fuentes de CI externas (solo lectura), comprobaciones de postura, vistas de colaboración y de flota, un modo estricto de solo lectura, una política de red y un informe de cumplimiento están apagados hasta que los enciendas.
+- **Descargas y tráfico, guardados por ti (apagado de fábrica)**: una vez al día las descargas de los ficheros de tus releases y, con permiso de escritura, las visitas y clonados de los repositorios que elijas, guardados en tu equipo, con gráficas y CSV (`monitor/docs/TRAFFIC_spa.md`). Acerca de tiene además un enlace voluntario para decir públicamente que usas el monitor; no se envía nada salvo lo que escribas tú en GitHub.
 - **Cuotas para cualquier cuenta**: plan, minutos facturables (los repositorios públicos no cuestan), cuota de la API leída de las cabeceras de GitHub, concurrencia y jobs cerca del límite de 6 horas; las cifras están en un archivo editable.
 
 ## Qué ahorra
@@ -85,7 +87,7 @@ Método, supuestos y cómo medirlo en tu propio uso: [`monitor/docs/PRODUCTIVITY
 
 | | |
 |---|---|
-| **Versión** | **2.1.8** · [todas las versiones](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versión** | **2.2.0** · [todas las versiones](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Necesita** | Python 3.11+ y la CLI de GitHub (`gh auth login`); nada más (la vista de consola usa el paquete opcional `rich`) |
 | **Se abre** | en una página de `127.0.0.1` solamente, en ocho idiomas |
 | **Escribe en GitHub** | nunca por sí solo: solo las órdenes por lotes que lances con un `--go` explícito |
@@ -93,13 +95,13 @@ Método, supuestos y cómo medirlo en tu propio uso: [`monitor/docs/PRODUCTIVITY
 
 <!-- glance:begin -->
 
-**Medido hoy** (v2.1.8)
+**Medido hoy** (v2.2.0)
 
 | | |
 |---|---|
 | **Madurez** | functional |
-| **Tests** | 6236 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Ajustes** | 1030 ajustes, todos con ayuda |
+| **Tests** | 6249 métodos de test (`python -m unittest discover -s monitor/tests`) |
+| **Ajustes** | 1035 ajustes, todos con ayuda |
 | **Idiomas** | 8 (inglés, español, alemán, francés, italiano, japonés, chino y portugués) |
 | **Probado en el CI en** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -172,6 +174,7 @@ Un segundo producto, más sencillo, en el mismo paquete: la página de lo que co
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="Ahora" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_menu_groups_light.png"><img src="docs/screenshots/web_menu_groups_dark.png" alt="El menú con grupos: Vigilar, Centinelas, Equipo, Informes y aprendizaje" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_palette_light.png"><img src="docs/screenshots/web_palette_dark.png" alt="La paleta de Ctrl+K: un cuadro de búsqueda para cualquier pestaña, repositorio o acción" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_update_notice_light.png"><img src="docs/screenshots/web_update_notice_dark.png" alt="La ventana que anuncia una versión nueva" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_ci_light.png"><img src="docs/screenshots/web_sentinel_ci_dark.png" alt="Centinela: CI" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_external_ci_light.png"><img src="docs/screenshots/web_external_ci_dark.png" alt="Fuentes de CI externas: qué dice cada una y por qué no se pudo leer alguna" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_collab_light.png"><img src="docs/screenshots/web_sentinel_collab_dark.png" alt="Centinela: colaboración" width="92%"></picture></p>
@@ -366,6 +369,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/PLUGINS_spa.md`](monitor/docs/PLUGINS_spa.md): Complementos (apagados por defecto), sus paquetes, el aislamiento y leer el token de un almacén de secretos
 - [`monitor/docs/POSTURE_spa.md`](monitor/docs/POSTURE_spa.md): Postura de repositorios y organización, solo lectura
 - [`monitor/docs/COMPLIANCE_spa.md`](monitor/docs/COMPLIANCE_spa.md): Cumplimiento: solo lectura estricto, política de red, informe, retención y retención legal, registro de acciones firmado y exportado
+- [`monitor/docs/TRAFFIC_spa.md`](monitor/docs/TRAFFIC_spa.md): Descargas y tráfico
 - [`monitor/docs/ECOSYSTEM_TOOLS_spa.md`](monitor/docs/ECOSYSTEM_TOOLS_spa.md): Las herramientas que rodean al monitor y hasta dónde se soporta cada una
 - [`monitor/docs/EDITIONS_spa.md`](monitor/docs/EDITIONS_spa.md): Completa y Lite: qué hay en cada edición
 - [`monitor/docs/COLLABORATION_spa.md`](monitor/docs/COLLABORATION_spa.md): Vistas de colaboración y acciones opcionales en GitHub

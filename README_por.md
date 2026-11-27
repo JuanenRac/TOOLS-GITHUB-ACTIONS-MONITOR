@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6236_passing-brightgreen.svg" alt="6236 tests">
+  <img src="https://img.shields.io/badge/Tests-6249_passing-brightgreen.svg" alt="6249 tests">
 </p>
 
 > Vigia os workflows de todos os seus repositórios e diz-lhe, numa página local, o que está a vermelho, o que está encravado e o que o espera.
@@ -65,6 +65,8 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 - **Ferramentas por lotes**: planeiam e lançam várias compilações de uma vez; nada é lançado sem `--go`.
 - **Acerca de e Ajuda na página**: o botão **i** mostra a versão, a edição, as ligações, os ficheiros, o estado de saúde e um botão que copia a informação para o suporte; o botão **?** (ou a tecla `?`) abre toda a documentação, com pesquisa e no seu idioma, sem Internet. A consola tem `--about` e `--help-topics`, e uma aplicação interativa de terminal por separadores (`textual` opcional).
 - **Aviso de versão nova**: um emblema discreto quando sai uma versão mais recente; só lê a página pública de versões uma vez por dia, nunca instala nada e pode ser desligado (sempre desligado numa instalação isolada).
+- **Releases assinadas e partes opcionais para instalações maiores**: cada release leva uma assinatura separada que o atualizador verifica, e uma janela diz o que traz uma versão nova; extensões, cofres de segredos, fontes de CI externas (só de leitura), verificações de postura, vistas de colaboração e de frota, um modo estrito só de leitura, uma política de rede e um relatório de conformidade estão desligados até os ligar.
+- **Transferências e tráfego, guardados por si (desligado por omissão)**: uma vez por dia as transferências dos ficheiros das releases e, com acesso de escrita, as visitas e clonagens dos repositórios escolhidos, guardadas no seu computador, com gráficos e CSV (`monitor/docs/TRAFFIC_por.md`). Acerca tem ainda uma ligação voluntária para dizer publicamente que utiliza o monitor; nada é enviado além do que escrever no GitHub.
 - **Quotas para qualquer conta**: plano, minutos faturáveis (os repositórios públicos não custam), quota da API lida dos cabeçalhos do GitHub, concorrência e jobs perto do limite de 6 horas; os valores estão num ficheiro editável.
 
 ## O que poupa
@@ -85,7 +87,7 @@ Método, pressupostos e como medi-lo na sua própria utilização: [`monitor/doc
 
 | | |
 |---|---|
-| **Versão** | **2.1.8** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versão** | **2.2.0** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Requisitos** | Python 3.11+ e a CLI do GitHub (`gh auth login`); mais nada (a vista de consola usa o pacote opcional `rich`) |
 | **Abre** | uma página só em `127.0.0.1`, em oito idiomas |
 | **Escreve no GitHub** | nunca sozinho: apenas os comandos por lotes que lançar com um `--go` explícito |
@@ -93,13 +95,13 @@ Método, pressupostos e como medi-lo na sua própria utilização: [`monitor/doc
 
 <!-- glance:begin -->
 
-**Medido hoje** (v2.1.8)
+**Medido hoje** (v2.2.0)
 
 | | |
 |---|---|
 | **Maturidade** | functional |
-| **Testes** | 6236 métodos de teste (`python -m unittest discover -s monitor/tests`) |
-| **Definições** | 1030 definições, todas com ajuda |
+| **Testes** | 6249 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Definições** | 1035 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -172,6 +174,7 @@ Um segundo produto, mais simples, no mesmo pacote: a página do que está a corr
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="Agora" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_menu_groups_light.png"><img src="docs/screenshots/web_menu_groups_dark.png" alt="O menu em grupos: Vigiar, Sentinelas, Equipa, Relatórios e aprendizagem" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_palette_light.png"><img src="docs/screenshots/web_palette_dark.png" alt="A paleta Ctrl+K: uma caixa de pesquisa para qualquer separador, repositório ou ação" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_update_notice_light.png"><img src="docs/screenshots/web_update_notice_dark.png" alt="A janela que anuncia uma versão nova" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_ci_light.png"><img src="docs/screenshots/web_sentinel_ci_dark.png" alt="Sentinela: CI" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_external_ci_light.png"><img src="docs/screenshots/web_external_ci_dark.png" alt="Fontes de CI externas: o que diz cada uma e porque não foi possível ler alguma" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_collab_light.png"><img src="docs/screenshots/web_sentinel_collab_dark.png" alt="Sentinela: colaboração" width="92%"></picture></p>
@@ -366,6 +369,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/PLUGINS_por.md`](monitor/docs/PLUGINS_por.md): Plugins (desligados por predefinição), os pacotes, o isolamento e ler o token de um cofre de segredos
 - [`monitor/docs/POSTURE_por.md`](monitor/docs/POSTURE_por.md): Postura dos repositórios e da organização, só de leitura
 - [`monitor/docs/COMPLIANCE_por.md`](monitor/docs/COMPLIANCE_por.md): Conformidade: só leitura estrita, política de rede, relatório, retenção e retenção legal, registo de ações assinado e exportado
+- [`monitor/docs/TRAFFIC_por.md`](monitor/docs/TRAFFIC_por.md): Transferências e tráfego
 - [`monitor/docs/ECOSYSTEM_TOOLS_por.md`](monitor/docs/ECOSYSTEM_TOOLS_por.md): As ferramentas à volta do monitor e até onde cada uma é suportada
 - [`monitor/docs/EDITIONS_por.md`](monitor/docs/EDITIONS_por.md): Completa e Lite: o que há em cada edição
 - [`monitor/docs/COLLABORATION_por.md`](monitor/docs/COLLABORATION_por.md): Vistas de colaboração e ações opcionais no GitHub

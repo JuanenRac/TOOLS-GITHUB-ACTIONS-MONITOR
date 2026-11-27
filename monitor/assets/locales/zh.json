@@ -2408,6 +2408,8 @@
  "ui.about_health": "运行状况",
  "ui.about_installed": "已安装",
  "ui.about_issues": "问题反馈",
+ "ui.about_i_use_it": "告诉大家你在使用 (公开)",
+ "ui.about_i_use_it_note": "仅在点击时, 在浏览器中打开一个 GitHub 页面。你在那里写的内容是公开的。监视器不发送任何内容。",
  "ui.about_license": "许可证",
  "ui.about_links": "链接",
  "ui.about_not_installed": "未安装",

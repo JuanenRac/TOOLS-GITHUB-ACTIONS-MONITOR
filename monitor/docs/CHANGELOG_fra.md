@@ -9,8 +9,12 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+## [2.2.0]
+
 ### Ajouté
 
+- **Historique des téléchargements et du trafic**, gardé sur cet ordinateur (`traffic.enabled`, désactivé ; Complete) : une fois par jour les téléchargements des fichiers des versions et, si le jeton le peut, les visites et clonages des dépôts choisis, avec un panneau dans Dépôts, l'export CSV et la commande `traffic`. Requêtes GET seulement. `TRAFFIC.md`.
+- **Dites que vous l'utilisez** : À propos contient un lien qui ouvre un formulaire sur GitHub, seulement au clic ; ce que vous y écrivez est public. Le moniteur n'envoie et ne remplit rien.
 - **Maintenir une planification avant que GitHub la coupe** : avec `teamwork.keep_alive_days` (désactivé), il est proposé de réactiver les workflows planifiés d'un dépôt public calme, avec les jours restants. La démo statique et la vérification de workflows dans le navigateur sont désormais ouvertes par la CI dans un vrai navigateur.
 - **Mode lecture seule strict et politique réseau** (`security.read_only_strict`, `security.egress_policy`, désactivés) : appliqués sous toutes les parties ; une commande ou connexion refusée échoue en nommant le réglage, et le doctor liste les destinations hors politique.
 - **Rapport de conformité** (`compliance report`, `/api/compliance/report`, un encadré dans l'onglet Sécurité) : chaque ligne vérifiée ou seulement déclarée.
@@ -36,6 +40,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Modifié
 
+- **Les groupes des Réglages forment une liste à gauche** de leur panneau au lieu de plusieurs rangées d'onglets au-dessus, le panneau a donc plus de place (une fenêtre de moins de 701 pixels et la vue compacte les gardent en haut).
+- **Sur un téléphone, les chiffres de l'en-tête sont repliés** derrière un bouton, en portrait comme en paysage ; il les ouvre et ce navigateur retient le choix.
 - **Le programme de mise à jour autonome publié avec une version contient désormais le registre des migrations**, et SHA256SUMS le nomme avec le zip et les deux nomenclatures.
 
 ### Corrigé
@@ -43,6 +49,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 - **Une branche protégée par un ruleset n'est plus dite non protégée après une mise à jour** : les trois lectures de la protection n'envoient leur ETag que tant que la réponse est conservée, et ce qu'une version antérieure avait jugé est relu entièrement. `security.branch_unprotected` pouvait rester pour toujours sur un dépôt protégé.
 - **Les constats de posture et les alertes suivent la langue de la page** (`?lang=` et le sélecteur de langue), et non celle de la configuration.
 - **Sur téléphone, le contenu de chaque onglet est de nouveau visible** : sous un en-tête haut, l'onglet ouvert n'avait plus de hauteur et ses panneaux étaient inaccessibles au défilement.
+- **Les onglets sont visibles sur un téléphone tenu en paysage et dans les fenêtres basses** : à partir de 701 pixels de largeur, l'en-tête prenait toute la hauteur et l'onglet ouvert n'en avait aucune ; la page défile maintenant jusqu'à lui. Jusqu'à 800 pixels de largeur, le menu reste sur une ligne qui défile de côté au lieu de couper les noms lettre par lettre. Les écrans muraux ne changent pas.
 - **Les cadres des parties facultatives gardent toute leur hauteur** sur ordinateur et écran mural au lieu d'être écrasés en quelques lignes, leurs tableaux gardent les mots entiers, les boutons de la vue compacte font au moins 44 px de large et les grands graphiques n'écrivent plus d'erreur dans la console du navigateur. Un workflow mesure chaque cadre en huit langues, sur téléphone, ordinateur et écran mural.
 - **Plus de faux avertissements « réglage inconnu » lors d'une mise à jour** : la mise à jour ne signale plus comme inconnus les réglages présents dans la configuration d'exemple de la version visée mais non décrits par la page des réglages.
 - Les noms d'étapes gardés par workflow ont un plafond.

@@ -41,6 +41,7 @@
 | `kiosk` | テレビや壁面向けのモニターのアドレス（`ops`、`team`、`release`、`quiet`）。[KIOSK_jpn.md](KIOSK_jpn.md) を参照 | 不可 |
 | `metrics` | cron とメール向けに数値を `名前=値` の行で出力します。`--if-problem` を付けると問題がないときは何も出力しません。[CLI_OPERATOR.md](CLI_OPERATOR.md) を参照 | いいえ |
 | `posture` | リポジトリと組織の体制、読み取り専用(`posture status|matrix|check --repo-name`)。[POSTURE.md](POSTURE_jpn.md) を参照 | 不可 |
+| `traffic` | このコンピューターに保存したダウンロードとトラフィックの履歴 (`traffic status|export`)。[TRAFFIC_jpn.md](TRAFFIC_jpn.md) を参照 | 不可 |
 | `external-ci` | 外部CIソース、読み取り専用(`external-ci list|status|probe --source`)。[EXTERNAL_CI.md](EXTERNAL_CI_jpn.md) を参照 | 不可 |
 | `plugin` | プラグイン: `plugin list|validate|pack|verify|init|install|enable|disable|uninstall|audit`。参照: [PLUGINS.md](PLUGINS_jpn.md) | 不可 |
 

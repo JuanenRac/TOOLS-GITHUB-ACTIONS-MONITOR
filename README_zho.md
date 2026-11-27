@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-6236_passing-brightgreen.svg" alt="6236 tests">
+  <img src="https://img.shields.io/badge/Tests-6249_passing-brightgreen.svg" alt="6249 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -65,6 +65,8 @@
 - **批处理工具**：一次计划并触发多个构建；没有 `--go` 就不会触发任何东西。
 - **页面内的“关于”和“帮助”**：**i** 按钮显示版本、版本类型、链接、文件、运行状况和复制支持信息的按钮；**?** 按钮（或 `?` 键）可离线打开全部文档，支持搜索并使用你的语言。控制台提供 `--about` 和 `--help-topics`，以及分标签页的交互式终端应用（可选 `textual`）。
 - **新版本提示**：发布较新版本时显示低调的徽章；它每天只读取一次公开发布页，从不安装任何内容，可以关闭（隔离网络安装中始终关闭）。
+- **签名发布与面向较大部署的可选部分**: 每个版本带有分离签名, 更新程序会校验, 弹窗说明新版本带来什么; 插件、密钥库、外部 CI 源 (只读)、安全态势检查、协作与舰队视图、严格只读模式、网络策略和合规报告在开启前均关闭。
+- **下载与流量由你自己保存 (默认关闭)**: 每天一次读取发布文件的下载次数, 并在拥有 push 权限时读取所选仓库的访问和克隆, 保存在你的电脑上, 提供图表和 CSV (`monitor/docs/TRAFFIC_zho.md`)。“关于”中还有一个自愿的链接, 用于公开告诉大家你在使用本监视器; 除了你自己在 GitHub 上写的内容, 什么都不会发送。
 - **适用于任何账户的配额**：套餐、计费分钟数（公开仓库不计费）、从 GitHub 响应头读取的 API 配额、并发数，以及接近 6 小时上限的作业；数字保存在可编辑的文件中。
 
 ## 能节省什么
@@ -85,7 +87,7 @@
 
 | | |
 |---|---|
-| **版本** | **2.1.8** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **版本** | **2.2.0** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **需要** | Python 3.11+ 和 GitHub CLI（`gh auth login`）；不需要其他东西(终端视图使用可选的 `rich` 包) |
 | **打开** | 仅在 `127.0.0.1` 上的页面，支持八种语言 |
 | **写入 GitHub** | 绝不自行写入：只有你用明确的 `--go` 运行的批处理命令才会 |
@@ -93,13 +95,13 @@
 
 <!-- glance:begin -->
 
-**今日实测** (v2.1.8)
+**今日实测** (v2.2.0)
 
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 6236 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **设置** | 1030 个设置,均有帮助 |
+| **测试** | 6249 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **设置** | 1035 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
 
@@ -172,6 +174,7 @@
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="当前" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_menu_groups_light.png"><img src="docs/screenshots/web_menu_groups_dark.png" alt="分组菜单：监视、哨兵、团队、报告与学习" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_palette_light.png"><img src="docs/screenshots/web_palette_dark.png" alt="Ctrl+K 面板：可搜索任意标签页、仓库或操作的搜索框" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_update_notice_light.png"><img src="docs/screenshots/web_update_notice_dark.png" alt="提示新版本的窗口" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_ci_light.png"><img src="docs/screenshots/web_sentinel_ci_dark.png" alt="哨兵：CI" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_external_ci_light.png"><img src="docs/screenshots/web_external_ci_dark.png" alt="外部 CI 源:各自的状态以及无法读取的原因" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_collab_light.png"><img src="docs/screenshots/web_sentinel_collab_dark.png" alt="哨兵：协作" width="92%"></picture></p>
@@ -366,6 +369,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/PLUGINS_zho.md`](monitor/docs/PLUGINS_zho.md): 插件（默认关闭）、软件包、隔离以及从密钥存储读取令牌
 - [`monitor/docs/POSTURE_zho.md`](monitor/docs/POSTURE_zho.md): 仓库与组织的安全态势(只读)
 - [`monitor/docs/COMPLIANCE_zho.md`](monitor/docs/COMPLIANCE_zho.md): 合规: 严格只读、网络策略、报告、保留与法律保留、签名并导出的操作日志
+- [`monitor/docs/TRAFFIC_zho.md`](monitor/docs/TRAFFIC_zho.md): 下载与流量
 - [`monitor/docs/ECOSYSTEM_TOOLS_zho.md`](monitor/docs/ECOSYSTEM_TOOLS_zho.md): 监控器周边工具及其支持程度
 - [`monitor/docs/EDITIONS_zho.md`](monitor/docs/EDITIONS_zho.md): 完整版与 Lite: 各版型包含什么
 - [`monitor/docs/COLLABORATION_zho.md`](monitor/docs/COLLABORATION_zho.md): 协作视图与可选的 GitHub 操作

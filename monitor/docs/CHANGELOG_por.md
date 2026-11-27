@@ -9,8 +9,12 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+## [2.2.0]
+
 ### Adicionado
 
+- **Histórico de transferências e tráfego**, guardado neste computador (`traffic.enabled`, desligado; Complete): uma vez por dia as transferências dos ficheiros das releases e, se o token puder, as visitas e clonagens dos repositórios escolhidos, com um painel em Repositórios, exportação CSV e o comando `traffic`. Apenas pedidos GET. `TRAFFIC.md`.
+- **Diga que o utiliza**: Acerca tem uma ligação que abre um formulário no GitHub, apenas quando clica; o que lá escrever é público. O monitor não envia nem preenche nada.
 - **Manter vivo um agendamento antes de o GitHub o desligar**: com `teamwork.keep_alive_days` (desligado) é proposto voltar a ativar os workflows agendados de um repositório público parado, com os dias que faltam. A demonstração estática e a verificação de workflows no navegador passam a ser abertas pela CI num navegador real.
 - **Modo estrito só de leitura e política de rede** (`security.read_only_strict`, `security.egress_policy`, desligados): impostos por baixo de todas as partes; um comando ou ligação recusada falha indicando a definição, e o doctor lista os destinos fora da política.
 - **Relatório de conformidade** (`compliance report`, `/api/compliance/report`, uma caixa no separador Segurança): cada linha verificada ou só declarada.
@@ -36,6 +40,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Alterado
 
+- **Os grupos das Definições são uma lista à esquerda** do respetivo painel em vez de várias filas de separadores por cima, pelo que o painel tem mais espaço (uma janela com menos de 701 píxeis e a vista compacta mantêm-nos em cima).
+- **No telemóvel os valores do cabeçalho ficam recolhidos** atrás de um botão, na vertical e na horizontal; o botão abre-os e este navegador recorda a escolha.
 - **O atualizador avulso publicado com uma versão passa a trazer o registo de migrações**, e o SHA256SUMS nomeia-o juntamente com o zip e as duas listas de materiais.
 
 ### Corrigido
@@ -43,6 +49,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 - **Um ramo protegido por um ruleset já não é dado como desprotegido após uma atualização**: as três leituras da proteção só enviam o seu ETag enquanto a resposta se mantém guardada, e o que uma versão anterior avaliou é lido de novo por inteiro. `security.branch_unprotected` podia ficar para sempre num repositório protegido.
 - **As constatações de postura e os alertas seguem o idioma da página** (`?lang=` e o seletor de idioma), não o da configuração.
 - **No telemóvel volta a ver-se o conteúdo de todos os separadores**: sob um cabeçalho alto, o separador aberto ficava sem altura e os painéis não se alcançavam ao deslizar.
+- **Os separadores veem-se num telemóvel na horizontal e em janelas baixas**: a partir de 701 píxeis de largura o cabeçalho ocupava toda a altura e o separador aberto ficava sem nenhuma; agora a página desloca-se até ele. Até 800 píxeis de largura o menu continua numa fila que se desloca para o lado em vez de partir os nomes letra a letra. Os ecrãs de parede não mudam.
 - **As caixas das partes opcionais mantêm toda a altura** em computadores e ecrãs de parede em vez de ficarem esmagadas em poucas linhas, as tabelas não partem as palavras, os botões da vista compacta têm pelo menos 44 px de largura e os gráficos grandes já não escrevem um erro na consola do navegador. Um workflow mede cada caixa em oito idiomas, em telemóvel, computador e ecrãs de parede.
 - **Acabaram os falsos avisos de «definição desconhecida» ao atualizar**: o atualizador já não assinala como desconhecidas as definições presentes na configuração de exemplo da versão de destino mas não descritas pela página de definições.
 - Os nomes de passos guardados por workflow têm um limite.

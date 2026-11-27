@@ -10,8 +10,12 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+## [2.2.0]
+
 ### Added
 
+- **A history of downloads and traffic**, kept on this computer (`traffic.enabled`, off; Complete): once a day the download counts of the release files and, when the token may, the visits and clones of the repositories you choose, with a panel in Repositories, CSV export and the command `traffic`. GET requests only. `TRAFFIC.md`.
+- **Say that you use it**: About has a link that opens a form on GitHub, only when you click it; what you write there is public. Nothing is sent by the monitor and nothing is filled in.
 - **Keep a schedule alive before GitHub switches it off**: with `teamwork.keep_alive_days` (off) the scheduled workflows of a quiet public repository are proposed to be enabled again, with the days left. The static demo and the workflow check in the browser are now opened in a real browser by CI.
 - **Strict read-only mode and network policy** (`security.read_only_strict`, `security.egress_policy`, both off): enforced below every part of the monitor; a refused command or connection fails naming the setting, and the doctor lists destinations outside the policy.
 - **Compliance report** (`compliance report`, `/api/compliance/report`, a box in the Security tab): each line checked or only declared.
