@@ -40,6 +40,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Corrigido
 
+- **Um ramo protegido por um ruleset já não é dado como desprotegido após uma atualização**: as três leituras da proteção só enviam o seu ETag enquanto a resposta se mantém guardada, e o que uma versão anterior avaliou é lido de novo por inteiro. `security.branch_unprotected` podia ficar para sempre num repositório protegido.
+- **As constatações de postura e os alertas seguem o idioma da página** (`?lang=` e o seletor de idioma), não o da configuração.
 - **No telemóvel volta a ver-se o conteúdo de todos os separadores**: sob um cabeçalho alto, o separador aberto ficava sem altura e os painéis não se alcançavam ao deslizar.
 - **As caixas das partes opcionais mantêm toda a altura** em computadores e ecrãs de parede em vez de ficarem esmagadas em poucas linhas, as tabelas não partem as palavras, os botões da vista compacta têm pelo menos 44 px de largura e os gráficos grandes já não escrevem um erro na consola do navegador. Um workflow mede cada caixa em oito idiomas, em telemóvel, computador e ecrãs de parede.
 - **Acabaram os falsos avisos de «definição desconhecida» ao atualizar**: o atualizador já não assinala como desconhecidas as definições presentes na configuração de exemplo da versão de destino mas não descritas pela página de definições.

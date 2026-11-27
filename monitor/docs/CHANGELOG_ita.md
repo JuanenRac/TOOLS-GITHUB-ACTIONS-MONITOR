@@ -40,6 +40,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Corretto
 
+- **Un ramo protetto da un ruleset non viene più dato per non protetto dopo un aggiornamento**: le tre letture della protezione inviano il loro ETag solo finché la risposta è conservata, e ciò che una versione precedente aveva giudicato viene riletto per intero. `security.branch_unprotected` poteva restare per sempre su un repository protetto.
+- **I rilievi di postura e gli avvisi seguono la lingua della pagina** (`?lang=` e il selettore della lingua), non quella della configurazione.
 - **Sul telefono il contenuto di ogni scheda è di nuovo visibile**: sotto un'intestazione alta la scheda aperta restava senza altezza e i riquadri non si raggiungevano scorrendo.
 - **I riquadri delle parti facoltative mantengono tutta la loro altezza** su computer e schermi a parete invece di ridursi a poche righe, le loro tabelle non spezzano le parole, i pulsanti della vista compatta sono larghi almeno 44 px e i grafici grandi non scrivono più errori nella console del browser. Un workflow misura ogni riquadro in otto lingue, su telefono, computer e schermi a parete.
 - **Niente più falsi avvisi «impostazione sconosciuta» durante l'aggiornamento**: l'aggiornamento non segnala più come sconosciute le impostazioni presenti nella configurazione di esempio della versione di destinazione ma non descritte dalla pagina delle impostazioni.

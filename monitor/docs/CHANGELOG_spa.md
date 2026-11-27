@@ -40,6 +40,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Corregido
 
+- **Una rama protegida por un ruleset ya no se da por desprotegida tras actualizar**: las tres lecturas de la protección solo envían su ETag mientras se conserva la respuesta, y lo que juzgó una versión anterior se vuelve a leer entero. `security.branch_unprotected` podía quedarse para siempre en un repositorio protegido.
+- **Los hallazgos de postura y las alertas siguen el idioma de la página** (`?lang=` y el selector de idioma), no el de la configuración.
 - **En el teléfono vuelve a verse el contenido de todas las pestañas**: bajo una cabecera alta, la pestaña abierta se quedaba sin altura y sus paneles no se alcanzaban al desplazarse.
 - **Las cajas de las partes opcionales conservan toda su altura** en ordenadores y pantallas de pared en vez de quedar aplastadas en pocas líneas, sus tablas respetan las palabras enteras, los botones de la vista compacta miden al menos 44 px de ancho y las gráficas grandes ya no escriben un error en la consola del navegador. Un workflow mide cada caja en ocho idiomas, en teléfono, ordenador y pantallas de pared.
 - **Se acabaron los falsos avisos de «ajuste desconocido» al actualizar**: el actualizador ya no marca como desconocidos los ajustes que trae la configuración de ejemplo de la versión de destino pero que la página de ajustes no describe.

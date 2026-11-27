@@ -40,6 +40,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Behoben
 
+- **Ein durch ein Ruleset geschützter Branch gilt nach einer Aktualisierung nicht mehr als ungeschützt**: Die drei Abfragen des Schutzes senden ihr ETag nur, solange die Antwort noch vorliegt, und was eine ältere Version beurteilt hat, wird vollständig neu gelesen. `security.branch_unprotected` konnte bei einem geschützten Repository für immer stehen bleiben.
+- **Befunde der Sicherheitslage und Warnungen folgen der Sprache der Seite** (`?lang=` und die Sprachauswahl), nicht der der Konfiguration.
 - **Auf dem Telefon ist der Inhalt jedes Reiters wieder sichtbar**: Unter einem hohen Kopf blieb dem offenen Reiter keine Höhe, seine Felder waren durch Scrollen nicht erreichbar.
 - **Die Kästen der optionalen Teile behalten ihre volle Höhe** auf Rechnern und Wandanzeigen, statt auf wenige Zeilen gedrückt zu werden, ihre Tabellen trennen keine Wörter, Schaltflächen der kompakten Ansicht sind mindestens 44 px breit, und die großen Diagramme schreiben keinen Fehler mehr in die Browserkonsole. Ein Workflow misst jeden Kasten in acht Sprachen auf Telefon, Rechner und Wandanzeigen.
 - **Keine falschen Warnungen "unbekannte Einstellung" mehr beim Aktualisieren**: Der Updater meldet Einstellungen nicht mehr als unbekannt, die in der Beispielkonfiguration der Zielversion stehen, aber nicht auf der Einstellungsseite beschrieben sind.
