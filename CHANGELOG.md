@@ -10,6 +10,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+### Fixed
+
+- **The browser check of the optional parts** measures a page again, up to three times, when the browser runs out of socket buffers (`net::ERR_NO_BUFFER_SPACE`); any other problem fails at once.
+
 ## [2.2.0]
 
 ### Added
@@ -1790,7 +1794,7 @@ A release of integrity and security: no large new feature. What cannot be proven
 | `<signed_dir>/lotes/lote_<time>.json` | `<signed_dir>/batches/batch_<time>.json` (the old records are still read) |
 | `parte_history_days` (setting) | `report_history_days` (the old name is still read) |
 | `monitor_y_centinela.zip` and folder | `github_actions_monitor.zip` and folder; `LEEME_CORREO.txt` is `README_MAIL.txt` |
-| A8 looked for `RECONCILIACION_TOTAL_AUDITORIAS_*.txt`, `MAPA_DE_RONDAS_*` | the names are `sentinel.audit_files` (neutral defaults `RECONCILIATION_TOTAL_*.txt`, `ROUNDS_MAP_2*.txt`, `ROUNDS_MAP_EXTRA_*.txt`); set your own there |
+| A8 looked for report files with fixed names | the names are `sentinel.audit_files` (neutral defaults `RECONCILIATION_TOTAL_*.txt`, `ROUNDS_MAP_2*.txt`, `ROUNDS_MAP_EXTRA_*.txt`); set your own there |
 | `ci_red.json`, its schema and the `--export-status` files | unchanged (they are a contract) |
 
 - **English by default.** The language of the system no longer decides: the tools start in English until you choose another one in the Settings tab, with `language` in `actions_monitor.json`, `MONITOR_LANG` or `--lang`.

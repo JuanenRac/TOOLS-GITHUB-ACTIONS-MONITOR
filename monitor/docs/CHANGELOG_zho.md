@@ -9,6 +9,10 @@
 
 ## [Unreleased]
 
+### 修复
+
+- **可选部分的浏览器检查**：当浏览器的套接字缓冲区用尽（`net::ERR_NO_BUFFER_SPACE`）时，会重新测量该页面，最多三次；其他问题仍立即报错。
+
 ## [2.2.0]
 
 ### 新增
@@ -1658,7 +1662,7 @@
 | `<signed_dir>/lotes/lote_<time>.json` | `<signed_dir>/batches/batch_<time>.json`（旧记录仍会被读取） |
 | `parte_history_days`（设置） | `report_history_days`（旧名称仍会被读取） |
 | `monitor_y_centinela.zip` 及文件夹 | `github_actions_monitor.zip` 及文件夹；`LEEME_CORREO.txt` 变为 `README_MAIL.txt` |
-| A8 查找 `RECONCILIACION_TOTAL_AUDITORIAS_*.txt`、`MAPA_DE_RONDAS_*` | 名称由 `sentinel.audit_files` 指定（中性默认值 `RECONCILIATION_TOTAL_*.txt`、`ROUNDS_MAP_2*.txt`、`ROUNDS_MAP_EXTRA_*.txt`）；请在此设置你自己的 |
+| A8 查找名称固定的报告文件 | 名称由 `sentinel.audit_files` 指定（中性默认值 `RECONCILIATION_TOTAL_*.txt`、`ROUNDS_MAP_2*.txt`、`ROUNDS_MAP_EXTRA_*.txt`）；请在此设置你自己的 |
 | `ci_red.json`、其模式和 `--export-status` 的文件 | 不变（它们是契约） |
 
 - **默认英文。** 不再由系统语言决定：工具以英文启动，直到你在设置标签页、`actions_monitor.json` 的 `language`、`MONITOR_LANG` 或 `--lang` 中选择其他语言。
