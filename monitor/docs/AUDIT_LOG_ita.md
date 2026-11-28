@@ -26,3 +26,7 @@ Un amministratore (e la persona al computer quando non c'è la modalità team). 
 Impostazioni, scheda Sentinella, blocco **Registro delle azioni**: `audit_log.enabled` (attivo), `audit_log.max_mb` (10) e `audit_log.maintainers_can_read` (spento). `audit_log.keep_generations` (5) è il numero di file ruotati conservati. `audit_log.required` (spento) rifiuta con un 503 le azioni che devono essere registrate (le conferme delle azioni su GitHub, la modalità, i silenzi, le credenziali...) finché il registro non si può scrivere; le impostazioni restano aperte per poterlo sistemare.
 
 Un backup fatto ora (`POST /api/ops/backup`) e la pulizia su richiesta (`POST /api/ops/purge`, anche una prova) vengono registrati come `backup_run` e `purge_run`: la riga dice chi l'ha chiesto e il risultato, mai il contenuto del backup.
+
+## Punti di controllo firmati, pulizia ed esportazione
+
+Con `audit_checkpoints.enabled` la catena è firmata con una chiave dell'installazione e il registro si può pulire e copiare altrove: vedi [COMPLIANCE_ita.md](COMPLIANCE_ita.md). Con `retention.legal_hold` il registro non viene ruotato né pulito.

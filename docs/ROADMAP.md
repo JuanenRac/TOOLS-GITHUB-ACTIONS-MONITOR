@@ -9,19 +9,23 @@ What has shipped, what comes next and what is only an idea, in that order of cer
 
 ## Where the monitor is now
 
-Version 2.0.2. The lite edition shows what runs and what failed. The complete edition adds three sentinels (CI, Collab and Security), one list of alerts, several accounts and a team with roles, the score of each account, the health of each repository and of the team, scheduled reports, a log of actions, notifications (ntfy, Teams, e-mail and Apprise), an optional AI assistant with presets of compatible services, the service mode with Docker, and a page for every size of screen from a phone to 4K.
+Version 2.2.0. The lite edition shows what runs and what failed. The complete edition adds three sentinels (CI, Collab and Security), one list of alerts, several accounts and a team with roles, the score of each account, the health of each repository and of the team, scheduled reports, a log of actions, notifications (ntfy, Teams, e-mail and Apprise), an optional AI assistant with presets of compatible services, the service mode with Docker, and a page for every size of screen from a phone to 4K. Releases are signed from this version on, and plugins, external CI sources, posture checks, collaboration and fleet views, a strict read-only mode and a compliance report are there, all off until you switch them on.
 
 ## Planned, in this order
 
 Each version carries only real content: a version with nothing real to add is skipped and never published empty. Nothing here is claimed as proven on live services unless its guide says so.
 
-### 2.0.2 to 2.0.9 - After the freeze
+### 2.2.1 - Corrections only
 
-What only shows with long real use: the migration from 1.8 and 1.9, the growth of the events and the database over months, sessions after an upgrade, Docker volumes, many accounts with three sentinels and the team mode together, and whatever the contract suite finds. Nothing of the fourth phase (plugins, wide automation, advanced AI) goes into these versions; a version with nothing real to add is skipped.
+A version of corrections after a review of 2.2.0, with no new function. What the new optional parts have not been tried against (real external CI servers, real organizations, real AI providers, signing and attestations over several releases) is proved or corrected here and in the versions that follow.
 
 The monitor's own workflows keep to what the hygiene sentinel will ask of others: actions pinned to a commit, the least permissions and a time limit on every job.
 
-## Done in 1.8.2 to 2.1.8
+## Done in 1.8.2 to 2.2.0
+
+### 2.2.0 - Signed releases, optional parts for larger setups and a page that fits a phone better
+
+Version 2.2.0 brings together everything planned for 2.1.9 and 2.2.0. Releases are signed and the updater checks the signature; a window announces newer versions; two bills of materials and attestations go with each release. All off until you switch them on: signed plugins and secret stores, proposals of the AI that people decide, external CI sources read only, posture checks, collaboration views with confirmed actions, fleet views and APIs, a strict read-only mode and a network policy, a compliance report, retention with legal hold and a signed log of actions. A repository is told apart by source, owner and name, the Settings groups are a list on the left and the page works again on a phone held sideways. It also keeps, if you switch it on, a history of downloads and traffic on your computer, and About has a voluntary, public link to say that you use it.
 
 ### 2.1.8 - A review of 2.1.7: honest sentinels, working approvals of AI proposals, stricter network access, a proxy tunnel and a safer release image
 
@@ -211,19 +215,18 @@ Isolation tests of the lite edition and of the demo, no network request at all w
 
 What 1.6.4 did not reach, and why:
 
-- **Several owners in one process and one page**: since 1.7.0 every account is a monitor of its own and the page shows them side by side, but inside one monitor a repository is still identified by its name alone, so two owners in the same monitor would mix. Bringing them into one process means the owner in every identifier (the reads, the alert ids, the lists of the settings, the sentinels and the page); it could not be proved without repositories of two real owners, so the accounts of 1.7.0 remain the way to keep them apart.
+- **Several owners in one process and one page**: since 2.2.0 a repository is identified by source, owner and name, and `sources.multi_owner` (off) lets one monitor watch more than one owner; it has not been proved on repositories of two real owners, so the separate accounts of 1.7.0 remain the safe way.
 - **The billing report against a login that may read it**: the real answer for a login without the `user` scope is "not found" and the monitor degrades to the estimate (checked); the figures themselves have not been compared with a billing account.
 - **The prices of larger runners** in `quotas.json` come from memory of the public price list and are marked as unverified; compare them with the billing page of GitHub and edit the file.
 - **`gh copilot`**: its flags are checked with `gh copilot -- --help`, which needs the Copilot command line; it is not installed here, so they stay unverified.
 - **Notifications, webhook, Enterprise Server and the service examples** against live services: `tools/manual_check_live.py` checks them by hand; they need your channels and hosts, so they were not run here.
 - **The terminal application** edits the simple settings, lists and maps of numbers and shows the AI status; the explanation of a single red workflow stays in the page.
 - **Only the owner can prove them on a real installation**: several accounts with the Collab sentinel on real repositories, a GitHub App and a second read-only account with real keys, and the HTTPS proxy with a real certificate. They are run by hand (`tools/manual_check_live.py`) and are not claimed as done.
-- **A check for a new release that downloads or installs**: never; the monitor only tells.
+- **A new release that installs itself**: never; the monitor tells, and a person decides to update.
 
 ## Later
 
 - **Hardware telemetry of runners** through an agent: today only an optional node exporter endpoint is read.
-- **A fourth phase** (plugins, wider automation, advanced AI) only after several weeks of stable 2.0.x and an explicit decision.
 
 ## Ideas that need a decision first
 

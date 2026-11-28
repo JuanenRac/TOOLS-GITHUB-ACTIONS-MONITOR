@@ -7,7 +7,7 @@
 
 Generated from the code. It reads what the running monitor says (and never writes to GitHub). `--json` prints one JSON document; the exit codes are stable.
 
-Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `briefs`, `api`, `install-skill`, `gh-token`, `ai`, `backup`, `update`, `compare`, `screens`, `docs`, `toolbox`, `watch`, `monitor`, `completions`, `kiosk`, `metrics`, `proposals`.
+Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `briefs`, `api`, `install-skill`, `gh-token`, `ai`, `backup`, `update`, `compare`, `screens`, `docs`, `toolbox`, `watch`, `monitor`, `completions`, `kiosk`, `metrics`, `proposals`, `keyring`, `verify-release`, `plugin`, `external-ci`, `identity`, `compliance`, `audit`, `actions`, `runner-hook`, `posture`, `traffic`.
 
 | flag | what |
 | --- | --- |
@@ -25,6 +25,7 @@ Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `
 | `--token-file` | file whose first line is the access token of the network mode (keep it readable by you only) |
 | `--token` | access token of the network mode (last resort: it shows in the list of processes; prefer MONITOR_ACCESS_TOKEN) |
 | `--deep` | health: also ask the deep check (the supervisor and the refresh cycle of every account) |
+| `--code` | proposals approve: the first 8 characters of the fingerprint (one user) |
 | `--user` | team mode: sign in as this user (with --password-file or MONITOR_PASSWORD_FILE) |
 | `--password-file` | team mode: a file with the password of --user on its first line |
 | `--ca-file` | HTTPS: trust this certificate authority (a PEM file), for a monitor with a certificate of your own |
@@ -66,5 +67,24 @@ Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `
 | `--egress` | doctor: list every host this configuration can call, why, and what fails if it is blocked (nothing is called) |
 | `--latency` | doctor: measure how late the events of the account learn of a push compared with its run (reads only; nothing is created on GitHub) |
 | `--version` | print the version |
+| `--key-id` | the name of a key (revoke also takes its fingerprint) |
+| `--public-key` | the Ed25519 public key to add, 64 hexadecimal digits |
+| `--key-scope` | what the key may sign |
+| `--expires` | the last day the key is valid, YYYY-MM-DD |
+| `--document` | the file to verify; its signature is the same name with .ed25519.sig |
+| `--folder` | the folder with the files of a release |
+| `--installed` | also compare this installation with the bill of materials of the release |
+| `--attestations` | also ask GitHub for the attestation of the zip (needs gh and the network) |
+| `--fetch` | download the files of the installed version (needs ops.verify_release.fetch) |
+| `--verify-release` | with doctor: check a folder of release files and this installation |
+| `--path` | plugin: folder or package |
+| `--name` | plugin: name of an installed plugin |
+| `--fingerprint` | plugin install: fingerprint of the key, to confirm |
+| `--keyring` | plugin: another keyring file |
+| `--out` | plugin pack: file to write |
+| `--source` | The source line to try (external-ci probe). |
+| `--audit-from` | verify from this line on (1 = the first) |
+| `--older-than-days` | purge: remove rotated files older than this many days |
+| `--repo-name` | The repository to read now (posture check). |
 
 Other entry points: `bin/mcp_server.py` (MCP over standard input and output; `--allow-ack`, `--allow-lessons`), `bin/ai_hook.py` (gate script of an AI tool), `bin/read_report.py`, `bin/actions_monitor.py --doctor`.

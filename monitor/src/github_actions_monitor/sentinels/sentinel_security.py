@@ -42,7 +42,9 @@ STATE_FILE = paths.place("security_state.json")
 PER_PAGE = 100
 WEIGHTY = ("dependabot", "code_scanning", "secret")      # the sources that carry the penalty: the ones whose silence must never pass for a clean bill of health
 RETRY_AFTER = (300, 1800, 21600)                         # seconds a repository whose read fails waits before it is tried again: after the 1st, 2nd, 3rd and later failure in a row
-BRANCH_LOGIC = 2                                         # how the protection of the branch is judged: 1 = classic endpoint only, 2 = also the `protected` flag and the rules of the branch; a state written by an older logic is not trusted for it
+BRANCH_LOGIC = 3                                         # how the protection of the branch is judged: 1 = classic endpoint only, 2 = also the `protected` flag and the rules of the branch, 3 = an ETag is only sent while its answer is held; a state written by an older logic is not trusted for it
+BRANCH_ETAGS = ("branch", "branch_meta", "branch_rules")   # the ETags of the three reads of the protection of the branch
+BRANCH_FACTS = ("branch_protected", "branch_rules", "branch_flag", "branch_types")
 UNREAD_KEEP = 7 * 24 * 3600                              # an alert whose source cannot be read any more is kept (marked unread) this long before it is dropped without an event
 CODEOWNERS_EVERY = 24 * 3600          # a repository without a CODEOWNERS file is looked at again this often (three reads)
 CODEOWNERS_PATHS = (".github/CODEOWNERS", "CODEOWNERS", "docs/CODEOWNERS")
@@ -117,8 +119,11 @@ def load_state(path):
             data["per_repo"] = {str(k): v for k, v in data["per_repo"].items() if isinstance(v, dict)}
             for name, record in data["per_repo"].items():
                 if record.get("logic") != BRANCH_LOGIC and isinstance(record.get("facts"), dict):      # judged before the rulesets were read: its "unprotected" is not a finding, and the repository is looked at again first
-                    record["facts"].pop("branch_protected", None)
-                    record["facts"].pop("branch_rules", None)
+                    for fact in BRANCH_FACTS:
+                        record["facts"].pop(fact, None)
+                    if isinstance(record.get("etag"), dict):      # the ETags go with the answers: a 304 for an answer that was dropped would read as "no protection" for ever
+                        for key in BRANCH_ETAGS:
+                            record["etag"].pop(key, None)
                     data["alerts"] = {k: a for k, a in data["alerts"].items() if not (a["repo"] == name and a["code"] == "security.branch_unprotected")}
             return data
     except (OSError, ValueError, AttributeError):
@@ -398,6 +403,7 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
             facts["archived"] = bool(body.get("archived"))
         if facts.get("archived"):
             facts = {"default_branch": facts.get("default_branch"), "archived": True}      # an archived repository is read-only: nothing to ask of it
+            etag = {k: v for k, v in etag.items() if k == "repo"}      # what was dropped is read in full again if it is ever unarchived
         else:
             for kind, key, endpoint in (("dependabot", "dependabot", "dependabot/alerts"), ("code_scanning", "code_scanning", "code-scanning/alerts"), ("secret", "secret", "secret-scanning/alerts")):
                 if not rules[kind]["enabled"]:
@@ -425,6 +431,10 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
                         silent.add(kind)
             if rules["branch"]["enabled"]:
                 branch = quote(facts.get("default_branch") or "main", safe="")
+                # an ETag is only sent while the answer it stands for is still held: "304, unchanged" says nothing about an answer that was forgotten
+                for key, fact in zip(BRANCH_ETAGS, ("branch_protected", "branch_flag", "branch_types")):
+                    if fact not in facts:
+                        etag.pop(key, None)
                 status, _body = read("branch", f"repos/{owner}/{repo}/branches/{branch}/protection")
                 if status == 200:
                     facts["branch_protected"] = True
@@ -436,15 +446,14 @@ class SentinelSecurity(sentinel_base.BaseSentinel):
                     protected, types = False, None
                     meta_status, meta = self._side(etag, "branch_meta", f"repos/{owner}/{repo}/branches/{branch}")
                     if meta_status == 200 and isinstance(meta, dict):
-                        protected = bool(meta.get("protected"))
-                    elif meta_status == 304:
-                        protected = bool(facts.get("branch_protected"))
+                        facts["branch_flag"] = bool(meta.get("protected"))
+                    if meta_status in (200, 304):
+                        protected = bool(facts.get("branch_flag"))
                     rules_status, rules_body = self._side(etag, "branch_rules", f"repos/{owner}/{repo}/rules/branches/{branch}")
                     if rules_status == 200 and isinstance(rules_body, list):
-                        types = sorted({str(r.get("type")) for r in rules_body if isinstance(r, dict) and r.get("type")})
-                        protected = protected or bool(types)
-                    elif rules_status == 304:
-                        types = facts.get("branch_rules")
+                        facts["branch_types"] = sorted({str(r.get("type")) for r in rules_body if isinstance(r, dict) and r.get("type")})
+                    if rules_status in (200, 304):
+                        types = facts.get("branch_types")
                         protected = protected or bool(types)
                     if meta_status == 0 and rules_status == 0:
                         pass      # neither side read answered (a refusal, a timeout): that is not "no rule", so what was known stays and nothing is called unprotected

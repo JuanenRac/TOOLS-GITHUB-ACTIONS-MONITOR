@@ -9,6 +9,8 @@
 
 Uma segunda sentinela ao lado da de CI. Olha para as **issues e pull requests abertas** dos seus repositórios e diz-lhe o que precisa de uma pessoa: issues esquecidas, etiquetas críticas, revisões que ninguém faz, rascunhos sem fim, conflitos que ficam. Tem um relógio próprio, nunca altera o que a sentinela de CI decide e **nunca escreve no GitHub**. Pertence à edição completa; a edição lite não a carrega.
 
+O separador Colaboração e o separador Alertas têm ainda caixas opcionais com guia próprio: [vistas de colaboração e ações](COLLABORATION_por.md) e [propostas, conversa e relatório de um repositório](ASSISTANT_por.md).
+
 ## Ativá-la
 
 Vem desligada. Definições > Sentinela > Issues e pull requests, ou em `actions_monitor.json`:
@@ -41,7 +43,7 @@ Uma ronda lê no máximo `max_repos_per_tick` repositórios, com dois pedidos co
 ## Menos ruído: ignorar e silenciar
 
 - **Etiqueta de ignorar**: ponha no GitHub uma etiqueta de `ignore_labels` (`monitor:ignore` por omissão) na issue ou no pull request e a Collab não gera alerta para ele. O monitor nunca escreve etiquetas.
-- **Silêncio no monitor**: no separador Alertas, cada alerta tem botões para silenciar esse alerta, a sua regra ou toda a sentinela durante `alerts.mute_hours` horas (24 por omissão, de 1 a 720). Caduca sozinho, pode repor-se quando quiser e o separador guarda um histórico curto do que foi silenciado e até quando. É uma nota deste monitor; nada muda no GitHub. No modo de rede um silêncio só pode ser feito (e levantado) a partir do computador onde o monitor corre (`this_computer`); um cliente da rede vê os silêncios e não os pode alterar. Continuará assim até uma edição posterior ter utilizadores próprios. O silêncio de um alerta também pode durar «até o item mudar» (`until_change` no pedido de `POST /api/alerts/mute`): termina logo que o `updated_at` da issue ou do pull request muda, ou no fim das horas, o que acontecer primeiro. No separador Alertas é o botão **Até haver alteração**, mostrado nos alertas que trazem o `updated_at` do seu elemento (os da sentinela Collab); o alerta silenciado indica então «silenciado até haver alteração».
+- **Silêncio no monitor**: no separador Alertas, cada alerta tem botões para silenciar esse alerta, a sua regra ou toda a sentinela durante `alerts.mute_hours` horas (24 por omissão, de 1 a 720). Caduca sozinho, pode repor-se quando quiser e o separador guarda um histórico curto do que foi silenciado e até quando. É uma nota deste monitor; nada muda no GitHub. No modo de rede um silêncio só pode ser feito (e levantado) a partir do computador onde o monitor corre (`this_computer`); um cliente da rede vê os silêncios e não os pode alterar. O mesmo acontece no modo de equipa, seja qual for a função do utilizador. O silêncio de um alerta também pode durar «até o item mudar» (`until_change` no pedido de `POST /api/alerts/mute`): termina logo que o `updated_at` da issue ou do pull request muda, ou no fim das horas, o que acontecer primeiro. No separador Alertas é o botão **Até haver alteração**, mostrado nos alertas que trazem o `updated_at` do seu elemento (os da sentinela Collab); o alerta silenciado indica então «silenciado até haver alteração».
 
 ## Onde se vê
 

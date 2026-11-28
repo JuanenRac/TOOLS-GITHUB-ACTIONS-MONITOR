@@ -4,19 +4,23 @@ Ce qui est publié, ce qui vient ensuite et ce qui n'est qu'une idée, dans cet 
 
 ## Où en est le moniteur
 
-Version 2.0.2. L'édition lite montre ce qui tourne et ce qui a échoué. L'édition complète ajoute trois sentinelles (CI, Collab et Security), une liste d'alertes, plusieurs comptes et une équipe avec des rôles, la note de chaque compte, la santé de chaque dépôt et de l'équipe, des rapports programmés, un journal des actions, des notifications (ntfy, Teams, e-mail et Apprise), un assistant d'IA facultatif avec des préréglages de services compatibles, le mode service avec Docker et une page pour toutes les tailles d'écran, du téléphone à la 4K.
+Version 2.2.0. L'édition lite montre ce qui tourne et ce qui a échoué. L'édition complète ajoute trois sentinelles (CI, Collab et Security), une liste d'alertes, plusieurs comptes et une équipe avec des rôles, la note de chaque compte, la santé de chaque dépôt et de l'équipe, des rapports programmés, un journal des actions, des notifications (ntfy, Teams, e-mail et Apprise), un assistant d'IA facultatif avec des préréglages de services compatibles, le mode service avec Docker et une page pour toutes les tailles d'écran, du téléphone à la 4K. À partir de cette version les releases sont signées, et les extensions, les sources de CI externes, les contrôles de posture, les vues de collaboration et de flotte, un mode lecture seule strict et un rapport de conformité sont là, tous désactivés tant que vous ne les activez pas.
 
 ## Prévu, dans cet ordre
 
 Chaque version ne porte que du contenu réel : une version sans rien de réel à ajouter est sautée et jamais publiée vide. Rien ici n'est tenu pour prouvé sur des services réels sauf si son guide le dit.
 
-### 2.0.2 à 2.0.9 - Après le gel
+### 2.2.1 - Corrections seulement
 
-Ce qui n'apparaît qu'à l'usage réel prolongé : la migration depuis la 1.8 et la 1.9, la croissance des événements et de la base de données sur des mois, les sessions après une mise à jour, les volumes Docker, beaucoup de comptes avec trois sentinelles et le mode équipe en même temps, et ce que trouve la suite de contrat. Rien de la quatrième phase (greffons, automatisation étendue, IA avancée) n'entre dans ces versions ; une version sans contenu réel est sautée.
+Une version de corrections après une relecture de la 2.2.0, sans nouvelle fonction. Ce face à quoi les nouvelles parties optionnelles n'ont pas été essayées (vrais serveurs de CI externes, vraies organisations, vrais fournisseurs d'IA, signature et attestations sur plusieurs releases) est démontré ou corrigé ici et dans les versions suivantes.
 
 Les workflows du moniteur lui-même respectent ce que la sentinelle d'hygiène demandera aux autres : actions fixées à un commit, permissions minimales et une limite de temps sur chaque job.
 
-## Fait dans la 1.8.2 à la 2.1.8
+## Fait dans la 1.8.2 à la 2.2.0
+
+### 2.2.0 - Releases signées, parties optionnelles pour les grandes installations et une page mieux adaptée au téléphone
+
+La version 2.2.0 réunit tout ce qui était prévu pour la 2.1.9 et la 2.2.0. Les releases sont signées et la mise à jour vérifie la signature ; une fenêtre annonce les nouvelles versions ; chaque release porte deux listes de composants et des attestations. Tout est désactivé tant que vous ne l'activez pas : extensions signées et coffres de secrets, propositions de l'IA décidées par des personnes, sources de CI externes en lecture seule, contrôles de posture, vues de collaboration avec actions confirmées, vues de flotte et API, mode lecture seule strict et politique réseau, rapport de conformité, conservation légale et journal des actions signé. Un dépôt se distingue par source, propriétaire et nom, les groupes des Réglages forment une liste à gauche et la page fonctionne à nouveau sur un téléphone en paysage. Il garde aussi, si vous l'activez, un historique des téléchargements et du trafic sur votre ordinateur, et À propos contient un lien public et volontaire pour dire que vous l'utilisez.
 
 ### 2.1.8 - Revue de la 2.1.7 : sentinelles honnêtes, approbations des propositions de l'IA qui fonctionnent, accès réseau plus strict, tunnel de proxy et image de release plus sûre
 
@@ -206,19 +210,18 @@ Tests d'isolation de l'édition lite et de la démo, aucune requête réseau qua
 
 Ce que la 1.6.4 n'a pas atteint, et pourquoi :
 
-- **Plusieurs propriétaires dans un processus et une page** : depuis la 1.7.0 chaque compte est un moniteur à part et la page les montre côte à côte, mais dans un moniteur un dépôt reste identifié par son seul nom, si bien que deux propriétaires dans le même moniteur se mélangeraient. Les réunir dans un seul processus exige le propriétaire dans chaque identifiant (les lectures, les identifiants d'alerte, les listes des réglages, les sentinelles et la page) ; cela n'a pas pu être démontré sans les dépôts de deux vrais propriétaires, donc les comptes de la 1.7.0 restent le moyen de les séparer.
+- **Plusieurs propriétaires dans un processus et une page** : depuis la 2.2.0 un dépôt est identifié par source, propriétaire et nom, et `sources.multi_owner` (désactivé) permet à un moniteur de surveiller plus d'un propriétaire ; ce n'est pas démontré sur les dépôts de deux propriétaires réels, les comptes séparés de la 1.7.0 restent donc la voie sûre.
 - **Le rapport de facturation avec un compte qui peut le lire** : la vraie réponse pour un compte sans la portée `user` est « introuvable » et le moniteur retombe sur l'estimation (vérifié) ; les chiffres eux-mêmes n'ont pas été comparés à un compte de facturation.
 - **Les prix des gros runners** de `quotas.json` viennent de la mémoire de la grille tarifaire publique et sont marqués non vérifiés ; comparez-les à la page de facturation de GitHub et modifiez le fichier.
 - **`gh copilot`** : ses options se vérifient avec `gh copilot -- --help`, qui exige la ligne de commande Copilot ; elle n'est pas installée ici, donc elles restent non vérifiées.
 - **Notifications, webhook, Enterprise Server et exemples de service** face à des services réels : `tools/manual_check_live.py` les vérifie à la main ; ils demandent vos canaux et hôtes, ils n'ont donc pas été lancés ici.
 - **L'application de terminal** modifie les réglages simples, les listes et les tables de nombres et montre l'état de l'IA ; l'explication d'un workflow rouge précis reste dans la page.
 - **Seul le propriétaire peut les démontrer sur une vraie installation** : plusieurs comptes avec la sentinelle Collab sur de vrais dépôts, une GitHub App et un second compte en lecture seule avec de vraies clés, et le proxy HTTPS avec un vrai certificat. Ils se vérifient à la main (`tools/manual_check_live.py`) et ne sont pas donnés pour faits.
-- **Une vérification de nouvelle version qui télécharge ou installe** : jamais ; le moniteur ne fait que le dire.
+- **Une nouvelle version qui s'installe toute seule** : jamais ; le moniteur prévient et une personne décide de mettre à jour.
 
 ## Plus tard
 
 - **Télémétrie matérielle des runners** par un agent : aujourd'hui seul un point d'accès facultatif de node exporter est lu.
-- **Une quatrième phase** (plugins, automatisation plus large, IA avancée) seulement après plusieurs semaines de 2.0.x stable et une décision explicite.
 
 ## Idées qui demandent d'abord une décision
 

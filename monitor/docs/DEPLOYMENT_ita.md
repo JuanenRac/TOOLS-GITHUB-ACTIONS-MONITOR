@@ -186,6 +186,16 @@ docker compose pull && docker compose up -d
 gh attestation verify oci://ghcr.io/juanenrac/tools-github-actions-monitor:2.1.0 --owner JuanenRac
 ```
 
+Dalla 2.2.0 l'immagine è firmata anche con Cosign senza chiave (identità del workflow di rilascio):
+
+```sh
+cosign verify ghcr.io/juanenrac/tools-github-actions-monitor:2.2.0 \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --certificate-identity-regexp '^https://github\.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/\.github/workflows/release-image\.yml@refs/tags/v'
+```
+
+**Cosa si prova e dove**: il container (utente non root, file system in sola lettura, volumi, segreti, webhook dietro proxy) nel workflow Docker audit; l'unità del servizio su un vero systemd e un database di oltre 1 GB nel workflow Cross-cutting, che ripristina anche un backup ed esegue un ciclo di un account con un sostituto di GitHub. File system di rete (NFS) e altre architetture hardware non sono provati.
+
 ## Dietro un reverse proxy
 
 Per impostazione predefinita il monitor ascolta solo su `127.0.0.1`. Se devi raggiungerlo da un'altra macchina, metti davanti un reverse proxy con TLS, attiva la modalità di rete (`listen.network`: allora ogni richiesta deve portare il token di accesso) e DICHIARA il proxy (`listen.proxy_public_host` con il suo nome pubblico, `listen.secure_cookie` o `listen.trusted_proxy`). Il monitor rifiuta ogni richiesta il cui `Host` non sia il suo indirizzo o quel nome pubblico; il proxy deve quindi inviarlo e deve aggiungere l'indirizzo reale del client:
@@ -239,7 +249,7 @@ Gli stessi script girano su una macchina Linux con Docker (`tools/docker_audit/r
 Tutto in questa sezione è spento o innocuo per impostazione predefinita.
 
 - **App installabile** (`pwa.enabled`): la pagina offre un manifest, due icone e un piccolo service worker, così un browser può installare il monitor come app. I file sono `/manifest.webmanifest`, `/sw.js`, `/pwa/offline`, `/pwa/icon-192.png` e `/pwa/icon-512.png`; in modalità di rete sono serviti dietro il token di accesso come ogni pagina. Il worker conserva solo la pagina offline e le icone: mai la pagina, mai una risposta dell'API. Quando l'app torna in primo piano, o torna la rete, la pagina chiede subito dati freschi (`pwa.refresh_on_return`).
-- **Vista compatta** (`ui.compact`): `auto` la usa in una finestra stretta, `on` sempre, `off` mai; `?compact=1` o `?compact=0` la cambia per una finestra. Il menu passa in alto come una riga di schede, le tabelle scorrono di lato, uno schermo tattile riceve bersagli di almeno 44 pixel e i dialoghi seguono l'altezza lasciata dalla tastiera sullo schermo.
+- **Vista compatta** (`ui.compact`): `auto` la usa in una finestra stretta, `on` sempre, `off` mai; `?compact=1` o `?compact=0` la cambia per una finestra. Il menu passa in alto come una riga di schede, le tabelle scorrono di lato, uno schermo tattile riceve bersagli di almeno 44 pixel e i dialoghi seguono l'altezza lasciata dalla tastiera sullo schermo. Su un telefono, in verticale o in orizzontale, le cifre dell'intestazione sono ripiegate dietro un pulsante che le apre e questo browser ricorda la scelta. In una finestra bassa la pagina scorre fino alla scheda aperta invece di lasciarla senza altezza, e da 701 pixel di larghezza i gruppi delle impostazioni sono un elenco a sinistra del loro pannello.
 - **Abbinamento con un codice QR** (`pairing.enabled`, solo in modalità di rete): apri la tavolozza (Ctrl+K) e scegli "Abbina un telefono", poi "Nuovo codice QR". Il codice vale una sola volta e per `pairing.code_minutes` minuti; un nuovo codice annulla il precedente. Il telefono lo scansiona, preme il pulsante della pagina che si apre e riceve un token proprio (un cookie), mai il token di accesso. La stessa finestra elenca i dispositivi abbinati e ne revoca uno: il suo token smette subito di funzionare. Al massimo `pairing.max_devices` dispositivi; un dispositivo va abbinato di nuovo dopo `pairing.device_days` giorni (0 = mai). Il monitor conserva solo l'hash di ogni token in `devices.json` della cartella dei dati, un codice errato conta contro l'indirizzo come un token di accesso errato, e ogni abbinamento e ogni revoca lasciano una riga nel registro delle azioni.
 
 | Percorso | Cosa fa |

@@ -131,7 +131,10 @@ def public_state():
 
 def cookie_header(token, secure=None):
     """The Set-Cookie value that remembers the access token: HttpOnly, SameSite=Strict and, when the connection is HTTPS, Secure (`secure` overrides that: the local port is plain HTTP)."""
-    return f"{COOKIE}={token}; Path=/; HttpOnly; SameSite=Strict" + ("; Secure" if (STATE["secure"] if secure is None else secure) else "")
+    value = str(token).replace("\r", "").replace("\n", "")
+    if value != str(token) or ";" in value or any(ord(c) < 32 or ord(c) == 127 for c in value):      # such a value would add attributes, headers or a body of its own to the answer
+        raise ValueError("cookie_value")
+    return f"{COOKIE}={value}; Path=/; HttpOnly; SameSite=Strict" + ("; Secure" if (STATE["secure"] if secure is None else secure) else "")
 
 
 _lock = threading.Lock()

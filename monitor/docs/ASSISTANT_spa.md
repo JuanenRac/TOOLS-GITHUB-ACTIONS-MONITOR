@@ -34,3 +34,21 @@ No escribe nada ni toca nada en GitHub. Lo que escribió un repositorio (un tít
 ## Compruébalo
 
 `GET /api/assistant` dice qué es y sus límites; `POST /api/assistant/ask` recibe `action` y, según haga falta, `alert` o `repo`. Ambas responden 404 mientras está apagado. La pregunta queda en el registro de acciones (nunca su texto); con `ai.prompt_log.enabled` los prompts limpios se guardan en un registro local que puedes ver y vaciar en Ajustes.
+
+## Propuestas que aprueban personas
+
+Cada orden que propone una IA (`ai.actions.enabled`) queda marcada como venida de una IA, lleva la huella (SHA-256) de lo que se ejecutaría y se conserva hasta que caduca, también tras un reinicio. Nunca se ejecuta sola. Aprobarla desde la página o la línea de órdenes es decisión de personas: con dos o más usuarios hacen falta dos personas (quien preguntó a la IA cuenta como una y no puede aprobar la suya); con un usuario escribes los ocho primeros caracteres de la huella. Una persona basta para rechazar. Con `ai.assistant.can_propose` (apagado) una respuesta del chat también puede convertirse en propuesta. Se ven en la pestaña Alertas.
+
+## Chat libre
+
+`ai.chat.enabled` (apagado) añade un chat en la pestaña Alertas. La IA solo puede leer, con las cuatro herramientas de arriba; las pide y el monitor decide. Mismo presupuesto, mismo limpiador, mismas marcas alrededor de lo que escribieron los repositorios; cada respuesta lista lo leído. No hay ninguna herramienta que escriba.
+
+## Alertas parecidas con un modelo local
+
+Con `ai.rag.enabled` (apagado) y `ai.rag.model`, «explicar esta alerta» ordena las alertas por los embeddings de un modelo que corre en este equipo (la API de Ollama; solo se acepta una dirección local). El índice guarda vectores y huellas, nunca el texto, hasta `ai.rag.max_mb`; borrar `ai_rag_index.json` no pierde nada. Sin modelo se usa la comparación de palabras. Solo se ha probado con un servidor falso.
+
+## Informe de un repositorio
+
+Con `ui.copy_report.enabled` la pestaña Alertas copia el informe de un repositorio en Markdown, o un borrador de comentario de triaje, para pegarlo a mano. Sin IA, sin consultar GitHub, sin publicar nada.
+
+Rutas: `GET /api/assistant/extras`, `GET /api/assistant/repo-report?repo=`, `POST /api/assistant/chat`. Para clientes MCP los resúmenes también son recursos: `resources/list`, `resources/read`, `monitor://briefs/index`, `monitor://briefs/<tab>`.

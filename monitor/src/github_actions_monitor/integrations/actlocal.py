@@ -71,13 +71,21 @@ def clone_dir(workspace_root, repo, workflow, allow_symlinks=False):
         return None, "no_clone"
     try:
         root = Path(workspace_root).resolve()
-        repo_dir = root / repo
+        top = os.path.join(str(root), "")
+        named = os.path.normpath(os.path.join(top, repo))      # the NAME must stay under the workspace, before any link is followed
+        if not named.startswith(top):
+            return None, "outside"
+        repo_dir = Path(named)
         if repo_dir.is_symlink() and not allow_symlinks:
             return None, "symlink"
         real = repo_dir.resolve()
         if not allow_symlinks and (real.parent != root):
             return None, "outside"
-        flow = (repo_dir / ".github" / "workflows" / workflow)
+        flows = os.path.join(named, ".github", "workflows", "")
+        named_flow = os.path.normpath(os.path.join(flows, workflow))
+        if not named_flow.startswith(flows):
+            return None, "outside"
+        flow = Path(named_flow)
         if not flow.is_file():
             return None, "no_clone"
         if not inside(flow.resolve(), real):
@@ -90,8 +98,11 @@ def clone_dir(workspace_root, repo, workflow, allow_symlinks=False):
 def workflow_fingerprint(repo_dir, workflow):
     """(resolved path, SHA-256 of the content) of the workflow file; ('', '') when it cannot be read."""
     try:
-        path = (Path(repo_dir) / ".github" / "workflows" / workflow).resolve()
-        return str(path), hashlib.sha256(path.read_bytes()).hexdigest()
+        clone = os.path.join(os.path.realpath(str(repo_dir)), "")
+        path = os.path.realpath(os.path.join(clone, ".github", "workflows", workflow))
+        if not path.startswith(clone):
+            return "", ""
+        return path, hashlib.sha256(Path(path).read_bytes()).hexdigest()
     except OSError:
         return "", ""
 

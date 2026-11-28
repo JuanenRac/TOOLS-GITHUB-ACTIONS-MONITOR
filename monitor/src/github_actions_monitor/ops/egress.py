@@ -9,10 +9,12 @@ A test compares this table with the hosts the code names, so a new destination c
 import re
 from urllib.parse import urlsplit
 
+from github_actions_monitor import families
+
 #: id -> (hosts that do not depend on the configuration, setting that makes the row active (None = always), kind of the consequence text)
 ROWS = (
     ("github_api", ("api.github.com",), None),
-    ("github_download", ("github.com", "objects.githubusercontent.com"), "updates.check"),
+    ("github_download", ("github.com", "objects.githubusercontent.com", "release-assets.githubusercontent.com"), "updates.check"),
     ("github_raw", ("raw.githubusercontent.com",), "lint.anonymous_public"),
     ("github_status", ("www.githubstatus.com",), "github_status.enabled"),
     ("ntfy", ("ntfy.sh",), "notify.channels.ntfy.enabled"),
@@ -21,7 +23,7 @@ ROWS = (
     ("ai", (), "ai.provider"),
     ("otlp", (), "otlp.enabled"),
     ("siem", (), "siem.sinks"),
-)
+) + tuple((row.id, tuple(row.hosts), row.setting) for row in families.egress())      # the destinations of the parts (families/)
 LINK_ONLY = frozenset({"github.com", "www.python.org", "docs.anthropic.com", "platform.openai.com", "ollama.com", "localai.io", "lmstudio.ai", "jan.ai", "docs.x.ai", "docs.vllm.ai", "docs.together.ai",
                        "docs.perplexity.ai", "docs.mistral.ai", "docs.fireworks.ai", "docs.cohere.com", "console.groq.com", "api-docs.deepseek.com", "ai.google.dev", "example.invalid", "openrouter.ai", "owasp.org", "scorecard.dev", "www.w3.org", "adaptivecards.io"})
 DYNAMIC_HOSTS = frozenset({"api.anthropic.com", "api.openai.com"})      # hosts of the AI provider rows that are named in the code as the default of a provider
@@ -46,8 +48,15 @@ def _is_remote(host):
     return bool(host) and host not in ("localhost", "127.0.0.1", "::1") and not host.startswith(("10.", "192.168.", "172.16.", "172.17."))
 
 
+def _declared(row_id):
+    return next((row for row in families.egress() if row.id == row_id), None)
+
+
 def _dynamic_hosts(row_id, config):
     """The hosts that come from the configuration (the provider of the AI, the endpoint of OTLP, the sinks of the SIEM)."""
+    part = _declared(row_id)
+    if part is not None and part.hosts_from is not None:
+        return sorted({h for h in part.hosts_from(config) if _is_remote(h)})
     if row_id == "ai":
         provider = _get(config, "ai.provider")
         base = _get(config, "ai.base_url")
@@ -88,7 +97,9 @@ def table(config):
     rows = []
     for row_id, hosts, rule in ROWS:
         found = sorted(set(hosts) | set(_dynamic_hosts(row_id, config)))
-        active = (not airgapped) and _active(config, rule) and bool(found)
+        part = _declared(row_id)
+        on = part.active(config) is True if part is not None and part.active is not None else _active(config, rule)
+        active = (not airgapped) and on and bool(found)
         rows.append({"id": row_id, "hosts": found, "active": active, "setting": rule or "", "airgapped": airgapped})
     return rows
 

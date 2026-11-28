@@ -41,6 +41,8 @@ O predefinido continua a ser o seu próprio início de sessão do `gh`. Com `git
 
 Com `github_actions.enabled` ligado, o monitor pode reexecutar uma execução falhada (`rerun_failed`, `rerun_run`, `rerun_job`), cancelar uma execução (`cancel`), fechar uma issue ou um pull request (`close_issue`, `close_pr`) e fundir um (`merge_pr`, com `github_actions.merge_method`). Só se podem usar os nomes em `github_actions.allowed` (por defeito `rerun_failed` e `cancel`). **Cada ação é confirmada à parte**: a página mostra exatamente o que será enviado (método e endpoint) e não envia nada até confirmar esse plano com o token de uso único. O token do GitHub precisa da permissão (`workflow` para execuções, `repo` para issues e pull requests; caso contrário mostra-se a recusa do próprio GitHub). Cada tentativa é escrita em `github_actions_log.jsonl`. O assistente de IA não tem forma de iniciar nenhuma.
 
+Acrescentadas pelas vistas de colaboração: `update_branch`, `approve_fork`, `approve_deployment`, `force_cancel`, `enable_workflow`, `dispatch` ([COLLABORATION_por.md](COLLABORATION_por.md)).
+
 ## Executar um workflow aqui com act
 
 Com `act.enabled` ligado e entradas `repositório:ficheiro.yml:evento` em `act.allowed` (as três exatas), um botão executa o `act` no clone local depois de confirmar a linha de comandos exata. Não são fornecidos segredos reais (ficheiros de segredos, variáveis, ambiente e entradas vazios, e um ambiente mínimo sem token), a saída aparece à medida que chega, uma execução de cada vez, com o limite de tempo `act.timeout_seconds`, e pode pará-la.

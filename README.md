@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-5936_passing-brightgreen.svg" alt="5936 tests">
+  <img src="https://img.shields.io/badge/Tests-6266_passing-brightgreen.svg" alt="6266 tests">
 </p>
 
 > Watches the workflows of every repository you own and tells you, on one local page, what is red, what is stuck and what is waiting for you.
@@ -65,6 +65,8 @@
 - **Batch tools**: plan and dispatch many builds at once; nothing is fired without `--go`.
 - **About and Help in the page**: the **i** button shows the version, the edition, the links, the files, the health and a button that copies the information for support; the **?** button (or the key `?`) opens the whole documentation, searchable and in your language, with no Internet. The console has `--about` and `--help-topics`, and a tab-by-tab interactive terminal application (optional `textual`).
 - **Notice of a newer version**: a discreet badge when a newer release is published; it only reads the public releases page once a day, never installs anything and can be switched off (always off when air-gapped).
+- **Signed releases and optional parts for larger setups**: a release carries a detached signature that the updater checks, and a window tells what a newer version brings; plugins, secret stores, external CI sources (read only), posture checks, collaboration and fleet views, a strict read-only mode, a network policy and a compliance report are all off until you switch them on.
+- **Downloads and traffic, kept by you (off by default)**: once a day the download counts of your release files and, with push access, the visits and clones of the repositories you choose, saved on your computer, with charts and CSV (`monitor/docs/TRAFFIC.md`). About also has a voluntary link to say publicly that you use the monitor; nothing is sent unless you write it on GitHub yourself.
 - **Quotas for every account**: plan, billable minutes (public repositories cost none), allowance of the API read from GitHub's headers, concurrency and jobs near the 6-hour limit; the figures are in an editable file.
 
 ## What it saves
@@ -85,7 +87,7 @@ Method, assumptions and how to measure it in your own use: [`monitor/docs/PRODUC
 
 | | |
 |---|---|
-| **Version** | **2.1.8** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **2.2.0** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Needs** | Python 3.11+ and the GitHub CLI (`gh auth login`); nothing else (the terminal view uses the optional package `rich`) |
 | **Opens** | a page on `127.0.0.1` only, in eight languages |
 | **Writes to GitHub** | never by itself: only batch commands you run with an explicit `--go` |
@@ -93,13 +95,13 @@ Method, assumptions and how to measure it in your own use: [`monitor/docs/PRODUC
 
 <!-- glance:begin -->
 
-**Measured today** (v2.1.8)
+**Measured today** (v2.2.0)
 
 | | |
 |---|---|
 | **Maturity** | functional |
-| **Tests** | 5936 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Settings** | 914 settings, all with help |
+| **Tests** | 6266 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Settings** | 1035 settings, all with help |
 | **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
 | **Tested in the CI on** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -172,10 +174,21 @@ A second, simpler product in the same package: the page of what is running and w
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="Now" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_menu_groups_light.png"><img src="docs/screenshots/web_menu_groups_dark.png" alt="The menu in titled groups: Watch, Sentinels, Team, Reports and learning" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_palette_light.png"><img src="docs/screenshots/web_palette_dark.png" alt="The palette on Ctrl+K: a search box for any tab, repository or action" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_update_notice_light.png"><img src="docs/screenshots/web_update_notice_dark.png" alt="The window that announces a newer version" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_ci_light.png"><img src="docs/screenshots/web_sentinel_ci_dark.png" alt="Sentinel: CI" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_external_ci_light.png"><img src="docs/screenshots/web_external_ci_dark.png" alt="External CI sources: what each one says and why one could not be read" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_collab_light.png"><img src="docs/screenshots/web_sentinel_collab_dark.png" alt="Sentinel: collaboration" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_delivery_light.png"><img src="docs/screenshots/web_sentinel_delivery_dark.png" alt="Delivery sentinel: what is built but not yet delivered" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_supply_light.png"><img src="docs/screenshots/web_sentinel_supply_dark.png" alt="Supply chain sentinel: unpinned actions and wide permissions" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_security_light.png"><img src="docs/screenshots/web_sentinel_security_dark.png" alt="Security sentinel with findings" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_posture_light.png"><img src="docs/screenshots/web_posture_dark.png" alt="Posture report of repositories and organization against OWASP and CIS" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_compliance_light.png"><img src="docs/screenshots/web_compliance_dark.png" alt="Compliance report of the installation: each line checked or declared" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_collaboration_light.png"><img src="docs/screenshots/web_collaboration_dark.png" alt="Collaboration views: what waits for a person and what could be done" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_roles_groups_light.png"><img src="docs/screenshots/web_roles_groups_dark.png" alt="Fleet by role of workflow and by group" width="92%"></picture></p>
+<p align="center"><img src="docs/screenshots/web_screen_group.png" alt="Wall screen of one group" width="92%"></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_proposals_light.png"><img src="docs/screenshots/web_proposals_dark.png" alt="Proposals of the AI that a person decides" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_assistant_chat_light.png"><img src="docs/screenshots/web_assistant_chat_dark.png" alt="Chat with the AI, with read-only tools and the sources it read" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_extensions_light.png"><img src="docs/screenshots/web_extensions_dark.png" alt="Extensions: what runs, with which permissions and what is isolated" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_trend_light.png"><img src="docs/screenshots/web_sentinel_trend_dark.png" alt="Daily trend: one line for each figure" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_fleet_light.png"><img src="docs/screenshots/web_fleet_dark.png" alt="Fleet: every repository at a glance" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_reports_light.png"><img src="docs/screenshots/web_reports_dark.png" alt="Reports" width="92%"></picture></p>
@@ -356,6 +369,15 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ACCOUNTS.md`](monitor/docs/ACCOUNTS.md): several accounts, one process each
 - [`monitor/docs/QUOTAS.md`](monitor/docs/QUOTAS.md): quotas and plans of GitHub
 - [`monitor/docs/MODES.md`](monitor/docs/MODES.md): working modes: normal, fast and turbo
+- [`monitor/docs/EXTERNAL_CI.md`](monitor/docs/EXTERNAL_CI.md): External CI sources, read only: Buildbot, GitLab CI, Jenkins, Azure Pipelines
+- [`monitor/docs/PLUGINS.md`](monitor/docs/PLUGINS.md): Plugins (off by default), their packages, isolation, and reading the token from a secret store
+- [`monitor/docs/POSTURE.md`](monitor/docs/POSTURE.md): Posture of repositories and organization, read only
+- [`monitor/docs/COMPLIANCE.md`](monitor/docs/COMPLIANCE.md): Compliance: strict read-only mode, network policy, report, retention and legal hold, signed and exported log of actions
+- [`monitor/docs/TRAFFIC.md`](monitor/docs/TRAFFIC.md): Downloads and traffic
+- [`monitor/docs/ECOSYSTEM_TOOLS.md`](monitor/docs/ECOSYSTEM_TOOLS.md): The tools around the monitor and how far each is supported
+- [`monitor/docs/EDITIONS.md`](monitor/docs/EDITIONS.md): Complete and Lite: what is in each edition
+- [`monitor/docs/COLLABORATION.md`](monitor/docs/COLLABORATION.md): Collaboration views and optional actions on GitHub
+- [`monitor/docs/FLEET_APIS.md`](monitor/docs/FLEET_APIS.md): Fleet by role and group, CCTray and security APIs, report digest, demo site
 - [`monitor/docs/AI_CONNECTION.md`](monitor/docs/AI_CONNECTION.md): Connect an AI tool: everything the monitor says, as signals, in the brief, the endpoint, the MCP tools and the hook
 - [`monitor/docs/AI_SETUP_PROMPT.md`](monitor/docs/AI_SETUP_PROMPT.md): Set up the monitor with an AI: a prompt to paste into your AI assistant that installs it, asks what you want and writes the configuration
 - [`monitor/docs/QUOTA.md`](monitor/docs/QUOTA.md): More quota, less spending: Low mode, the central panel, a GitHub App and how to share the allowance

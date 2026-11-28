@@ -69,9 +69,25 @@ def check_host(host, port=443, allow_private=False, resolver=None):
     return addresses[0]
 
 
+def only_private(url, resolver=None):
+    """True when every address of the host of `url` is of this computer or of a private network: the only places a secret may go without TLS. False when it cannot be known."""
+    try:
+        parts = urllib.parse.urlsplit(url)
+        return bool(parts.hostname) and all(blocked_ip(a) for a in resolve(parts.hostname, parts.port or 80, resolver))
+    except (OSError, ValueError):
+        return False
+
+
 def _connect(connection, allow_private, resolver):
     ip = check_host(connection.host, connection.port, allow_private, resolver)
     return socket.create_connection((ip, connection.port), connection.timeout, connection.source_address)
+
+
+def tls_context():
+    """The context of an outgoing HTTPS connection: certificate and name checked, nothing older than TLS 1.2 whatever the Python or the system would still allow."""
+    context = ssl.create_default_context()
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    return context
 
 
 def _handlers(allow_private, resolver, use_proxy=False):
@@ -92,7 +108,7 @@ def _handlers(allow_private, resolver, use_proxy=False):
                     raise
                 sock = self.sock
                 name = self._tunnel_host
-            self.sock = ssl.create_default_context().wrap_socket(sock, server_hostname=name)      # the certificate is checked against the NAME, the socket goes to the checked address
+            self.sock = tls_context().wrap_socket(sock, server_hostname=name)      # the certificate is checked against the NAME, the socket goes to the checked address
 
     class HttpHandler(urllib.request.HTTPHandler):
         def http_open(self, req):

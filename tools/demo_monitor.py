@@ -6,10 +6,12 @@
 # =============================================================================
 """A demo monitor with invented data (the demo-* repositories of the demo-owner account) for the screenshots of the documentation.
 
-    python tools/demo_monitor.py [PORT] [--lite] [--network] [--rich] [--kiosk]   # default 18765; runs until it is stopped
+    python tools/demo_monitor.py [PORT] [--lite] [--network] [--rich] [--parts] [--kiosk]   # default 18765; runs until it is stopped
 
 It starts the real web server of the monitor on 127.0.0.1 with a temporary configuration and made-up runs, alerts, a signing queue, analytics and linter findings, so the page can be
 photographed without touching your own configuration or GitHub. Nothing is read from GitHub and nothing is written outside a temporary folder.
+
+`--parts` switches on the optional parts (extensions, proposals and chat, collaboration, fleet by role and group, posture) with the invented data of tools/demo_parts.py.
 
 `--network` shows the page as it looks in the network mode (the persistent red bar and, in Settings, the warning for every interface) so that it can be photographed: the page only
 shows them, the demo still listens on 127.0.0.1 only and no access token is needed. It exists for the pictures and is never the real network mode.
@@ -23,6 +25,7 @@ from http.server import ThreadingHTTPServer
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent / "monitor"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "tests"))
 from github_actions_monitor.app import actions_monitor as am  # noqa: E402
@@ -54,6 +57,9 @@ def setup(now):
     cfg.update({"github_owner": OWNER, "workspace_root": "", "signed_dir": "", "audit_dir": "", "screens": {**cfg.get("screens", {}), "enabled": True}})      # the wall screens are off by default; the demo shows them
     if "--kiosk" in sys.argv:      # the kiosk profile is off by default too: the measuring tool of the screens asks for it
         cfg["kiosk"] = {**cfg.get("kiosk", {}), "enabled": True}
+    if "--parts" in sys.argv:
+        import demo_parts
+        demo_parts.settings(cfg)
     (tmp / "actions_monitor.json").write_text(json.dumps(cfg), encoding="utf-8")
     am.CONFIG_FILE = settings_api.CONFIG_FILE = toolconfig.CONFIG_FILE = tmp / "actions_monitor.json"
     settings_api.BACKUP_DIR = tmp / "backups"
@@ -275,7 +281,19 @@ def rich_setup(snap, now):
     am.LIVE_CONFIG.setdefault("compare", {})["enabled"] = True
 
 
+#: what the About panel of the demo shows instead of the temporary folders it really uses: a picture never carries a path of the computer that took it
+DEMO_PATHS = {"config": "~/github-actions-monitor/monitor/config/actions_monitor.json", "log": "~/github-actions-monitor/monitor/logs/actions_monitor_log.txt",
+              "etag_cache": "~/github-actions-monitor/monitor/data/cache/etag_cache.json", "package_folder": "~/github-actions-monitor/monitor"}
+
+
+def generic_paths():
+    from github_actions_monitor.ui import about
+    real = about.info
+    about.info = lambda lite, health, paths, update, language: real(lite, health, {name: DEMO_PATHS.get(name, "~/github-actions-monitor") for name in paths}, update, language)
+
+
 def main():
+    generic_paths()
     lite = "--lite" in sys.argv
     rich = "--rich" in sys.argv      # the pictures of the newest tabs: findings for the Delivery and Supply chain sentinels, a daily trend and a comparison of periods
     numbers = [a for a in sys.argv[1:] if a.isdigit()]
@@ -332,12 +350,18 @@ def main():
         am.ANALYTICS["summary"] = demo_analytics(runs)
     am.ETAG["cache"] = etagcache.EtagCache(Path(tempfile.mkdtemp()) / "e.json")
     am.update_info = lambda read=True: {"enabled": True, "newer": True, "latest": "9.9.9", "current": am.TOOL_VERSION, "url": "https://example.invalid/release", "changelog": "https://example.invalid/changelog", "airgapped": False, "checked_at": 0, "offline": False}   # an invented newer version, for the picture of the badge
+    from github_actions_monitor.families.supply import notice
+    notice.state = lambda request: {"show": False}      # the window that announces it would cover the page of the demo (tools/make_screenshots.py draws it on purpose)
     am.LIVE_CONFIG.update({"account": {"plan": "free"}, "session_guard": False})
     if rich and not lite:
         rich_tabs(am.LIVE_CONFIG, snap, now)
     if "--network" in sys.argv:      # only what the page shows: the server below still listens on 127.0.0.1 and localguard stays off
         real_state = am.localguard.public_state
         am.localguard.public_state = lambda: {**real_state(), "network": True, "host": "0.0.0.0", "token_required": True, "secure": True}
+    if "--parts" in sys.argv and not lite:
+        import demo_parts
+        demo_parts.fill(REPOS, runs, iso, now)
+    ThreadingHTTPServer.request_queue_size = 64      # a page asks for many things at once: a short queue refuses some of them on Windows
     server = ThreadingHTTPServer(("127.0.0.1", port), am.Handler)
     print("demo on", port, flush=True)
     try:

@@ -22,6 +22,8 @@ Le suivi des originaux des forks (`upstream.enabled`) indique dans son panneau c
 
 Les appels d'un tick de la Sentinelle (`sentinel.max_calls_per_tick`) forment un seul décompte pour toutes ses étapes, et un dépôt dont les lectures échouent trois fois de suite est laissé tranquille 30 secondes, en doublant jusqu'à 10 minutes, pendant que les autres sont lus.
 
+L'onglet Flotte porte aussi un cadre facultatif par [rôle de workflow et par groupe, avec un écran pour chaque groupe](FLEET_APIS_fra.md).
+
 ## File de lectures, limites et une lecture pour tous
 
 - **Contre-pression** (`backpressure.enabled`, désactivée par défaut) : les lectures d'un cycle passent par une file bornée (d'abord les dépôts avec un workflow rouge, puis les chauds, les jamais lus et les lus il y a le plus longtemps). `backpressure.max_reads_per_cycle` fixe un nombre (0 = aucun) ; quand un cycle dure plus de `backpressure.shed_percent` pour cent de la pause entre cycles, le nombre permis est réduit de moitié (jamais sous `backpressure.min_reads`) et regagne un dixième après chaque cycle rapide. Ce qui attend garde sa dernière image et passe en premier au cycle suivant. `/metrics` montre `ghamon_read_queue_*`.

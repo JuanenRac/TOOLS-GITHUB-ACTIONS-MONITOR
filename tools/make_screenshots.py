@@ -48,8 +48,24 @@ TOP = 'window.scrollTo(0,0);document.querySelectorAll("*").forEach(function(e){i
 PALETTE = 'document.dispatchEvent(new KeyboardEvent("keydown",{key:"k",ctrlKey:true,bubbles:true}))'      # the palette of Ctrl+K, open on its first screen
 SAVE_DIALOG = 'document.getElementById("bar-save").click()'      # the window of the report of a tab: TXT, PDF and JSON
 SAVED = ('var t=[].slice.call(document.querySelectorAll("#t-sci h3,#t-sci h4,#t-sci strong,#t-sci b")).filter(function(e){return /^Time saved/.test(e.textContent.trim())})[0];if(t){t.scrollIntoView({block:"start"})}')      # the estimate of the time saved, at the foot of the analytics layer
-RICH_WEB = [("size_phone", "tab=now&compact=1", (390, 844), TOP), ("sentinel_analytics", "tab=sci&open=a12,a13", V, ""), ("sentinel_saved", "tab=sci&open=a12", V, SAVED), ("palette", "tab=now", V, PALETTE), ("report_dialog", "tab=al", V, SAVE_DIALOG), ("sentinel_delivery", "tab=sdel&open=delivery", V, ""), ("sentinel_supply", "tab=ssup&open=supply", V, ""), ("sentinel_trend", "tab=strend", V, ""),
-            ("compare", "tab=charts", V, SCROLL_CMP), ("updates", "tab=upd", V, FOLD)]      # the newest tabs, against tools/demo_monitor.py --rich; a little script scrolls or folds the page
+UPDATE_NOTICE = 'setTimeout(function(){if(window.supplyNotice)window.supplyNotice.show({version:"9.9.9",current:"2.2.0",notes:"Signed releases, a window for new versions and two bills of materials.",changelog:"https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/blob/main/monitor/CHANGELOG.md"})},500)'
+RICH_WEB = [("update_notice", "tab=now", V, UPDATE_NOTICE), ("size_phone", "tab=now&compact=1", (390, 844), TOP), ("sentinel_analytics", "tab=sci&open=a12,a13", V, ""), ("sentinel_saved", "tab=sci&open=a12", V, SAVED), ("palette", "tab=now", V, PALETTE), ("report_dialog", "tab=al", V, SAVE_DIALOG), ("sentinel_delivery", "tab=sdel&open=delivery", V, ""), ("sentinel_supply", "tab=ssup&open=supply", V, ""), ("sentinel_trend", "tab=strend", V, ""),
+            ("compare", "tab=charts", V, SCROLL_CMP), ("updates", "tab=upd", V, FOLD), ("sentinel_security", "tab=ssec&open=security", V, "")]      # the newest tabs, against tools/demo_monitor.py --rich; a little script scrolls or folds the page
+
+
+#: the boxes of the optional parts, against tools/demo_monitor.py --parts. A script that does not find its box answers "missing" and the picture counts as not made
+def only_box(ident, before=""):
+    """Leaves one box of a tab on the screen, with everything of it unfolded, from the top."""
+    return ('(function(){var b=document.getElementById("%s");if(!b)return "missing";%s[].forEach.call(b.parentNode.children,function(c){if(c!==b)c.hidden=true});'
+            '[].forEach.call(b.querySelectorAll("details"),function(d){d.open=true});window.scrollTo(0,0);document.querySelectorAll("*").forEach(function(e){if(e.scrollTop>0)e.scrollTop=0});return "ok"})()') % (ident, before)
+
+
+ASK = 'var i=b.querySelector("input");if(!i)return "missing";i.value="What is red right now?";i.dispatchEvent(new KeyboardEvent("keydown",{key:"Enter",bubbles:true}));'
+EXTENSIONS = '(function(){var b=document.getElementById("plugins-catalog");if(!b)return "missing";b.scrollIntoView({block:"start"});return "ok"})()'
+SHOW = 'var s=b.querySelector("button");if(!s)return "missing";s.click();'
+PARTS_WEB = [("extensions", "tab=cfg&cfgtab=plugins", V, EXTENSIONS), ("proposals", "tab=al", V, only_box("assistant-proposals")), ("assistant_chat", "tab=al", V, only_box("assistant-chat", ASK)),
+             ("collaboration", "tab=scol", V, only_box("actions-box")), ("roles_groups", "tab=fleet", V, only_box("fleet-columns")), ("posture", "tab=ssec", V, only_box("posture-box")),
+             ("compliance", "tab=ssec", V, only_box("compliance-box", SHOW)), ("external_ci", "tab=sci", V, only_box("extci-box"))]
 
 
 LITE_WEB = [("lite_about", "tab=now&dlg=about", V), ("lite_basic", "tab=cfg&cfgtab=basic", V), ("lite_now", "tab=now", V), ("lite_charts", "tab=charts", V), ("lite_history", "tab=hist", V), ("lite_settings", "tab=cfg&cfgtab=general", V)]
@@ -158,9 +174,21 @@ def shot(url, target, size, tries=3, flags=()):
     return False
 
 
-def cdp_shot(url, target, size, script="", wait=10.0):
+def cdp_shot(url, target, size, script="", wait=10.0, tries=3):
     """A screenshot through the DevTools protocol (the optional package `websockets`): the page is loaded at exactly `size`, a small script runs (scroll to a section, fold the menu) and the picture is taken.
-    Only the browser started here is ended."""
+    A browser that stops answering is ended after a time limit and the picture is tried again with a new one."""
+    for attempt in range(tries):
+        done = _cdp_try(url, target, size, script, wait)
+        if done:
+            return True
+        print(f"no picture (try {attempt + 1} of {tries}):", target, flush=True)
+    print("FAILED:", target, flush=True)
+    FAILED.append(str(target))
+    return False
+
+
+def _cdp_try(url, target, size, script, wait):
+    """One try with its own browser and profile; only the browser started here is ended."""
     import asyncio
     import base64
     import urllib.request
@@ -186,7 +214,9 @@ def cdp_shot(url, target, size, script="", wait=10.0):
             await call("Page.navigate", url=url)
             await asyncio.sleep(wait)
             if script:
-                await call("Runtime.evaluate", expression=script)
+                answer = await call("Runtime.evaluate", expression=script, returnByValue=True)
+                if (answer.get("result") or {}).get("value") == "missing":
+                    return b""      # what the picture is about is not on the page
                 await asyncio.sleep(3.0)
             return base64.b64decode((await call("Page.captureScreenshot", format="png")).get("data", ""))
     try:
@@ -200,12 +230,14 @@ def cdp_shot(url, target, size, script="", wait=10.0):
             except OSError:
                 pass
             time.sleep(0.5)
-        data = asyncio.run(go(ws_url)) if ws_url else b""
+        try:      # every answer of the browser has to come in time: waiting for one that never comes held the whole job until it was cancelled
+            data = asyncio.run(asyncio.wait_for(go(ws_url), wait + 60)) if ws_url else b""
+        except (OSError, TimeoutError, websockets.WebSocketException) as error:
+            print("browser:", type(error).__name__, flush=True)
+            data = b""
         if len(data) > 2000:
             Path(target).write_bytes(data)
             return True
-        print("FAILED:", target, flush=True)
-        FAILED.append(str(target))
         return False
     finally:
         child.kill()
@@ -319,6 +351,8 @@ def main():
     net = subprocess.Popen([sys.executable, "-I", str(ROOT / "tools" / "demo_monitor.py"), str(net_port), "--network"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     rich_port = free_port()
     rich = subprocess.Popen([sys.executable, "-I", str(ROOT / "tools" / "demo_monitor.py"), str(rich_port), "--rich"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    parts_port = free_port()
+    parts = subprocess.Popen([sys.executable, "-I", str(ROOT / "tools" / "demo_monitor.py"), str(parts_port), "--parts"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     acc_port = free_port()
     acc = subprocess.Popen([sys.executable, "-I", str(ROOT / "tools" / "demo_accounts.py"), str(acc_port)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
@@ -372,6 +406,21 @@ def main():
                     if wanted(f"web_{name}"):
                         cdp_shot(f"http://127.0.0.1:{rich_port}/?{query}&theme={theme}&lang=en&nowizard=1", str(OUT / f"web_{name}_{theme}.png"), size, script)
                         print("web", name, theme, flush=True)
+        if args.web or both:
+            for _ in range(60):
+                try:
+                    socket.create_connection(("127.0.0.1", parts_port), 0.5).close()
+                    break
+                except OSError:
+                    time.sleep(0.5)
+            for name, query, size, script in PARTS_WEB:
+                for theme in ("light", "dark"):
+                    if wanted(f"web_{name}"):
+                        cdp_shot(f"http://127.0.0.1:{parts_port}/?{query}&theme={theme}&lang=en&nowizard=1", str(OUT / f"web_{name}_{theme}.png"), size, script)
+                        print("web", name, theme, flush=True)
+            if wanted("web_screen_group"):      # the screen of one group (dark only, as every wall screen)
+                shot(f"http://127.0.0.1:{parts_port}/g/alpha", str(OUT / "web_screen_group.png"), (1920, 1080))
+                print("web screen_group", flush=True)
         if args.web or both:
             for _ in range(60):
                 try:
@@ -432,6 +481,7 @@ def main():
         lite.terminate()
         net.terminate()
         rich.terminate()
+        parts.terminate()
         if sys.platform == "win32":      # the supervisor started three monitors of its own: its whole tree ends, and only that tree
             subprocess.run(["taskkill", "/PID", str(acc.pid), "/T", "/F"], capture_output=True)
         else:

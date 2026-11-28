@@ -25,6 +25,7 @@ from pathlib import Path
 from github_actions_monitor import i18n
 from github_actions_monitor.app import toolconfig
 from github_actions_monitor.data_pipeline import causes
+from github_actions_monitor.data_pipeline import repo_identity
 from github_actions_monitor.data_pipeline import githubstatus
 from github_actions_monitor.data_pipeline import alertflow
 from github_actions_monitor.security import envguard, private_io
@@ -73,7 +74,7 @@ def diff(old, new, loaded):
     events = []
 
     def ev(kind, level, where, url=None, **args):
-        events.append({"kind": kind, "code": kind, "level": level, "repo": where, "owner": owner_of(where), "text": i18n.t("evt." + kind, **args), "url": url, "args": args})
+        events.append({"kind": kind, "code": kind, "level": level, "repo": where, "repo_key": repo_identity.github(toolconfig.github_owner(), where) if where else "", "owner": owner_of(where), "text": i18n.t("evt." + kind, **args), "url": url, "args": args})
 
     for key, r in new["reds"].items():
         if key not in old["reds"]:
@@ -237,7 +238,8 @@ class Feed:
         """Keeps the newest half of the feed once it is past MAX_BYTES. Tolerant: a byte that is not UTF-8 (a cut of power, a bad disk) is read as a replacement character and never raises,
         and a failure here is never allowed to stop the notifications that come after the write."""
         try:
-            if self.events_file.stat().st_size <= MAX_BYTES:
+            from github_actions_monitor.storage import retention
+            if self.events_file.stat().st_size <= MAX_BYTES or retention.held():
                 return
             lines = self.events_file.read_bytes().decode("utf-8", errors="replace").splitlines()
             private_io.write_private(self.events_file, "\n".join(lines[len(lines) // 2:]) + "\n")

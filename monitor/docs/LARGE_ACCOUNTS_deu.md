@@ -22,6 +22,8 @@ Die Verfolgung der Originale von Forks (`upstream.enabled`) sagt in ihrer Anzeig
 
 Die Aufrufe eines Ticks des Wächters (`sentinel.max_calls_per_tick`) sind eine einzige Zählung für alle seine Stufen, und ein Repository, dessen Lesungen dreimal hintereinander fehlschlagen, wird 30 Sekunden in Ruhe gelassen (bis auf 10 Minuten verdoppelt), während die anderen gelesen werden.
 
+Die Registerkarte Flotte hat außerdem einen optionalen Kasten nach [Rolle des Workflows und Gruppe, mit einem Bildschirm je Gruppe](FLEET_APIS_deu.md).
+
 ## Warteschlange der Lesevorgänge, Grenzen und ein Lesevorgang für alle
 
 - **Gegendruck** (`backpressure.enabled`, standardmäßig aus): die Lesevorgänge eines Zyklus laufen durch eine begrenzte Warteschlange (zuerst Repositories mit rotem Workflow, dann heiße, nie gelesene und die am längsten nicht gelesenen). `backpressure.max_reads_per_cycle` setzt eine feste Zahl (0 = keine); dauert ein Zyklus mehr als `backpressure.shed_percent` Prozent der Pause zwischen den Zyklen, wird die erlaubte Zahl halbiert (nie unter `backpressure.min_reads`) und wächst nach jedem schnellen Zyklus um ein Zehntel. Was wartet, behält sein letztes Bild und kommt im nächsten Zyklus zuerst. `/metrics` zeigt `ghamon_read_queue_*`.

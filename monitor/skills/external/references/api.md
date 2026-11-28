@@ -19,6 +19,12 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/act/plan` | POST | admin | plan a local run of a workflow; nothing runs until it is confirmed (this computer only) |
 | `/api/act/status` | GET | viewer | progress of the local run |
 | `/api/act/stop` | POST | admin | stop the local run (this computer only) |
+| `/api/actions/dismiss` | POST | maintainer | set a red run aside for a while or restore it (kept by the monitor, nothing on GitHub) |
+| `/api/actions/dispatch-form` | GET | maintainer | the inputs of a workflow fired by hand; ?repo=&workflow=file.yml |
+| `/api/actions/environments` | GET | maintainer | the environments a run waits for; ?repo=&run= |
+| `/api/actions/fork-facts` | GET | maintainer | facts about the author of a fork run that waits for approval (teamwork.forks_help); ?repo=&run= |
+| `/api/actions/plan` | POST | admin | the plan of an action on GitHub (nothing is sent); confirmed with /api/gh-action/confirm |
+| `/api/actions/state` | GET | viewer | collaboration views: what waits for a person or a runner, last run of each lane, set aside runs, dependency pull requests, vulnerable repositories (and the ones not read), proposals |
 | `/api/advanced` | GET | admin | state of the opt-in features (token store, mirror, OpenTelemetry, runners) |
 | `/api/ai` | GET | viewer | prefix of the routes for AIs (see the routes below) |
 | `/api/ai/ack` | POST | maintainer | acknowledge an alert of the feed: changes only the local state, never GitHub (this computer only) |
@@ -50,6 +56,9 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/analytics` | GET | viewer | history, trends, the numbers behind the charts and, when `productivity.enabled` is on, the ESTIMATE of the time saved (`time_saved`: a task without notes is `no_data`, a percentage that was not timed is `assumed`) |
 | `/api/assistant` | GET | viewer | whether the optional assistant is on (404 while it is off), its three fixed questions, its closed list of read-only tools and its limits (it spends nothing) |
 | `/api/assistant/ask` | POST | viewer | one fixed question to the assistant ({action: explain_alert | summarize_week | why_slow | explain_repo | prioritize, alert?, repo?}); answered by the AI of the monitor from the data it holds, with sources, the size sent and the one daily budget; a viewer may ask; 404 while it is off |
+| `/api/assistant/chat` | POST | viewer | one turn of the free chat with read only tools (ai.chat.enabled); body {message, history}; spends from the budget of the AI; nothing is run |
+| `/api/assistant/extras` | GET | viewer | whether the chat, the repository report and the proposals of the assistant are on, and how many people decide on a proposal |
+| `/api/assistant/repo-report` | GET | viewer | the report of one repository in Markdown and a draft of a triage comment, to copy by hand (ui.copy_report.enabled); ?repo=; no request to GitHub |
 | `/api/audit-log` | GET | maintainer | the log of actions of the account (who changed what, when): the last 200 lines and whether the chain of hashes holds; an administrator, or a maintainer when `audit_log.maintainers_can_read` is on; names only, never values or secrets (Complete only) |
 | `/api/auth` | GET | viewer | who you are in the team mode (`/api/auth/me`: whether the sign-in is on, the mode and whether you are signed in); the complete edition only |
 | `/api/auth/audit` | GET | admin | the audit of the team mode (administrators) |
@@ -68,6 +77,8 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/chatops/slack` | POST | public | a slash command of Slack, read only (signed with the v0 HMAC of Slack, off by default) |
 | `/api/clone-anomalies` | GET | maintainer | the users who cloned more different repositories than the threshold in the window, read from the audit log of the organization (maintainer; `audit_feed.clone_alert.enabled`; `available` is false when the plan has no git events) |
 | `/api/compare` | GET | viewer | this period against the one before, read only, from the ledger and the snapshots of the score (`?window=`, `?days=`, `?baseline=`, `?from=`/`?to=`, `?format=json|ndjson|csv`): every figure with its change, direction and state (`insufficient_data`, `baseline_unavailable` instead of a made-up number), and what changed (Complete only, off by default) |
+| `/api/compliance/report` | GET | admin | which guarantees this installation offers, each line checked or only declared; not a certification, no secret and no path |
+| `/api/compliance/state` | GET | admin | the restrictions in force (strict read-only, network policy), the retention of each category and the state of the export of the log of actions |
 | `/api/credential` | POST | admin | replace the GitHub login without restarting (this computer only) |
 | `/api/credential/probe` | POST | admin | does the login (and the GitHub App) work: who it is, classic or fine-grained, scopes it lacks, repositories seen, allowance left, installations of the App (this computer only; at most one real check every 10 seconds) |
 | `/api/data` | GET | viewer | the main picture: repositories, runs, failing, active, rate |
@@ -77,6 +88,11 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/discovery/group` | POST | maintainer | put discovered repositories in a group |
 | `/api/events` | GET | viewer | the event journal |
 | `/api/expected-red` | GET,POST | viewer / maintainer | the workflows marked as red on purpose with a reason, an owner and an end (GET: the list with each state; POST {action: add|remove, repo, workflow, reason, owner, days}: a maintainer, `expected_red.enabled`, a note of this monitor) |
+| `/api/external-ci/log` | GET | maintainer | the bounded and redacted end of the log of a failed external build (external_ci.logs.enabled); ?source=&build= |
+| `/api/external-ci/probe` | POST | admin | one read of a source line, nothing is saved |
+| `/api/external-ci/status` | GET | viewer | state of the external CI sources, what each says and why one could not be read |
+| `/api/fleet/columns` | GET | viewer | the fleet with one column per role of workflow and the worst state of each group |
+| `/api/fleet/group` | GET | viewer | the repositories of one group, worst first (the screen /g/<slug> shows it); ?slug= |
 | `/api/gh-action` | POST | admin | prefix of the actions on GitHub (plan and confirm, see below) |
 | `/api/gh-action/confirm` | POST | admin | confirm an action on GitHub (this computer only) |
 | `/api/gh-action/plan` | POST | admin | plan an action on GitHub; nothing is sent until it is confirmed (this computer only) |
@@ -107,6 +123,12 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/pair/start` | POST | admin | open a one-use pairing code and answer its address and QR code (this computer only; needs `pairing.enabled` and the network mode) |
 | `/api/pair/status` | GET | viewer | the same answer as /api/devices (this computer only) |
 | `/api/paths` | GET | viewer | the folders and files of this monitor in use and what is left in the old places |
+| `/api/plugins/catalog` | GET | admin | the plugins that exist here: permissions, key, fingerprint, state and what is isolated |
+| `/api/plugins/enable` | POST | admin | switch an installed plugin of another person on or off, or resume a paused one; body {name, enabled} |
+| `/api/plugins/inspect` | POST | admin | what a package on this computer declares and who signed it, nothing is installed; body {path} |
+| `/api/plugins/install` | POST | admin | install a signed package after confirming the fingerprint of its key; it arrives switched off; body {path, fingerprint} |
+| `/api/plugins/uninstall` | POST | admin | remove an installed plugin; body {name} |
+| `/api/posture` | GET | viewer | posture of the repositories and the organization: findings, what could not be checked, OWASP and CIS references, permissions needed, history |
 | `/api/quota` | GET | viewer | plan, billable minutes, allowance of the API, concurrency, long jobs |
 | `/api/quota-pool/status` | GET | viewer | every read source with its allowance, the sum, and what each way of reading less has spared (this computer only) |
 | `/api/refresh-repos` | POST | maintainer | read the list of repositories again |
@@ -128,6 +150,8 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/screens/logo/info` | GET | viewer | whether a logo was uploaded: `present`, `kind`, `bytes` and the `tag` that goes in the address of the image |
 | `/api/screens/logo/remove` | POST | admin | removes the logo of the organization (an administrator) |
 | `/api/screens/menu` | GET | viewer | the Screens menu of the page: every kind of screen (the page, kiosks, tab screens, the wall screens, the TV, a set of monitors) with its address, the parameters it accepts and whether it can be opened here; navigation only |
+| `/api/security/code-scanning` | GET | viewer | open code scanning alerts per repository (fleet.security_api) |
+| `/api/security/secrets` | GET | viewer | open secret scanning alerts per repository, counts only (fleet.security_api) |
 | `/api/sentinel` | GET | viewer | the snapshot of the Sentinel (checks A1-A13) |
 | `/api/sentinel/ai` | GET | viewer | the AI explanation of a failed build or a CodeQL alert (a person asks; cached) |
 | `/api/sentinel/collab` | GET | viewer | issues and pull requests that need a person |
@@ -141,10 +165,14 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/settings` | GET,POST | viewer / admin | read and change the settings (a fixed list of keys, validated, with a backup) |
 | `/api/skills` | GET | viewer | the two skills of the monitor (`?name=internal|external[&file=NAME]`) as text |
 | `/api/statusbar` | GET | viewer | the data of the status bar of the page |
+| `/api/supply/update-dismiss` | POST | admin | do not announce one version again; body {version} |
+| `/api/supply/update-notice` | GET | viewer | what the window that announces a newer version shows: the version, the summary of its changes in the language asked and whether to show it (setting updates.notify_window) |
 | `/api/tags` | GET | viewer | tags and releases of the repositories |
 | `/api/team` | GET | viewer | the prefix of the health views of the repositories and of the team (see /api/team/health); Complete only |
 | `/api/team/fleet` | GET | viewer | the same health grouped and ordered for hundreds of repositories: `groups` with their totals and `rows` (one per repository, at most 5,000; the page draws them a page at a time); `?group=ecosystem|label|state|none`, `?sort=risk|name|last_run|state`, `?saved=<name>` and the filters of the team view (read only; Complete only) |
 | `/api/team/health` | GET | viewer | the health of the team: every repository ranked by risk with the ones that need a person first, the totals by state, the numbers by ecosystem and by sentinel; filters `?ecosystem=`, `?severity=warn|bad`, `?q=`, `?label=` (read only, from what the monitor holds; Complete only) |
+| `/api/traffic` | GET | viewer | history kept on this computer of the downloads of release files and of the visits and clones of the chosen repositories, with what could not be read |
+| `/api/traffic/export` | GET | viewer | that history as CSV (?what=days, one line per repository and day; ?what=assets, one line per release file and day on which its count changed) |
 | `/api/updates` | GET | viewer | the prefix of the routes of the Updates menu (see /api/updates/status, /api/updates/progress, /api/updates/history, /api/updates/check, /api/updates/plan, /api/updates/apply and /api/updates/rollback); Complete only |
 | `/api/updates/apply` | POST | admin | starts the update to `target` in a process of its own and stops the monitor so that it can be replaced; needs `confirm: true`; one update at a time; not from a container, a service manager, the Lite edition or the demo (administrator, from this computer only; Complete only) |
 | `/api/updates/check` | POST | admin | lists the published versions with their notes: ONE request to GitHub, only on explicit action, refused while `updates.check` is off or the monitor is offline (administrator, from this computer only; Complete only) |

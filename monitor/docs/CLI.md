@@ -19,7 +19,7 @@
 | `backup` | the complete backup of the installation (the monitor need not be running): `backup create [FILE] [--account ID]`, `verify FILE [--deep]`, `restore FILE [--account ID] [--to-dir DIR] [--force]`, `status`, `list`; `--encrypt` with `--key-env NAME` seals it (optional library); see [OPS.md](OPS.md) | no |
 | `accounts` | the accounts of the supervisor (several accounts only) | no |
 | `alerts` | the alerts of every sentinel in one list: `--sentinel ci\|collab\|security\|supply\|delivery`, `--level info\|warning\|error`, `--muted show\|hide\|only`; `--since 90m|24h|7d|2w` lists the ones that were open at some moment of that time, the closed ones too (from the history the monitor keeps while it runs; an alert counts as closed after ten minutes of absence) | no |
-| `proposals` | the actions the AI proposed (`ai.actions.enabled`): `proposals list`, `show ID`, `approve ID`, `reject ID`, `execute ID` (an id may be shortened). `approve` and `reject` only record the decision; `execute` runs it through the same door as the page and needs `ai.actions.execute`, and with `ai.actions.require_approval` an approval first. Approve, reject and execute are for this computer only | no |
+| `proposals` | the actions the AI proposed (`ai.actions.enabled`): `proposals list`, `show ID`, `approve ID`, `reject ID`, `execute ID` (an id may be shortened). `approve` and `reject` only record the decision; `execute` runs it through the same door as the page and needs `ai.actions.execute`, and with `ai.actions.require_approval` an approval first. Approve, reject and execute are for this computer only With one user `approve` needs `--code` and the first eight characters of the fingerprint; with several, approve in the page with your session (two people). | no |
 | `score` | the score of the account: number, letter, trend, parts, coverage and the breakdown by repository; `--compare` sets it against the history of the window | no |
 | `compare` | this period against the one before: the figures with their change and direction, who got worse or better; `--window 7\|30d`, `--days all\|workdays\|weekend`, `--baseline previous\|year_ago`, `--format table\|json\|ndjson\|csv`; exit 4 when a figure has too little data, 5 with `--fail-on` when one got worse; `--format csv` with any other command is a wrong use (exit 1) | no |
 | `api` | the read API for clients: `api openapi` prints the OpenAPI document of every frozen route (redirect it to a file), `api me` says who the monitor takes this client for (mode, user, role, what the session may do, version of the contract); a monitor whose `api.v1_enabled` is closed says so; `api contract-check` runs the contract suite for clients against it (exit 4 when a check fails) | no |
@@ -30,6 +30,8 @@
 | `briefs` | the briefs of the tabs that AI tools read: `briefs index`, `briefs show TAB`, `briefs all` | yes |
 | `docs` | the guides of this version, read from the installation (no monitor needed): `docs list` names them with their title, `docs show NAME` prints one in the language of `--lang` | no |
 | `screens` | the Screens menu of the page: `screens list` (every kind of screen and whether it can be opened) and `screens urls` (the full addresses, ready for a kiosk command) | no |
+| `keyring` | the public keys that may sign: `keyring list`, `add` (`--key-id`, `--public-key`, `--key-scope`, `--expires`), `revoke --key-id`, `verify --document FILE`; no monitor needed, private keys are refused | no |
+| `verify-release` | a folder of downloaded release files checked without network against SHA256SUMS and its signature: `verify-release --folder DIR`; exit 4 when they cannot be trusted Also `--installed` (this installation against the bill of materials), `--attestations`, `--fetch` (needs `ops.verify_release.fetch`); `doctor --verify-release DIR` does the check of the installation; `keyring check-rotation --document FILE` checks the announcement of a new key. | no |
 | `toolbox` | the small tools of the operator that work on this computer, with no monitor running: `toolbox limits [N]` (the setup against its ceilings), `toolbox workspaces` (the workspaces and the one in use), `toolbox ledger [--force]` (the ledger of notifications already sent; `--force` forgets it), `toolbox summary` (the events by kind, repository and day) and `toolbox export-events FILE` (the events as jsonl, csv, parquet or duckdb by the end of the name; parquet and duckdb need their package, the file must be new) | no |
 | `credential` | another GitHub login for one account while everything runs: `credential replace\|reload [--account ID] [--new-token-file FILE\|-]`; it never prints a token | no |
 | `install-skill` | copies a skill of the monitor (`internal` or `external`) to the folder an AI tool reads its skills from: `install-skill external --dest FOLDER`; the monitor need not be running | no |
@@ -38,6 +40,10 @@
 | `completions` | the completion script for `bash`, `zsh`, `fish` or `powershell`, written from the real parser (it only prints) | no |
 | `kiosk` | the address of the monitor for a TV or a wall (`ops`, `team`, `release`, `quiet`); see [KIOSK.md](KIOSK.md) | no |
 | `metrics` | the figures as `name=value` lines for cron and mail; with `--if-problem` it writes nothing when all is well; see [CLI_OPERATOR.md](CLI_OPERATOR.md) | no |
+| `posture` | Posture of repositories and organization, read only (`posture status|matrix|check --repo-name`); see [POSTURE.md](POSTURE.md) | no |
+| `traffic` | History of downloads and traffic kept on this computer (`traffic status|export`); see [TRAFFIC.md](TRAFFIC.md) | no |
+| `external-ci` | External CI sources, read only (`external-ci list|status|probe --source`); see [EXTERNAL_CI.md](EXTERNAL_CI.md) | no |
+| `plugin` | Plugins: `plugin list|validate|pack|verify|init|install|enable|disable|uninstall|audit`; see [PLUGINS.md](PLUGINS.md) | no |
 
 Options of every command: `--json` (the answer as one JSON document: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (port 8766), `--timeout SECONDS` (1 to 60), `--lang CODE`. In the network mode put the access token in the environment variable `MONITOR_ACCESS_TOKEN`, the one the monitor itself reads (`MONITOR_TOKEN` is accepted as an alias; `--token TOKEN` is the last resort, because a flag shows in the list of processes). The order is: `MONITOR_ACCESS_TOKEN`, then `MONITOR_TOKEN`, then `--token`. It travels in the header `X-Monitor-Access`, never in the address and never on screen. A `--url` with plain `http` to another computer prints a warning on stderr (the token and the answers would travel unencrypted): use `https` outside a network you control.
 
@@ -95,3 +101,24 @@ In the network mode the token is read from `MONITOR_ACCESS_TOKEN`, then `MONITOR
 ## Backup and the doctor
 
 `backup` and `doctor` work on the folders of the installation, so they need no running monitor. `doctor` exits `0` when all is well (warnings too), `1` when a check failed, `3` when there are only warnings and `--strict` (or `ops.doctor.strict_exit`) is on, and `4` when the doctor itself could not run; these are the codes of the doctor, the other commands keep the exit codes above. `backup` exits `0` when it is done and `1` when it is refused or the package does not verify. The guide [OPS.md](OPS.md) has the checks, the restore and the scheduled copy. The doctor also has `compare_window` (can the comparison of two periods look back two windows with the history it asks for and keeps) and `etag` (the share of conditional reads answered with 304 in the monitor that runs here, and whether GitHub answers come back without an ETag).
+
+## Identity of a repository, several owners
+
+Command line: `identity status`, `identity plan`, `identity apply`.
+
+```
+python bin/monitor_cli.py identity plan
+```
+
+## Compliance and the log of actions
+
+`compliance report` says which guarantees this installation offers; `audit verify|checkpoint|purge|export` works on the chain of the log of actions. See [COMPLIANCE.md](COMPLIANCE.md).
+
+## Commands: actions, runner-hook
+
+```
+python bin/monitor_cli.py actions proposals
+python bin/monitor_cli.py runner-hook started
+```
+
+[COLLABORATION.md](COLLABORATION.md)

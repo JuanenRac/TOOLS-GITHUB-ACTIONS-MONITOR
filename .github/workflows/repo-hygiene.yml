@@ -1,0 +1,128 @@
+# Hygiene of the repository: what a pull request adds to the dependencies of the workflows and of the CI is reviewed, the code (Python and JavaScript) is analysed with CodeQL, osv-scanner looks for
+# known vulnerabilities, OpenSSF Scorecard rates the repository and the coverage of the tests is measured. The tools of other projects are downloaded with a pinned SHA-256 (tools/fetch_pinned.sh).
+# Only actions of GitHub itself are used.
+name: Repository hygiene
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 5 * * 2"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: repo-hygiene-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  dependency-review:
+    name: Review of the dependencies a pull request adds
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@bbc44d14a204704ccc493733616cd1e93a0321ec # v5.0.1
+        with:
+          fail-on-severity: high
+
+  osv:
+    name: Known vulnerabilities (osv-scanner)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Scan the declared dependencies of the repository
+        run: |
+          sh tools/fetch_pinned.sh osv-scanner "$RUNNER_TEMP/osv"
+          status=0
+          "$RUNNER_TEMP/osv/osv-scanner" scan source --recursive . || status=$?
+          # 128: no package manifest to read (the product needs no package)
+          if [ "$status" = 128 ]; then echo "no packages found"; exit 0; fi
+          exit "$status"
+
+  scorecard:
+    name: OpenSSF Scorecard
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Rate the repository and keep the report
+        env:
+          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          sh tools/fetch_pinned.sh scorecard "$RUNNER_TEMP/scorecard"
+          "$RUNNER_TEMP/scorecard/scorecard" --repo="github.com/$REPOSITORY" --format=json > scorecard.json
+          python3 -c "import json; d=json.load(open('scorecard.json')); print('| check | score |'); print('|---|---|'); print('| TOTAL | %s |' % d.get('score')); [print('| %s | %s |' % (c['name'], c['score'])) for c in d.get('checks', [])]" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: scorecard
+          path: scorecard.json
+          retention-days: 30
+
+  coverage:
+    name: Coverage of the tests
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: The suite under coverage, pinned
+        run: |
+          python -m pip install -r .github/ci-requirements.txt coverage==7.10.7
+          python -m coverage run --source=monitor/src --parallel-mode -m unittest discover -s monitor/tests || echo "some tests failed: ci.yml is the job that judges them"
+          python -m coverage combine
+          python -m coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
+          python -m coverage xml -o coverage.xml
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage
+          path: coverage.xml
+          retention-days: 30
+
+  codeql:
+    name: CodeQL (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      security-events: write      # the results of the analysis
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [python, javascript-typescript, actions]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@915412ff23e8b7659517e607487dbeae018f2934 # v4.39.5
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+      - uses: github/codeql-action/analyze@915412ff23e8b7659517e607487dbeae018f2934 # v4.39.5
+        with:
+          category: "/language:${{ matrix.language }}"

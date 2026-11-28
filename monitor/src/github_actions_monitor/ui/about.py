@@ -12,7 +12,8 @@ from github_actions_monitor.tool_version import AUTHOR, LICENSE_ID, TOOL_VERSION
 
 REPO_URL = "https://github.com/" + updatecheck.REPO
 LINKS = {"repository": REPO_URL, "releases": REPO_URL + "/releases", "changelog": REPO_URL + "/blob/main/CHANGELOG.md", "documentation": REPO_URL + "#readme", "bridge": REPO_URL + "/blob/main/monitor/docs/CI_RED_BRIDGE.md",
-         "issues": REPO_URL + "/issues", "license": REPO_URL + "/blob/main/LICENSE"}
+         "issues": REPO_URL + "/issues", "license": REPO_URL + "/blob/main/LICENSE",
+         "i_use_it": REPO_URL + "/issues/new?template=i-use-it.yml"}      # only a link the person may click: nothing is read from it, nothing is sent and no field of it is filled in
 CREDITS = (("python", "Python", "PSF-2.0", None), ("gh", "GitHub CLI (gh)", "MIT", None), ("rich", "Rich", "MIT", "rich"), ("textual", "Textual", "MIT", "textual"))
 
 
@@ -38,7 +39,8 @@ def home_free(text):
 
 def info(lite, health, paths, update, language):
     """The dictionary of the panel. `paths` is {"config": Path, "log": Path, ...} (names to files; only the paths are shown, never their content)."""
-    return {"version": TOOL_VERSION, "edition": "lite" if lite else "complete", "author": AUTHOR, "license": LICENSE_ID, "links": dict(LINKS),
+    from github_actions_monitor.security import compliance_guard
+    return {"restrictions": compliance_guard.status(), "version": TOOL_VERSION, "edition": "lite" if lite else "complete", "author": AUTHOR, "license": LICENSE_ID, "links": dict(LINKS),
             "python": platform.python_version(), "implementation": platform.python_implementation(), "system": f"{platform.system()} {platform.release()} ({platform.machine()})",
             "paths": {name: home_free(path) for name, path in paths.items()}, "health": health, "update": update, "language": language,
             "credits": [{"id": i, "name": n, "license": lic, "installed": library_state(mod)} for i, n, lic, mod in CREDITS]}
@@ -66,6 +68,8 @@ def console_text(data, translate):
             f"{translate('ui.about_author')}: {data['author']}", f"{translate('ui.about_license')}: {data['license']}",
             f"{translate('ui.about_python')}: {data['python']}", f"{translate('ui.about_system')}: {data['system']}", ""]
     rows += [f"{translate('ui.about_' + key)}: {url}" for key, url in data["links"].items() if key != "license"]
+    if "i_use_it" in data["links"]:
+        rows.append("  " + translate("ui.about_i_use_it_note"))
     rows += ["", translate("ui.about_credits") + ":"] + [f"  {c['name']} ({c['license']}) - {translate('ui.credit_' + c['id'])}" + ("" if c["installed"] else " [-]") for c in data["credits"]]
     line = updatecheck.notice(update, translate)
     if line:

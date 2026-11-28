@@ -1,0 +1,13 @@
+{
+  "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+  "_license": "GPL-3.0-or-later - see LICENSE",
+  "name": "discussions",
+  "version": "1.0.0",
+  "api_compat": "1",
+  "author": "JuanenRac (Electro Hobby 3D)",
+  "description": "Discussions that nobody has answered after some days. Issues and pull requests belong to Collab and are not repeated here.",
+  "trust": "official",
+  "entry": "discussions_plugin.py",
+  "permissions": ["graphql.discussions"],
+  "refresh_seconds": 3600
+}

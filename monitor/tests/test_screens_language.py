@@ -82,7 +82,7 @@ class TheTexts(unittest.TestCase):
 
     def test_no_visible_text_is_fixed_in_english_in_the_screen(self):
         body = SCREENS.split("<body", 1)[1]
-        visible = re.sub(r"<script.*?</script>|<style.*?</style>|<svg.*?</svg>", "", body, flags=re.S)
+        visible = re.sub(r"<script.*?</script[^>]*>|<style.*?</style[^>]*>|<svg.*?</svg[^>]*>", "", body, flags=re.S | re.I)
         words = [w for w in re.findall(r">([^<>{}]*[A-Za-z]{3,}[^<>{}]*)<", visible) if w.strip()]
         self.assertEqual(words, [], "text between tags in the static part of the page: it must come from the catalogue")
         for fixed in re.findall(r'textContent\s*=\s*"([A-Za-z][^"]{3,})"', SCREENS):

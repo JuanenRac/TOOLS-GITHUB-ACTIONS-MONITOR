@@ -23,11 +23,11 @@ from pathlib import Path
 from github_actions_monitor.util import paths
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder
 ORDER = ("python", "gh", "login", "quota", "access", "estimate", "network", "folder", "port", "running", "docker", "rich", "textual", "targets", "token", "exposure", "risks", "conflicts", "backend", "degraded", "credential", "timezone", "github_app", "layout", "storage", "retention", "compare_window", "etag")
-FIX = {"access": "gh auth refresh -h github.com -s repo,read:org   |   https://github.com/settings/tokens (Configure SSO)", "estimate": "", "python": "https://www.python.org/downloads/", "gh": "winget install --id GitHub.cli   |   brew install gh   |   sudo apt install gh", "login": "gh auth login",
+FIX = {"plugins": "python bin/monitor_cli.py plugin audit", "access": "gh auth refresh -h github.com -s repo,read:org   |   https://github.com/settings/tokens (Configure SSO)", "estimate": "", "python": "https://www.python.org/downloads/", "gh": "winget install --id GitHub.cli   |   brew install gh   |   sudo apt install gh", "login": "gh auth login",
        "quota": "gh api rate_limit", "network": "gh api rate_limit", "folder": "", "port": "python bin/actions_monitor.py --port 8800", "running": "", "docker": "", "rich": "pip install rich",
        "textual": "pip install textual", "targets": "python bin/actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "conflicts": "", "backend": "", "degraded": "", "credential": "", "timezone": "", "github_app": "", "layout": "python -m github_actions_monitor.util.rootmigrate --apply", "storage": "python tools/migrate_storage.py --from file --to sqlite", "retention": "", "compare_window": "", "etag": "",
        "volumes": "", "supervisor": "python bin/monitor_cli.py health --deep", "limits": "", "capacity": "python bin/monitor_cli.py doctor --json", "sqlite_hot": "python tools/backup_storage.py backup FILE.zip --backend sqlite", "backup_age": "python bin/monitor_cli.py backup create", "disk": "", "metrics": "", "latency": "python bin/monitor_cli.py doctor --latency"}
-ORDER_OPS = ("volumes", "supervisor", "limits", "capacity", "sqlite_hot", "backup_age", "disk", "metrics")
+ORDER_OPS = ("volumes", "supervisor", "limits", "capacity", "sqlite_hot", "backup_age", "disk", "metrics", "plugins")
 EXIT_OK, EXIT_FAIL, EXIT_WARN, EXIT_DOCTOR_ERROR = 0, 1, 3, 4
 
 
@@ -103,6 +103,18 @@ def _writable(folder):
         return False
 
 
+def _part_checks(config, out, order, fixes):
+    """The checks the parts of the monitor declare (families/). One that cannot run answers warn: the doctor always answers."""
+    from github_actions_monitor import families
+    for check in families.checks():
+        try:
+            out[check.id] = check.run(config)
+        except Exception as error:   # noqa: BLE001
+            out[check.id] = ("warn", f"could not run ({type(error).__name__})")
+        order, fixes[check.id] = order + (check.id,), check.fix
+    return order, fixes
+
+
 def run(runner=default_runner, folder=HERE, ports=None, python=None, config=None, edition=None, reader=None, etag_reader=None):
     """The list of checks, in ORDER (and, for edition="complete", ORDER_OPS after them). `config` is the content of the configuration file ({} when there is none)."""
     config = config if isinstance(config, dict) else {}
@@ -170,7 +182,10 @@ def run(runner=default_runner, folder=HERE, ports=None, python=None, config=None
         from github_actions_monitor.ops import checks as ops_checks
         out.update(ops_checks.run_all(config, folder))
         order = ORDER + ORDER_OPS
-    return [{"id": name, "status": out[name][0], "detail": out[name][1], "fix": FIX[name] if out[name][0] != "ok" else ""} for name in order]
+    fixes = dict(FIX)
+    if edition == "complete":
+        order, fixes = _part_checks(config, out, order, fixes)
+    return [{"id": name, "status": out[name][0], "detail": out[name][1], "fix": fixes[name] if out[name][0] != "ok" else ""} for name in order]
 
 
 LATENCY_WARN_SECONDS = 120      # a push that GitHub tells in its events more than this long after the run began makes `--latency` warn

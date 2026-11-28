@@ -9,6 +9,74 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+## [2.2.0]
+
+### Añadido
+
+- **Historial de descargas y tráfico**, guardado en este equipo (`traffic.enabled`, apagado; Complete): una vez al día las descargas de los ficheros de las releases y, si el token puede, las visitas y clonados de los repositorios que elijas, con un panel en Repositorios, exportación CSV y la orden `traffic`. Solo peticiones GET. `TRAFFIC.md`.
+- **Di que lo usas**: Acerca de tiene un enlace que abre un formulario en GitHub, solo cuando haces clic; lo que escribas allí es público. El monitor no envía ni rellena nada.
+- **Mantener viva una programación antes de que GitHub la apague**: con `teamwork.keep_alive_days` (apagado) se propone volver a activar los workflows programados de un repositorio público sin actividad, con los días que quedan. La demo estática y la comprobación de workflows en el navegador ahora las abre el CI en un navegador real.
+- **Modo de solo lectura estricto y política de red** (`security.read_only_strict`, `security.egress_policy`, apagados): se aplican por debajo de todas las partes; una orden o conexión rechazada falla nombrando el ajuste, y el doctor lista los destinos fuera de la política.
+- **Informe de cumplimiento** (`compliance report`, `/api/compliance/report`, una caja en la pestaña Seguridad): cada línea comprobada o solo declarada.
+- **Retención de cada categoría y retención legal**, **puntos de control firmados y purga del registro de acciones** (`audit verify|checkpoint|purge`) y **exportación de ese registro** a fichero, syslog sobre TLS o HTTP; todo apagado de fábrica.
+- Guías nuevas: cumplimiento, las herramientas que rodean al monitor y qué tiene cada edición. Un workflow pasa las comprobaciones transversales por área, una base de datos de más de 1 GB y el servicio en un systemd real. `COMPLIANCE.md`, `ECOSYSTEM_TOOLS.md`, `EDITIONS.md`.
+- **Flota por rol y grupo**: una columna por rol de workflow, el peor estado de cada grupo con pantalla propia `/g/<clave>`, repositorios y grupos desactivables sin reiniciar; fuente CCTray y APIs de alertas de secretos y de código (apagadas), `report_digest` en informes y briefs, y un sitio de demostración estático con comprobación de workflows en el navegador (lo construye el CI, nunca se publica solo). El panel de roadmaps avisa ahora cuando el clon del repositorio de perfil está atrasado. (FLEET_APIS)
+- **Vistas de colaboración y acciones opcionales** (todo apagado de fábrica): esperando a una persona aparte de esperando un ejecutor, última ejecución de cada carril con rojos apartados un tiempo, pull requests de dependencias y atrasadas, repositorios vulnerables y no leídos, alertas de seguridad descartadas, propuestas (limpieza, política de cancelación, ejecuciones atascadas, workflows inactivos), workflows manuales con formulario tipado, datos para aprobar forks y hooks de ejecutores. Las acciones nuevas en GitHub se planifican y confirman una a una; la única automática es un reintento único tras un fallo de infraestructura.
+- **Las propuestas de la IA las deciden personas**: van marcadas como IA, llevan huella, sobreviven a un reinicio, exigen dos personas con dos o más usuarios, o el código tecleado con uno, y se ven en la pestaña Alertas; con `ai.assistant.can_propose` también nacen del chat.
+- **Chat libre con herramientas de solo lectura** (`ai.chat.enabled`, apagado), **alertas parecidas con un modelo local de embeddings** (`ai.rag.enabled`, apagado), **informe de un repositorio y borrador de triaje para copiar** y **los resúmenes como recursos MCP**.
+- Un enlace con puerto y una `@` en la ruta ya no se limpia como si fuera usuario y contraseña.
+- **Un repositorio es (fuente, dueño, nombre)**: dos repositorios con el mismo nombre de dos sitios ya no comparten identificadores, ejecuciones ni alertas, y los datos guardados siguen al dueño vigilado (con copia previa, orden `identity`, `sources.multi_owner` apagado). Las fuentes de CI externas tienen además comprobación en el doctor, tarjeta en Acerca de y ruta congelada bajo `/api/v1/`.
+- **Informe de postura frente a OWASP y CIS** (`posture report`): qué muestra cada sección de la norma, qué significan los riesgos y la tendencia de una semana; además los tokens personales amplios de la organización, los originales de los forks (apagado) y qué permiso de GitHub App desbloquea cada comprobación.
+- Comprobaciones de postura de repositorios y organización, solo lectura y apagadas de fábrica: webhooks, ajustes de Actions, análisis, protección de ramas y de ramas de versión, claves de despliegue, edad de secretos, aplicaciones, auditoría de la organización, endurecimiento de lo ejecutado y versiones cambiadas, con su referencia OWASP CI/CD y CIS. Lo que GitHub deniega aparece sin comprobar. Madurez por repositorio, historial y `posture` en la consola.
+- **Una ventana anuncia una versión nueva**: con el resumen de sus cambios en tu idioma, un botón a la página de Actualizaciones, «Más tarde» y «No avisar de esta versión»; viene encendida y no aparece en pantallas de pared ni quiosco.
+- **Órdenes nuevas**: para comprobar sin red una release descargada y gestionar las claves públicas.
+- Fuentes de CI externas, solo lectura y apagadas de fábrica: Buildbot, GitLab CI, Jenkins y Azure Pipelines (los dos últimos experimentales) para repositorios espejados. Sus fallos se cuentan, notifican y silencian como los de Actions; un servicio que no responde aparece degradado, nunca en rojo. Lecturas seguras, final de logs opcional, acotado y depurado, Probar conexión y `external-ci` en la consola.
+- **Las releases van firmadas y el actualizador comprueba la firma**: desde la versión 2.2.0 una release lleva una firma Ed25519 separada de SHA256SUMS y de cada fichero, hecha en GitHub por el workflow de release. El actualizador (página, ventana, consola y línea de órdenes) rechaza una release desde la 2.2.0 sin firma o con firma incorrecta, y un zip firmado ofrecido con otra versión, antes de descomprimir nada; volver a una versión anterior sin firma está permitido con un aviso.
+- **Dos listas de materiales y atestaciones en cada release**: documentos CycloneDX y SPDX enumeran cada fichero del zip y las librerías opcionales, y el workflow de release atestigua la procedencia de los ficheros, la lista de materiales y el acta de la puerta de calidad.
+- **La puerta de calidad puede ejecutarse en GitHub**: un workflow ejecuta la puerta completa en un runner de Windows, comprueba que una segunda compilación da los mismos bytes y guarda un acta de lo ejecutado; ejecutarla en tu equipo sigue siendo posible y opcional.
+- **Un llavero de claves públicas y la comprobación de una release descargada**: un único sitio para las claves que pueden firmar (un valor privado se rechaza) y la verificación de una carpeta de ficheros de release sin red. Sus órdenes de consola llegan aparte.
+- **Las notas de una release pueden llevar un resumen corto en los ocho idiomas**, leído por la comprobación de versión con la misma petición; además recuerda una versión descartada. La ventana que lo muestra llega aparte.
+- **Comprobaciones del repositorio**: revisión de las dependencias que añade un pull request y análisis CodeQL del código.
+
+### Cambiado
+
+- **Los grupos de Ajustes son una lista a la izquierda** de su panel en vez de varias filas de pestañas encima, así el panel tiene más sitio (en una ventana de menos de 701 píxeles y en la vista compacta siguen arriba).
+- **En el teléfono las cifras de la cabecera van plegadas** tras un botón, en vertical y en horizontal; el botón las abre y este navegador recuerda la elección.
+- **El actualizador suelto que se publica con una release lleva ahora dentro el registro de migraciones**, y SHA256SUMS lo nombra junto con el zip y las dos listas de materiales.
+
+### Corregido
+
+- **Una rama protegida por un ruleset ya no se da por desprotegida tras actualizar**: las tres lecturas de la protección solo envían su ETag mientras se conserva la respuesta, y lo que juzgó una versión anterior se vuelve a leer entero. `security.branch_unprotected` podía quedarse para siempre en un repositorio protegido.
+- **Los hallazgos de postura y las alertas siguen el idioma de la página** (`?lang=` y el selector de idioma), no el de la configuración.
+- **En el teléfono vuelve a verse el contenido de todas las pestañas**: bajo una cabecera alta, la pestaña abierta se quedaba sin altura y sus paneles no se alcanzaban al desplazarse.
+- **Las pestañas se ven en un teléfono en horizontal y en ventanas bajas**: desde 701 píxeles de ancho la cabecera ocupaba toda la altura y la pestaña abierta se quedaba sin ninguna; ahora la página se desplaza hasta ella. Hasta 800 píxeles de ancho el menú sigue en una fila que se desplaza de lado en vez de partir los nombres letra a letra. Las pantallas de pared no cambian.
+- **Las cajas de las partes opcionales conservan toda su altura** en ordenadores y pantallas de pared en vez de quedar aplastadas en pocas líneas, sus tablas respetan las palabras enteras, los botones de la vista compacta miden al menos 44 px de ancho y las gráficas grandes ya no escriben un error en la consola del navegador. Un workflow mide cada caja en ocho idiomas, en teléfono, ordenador y pantallas de pared.
+- **Se acabaron los falsos avisos de «ajuste desconocido» al actualizar**: el actualizador ya no marca como desconocidos los ajustes que trae la configuración de ejemplo de la versión de destino pero que la página de ajustes no describe.
+- Los nombres de paso guardados por workflow tienen tope.
+- Los lanzadores de Windows usan `python` cuando no está instalado el lanzador `py`.
+- **Comprobaciones de postura que respondían mal**: las alertas de dependencias podían leerse mal con las lecturas condicionales activas; una protección que no se puede leer se daba como inexistente; no se veía la política de seguridad compartida por la cuenta; las comprobaciones apagadas o filtradas contaban como «sin hallazgos» y como superadas; una organización rechazada detenía la lectura de todos los repositorios; las listas largas se leían en parte; un resumen de fichero aparecido después contaba como fichero sustituido.
+- **Informe de cumplimiento**: nunca veía un certificado TLS; anunciaba como más nueva una versión publicada más antigua; un registro de acciones vaciado o ilegible, una carpeta de copias ilegible y un almacenamiento desconocido salían como comprobados; una exportación sin destino ahora lo dice.
+- **Registros de CI externa**: Azure Pipelines daba el paso de cierre en vez del fallido, Buildbot conservaba sus letras de canal, GitLab podía elegir un trabajo al que se le permite fallar, un token de Azure rechazado se informaba como respuesta ilegible y un registro muy largo podía cortarse antes de su final. Las canalizaciones de GitLab que se están cancelando cuentan como en curso.
+
+### Seguridad
+
+- **Un token en la dirección solo pasa a ser la cookie de sesión cuando es correcto por sí mismo** (`listen.query_access`): una petición ya admitida por su cookie o cabecera podía meter otro texto en la respuesta. Los ficheros de secretos, informes y workflows deben quedar dentro de su carpeta con los enlaces resueltos, el HTTPS saliente exige TLS 1.2 o posterior y se rechaza una orden del llavero demasiado larga.
+- **Los plugins de otras personas obedecen las restricciones**: con el modo de solo lectura estricto o la política de red en vigor, uno solo se ejecuta si su proceso no tiene red.
+- **Tokens de las fuentes de CI externas y de la exportación del registro**: no pueden nombrar un secreto del sistema o del monitor y nunca se envían sin TLS a una dirección pública.
+- Una descarga sin firma ofrecida con un número anterior se rechaza cuando contiene una versión que debe ir firmada.
+- Un fichero de estado dañado de la exportación del registro ya no detiene sus comprobaciones, y la única repetición automática no se envía si no se puede anotar.
+- Las guías dicen dos límites conocidos (carpetas que ve un viewer en el propio equipo; repetición de eventos sin hora) y el valor por defecto correcto de `webhook.reject_stale`.
+- El limpiador de texto para las IA ahora quita entero un nombre largo de equipo interno acabado en `.local` y los trozos de una clave privada que perdió su cabecera (una línea cortada o un registro que empieza a mitad de la clave).
+- Solo se soporta la última versión publicada (política de seguridad).
+- **Las restricciones valen en más casos**: `sops` y `bws` no arrancan con una política de red, la palabra `version` en cualquier sitio de una orden ya no la deja pasar, un fichero de configuración ilegible restringe y `security.*` del fichero de la edición lite se le aplica.
+- **Un despliegue se aprueba de un entorno cada vez**, nombrado en la confirmación, en lugar de todos los que la persona puede aprobar a la vez.
+
+### Complementos
+
+- **Complementos, apagados por defecto** (Complete): oficiales para discusiones sin respuesta y retención de paquetes; los de terceros solo como paquetes firmados por una clave de tu llavero, en un proceso aparte sin el token y con la etiqueta «sin aislamiento de red» donde no se puede cortar la red. La salida no fiable se limpia, un complemento que falla se pausa, y hay catálogo en Ajustes, la orden `plugin`, una comprobación del doctor, una plantilla para autores y un contrato con versión (`api_compat` 1).
+- **El token de GitHub puede leerse de Vault, SOPS, Bitwarden Secrets Manager o el gestor de secretos de AWS, Azure o Google** (solo lectura, `secrets.backend`).
+- **La skill externa puede empaquetarse para un registro de skills** (`tools/prepare_skill_bundle.py`, no publica nada).
+
 ## [2.1.8]
 
 La versión 2.1.8 no añade ninguna función: corrige lo que encontró una revisión de la 2.1.7. El centinela de CI ya no sale en verde cuando la lista de ejecuciones puede ocultar un workflow; aprobar o rechazar una propuesta de la IA funciona; un dispositivo revocado pierde los flujos que tenía abiertos; las conexiones tienen límite de tiempo y de número; el túnel del proxy funciona; deshacer ya no pasa por encima de una actualización en curso; la imagen del contenedor solo se publica desde una etiqueta; y las pantallas, el quiosco, la línea de órdenes y la documentación dicen lo que hace el programa.

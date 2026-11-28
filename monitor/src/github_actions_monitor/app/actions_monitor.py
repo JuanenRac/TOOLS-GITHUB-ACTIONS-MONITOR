@@ -58,6 +58,7 @@ from github_actions_monitor.security import wsforward
 from github_actions_monitor.integrations import heartbeat
 from github_actions_monitor.data_pipeline import graphql_checks
 from github_actions_monitor import i18n
+from github_actions_monitor import families
 from github_actions_monitor.security import auth_http
 from github_actions_monitor.security import envguard
 from github_actions_monitor.security import localguard
@@ -197,6 +198,7 @@ DEFAULTS = {
                   "heartbeat": {"enabled": True, "window_minutes": 15},
                   "client_hook": {"enabled": True, "block_on_stop": False, "cooldown_minutes": 20, "stale_hours": 3, "max_lines": 12, "max_chars": 2400}},     # a local, read-only feed of alerts for AIs (ai_alerts.py); the hook is OFF                                          # 0: the system of each job is not read (quota.default_runner is assumed)
 }
+families.merge_into(DEFAULTS, families.defaults())      # the defaults of the parts that plug in by themselves (families/)
 
 DEMO = {"on": False}      # --demo: invented data, no gh, no network
 LITE = {"on": False}      # the lite product: the same server without the sentinel, with its own configuration file, its own state files and a short settings page
@@ -238,6 +240,8 @@ def enable_lite():
     CONFIG_FILE = paths.place("actions_monitor_lite.json")
     LOG_FILE = paths.place("actions_monitor_log_lite.txt")
     settings_api.CONFIG_FILE = toolconfig.CONFIG_FILE = CONFIG_FILE
+    from github_actions_monitor.security import compliance_guard
+    compliance_guard.arm_from_file(CONFIG_FILE)      # security.* written in the file of the lite edition holds for it too
     settings_api.BACKUP_DIR = paths.place("config_backups_lite")
     etagcache.CACHE_FILE = paths.place("etag_cache_lite.json")
 
@@ -676,6 +680,17 @@ def read_visibility(config, force=False):
     VISIBILITY["known"] = {item["name"] for item in data if isinstance(item, dict) and isinstance(item.get("name"), str) and "isPrivate" in item}
 
 
+def switched_on(names):
+    """The repositories that `fleet.disabled` does not name (complete edition). Read from the file each time: switching one off needs no restart."""
+    if LITE["on"]:
+        return names
+    disabled = families.block(toolconfig.raw_config(), "fleet").get("disabled")
+    if not disabled:
+        return names
+    from github_actions_monitor.families.fleet import fleet_views
+    return [n for n in names if not fleet_views.switched_off(n, disabled)]
+
+
 def watched_repos(config, force=False):
     """The list from the config file or, with "repos": "all", the repositories of the account (one call, cached)."""
     wanted = config["repos"]
@@ -738,7 +753,7 @@ def watched_repos(config, force=False):
     for n in names:
         if not NAME_RE.match(n):
             print(i18n.t("mon.bad_repo_name", name=repr(n)[:60]))
-    return valid
+    return switched_on(valid)
 
 
 RUN_SUMMARY = {"by_repo": {}}      # repo -> counts over ALL the runs of the last cycle (health/repo_view.summarize_runs): the page only receives the 600 newest ones, the health must not
@@ -2043,8 +2058,55 @@ def download_artifact(endpoint, destination):
     Path(destination).write_bytes(done.stdout)
 
 
+def external_ci(call, *args):
+    """What the external CI sources (integrations/external_ci/) say, [] in the lite edition and while they are off: that package is only imported once external_ci.enabled is on. Never raises."""
+    if LITE["on"]:
+        return []
+    try:
+        config = toolconfig.raw_config()
+        if ((config or {}).get("external_ci") or {}).get("enabled") is not True:
+            return []
+        from github_actions_monitor.integrations.external_ci import extci_engine as engine
+        return getattr(engine, call)(config, *args)
+    except Exception as error:   # noqa: BLE001 - a source of another service never stops a cycle nor the list of alerts
+        degraded.note("external_ci." + call, error)
+        return []
+
+
+def part_alerts():
+    """The alerts the parts declare (families/), [] in the lite edition; never raises."""
+    if LITE["on"]:
+        return []
+    return families.alerts(toolconfig.raw_config(), CHILD["account"] or "", degraded.note)
+
+
+def posture_alerts():
+    """The alerts of the posture checks (families/posture/) and of the parts that declare some, [] in the lite edition. Reads only the files they keep; never raises."""
+    return posture_only_alerts() + part_alerts()
+
+
+def posture_only_alerts():
+    """The alerts of the posture checks, [] while they are off."""
+    if LITE["on"]:
+        return []
+    try:
+        config = toolconfig.raw_config()
+        if ((config or {}).get("posture") or {}).get("enabled") is not True:
+            return []
+        from github_actions_monitor.families.posture import posture_engine as engine
+        return engine.alerts(config, CHILD["account"] or "")
+    except Exception as error:   # noqa: BLE001 - the list of alerts must still answer
+        degraded.note("posture.alerts", error)
+        return []
+
+
 def red_rows(data):
-    """The red workflows of this cycle: those of the sentinel when it runs, else the same small rule the lite edition uses."""
+    """The red workflows of this cycle, those of the external CI sources included."""
+    return actions_red_rows(data) + external_ci("red_rows")
+
+
+def actions_red_rows(data):
+    """The red workflows of Actions: those of the sentinel when it runs, else the same small rule the lite edition uses."""
     sentinel = SENTINEL["obj"]
     if sentinel is not None:
         try:
@@ -2514,7 +2576,7 @@ def score_tick(config, data):
         known = bool(collab is not None and getattr(collab, "enabled", False) and not (collab.get_status() or {}).get("loading"))
         storage, account = runtime.process_storage(CHILD["account"] or None)
         idle = set(data.get("forks_idle_all") or data.get("forks_idle") or [])      # the runs of a fork without a CI of its own (the cron it inherited) are not the work of the account
-        snapshot = score_service.tick(storage, account, config, [r for r in source_runs(config, data) if r.get("repo") not in idle], collab.get_alerts() if known else [], collab_known=known, security=score_security(registry, config), activity=data.get("activity"), keep_days_min=compare_keep_days(config), seen=data.get("runs_total"))
+        snapshot = score_service.tick(storage, account, config, [r for r in source_runs(config, data) if r.get("repo") not in idle] + external_ci("runs"), collab.get_alerts() if known else [], collab_known=known, security=score_security(registry, config), activity=data.get("activity"), keep_days_min=compare_keep_days(config), seen=data.get("runs_total"))
         if snapshot and snapshot.get("drop_new") and snapshot.get("drop"):      # the moment a drop appears; it leaves the panel only when the person asked for it
             from github_actions_monitor.scoring import drop as score_drop, engine as score_engine
             sentinel = SENTINEL["obj"]
@@ -2542,7 +2604,7 @@ def report_gather():
     storage, account = runtime.process_storage(CHILD["account"] or None)
     snapshot = score_api.latest(storage, account, config)
     try:
-        alerts = alert_center.collect(SENTINEL["registry"], extra=credential_alerts() + score_alerts() + runner_alerts() + mark_alerts())
+        alerts = alert_center.collect(SENTINEL["registry"], extra=credential_alerts() + score_alerts() + runner_alerts() + mark_alerts() + external_ci("alerts", CHILD["account"] or "") + posture_alerts())
     except Exception as error:   # noqa: BLE001 - the report still has the rest
         degraded.note("reports.alerts", error)
         alerts = []
@@ -2605,7 +2667,7 @@ def health_views(now=None, only=None):
     failing, active = data.get("failing") or [], data.get("active") or []
     registry = SENTINEL["registry"]
     try:
-        alerts = alert_center.collect(registry, extra=credential_alerts() + score_alerts() + runner_alerts() + mark_alerts())
+        alerts = alert_center.collect(registry, extra=credential_alerts() + score_alerts() + runner_alerts() + mark_alerts() + external_ci("alerts", CHILD["account"] or "") + posture_alerts())
     except Exception as error:   # noqa: BLE001 - the health still answers without the alerts
         degraded.note("health.alerts", error)
         alerts = []
@@ -2706,6 +2768,8 @@ def maintain(config, data):
     backup_tick(toolconfig.raw_config() if not LITE["on"] else config)
     score_tick(toolconfig.raw_config() if not LITE["on"] else config, data)
     report_tick(toolconfig.raw_config() if not LITE["on"] else config)
+    if not LITE["on"]:
+        families.run_ticks(toolconfig.raw_config(), data, degraded.note)
     try:
         if ETAG["cache"]:
             ETAG["cache"].save()
@@ -2985,7 +3049,8 @@ def render_page():
     if pwa_cfg["enabled"]:
         extras += "\n" + pwa.REGISTER_JS
     page = page.replace("/*EXTRAS_JS*/", extras, 1)
-    return page.replace("/*I18N_DATA*/null", blob, 1)
+    page = page.replace("/*I18N_DATA*/null", blob, 1)
+    return page if LITE["on"] else families.inject_page(page)
 
 
 def render_screen(kind, query):
@@ -3010,6 +3075,9 @@ def screens_payload(kind, cfg, repo=""):
     """GET /api/screens/data: what the screens show, from what the monitor holds. Nothing is read from GitHub here: the last cycle, the snapshot of the sentinel, the alerts and the score are already in memory or in the local files."""
     with LOCK:
         state = STATE["data"]
+    extra = external_ci("red_rows")
+    if extra and isinstance(state, dict):
+        state = dict(state, external_red=extra)
     sentinel = None if LITE["on"] else SENTINEL["obj"]
     snapshot = alerts = score = None
     if sentinel is not None:
@@ -3497,7 +3565,8 @@ class Handler(BaseHTTPRequestHandler):
             self.json_reply({"error": "access"}, 401)
             return False
         self.deprecated_access = bool(query_token) and not localguard.presented(self.headers)      # the token came in the address: every answer says that way is deprecated
-        if query_token and self.command == "GET" and "text/html" in (self.headers.get("Accept") or "text/html"):
+        # the token of the ADDRESS must be right by itself: a request that is let in by its cookie or header must not put whatever the address says into the cookie
+        if query_token and localguard.access_ok({}, query_token) and self.command == "GET" and "text/html" in (self.headers.get("Accept") or "text/html"):
             self.send_response(302)
             self.send_header("Set-Cookie", localguard.cookie_header(query_token, secure=False if self.local_door else None))
             self.send_header("Referrer-Policy", "no-referrer")       # the clean address follows at once: the token must not travel on in a Referer header
@@ -3633,11 +3702,15 @@ class Handler(BaseHTTPRequestHandler):
                 self.json_reply({"ok": False, "error": "audit_log_required", "code": "audit_unwritable"}, 503)
                 return
             with i18n.use_language(self.request_language()):
-                try:
-                    self.handle_post()
-                except Exception as error:      # noqa: BLE001 - see storage_failure
-                    if not self.storage_failure(error):
-                        raise
+                from github_actions_monitor.security import compliance_guard
+                if compliance_guard.route_refused(route, toolconfig.raw_config()):      # security.read_only_strict: nothing that writes is even prepared
+                    self.json_reply({"ok": False, "error": "forbidden", "code": "read_only_strict", "message": i18n.t("ui.compliance.refused")}, 403)
+                else:
+                    try:
+                        self.handle_post()
+                    except Exception as error:      # noqa: BLE001 - see storage_failure
+                        if not self.storage_failure(error):
+                            raise
             self.audit_post(self.path.split("?")[0])
         finally:
             self.drain_body(counted)
@@ -3663,8 +3736,48 @@ class Handler(BaseHTTPRequestHandler):
             degraded.note("chatops", error)
             self.json_reply({"ok": False}, 400)
 
+    def family_route(self, method, path):
+        """A route that a part of the monitor declared (families/): the checks it asks for, then its handler. True when the path was one of them (and answered)."""
+        route = families.find_route(method, path)
+        if route is None:
+            return False
+        if LITE["on"] and not route.lite:
+            self.send_response(404)
+            self.end_headers()
+            return True
+        if not self.guard() or (route.this_computer and not self.this_computer()) or (method == "POST" and route.token and not self.token_ok()):
+            return True
+        body = {}
+        if method == "POST":
+            try:
+                size = int(self.headers.get("Content-Length") or 0)
+                if not 0 <= size <= route.max_body:
+                    self.json_reply({"ok": False, "error": "size"}, 413)
+                    return True
+                body = json.loads(self.rfile.read(size) or b"{}")
+            except ValueError:
+                body = None
+            if not isinstance(body, dict):
+                self.json_reply({"ok": False, "error": "request"}, 400)
+                return True
+        query = {k: v[0] for k, v in urllib.parse.parse_qs(self.path.partition("?")[2]).items() if v}
+        try:
+            answer = route.handler(families.Request(method, path, query, body, auth_http.acting_user(self), toolconfig.raw_config()))
+        except (AttributeError, IndexError, KeyError, RuntimeError, TypeError, ValueError) as error:      # a storage that does not answer goes on to storage_failure
+            degraded.note("family.route", error)
+            self.json_reply({"ok": False, "error": "server"}, 500)
+            return True
+        if isinstance(answer, families.Raw):
+            self.reply(answer.body.decode("utf-8"), answer.content_type)
+            return True
+        status, payload = answer if isinstance(answer, tuple) else (200, answer)
+        self.json_reply(payload, status)
+        return True
+
     def handle_post(self):
         path = self.path.split("?")[0]
+        if self.family_route("POST", path):
+            return
         if LITE["on"] and path.startswith(LITE_PATHS) and path not in LITE_SHARED:
             self.send_response(404)
             self.end_headers()
@@ -4032,6 +4145,8 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Cache-Control", "max-age=86400")
             self.end_headers()
             return
+        if self.family_route("GET", path):
+            return
         if LITE["on"] and path.startswith(LITE_PATHS) and path not in LITE_SHARED:      # the lite product does not have these endpoints
             self.send_response(404)
             self.end_headers()
@@ -4371,7 +4486,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_response(404)
                 self.end_headers()
                 return
-            self.json_reply(assistant.describe(cfg))
+            self.json_reply(assistant.describe(cfg, families.block(toolconfig.raw_config(), "ai.chat").get("enabled") is True))
         elif path == "/api/ai/prompts":      # read only, administrator: the local record of the cleaned prompts and answers (off by default; it only exists while `ai.prompt_log.enabled` is on)
             if not self.guard():
                 return
@@ -4630,6 +4745,10 @@ class Handler(BaseHTTPRequestHandler):
                 self.reply(kiosk_profile.redact(picture, screens.Names(data.get("repos"), data.get("repo_meta"), screens.settings(raw)["show_repo_names"])), "application/json; charset=utf-8")
                 return
             self.reply(json.dumps(picture), "application/json; charset=utf-8")
+        elif re.fullmatch(r"/g/[a-z0-9_-]{1,40}/?", path) and not LITE["on"]:      # the screen of one group (families/fleet)
+            if not self.guard():
+                return
+            self.reply((families.FOLDER / "fleet" / "group.html").read_text(encoding="utf-8"), "text/html; charset=utf-8")
         elif path in ("/", "/index.html") or re.fullmatch(r"/screen/[1-3]/?", path):
             if not self.guard():      # the page checks the Host like the API does (a rebinding page gets a 403, not the monitor)
                 return
@@ -4690,7 +4809,7 @@ def alerts_payload(ask):
     from github_actions_monitor.sentinels import alert_center
     refresh_feed()
     registry = SENTINEL["registry"]
-    extra = credential_alerts() + score_alerts() + runner_alerts() + mark_alerts()
+    extra = credential_alerts() + score_alerts() + runner_alerts() + mark_alerts() + external_ci("alerts", CHILD["account"] or "") + posture_alerts()
     everything = alert_center.collect(registry, extra=extra)
     chosen = alert_center.select(everything, ask.get("sentinel", ""), ask.get("level", ""), ask.get("muted", "show") if ask.get("muted") in ("show", "hide", "only") else "show")
     out = {"schema": 1, "account": CHILD["account"] or None, "alerts": chosen, "summary": alert_center.summary(everything), "mutes": alert_center.active(), "history": alert_center.history(20),
@@ -5078,7 +5197,12 @@ def assistant_reader():
     def history():
         from github_actions_monitor.integrations import ai_alerts, similar_alerts
         return similar_alerts.from_feed(ai_alerts.alerts(toolconfig.raw_config(), states=("resolved",))[:200])
-    return {"views": health_views, "score": score, "history": history}
+    out = {"views": health_views, "score": score, "history": history}
+    from github_actions_monitor.integrations import ai_rag
+    rag = ai_rag.settings(toolconfig.raw_config())
+    if rag["enabled"]:      # "alerts like this one" ranked by a local embedding model
+        out["ranker"] = lambda found, pool, count: ai_rag.rank(rag, found, pool, count)
+    return out
 
 
 def assistant_ask(request, role="admin"):
@@ -5107,6 +5231,19 @@ def _register_cloud_hook():
 _register_cloud_hook()
 
 
+def ai_people(config):
+    """How many people can decide on a proposal of the AI: the active users who are not mere viewers in the team mode, else one."""
+    from github_actions_monitor.security import auth
+    try:
+        if not auth.settings(config)["enabled"]:
+            return 1
+        users = auth.list_users(auth.get_storage(config))
+        return max(1, sum(1 for u in users if u["active"] and u["role"] != "viewer"))
+    except Exception as error:   # noqa: BLE001 - when it cannot be known, the stricter rule
+        degraded.note("ai.people", error)
+        return 2
+
+
 def handle_action_post(path, request, who=""):
     """The endpoints that DO something on request of the page: confirm an action of the AI, unlock the actions, test the AI connection, send a test notification."""
     config = toolconfig.raw_config()
@@ -5115,10 +5252,11 @@ def handle_action_post(path, request, who=""):
         return ai_models.handle_post(path, request, sentinel_ai.ai_config(config), ai_store())
     if path == "/api/ai/actions/confirm":
         from github_actions_monitor.integrations import ai_actions
-        return ai_actions.ACTIONS.run(request.get("id"), request.get("command"), config)
+        return ai_actions.ACTIONS.run(request.get("id"), request.get("command"), config, people=ai_people(config))
     if path == "/api/ai/actions/review":     # approve or reject a proposal; the person with a session counts, never the name the request claims
         from github_actions_monitor.integrations import ai_actions
-        return ai_actions.ACTIONS.review(request.get("id"), request.get("decision"), who or str(request.get("by") or "")[:60])
+        people = ai_people(config)      # with several users the name is the one of the session, never the one the request claims
+        return ai_actions.ACTIONS.review(request.get("id"), request.get("decision"), who or ("" if people >= 2 else str(request.get("by") or "")[:60]), confirm=request.get("confirm"), people=people)
     if path == "/api/ai/actions/unlock":
         from github_actions_monitor.integrations import ai_actions
         ai_actions.ACTIONS.unlock()

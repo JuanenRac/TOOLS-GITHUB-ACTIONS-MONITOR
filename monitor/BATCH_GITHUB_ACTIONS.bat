@@ -12,16 +12,19 @@ goto ppdone
 :nopp
 set "PYTHONPATH=%~dp0src"
 :ppdone
+set "PY=py -3"
+where py >nul 2>nul
+if errorlevel 1 set "PY=python"
 :menu
-py -3 -m github_actions_monitor.cli.launcher_msg menu
-for /f "delims=" %%p in ('py -3 -m github_actions_monitor.cli.launcher_msg choose') do set "ask=%%p"
+%PY% -m github_actions_monitor.cli.launcher_msg menu
+for /f "delims=" %%p in ('%PY% -m github_actions_monitor.cli.launcher_msg choose') do set "ask=%%p"
 set "op="
 set /p op=%ask% 
-if "%op%"=="1" py -3 -m github_actions_monitor.cli.gha_dispatch_all plan
-if "%op%"=="2" py -3 -m github_actions_monitor.cli.gha_dispatch_all dispatch --go
-if "%op%"=="3" py -3 -m github_actions_monitor.cli.gha_dispatch_all status
-if "%op%"=="4" py -3 -m github_actions_monitor.cli.gha_dispatch_all finalize --execute
-if "%op%"=="5" py -3 -m github_actions_monitor.cli.gha_dispatch_all hygiene
+if "%op%"=="1" %PY% -m github_actions_monitor.cli.gha_dispatch_all plan
+if "%op%"=="2" %PY% -m github_actions_monitor.cli.gha_dispatch_all dispatch --go
+if "%op%"=="3" %PY% -m github_actions_monitor.cli.gha_dispatch_all status
+if "%op%"=="4" %PY% -m github_actions_monitor.cli.gha_dispatch_all finalize --execute
+if "%op%"=="5" %PY% -m github_actions_monitor.cli.gha_dispatch_all hygiene
 if "%op%"=="6" goto fin
 goto menu
 :fin

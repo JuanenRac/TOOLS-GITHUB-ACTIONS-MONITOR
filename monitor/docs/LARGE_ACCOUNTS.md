@@ -22,6 +22,8 @@ The follow-up of the originals of forks (`upstream.enabled`) says in its panel h
 
 The calls of one tick of the Sentinel (`sentinel.max_calls_per_tick`) are one count for all its stages, and a repository whose reads fail three times in a row is left alone for 30 seconds, doubling up to 10 minutes, while the others are read.
 
+The Fleet tab also has an optional box by [role of workflow and group, with a screen for each group](FLEET_APIS.md).
+
 ## Queue of reads, limits and one read for everybody
 
 - **Backpressure** (`backpressure.enabled`, off by default): the reads of a cycle go through one bounded queue (red repositories first, then hot ones, never read ones and the oldest read). `backpressure.max_reads_per_cycle` sets a fixed number (0 = none); when a cycle lasts more than `backpressure.shed_percent` percent of the pause between cycles the allowed number is cut in half (never under `backpressure.min_reads`) and it grows back by a tenth after each fast cycle. What waits keeps its last picture and goes first in the next cycle. `/metrics` shows `ghamon_read_queue_*`.

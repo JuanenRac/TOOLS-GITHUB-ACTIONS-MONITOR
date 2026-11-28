@@ -19,7 +19,7 @@
 | `backup` | la sauvegarde complète de l'installation (le moniteur n'a pas besoin de tourner) : `backup create [FICHIER] [--account ID]`, `verify FICHIER [--deep]`, `restore FICHIER [--account ID] [--to-dir DOSSIER] [--force]`, `status`, `list` ; `--encrypt` avec `--key-env NOM` la chiffre (bibliothèque facultative) ; voir [OPS_fra.md](OPS_fra.md) | non |
 | `accounts` | les comptes du superviseur (plusieurs comptes seulement) | non |
 | `alerts` | les alertes de toutes les sentinelles dans une liste : `--sentinel ci\|collab\|security\|supply\|delivery`, `--level info\|warning\|error`, `--muted show\|hide\|only`; `--since 90m|24h|7d|2w` liste celles qui ont été ouvertes à un moment de cette durée, les closes aussi (depuis l'historique que le moniteur garde en fonctionnant ; une alerte compte comme close après dix minutes d'absence) | non |
-| `proposals` | les actions que l'IA a proposées (`ai.actions.enabled`) : `proposals list`, `show ID`, `approve ID`, `reject ID`, `execute ID` (un identifiant peut être abrégé). `approve` et `reject` ne font qu'enregistrer la décision ; `execute` l'exécute par la même porte que la page et demande `ai.actions.execute`, et avec `ai.actions.require_approval` une approbation d'abord. Approuver, rejeter et exécuter ne se font que depuis cet ordinateur | non |
+| `proposals` | les actions que l'IA a proposées (`ai.actions.enabled`) : `proposals list`, `show ID`, `approve ID`, `reject ID`, `execute ID` (un identifiant peut être abrégé). `approve` et `reject` ne font qu'enregistrer la décision ; `execute` l'exécute par la même porte que la page et demande `ai.actions.execute`, et avec `ai.actions.require_approval` une approbation d'abord. Approuver, rejeter et exécuter ne se font que depuis cet ordinateur Avec un seul utilisateur, `approve` exige `--code` et les huit premiers caractères de l'empreinte ; à plusieurs, approuvez dans la page avec votre session (deux personnes). | non |
 | `score` | le score du compte : nombre, lettre, tendance, parties, couverture et ventilation par dépôt ; `--compare` le compare à l'historique de la fenêtre | non |
 | `compare` | cette période contre la précédente : les chiffres avec leur variation et leur sens, qui se dégrade ou s'améliore ; `--window 7\|30d`, `--days all\|workdays\|weekend`, `--baseline previous\|year_ago`, `--format table\|json\|ndjson\|csv` ; sortie 4 si un chiffre manque de données, 5 avec `--fail-on` si l'un se dégrade ; `--format csv` avec une autre commande est un mauvais usage (sortie 1) | non |
 | `api` | l'API de lecture pour les clients : `api openapi` affiche le document OpenAPI de chaque route figée (redirigez-le vers un fichier), `api me` dit pour qui le moniteur prend ce client (mode, utilisateur, rôle, ce que la session peut faire, version du contrat) ; un moniteur dont `api.v1_enabled` est fermé le dit ; `api contract-check` lance contre lui la suite de contrat pour les clients (sortie 4 si une vérification échoue) | non |
@@ -30,6 +30,8 @@
 | `briefs` | les briefs des onglets que lisent les outils d'IA : `briefs index`, `briefs show ONGLET`, `briefs all` | oui |
 | `docs` | les guides de cette version, lus dans l'installation (sans moniteur) : `docs list` les nomme avec leur titre, `docs show NOM` en affiche un dans la langue de `--lang` | non |
 | `screens` | le menu Écrans de la page : `screens list` (chaque type d'écran et s'il peut être ouvert) et `screens urls` (les adresses complètes, prêtes pour une commande de borne) | non |
+| `keyring` | les clés publiques autorisées à signer : `keyring list`, `add` (`--key-id`, `--public-key`, `--key-scope`, `--expires`), `revoke --key-id`, `verify --document FILE` ; sans moniteur, les clés privées sont refusées | non |
+| `verify-release` | un dossier de fichiers de version téléchargés, vérifié sans réseau avec SHA256SUMS et sa signature : `verify-release --folder DIR` ; sortie 4 s'ils ne sont pas fiables Aussi `--installed` (cette installation contre la nomenclature), `--attestations`, `--fetch` (nécessite `ops.verify_release.fetch`) ; `doctor --verify-release DIR` vérifie l'installation ; `keyring check-rotation --document FILE` vérifie l'annonce d'une nouvelle clé. | non |
 | `toolbox` | les petits outils de l'opérateur qui fonctionnent sur cet ordinateur, sans moniteur lancé : `toolbox limits [N]` (la configuration face à ses plafonds), `toolbox workspaces` (les espaces de travail et celui utilisé), `toolbox ledger [--force]` (le registre des notifications déjà envoyées ; `--force` l'oublie), `toolbox summary` (les événements par type, dépôt et jour) et `toolbox export-events FILE` (les événements en jsonl, csv, parquet ou duckdb selon la fin du nom ; parquet et duckdb demandent leur paquet, le fichier doit être nouveau) | non |
 | `credential` | une autre connexion GitHub pour un compte pendant que tout tourne : `credential replace\|reload [--account ID] [--new-token-file FICHIER\|-]` ; n'affiche jamais de jeton | non |
 | `install-skill` | copie une skill du moniteur (`internal` ou `external`) dans le dossier où un outil d'IA lit ses skills : `install-skill external --dest DOSSIER` ; le moniteur n'a pas besoin de tourner | non |
@@ -38,6 +40,10 @@
 | `completions` | le script de complétion pour `bash`, `zsh`, `fish` ou `powershell`, écrit à partir de l'analyseur réel (il se contente d'afficher) | non |
 | `kiosk` | l'adresse du moniteur pour une télévision ou un mur (`ops`, `team`, `release`, `quiet`) ; voir [KIOSK_fra.md](KIOSK_fra.md) | non |
 | `metrics` | les chiffres en lignes `nom=valeur` pour cron et le courrier ; avec `--if-problem` il n'écrit rien quand tout va bien ; voir [CLI_OPERATOR.md](CLI_OPERATOR.md) | non |
+| `posture` | Posture des dépôts et de l'organisation, lecture seule (`posture status|matrix|check --repo-name`) ; voir [POSTURE.md](POSTURE_fra.md) | non |
+| `traffic` | Historique des téléchargements et du trafic gardé sur cet ordinateur (`traffic status|export`) ; voir [TRAFFIC_fra.md](TRAFFIC_fra.md) | non |
+| `external-ci` | Sources CI externes, lecture seule (`external-ci list|status|probe --source`) ; voir [EXTERNAL_CI.md](EXTERNAL_CI_fra.md) | non |
+| `plugin` | Greffons : `plugin list|validate|pack|verify|init|install|enable|disable|uninstall|audit` ; voir [PLUGINS.md](PLUGINS_fra.md) | non |
 
 Options de toutes les commandes : `--json` (la réponse comme un document JSON : `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (port 8766), `--timeout SECONDES` (1 à 60), `--lang CODE`. En mode réseau, mettez le jeton d'accès dans la variable d'environnement `MONITOR_ACCESS_TOKEN`, celle que lit le moniteur lui-même (`MONITOR_TOKEN` est accepté comme alias ; `--token JETON` est le dernier recours, car une option apparaît dans la liste des processus). L'ordre : `MONITOR_ACCESS_TOKEN`, puis `MONITOR_TOKEN`, puis `--token`. Il voyage dans l'en-tête `X-Monitor-Access`, jamais dans l'adresse ni à l'écran. Un `--url` en `http` non chiffré vers un autre ordinateur affiche un avertissement sur stderr (le jeton et les réponses circuleraient en clair) : utilisez `https` hors d'un réseau que vous contrôlez.
 
@@ -95,3 +101,24 @@ En mode réseau le jeton est lu dans `MONITOR_ACCESS_TOKEN`, puis `MONITOR_TOKEN
 ## Sauvegarde et le doctor
 
 `backup` et `doctor` travaillent sur les dossiers de l'installation, ils n'ont donc pas besoin d'un moniteur en marche. `doctor` sort avec `0` quand tout va bien (avertissements compris), `1` quand un contrôle a échoué, `3` quand il n'y a que des avertissements et que `--strict` (ou `ops.doctor.strict_exit`) est actif, et `4` quand le doctor lui-même n'a pas pu s'exécuter ; ce sont les codes du doctor, les autres commandes gardent les codes de sortie ci-dessus. `backup` sort avec `0` quand c'est fait et `1` quand il est refusé ou que le paquet ne se vérifie pas. Le guide [OPS_fra.md](OPS_fra.md) donne les contrôles, la restauration et la sauvegarde planifiée. Le doctor a aussi `compare_window` (la comparaison de deux périodes peut-elle remonter de deux fenêtres avec l'historique qu'elle demande et garde) et `etag` (la part des lectures conditionnelles répondues par 304 dans le moniteur qui tourne ici, et si les réponses de GitHub arrivent sans ETag).
+
+## Identité d'un dépôt, plusieurs propriétaires
+
+Ligne de commande : `identity status`, `identity plan`, `identity apply`.
+
+```
+python bin/monitor_cli.py identity plan
+```
+
+## Conformité et journal des actions
+
+`compliance report` dit quelles garanties offre cette installation ; `audit verify|checkpoint|purge|export` travaille sur la chaîne du journal des actions. Voir [COMPLIANCE_fra.md](COMPLIANCE_fra.md).
+
+## Commandes: actions, runner-hook
+
+```
+python bin/monitor_cli.py actions proposals
+python bin/monitor_cli.py runner-hook started
+```
+
+[COLLABORATION_fra.md](COLLABORATION_fra.md)

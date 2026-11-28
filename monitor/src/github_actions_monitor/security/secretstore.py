@@ -18,6 +18,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 SERVICE = "github-actions-monitor"
@@ -32,6 +33,7 @@ def folder():
 
 
 APPLIED = {"token": ""}     # the token this process put in GH_TOKEN (a GH_TOKEN the user set himself is never removed)
+BACKEND = {"config": None, "at": 0.0, "error": ""}      # when the token comes from another program (secrets.backend): when it was last read, to notice a rotation
 
 
 def settings(config):
@@ -183,6 +185,9 @@ def apply_to_environment(config, store=None):
     cfg = settings(config)
     if not cfg["enabled"]:
         return False
+    BACKEND.update(config=None, error="")
+    if isinstance(config.get("secrets"), dict) and config["secrets"].get("backend") not in (None, "local"):      # read only, from another program
+        return _apply_backend(config)
     token = (store or Store(cfg["store"])).load()
     if not valid(token):
         return False
@@ -190,9 +195,36 @@ def apply_to_environment(config, store=None):
     return True
 
 
+def _apply_backend(config):
+    from github_actions_monitor.security import secret_backends
+    BACKEND.update(config=config, at=time.monotonic())
+    try:
+        token = secret_backends.read(config)
+        error = "" if valid(token) else "format"
+    except secret_backends.BackendError as failure:
+        token, error = "", failure.code
+    BACKEND["error"] = error
+    if error:
+        return False      # the token read before stays: a backend that does not answer for a moment does not stop the monitor
+    APPLIED["token"] = token
+    return True
+
+
+def reload_backend():
+    """Reads the token of the backend again when secrets.reload_on_rotate is on and secrets.reload_seconds have passed: a rotated token is picked up without a restart."""
+    config = BACKEND["config"]
+    if config is None:
+        return
+    from github_actions_monitor.security import secret_backends
+    cfg = secret_backends.settings(config)
+    if cfg.get("reload_on_rotate", True) is True and time.monotonic() - BACKEND["at"] >= cfg.get("reload_seconds", 900):
+        _apply_backend(config)
+
+
 def gh_kwargs():
     """Extra arguments for a subprocess call that runs `gh`: {"env": ...} with the stored token as GH_TOKEN when the monitor keeps one, else {} (gh then uses its own login). It is passed
     to `gh` calls ONLY - never to `act`, to a notification command or to any program of the user."""
+    reload_backend()
     if not APPLIED["token"]:
         return {}
     from github_actions_monitor.security import envguard
@@ -204,3 +236,4 @@ def gh_kwargs():
 def clear_environment():
     """After a delete or when the setting is turned off: the monitor stops using the stored token. (A GH_TOKEN the user set in his own environment is never touched.)"""
     APPLIED["token"] = ""
+    BACKEND.update(config=None, error="")

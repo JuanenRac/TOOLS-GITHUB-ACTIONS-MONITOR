@@ -9,6 +9,74 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+## [2.2.0]
+
+### Hinzugefügt
+
+- **Verlauf der Downloads und Zugriffe**, auf diesem Rechner gespeichert (`traffic.enabled`, aus; Complete): einmal am Tag die Downloadzahlen der Release-Dateien und, wenn das Token darf, Besuche und Klone der gewählten Repositorys, mit Tafel unter Repositorys, CSV-Export und dem Befehl `traffic`. Nur GET-Anfragen. `TRAFFIC.md`.
+- **Sagen Sie, dass Sie ihn nutzen**: Über enthält einen Link, der nur beim Klicken ein Formular auf GitHub öffnet; was Sie dort schreiben, ist öffentlich. Der Monitor sendet und füllt nichts aus.
+- **Einen Zeitplan wachhalten, bevor GitHub ihn abschaltet**: mit `teamwork.keep_alive_days` (aus) wird vorgeschlagen, die geplanten Workflows eines ruhigen öffentlichen Repositorys erneut zu aktivieren, mit den verbleibenden Tagen. Die statische Demo und die Workflow-Prüfung im Browser öffnet die CI jetzt in einem echten Browser.
+- **Strikter Nur-Lese-Modus und Netzwerkrichtlinie** (`security.read_only_strict`, `security.egress_policy`, beide aus): unterhalb aller Teile durchgesetzt; ein abgelehnter Befehl oder eine Verbindung scheitert mit Nennung der Einstellung, und der Doctor listet Ziele außerhalb der Richtlinie.
+- **Compliance-Bericht** (`compliance report`, `/api/compliance/report`, ein Kasten im Tab Sicherheit): jede Zeile geprüft oder nur angegeben.
+- **Aufbewahrung jeder Kategorie und Aufbewahrungssperre**, **signierte Prüfpunkte und Bereinigung des Aktionsprotokolls** (`audit verify|checkpoint|purge`) und **Export dieses Protokolls** in eine Datei, per Syslog über TLS oder HTTP; alles ab Werk aus.
+- Neue Anleitungen: Compliance, die Werkzeuge rund um den Monitor und der Inhalt jeder Edition. Ein Workflow führt die übergreifenden Prüfungen je Bereich aus, eine Datenbank über 1 GB und den Dienst unter echtem systemd. `COMPLIANCE.md`, `ECOSYSTEM_TOOLS.md`, `EDITIONS.md`.
+- **Flotte nach Rolle und Gruppe**: eine Spalte je Workflow-Rolle, der schlechteste Zustand jeder Gruppe mit eigenem Bildschirm `/g/<Schlüssel>`, Repositorys und Gruppen ohne Neustart abschaltbar; CCTray-Feed und APIs für Secret- und Code-Scanning (aus), `report_digest` in Berichten und Briefs und eine statische Demo-Seite mit Workflow-Prüfung im Browser (von der CI gebaut, nie selbst veröffentlicht). Das Roadmap-Panel meldet jetzt einen veralteten Klon des Profil-Repositorys. (FLEET_APIS)
+- **Ansichten der Zusammenarbeit und optionale Aktionen** (alles ab Werk aus): Warten auf eine Person getrennt vom Warten auf Runner, letzter Lauf jeder Spur mit zeitweise zurückgestellten roten Läufen, Abhängigkeits- und veraltete Pull Requests, verwundbare und ungelesene Repositorys, verworfene Sicherheitswarnungen, Vorschläge (Aufräumen, Abbruchregel, hängende Läufe, inaktive Workflows), manuelle Workflows mit typisiertem Formular, Fakten zur Freigabe von Forks und Runner-Hooks. Neue GitHub-Aktionen werden einzeln geplant und bestätigt; automatisch ist nur ein einmaliger Neustart nach Infrastrukturfehler.
+- **KI-Vorschläge werden von Menschen entschieden**: als KI markiert, mit Fingerabdruck, überstehen einen Neustart, brauchen zwei Personen bei mehreren Benutzern oder den getippten Code bei einem, und stehen im Reiter Meldungen; mit `ai.assistant.can_propose` entstehen sie auch im Chat.
+- **Freier Chat mit nur lesenden Werkzeugen** (`ai.chat.enabled`, aus), **ähnliche Meldungen per lokalem Embedding-Modell** (`ai.rag.enabled`, aus), **Repository-Bericht und Triage-Entwurf zum Kopieren** und **die Kurzberichte als MCP-Ressourcen**.
+- Ein Link mit Port und `@` im Pfad wird nicht mehr wie Benutzer und Passwort maskiert.
+- **Ein Repository ist (Quelle, Eigentümer, Name)**: zwei gleichnamige Repositorys aus zwei Orten teilen keine Kennungen, Läufe oder Warnungen mehr, und gespeicherte Daten folgen dem beobachteten Eigentümer (vorher Kopie, Befehl `identity`, `sources.multi_owner` aus). Die externen CI-Quellen erhalten außerdem eine Doctor-Prüfung, eine Karte in Über und eine feste Route unter `/api/v1/`.
+- **Posture-Bericht gegen OWASP und CIS** (`posture report`): was jeder Abschnitt zeigt, was die Risiken bedeuten und der Wochentrend; außerdem weitreichende persönliche Tokens der Organisation, die Originale von Forks (aus) und welche GitHub-App-Berechtigung jede Prüfung freischaltet.
+- Prüfungen der Sicherheitslage, nur lesend und standardmäßig aus: Webhooks, Actions-Einstellungen, Scans, Schutz von Branches und Release-Branches, Deploy-Schlüssel, Alter von Secrets, Apps, Audit-Log der Organisation, Härtung der ausgeführten Läufe und geänderte Releases, jeweils mit OWASP-CI/CD- und CIS-Bezug. Verweigertes erscheint als nicht geprüft. Reife je Repository, Verlauf und `posture` in der Befehlszeile.
+- **Ein Fenster kündigt eine neuere Version an**: mit der Zusammenfassung der Änderungen in Ihrer Sprache, einer Schaltfläche zur Seite Updates, „Später“ und „Diese Version nicht mehr melden“; standardmäßig ein und auf Wand- und Kioskbildschirmen stumm.
+- **Neue Befehle**: zur netzlosen Prüfung eines heruntergeladenen Releases und zur Verwaltung der öffentlichen Schlüssel.
+- Externe CI-Quellen, nur lesend und standardmäßig aus: Buildbot, GitLab CI, Jenkins und Azure Pipelines (die letzten beiden experimentell) für gespiegelte Repositorys. Fehler werden wie die von Actions gezählt, gemeldet und stummgeschaltet; ein nicht antwortender Dienst erscheint eingeschränkt, nie rot. Sichere Abfragen, optionales begrenztes und bereinigtes Logende, Verbindungstest und `external-ci` in der Befehlszeile.
+- **Releases sind signiert und der Updater prüft die Signatur**: ab Version 2.2.0 trägt ein Release eine separate Ed25519-Signatur von SHA256SUMS und jeder Datei, erstellt auf GitHub durch den Release-Workflow. Der Updater (Seite, Fenster, Konsole und Befehlszeile) lehnt ein Release ab 2.2.0 mit fehlender oder falscher Signatur sowie ein unter anderer Version angebotenes signiertes Zip ab, bevor etwas entpackt wird; die Rückkehr zu einer älteren unsignierten Version ist mit Warnung erlaubt.
+- **Zwei Stücklisten und Attestierungen bei jedem Release**: CycloneDX- und SPDX-Dokumente listen jede Datei des Zips und die optionalen Bibliotheken, und der Release-Workflow attestiert die Herkunft der Dateien, die Stückliste und das Protokoll der Qualitätsprüfung.
+- **Die Qualitätsprüfung kann auf GitHub laufen**: ein Workflow führt die gesamte Prüfung auf einem Windows-Runner aus, prüft, dass ein zweiter Build dieselben Bytes ergibt, und hält fest, was gelaufen ist; die Ausführung auf dem eigenen Rechner bleibt möglich und optional.
+- **Ein Schlüsselbund öffentlicher Schlüssel und die Prüfung eines heruntergeladenen Releases**: ein Ort für die Schlüssel, die signieren dürfen (ein privater Wert wird abgelehnt), und die Prüfung eines Ordners mit Release-Dateien ohne Netz. Die Konsolenbefehle dazu folgen separat.
+- **Die Release-Notizen können eine kurze Zusammenfassung in acht Sprachen tragen**, die die Versionsprüfung mit derselben Anfrage liest; sie merkt sich auch eine verworfene Version. Das Fenster, das sie zeigt, folgt separat.
+- **Prüfungen des Repositorys**: Überprüfung der Abhängigkeiten, die ein Pull Request hinzufügt, und CodeQL-Analyse des Codes.
+
+### Geändert
+
+- **Die Gruppen der Einstellungen stehen als Liste links** in ihrem Bereich statt in mehreren Reiterzeilen darüber, so hat der Bereich mehr Platz (ein Fenster unter 701 Pixeln und die Kompaktansicht behalten sie oben).
+- **Auf dem Telefon sind die Zahlen der Kopfzeile eingeklappt**, hinter einem Knopf, hochkant und quer; er öffnet sie und dieser Browser merkt sich die Wahl.
+- **Der einzeln veröffentlichte Updater eines Releases enthält nun das Migrationsregister**, und SHA256SUMS nennt ihn zusammen mit dem Zip und den zwei Stücklisten.
+
+### Behoben
+
+- **Ein durch ein Ruleset geschützter Branch gilt nach einer Aktualisierung nicht mehr als ungeschützt**: Die drei Abfragen des Schutzes senden ihr ETag nur, solange die Antwort noch vorliegt, und was eine ältere Version beurteilt hat, wird vollständig neu gelesen. `security.branch_unprotected` konnte bei einem geschützten Repository für immer stehen bleiben.
+- **Befunde der Sicherheitslage und Warnungen folgen der Sprache der Seite** (`?lang=` und die Sprachauswahl), nicht der der Konfiguration.
+- **Auf dem Telefon ist der Inhalt jedes Reiters wieder sichtbar**: Unter einem hohen Kopf blieb dem offenen Reiter keine Höhe, seine Felder waren durch Scrollen nicht erreichbar.
+- **Die Reiter sind auf einem quer gehaltenen Telefon und in niedrigen Fenstern sichtbar**: ab 701 Pixeln Breite nahm die Kopfzeile die ganze Höhe ein und der offene Reiter bekam keine; jetzt scrollt die Seite bis zu ihm. Bis 800 Pixel Breite bleibt das Menü eine seitlich scrollbare Zeile, statt die Namen Buchstabe für Buchstabe umzubrechen. Wandbildschirme sind unverändert.
+- **Die Kästen der optionalen Teile behalten ihre volle Höhe** auf Rechnern und Wandanzeigen, statt auf wenige Zeilen gedrückt zu werden, ihre Tabellen trennen keine Wörter, Schaltflächen der kompakten Ansicht sind mindestens 44 px breit, und die großen Diagramme schreiben keinen Fehler mehr in die Browserkonsole. Ein Workflow misst jeden Kasten in acht Sprachen auf Telefon, Rechner und Wandanzeigen.
+- **Keine falschen Warnungen "unbekannte Einstellung" mehr beim Aktualisieren**: Der Updater meldet Einstellungen nicht mehr als unbekannt, die in der Beispielkonfiguration der Zielversion stehen, aber nicht auf der Einstellungsseite beschrieben sind.
+- Die je Workflow gespeicherten Schrittnamen haben eine Obergrenze.
+- Die Windows-Starter nehmen `python`, wenn der Starter `py` nicht installiert ist.
+- **Haltungsprüfungen mit falscher Antwort**: Abhängigkeitswarnungen konnten bei bedingten Abfragen falsch gelesen werden; ein nicht lesbarer Schutz galt als fehlend; die vom Konto geteilte Sicherheitsrichtlinie wurde nicht gesehen; abgeschaltete oder gefilterte Prüfungen zählten als "ohne Befund" und als bestanden; eine abgewiesene Organisation stoppte das Lesen aller Repositories; lange Listen wurden nur teilweise gelesen; eine später erschienene Prüfsumme galt als ersetzte Datei.
+- **Compliance-Bericht**: ein TLS-Zertifikat wurde nie gesehen; eine ältere veröffentlichte Version wurde als neuer gemeldet; ein geleertes oder unlesbares Aktionsprotokoll, ein unlesbarer Sicherungsordner und ein unbekannter Speicher galten als geprüft; ein Export ohne Ziel sagt es jetzt.
+- **Protokolle externer CI**: Azure Pipelines lieferte den Abschlussschritt statt des fehlgeschlagenen, Buildbot behielt seine Kanalbuchstaben, GitLab konnte einen Job wählen, der fehlschlagen darf, ein abgewiesenes Azure-Token wurde als unlesbare Antwort gemeldet und ein sehr langes Protokoll konnte vor seinem Ende abgeschnitten werden. Abbrechende GitLab-Pipelines zählen als laufend.
+
+### Sicherheit
+
+- **Ein Token in der Adresse wird nur dann zum Sitzungs-Cookie, wenn es selbst richtig ist** (`listen.query_access`): Eine schon durch Cookie oder Header zugelassene Anfrage konnte anderen Text in die Antwort bringen. Dateien von Geheimnissen, Berichten und Workflows müssen auch nach Auflösung der Verknüpfungen in ihrem Ordner bleiben, ausgehendes HTTPS verlangt TLS 1.2 oder neuer, und ein zu langer Schlüsselbund-Befehl wird abgelehnt.
+- **Plugins anderer Personen halten die Einschränkungen ein**: Solange der strikte Nur-Lese-Modus oder die Netzwerkrichtlinie gelten, läuft eines nur, wenn sein Prozess kein Netz hat.
+- **Token externer CI-Quellen und des Protokollexports**: Sie können kein Geheimnis des Systems oder des Monitors nennen und werden nie ohne TLS an eine öffentliche Adresse gesendet.
+- Ein unsignierter Download, der unter einer älteren Nummer angeboten wird, wird abgelehnt, wenn er eine Version enthält, die signiert sein muss.
+- Eine beschädigte Zustandsdatei des Protokollexports hält seine Prüfungen nicht mehr an, und die einzige automatische Wiederholung wird nicht gesendet, wenn sie nicht notiert werden kann.
+- Die Anleitungen nennen zwei bekannte Grenzen (Ordner, die ein Viewer am Rechner sieht; Wiederholung von Ereignissen ohne Zeit) und die richtige Vorgabe von `webhook.reject_stale`.
+- Der Textfilter für die KIs entfernt jetzt lange interne Hostnamen auf `.local` vollständig und auch Teile eines privaten Schlüssels ohne Kopfzeile (eine abgeschnittene Zeile oder ein Protokoll, das mitten im Schlüssel beginnt).
+- Unterstützt wird nur die neueste veröffentlichte Version (Sicherheitsrichtlinie).
+- **Einschränkungen greifen in mehr Fällen**: `sops` und `bws` starten unter einer Netzrichtlinie nicht, das Wort `version` irgendwo im Befehl lässt ihn nicht mehr durch, eine unlesbare Konfigurationsdatei schränkt ein, und `security.*` der Datei der Lite-Ausgabe gilt für sie.
+- **Ein Deployment wird eine Umgebung nach der anderen genehmigt**, in der Bestätigung genannt, statt aller genehmigbaren auf einmal.
+
+### Plugins
+
+- **Plugins, standardmäßig aus** (Complete): offizielle für unbeantwortete Diskussionen und Paketaufbewahrung; Fremd-Plugins nur als mit Ihrem Schlüsselbund signierte Pakete, in eigenem Prozess ohne Token, mit dem Hinweis „ohne Netzisolierung“, wo das Netz nicht abgetrennt werden kann. Ausgaben werden bereinigt, fehlschlagende Plugins pausiert; dazu Katalog in den Einstellungen, Befehl `plugin`, Doctor-Prüfung, Autorenvorlage und versionierter Vertrag (`api_compat` 1).
+- **Das GitHub-Token kann aus Vault, SOPS, Bitwarden Secrets Manager oder den Secret-Managern von AWS, Azure oder Google gelesen werden** (nur lesend, `secrets.backend`).
+- **Der externe Skill lässt sich für ein Skill-Verzeichnis paketieren** (`tools/prepare_skill_bundle.py`, veröffentlicht nichts).
+
 ## [2.1.8]
 
 Version 2.1.8 bringt keine neue Funktion: Sie korrigiert, was eine Überprüfung von 2.1.7 gefunden hat. Der CI-Wächter ist nicht mehr grün, wenn die Liste der Läufe einen Workflow verbergen kann; das Freigeben oder Ablehnen eines KI-Vorschlags funktioniert; ein gesperrtes Gerät verliert seine offenen Datenströme; Verbindungen haben ein Zeit- und ein Anzahllimit; der Proxy-Tunnel funktioniert; das Zurückgehen läuft nicht mehr über eine laufende Aktualisierung hinweg; das Container-Image wird nur noch von einem Tag veröffentlicht; und die Bildschirme, der Kiosk, die Befehlszeile und die Dokumentation sagen, was das Programm tut.

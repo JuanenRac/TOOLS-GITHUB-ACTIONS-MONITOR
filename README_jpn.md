@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-5936_passing-brightgreen.svg" alt="5936 tests">
+  <img src="https://img.shields.io/badge/Tests-6266_passing-brightgreen.svg" alt="6266 tests">
 </p>
 
 > 所有するすべてのリポジトリのワークフローを監視し、赤いもの・止まっているもの・対応待ちのものを、ローカルの1ページで教えます。
@@ -65,6 +65,8 @@
 - **バッチツール**：多数のビルドをまとめて計画・実行します。`--go` なしでは何も実行されません。
 - **ページ内のバージョン情報とヘルプ**: **i** ボタンでバージョン、エディション、リンク、ファイル、動作状況、サポート用情報をコピーするボタンを表示し、**?** ボタン（またはキー `?`）でドキュメント全体を検索付き・お使いの言語でインターネットなしに開きます。コンソールには `--about` と `--help-topics`、タブ付きの対話型ターミナルアプリ（任意の `textual`）があります。
 - **新バージョンのお知らせ**: 新しいリリースが公開されると控えめなバッジを表示します。公開リリースページを1日1回読むだけで、何もインストールせず、オフにでき（隔離環境では常にオフ）ます。
+- **署名付きリリースと、大きな構成向けの任意機能**: リリースには分離署名が付き、アップデーターが確認します。新しいバージョンの内容はウィンドウで知らせます。プラグイン、シークレット保管先、外部 CI ソース（読み取り専用）、状態点検、共同作業とフリートの表示、厳格な読み取り専用モード、ネットワークポリシー、コンプライアンスレポートは、オンにするまで無効です。
+- **ダウンロードとトラフィックを自分で保存（既定はオフ）**: 1 日 1 回、リリースファイルのダウンロード数と、push 権限があれば選んだリポジトリの訪問とクローンを、お使いのコンピューターに保存します。グラフと CSV があります（`monitor/docs/TRAFFIC_jpn.md`）。「このプログラムについて」には、モニターを使っていることを公開で伝える任意のリンクもあります。GitHub に自分で書いた内容以外は何も送信しません。
 - **あらゆるアカウント向けのクォータ**: プラン、課金対象の分数（公開リポジトリは無料）、GitHub のヘッダーから読む API クォータ、並行実行、6時間の上限に近いジョブ。数値は編集可能なファイルにあります。
 
 ## 節約できること
@@ -85,7 +87,7 @@
 
 | | |
 |---|---|
-| **バージョン** | **2.1.8** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **バージョン** | **2.2.0** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **必要なもの** | Python 3.11 以上と GitHub CLI（`gh auth login`）。それ以外は不要(ターミナル表示は任意のパッケージ `rich` を使います) |
 | **開く先** | `127.0.0.1` 上のページのみ、8言語対応 |
 | **GitHub への書き込み** | 自動では行いません。明示的な `--go` を付けて実行したバッチコマンドのみ |
@@ -93,13 +95,13 @@
 
 <!-- glance:begin -->
 
-**現時点の実測** (v2.1.8)
+**現時点の実測** (v2.2.0)
 
 | | |
 |---|---|
 | **成熟度** | functional |
-| **テスト** | テストメソッド 5936 件(`python -m unittest discover -s monitor/tests`) |
-| **設定** | 設定 914 件、すべてヘルプ付き |
+| **テスト** | テストメソッド 6266 件(`python -m unittest discover -s monitor/tests`) |
+| **設定** | 設定 1035 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows、Python 3.11, 3.13 |
 
@@ -172,10 +174,21 @@
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="現在" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_menu_groups_light.png"><img src="docs/screenshots/web_menu_groups_dark.png" alt="グループ分けされたメニュー：監視、センチネル、チーム、レポートと学習" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_palette_light.png"><img src="docs/screenshots/web_palette_dark.png" alt="Ctrl+K のパレット：任意のタブ、リポジトリ、操作を探す検索ボックス" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_update_notice_light.png"><img src="docs/screenshots/web_update_notice_dark.png" alt="新しいバージョンを知らせるウィンドウ" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_ci_light.png"><img src="docs/screenshots/web_sentinel_ci_dark.png" alt="センチネル：CI" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_external_ci_light.png"><img src="docs/screenshots/web_external_ci_dark.png" alt="外部 CI ソース: それぞれの状態と、読み取れなかった理由" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_collab_light.png"><img src="docs/screenshots/web_sentinel_collab_dark.png" alt="センチネル：コラボレーション" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_delivery_light.png"><img src="docs/screenshots/web_sentinel_delivery_dark.png" alt="配信センチネル: ビルド済みでまだ配信されていないもの" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_supply_light.png"><img src="docs/screenshots/web_sentinel_supply_dark.png" alt="サプライチェーンセンチネル: 固定されていないアクションと広い権限" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_security_light.png"><img src="docs/screenshots/web_sentinel_security_dark.png" alt="検出結果のあるセキュリティ監視" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_posture_light.png"><img src="docs/screenshots/web_posture_dark.png" alt="OWASP と CIS に照らしたリポジトリと組織の状態レポート" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_compliance_light.png"><img src="docs/screenshots/web_compliance_dark.png" alt="このインストールのコンプライアンスレポート: 各行は確認済みか申告値" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_collaboration_light.png"><img src="docs/screenshots/web_collaboration_dark.png" alt="コラボレーションのビュー：人を待っているものと可能な対応" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_roles_groups_light.png"><img src="docs/screenshots/web_roles_groups_dark.png" alt="ワークフローの役割別・グループ別のフリート" width="92%"></picture></p>
+<p align="center"><img src="docs/screenshots/web_screen_group.png" alt="1 つのグループの大画面" width="92%"></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_proposals_light.png"><img src="docs/screenshots/web_proposals_dark.png" alt="人が判断する AI の提案" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_assistant_chat_light.png"><img src="docs/screenshots/web_assistant_chat_dark.png" alt="読み取り専用ツールを使う AI チャットと参照元" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_extensions_light.png"><img src="docs/screenshots/web_extensions_dark.png" alt="拡張機能：何が動き、どの権限を持ち、何が分離されているか" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_trend_light.png"><img src="docs/screenshots/web_sentinel_trend_dark.png" alt="日次の推移: 数値ごとに1本の線" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_fleet_light.png"><img src="docs/screenshots/web_fleet_dark.png" alt="フリート：すべてのリポジトリを一目で" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_reports_light.png"><img src="docs/screenshots/web_reports_dark.png" alt="レポート" width="92%"></picture></p>
@@ -352,6 +365,15 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ACCOUNTS_jpn.md`](monitor/docs/ACCOUNTS_jpn.md): 複数アカウント（1 つにつき 1 プロセス）
 - [`monitor/docs/QUOTAS_jpn.md`](monitor/docs/QUOTAS_jpn.md): GitHub のクォータとプラン
 - [`monitor/docs/MODES_jpn.md`](monitor/docs/MODES_jpn.md): 動作モード: 通常・高速・ターボ
+- [`monitor/docs/EXTERNAL_CI_jpn.md`](monitor/docs/EXTERNAL_CI_jpn.md): 外部CIソース(読み取り専用): Buildbot、GitLab CI、Jenkins、Azure Pipelines
+- [`monitor/docs/PLUGINS_jpn.md`](monitor/docs/PLUGINS_jpn.md): プラグイン（既定でオフ）、パッケージ、分離、シークレット保管庫からのトークン読み取り
+- [`monitor/docs/POSTURE_jpn.md`](monitor/docs/POSTURE_jpn.md): リポジトリと組織のセキュリティ体制(読み取り専用)
+- [`monitor/docs/COMPLIANCE_jpn.md`](monitor/docs/COMPLIANCE_jpn.md): コンプライアンス: 厳格な読み取り専用、ネットワークポリシー、レポート、保持と訴訟ホールド、署名とエクスポートされる操作ログ
+- [`monitor/docs/TRAFFIC_jpn.md`](monitor/docs/TRAFFIC_jpn.md): ダウンロードとトラフィック
+- [`monitor/docs/ECOSYSTEM_TOOLS_jpn.md`](monitor/docs/ECOSYSTEM_TOOLS_jpn.md): モニター周辺のツールとサポート水準
+- [`monitor/docs/EDITIONS_jpn.md`](monitor/docs/EDITIONS_jpn.md): 完全版と Lite: 各エディションの内容
+- [`monitor/docs/COLLABORATION_jpn.md`](monitor/docs/COLLABORATION_jpn.md): 共同作業の表示と任意の GitHub 操作
+- [`monitor/docs/FLEET_APIS_jpn.md`](monitor/docs/FLEET_APIS_jpn.md): 役割とグループ別のフリート、CCTray とセキュリティ API、レポートのダイジェスト、デモサイト
 - [`monitor/docs/AI_CONNECTION_jpn.md`](monitor/docs/AI_CONNECTION_jpn.md): AI ツールを接続する:モニターが伝えるすべてをシグナルとして、ブリーフ、エンドポイント、MCP ツール、フックで提供
 - [`monitor/docs/AI_SETUP_PROMPT_jpn.md`](monitor/docs/AI_SETUP_PROMPT_jpn.md): AI でモニターをセットアップする:AI アシスタントに貼り付けると、インストールし、希望を尋ね、設定を書き込むプロンプト
 - [`monitor/docs/QUOTA_jpn.md`](monitor/docs/QUOTA_jpn.md): クォータを増やし、消費を減らす:節約モード、中央パネル、GitHub App、クォータの共有方法

@@ -72,6 +72,7 @@ La pulizia di conservazione parte da sola ogni `retention.interval_hours`. Per e
 | `backup_age` | l'ultimo backup valido rispetto a `ops.doctor.backup_max_age_days` |
 | `disk` | spazio libero del volume dei dati rispetto a `ops.doctor.min_free_mb` |
 | `metrics` | `/metrics` risponde quando l'uscita Prometheus è accesa e un monitor è in esecuzione |
+| `plugins` | con `plugins.enabled`: plugin installati che non superano più il controllo (chiave revocata, file cambiato) e quelli sospesi |
 
 **Codici di uscita (stabili, per cron):** `0` tutto bene (anche con avvisi, senza `--strict`); `1` almeno un controllo è fallito; `3` solo avvisi e `--strict` (o `ops.doctor.strict_exit`); `4` il doctor stesso non è riuscito a partire. Sono i codici del doctor; gli altri comandi di `monitor_cli.py` mantengono i loro. Esempio: `0 * * * * python3 bin/monitor_cli.py doctor --strict --json > /var/lib/github-actions-monitor/doctor.json || true` e avvisa per qualunque codice diverso da 0.
 

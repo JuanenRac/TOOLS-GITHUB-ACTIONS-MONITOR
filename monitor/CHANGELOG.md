@@ -11,6 +11,74 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+## [2.2.0]
+
+### Added
+
+- **A history of downloads and traffic**, kept on this computer (`traffic.enabled`, off; Complete): once a day the download counts of the release files and, when the token may, the visits and clones of the repositories you choose, with a panel in Repositories, CSV export and the command `traffic`. GET requests only. `TRAFFIC.md`.
+- **Say that you use it**: About has a link that opens a form on GitHub, only when you click it; what you write there is public. Nothing is sent by the monitor and nothing is filled in.
+- **Keep a schedule alive before GitHub switches it off**: with `teamwork.keep_alive_days` (off) the scheduled workflows of a quiet public repository are proposed to be enabled again, with the days left. The static demo and the workflow check in the browser are now opened in a real browser by CI.
+- **Strict read-only mode and network policy** (`security.read_only_strict`, `security.egress_policy`, both off): enforced below every part of the monitor; a refused command or connection fails naming the setting, and the doctor lists destinations outside the policy.
+- **Compliance report** (`compliance report`, `/api/compliance/report`, a box in the Security tab): each line checked or only declared.
+- **Retention of every category and legal hold**, **signed checkpoints and purge of the log of actions** (`audit verify|checkpoint|purge`), and **export of that log** to a file, syslog over TLS or HTTP; all off by default.
+- New guides: compliance, the tools around the monitor, and what each edition has. A workflow runs the cross-cutting checks by area, a database of more than 1 GB and the service on a real systemd. `COMPLIANCE.md`, `ECOSYSTEM_TOOLS.md`, `EDITIONS.md`.
+- **Fleet by role and group**: a column per role of workflow, the worst state of each group with its own screen `/g/<key>`, repositories and groups switched off without restarting; CCTray feed and secret and code scanning APIs (off), `report_digest` on reports and briefs, and a static demo site with a workflow check in the browser (built by CI, never published by itself). The roadmap panel now says when the clone of the profile repository is behind. (FLEET_APIS)
+- **Collaboration views and optional actions** (all off by default): waiting for a person apart from waiting for a runner, last run of each lane with red runs set aside for a while, dependency pull requests, pull requests behind their base, vulnerable and unread repositories, dismissed security alerts, proposals (clean-up, cancel policy, stuck runs, inactive workflows), manual workflows with a typed form, fork approval facts and runner hooks. New actions on GitHub are planned and confirmed one by one; the only automatic one is a single re-run after an infrastructure failure.
+- **Proposals of the AI are decided by people**: they are marked as AI, carry a fingerprint, survive a restart, need two persons when there are two or more users, or the typed code when there is one, and are shown in the Alerts tab with `ai.assistant.can_propose` for those born in the chat.
+- **Free chat with read-only tools** (`ai.chat.enabled`, off), **similar alerts by a local embedding model** (`ai.rag.enabled`, off), **report of a repository and triage draft to copy**, and **the briefs as MCP resources**.
+- A link with a port and an `@` in its path is no longer cleaned as if it were a user and a password.
+- **A repository is (source, owner, name)**: two repositories with one name from two places no longer share ids, runs or alerts, and saved data follows the owner watched (copy first, `identity` command, `sources.multi_owner` off). The external CI sources also get a doctor check, a card in About and a frozen route under `/api/v1/`.
+- **Posture report against OWASP and CIS** (`posture report`): what each standard section shows, what the risks mean and the trend of a week; also broad personal access tokens of the organization, the originals of forks (off) and which GitHub App permission unlocks each check.
+- Posture checks of repositories and organization, read only and off by default: webhooks, Actions settings, scanning, branch and release-branch protection, deploy keys, secret age, apps, organization audit log, hardening of what ran and changed releases, each with its OWASP CI/CD and CIS reference. What GitHub refuses is shown as not checked. Maturity per repository, history, `posture` on the command line.
+- **A window announces a newer version**: with the summary of its changes in your language, a button to the Updates page, "Later" and "Do not announce this version"; it is on by default and silent on wall and kiosk screens.
+- **New commands**: to check a downloaded release without network and to manage the public keys.
+- External CI sources, read only and off by default: Buildbot, GitLab CI, Jenkins and Azure Pipelines (the last two experimental) for mirrored repositories. Their failures are counted, notified and silenced like those of Actions; a service that does not answer is shown as degraded, never red. Safe reads, optional bounded and redacted log tails, Test connection, `external-ci` on the command line.
+- **Releases are signed and the updater checks the signature**: from version 2.2.0 a release carries a detached Ed25519 signature of SHA256SUMS and of every file, made on GitHub by the release workflow. The updater (page, window, console and command line) refuses a release from 2.2.0 on whose signature is missing or wrong, and a signed zip offered under another version, before anything is unpacked; going back to an older unsigned version is allowed with a warning.
+- **Two bills of materials and attestations with every release**: CycloneDX and SPDX documents list every file of the zip and the optional libraries, and the release workflow attests the provenance of the files, the bill of materials and the record of the quality gate.
+- **The quality gate can run on GitHub**: a workflow runs the whole gate on a Windows runner, checks that a second build gives the same bytes and keeps a record of what ran; running it on your own computer stays possible and optional.
+- **A keyring of public keys and the check of a downloaded release**: one place for the keys that may sign (a private value is refused) and the verification of a folder of release files without any network. Their commands in the console arrive separately.
+- **The notes of a release can carry a short summary in the eight languages**, read by the update check with the same request; it also remembers a dismissed version. The window that shows it arrives separately.
+- **Checks of the repository**: a review of the dependencies a pull request adds and CodeQL analysis of the code.
+
+### Changed
+
+- **The groups of Settings are a list on the left** of their panel instead of several rows of tabs above it, so the panel has more room (a window narrower than 701 pixels and the compact view keep them above).
+- **On a phone the figures of the header are folded** behind one button, upright and sideways; it opens them and this browser remembers the choice.
+- **The stand-alone updater published with a release now carries the registry of migrations inside**, and SHA256SUMS names it together with the zip and the two bills of materials.
+
+### Fixed
+
+- **A branch protected by a ruleset is no longer called unprotected after an update**: the three reads of the protection only send their ETag while the answer is still held, and what an older version judged is read again in full. `security.branch_unprotected` could stay for ever on a protected repository.
+- **Posture findings and alerts follow the language of the page** (`?lang=` and the language selector), not the one of the configuration.
+- **On a phone the content of every tab can be seen again**: under a tall header the open tab was left with no height, so its panels could not be reached by scrolling.
+- **The tabs can be seen on a phone held sideways and in short windows**: from 701 pixels of width the header took the whole height and the open tab was left with none; now the page scrolls to it. Up to 800 pixels of width the menu stays one row that scrolls sideways instead of breaking its names letter by letter. Wall screens are not changed.
+- **The boxes of the optional parts keep their full height** on computers and wall displays instead of being squeezed to a few lines, their tables keep whole words, buttons of the compact view are at least 44 px wide, and the large charts no longer write an error to the browser console. A workflow measures every box in eight languages, on a phone, a computer and wall displays.
+- **No more false "unknown setting" warnings when updating**: the updater no longer reports as unknown the settings that the example configuration of the target version carries but the settings page does not describe.
+- The names of the steps kept per workflow have a ceiling.
+- The Windows launchers fall back to `python` where the `py` launcher is not installed.
+- **Posture checks that gave a wrong answer**: dependency alerts could be misread while conditional reads were on; a protection that may not be read was reported as no protection; a security policy shared by the account was not seen; switched-off or filtered checks counted as "no findings" and as passed; a refused organization stopped the reading of every repository; long lists were read only in part; a file digest that appeared later counted as a replaced file.
+- **Compliance report**: a TLS certificate was never seen; an older published version was announced as newer; an emptied or unreadable log of actions, an unreadable backup folder and an unknown storage were marked as checked; an export without destination now says so.
+- **External CI logs**: Azure Pipelines gave the closing step instead of the failed one, Buildbot kept its channel letters, GitLab could pick a job that is allowed to fail, a refused Azure token was reported as an unreadable answer and a very long log could be cut away from its end. Cancelling GitLab pipelines count as running.
+
+### Security
+
+- **A token in the address only becomes the session cookie when it is right by itself** (`listen.query_access`): a request already let in by its cookie or header could put other text into the answer. Files of secrets, reports and workflows must stay in their folder with links resolved, outgoing HTTPS needs TLS 1.2 or later, and a too long Keychain command is refused.
+- **Plugins of other people obey the restrictions**: while strict read-only mode or the network policy is in force, one is run only when its process has no network.
+- **Tokens of external CI sources and of the export of the log**: they cannot name a secret of the system or of the monitor, and are never sent without TLS to a public address.
+- An unsigned download offered under an older number is refused when it holds a version that must be signed.
+- A damaged state file of the export of the log no longer stops its checks, and the single automatic re-run is not sent when it cannot be written down.
+- The guides state two known limits (folders seen by a viewer at the computer; replay of events that carry no time) and the right default of `webhook.reject_stale`.
+- The cleaner of text for the AIs now removes the whole of a long internal host name that ends in `.local`, and the pieces of a private key that lost its header (a line cut short, or a log that begins in the middle of the key).
+- Only the latest published version is supported (security policy).
+- **Restrictions hold in more cases**: `sops` and `bws` do not start under a network policy, the word `version` anywhere in a command no longer lets it through, an unreadable configuration file restricts, and `security.*` of the lite edition's file applies to it.
+- **A deployment is approved one environment at a time**, named in the confirmation, instead of every environment the person may approve at once.
+
+### Plugins
+
+- **Plugins, off by default** (Complete): official ones for unanswered discussions and package retention; plugins of other people only as packages signed by a key of your keyring, in a separate process without the token, with the label "no network isolation" where the network cannot be cut off. Untrusted output is cleaned, a failing plugin is paused, and there are a catalogue in Settings, the command `plugin`, a doctor check, a template for authors and a versioned contract (`api_compat` 1).
+- **The GitHub token can be read from Vault, SOPS, Bitwarden Secrets Manager or the secret manager of AWS, Azure or Google** (read only, `secrets.backend`).
+- **The external skill can be packaged for a skill registry** (`tools/prepare_skill_bundle.py`, publishes nothing).
+
 ## [2.1.8]
 
 Version 2.1.8 adds no new function: it corrects what a review of 2.1.7 found. The CI sentinel is no longer green when the list of runs may hide a workflow; approving or rejecting a proposal of the AI works; a revoked device loses the streams it had open; connections have a time and a number limit; the proxy tunnel works; going back no longer runs over an update in progress; the container image is only published from a tag; and the screens, the kiosk, the command line and the documentation say what the program does.

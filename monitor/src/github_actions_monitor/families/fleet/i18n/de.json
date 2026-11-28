@@ -1,0 +1,22 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "ui.cfg_g_fleetapi": "Flotte und APIs",
+ "ui.cfg_b_fleet_apis": "Flottenansichten und Lese-APIs",
+ "cfg.f.fleet.disabled": "Abgeschaltete Repositorys und Gruppen",
+ "cfg.h.fleet.disabled": "Je Zeile ein Name oder Muster, oder group:<Schlüssel>. Gilt ab dem nächsten Zyklus ohne Neustart.",
+ "cfg.f.fleet.roles": "Spalten nach Workflow-Rolle",
+ "cfg.h.fleet.roles": "Rolle=Muster|Muster je Zeile, gegen Name und Datei; die erste passende Zeile gilt.",
+ "cfg.f.fleet.cctray": "CCTray-Feed (nur lesen)",
+ "cfg.h.fleet.cctray": "Liefert /api/cctray.xml und /api/cctray.json für CCMenu und Ähnliches, hinter denselben Zugriffsprüfungen. Ab Werk aus.",
+ "cfg.f.fleet.security_api": "API für Secret- und Code-Scanning-Warnungen",
+ "cfg.h.fleet.security_api": "Liefert Zählungen je Repository, nie ein Secret, aus dem, was der Sicherheitswächter gelesen hat. Ab Werk aus.",
+ "ui.fleet.title": "Rollen und Gruppen",
+ "ui.fleet.group_counts": "{red} von {repos} rot",
+ "ui.fleet.by_role": "Nach Workflow-Rolle",
+ "ui.fleet.col_repo": "Repository",
+ "ui.fleet.state_red": "rot",
+ "ui.fleet.state_running": "läuft",
+ "ui.fleet.state_ok": "ok",
+ "ui.fleet.state_unknown": "unbekannt"
+}

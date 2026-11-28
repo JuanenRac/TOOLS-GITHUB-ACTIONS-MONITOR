@@ -6,6 +6,10 @@ Please report security problems privately to `electrohobby3d@gmail.com` (or with
 Useful reports are: a way to reach the local web page from another machine, a way to make the monitor write outside its own folder, a way to read a token
 or a private file through the page or the metrics endpoint, or an injection through a repository name, a workflow name or a log line.
 
+## Supported versions
+
+Only the latest published version is supported. Security fixes are made in a new version; older versions and branches receive no fixes. Please update before reporting a problem, and check whether it is still there.
+
 ## Design points you can rely on
 - The web page and the optional metrics endpoint listen on `127.0.0.1` only, and refuse requests whose `Host` or `Origin` is not local. The optional network mode (off by default) adds an access token for every request, a list of accepted host names and a persistent warning.
 - By default the monitor does not store or show tokens; it calls your own authenticated `gh` client. The optional token kept by the monitor lives in the secure store of the system and is never written to a setting, a log or an answer.

@@ -186,6 +186,16 @@ docker compose pull && docker compose up -d
 gh attestation verify oci://ghcr.io/juanenrac/tools-github-actions-monitor:2.1.0 --owner JuanenRac
 ```
 
+A partir da 2.2.0 a imagem é também assinada com Cosign sem chave (identidade do workflow de publicação):
+
+```sh
+cosign verify ghcr.io/juanenrac/tools-github-actions-monitor:2.2.0 \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --certificate-identity-regexp '^https://github\.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/\.github/workflows/release-image\.yml@refs/tags/v'
+```
+
+**O que se testa e onde**: o contentor (utilizador que não é root, sistema de ficheiros só de leitura, volumes, segredos, webhook atrás de um proxy) no workflow Docker audit; a unidade do serviço num systemd real e uma base de dados com mais de 1 GB no workflow Cross-cutting, que também repõe uma cópia de segurança e executa um ciclo de uma conta com um substituto do GitHub. Os sistemas de ficheiros de rede (NFS) e outras arquiteturas de hardware não são testados.
+
 ## Atrás de um proxy inverso
 
 Por defeito, o monitor só escuta em `127.0.0.1`. Se precisar de lhe chegar a partir de outra máquina, ponha à frente um proxy inverso com TLS, ative o modo de rede (`listen.network`: então todos os pedidos têm de levar o token de acesso) e DECLARE o proxy (`listen.proxy_public_host` com o seu nome público, `listen.secure_cookie` ou `listen.trusted_proxy`). O monitor recusa qualquer pedido cujo `Host` não seja o seu próprio endereço nem esse nome público; por isso o proxy tem de o enviar e tem de acrescentar o endereço real do cliente:
@@ -239,7 +249,7 @@ Os mesmos scripts correm numa máquina Linux com Docker (`tools/docker_audit/run
 Tudo nesta secção está desligado ou é inofensivo por defeito.
 
 - **Aplicação instalável** (`pwa.enabled`): a página oferece um manifesto, dois ícones e um pequeno service worker, para que um navegador possa instalar o monitor como aplicação. Os ficheiros são `/manifest.webmanifest`, `/sw.js`, `/pwa/offline`, `/pwa/icon-192.png` e `/pwa/icon-512.png`; no modo de rede são servidos atrás do token de acesso como qualquer página. O worker guarda apenas a página offline e os ícones: nunca a página, nunca uma resposta da API. Quando a aplicação volta ao primeiro plano, ou a rede regressa, a página pede logo dados novos (`pwa.refresh_on_return`).
-- **Vista compacta** (`ui.compact`): `auto` usa-a numa janela estreita, `on` sempre, `off` nunca; `?compact=1` ou `?compact=0` altera-a numa janela. O menu passa para cima como uma fila de separadores, as tabelas deslizam para o lado, um ecrã tátil recebe alvos de pelo menos 44 pixéis e as caixas de diálogo seguem a altura que o teclado no ecrã deixa.
+- **Vista compacta** (`ui.compact`): `auto` usa-a numa janela estreita, `on` sempre, `off` nunca; `?compact=1` ou `?compact=0` altera-a numa janela. O menu passa para cima como uma fila de separadores, as tabelas deslizam para o lado, um ecrã tátil recebe alvos de pelo menos 44 pixéis e as caixas de diálogo seguem a altura que o teclado no ecrã deixa. Num telemóvel, na vertical ou na horizontal, os números do cabeçalho ficam recolhidos atrás de um botão que os abre e este navegador lembra a escolha. Numa janela baixa a página desliza até ao separador aberto em vez de o deixar sem altura, e a partir de 701 píxeis de largura os grupos de definições são uma lista à esquerda do respetivo painel.
 - **Emparelhamento com um código QR** (`pairing.enabled`, só no modo de rede): abra a paleta (Ctrl+K) e escolha "Emparelhar um telemóvel", depois "Novo código QR". O código funciona uma vez e durante `pairing.code_minutes` minutos; um código novo anula o anterior. O telemóvel lê-o, carrega no botão da página que se abre e recebe um token próprio (um cookie), nunca o token de acesso. A mesma janela lista os dispositivos emparelhados e retira um: o seu token deixa de funcionar de imediato. No máximo `pairing.max_devices` dispositivos; um dispositivo tem de ser emparelhado de novo passados `pairing.device_days` dias (0 = nunca). O monitor guarda apenas o hash de cada token em `devices.json` da pasta de dados, um código errado conta contra o endereço como um token de acesso errado, e cada emparelhamento e cada revogação deixam uma linha no registo de ações.
 
 | Rota | O que faz |

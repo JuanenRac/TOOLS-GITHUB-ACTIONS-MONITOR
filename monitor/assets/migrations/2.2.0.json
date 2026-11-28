@@ -1,0 +1,935 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.2.0",
+ "previous": "2.1.8",
+ "digest": "96ecdd2dd2812491bee33cc4a5112262dae3af0b9127c6778aa7257a562027c7",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "ai.assistant.can_propose",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ai.chat.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ai.rag.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ai.rag.max_mb",
+    "kind": "int",
+    "bounds": [
+     10,
+     100000
+    ],
+    "default": 200
+   },
+   {
+    "key": "ai.rag.model",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9._:/-]{0,100}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "ai.rag.url",
+    "kind": "text",
+    "bounds": {
+     "re": "^http://(127\\.0\\.0\\.1|localhost|\\[::1\\]):\\d{2,5}\\Z"
+    },
+    "default": "http://127.0.0.1:11434"
+   },
+   {
+    "key": "audit_checkpoints.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "audit_export.allow_private_targets",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "audit_export.batch",
+    "kind": "int",
+    "bounds": [
+     1,
+     1000
+    ],
+    "default": 100
+   },
+   {
+    "key": "audit_export.ca_file",
+    "kind": "text",
+    "bounds": {
+     "re": "^[^\\x00-\\x1f]{0,400}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "audit_export.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "audit_export.host",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9.:-]{0,200}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "audit_export.max_mb",
+    "kind": "int",
+    "bounds": [
+     1,
+     1000
+    ],
+    "default": 50
+   },
+   {
+    "key": "audit_export.path",
+    "kind": "text",
+    "bounds": {
+     "re": "^[^\\x00-\\x1f]{0,400}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "audit_export.port",
+    "kind": "int",
+    "bounds": [
+     1,
+     65535
+    ],
+    "default": 6514
+   },
+   {
+    "key": "audit_export.spool_mb",
+    "kind": "int",
+    "bounds": [
+     1,
+     10000
+    ],
+    "default": 50
+   },
+   {
+    "key": "audit_export.target",
+    "kind": "enum",
+    "bounds": [
+     "file",
+     "syslog",
+     "http"
+    ],
+    "default": "file"
+   },
+   {
+    "key": "audit_export.tls",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "audit_export.token_env",
+    "kind": "text",
+    "bounds": {
+     "re": "^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|PATHEXT|COMSPEC|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|SSH_AUTH_SOCK|MONITOR_SUPERVISOR_KEY|MONITOR_ACCESS_TOKEN|MONITOR_WEBHOOK_SECRET|MONITOR_SLACK_SIGNING_SECRET|MONITOR_DISCORD_PUBLIC_KEY|MONITOR_HEARTBEAT_URL)\\Z)(?:[A-Z_][A-Z0-9_]{0,63})?\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "audit_export.url",
+    "kind": "text",
+    "bounds": {
+     "re": "^(https?://[^\\s@]{1,400})?\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "external_ci.alert.enabled",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "external_ci.alert.level",
+    "kind": "enum",
+    "bounds": [
+     "error",
+     "warning"
+    ],
+    "default": "error"
+   },
+   {
+    "key": "external_ci.allow_private_targets",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "external_ci.azure.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "external_ci.breaker.failures",
+    "kind": "int",
+    "bounds": [
+     1,
+     20
+    ],
+    "default": 3
+   },
+   {
+    "key": "external_ci.buildbot.max_builders",
+    "kind": "int",
+    "bounds": [
+     1,
+     500
+    ],
+    "default": 50
+   },
+   {
+    "key": "external_ci.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "external_ci.experimental",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "external_ci.gitlab.max_pipelines",
+    "kind": "int",
+    "bounds": [
+     1,
+     200
+    ],
+    "default": 30
+   },
+   {
+    "key": "external_ci.jenkins.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "external_ci.logs.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "external_ci.logs.keep_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     720
+    ],
+    "default": 72
+   },
+   {
+    "key": "external_ci.logs.max_kb",
+    "kind": "int",
+    "bounds": [
+     4,
+     1024
+    ],
+    "default": 64
+   },
+   {
+    "key": "external_ci.logs.tail_lines",
+    "kind": "int",
+    "bounds": [
+     10,
+     5000
+    ],
+    "default": 200
+   },
+   {
+    "key": "external_ci.max_bytes",
+    "kind": "int",
+    "bounds": [
+     10000,
+     50000000
+    ],
+    "default": 2000000
+   },
+   {
+    "key": "external_ci.refresh_seconds",
+    "kind": "int",
+    "bounds": [
+     300,
+     86400
+    ],
+    "default": 600
+   },
+   {
+    "key": "external_ci.sources",
+    "kind": "names",
+    "bounds": {
+     "re": "^(buildbot|gitlab|jenkins|azure)(;[a-z_]{2,12}=[^;\\s,]{1,200}){2,7}\\Z"
+    },
+    "default": []
+   },
+   {
+    "key": "external_ci.timeout_s",
+    "kind": "int",
+    "bounds": [
+     2,
+     120
+    ],
+    "default": 15
+   },
+   {
+    "key": "fleet.cctray",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "fleet.disabled",
+    "kind": "names",
+    "bounds": {
+     "re": "^(?:group:[a-z0-9_-]{1,40}|[A-Za-z0-9._*?\\[\\]-]{1,100})\\Z"
+    },
+    "default": []
+   },
+   {
+    "key": "fleet.roles",
+    "kind": "names",
+    "bounds": {
+     "re": "^[a-z][a-z0-9_-]{0,19}=[A-Za-z0-9 ._/*?|()-]{1,150}\\Z"
+    },
+    "default": [
+     "release=*release*|*publish*",
+     "nightly=*nightly*|*schedule*",
+     "benchmark=*bench*",
+     "docs=*doc*|*pages*",
+     "build=*build*|*firmware*|*package*",
+     "test=*test*|*ci*|*check*"
+    ]
+   },
+   {
+    "key": "fleet.security_api",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ops.verify_release.fetch",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "plugins.alert_title_max",
+    "kind": "int",
+    "bounds": [
+     40,
+     400
+    ],
+    "default": 120
+   },
+   {
+    "key": "plugins.breaker.failures",
+    "kind": "int",
+    "bounds": [
+     1,
+     50
+    ],
+    "default": 3
+   },
+   {
+    "key": "plugins.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "plugins.entry_points",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "plugins.official.discussions.days",
+    "kind": "int",
+    "bounds": [
+     1,
+     365
+    ],
+    "default": 7
+   },
+   {
+    "key": "plugins.official.discussions.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "plugins.official.packages.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "plugins.official.packages.max_versions",
+    "kind": "int",
+    "bounds": [
+     1,
+     10000
+    ],
+    "default": 50
+   },
+   {
+    "key": "plugins.official.packages.types",
+    "kind": "names",
+    "bounds": {
+     "re": "^(container|npm)\\Z"
+    },
+    "default": [
+     "container"
+    ]
+   },
+   {
+    "key": "plugins.official_timeout_s",
+    "kind": "int",
+    "bounds": [
+     10,
+     3600
+    ],
+    "default": 300
+   },
+   {
+    "key": "plugins.reverify_on_start",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "plugins.third_party.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "plugins.worker.max_output_kb",
+    "kind": "int",
+    "bounds": [
+     16,
+     4096
+    ],
+    "default": 256
+   },
+   {
+    "key": "plugins.worker.memory_mb",
+    "kind": "int",
+    "bounds": [
+     64,
+     4096
+    ],
+    "default": 256
+   },
+   {
+    "key": "plugins.worker.platforms_ok",
+    "kind": "names",
+    "bounds": {
+     "re": "^(linux|windows|darwin)\\Z"
+    },
+    "default": [
+     "linux",
+     "windows",
+     "darwin"
+    ]
+   },
+   {
+    "key": "plugins.worker.timeout_s",
+    "kind": "int",
+    "bounds": [
+     1,
+     300
+    ],
+    "default": 20
+   },
+   {
+    "key": "posture.alerts",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "posture.audit_log",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "posture.deploy_max_days",
+    "kind": "int",
+    "bounds": [
+     30,
+     3650
+    ],
+    "default": 365
+   },
+   {
+    "key": "posture.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "posture.org_checks",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "posture.profile",
+    "kind": "enum",
+    "bounds": [
+     "basic",
+     "strict"
+    ],
+    "default": "basic"
+   },
+   {
+    "key": "posture.refresh_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     720
+    ],
+    "default": 24
+   },
+   {
+    "key": "posture.release_branches",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9._/*?-]{1,100}\\Z"
+    },
+    "default": [
+     "release/*",
+     "release-*",
+     "hotfix/*"
+    ]
+   },
+   {
+    "key": "posture.release_window",
+    "kind": "text",
+    "bounds": {
+     "re": "^(?:[1-7]-[1-7] (?:[01]\\d|2[0-4])-(?:[01]\\d|2[0-4]))?\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "posture.releases",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "posture.repos_per_cycle",
+    "kind": "int",
+    "bounds": [
+     1,
+     50
+    ],
+    "default": 3
+   },
+   {
+    "key": "posture.review_sample",
+    "kind": "int",
+    "bounds": [
+     0,
+     30
+    ],
+    "default": 0
+   },
+   {
+    "key": "posture.runner_runs",
+    "kind": "int",
+    "bounds": [
+     0,
+     20
+    ],
+    "default": 0
+   },
+   {
+    "key": "posture.skip",
+    "kind": "names",
+    "bounds": {
+     "re": "^(webhook|actions|scan|repo|branch|deploy|stored|org|runner|release|original)\\.[a-z_]{2,30}\\Z"
+    },
+    "default": []
+   },
+   {
+    "key": "posture.stored_max_days",
+    "kind": "int",
+    "bounds": [
+     30,
+     3650
+    ],
+    "default": 365
+   },
+   {
+    "key": "posture.types",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9._*?-]{1,100}=(standard|library|internal|sandbox)\\Z"
+    },
+    "default": []
+   },
+   {
+    "key": "posture.upstream",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "retention.ai_log_days",
+    "kind": "int",
+    "bounds": [
+     0,
+     3650
+    ],
+    "default": 0
+   },
+   {
+    "key": "retention.audit_days",
+    "kind": "int",
+    "bounds": [
+     0,
+     3650
+    ],
+    "default": 0
+   },
+   {
+    "key": "retention.backups_days",
+    "kind": "int",
+    "bounds": [
+     0,
+     3650
+    ],
+    "default": 0
+   },
+   {
+    "key": "retention.legal_hold",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "retention.reports_days",
+    "kind": "int",
+    "bounds": [
+     0,
+     3650
+    ],
+    "default": 0
+   },
+   {
+    "key": "secrets.backend",
+    "kind": "enum",
+    "bounds": [
+     "local",
+     "vault",
+     "sops",
+     "bitwarden",
+     "aws",
+     "azure",
+     "gcp"
+    ],
+    "default": "local"
+   },
+   {
+    "key": "secrets.bitwarden.item",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9-]{0,100}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "secrets.cloud.ref",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9_./:@=+-]{0,300}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "secrets.reload_on_rotate",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "secrets.reload_seconds",
+    "kind": "int",
+    "bounds": [
+     60,
+     86400
+    ],
+    "default": 900
+   },
+   {
+    "key": "secrets.sops.field",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9_.-]{1,100}\\Z"
+    },
+    "default": "token"
+   },
+   {
+    "key": "secrets.sops.file",
+    "kind": "text",
+    "bounds": {
+     "re": "^[^\\x00-\\x1f]{0,260}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "secrets.vault.addr",
+    "kind": "text",
+    "bounds": {
+     "re": "^(https?://[^\\s]{1,200})?\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "secrets.vault.field",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9_.-]{1,100}\\Z"
+    },
+    "default": "token"
+   },
+   {
+    "key": "secrets.vault.path",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9_./-]{0,200}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "secrets.vault.token_env",
+    "kind": "text",
+    "bounds": {
+     "re": "^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|PATHEXT|COMSPEC|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|SSH_AUTH_SOCK|MONITOR_SUPERVISOR_KEY|MONITOR_ACCESS_TOKEN|MONITOR_WEBHOOK_SECRET|MONITOR_SLACK_SIGNING_SECRET|MONITOR_DISCORD_PUBLIC_KEY|MONITOR_HEARTBEAT_URL)\\Z)(?:[A-Z_][A-Z0-9_]{0,63})?\\Z"
+    },
+    "default": "VAULT_TOKEN"
+   },
+   {
+    "key": "security.egress_allow",
+    "kind": "names",
+    "bounds": {
+     "re": "^(program:[a-z0-9_.-]{1,40}|(\\*\\.)?[a-z0-9.-]{1,200}|[0-9a-f:.]{2,45})\\Z"
+    },
+    "default": []
+   },
+   {
+    "key": "security.egress_policy",
+    "kind": "enum",
+    "bounds": [
+     "default",
+     "github_only",
+     "none"
+    ],
+    "default": "default"
+   },
+   {
+    "key": "security.read_only_strict",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "sources.multi_owner",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "teamwork.auto_rerun",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "teamwork.bot_authors",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9\\[\\]-]{1,60}\\Z"
+    },
+    "default": [
+     "dependabot[bot]",
+     "renovate[bot]"
+    ]
+   },
+   {
+    "key": "teamwork.bot_branches",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9 ._/*?\\[\\]()-]{1,100}\\Z"
+    },
+    "default": [
+     "dependabot/*",
+     "renovate/*"
+    ]
+   },
+   {
+    "key": "teamwork.bot_labels",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9 ._/*?\\[\\]()-]{1,100}\\Z"
+    },
+    "default": [
+     "dependencies"
+    ]
+   },
+   {
+    "key": "teamwork.cancel_policy",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9._*?-]{1,100}:[^:]{1,100}:[A-Za-z0-9._/*?-]{1,100}\\Z"
+    },
+    "default": []
+   },
+   {
+    "key": "teamwork.dismiss_allowed",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9\\[\\]-]{1,60}\\Z"
+    },
+    "default": []
+   },
+   {
+    "key": "teamwork.dismiss_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     365
+    ],
+    "default": 30
+   },
+   {
+    "key": "teamwork.dismissed_alerts",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "teamwork.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "teamwork.forks_help",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "teamwork.hide_workflows",
+    "kind": "names",
+    "bounds": {
+     "re": "^[A-Za-z0-9 ._/*?\\[\\]()-]{1,100}\\Z"
+    },
+    "default": [
+     "Dependabot Updates"
+    ]
+   },
+   {
+    "key": "teamwork.inactive_workflows",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "teamwork.keep_alive_days",
+    "kind": "int",
+    "bounds": [
+     0,
+     59
+    ],
+    "default": 0
+   },
+   {
+    "key": "teamwork.queued_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     720
+    ],
+    "default": 6
+   },
+   {
+    "key": "teamwork.refresh_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     720
+    ],
+    "default": 6
+   },
+   {
+    "key": "teamwork.repos_per_cycle",
+    "kind": "int",
+    "bounds": [
+     1,
+     50
+    ],
+    "default": 3
+   },
+   {
+    "key": "teamwork.runner_hooks",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "teamwork.stuck_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     720
+    ],
+    "default": 6
+   },
+   {
+    "key": "traffic.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "traffic.keep_days",
+    "kind": "int",
+    "bounds": [
+     30,
+     3650
+    ],
+    "default": 400
+   },
+   {
+    "key": "traffic.repos",
+    "kind": "names",
+    "bounds": {
+     "re": "^(?:[A-Za-z0-9-]{1,39}/)?[A-Za-z0-9._-]{1,100}\\Z"
+    },
+    "default": []
+   },
+   {
+    "key": "traffic.repos_per_cycle",
+    "kind": "int",
+    "bounds": [
+     1,
+     10
+    ],
+    "default": 2
+   },
+   {
+    "key": "traffic.views_clones",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "ui.copy_report.enabled",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "updates.notify_window",
+    "kind": "bool",
+    "default": true
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {}
+}

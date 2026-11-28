@@ -186,6 +186,16 @@ docker compose pull && docker compose up -d
 gh attestation verify oci://ghcr.io/juanenrac/tools-github-actions-monitor:2.1.0 --owner JuanenRac
 ```
 
+Ab 2.2.0 ist das Image zusätzlich ohne Schlüssel mit Cosign signiert (Identität des Release-Workflows):
+
+```sh
+cosign verify ghcr.io/juanenrac/tools-github-actions-monitor:2.2.0 \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --certificate-identity-regexp '^https://github\.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/\.github/workflows/release-image\.yml@refs/tags/v'
+```
+
+**Was wo getestet wird**: der Container (Nicht-root-Benutzer, schreibgeschütztes Dateisystem, Volumes, Geheimnisse, Webhook hinter Proxy) im Workflow Docker audit; die Dienst-Unit unter echtem systemd und eine Datenbank über 1 GB im Workflow Cross-cutting, der auch eine Sicherung wiederherstellt und einen Zyklus eines Kontos mit einem GitHub-Double ausführt. Netzwerkdateisysteme (NFS) und andere Hardware-Architekturen sind ungetestet.
+
 ## Hinter einem Reverse-Proxy
 
 Standardmäßig lauscht der Monitor nur auf `127.0.0.1`. Wenn du ihn von einem anderen Rechner aus erreichen musst, setze einen Reverse-Proxy mit TLS davor, schalte den Netzwerkmodus ein (`listen.network`: dann muss jede Anfrage das Zugriffstoken tragen) und DEKLARIERE den Proxy (`listen.proxy_public_host` mit seinem öffentlichen Namen, `listen.secure_cookie` oder `listen.trusted_proxy`). Der Monitor weist jede Anfrage ab, deren `Host` nicht seine eigene Adresse oder dieser öffentliche Name ist; der Proxy muss ihn also senden und die echte Adresse des Clients anfügen:
@@ -239,7 +249,7 @@ Dieselben Skripte laufen auf einem Linux-Rechner mit Docker (`tools/docker_audit
 Alles in diesem Abschnitt ist standardmäßig aus oder harmlos.
 
 - **Installierbare App** (`pwa.enabled`): Die Seite bietet ein Manifest, zwei Symbole und einen kleinen Service Worker, damit ein Browser den Monitor als App installieren kann. Die Dateien sind `/manifest.webmanifest`, `/sw.js`, `/pwa/offline`, `/pwa/icon-192.png` und `/pwa/icon-512.png`; im Netzwerkmodus werden sie wie jede Seite hinter dem Zugriffstoken ausgeliefert. Der Worker speichert nur die Offline-Seite und die Symbole: nie die Seite, nie eine Antwort der API. Kehrt die App in den Vordergrund zurück oder das Netz wieder, fragt die Seite sofort frische Daten ab (`pwa.refresh_on_return`).
-- **Kompakte Ansicht** (`ui.compact`): `auto` nutzt sie in einem schmalen Fenster, `on` immer, `off` nie; `?compact=1` oder `?compact=0` ändert sie für ein Fenster. Das Menü rückt als Tab-Reihe nach oben, Tabellen scrollen seitlich, ein Touchscreen erhält Ziele von mindestens 44 Pixeln und die Dialoge folgen der Höhe, die die Bildschirmtastatur übrig lässt.
+- **Kompakte Ansicht** (`ui.compact`): `auto` nutzt sie in einem schmalen Fenster, `on` immer, `off` nie; `?compact=1` oder `?compact=0` ändert sie für ein Fenster. Das Menü rückt als Tab-Reihe nach oben, Tabellen scrollen seitlich, ein Touchscreen erhält Ziele von mindestens 44 Pixeln und die Dialoge folgen der Höhe, die die Bildschirmtastatur übrig lässt. Auf einem Telefon, hoch oder quer, sind die Zahlen der Kopfzeile hinter einer Schaltfläche eingeklappt, die sie öffnet; dieser Browser merkt sich die Wahl. In einem niedrigen Fenster scrollt die Seite zum offenen Tab, statt ihn ohne Höhe zu lassen, und ab 701 Pixeln Breite stehen die Gruppen der Einstellungen als Liste links neben ihrem Bereich.
 - **Kopplung per QR-Code** (`pairing.enabled`, nur im Netzwerkmodus): Öffnen Sie die Palette (Strg+K) und wählen Sie „Handy koppeln“, dann „Neuer QR-Code“. Der Code gilt einmal und `pairing.code_minutes` Minuten lang; ein neuer Code macht den vorigen ungültig. Das Handy scannt ihn, tippt auf die Schaltfläche der sich öffnenden Seite und erhält ein eigenes Token (ein Cookie), nie das Zugriffstoken. Dasselbe Fenster listet die gekoppelten Geräte und entzieht eines: Sein Token funktioniert sofort nicht mehr. Höchstens `pairing.max_devices` Geräte; nach `pairing.device_days` Tagen muss ein Gerät neu gekoppelt werden (0 = nie). Der Monitor speichert nur den Hash jedes Tokens in `devices.json` im Datenordner, ein falscher Code zählt wie ein falsches Zugriffstoken gegen die Adresse, und jede Kopplung und jeder Entzug hinterlässt eine Zeile im Aktionsprotokoll.
 
 | Route | Was sie tut |

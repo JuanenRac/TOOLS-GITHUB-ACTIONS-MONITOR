@@ -186,6 +186,16 @@ docker compose pull && docker compose up -d
 gh attestation verify oci://ghcr.io/juanenrac/tools-github-actions-monitor:2.1.0 --owner JuanenRac
 ```
 
+À partir de la 2.2.0, l'image est aussi signée avec Cosign sans clé (identité du workflow de publication) :
+
+```sh
+cosign verify ghcr.io/juanenrac/tools-github-actions-monitor:2.2.0 \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --certificate-identity-regexp '^https://github\.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/\.github/workflows/release-image\.yml@refs/tags/v'
+```
+
+**Ce qui est testé et où** : le conteneur (utilisateur non root, système de fichiers en lecture seule, volumes, secrets, webhook derrière un proxy) par le workflow Docker audit ; l'unité de service sur un vrai systemd et une base de plus de 1 Go par le workflow Cross-cutting, qui restaure aussi une sauvegarde et exécute un cycle d'un compte avec une doublure de GitHub. Les systèmes de fichiers réseau (NFS) et d'autres architectures matérielles ne sont pas testés.
+
 ## Derrière un reverse proxy
 
 Par défaut, le moniteur n'écoute que sur `127.0.0.1`. Si vous devez l'atteindre depuis une autre machine, placez devant un reverse proxy avec TLS, activez le mode réseau (`listen.network` : chaque requête doit alors porter le jeton d'accès) et DÉCLAREZ le proxy (`listen.proxy_public_host` avec son nom public, `listen.secure_cookie` ou `listen.trusted_proxy`). Le moniteur refuse toute requête dont le `Host` n'est ni sa propre adresse ni ce nom public ; le proxy doit donc l'envoyer, et il doit ajouter l'adresse réelle du client :
@@ -239,7 +249,7 @@ Les mêmes scripts s'exécutent sur une machine Linux avec Docker (`tools/docker
 Tout ce qui figure dans cette section est désactivé ou inoffensif par défaut.
 
 - **Application installable** (`pwa.enabled`) : la page propose un manifeste, deux icônes et un petit service worker, afin qu'un navigateur puisse installer le moniteur comme une application. Les fichiers sont `/manifest.webmanifest`, `/sw.js`, `/pwa/offline`, `/pwa/icon-192.png` et `/pwa/icon-512.png` ; en mode réseau ils sont servis derrière le jeton d'accès comme n'importe quelle page. Le worker ne garde que la page hors ligne et les icônes : jamais la page, jamais une réponse de l'API. Quand l'application revient au premier plan, ou que le réseau revient, la page demande aussitôt des données fraîches (`pwa.refresh_on_return`).
-- **Vue compacte** (`ui.compact`) : `auto` l'utilise dans une fenêtre étroite, `on` toujours, `off` jamais ; `?compact=1` ou `?compact=0` la change pour une fenêtre. Le menu passe en haut comme une rangée d'onglets, les tableaux défilent latéralement, un écran tactile reçoit des cibles d'au moins 44 pixels et les boîtes de dialogue suivent la hauteur que laisse le clavier à l'écran.
+- **Vue compacte** (`ui.compact`) : `auto` l'utilise dans une fenêtre étroite, `on` toujours, `off` jamais ; `?compact=1` ou `?compact=0` la change pour une fenêtre. Le menu passe en haut comme une rangée d'onglets, les tableaux défilent latéralement, un écran tactile reçoit des cibles d'au moins 44 pixels et les boîtes de dialogue suivent la hauteur que laisse le clavier à l'écran. Sur un téléphone, en portrait ou en paysage, les chiffres de l'en-tête sont repliés derrière un bouton qui les ouvre, et ce navigateur retient le choix. Dans une fenêtre basse, la page défile jusqu'à l'onglet ouvert au lieu de le laisser sans hauteur, et à partir de 701 pixels de large les groupes de réglages forment une liste à gauche de leur panneau.
 - **Appairage avec un code QR** (`pairing.enabled`, mode réseau uniquement) : ouvrez la palette (Ctrl+K) et choisissez « Appairer un téléphone », puis « Nouveau code QR ». Le code ne sert qu'une fois et pendant `pairing.code_minutes` minutes ; un nouveau code annule le précédent. Le téléphone le scanne, appuie sur le bouton de la page qui s'ouvre et reçoit son propre jeton (un cookie), jamais le jeton d'accès. La même fenêtre liste les appareils appairés et en retire un : son jeton cesse de fonctionner aussitôt. Au plus `pairing.max_devices` appareils ; un appareil doit être appairé de nouveau après `pairing.device_days` jours (0 = jamais). Le moniteur ne garde que le hachage de chaque jeton dans `devices.json` du dossier de données, un mauvais code compte contre l'adresse comme un mauvais jeton d'accès, et chaque appairage et chaque révocation laissent une ligne dans le journal des actions.
 
 | Route | Ce qu'elle fait |

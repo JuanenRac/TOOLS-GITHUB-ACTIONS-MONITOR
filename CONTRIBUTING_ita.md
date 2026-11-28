@@ -28,3 +28,15 @@
 - **Smoke delle fonti esterne**: il workflow `sources-smoke.yml` (settimanale) esegue `tools/smoke_sources.py` contro la vera pagina di stato, gli advisory, la descrizione dell'API REST e l'ultima release, e fallisce quando una ha cambiato formato.
 - **Limiti**: `tools/limits_check.py` esegue il monitor con un account di 120 workflow in un container con un processore e 512 MB.
 - **Ordine della release**: crea la release di GitHub come BOZZA e fai il push del tag `vX.Y.Z`; `release-image.yml` costruisce e pubblica l'immagine e pubblica la bozza solo quando risponde con il suo tag per entrambe le piattaforme. Lo strumento che la pubblica crea la release come BOZZA, carica `github_actions_monitor.zip`, `SHA256SUMS` e `monitor_updater.py`, verifica che ci siano tutti e solo allora pubblica (le release immutabili poi non accettano più file); con l'immagine per prima, invia il tag e `release-image.yml` pubblica la bozza.
+
+## Lavorare con un assistente IA
+
+Una modifica scritta con un assistente IA segue le stesse regole, e chi la invia ne risponde: leggi ogni riga, esegui i test e non incollare mai nell'assistente un token, un registro con nomi privati o il contenuto di `actions_monitor.json`. Le due skill che viaggiano con il monitor (`monitor/skills/external/SKILL.md` per uno strumento che parla con un monitor in funzione, `monitor/skills/internal/SKILL.md` per l'IA integrata) fanno parte del prodotto: una nuova impostazione, rotta o comando le aggiorna (`python tools/make_skill_refs.py`). A che cosa serve il prodotto e che cosa non deve mai fare è in `PRODUCT_ita.md`.
+
+## macOS: il marchio di quarantena
+
+I file non sono firmati con un certificato Apple. Uno zip scaricato con un browser porta il marchio di quarantena e macOS può rifiutare di aprire i lanciatori `.command`. Controlla prima la release (vedi `monitor/docs/UPDATE_ita.md`) e poi togli il marchio dalla cartella estratta. macOS per ora non è testato.
+
+```sh
+xattr -dr com.apple.quarantine /path/to/github_actions_monitor
+```

@@ -186,6 +186,16 @@ docker compose pull && docker compose up -d
 gh attestation verify oci://ghcr.io/juanenrac/tools-github-actions-monitor:2.1.0 --owner JuanenRac
 ```
 
+From 2.2.0 the image is also signed with Cosign without a key (the identity of the release workflow):
+
+```sh
+cosign verify ghcr.io/juanenrac/tools-github-actions-monitor:2.2.0 \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --certificate-identity-regexp '^https://github\.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/\.github/workflows/release-image\.yml@refs/tags/v'
+```
+
+**What is tested where**: the container (user that is not root, read-only file system, volumes, secrets, webhook behind a proxy) by the workflow Docker audit; the service unit on a real systemd and a database of more than 1 GB by the workflow Cross-cutting, which also restores a backup and runs one cycle of an account with a double of GitHub. Network file systems (NFS) and other architectures of hardware are not tested.
+
 ## Behind a reverse proxy
 
 By default the monitor only listens on `127.0.0.1`. If you must reach it from another machine, put a reverse proxy with TLS in front, turn the network mode on (`listen.network`: then every request must carry the access token) and DECLARE the proxy (`listen.proxy_public_host` with its public name, `listen.secure_cookie`, or `listen.trusted_proxy`). The monitor refuses any request whose `Host` is not its own address or that public name, so the proxy must send it, and it must add the real address of the client:
@@ -239,7 +249,7 @@ The same scripts run on a Linux machine with Docker (`tools/docker_audit/run_all
 Everything in this section is off or harmless by default.
 
 - **Installable app** (`pwa.enabled`): the page offers a manifest, two icons and a small service worker, so a browser can install the monitor as an app. The files are `/manifest.webmanifest`, `/sw.js`, `/pwa/offline`, `/pwa/icon-192.png` and `/pwa/icon-512.png`; in the network mode they are served behind the access token like every page. The worker keeps only the offline page and the icons: never the page, never an answer of the API. When the app comes back to the front, or the network returns, the page asks for fresh data at once (`pwa.refresh_on_return`).
-- **Compact view** (`ui.compact`): `auto` uses it in a narrow window, `on` always, `off` never; `?compact=1` or `?compact=0` changes it for one window. The menu goes to the top as a row of tabs, the tables scroll sideways, a touch screen gets targets of at least 44 pixels and the dialogs follow the height that the on-screen keyboard leaves.
+- **Compact view** (`ui.compact`): `auto` uses it in a narrow window, `on` always, `off` never; `?compact=1` or `?compact=0` changes it for one window. The menu goes to the top as a row of tabs, the tables scroll sideways, a touch screen gets targets of at least 44 pixels and the dialogs follow the height that the on-screen keyboard leaves. On a phone, upright or sideways, the figures of the header are folded behind one button that opens them and this browser remembers the choice. In a short window the page scrolls down to the open tab instead of leaving it without height, and from 701 pixels of width the groups of Settings are a list on the left of their panel.
 - **Pairing with a QR code** (`pairing.enabled`, network mode only): open the palette (Ctrl+K) and choose "Pair a phone", then "New QR code". The code works once and for `pairing.code_minutes` minutes; a new code cancels the previous one. The phone scans it, presses the button of the page that opens and gets a token of its own (a cookie), never the access token. The same window lists the paired devices and takes one away: its token stops working at once. At most `pairing.max_devices` devices; a device must be paired again after `pairing.device_days` days (0 = never). The monitor keeps only the hash of each token in `devices.json` of the data folder, a wrong code counts against the address like a wrong access token, and every pairing and every revocation leaves a line in the log of actions.
 
 | Route | What it does |

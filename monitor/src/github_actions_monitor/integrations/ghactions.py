@@ -41,7 +41,15 @@ ACTIONS = {
     "close_issue": ("PATCH", "repos/{owner}/{repo}/issues/{id}", "repo", "issue"),
     "close_pr": ("PATCH", "repos/{owner}/{repo}/pulls/{id}", "repo", "pr"),
     "merge_pr": ("PUT", "repos/{owner}/{repo}/pulls/{id}/merge", "repo", "pr"),
+    "update_branch": ("PUT", "repos/{owner}/{repo}/pulls/{id}/update-branch", "repo", "pr"),
+    "approve_fork": ("POST", "repos/{owner}/{repo}/actions/runs/{id}/approve", "workflow", "run"),
+    "approve_deployment": ("POST", "repos/{owner}/{repo}/actions/runs/{id}/pending_deployments", "repo", "run"),
+    "force_cancel": ("POST", "repos/{owner}/{repo}/actions/runs/{id}/force-cancel", "workflow", "run"),
+    "enable_workflow": ("PUT", "repos/{owner}/{repo}/actions/workflows/{id}/enable", "workflow", "workflow"),
+    "dispatch": ("POST", "repos/{owner}/{repo}/actions/workflows/{id}/dispatches", "workflow", "workflow"),
 }
+#: actions that mean nothing without the fields the monitor builds for them (families/actions/): never planned from a number alone
+NEEDS_FIELDS = ("approve_deployment", "dispatch")
 DEFAULT_ALLOWED = ("rerun_failed", "cancel")
 PENDING = confirmation.Pending()
 REASON_RANGE = (3, 200)
@@ -218,7 +226,7 @@ def preflight_reason(run_gh, owner, repo, action, login=""):
         return ""
 
 
-def plan(config, owner, action, repo, number, reason="", operator="", run_gh=None):
+def plan(config, owner, action, repo, number, reason="", operator="", run_gh=None, fields=None):
     """({plan dict} | None, reason). Reasons: off, action, not_allowed, repo, number, reason_required, operator_required, observer, preflight. The plan is what will be sent; it is kept for the confirmation."""
     cfg = settings(config)
     if not cfg["enabled"]:
@@ -232,6 +240,8 @@ def plan(config, owner, action, repo, number, reason="", operator="", run_gh=Non
     number = str(number)
     if not NUMBER_RE.match(number):
         return None, "number"
+    if action in NEEDS_FIELDS and not fields:
+        return None, "fields"
     why = clean_text(reason, REASON_RANGE[1])
     who = clean_text(operator, OPERATOR_MAX) or cfg.get("operator", "")
     if cfg.get("require_reason", True):
@@ -245,7 +255,8 @@ def plan(config, owner, action, repo, number, reason="", operator="", run_gh=Non
     if cfg.get("preflight", True) and run_gh is not None and preflight_reason(run_gh, owner, repo, action):
         return None, "preflight"
     method, endpoint, scope, subject = ACTIONS[action]
-    fields = {"state": "closed"} if action in ("close_issue", "close_pr") else ({"merge_method": cfg["merge_method"]} if action == "merge_pr" else {})
+    if action not in NEEDS_FIELDS:      # the fields of these two are the only ones a caller may give
+        fields = {"state": "closed"} if action in ("close_issue", "close_pr") else ({"merge_method": cfg["merge_method"]} if action == "merge_pr" else {})
     item = {"action": action, "method": method, "endpoint": endpoint.format(owner=owner, repo=repo, id=number), "scope": scope, "subject": subject, "repo": repo, "number": number,
             "fields": fields, "reason": why, "operator": who, "owner": owner}
     item["id"] = PENDING.add("ghaction", item)
@@ -289,7 +300,8 @@ def still_fits(item, run_gh):
         return True
     if not owner:
         return True
-    kind = {"close_issue": f"issues/{number}", "close_pr": f"pulls/{number}", "merge_pr": f"pulls/{number}", "cancel": f"actions/runs/{number}", "rerun_failed": f"actions/runs/{number}", "rerun_run": f"actions/runs/{number}"}.get(action)
+    kind = {"close_issue": f"issues/{number}", "close_pr": f"pulls/{number}", "merge_pr": f"pulls/{number}", "cancel": f"actions/runs/{number}", "rerun_failed": f"actions/runs/{number}", "rerun_run": f"actions/runs/{number}",
+            "update_branch": f"pulls/{number}", "force_cancel": f"actions/runs/{number}", "approve_fork": f"actions/runs/{number}", "approve_deployment": f"actions/runs/{number}"}.get(action)
     if not kind:
         return True
     code, text, _err = run_gh(["api", f"repos/{owner}/{repo}/{kind}"], 25)
@@ -301,9 +313,15 @@ def still_fits(item, run_gh):
         return True
     if not isinstance(body, dict):
         return True
-    if action in ("close_issue", "close_pr", "merge_pr"):
+    if action in ("close_issue", "close_pr", "merge_pr", "update_branch"):
         return body.get("state") in (None, "open") and not body.get("merged")
     status, conclusion = body.get("status"), body.get("conclusion")
+    if action == "approve_fork":
+        return conclusion in (None, "action_required")
+    if action == "approve_deployment":
+        return status in (None, "waiting")
+    if action == "force_cancel":
+        return status != "completed"
     if action == "cancel":
         return status in (None, "in_progress", "queued", "waiting", "pending", "requested")
     return status in (None, "completed") and conclusion not in ("success",)      # a run that passed is not run again behind someone's back
@@ -337,7 +355,10 @@ def execute(config, plan_id, run_gh, log_file=None):
     elif not still_fits(item, run_gh):
         result = {"ok": False, "status": "stale"}
     else:
-        args = ["api", "-X", item["method"], item["endpoint"]] + [x for k, v in item["fields"].items() for x in ("-f", f"{k}={v}")]
+        args = ["api", "-X", item["method"], item["endpoint"]]
+        for key, value in item["fields"].items():
+            for one in value if isinstance(value, list) else [value]:      # a list repeats the key; the numbers of it are sent as numbers
+                args += ["-F" if isinstance(one, int) else "-f", f"{key}={one}"]
         code, _out, err = run_gh(args, 40)
         if code == 0:
             result = {"ok": True, "status": "done"}

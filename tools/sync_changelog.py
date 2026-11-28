@@ -21,7 +21,7 @@ HEADER = """<!--
 
 # Changelog
 
-The history of GitHub Actions Monitor, from the first version to the latest. Each version groups its changes under Added, Changed, Fixed and Security.
+The history of GitHub Actions Monitor, from the first version to the latest. Each version groups its changes under Added, Changed, Fixed and Security; what concerns the extensions goes under Plugins.
 
 """
 

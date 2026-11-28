@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-5936_passing-brightgreen.svg" alt="5936 tests">
+  <img src="https://img.shields.io/badge/Tests-6266_passing-brightgreen.svg" alt="6266 tests">
 </p>
 
 > Surveille les workflows de tous vos dépôts et vous dit, sur une page locale, ce qui est rouge, ce qui est bloqué et ce qui vous attend.
@@ -65,6 +65,8 @@
 - **Outils par lots** : planifient et lancent plusieurs builds à la fois ; rien n'est lancé sans `--go`.
 - **À propos et Aide dans la page** : le bouton **i** montre la version, l'édition, les liens, les fichiers, l'état de santé et un bouton qui copie les informations pour le support ; le bouton **?** (ou la touche `?`) ouvre toute la documentation, avec recherche et dans votre langue, sans Internet. La console offre `--about` et `--help-topics`, et une application interactive de terminal par onglets (`textual` facultatif).
 - **Avis de nouvelle version** : un badge discret quand une version plus récente est publiée ; il ne lit la page publique des versions qu'une fois par jour, n'installe jamais rien et peut être désactivé (toujours désactivé sur une installation isolée).
+- **Releases signées et parties optionnelles pour les grandes installations** : chaque release porte une signature détachée que la mise à jour vérifie, et une fenêtre dit ce qu'apporte une nouvelle version ; extensions, coffres de secrets, sources de CI externes (lecture seule), contrôles de posture, vues de collaboration et de flotte, mode lecture seule strict, politique réseau et rapport de conformité sont désactivés tant que vous ne les activez pas.
+- **Téléchargements et trafic, gardés par vous (désactivé par défaut)** : une fois par jour les téléchargements des fichiers de vos versions et, avec l'accès en écriture, les visites et clonages des dépôts choisis, enregistrés sur votre ordinateur, avec graphiques et CSV (`monitor/docs/TRAFFIC_fra.md`). À propos contient aussi un lien volontaire pour dire publiquement que vous utilisez le moniteur ; rien n'est envoyé hormis ce que vous écrivez vous-même sur GitHub.
 - **Quotas pour tout compte** : offre, minutes facturables (les dépôts publics ne coûtent rien), quota de l'API lu dans les en-têtes de GitHub, concurrence et jobs proches de la limite de 6 heures ; les chiffres sont dans un fichier modifiable.
 
 ## Ce qu'il fait gagner
@@ -85,7 +87,7 @@ Méthode, hypothèses et comment le mesurer dans votre propre usage: [`monitor/d
 
 | | |
 |---|---|
-| **Version** | **2.1.8** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **2.2.0** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Prérequis** | Python 3.11+ et la CLI GitHub (`gh auth login`) ; rien d'autre (la vue console utilise le paquet optionnel `rich`) |
 | **S'ouvre** | sur une page `127.0.0.1` uniquement, en huit langues |
 | **Écrit sur GitHub** | jamais seul : seulement les commandes par lots que vous lancez avec un `--go` explicite |
@@ -93,13 +95,13 @@ Méthode, hypothèses et comment le mesurer dans votre propre usage: [`monitor/d
 
 <!-- glance:begin -->
 
-**Mesuré aujourd'hui** (v2.1.8)
+**Mesuré aujourd'hui** (v2.2.0)
 
 | | |
 |---|---|
 | **Maturité** | functional |
-| **Tests** | 5936 méthodes de test (`python -m unittest discover -s monitor/tests`) |
-| **Réglages** | 914 réglages, tous avec aide |
+| **Tests** | 6266 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Réglages** | 1035 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -172,10 +174,21 @@ Un second produit, plus simple, dans le même paquet : la page de ce qui tourne 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="Maintenant" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_menu_groups_light.png"><img src="docs/screenshots/web_menu_groups_dark.png" alt="Le menu en groupes : Surveiller, Sentinelles, Équipe, Rapports et apprentissage" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_palette_light.png"><img src="docs/screenshots/web_palette_dark.png" alt="La palette Ctrl+K : une zone de recherche pour tout onglet, dépôt ou action" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_update_notice_light.png"><img src="docs/screenshots/web_update_notice_dark.png" alt="La fenêtre qui annonce une nouvelle version" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_ci_light.png"><img src="docs/screenshots/web_sentinel_ci_dark.png" alt="Sentinelle : CI" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_external_ci_light.png"><img src="docs/screenshots/web_external_ci_dark.png" alt="Sources CI externes : ce que dit chacune et pourquoi l'une n'a pas pu être lue" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_collab_light.png"><img src="docs/screenshots/web_sentinel_collab_dark.png" alt="Sentinelle : collaboration" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_delivery_light.png"><img src="docs/screenshots/web_sentinel_delivery_dark.png" alt="Sentinelle de livraison : ce qui est construit mais pas encore livré" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_supply_light.png"><img src="docs/screenshots/web_sentinel_supply_dark.png" alt="Sentinelle de la chaîne d'approvisionnement : actions non épinglées et permissions larges" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_security_light.png"><img src="docs/screenshots/web_sentinel_security_dark.png" alt="Sentinelle de sécurité avec des constats" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_posture_light.png"><img src="docs/screenshots/web_posture_dark.png" alt="Rapport de posture des dépôts et de l'organisation face à OWASP et CIS" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_compliance_light.png"><img src="docs/screenshots/web_compliance_dark.png" alt="Rapport de conformité de l'installation : chaque ligne vérifiée ou déclarée" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_collaboration_light.png"><img src="docs/screenshots/web_collaboration_dark.png" alt="Vues de collaboration : ce qui attend une personne et ce qui pourrait être fait" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_roles_groups_light.png"><img src="docs/screenshots/web_roles_groups_dark.png" alt="Flotte par rôle de workflow et par groupe" width="92%"></picture></p>
+<p align="center"><img src="docs/screenshots/web_screen_group.png" alt="Écran mural d'un groupe" width="92%"></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_proposals_light.png"><img src="docs/screenshots/web_proposals_dark.png" alt="Propositions de l'IA décidées par une personne" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_assistant_chat_light.png"><img src="docs/screenshots/web_assistant_chat_dark.png" alt="Discussion avec l'IA, avec des outils en lecture seule et les sources lues" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_extensions_light.png"><img src="docs/screenshots/web_extensions_dark.png" alt="Extensions : ce qui tourne, avec quelles autorisations et ce qui est isolé" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_trend_light.png"><img src="docs/screenshots/web_sentinel_trend_dark.png" alt="Tendance quotidienne : une ligne pour chaque chiffre" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_fleet_light.png"><img src="docs/screenshots/web_fleet_dark.png" alt="Flotte : tous les dépôts d'un coup d'œil" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_reports_light.png"><img src="docs/screenshots/web_reports_dark.png" alt="Rapports" width="92%"></picture></p>
@@ -352,6 +365,15 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ACCOUNTS_fra.md`](monitor/docs/ACCOUNTS_fra.md) : plusieurs comptes, un processus chacun
 - [`monitor/docs/QUOTAS_fra.md`](monitor/docs/QUOTAS_fra.md) : quotas et offres de GitHub
 - [`monitor/docs/MODES_fra.md`](monitor/docs/MODES_fra.md) : modes de travail : normal, rapide et turbo
+- [`monitor/docs/EXTERNAL_CI_fra.md`](monitor/docs/EXTERNAL_CI_fra.md): Sources CI externes, lecture seule : Buildbot, GitLab CI, Jenkins, Azure Pipelines
+- [`monitor/docs/PLUGINS_fra.md`](monitor/docs/PLUGINS_fra.md): Greffons (désactivés par défaut), leurs paquets, l'isolation et la lecture du jeton dans un coffre
+- [`monitor/docs/POSTURE_fra.md`](monitor/docs/POSTURE_fra.md): Posture des dépôts et de l'organisation, lecture seule
+- [`monitor/docs/COMPLIANCE_fra.md`](monitor/docs/COMPLIANCE_fra.md): Conformité : lecture seule stricte, politique réseau, rapport, conservation et conservation légale, journal des actions signé et exporté
+- [`monitor/docs/TRAFFIC_fra.md`](monitor/docs/TRAFFIC_fra.md): Téléchargements et trafic
+- [`monitor/docs/ECOSYSTEM_TOOLS_fra.md`](monitor/docs/ECOSYSTEM_TOOLS_fra.md): Les outils autour du moniteur et leur niveau de prise en charge
+- [`monitor/docs/EDITIONS_fra.md`](monitor/docs/EDITIONS_fra.md): Complète et Lite : le contenu de chaque édition
+- [`monitor/docs/COLLABORATION_fra.md`](monitor/docs/COLLABORATION_fra.md): Vues de collaboration et actions GitHub facultatives
+- [`monitor/docs/FLEET_APIS_fra.md`](monitor/docs/FLEET_APIS_fra.md): Flotte par rôle et groupe, API CCTray et de sécurité, empreinte des rapports, site de démonstration
 - [`monitor/docs/AI_CONNECTION_fra.md`](monitor/docs/AI_CONNECTION_fra.md): Connecter un outil d'IA : tout ce que dit le moniteur, en signaux, dans le résumé, le point d'accès, les outils MCP et le hook
 - [`monitor/docs/AI_SETUP_PROMPT_fra.md`](monitor/docs/AI_SETUP_PROMPT_fra.md): Configurer le moniteur avec une IA : un prompt à coller dans votre assistant IA qui l'installe, vous demande ce que vous voulez et écrit la configuration
 - [`monitor/docs/QUOTA_fra.md`](monitor/docs/QUOTA_fra.md): Plus de quota, moins de dépense : mode économe, le panneau central, une GitHub App et comment partager le quota

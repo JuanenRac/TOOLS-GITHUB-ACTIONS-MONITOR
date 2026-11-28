@@ -26,6 +26,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.allowed_repos` | `-` | ai | Repositories it may see |
 | `ai.answer_language` | `-` | ai | Language of the answers |
 | `ai.api_key_env` | `-` | ai | Key variable |
+| `ai.assistant.can_propose` (secure) | `false` | ai | The assistant may propose actions |
 | `ai.assistant.enabled` (secure) | `-` | ai | Assistant panel |
 | `ai.assistant.max_context` | `-` | ai | Context sent per question |
 | `ai.assistant.max_tool_calls` | `-` | ai | Tool calls per question |
@@ -35,6 +36,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.catalog.fit_context` | `-` | ai | Fit the input to the context window |
 | `ai.catalog.max_requests_per_day` | `-` | ai | Requests for the list per day |
 | `ai.catalog.ttl_minutes` | `-` | ai | Life of the list of models |
+| `ai.chat.enabled` (secure) | `false` | ai | Free chat with the AI |
 | `ai.cost_limit_daily` | `-` | ai | Estimated cost per day (all models) |
 | `ai.daily_limit` | `-` | ai | Calls per day |
 | `ai.events` | `-` | ai | Events it may analyse |
@@ -51,6 +53,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.prompt_log.enabled` (secure) | `-` | ai | Local record of prompts |
 | `ai.prompt_log.keep` | `-` | ai | Prompts kept |
 | `ai.provider` (secure) | `"none"` | ai | AI service |
+| `ai.rag.enabled` (secure) | `false` | ai | Similar alerts by a local embedding model |
+| `ai.rag.max_mb` | `200` | ai | Largest size of the index (MB) |
+| `ai.rag.model` | `""` | ai | Embedding model |
+| `ai.rag.url` (secure) | `"http://127.0.0.1:11434"` | ai | Address of the local model |
 | `ai.redact.extra_patterns` (secure) | `-` | ai | Patterns to always hide |
 | `ai.redact.extra_terms` (secure) | `-` | ai | Words to always hide |
 | `ai.report_summary.enabled` | `-` | ai | AI draft for the summary of a report |
@@ -141,7 +147,21 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `api.gzip_min_bytes` | `1024` | advanced | Smallest answer to compress (bytes) |
 | `api.max_limit` | `200` | advanced | Most items per page |
 | `api.v1_enabled` | `"auto"` | advanced | Read API under /api/v1/ |
+| `audit_checkpoints.enabled` (secure) | `false` | compliance | Signed checkpoints of the log of actions |
 | `audit_dir` | `""` | paths | Folder of audit files |
+| `audit_export.allow_private_targets` (secure) | `false` | compliance | Allow private addresses |
+| `audit_export.batch` (secure) | `100` | compliance | Lines per send |
+| `audit_export.ca_file` (secure) | `""` | compliance | Certificate authority file |
+| `audit_export.enabled` (secure) | `false` | compliance | Export the log of actions |
+| `audit_export.host` (secure) | `""` | compliance | Syslog server |
+| `audit_export.max_mb` (secure) | `50` | compliance | Size of the export file |
+| `audit_export.path` (secure) | `""` | compliance | File of the export |
+| `audit_export.port` (secure) | `6514` | compliance | Syslog port |
+| `audit_export.spool_mb` (secure) | `50` | compliance | Waiting limit before the alert |
+| `audit_export.target` (secure) | `"file"` | compliance | Destination kind |
+| `audit_export.tls` (secure) | `true` | compliance | Syslog with TLS |
+| `audit_export.token_env` (secure) | `""` | compliance | Variable with the token |
+| `audit_export.url` (secure) | `""` | compliance | Address of the HTTP receiver |
 | `audit_feed.clone_alert.bot_patterns` | `["-bot", "_bot", "deploy", "guardian"]` | sentinel | Names that are robots |
 | `audit_feed.clone_alert.check_minutes` | `30` | sentinel | Minutes between two reads of the audit log |
 | `audit_feed.clone_alert.enabled` | `false` | sentinel | Warn about abnormal clones |
@@ -278,6 +298,24 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `exclude` | `[]` | general | Repositories to skip |
 | `expected_red.enabled` | `false` | sentinel | Expected red |
 | `expected_red.max_days` | `30` | sentinel | Most days of an expected red |
+| `external_ci.alert.enabled` | `true` | extci | Alert on a failed external build |
+| `external_ci.alert.level` | `"error"` | extci | Level of that alert |
+| `external_ci.allow_private_targets` (secure) | `false` | extci | Allow private addresses |
+| `external_ci.azure.enabled` (secure) | `false` | extci | Azure Pipelines sources (experimental) |
+| `external_ci.breaker.failures` | `3` | extci | Failures before waiting longer |
+| `external_ci.buildbot.max_builders` | `50` | extci | Buildbot: builders at most |
+| `external_ci.enabled` (secure) | `false` | extci | Read external CI sources |
+| `external_ci.experimental` | `true` | extci | Show the experimental label |
+| `external_ci.gitlab.max_pipelines` | `30` | extci | GitLab: pipelines at most |
+| `external_ci.jenkins.enabled` (secure) | `false` | extci | Jenkins sources (experimental) |
+| `external_ci.logs.enabled` (secure) | `false` | extci | Fetch the end of failed logs |
+| `external_ci.logs.keep_hours` | `72` | extci | Hours a log is kept |
+| `external_ci.logs.max_kb` | `64` | extci | Log tail size (KB) |
+| `external_ci.logs.tail_lines` | `200` | extci | Log tail lines |
+| `external_ci.max_bytes` | `2000000` | extci | Largest answer (bytes) |
+| `external_ci.refresh_seconds` | `600` | extci | Seconds between reads |
+| `external_ci.sources` (secure) | `[]` | extci | Sources |
+| `external_ci.timeout_s` | `15` | extci | Time limit of a read (seconds) |
 | `extra_reader.any_folder` (secure) | `false` | quota | Accept the token file from any folder |
 | `extra_reader.enabled` (secure) | `false` | quota | Read also with a second account |
 | `extra_reader.file` (secure) | `""` | quota | File with the token of the second account |
@@ -286,6 +324,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `finops.co2_grams_per_kwh` | `400` | advanced | Grams of CO2 per kWh of the grid (for the carbon estimate) |
 | `finops.co2_watts` | `40` | advanced | Watts of a runner (for the carbon estimate) |
 | `finops.jobs_per_cycle` | `0` | advanced | Jobs read per cycle for their system |
+| `fleet.cctray` (secure) | `false` | fleetapi | CCTray feed (read only) |
+| `fleet.disabled` | `[]` | fleetapi | Repositories and groups switched off |
 | `fleet.fork_behind` | `false` | general | Show how far a fork is behind its original |
 | `fleet.fork_behind_per_call` | `5` | general | Forks read per round for the column behind the original |
 | `fleet.group_by` | `"ecosystem"` | general | Group the fleet by |
@@ -294,7 +334,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `fleet.meta_per_call` | `20` | general | Files read per round for the metadata columns |
 | `fleet.meta_ttl_hours` | `6` | general | Hours before a metadata value is read again |
 | `fleet.page_size` | `50` | general | Repositories per page |
+| `fleet.roles` | `["release=*release*|*publish*", "nightly=*nightly*|*schedule*", "benchmark=*bench*", "docs=*doc*|*pages*", "build=*build*|*firmware*|*package*", "test=*test*|*ci*|*check*"]` | fleetapi | Columns by role of workflow |
 | `fleet.saved_filters` | `[]` | general | Saved filters |
+| `fleet.security_api` (secure) | `false` | fleetapi | API of secret and code scanning alerts |
 | `fleet.show_all_active` | `true` | general | Every run that is going |
 | `fleet.sort` | `"risk"` | general | Order inside a group |
 | `github_actions.allowed` (secure) | `["rerun_failed", "cancel"]` | advanced | Actions that can be planned |
@@ -475,6 +517,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ops.doctor.webhook_min_length` | `-` | paths | Shortest webhook secret accepted |
 | `ops.purge.enabled` (secure) | `-` | paths | Allow "purge now" |
 | `ops.purge.require_backup_hours` (secure) | `-` | paths | Require a good copy newer than |
+| `ops.verify_release.fetch` (secure) | `false` | basic | Let the release check download the release |
 | `organizations.discover` | `false` | advanced | List the organisations of the login |
 | `otlp.cicd_conventions` | `false` | advanced | Names and attributes of the CI/CD conventions |
 | `otlp.enabled` (secure) | `false` | advanced | Export OpenTelemetry (OTLP) |
@@ -496,8 +539,41 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `pairing.device_days` | `90` | general | Days a paired device keeps its access |
 | `pairing.enabled` (secure) | `false` | general | Pair phones with a QR code |
 | `pairing.max_devices` | `10` | general | Most paired devices |
+| `plugins.alert_title_max` | `120` | plugins | Longest title of a plugin alert |
+| `plugins.breaker.failures` | `3` | plugins | Failures before a plugin is paused |
+| `plugins.enabled` (secure) | `false` | plugins | Run plugins |
+| `plugins.entry_points` (secure) | `false` | plugins | Find plugin packages installed with pip |
+| `plugins.official.discussions.days` | `7` | plugins | Days without an answer |
+| `plugins.official.discussions.enabled` | `false` | plugins | Official plugin: unanswered discussions |
+| `plugins.official.packages.enabled` | `false` | plugins | Official plugin: package retention |
+| `plugins.official.packages.max_versions` | `50` | plugins | Versions kept at most |
+| `plugins.official.packages.types` | `["container"]` | plugins | Package types |
+| `plugins.official_timeout_s` | `300` | plugins | Time limit of an official plugin (seconds) |
+| `plugins.reverify_on_start` (secure) | `true` | plugins | Check installed plugins at start |
+| `plugins.third_party.enabled` (secure) | `false` | plugins | Run plugins of other people |
+| `plugins.worker.max_output_kb` (secure) | `256` | plugins | Largest answer of a plugin (KB) |
+| `plugins.worker.memory_mb` (secure) | `256` | plugins | Memory ceiling of a plugin (MB) |
+| `plugins.worker.platforms_ok` (secure) | `["linux", "windows", "darwin"]` | plugins | Systems where plugins of others may run |
+| `plugins.worker.timeout_s` (secure) | `20` | plugins | Time limit of a plugin (seconds) |
 | `ports.complete` | `8765` | general | Port of the complete edition |
 | `ports.lite` | `8766` | general | Port of the lite edition |
+| `posture.alerts` | `true` | posture | Alerts for the findings |
+| `posture.audit_log` | `false` | posture | Read the organization audit log |
+| `posture.deploy_max_days` | `365` | posture | Age limit of deploy keys |
+| `posture.enabled` (secure) | `false` | posture | Check the posture |
+| `posture.org_checks` | `true` | posture | Check the organization |
+| `posture.profile` | `"basic"` | posture | Profile |
+| `posture.refresh_hours` | `24` | posture | Hours between reads |
+| `posture.release_branches` | `["release/*", "release-*", "hotfix/*"]` | posture | Release branches |
+| `posture.release_window` | `""` | posture | Hours for releases |
+| `posture.releases` | `true` | posture | Watch published releases |
+| `posture.repos_per_cycle` | `3` | posture | Repositories per cycle |
+| `posture.review_sample` | `0` | posture | Merged changes looked at |
+| `posture.runner_runs` | `0` | posture | Runs looked at for hardening |
+| `posture.skip` | `[]` | posture | Checks not asked for |
+| `posture.stored_max_days` | `365` | posture | Age limit of stored secrets |
+| `posture.types` | `[]` | posture | Kinds of project |
+| `posture.upstream` | `false` | posture | Look at the original of forks |
 | `productivity.enabled` | `-` | analytics | Time saved (estimate) |
 | `productivity.saving_percent` | `-` | analytics | Assumed saving when nothing was timed |
 | `productivity.team_hours_per_week` | `-` | analytics | Hours worked in a week (team) |
@@ -548,12 +624,17 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `reports.supply_chain.enabled` (secure) | `false` | sentinel | Report on the supply chain of releases |
 | `reports.workflow_hygiene.enabled` (secure) | `false` | sentinel | Report on workflow files |
 | `repos` | `"all"` | general | Repositories |
+| `retention.ai_log_days` (secure) | `0` | compliance | Days of the record of prompts |
 | `retention.analytics_days` | `-` | paths | Keep analytics history for |
+| `retention.audit_days` (secure) | `0` | compliance | Days of the log of actions |
+| `retention.backups_days` (secure) | `0` | compliance | Days of the copies |
 | `retention.enabled` (secure) | `-` | paths | Purge old events and analytics |
 | `retention.events_days` | `-` | paths | Keep events for |
 | `retention.events_max_kb` | `-` | paths | Largest size of the feed file |
 | `retention.interval_hours` | `-` | paths | Purge every |
+| `retention.legal_hold` (secure) | `false` | compliance | Legal hold |
 | `retention.mode` (secure) | `-` | paths | What to do with old events |
+| `retention.reports_days` (secure) | `0` | compliance | Days of the report files |
 | `retention.warn_events_mb` | `-` | paths | Warn when the events are bigger than |
 | `runners.enabled` | `false` | advanced | Watch self-hosted runners |
 | `runners.group_by` | `"none"` | advanced | Group the runners by |
@@ -644,6 +725,20 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `screens.theme_sentinels` | `"inherit"` | general | Theme of the screen: Sentinels |
 | `screens.transition` | `"fade"` | general | Change between screens |
 | `screens.version_check_seconds` | `300` | general | Look for a new version every |
+| `secrets.backend` (secure) | `"local"` | plugins | Read the token from |
+| `secrets.bitwarden.item` (secure) | `""` | plugins | Bitwarden: id of the secret |
+| `secrets.cloud.ref` (secure) | `""` | plugins | Cloud: name of the secret |
+| `secrets.reload_on_rotate` (secure) | `true` | plugins | Read the token again now and then |
+| `secrets.reload_seconds` (secure) | `900` | plugins | Seconds between two reads of the token |
+| `secrets.sops.field` (secure) | `"token"` | plugins | SOPS: name of the value |
+| `secrets.sops.file` (secure) | `""` | plugins | SOPS: encrypted file |
+| `secrets.vault.addr` (secure) | `""` | plugins | Vault: address |
+| `secrets.vault.field` (secure) | `"token"` | plugins | Vault: name of the value |
+| `secrets.vault.path` (secure) | `""` | plugins | Vault: path of the secret |
+| `secrets.vault.token_env` (secure) | `"VAULT_TOKEN"` | plugins | Vault: environment variable of its token |
+| `security.egress_allow` (secure) | `[]` | compliance | Allowed hosts |
+| `security.egress_policy` (secure) | `"default"` | compliance | Network policy (outgoing) |
+| `security.read_only_strict` (secure) | `false` | compliance | Strict read-only mode |
 | `selfwatch.enabled` | `true` | paths | The monitor watches itself |
 | `selfwatch.interval_seconds` | `60` | paths | Seconds between two readings |
 | `selfwatch.rss_warn_mb` | `1024` | paths | Warn when its memory is above |
@@ -864,15 +959,40 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sound.tick_seconds` | `1` | general | Seconds between ticks |
 | `sound.voices` | `""` | general | Sound of each kind of event |
 | `sound.volume` | `40` | general | Volume of the page |
+| `sources.multi_owner` (secure) | `false` | extci | Accounts of more than one owner |
 | `startup.resume_max_age_hours` | `12` | basic | Show the last picture after a restart (hours) |
 | `stuck_minutes` | `120` | polling | A build is stuck after |
 | `targets_file` | `-` | paths | Build targets file |
+| `teamwork.auto_rerun` (secure) | `false` | teamwork | Re-run once by itself after an infrastructure failure |
+| `teamwork.bot_authors` | `["dependabot[bot]", "renovate[bot]"]` | teamwork | Bot accounts of dependency updates |
+| `teamwork.bot_branches` | `["dependabot/*", "renovate/*"]` | teamwork | Branch patterns of dependency updates |
+| `teamwork.bot_labels` | `["dependencies"]` | teamwork | Labels of dependency updates |
+| `teamwork.cancel_policy` (secure) | `[]` | teamwork | Runs that should not run (repository:workflow:branch) |
+| `teamwork.dismiss_allowed` (secure) | `[]` | teamwork | People allowed to dismiss alerts |
+| `teamwork.dismiss_days` | `30` | teamwork | Days a red run stays set aside |
+| `teamwork.dismissed_alerts` | `false` | teamwork | Watch dismissed security alerts |
+| `teamwork.enabled` (secure) | `false` | teamwork | Collaboration views and actions |
+| `teamwork.forks_help` | `false` | teamwork | Facts about authors of fork runs |
+| `teamwork.hide_workflows` | `["Dependabot Updates"]` | teamwork | Workflows hidden from these views |
+| `teamwork.inactive_workflows` | `false` | teamwork | Find workflows switched off for inactivity |
+| `teamwork.keep_alive_days` | `0` | teamwork | Quiet days before proposing to keep a schedule alive |
+| `teamwork.queued_hours` | `6` | teamwork | Hours queued before proposing to cancel |
+| `teamwork.refresh_hours` | `6` | teamwork | Hours between reads of a repository |
+| `teamwork.repos_per_cycle` | `3` | teamwork | Repositories read per cycle |
+| `teamwork.runner_hooks` (secure) | `false` | teamwork | Accept events of self-hosted runner hooks |
+| `teamwork.stuck_hours` | `6` | teamwork | Hours running before proposing a forced cancel |
 | `tools_dir` | `-` | paths | Folder of the local signing tools |
+| `traffic.enabled` (secure) | `false` | traffic | Keep a history of downloads and traffic |
+| `traffic.keep_days` | `400` | traffic | Days to keep |
+| `traffic.repos` | `[]` | traffic | Repositories to follow |
+| `traffic.repos_per_cycle` | `2` | traffic | Repositories per cycle |
+| `traffic.views_clones` | `true` | traffic | Visits and clones too |
 | `tui.refresh_seconds` | `-` | console | Refresh |
 | `tui.theme` | `-` | console | Colours |
 | `ui.about_org_logo` | `false` | general | Organization logo in About |
 | `ui.alerts_sort` | `"server"` | general | Order of the alerts |
 | `ui.compact` | `"auto"` | general | Compact view |
+| `ui.copy_report.enabled` | `true` | ai | Copy the report of a repository |
 | `ui.now_sort` | `"ecosystem"` | general | Order of the runs happening now |
 | `ui.orientation` | `"auto"` | general | Orientation of the page |
 | `ui.palette` | `true` | general | Palette and shortcuts |
@@ -886,6 +1006,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ui.screen3_tabs` | `""` | general | Tabs of screen 3 |
 | `ui.theme` | `"auto"` | general | Colour theme |
 | `updates.check` | `true` | basic | Tell me when a newer version is published |
+| `updates.notify_window` | `true` | basic | Window that announces a new version |
 | `updates.systemd_helper` | `false` | basic | Update from the page under a systemd user service |
 | `upstream.enabled` | `false` | advanced | Follow the original repository of each fork |
 | `upstream.forks_per_request` | `8` | advanced | Forks per request |

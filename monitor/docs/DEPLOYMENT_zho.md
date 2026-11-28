@@ -186,6 +186,16 @@ docker compose pull && docker compose up -d
 gh attestation verify oci://ghcr.io/juanenrac/tools-github-actions-monitor:2.1.0 --owner JuanenRac
 ```
 
+自 2.2.0 起, 镜像还带有 Cosign 无密钥签名 (发布工作流的身份):
+
+```sh
+cosign verify ghcr.io/juanenrac/tools-github-actions-monitor:2.2.0 \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --certificate-identity-regexp '^https://github\.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/\.github/workflows/release-image\.yml@refs/tags/v'
+```
+
+**在哪里测试什么**: 容器 (非 root 用户、只读文件系统、卷、密钥、代理后的 webhook) 由 Docker audit 工作流测试; 真实 systemd 上的服务单元和超过 1 GB 的数据库由 Cross-cutting 工作流测试, 它还会恢复一个备份, 并用 GitHub 替身运行一个账户的一个周期。网络文件系统 (NFS) 和其他硬件架构未测试。
+
 ## 置于反向代理之后
 
 默认情况下,监控只监听 `127.0.0.1`。如果必须从另一台机器访问,请在前面放一个带 TLS 的反向代理,开启网络模式(`listen.network`:此时每个请求都必须带访问令牌),并声明该代理(带公开名称的 `listen.proxy_public_host`、`listen.secure_cookie` 或 `listen.trusted_proxy`)。监控会拒绝 `Host` 既不是自己的地址也不是该公开名称的任何请求,因此代理必须发送它,并且必须追加客户端的真实地址:
@@ -239,7 +249,7 @@ gh workflow run docker-audit.yml -f ref=<tag>
 本节的内容默认都是关闭的或无害的。
 
 - **可安装的应用**(`pwa.enabled`):页面提供清单、两个图标和一个小型 service worker,浏览器因此可以把监视器安装为应用。文件为 `/manifest.webmanifest`、`/sw.js`、`/pwa/offline`、`/pwa/icon-192.png` 和 `/pwa/icon-512.png`;在网络模式下,它们像其他页面一样在访问令牌之后提供。worker 只保存离线页面和图标:绝不保存页面,也绝不保存 API 的任何响应。应用回到前台或网络恢复时,页面会立即请求最新数据(`pwa.refresh_on_return`)。
-- **紧凑视图**(`ui.compact`):`auto` 在窄窗口中使用,`on` 始终使用,`off` 从不使用;`?compact=1` 或 `?compact=0` 只改变一个窗口。菜单移到顶部成为一排标签页,表格可横向滚动,触屏的点击目标至少 44 像素,对话框会跟随屏幕键盘留下的高度。
+- **紧凑视图**(`ui.compact`):`auto` 在窄窗口中使用,`on` 始终使用,`off` 从不使用;`?compact=1` 或 `?compact=0` 只改变一个窗口。菜单移到顶部成为一排标签页,表格可横向滚动,触屏的点击目标至少 44 像素,对话框会跟随屏幕键盘留下的高度。在手机上(竖屏或横屏),页眉的数字折叠在一个按钮后面,点按即可展开,本浏览器会记住该选择。在高度较低的窗口中,页面会滚动到打开的标签页,而不是让它没有高度;宽度达到 701 像素起,设置分组以列表形式显示在其面板左侧。
 - **用二维码配对**(`pairing.enabled`,仅限网络模式):打开命令面板(Ctrl+K),选择「配对手机」,再选「新二维码」。该码只能使用一次,有效 `pairing.code_minutes` 分钟;新码会使旧码失效。手机扫描后点击打开页面上的按钮,即可获得自己的令牌(一个 cookie),绝不是访问令牌。同一窗口列出已配对的设备并可收回其中一台:它的令牌立即失效。最多 `pairing.max_devices` 台设备;设备在 `pairing.device_days` 天后需重新配对(0 = 永不)。监视器只在数据文件夹的 `devices.json` 中保存每个令牌的哈希,错误的码像错误的访问令牌一样计入该地址,每次配对和每次收回都会在操作日志中留下一行。
 
 | 路由 | 作用 |

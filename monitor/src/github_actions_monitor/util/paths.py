@@ -39,12 +39,12 @@ KINDS = ("config", "data", "logs", "ai")
 PATHS_FILE_NAME = "paths.json"
 #: (kind, regular expression of the name without the `_lite` / `_demo` mark): the first line that matches wins. The same table drives the code, the migration and the doctor.
 _RULES = (
-    ("config", r"actions_monitor\.json|targets\.json|ecosystems\.json|profiles\.json|quotas\.json|lessons\.json|lessons_rules\.json|ai_models\.json|config_backups|paths\.json"),
+    ("config", r"actions_monitor\.json|targets\.json|ecosystems\.json|profiles\.json|quotas\.json|lessons\.json|lessons_rules\.json|ai_models\.json|keyring\.json|audit_checkpoint\.key|config_backups|paths\.json"),
     ("ai", r"ALERTS_BRIEF\.md|ai_alerts\.jsonl|ai_alerts_state\.json|ai_heartbeat\.json|ai_hook_state\.json|ai_notify\.jsonl|ai_notify_state\.json|ci_red\.json|INDEX\.json|LESSONS\.md"),
     ("logs", r"actions_monitor_log\.txt|ai_actions_log\.jsonl|github_actions_log\.jsonl|auth_audit\.jsonl|ai_prompts\.jsonl|loop\.log"),
     ("data", r"etag_cache\.json|events_monitor\.jsonl|events_state\.json|eventos_monitor\.jsonl|eventos_estado\.json|analytics_history\.json|sentinel_cache\.json|sentinel_history\.json|"
              r"sentinel_ai_cache\.json|collab_state\.json|security_state\.json|supply_state\.json|delivery_state\.json|alert_mutes\.json|failures\.jsonl|update_check\.json|welcome_state\.json|orgs_state\.json|degraded\.json|targets\.candidates\.json|"
-             r"devices\.json|storage\.sqlite3|org_logo\.(?:png|jpg|webp|svg|tmp)|access_token|credential|accounts|state|secrets|_global|_no_workspace|update_history\.jsonl"),
+             r"devices\.json|audit_export_state\.json|compliance_state\.json|storage\.sqlite3|org_logo\.(?:png|jpg|webp|svg|tmp)|access_token|credential|accounts|state|secrets|_global|_no_workspace|update_history\.jsonl"),
 )
 _COMPILED = tuple((kind, re.compile(r"^(?:" + body + r")\Z")) for kind, body in _RULES)
 _VARIANT = re.compile(r"_(lite|demo)(?=\.|$)")

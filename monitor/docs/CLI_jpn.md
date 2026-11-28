@@ -19,7 +19,7 @@
 | `backup` | インストール全体の完全バックアップ（モニターが動いていなくても可）：`backup create [FILE] [--account ID]`、`verify FILE [--deep]`、`restore FILE [--account ID] [--to-dir DIR] [--force]`、`status`、`list`。`--encrypt` と `--key-env NAME` で暗号化（任意のライブラリ）。[OPS_jpn.md](OPS_jpn.md) を参照 | 不可 |
 | `accounts` | スーパーバイザーのアカウント一覧（複数アカウント時のみ） | 不可 |
 | `alerts` | すべての番人のアラートを 1 つの一覧で：`--sentinel ci\|collab\|security\|supply\|delivery`、`--level info\|warning\|error`、`--muted show\|hide\|only`；`--since 90m|24h|7d|2w` はその期間のどこかで開いていたものを、閉じたものも含めて一覧にします（モニターが動作中に保持する履歴から。アラートは 10 分間見えなくなると閉じたと数えます） | 不可 |
-| `proposals` | AI が提案した操作（`ai.actions.enabled`）：`proposals list`、`show ID`、`approve ID`、`reject ID`、`execute ID`（ID は短縮できます）。`approve` と `reject` は決定を記録するだけです。`execute` はページと同じ入口で実行し、`ai.actions.execute` が必要で、`ai.actions.require_approval` がオンなら先に承認が必要です。承認・却下・実行はこのコンピューターからのみ可能です | 不可 |
+| `proposals` | AI が提案した操作（`ai.actions.enabled`）：`proposals list`、`show ID`、`approve ID`、`reject ID`、`execute ID`（ID は短縮できます）。`approve` と `reject` は決定を記録するだけです。`execute` はページと同じ入口で実行し、`ai.actions.execute` が必要で、`ai.actions.require_approval` がオンなら先に承認が必要です。承認・却下・実行はこのコンピューターからのみ可能です 利用者が1人の場合、`approve` には `--code` とハッシュの先頭8文字が必要です。複数の場合はページの自分のセッションで承認します（2人）。 | 不可 |
 | `score` | アカウントのスコア：数値、文字評価、傾向、要素、カバレッジ、リポジトリ別の内訳。`--compare` で期間の履歴と比較します | 不可 |
 | `compare` | 今の期間と直前の期間の比較：数値とその変化・方向、悪化または改善したもの。`--window 7\|30d`、`--days all\|workdays\|weekend`、`--baseline previous\|year_ago`、`--format table\|json\|ndjson\|csv`。数値のデータが少ないと終了コード 4、`--fail-on` 指定で悪化があれば 5。他のコマンドでの `--format csv` は誤用（終了コード 1） | 不可 |
 | `api` | クライアント向けの読み取りAPI:`api openapi` は固定された各ルートの OpenAPI 文書を出力し(ファイルにリダイレクトできます)、`api me` はモニターがこのクライアントを何者と見ているか(モード、ユーザー、ロール、セッションができること、契約のバージョン)を示します。`api.v1_enabled` が閉じているモニターはそう伝えます。`api contract-check` はクライアント向けの契約スイートをそれに対して実行します(検査が失敗すると終了コード4) | 不可 |
@@ -30,6 +30,8 @@
 | `briefs` | AI ツールが読むタブごとのブリーフ:`briefs index`、`briefs show TAB`、`briefs all` | 可 |
 | `docs` | このバージョンのガイドをインストール先から読み取ります（モニター不要）: `docs list` はタイトル付きで一覧し、`docs show NAME` は `--lang` の言語で 1 件を表示します | いいえ |
 | `screens` | ページの「画面」メニュー:`screens list`(画面の種類と開けるかどうか)と `screens urls`(キオスクのコマンドにそのまま使える完全なアドレス) | 不可 |
+| `keyring` | 署名できる公開鍵: `keyring list`、`add`（`--key-id`、`--public-key`、`--key-scope`、`--expires`）、`revoke --key-id`、`verify --document FILE`。モニター不要、秘密鍵は拒否 | いいえ |
+| `verify-release` | ダウンロードしたリリースファイルのフォルダーをネットワークなしで SHA256SUMS と署名により確認: `verify-release --folder DIR`。信頼できない場合は終了コード 4 ほかに `--installed`（部品表とこのインストールの比較）、`--attestations`、`--fetch`（`ops.verify_release.fetch` が必要）。`doctor --verify-release DIR` はインストールを確認し、`keyring check-rotation --document FILE` は新しい鍵の告知を確認します。 | いいえ |
 | `toolbox` | モニターを起動せずにこのコンピューター上で動く運用者向けの小さなツール：`toolbox limits [N]`（設定と上限の比較）、`toolbox workspaces`（ワークスペースと使用中のもの）、`toolbox ledger [--force]`（送信済み通知の台帳。`--force` で消去）、`toolbox summary`（種類・リポジトリ・日別のイベント数）、`toolbox export-events FILE`（名前の末尾に応じて jsonl、csv、parquet、duckdb でイベントを書き出し。parquet と duckdb は各パッケージが必要で、ファイルは新規であること） | いいえ |
 | `credential` | すべてが動いたまま、1つのアカウントの GitHub ログインを差し替える:`credential replace\|reload [--account ID] [--new-token-file FILE\|-]`。トークンは表示しません | 不可 |
 | `install-skill` | モニターのスキル(`internal` または `external`)を、AI ツールがスキルを読むフォルダーにコピーします:`install-skill external --dest FOLDER`。モニターが動いている必要はありません | 不可 |
@@ -38,6 +40,10 @@
 | `completions` | `bash`、`zsh`、`fish`、`powershell` の補完スクリプト。実際のパーサーから作られ、出力するだけです | 不可 |
 | `kiosk` | テレビや壁面向けのモニターのアドレス（`ops`、`team`、`release`、`quiet`）。[KIOSK_jpn.md](KIOSK_jpn.md) を参照 | 不可 |
 | `metrics` | cron とメール向けに数値を `名前=値` の行で出力します。`--if-problem` を付けると問題がないときは何も出力しません。[CLI_OPERATOR.md](CLI_OPERATOR.md) を参照 | いいえ |
+| `posture` | リポジトリと組織の体制、読み取り専用(`posture status|matrix|check --repo-name`)。[POSTURE.md](POSTURE_jpn.md) を参照 | 不可 |
+| `traffic` | このコンピューターに保存したダウンロードとトラフィックの履歴 (`traffic status|export`)。[TRAFFIC_jpn.md](TRAFFIC_jpn.md) を参照 | 不可 |
+| `external-ci` | 外部CIソース、読み取り専用(`external-ci list|status|probe --source`)。[EXTERNAL_CI.md](EXTERNAL_CI_jpn.md) を参照 | 不可 |
+| `plugin` | プラグイン: `plugin list|validate|pack|verify|init|install|enable|disable|uninstall|audit`。参照: [PLUGINS.md](PLUGINS_jpn.md) | 不可 |
 
 全コマンド共通のオプション：`--json`（応答を 1 つの JSON 文書で：`{"ok", "exit", "data"}`）、`--account ID`、`--url URL`、`--lite`（ポート 8766）、`--timeout 秒`（1〜60）、`--lang コード`。ネットワークモードではアクセストークンを、モニター自身が読む環境変数 `MONITOR_ACCESS_TOKEN` に設定します(`MONITOR_TOKEN` は別名として受け付けます。`--token TOKEN` は最後の手段で、オプションはプロセス一覧に表示されるためです)。優先順位は `MONITOR_ACCESS_TOKEN`、`MONITOR_TOKEN`、`--token` の順です。ヘッダー `X-Monitor-Access` で送られ、アドレスや画面には出ません。別のコンピューターへの暗号化されていない `http` の `--url` では stderr に警告を出します(トークンと応答が平文で送られるため)。管理下にないネットワークでは `https` を使ってください。
 
@@ -95,3 +101,24 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python bin/monitor
 ## バックアップと doctor
 
 `backup` と `doctor` はインストールのフォルダを対象に動作するため、モニターが動いている必要はありません。`doctor` は、すべて正常なら (警告があっても) `0`、チェックが失敗したら `1`、警告のみで `--strict` (または `ops.doctor.strict_exit`) がオンなら `3`、doctor 自体を実行できなければ `4` で終了します。これは doctor のコードで、他のコマンドは上の終了コードのままです。`backup` は完了すれば `0`、拒否された場合やパッケージの検証に失敗した場合は `1` で終了します。チェック、復元、定期バックアップは [OPS_jpn.md](OPS_jpn.md) のガイドにあります。 doctor には `compare_window`（2 期間の比較が、必要とし保持する履歴で期間 2 つ分さかのぼれるか）と `etag`（ここで動いているモニターで条件付き読み取りが 304 で返された割合と、GitHub の応答が ETag なしで届いていないか）もあります。
+
+## リポジトリの識別と複数の所有者
+
+コマンドライン：`identity status`、`identity plan`、`identity apply`。
+
+```
+python bin/monitor_cli.py identity plan
+```
+
+## コンプライアンスと操作ログ
+
+`compliance report` はこのインストールの保証を表示します。`audit verify|checkpoint|purge|export` は操作ログの連鎖を扱います。[COMPLIANCE_jpn.md](COMPLIANCE_jpn.md) を参照してください。
+
+## コマンド: actions, runner-hook
+
+```
+python bin/monitor_cli.py actions proposals
+python bin/monitor_cli.py runner-hook started
+```
+
+[COLLABORATION_jpn.md](COLLABORATION_jpn.md)

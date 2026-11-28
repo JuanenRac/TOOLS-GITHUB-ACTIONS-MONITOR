@@ -82,7 +82,8 @@ class TheChecks(unittest.TestCase):
     def test_the_complete_edition_adds_its_checks_after_the_others_and_the_lite_one_does_not(self):
         runner = lambda *a, **k: (1, "", "")      # noqa: E731
         complete = doctor.run(runner=runner, folder=self.base, ports=(), config={}, edition="complete")
-        self.assertEqual([c["id"] for c in complete], list(doctor.ORDER + doctor.ORDER_OPS))
+        from github_actions_monitor import families
+        self.assertEqual([c["id"] for c in complete], list(doctor.ORDER + doctor.ORDER_OPS) + [c.id for c in families.checks()])      # those of the parts come last
         for edition in (None, "lite"):
             self.assertEqual([c["id"] for c in doctor.run(runner=runner, folder=self.base, ports=(), config={}, edition=edition)], list(doctor.ORDER))
         for name in doctor.ORDER_OPS:

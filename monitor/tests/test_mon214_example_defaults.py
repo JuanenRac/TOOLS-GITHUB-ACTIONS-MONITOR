@@ -7,6 +7,7 @@ import unittest
 from pathlib import Path
 
 import _testenv  # noqa: F401
+from github_actions_monitor import families  # noqa: E402
 from github_actions_monitor.app import actions_monitor as am  # noqa: E402
 from github_actions_monitor.app import settings_api as sa  # noqa: E402
 from github_actions_monitor.data_pipeline import readpool  # noqa: E402
@@ -34,8 +35,9 @@ def walk(tree, key):
 class TheExampleCarriesEverySetting(unittest.TestCase):
     def test_every_setting_is_in_the_example_but_the_computed_ones(self):
         missing = []
+        parts = {row.key for row in families.settings()}      # a part keeps its defaults in its own folder (families/): the template does not repeat them
         for key in sa.FIELDS:
-            if key in sa.STATUS_KEYS:
+            if key in sa.STATUS_KEYS or key in parts:
                 continue
             try:
                 example(key)

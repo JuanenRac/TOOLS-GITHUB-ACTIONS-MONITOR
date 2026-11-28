@@ -144,13 +144,17 @@ def prepare_accounts(env=None):
     if accounts.list_accounts():
         return []
     made = []
-    for account_id, owner in parse_accounts(env):
+    wanted = parse_accounts(env)
+    several = len({owner.lower() for _ident, owner in wanted if owner}) > 1      # listing several owners by hand is the choice of the person: it is written down as sources.multi_owner
+    for account_id, owner in wanted:
         try:
             path = accounts.create_account(account_id, owner)
         except FileExistsError:
             continue
         data = read_json(path) or {}
         data.setdefault("retention", {"enabled": True, "mode": "archive"})
+        if several:
+            data["sources"] = {**(data.get("sources") if isinstance(data.get("sources"), dict) else {}), "multi_owner": True}
         data["open_browser"] = False
         private_io.write_private(path, json.dumps(data, ensure_ascii=False, indent=2) + "\n")
         made.append(account_id)

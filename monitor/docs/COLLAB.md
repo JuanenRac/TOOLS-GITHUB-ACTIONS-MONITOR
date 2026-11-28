@@ -9,6 +9,8 @@
 
 A second sentinel next to the CI one. It looks at the **open issues and pull requests** of your repositories and tells you what needs a person: forgotten issues, critical labels, reviews that nobody does, drafts that never end, conflicts that stay. It runs on a clock of its own, never changes what the CI sentinel decides, and **never writes to GitHub**. It belongs to the complete edition; the lite edition does not load it.
 
+The Collaboration tab and the Alerts tab also carry optional boxes with their own guides: [collaboration views and actions](COLLABORATION.md) and [proposals, chat and report of a repository](ASSISTANT.md).
+
 ## Switch it on
 
 It is off by default. Settings > Sentinel > Issues and pull requests, or in `actions_monitor.json`:
@@ -41,7 +43,7 @@ A round reads at most `max_repos_per_tick` repositories, two conditional request
 ## Less noise: ignore and silence
 
 - **Ignore label**: put a label from `ignore_labels` (`monitor:ignore` by default) on the issue or pull request **on GitHub** and Collab raises no alert for it. The monitor never writes labels itself.
-- **Silence in the monitor**: in the Alerts tab, each alert has buttons to silence this alert, its rule or the whole sentinel for `alerts.mute_hours` hours (24 by default, 1 to 720). It lapses by itself, can be restored at any time, and the tab keeps a short history of what was silenced and until when. It is a note of this monitor; nothing changes on GitHub. In the network mode a silence can only be made (and lifted) from the computer where the monitor runs (`this_computer`); a client of the network sees the silences and cannot change them. This stays so until a later edition has users of its own. A silence of one alert can also last "until the item changes" (`until_change` in the request of `POST /api/alerts/mute`): it ends at once when the `updated_at` of the issue or pull request changes, or at the end of the hours, whichever comes first. In the Alerts tab this is the button **Until it changes**, shown on the alerts that carry the `updated_at` of their item (the ones of the Collab sentinel); the silenced alert then reads "silenced until it changes".
+- **Silence in the monitor**: in the Alerts tab, each alert has buttons to silence this alert, its rule or the whole sentinel for `alerts.mute_hours` hours (24 by default, 1 to 720). It lapses by itself, can be restored at any time, and the tab keeps a short history of what was silenced and until when. It is a note of this monitor; nothing changes on GitHub. In the network mode a silence can only be made (and lifted) from the computer where the monitor runs (`this_computer`); a client of the network sees the silences and cannot change them. The same holds in the team mode, whatever the role of the user. A silence of one alert can also last "until the item changes" (`until_change` in the request of `POST /api/alerts/mute`): it ends at once when the `updated_at` of the issue or pull request changes, or at the end of the hours, whichever comes first. In the Alerts tab this is the button **Until it changes**, shown on the alerts that carry the `updated_at` of their item (the ones of the Collab sentinel); the silenced alert then reads "silenced until it changes".
 
 ## Where you see it
 

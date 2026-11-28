@@ -28,3 +28,15 @@
 - **Rauchtest externer Quellen**: der wöchentliche Workflow `sources-smoke.yml` führt `tools/smoke_sources.py` gegen die echte Statusseite, die Advisories, die Beschreibung der REST-API und das letzte Release aus und scheitert, wenn eine ihr Format geändert hat.
 - **Grenzen**: `tools/limits_check.py` betreibt den Monitor mit einem Konto von 120 Workflows in einem Container mit einem Prozessor und 512 MB.
 - **Reihenfolge des Releases**: das GitHub-Release als ENTWURF anlegen und den Tag `vX.Y.Z` pushen; `release-image.yml` baut und veröffentlicht das Image und veröffentlicht den Entwurf erst, wenn es für beide Plattformen unter seinem Tag antwortet. Das Werkzeug zum Veröffentlichen legt das Release als ENTWURF an, lädt `github_actions_monitor.zip`, `SHA256SUMS` und `monitor_updater.py` hoch, prüft, dass alle da sind, und veröffentlicht erst dann (unveränderliche Releases nehmen danach keine Datei mehr an); mit dem Image zuerst pusht es den Tag und `release-image.yml` veröffentlicht den Entwurf.
+
+## Arbeiten mit einem KI-Assistenten
+
+Für eine mit einem KI-Assistenten geschriebene Änderung gelten dieselben Regeln, und wer sie einreicht, steht dafür ein: jede Zeile lesen, die Tests ausführen und dem Assistenten niemals ein Token, ein Protokoll mit privaten Namen oder den Inhalt von `actions_monitor.json` geben. Die beiden Skills, die mit dem Monitor ausgeliefert werden (`monitor/skills/external/SKILL.md` für ein Werkzeug, das mit einem laufenden Monitor spricht, `monitor/skills/internal/SKILL.md` für die eingebaute KI), sind Teil des Produkts: eine neue Einstellung, Route oder ein neuer Befehl aktualisiert sie (`python tools/make_skill_refs.py`). Wozu das Produkt da ist und was es nie tun darf, steht in `PRODUCT_deu.md`.
+
+## macOS: die Quarantänemarke
+
+Die Dateien sind nicht mit einem Apple-Zertifikat signiert. Ein mit dem Browser geladenes Zip trägt die Quarantänemarke, und macOS kann das Öffnen der `.command`-Starter verweigern. Prüfe zuerst das Release (siehe `monitor/docs/UPDATE_deu.md`) und entferne dann die Marke vom entpackten Ordner. macOS wird derzeit nicht getestet.
+
+```sh
+xattr -dr com.apple.quarantine /path/to/github_actions_monitor
+```

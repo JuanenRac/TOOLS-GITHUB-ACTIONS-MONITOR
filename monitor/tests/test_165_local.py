@@ -595,10 +595,10 @@ class GateStages(unittest.TestCase):
         def fake(cmd, **kw):
             seen.update(cmd=cmd, env=kw["env"], timeout=kw.get("timeout"))
             return subprocess.CompletedProcess(cmd, 0, "Ran 1 test\nOK\n", "")
-        with mock.patch.object(mr.subprocess, "run", fake):
+        with mock.patch.object(mr.subprocess, "run", fake), mock.patch.dict(os.environ, {"MONITOR_RELEASE_TEST_TIMEOUT": "4321"}):      # the workflow of the gate sets its own limit
             mr.run_tests()
         self.assertEqual(seen["env"]["MONITOR_NO_NESTED"], "1")
-        self.assertEqual(seen["timeout"], mr.TEST_TIMEOUT)
+        self.assertEqual(seen["timeout"], 4321)
 
     def test_a_failure_shows_stdout_and_stderr_and_a_hang_is_a_failure(self):
         with mock.patch.object(mr.subprocess, "run", return_value=subprocess.CompletedProcess([], 1, "OUT-TEXT", "ERR-TEXT")):

@@ -42,3 +42,16 @@ In Impostazioni, scheda IA, il blocco **Skill per le IA** ha Copia (il nucleo de
 ## Impostazioni
 
 `ai.skill` (attivo) e `ai.skill_max_chars` (3000; 1500 per un piccolo modello locale). Registrare fallimenti dall'esterno è `POST /api/ai/failures` e richiede `lessons.allow_write` e un amministratore, come scrivere una lezione.
+
+## Pubblicazione in un registro di skill
+
+`python tools/prepare_skill_bundle.py --out DIR` prepara la cartella della skill esterna (SKILL.md, riferimenti, `bundle.json` con la versione del monitor e la licenza, `SHA256SUMS`); le stesse fonti danno gli stessi byte. Non pubblica nulla: il caricamento su ClawHub si fa a mano, con l'account del responsabile, dopo aver letto le condizioni.
+
+## Assistenti
+
+Si dice provato solo ciò che è stato davvero provato.
+
+| Assistente o via | Riga di comando | HTTP e file | MCP |
+|---|---|---|---|
+| Un assistente di codice in terminale | provato | provato | compatibile per protocollo, non provato |
+| Altri assistenti | compatibile per protocollo, non provato | compatibile per protocollo, non provato | compatibile per protocollo, non provato |

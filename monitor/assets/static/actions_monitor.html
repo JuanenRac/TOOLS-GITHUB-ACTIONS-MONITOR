@@ -128,7 +128,10 @@ svg{display:block;max-width:none}svg text{fill:var(--mut);font-size:12px}
 #t-hist,#t-repos{grid-template-rows:minmax(0,1fr)}
 /* Sentinel */
 .sortbar{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:0 0 8px}.sortbar select{max-width:100%}.sortbar .foldbtns{display:flex;flex-wrap:wrap;gap:6px}
-#t-al,#t-rep,#t-les{grid-template-columns:minmax(0,1fr);overflow:auto}#al-filters{align-items:center;gap:10px;margin:0 0 10px}#al-chips button{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:999px;padding:3px 12px;margin:0 4px 0 0;cursor:pointer}#al-chips button[aria-pressed=true]{background:var(--acc);color:var(--on-acc,#fff);border-color:var(--acc)}
+#t-al,#t-rep,#t-les{grid-template-columns:minmax(0,1fr);overflow:auto}
+/* the boxes of the optional parts (FAM.panel) keep the height of what they hold: the tab scrolls, they are never squeezed under the boxes of the page */
+.tab>section.fam{min-height:max-content;flex-shrink:0}.tab>section.fam>.body{flex:0 0 auto}.tab.on:has(>section.fam){overflow:auto}
+#al-filters{align-items:center;gap:10px;margin:0 0 10px}#al-chips button{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:999px;padding:3px 12px;margin:0 4px 0 0;cursor:pointer}#al-chips button[aria-pressed=true]{background:var(--acc);color:var(--on-acc,#fff);border-color:var(--acc)}
 .alrow{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:6px 10px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}.alrow.muted{opacity:.6}.alrow .tt{min-width:0;overflow-wrap:anywhere}.alrow .acts{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}.alrow .acts button{font-size:12px;padding:2px 8px}.origin{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:1px 8px;border-radius:6px;border:1px solid var(--line)}.origin.ci{border-color:var(--acc);color:var(--acc)}.origin.collab{border-color:var(--ok);color:var(--ok)}
 @media (max-width:700px){.alrow{grid-template-columns:auto minmax(0,1fr)}.alrow .tt{grid-column:1/-1}.alrow .acts{grid-column:1/-1;justify-content:flex-start}.alrow>.chip,.alrow>.origin{justify-self:start}}
 .trbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-bottom:8px}.trbar select{max-width:100%}.trbig{margin-bottom:10px}.trlegend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}.trleg{display:inline-flex;align-items:center;gap:4px}.trleg.off{opacity:.45;text-decoration:line-through}.trwrap{position:relative}.trsvg{display:block;width:100%;height:auto;max-height:46vh;background:var(--panel2);border:1px solid var(--line);border-radius:6px}.trtip{position:absolute;top:4px;left:0;z-index:2;background:var(--panel);border:1px solid var(--line2);border-radius:4px;padding:3px 7px;font-size:12px;pointer-events:none;max-width:90%}.trax{font-size:10px;fill:var(--mut)}.trthr{stroke:var(--warn);stroke-width:1;stroke-dasharray:3 3}.trgrid0{stroke:var(--line2);stroke-width:1}.trev{stroke:var(--mut);stroke-width:1;stroke-dasharray:1 3}.trev.incident{stroke:var(--bad)}.trev.release{stroke:var(--ok)}.trevm{font-size:10px;fill:var(--mut)}.trevm.incident{fill:var(--bad)}.trevm.release{fill:var(--ok)}.trbar .trmsg{font-size:12px}.trcur{stroke:var(--text);stroke-width:1}.trgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}.trcard.spk{display:block;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);cursor:pointer}.trcard.sel{border-color:var(--run);box-shadow:0 0 0 1px var(--run)}.trcard .trh{display:flex;justify-content:space-between;gap:6px}.trcard .trh>span{min-width:0;flex:1 1 auto}.trcard .trh>b{flex:0 0 auto;overflow:visible;text-overflow:clip;white-space:nowrap}.trcard .trdl{font-size:11px;display:flex;flex-wrap:wrap;gap:2px 8px;margin:2px 0}.trd.good{color:var(--ok)}.trd.bad{color:var(--bad)}.trcard svg{height:34px}
@@ -375,7 +378,7 @@ nav .dot{display:inline-block;min-width:18px;padding:0 5px;margin-left:auto;bord
 .tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 @media (max-width:800px){.shell{flex-direction:column;overflow:auto}.sidebar{width:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 10px;border-right:0;border-bottom:1px solid var(--line)}
 .side-toggle,.side-foot .nl,.nav-group-title{display:none}.sidebar nav{flex:1 1 100%;order:3;flex-direction:row;overflow-x:auto;overflow-y:hidden;gap:6px}.nav-group,.nav-items,.nav-group.folded .nav-items{display:flex;gap:4px;align-items:center}
-.sidebar nav button[role=tab]{width:auto;padding:6px 10px}.side-foot{order:2;margin-left:auto}.side-foot button{width:auto;min-width:44px}#accbar{order:4;flex:1 1 100%}.stage{min-height:70vh}}
+.sidebar nav button[role=tab]{width:auto;flex:0 0 auto;white-space:nowrap;padding:6px 10px}.nav-group,.nav-items{flex:0 0 auto}.side-foot{order:2;margin-left:auto}.side-foot button{width:auto;min-width:44px}#accbar{order:4;flex:1 1 100%}.stage{min-height:70vh}}
 @media (prefers-reduced-motion:no-preference){.lg-pulse{stroke-dasharray:60;animation:lg-run 3.4s ease-in-out infinite}.lg-led{animation:lg-led 2.4s ease-in-out infinite}
 @keyframes lg-run{0%{stroke-dashoffset:60}45%,100%{stroke-dashoffset:0}}@keyframes lg-led{0%,100%{opacity:1}50%{opacity:.35}}}
 /* the themes: the page, the side panel, the panels, the lines, the text, the accent, the corners and the letters come from the variables of each one; the status colours (green, red, amber) stay the same in all */
@@ -464,13 +467,33 @@ header .tile.wide{min-width:0;grid-column:span 2}
 @media (min-width:3200px) and (min-height:1800px){html{zoom:1.6}}
 /* compact profile, touch targets, palette and pairing (ui_extras.js) */
 @media (pointer:coarse){button,select,summary,.nav-group-title,nav[role=tab] button{min-height:44px}.ib{min-width:44px}input:not([type=checkbox]):not([type=radio]):not([type=range]){min-height:44px}}
-:root.compact button,:root.compact select,:root.compact summary,:root.compact .nav-group-title,:root.compact [role=tab]{min-height:44px}:root.compact .ib{min-width:44px}:root.compact input:not([type=checkbox]):not([type=radio]):not([type=range]){min-height:44px}
+:root.compact button,:root.compact select,:root.compact summary,:root.compact .nav-group-title,:root.compact [role=tab]{min-height:44px}:root.compact button{min-width:44px}:root.compact .ib{min-width:44px}:root.compact input:not([type=checkbox]):not([type=radio]):not([type=range]){min-height:44px}
 :root.compact .shell{flex-direction:column;overflow:auto}:root.compact .sidebar{width:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:6px 8px;border-right:0;border-bottom:1px solid var(--line)}
 :root.compact .side-toggle,:root.compact .side-foot .nl,:root.compact .nav-group-title{display:none}:root.compact .sidebar nav{flex:1 1 100%;order:3;flex-direction:row;overflow-x:auto;overflow-y:hidden;gap:6px}
 :root.compact .nav-group,:root.compact .nav-items,:root.compact .nav-group.folded .nav-items{display:flex;gap:4px;align-items:center}:root.compact .sidebar nav button[role=tab]{width:auto;padding:6px 10px;white-space:nowrap}
 :root.compact .side-foot{order:2;margin-left:auto}:root.compact .side-foot button{width:auto;min-width:44px}:root.compact #accbar{order:4;flex:1 1 100%}:root.compact .stage{min-height:70vh}
+/* the header of a phone is taller than the screen: the tab under it takes the height of what it holds and the whole page scrolls to it (it was left with no height at all) */
+:root.compact .stage{flex:0 0 auto}:root.compact .stage>main{flex:0 0 auto}:root.compact main>.tab.on{height:auto;min-height:60vh}
 :root.compact main{padding:6px 8px}:root.compact header{padding:6px 8px}:root.compact .tile{min-width:calc(50% - 4px);flex:1 1 calc(50% - 4px);padding:4px 8px}:root.compact .tile b{font-size:17px}
 :root.compact .tab{overflow-x:auto}:root.compact table{display:block;max-width:100%;overflow-x:auto}:root.compact #statusbar .sb-opt{display:none}:root.compact .card{min-width:0}
+/* short windows (a phone held sideways, a small laptop window): the header would take the whole height, so the open tab takes the height of what it holds and the page scrolls to it. Not on a wall (kiosk) */
+@media screen and (max-width:800px) and (max-height:800px){body:not(.kiosk):not(.allmode) .stage{flex:0 0 auto}body:not(.kiosk):not(.allmode) .stage>main{flex:0 0 auto}body:not(.kiosk):not(.allmode) main>.tab.on{height:auto;min-height:60vh}}
+@media screen and (min-width:801px) and (max-height:600px){body:not(.kiosk):not(.allmode) .stage{overflow-y:auto}body:not(.kiosk):not(.allmode) .stage>*{flex:0 0 auto}body:not(.kiosk):not(.allmode) main>.tab.on{height:auto;min-height:60vh}}
+/* the groups of Settings are a list on the left of their panel (a narrow window or the compact view keeps them above it) */
+@media screen and (min-width:701px){:root:not(.compact) #t-cfg section>.body{display:grid;grid-template-columns:clamp(180px,24%,280px) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto}
+:root:not(.compact) #cfg-restart{grid-column:1/-1;grid-row:1}:root:not(.compact) #cfg-netwarn{grid-column:1/-1;grid-row:2}
+:root:not(.compact) .cfg-top{grid-column:1;grid-row:3;flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:6px;min-height:0;margin:0 12px 0 0;padding:0 8px 0 0;border-bottom:0;border-right:1px solid var(--line)}
+:root:not(.compact) #cfg-search{order:-1;min-width:0;width:100%;box-sizing:border-box;margin:0}
+:root:not(.compact) #cfg-tabs{flex:1 1 0;min-height:0;flex-direction:column;flex-wrap:nowrap;gap:2px;overflow-x:hidden;overflow-y:auto}
+:root:not(.compact) #cfg-tabs button{flex:0 0 auto;justify-content:flex-start;text-align:left;overflow-wrap:anywhere;border-bottom:1px solid transparent;border-radius:8px}
+:root:not(.compact) #cfg-tabs button[aria-selected=true]{border-color:var(--line)}
+:root:not(.compact) #cfg-panels{grid-column:2;grid-row:3}:root:not(.compact) #t-cfg .cfg-bar{grid-column:1/-1;grid-row:4}}
+@media screen and (min-width:701px) and (max-height:600px),screen and (min-width:701px) and (max-width:800px) and (max-height:800px){:root:not(.compact) #cfg-tabs{flex:0 0 auto;max-height:75vh}}
+/* on a phone, upright or sideways, the figures of the header are folded behind one button (ui_extras.js); a wall never folds them */
+#tiles-fold{display:none}
+:root.phone body:not(.kiosk):not(.allmode) #tiles-fold{display:flex;gap:8px;align-items:center;width:100%;min-height:44px;text-align:left}
+#tiles-fold::before{content:"\25B8";flex:none}#tiles-fold[aria-expanded=true]::before{content:"\25BE"}
+:root.phone:not(.tiles-open) body:not(.kiosk):not(.allmode) header .tiles{display:none}
 .dlg-box{max-height:calc(var(--vvh,100vh) - 28px)}
 #pal-dlg{align-items:flex-start;padding-top:12vh}#pal-dlg .dlg-box{width:min(560px,96vw)}#pal-dlg .dlg-top{display:none}#pal-dlg .dlg-body{padding:12px}
 #pal-q{width:100%;box-sizing:border-box;padding:10px 12px;font:inherit}#pal-list{list-style:none;margin:8px 0 0;padding:0;max-height:50vh;overflow:auto}
@@ -544,6 +567,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <div class="hgrid">
 <div class="hmain">
 <div class="h-row h-top"><div class="top-left"><svg class="ico top-ico" aria-hidden="true" focusable="false"><use id="vt-ico" href="#i-now"/></svg><span class="view-title" id="view-title"></span></div><div class="sb-bar" id="sb-bar" role="group" data-i18n-aria="ui.bar_aria"><button id="scrm-open" class="ib" type="button" aria-haspopup="dialog" hidden data-i18n-aria="ui.scrm_btn_tip" data-i18n-title="ui.scrm_btn_tip"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-screens"/></svg></button><button id="fs" class="ib" type="button" aria-pressed="false" data-i18n-aria="ui.fs_enter" data-i18n-title="ui.fs_enter"><svg class="ico" aria-hidden="true" focusable="false"><use id="fs-ico" href="#i-full"/></svg></button><button id="hotonly" class="ib" type="button" aria-pressed="false" data-i18n-aria="ui.ic_hotonly_off" data-i18n-title="ui.ic_hotonly_off"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-flame"/></svg></button><button type="button" class="ib" id="bar-save" data-i18n-title="ui.bar_save" data-i18n-aria="ui.bar_save"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-save"/></svg></button><button type="button" class="ib" id="bar-print" data-i18n-title="ui.bar_print" data-i18n-aria="ui.bar_print"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-report"/></svg></button><button type="button" class="ib ai-ind" id="bar-ai-int" data-kind="int" data-state="off"></button><button type="button" class="ib ai-ind" id="bar-ai-ext" data-kind="ext" data-state="off"></button></div></div>
+<button type="button" id="tiles-fold" aria-expanded="false" aria-controls="tiles1 tiles2"></button>
 <div class="tiles" id="tiles1" role="group" data-i18n-aria="ui.tiles_aria1"><div class="tile skel " id="kt-active" role="button" tabindex="0" data-go="now" data-i18n-title="ui.k_active_title" data-i18n-aria="ui.k_active_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-run"/></svg><b id="k-active" data-v>–</b><small data-i18n="ui.k_active"></small></div><div class="tile skel " id="kt-queued" role="button" tabindex="0" data-go="now" data-i18n-title="ui.k_queued_title" data-i18n-aria="ui.k_queued_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-queue"/></svg><b id="k-queued" data-v>–</b><small data-i18n="ui.k_queued"></small></div><div class="tile skel kclick" id="kp-fail" role="button" tabindex="0" data-i18n-title="ui.k_fail_title" data-i18n-aria="ui.k_fail_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-fail"/></svg><b id="k-fail" data-v>–</b><small data-i18n="ui.k_fail"></small></div><div class="tile skel " id="kt-ok" role="button" tabindex="0" data-go="hist" data-i18n-title="ui.k_ok_title" data-i18n-aria="ui.k_ok_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-okc"/></svg><b id="k-ok" data-v>–</b><small data-i18n="ui.k_ok"></small></div><div class="tile skel " id="kt-min" role="button" tabindex="0" data-go="charts" data-i18n-title="ui.k_min_title" data-i18n-aria="ui.k_min_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-timer"/></svg><b id="k-min" data-v>–</b><small data-i18n="ui.k_min"></small></div><div class="tile skel " id="kt-issues" role="button" tabindex="0" data-go="sent" data-i18n-title="ui.k_issues_title" data-i18n-aria="ui.k_issues_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-alert"/></svg><b id="k-issues" data-v>–</b><small data-i18n="ui.k_issues"></small></div><div class="tile skel kclick" id="kp-red" role="button" tabindex="0" data-i18n-title="ui.k_red_title" data-i18n-aria="ui.k_red_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-flag"/></svg><b id="k-red" data-v>–</b><small data-i18n="ui.k_red"></small></div><div class="tile skel kclick" id="kp-sign" role="button" tabindex="0" data-i18n-title="ui.k_sign_title" data-i18n-aria="ui.k_sign_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-pen"/></svg><b id="k-sign" data-v>–</b><small data-i18n="ui.k_sign"></small></div></div>
 <div class="tiles" id="tiles2" role="group" data-i18n-aria="ui.tiles_aria2"><div class="tile skel " id="kt-repos" role="button" tabindex="0" data-go="repos" data-i18n-title="ui.t_repos_title" data-i18n-aria="ui.t_repos_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repo"/></svg><b id="tv-repos" data-v>–</b><small data-i18n="ui.t_repos"></small></div><div class="tile skel " id="kt-hot" role="button" tabindex="0" data-go="repos" data-i18n-title="ui.t_hot_title" data-i18n-aria="ui.t_hot_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-flame"/></svg><b id="tv-hot" data-v>–</b><small data-i18n="ui.t_hot"></small></div><div class="tile skel " id="kt-mode" role="button" tabindex="0" data-go="cfg:general" data-i18n-title="ui.t_mode_title" data-i18n-aria="ui.t_mode_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-sliders"/></svg><b id="tv-mode" data-v>–</b><small data-i18n="ui.t_mode"></small></div><div class="tile skel " id="kt-etag" role="button" tabindex="0" data-go="cfg:cache" data-i18n-title="ui.t_etag_title" data-i18n-aria="ui.t_etag_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-save2"/></svg><b id="tv-etag" data-v>–</b><small data-i18n="ui.t_etag"></small></div><div class="tile skel wide" id="kt-quota" role="button" tabindex="0" data-go="cfg:polling" data-i18n-title="ui.t_quota_title" data-i18n-aria="ui.t_quota_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gauge"/></svg><b id="tv-quota" data-v>–</b><small><span data-i18n="ui.t_quota"></span> · <span id="tv-renews"></span></small><span class="qbar" aria-hidden="true"><i id="tq-fill"></i></span></div><div class="tile skel " id="kt-conn" role="group" data-i18n-title="ui.t_conn_title" data-i18n-aria="ui.t_conn_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-wifi"/></svg><b id="tv-conn" data-v>–</b><small data-i18n="ui.t_conn"></small><span class="vh" id="tv-conn-since"></span></div><div class="tile skel " id="kt-upd" role="group" data-i18n-title="ui.t_updated_title" data-i18n-aria="ui.t_updated_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg><b id="tv-upd" data-v>–</b><small data-i18n="ui.t_updated"></small></div><div class="tile wide run" id="kt-loading" role="group" hidden data-i18n-title="ui.t_loading_title" data-i18n-aria="ui.t_loading_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-spin"/></svg><b id="tv-load">–</b><small data-i18n="ui.t_loading"></small><span class="qbar" aria-hidden="true"><i id="tl-fill"></i></span></div></div>
 </div>
@@ -712,7 +736,7 @@ function applyStatic(){
   document.querySelectorAll("[data-i18n-title]").forEach(e=>{e.title=T(e.dataset.i18nTitle)});
   document.querySelectorAll("[data-i18n-aria]").forEach(e=>{e.setAttribute("aria-label",T(e.dataset.i18nAria))});
   document.querySelectorAll("[data-i18n-ph]").forEach(e=>{e.placeholder=T(e.dataset.i18nPh)});
-  const lq="?lang="+LANG;$("lnk-txt").href="/api/sentinel/parte.txt"+lq;$("lnk-md").href="/api/sentinel/parte.txt?fmt=md&lang="+LANG;
+  const lq="?lang="+encodeURIComponent(LANG);$("lnk-txt").href="/api/sentinel/parte.txt"+lq;$("lnk-md").href="/api/sentinel/parte.txt?fmt=md&lang="+encodeURIComponent(LANG);
   try{fsSync();renderBar()}catch(e){}      // the texts of the bar and of the full screen button follow the language
 }
 var DATA=null;
@@ -798,7 +822,7 @@ function fillEco(){
 function refreshLanguage(){
   applyStatic();fillThemes();applyTheme(theme);applySide();applyGroups();setViewTitle();applyDense(DENSE);fillEco();if(typeof authRender==='function')authRender();
   if(DATA)render(DATA);
-  sentTick();diffTick();if(CFG.groups.length)cfgBuild({groups:CFG.groups.map(g=>({id:g.id,fields:g.fields,blocks:g.blocks.map(b=>({...b,fields:b.fields.map(f=>({...f,value:f.type==="status"?f.value:CFG.cur[f.key]}))}))})),restart_pending:CFG.restart,backups:parseInt(($("cfg-backups").textContent.match(/\d+/)||[0])[0])});
+  sentTick();diffTick();alertsTick();if(CFG.groups.length)cfgBuild({groups:CFG.groups.map(g=>({id:g.id,fields:g.fields,blocks:g.blocks.map(b=>({...b,fields:b.fields.map(f=>({...f,value:f.type==="status"?f.value:CFG.cur[f.key]}))}))})),restart_pending:CFG.restart,backups:parseInt(($("cfg-backups").textContent.match(/\d+/)||[0])[0])});
 }
 
 /* tabs */
@@ -922,7 +946,7 @@ function soundQuiet(c,when){if(!c.quiet||c.qfrom===c.qto)return false;const h=ne
 function soundOn(k){const c=soundCfg();return c.enabled&&!SOUND.muted&&c.types[k]!==false&&!soundQuiet(c)}
 /* which kind an alert of the list is: the code says it, else the level */
 function soundKindOf(a){const c=String(a.code||""),l=String(a.level||"");
-  if(c==="ci.red")return "red";
+  if(c==="ci.red"||c==="ci.external.red")return "red";
   if(c==="score.dropped")return "score";
   if(c==="ci.stuck"||c==="ci.ghost_queue"||c.indexOf("runner.")===0)return "stuck";
   if(c.indexOf("security.")===0||c.indexOf("system.")===0||l==="error"||l==="critical")return "sentinel";
@@ -1032,7 +1056,7 @@ const TABS=LITE?["now","charts","repos","hist","cfg"]:["now","al","charts","sent
 const TABHASH={rep:"reports",les:"lessons",team:"team-health",trep:"team-reports",upd:"updates",sent:"sentinel",sci:"sentinel-ci",scol:"sentinel-collab",ssec:"sentinel-security",sdel:"sentinel-delivery",ssup:"sentinel-supply",strend:"sentinel-trend",syvt:"sentinel-yesterday"},TABALIAS={sentinel:"sent","sentinel-ci":"sci","sentinel-collab":"scol","sentinel-security":"ssec","sentinel-delivery":"sdel","sentinel-supply":"ssup","sentinel-trend":"strend","sentinel-yesterday":"syvt",reports:"rep",lessons:"les","rep-box":"rep","les-box":"les",alerts:"al","team-health":"team","team-reports":"trep","fleet-sec":"fleet","rs-sec":"trep",updates:"upd"};
 function tabOf(h){h=String(h||"").replace(/^#/,"").replace(/\/+$/,"").toLowerCase();if(!h)return"";const p=h.split("/");if((p[0]==="alerts"||p[0]==="al")&&p.length>1)return TABALIAS[p[1]]||"al";if((p[0]==="sentinel"||p[0]==="sent")&&p.length>1)return {ci:"sci",collab:"scol",security:"ssec",sec:"ssec",delivery:"sdel",supply:"ssup",trend:"strend"}[p[1]]||"sent";if(p[0]==="team"&&p.length>1)return p[1]==="fleet"?"fleet":(p[1]==="reports"?"trep":"team");return TABALIAS[h]||h}
 let KPI_TAB="";      /* the tab a counter of the header jumped to together with a filter of repositories: leaving that tab takes the filter away, so that the list of Now and the alerts are not left cut down */
-function showTab(t){if(!TABS.includes(t))t="now";if(KPI_TAB&&t!==KPI_TAB){KPI_TAB="";if(typeof FILTER!=="undefined"&&FILTER.list)setList(FILTER.listLabel,[])}TABS.forEach(x=>{$("t-"+x).classList.toggle("on",x===t);$("n-"+x).setAttribute("aria-selected",x===t)});store.set("am-tab",t);CURTAB=t;applyGroups();setViewTitle();if(t==="upd"&&typeof updLoad==="function")updLoad();if(t==="charts")cmpLoad();if(DATA&&t==="charts")setTimeout(()=>render(DATA),30);try{const hs="#"+(TABHASH[t]||t);if(location.hash!==hs)window.history.replaceState(null,"",hs)}catch(e){}}
+function showTab(t){if(!TABS.includes(t))t="now";if(KPI_TAB&&t!==KPI_TAB){KPI_TAB="";if(typeof FILTER!=="undefined"&&FILTER.list)setList(FILTER.listLabel,[])}TABS.forEach(x=>{$("t-"+x).classList.toggle("on",x===t);$("n-"+x).setAttribute("aria-selected",x===t)});store.set("am-tab",t);CURTAB=t;applyGroups();setViewTitle();if(t==="upd"&&typeof updLoad==="function")updLoad();if(t==="charts")cmpLoad();if(DATA&&t==="charts")setTimeout(()=>render(DATA),30);try{const hs="#"+(TABHASH[t]||t);if(location.hash!==hs)window.history.replaceState(null,"",hs)}catch(e){}if(window.FAM)window.FAM.run("tab",t)}
 document.querySelector("nav").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(b)showTab(b.dataset.tab)});
 document.querySelector("nav").addEventListener("keydown",e=>{if(!["ArrowRight","ArrowLeft","ArrowDown","ArrowUp"].includes(e.key))return;e.preventDefault();const V=TABS.filter(x=>!$("n-"+x).hidden),i=V.findIndex(x=>$("n-"+x).getAttribute("aria-selected")==="true"),n=V[(i+(e.key==="ArrowRight"||e.key==="ArrowDown"?1:V.length-1))%V.length];showTab(n);$("n-"+n).focus()});
 showTab(tabOf(QS.get("tab")||location.hash.slice(1))||store.get("am-tab")||"now");
@@ -1190,6 +1214,7 @@ function showingLine(c){const g=c.ghost?'<div class="mut" id="now-ghost" role="s
 function render(d){
   try{soundWatch(d)}catch(e){}
   DATA=d;const day=Date.now()-864e5;
+  if(window.FAM)window.FAM.run("data",d);      // the parts that plug in by themselves (families/page.js)
   const runs=d.runs,last=runs.filter(r=>new Date(r.started)>day),done=last.filter(r=>r.status==="completed");
   const F=d.figures||{},ok=F.ok24!=null?F.ok24:done.filter(r=>r.conclusion==="success").length,bad=F.fail24!=null?F.fail24:done.filter(r=>BAD.includes(r.conclusion)).length;      // the server counts them: both editions show the same figures
   {const c=runCounts(d);kSet("k-active",runFig(c.sr,c.tr));kSet("k-queued",runFig(c.sq,c.tq));runTitle("k-active","ui.k_active_title",c.sr,c.tr);runTitle("k-queued","ui.k_queued_title",c.sq,c.tq)}
@@ -1572,7 +1597,7 @@ function trChart(items,dates,events,o){
     events.forEach(e=>{const ex=x(e.i);g+=`<line x1="${ex.toFixed(1)}" x2="${ex.toFixed(1)}" y1="${Tp}" y2="${H-B}" class="trev ${e.kind}"/><text x="${ex.toFixed(1)}" y="${Tp-1}" text-anchor="middle" class="trevm ${e.kind}">${e.kind==="update"?"\u25B2":(e.kind==="release"?"\u25C6":(e.kind==="workflow"?"\u25A0":"!"))}<title>${esc(dates[e.i]+": "+e.text)}</title></text>`});
     g+=`<line class="trcur" x1="0" x2="0" y1="${Tp}" y2="${H-B}" visibility="hidden"/>`}
   if(!k)g+=`<text x="${L}" y="${H/2}" class="trax">${esc(T("ui.tr_nodata"))}</text>`;
-  return `<svg viewBox="0 0 ${W} ${H}" ${big?'class="trsvg" tabindex="0"':'preserveAspectRatio="none"'} width="100%" height="${big?"":H}" role="img" aria-label="${esc(o.label)}" data-n="${n}" data-l="${L}" data-r="${R}" data-w="${W}"><defs>${defs}</defs>${g}</svg>`}
+  return `<svg viewBox="0 0 ${W} ${H}" ${big?'class="trsvg" tabindex="0"':'preserveAspectRatio="none"'} width="100%"${big?"":` height="${H}"`} role="img" aria-label="${esc(o.label)}" data-n="${n}" data-l="${L}" data-r="${R}" data-w="${W}"><defs>${defs}</defs>${g}</svg>`}
 function renderTrend(){
   const box=$("s-trend"),tr=TRLAST;if(!box||!tr||!tr.red)return;
   const dates=trData(tr,"red").d,ev=trEvents(tr),defs=trDefs(tr),sel=trDef(TRSEL)&&tr[TRSEL]?TRSEL:"red",cmp=TRCMP&&TRCMP!==sel&&tr[TRCMP]?TRCMP:"";
@@ -1867,7 +1892,7 @@ $("t-sent").addEventListener("click",async e=>{
 });
 /* the Alerts tab: the alerts of every sentinel in one list, a filter by origin and level, and local silences with an end (the monitor never writes to GitHub) */
 var ALERTS=null;const ALF={s:QS.get("sentinel")||store.get("am-al-s")||"",l:"",c:"",m:store.get("am-al-m")==="1"};
-async function alertsTick(){if(LITE)return;try{const r=await fetch("/api/alerts",{cache:"no-store"});if(r.ok)ALERTS=await r.json()}catch(e){}try{renderAlerts()}catch(e){}try{soundAlerts(ALERTS)}catch(e){}try{assistantTick()}catch(e){}lessonsTick()}
+async function alertsTick(){if(LITE)return;try{const r=await fetch("/api/alerts?"+qlang(),{cache:"no-store"});if(r.ok)ALERTS=await r.json()}catch(e){}try{renderAlerts()}catch(e){}try{soundAlerts(ALERTS)}catch(e){}try{assistantTick()}catch(e){}lessonsTick()}
 /* the assistant (assistant.py): a panel of fixed questions, drawn only when ai.assistant.enabled answers; it reads, never acts, and always shows its sources and what it sent */
 var ASST=null;
 async function assistantTick(){
@@ -2136,7 +2161,7 @@ async function repoHealthOpen(repo){
   if(LITE)return;
   const owner=repo.includes("/")?repo.split("/")[0]:((ACC&&ACC.owner)||(DATA&&DATA.owner)||OWNER),name=repo.includes("/")?repo.split("/")[1]:repo;
   let doc=null;
-  try{const r=await fetch("/api/repos/"+encodeURIComponent(owner)+"/"+encodeURIComponent(name)+"/health",{cache:"no-store"});doc=r.ok?(await r.json()).health:null}catch(e){doc=null}
+  try{const r=await fetch("/api/repos/"+encodeURIComponent(owner)+"/"+encodeURIComponent(name)+"/health?"+qlang(),{cache:"no-store"});doc=r.ok?(await r.json()).health:null}catch(e){doc=null}
   $("rh-h").textContent=T("ui.rh_title")+": "+repo;
   $("rh-body").innerHTML=doc?repoHealthHtml(doc):`<span class="mut">${esc(T("ui.rh_none"))}</span>`;
   dlgOpen("rh")}
@@ -2312,7 +2337,10 @@ function cfgTipBind(wrap,f,input){
 function cfgShowTab(id,focus){
   const ids=cfgTabIds();if(!ids.includes(id))id="interface";CFG.tab=id;store.set("am-cfg-tab",id);
   ids.forEach(x=>{const b=$("cft-"+x),p=x==="interface"?$("cfp-interface"):$("cfp-"+x);if(b){b.setAttribute("aria-selected",x===id);b.tabIndex=x===id?0:-1}if(p)p.hidden=x!==id});
-  if(focus&&$("cft-"+id))$("cft-"+id).focus();
+  const bar=$("cfg-tabs"),cur=$("cft-"+id);
+  bar.setAttribute("aria-orientation",window.matchMedia("(min-width: 701px)").matches&&!document.documentElement.classList.contains("compact")?"vertical":"horizontal");
+  if(cur&&bar.scrollHeight>bar.clientHeight){const a=cur.getBoundingClientRect(),o=bar.getBoundingClientRect();if(a.top<o.top)bar.scrollTop-=o.top-a.top;else if(a.bottom>o.bottom)bar.scrollTop+=a.bottom-o.bottom}
+  if(focus&&cur)cur.focus();
 }
 function cfgBuildTabs(){
   const bar=$("cfg-tabs");bar.innerHTML="";
@@ -2321,7 +2349,7 @@ function cfgBuildTabs(){
 }
 $("cfg-tabs").addEventListener("click",e=>{const b=e.target.closest("button[role=tab]");if(b){$("cfg-search").value="";cfgFilter();cfgShowTab(b.id.slice(4))}});
 $("cfg-tabs").addEventListener("keydown",e=>{const ids=cfgTabIds(),i=ids.indexOf(CFG.tab);let n=null;
-  if(e.key==="ArrowRight")n=(i+1)%ids.length;else if(e.key==="ArrowLeft")n=(i-1+ids.length)%ids.length;else if(e.key==="Home")n=0;else if(e.key==="End")n=ids.length-1;
+  if(e.key==="ArrowRight"||e.key==="ArrowDown")n=(i+1)%ids.length;else if(e.key==="ArrowLeft"||e.key==="ArrowUp")n=(i-1+ids.length)%ids.length;else if(e.key==="Home")n=0;else if(e.key==="End")n=ids.length-1;
   if(n!==null){e.preventDefault();cfgShowTab(ids[n],true)}});
 function cfgFilter(){
   const q=$("cfg-search").value.trim().toLowerCase(),panels=document.querySelectorAll("#cfg-form [role=tabpanel]");let hits=0;
@@ -2456,6 +2484,7 @@ function cfgBuild(j){
   cfgBuildTabs();cfgShowTab(CFG.tab);
   const r=$("cfg-restart");const n=CFG.restart.length;r.style.display=n?"block":"none";r.textContent=n?T("ui.cfg_restart_banner",{n:n}):"";restartBar(n);
   $("cfg-backups").textContent=T("ui.cfg_backups",{n:j.backups||0});cfgRefreshButtons();cfgFilter();cfgExtras();
+  if(window.FAM)window.FAM.run("settings",j);
 }
 /* profiles: a few ready-made groups of settings (the server says which settings each one writes); choosing one writes them through the same checked path as the Save button */
 async function presetApply(p,out){
@@ -2601,12 +2630,13 @@ async function openAbout(){
   const a=await aboutLoad();if(!a){body.textContent=T("ui.err_monitor",{msg:"/api/about"});return}
   const h=a.health||{},L=a.links||{};
   let html=aboutLogos(a.logo)+dl([[T("ui.about_version"),"v"+a.version],[T("ui.about_edition"),T("ui.edition_"+(a.edition==="lite"?"lite":"complete"))],[T("ui.about_author"),a.author],[T("ui.about_license"),a.license],[T("ui.about_python"),a.python+" ("+a.implementation+")"],[T("ui.about_system"),a.system],[T("ui.about_update"),updLine(a.update),true]]);
-  html+=`<h3>${esc(T("ui.about_links"))}</h3>`+dl(["repository","releases","changelog","documentation","bridge","issues"].map(k=>[T("ui.about_"+k),aLink(L[k]),true]));
+  html+=`<h3>${esc(T("ui.about_links"))}</h3>`+dl(["repository","releases","changelog","documentation","bridge","issues","i_use_it"].map(k=>[T("ui.about_"+k),aLink(L[k]),true]))+`<p class="mut" id="about-i-use-it-note">${esc(T("ui.about_i_use_it_note"))}</p>`;
   html+=`<h3>${esc(T("ui.about_paths"))}</h3>`+dl(Object.keys(a.paths||{}).map(k=>[T("ui.path_"+k),a.paths[k]]));
   html+=`<h3>${esc(T("ui.about_health"))}</h3>`+dl([[T("ui.health_ok"),yn(h.ok)],[T("ui.health_loaded"),yn(h.loaded)],[T("ui.health_offline"),yn(h.offline)],[T("ui.health_uptime"),fmt(h.uptime_seconds||0)],[T("ui.health_degraded"),String(h.degraded||0)]]);
   html+=`<h3>${esc(T("ui.about_credits"))}</h3>`+dl((a.credits||[]).map(c=>[c.name+" ("+c.license+")",T("ui.credit_"+c.id)+" · "+T(c.installed?"ui.about_installed":"ui.about_not_installed")]));
   const ops=a.edition==="lite"?null:await opsLoad();if(ops)html+=opsCard(ops);
   body.innerHTML=html;aboutLogosWire(a.logo);opsWire();
+  if(window.FAM)window.FAM.run("about",body);
 }
 /* the logos at the top of About: the one of the monitor (the drawing of the side panel, drawn again, so no image is loaded) and, when Settings asks for it (ui.about_org_logo), the one of the organization;
    an organization logo that is not there or cannot be read leaves a short note and never breaks the panel */
@@ -3186,6 +3216,8 @@ function fsSync(){const b=$("fs");if(!b)return;const on=!!document.fullscreenEle
 {const b=$("fs");if(b){if(!document.fullscreenEnabled)b.hidden=true;else{b.addEventListener("click",()=>{const r=document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();if(r&&r.catch)r.catch(()=>{})});document.addEventListener("fullscreenchange",fsSync);fsSync()}}}
 {if(QS.get("dlg")==="notes")setTimeout(openNotes,800)}      /* deep link: ?dlg=notes opens the window of the notices (the pictures use it) */
 try{/*EXTRAS_JS*/}catch(e){}
+/* --vvh: the height that is really visible (the bar of a phone browser takes part of 100vh) */
+(function(){const v=window.visualViewport;if(!v)return;const set=()=>document.documentElement.style.setProperty("--vvh",v.height+"px");v.addEventListener("resize",set);set()})();
 </script>
 </body>
 </html>

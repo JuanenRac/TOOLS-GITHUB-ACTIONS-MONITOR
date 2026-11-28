@@ -52,7 +52,9 @@ def _ipv4(match):
 
 _SECRETS = [
     (re.compile(r"(?s)[-\u2010-\u2015\u2212]{2,80}BEGIN [A-Z ]*PRIVATE KEY(?: BLOCK)?[-\u2010-\u2015\u2212]{2,80}.*?(?:[-\u2010-\u2015\u2212]{2,80}END [A-Z ]*PRIVATE KEY(?: BLOCK)?[-\u2010-\u2015\u2212]{2,80}|$)"), "[pem]"),
-    (re.compile(r"(?i)\b([a-z][a-z0-9+.-]{0,30}://)[^/\s:@]{1,300}:[^\s?#]{1,300}@"), r"\1[credentials]@"),      # user:password@host in an address
+    # a piece of a private key without its header: it begins like the DER of a key (RSA, PKCS#8, EC, Ed25519, OpenSSH), however short the line was cut, and takes the base64 lines that follow it
+    (re.compile(r"(?<![A-Za-z0-9+/])(?:MII[A-J][A-Za-z0-9+/]{2}|MH[cQ]CAQ|MC4CAQAw|MIG[HT]A|b3BlbnNzaC1rZXktdjE)[A-Za-z0-9+/]{10,}={0,2}(?:\r?\n[ \t]*[A-Za-z0-9+/]{16,}={0,2}(?=[ \t]*(?:\r?\n|$)))*"), "[pem]"),
+    (re.compile(r"(?i)\b([a-z][a-z0-9+.-]{0,30}://)[^/\s:@]{1,300}:(?!\d{1,5}/)[^\s?#]{1,300}@"), r"\1[credentials]@"),      # user:password@host in an address
     (re.compile(r"(?i)\bhooks\.slack\.com/services/[A-Za-z0-9/_-]+"), "hooks.slack.com/services/[webhook]"),
     (re.compile(r"(?i)\bdiscord(?:app)?\.com/api/webhooks/\d+/[A-Za-z0-9._-]+"), "discord.com/api/webhooks/[webhook]"),
     (re.compile(r"\bbot\d{6,}:[A-Za-z0-9_-]{20,}"), "bot[token]"),
@@ -87,7 +89,7 @@ _SECRETS = [
     (re.compile(r"""(?i)([A-Za-z0-9_.-]{0,100}(?:password|passwd|pwd|secret|token|api[_-]?key|access[_-]?key|authorization|contrase[\u00f1n]a|secreto|clave)[A-Za-z0-9_.-]{0,100})(["']?\s*[:=]\s*)(?:"(?:[^"\\\n]|\\.){0,300}"|'(?:[^'\\\n]|\\.){0,300}'|["']?[^\s"',;]+)"""), _pair),      # DB_PASSWORD=, AWS_SECRET_ACCESS_KEY=, MYSQL_PWD=
     (re.compile(r"[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,253}\.[A-Za-z]{2,}"), "[email]"),
     (re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b(?!\.\d)"), _ipv4),
-    (re.compile(r"(?i)\b[a-z0-9-]{1,63}(?:\.[a-z0-9-]{1,63}){0,10}\.(?:lan|internal|corp|intranet|private)\b(?::\d{1,5})?|\b[a-z0-9-]{1,63}(?:\.[a-z0-9-]{1,63}){2,10}\.local\b(?::\d{1,5})?"), "[host]"),      # a name that only exists inside a network
+    (re.compile(r"(?i)\b[a-z0-9-]{1,63}(?:\.[a-z0-9-]{1,63}){2,10}\.local\b(?::\d{1,5})?|\b[a-z0-9-]{1,63}(?:\.[a-z0-9-]{1,63}){0,10}\.(?:lan|internal|corp|intranet|private)(?:\.local)?\b(?::\d{1,5})?"), "[host]"),      # a name that only exists inside a network
     (re.compile(r"\b(?:[0-9A-Fa-f]{1,4}:){4,7}[0-9A-Fa-f]{1,4}\b"), "[ip]"),
     (re.compile(r"(?<![\w:.])(?:[0-9A-Fa-f]{0,4}:){2,7}[0-9A-Fa-f]{0,4}(?![\w])"), _ipv6),
     (re.compile(r"""(?i)[A-Z]:(?:\\+|/)Users(?:\\+|/)[^\\/\s'"]+"""), "~"),      # also with doubled bars: it is how repr(), JSON and the text of an OSError write it
@@ -126,6 +128,28 @@ def _github_safe(match):
     return "https://" + ("api." if match.group("api") else "") + "github.com" + kept
 
 
+_PEM_END = re.compile(r"[-\u2010-\u2015\u2212]{2,80}END [A-Z ]*PRIVATE KEY(?: BLOCK)?[-\u2010-\u2015\u2212]{2,80}")
+_PEM_LINE = re.compile(r"[ \t]*[A-Za-z0-9+/]{4,200}={0,2}[ \t\r]*")
+
+
+def _pem_tails(text):
+    """A log that starts in the middle of a private key has its END line and no BEGIN: the lines of base64 above that END go with it. One pass over the lines, whatever their number."""
+    if not _PEM_END.search(text):
+        return text
+    out = []
+    for line in text.split("\n"):
+        end = _PEM_END.search(line)
+        if end:
+            cut = len(out)
+            while cut and _PEM_LINE.fullmatch(out[cut - 1]):
+                cut -= 1
+            if cut < len(out):
+                del out[cut:]
+                line = "[pem]" + line[end.end():]
+        out.append(line)
+    return "\n".join(out)
+
+
 def _clean(text, limit=None):
     """The text without tokens, keys, e-mail addresses, IP addresses, the home folder of a person and long opaque strings. The addresses of github.com that have the shape of a repository, a run,
     a commit, an issue, a pull request or a file pass untouched (a run link is longer than the 40 characters of an opaque string and used to be cut to [blob]); nothing after the first character
@@ -144,8 +168,10 @@ def _clean(text, limit=None):
         kept.append(url)
         return f"\ue000{len(kept) - 1}\ue001" + match.group(0)[len(url):]
     out = _GITHUB_URL.sub(keep, out)
-    for pattern, replacement in _SECRETS:
+    for index, (pattern, replacement) in enumerate(_SECRETS):
         out = pattern.sub(replacement, out)
+        if not index:      # right after the whole blocks: what is left of a key that lost its header
+            out = _pem_tails(out)
     for index, url in enumerate(kept):
         out = out.replace(f"\ue000{index}\ue001", url)
     return out[:limit] if limit else out

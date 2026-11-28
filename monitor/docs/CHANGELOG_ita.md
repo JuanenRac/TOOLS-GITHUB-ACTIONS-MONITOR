@@ -9,6 +9,74 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+## [2.2.0]
+
+### Aggiunto
+
+- **Storico di download e traffico**, conservato su questo computer (`traffic.enabled`, spento; Complete): una volta al giorno i download dei file delle release e, se il token può, visite e clonazioni dei repository scelti, con un pannello in Repository, esportazione CSV e il comando `traffic`. Solo richieste GET. `TRAFFIC.md`.
+- **Di' che lo usi**: Informazioni ha un link che apre un modulo su GitHub, solo quando si fa clic; ciò che vi si scrive è pubblico. Il monitor non invia né compila nulla.
+- **Tenere viva una pianificazione prima che GitHub la spenga**: con `teamwork.keep_alive_days` (disattivato) si propone di riattivare i workflow pianificati di un repository pubblico fermo, con i giorni rimasti. La demo statica e il controllo dei workflow nel browser ora vengono aperti dalla CI in un browser vero.
+- **Modalità di sola lettura rigorosa e criterio di rete** (`security.read_only_strict`, `security.egress_policy`, spenti): applicati sotto tutte le parti; un comando o una connessione rifiutata fallisce nominando l'impostazione, e il doctor elenca le destinazioni fuori criterio.
+- **Rapporto di conformità** (`compliance report`, `/api/compliance/report`, un riquadro nella scheda Sicurezza): ogni riga verificata o solo dichiarata.
+- **Conservazione di ogni categoria e blocco legale**, **punti di controllo firmati e pulizia del registro delle azioni** (`audit verify|checkpoint|purge`) ed **esportazione del registro** su file, syslog su TLS o HTTP; tutto spento di fabbrica.
+- Nuove guide: conformità, gli strumenti attorno al monitor e il contenuto di ogni edizione. Un workflow esegue i controlli trasversali per area, un database di oltre 1 GB e il servizio su un vero systemd. `COMPLIANCE.md`, `ECOSYSTEM_TOOLS.md`, `EDITIONS.md`.
+- **Flotta per ruolo e gruppo**: una colonna per ruolo di workflow, il peggior stato di ogni gruppo con schermo proprio `/g/<chiave>`, repository e gruppi disattivabili senza riavvio; feed CCTray e API degli avvisi di segreti e codice (spenti), `report_digest` in rapporti e brief, e un sito dimostrativo statico con controllo dei workflow nel browser (costruito dalla CI, mai pubblicato da solo). Il pannello delle roadmap ora avvisa quando il clone del repository del profilo è indietro. (FLEET_APIS)
+- **Viste di collaborazione e azioni facoltative** (tutto spento di fabbrica): attesa di una persona separata dall'attesa di un runner, ultima esecuzione di ogni corsia con rossi accantonati per un periodo, pull request di dipendenze e arretrate, repository vulnerabili e non letti, avvisi di sicurezza scartati, proposte (pulizia, regola di annullamento, esecuzioni bloccate, workflow inattivi), workflow manuali con modulo tipizzato, dati per approvare i fork e hook dei runner. Le nuove azioni su GitHub si pianificano e confermano una a una; l'unica automatica è un solo rilancio dopo un guasto dell'infrastruttura.
+- **Le proposte dell'IA le decidono le persone**: marcate IA, con impronta, sopravvivono al riavvio, richiedono due persone con più utenti o il codice digitato con uno, e si vedono nella scheda Avvisi; con `ai.assistant.can_propose` nascono anche dalla chat.
+- **Chat libera con strumenti di sola lettura** (`ai.chat.enabled`, spenta), **avvisi simili con un modello di embedding locale** (`ai.rag.enabled`, spento), **rapporto di un repository e bozza di triage da copiare** e **i riepiloghi come risorse MCP**.
+- Un link con porta e `@` nel percorso non viene più oscurato come utente e password.
+- **Un repository è (fonte, proprietario, nome)**: due repository con lo stesso nome da due luoghi non condividono più identificativi, esecuzioni o avvisi, e i dati salvati seguono il proprietario osservato (prima una copia, comando `identity`, `sources.multi_owner` spento). Le fonti di CI esterne hanno inoltre un controllo del doctor, una scheda in Informazioni e una rotta congelata sotto `/api/v1/`.
+- **Rapporto di postura rispetto a OWASP e CIS** (`posture report`): cosa mostra ogni sezione, cosa significano i rischi e l'andamento di una settimana; inoltre i token personali ampi dell'organizzazione, gli originali dei fork (spento) e quale permesso di GitHub App sblocca ogni controllo.
+- Controlli di postura di repository e organizzazione, sola lettura e disattivati di default: webhook, impostazioni di Actions, scansioni, protezione dei rami e dei rami di rilascio, chiavi di distribuzione, età dei segreti, app, audit dell'organizzazione, protezione di ciò che è stato eseguito e release modificate, con riferimento OWASP CI/CD e CIS. Ciò che GitHub nega risulta non verificato. Maturità per repository, cronologia e `posture` da riga di comando.
+- **Una finestra annuncia una versione più nuova**: con il riassunto delle modifiche nella tua lingua, un pulsante verso Aggiornamenti, «Più tardi» e «Non segnalare questa versione»; attiva per impostazione e muta sugli schermi a parete e chiosco.
+- **Nuovi comandi**: per controllare senza rete una release scaricata e gestire le chiavi pubbliche.
+- Fonti CI esterne, sola lettura e disattivate di default: Buildbot, GitLab CI, Jenkins e Azure Pipelines (gli ultimi due sperimentali) per repository replicati. Gli errori sono contati, notificati e silenziati come quelli di Actions; un servizio che non risponde è degradato, mai rosso. Letture sicure, coda dei log facoltativa, limitata e depurata, prova di connessione e `external-ci` da riga di comando.
+- **Le release sono firmate e l'aggiornatore controlla la firma**: dalla 2.2.0 una release porta una firma Ed25519 separata di SHA256SUMS e di ogni file, fatta su GitHub dal workflow di release. L'aggiornatore (pagina, finestra, console e riga di comando) rifiuta una release dalla 2.2.0 senza firma o con firma errata, e uno zip firmato offerto con un'altra versione, prima di scompattare qualsiasi cosa; tornare a una versione precedente non firmata è consentito con un avviso.
+- **Due distinte dei materiali e attestazioni in ogni release**: documenti CycloneDX e SPDX elencano ogni file dello zip e le librerie facoltative, e il workflow attesta la provenienza dei file, la distinta e il verbale del controllo di qualità.
+- **Il controllo di qualità può girare su GitHub**: un workflow esegue l'intero controllo su un runner Windows, verifica che una seconda build dia gli stessi byte e conserva il verbale di ciò che è stato eseguito; eseguirlo sul proprio computer resta possibile e facoltativo.
+- **Un portachiavi di chiavi pubbliche e la verifica di una release scaricata**: un solo posto per le chiavi che possono firmare (un valore privato è rifiutato) e la verifica senza rete di una cartella di file di release. I comandi da console arrivano a parte.
+- **Le note di una release possono portare un breve riassunto nelle otto lingue**, letto dal controllo degli aggiornamenti con la stessa richiesta; ricorda anche una versione scartata. La finestra che lo mostra arriva a parte.
+- **Controlli del repository**: revisione delle dipendenze aggiunte da una pull request e analisi CodeQL del codice.
+
+### Modificato
+
+- **I gruppi delle Impostazioni sono un elenco a sinistra** del loro pannello invece di più righe di schede in alto, così il pannello ha più spazio (una finestra sotto i 701 pixel e la vista compatta li tengono in alto).
+- **Sul telefono le cifre dell'intestazione sono ripiegate** dietro un pulsante, in verticale e in orizzontale; il pulsante le apre e questo browser ricorda la scelta.
+- **L'aggiornatore autonomo pubblicato con una release contiene ora il registro delle migrazioni**, e SHA256SUMS lo nomina insieme allo zip e alle due distinte.
+
+### Corretto
+
+- **Un ramo protetto da un ruleset non viene più dato per non protetto dopo un aggiornamento**: le tre letture della protezione inviano il loro ETag solo finché la risposta è conservata, e ciò che una versione precedente aveva giudicato viene riletto per intero. `security.branch_unprotected` poteva restare per sempre su un repository protetto.
+- **I rilievi di postura e gli avvisi seguono la lingua della pagina** (`?lang=` e il selettore della lingua), non quella della configurazione.
+- **Sul telefono il contenuto di ogni scheda è di nuovo visibile**: sotto un'intestazione alta la scheda aperta restava senza altezza e i riquadri non si raggiungevano scorrendo.
+- **Le schede si vedono su un telefono tenuto in orizzontale e nelle finestre basse**: da 701 pixel di larghezza l'intestazione prendeva tutta l'altezza e alla scheda aperta non ne restava; ora la pagina scorre fino a essa. Fino a 800 pixel di larghezza il menu resta su una riga che scorre di lato invece di spezzare i nomi lettera per lettera. Gli schermi a parete non cambiano.
+- **I riquadri delle parti facoltative mantengono tutta la loro altezza** su computer e schermi a parete invece di ridursi a poche righe, le loro tabelle non spezzano le parole, i pulsanti della vista compatta sono larghi almeno 44 px e i grafici grandi non scrivono più errori nella console del browser. Un workflow misura ogni riquadro in otto lingue, su telefono, computer e schermi a parete.
+- **Niente più falsi avvisi «impostazione sconosciuta» durante l'aggiornamento**: l'aggiornamento non segnala più come sconosciute le impostazioni presenti nella configurazione di esempio della versione di destinazione ma non descritte dalla pagina delle impostazioni.
+- I nomi dei passi conservati per workflow hanno un limite.
+- I lanciatori di Windows usano `python` quando il lanciatore `py` non è installato.
+- **Controlli di postura che rispondevano male**: gli avvisi sulle dipendenze potevano essere letti male con le letture condizionali; una protezione non leggibile risultava assente; la politica di sicurezza condivisa dall'account non veniva vista; i controlli disattivati o filtrati contavano come «nessun rilievo» e come superati; un'organizzazione rifiutata fermava la lettura di tutti i repository; gli elenchi lunghi erano letti solo in parte; un digest comparso dopo contava come file sostituito.
+- **Rapporto di conformità**: un certificato TLS non veniva mai visto; una versione pubblicata più vecchia era annunciata come più nuova; un registro delle azioni svuotato o illeggibile, una cartella delle copie illeggibile e un archivio sconosciuto risultavano controllati; un'esportazione senza destinazione ora lo dice.
+- **Log di CI esterna**: Azure Pipelines dava il passo di chiusura invece di quello fallito, Buildbot teneva le lettere di canale, GitLab poteva scegliere un job autorizzato a fallire, un token Azure rifiutato era segnalato come risposta illeggibile e un log molto lungo poteva essere troncato prima della fine. Le pipeline GitLab in annullamento contano come in corso.
+
+### Sicurezza
+
+- **Un token nell'indirizzo diventa il cookie di sessione solo se è corretto di per sé** (`listen.query_access`): una richiesta già ammessa dal cookie o dall'intestazione poteva inserire altro testo nella risposta. I file di segreti, rapporti e workflow devono restare nella loro cartella anche con i collegamenti risolti, l'HTTPS in uscita richiede TLS 1.2 o successivo e un comando del Portachiavi troppo lungo viene rifiutato.
+- **I plugin di altri rispettano le restrizioni**: finché sono in vigore la sola lettura rigorosa o il criterio di rete, uno viene eseguito solo se il suo processo è senza rete.
+- **Token delle fonti CI esterne e dell'esportazione del registro**: non possono indicare un segreto del sistema o del monitor e non vengono mai inviati senza TLS a un indirizzo pubblico.
+- Un download senza firma proposto con un numero precedente viene rifiutato quando contiene una versione che deve essere firmata.
+- Un file di stato danneggiato dell'esportazione del registro non ferma più i suoi controlli, e l'unica riesecuzione automatica non viene inviata se non si può annotare.
+- Le guide indicano due limiti noti (cartelle viste da un viewer al computer; ripetizione di eventi senza orario) e il valore predefinito corretto di `webhook.reject_stale`.
+- Il filtro del testo per le IA ora toglie per intero un lungo nome host interno che finisce in `.local` e i pezzi di una chiave privata senza intestazione (una riga troncata o un log che comincia a metà della chiave).
+- È supportata solo l'ultima versione pubblicata (politica di sicurezza).
+- **Le restrizioni valgono in più casi**: `sops` e `bws` non si avviano con una politica di rete, la parola `version` in un punto qualsiasi di un comando non lo lascia più passare, un file di configurazione illeggibile restringe e `security.*` del file dell'edizione lite si applica a essa.
+- **Un deployment si approva un ambiente alla volta**, indicato nella conferma, invece di tutti quelli che la persona può approvare insieme.
+
+### Plugin
+
+- **Plugin, spenti per impostazione predefinita** (Complete): ufficiali per discussioni senza risposta e conservazione dei pacchetti; quelli di terzi solo come pacchetti firmati da una chiave del tuo portachiavi, in un processo separato senza token, con l'etichetta «senza isolamento di rete» dove la rete non si può tagliare. Output ripulito, plugin che falliscono sospesi, catalogo nelle impostazioni, comando `plugin`, controllo del doctor, modello per autori e contratto con versione (`api_compat` 1).
+- **Il token di GitHub può essere letto da Vault, SOPS, Bitwarden Secrets Manager o dal gestore di segreti di AWS, Azure o Google** (sola lettura, `secrets.backend`).
+- **La skill esterna può essere impacchettata per un registro di skill** (`tools/prepare_skill_bundle.py`, non pubblica nulla).
+
 ## [2.1.8]
 
 La versione 2.1.8 non aggiunge alcuna funzione: corregge ciò che ha trovato una revisione della 2.1.7. La sentinella di CI non è più verde quando l'elenco delle esecuzioni può nascondere un workflow; approvare o rifiutare una proposta dell'IA funziona; un dispositivo revocato perde i flussi che aveva aperti; le connessioni hanno un limite di tempo e di numero; il tunnel del proxy funziona; tornare indietro non passa più sopra un aggiornamento in corso; l'immagine del contenitore viene pubblicata solo da un tag; e le schermate, il chiosco, la riga di comando e la documentazione dicono ciò che fa il programma.

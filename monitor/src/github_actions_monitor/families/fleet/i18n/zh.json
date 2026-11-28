@@ -1,0 +1,22 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "ui.cfg_g_fleetapi": "机群与 API",
+ "ui.cfg_b_fleet_apis": "机群视图与只读 API",
+ "cfg.f.fleet.disabled": "停用的仓库与分组",
+ "cfg.h.fleet.disabled": "每行一个名称或模式，或 group:<键>。下一周期生效，无需重启。",
+ "cfg.f.fleet.roles": "按工作流角色分列",
+ "cfg.h.fleet.roles": "每行 角色=模式|模式，匹配名称与文件名，取第一个匹配行。",
+ "cfg.f.fleet.cctray": "CCTray 订阅（只读）",
+ "cfg.h.fleet.cctray": "为 CCMenu 等工具提供 /api/cctray.xml 与 /api/cctray.json，沿用相同访问检查。默认关闭。",
+ "cfg.f.fleet.security_api": "机密与代码扫描告警 API",
+ "cfg.h.fleet.security_api": "根据安全哨兵读取的数据提供各仓库计数，绝不含机密本身。默认关闭。",
+ "ui.fleet.title": "角色与分组",
+ "ui.fleet.group_counts": "{repos} 个中 {red} 个失败",
+ "ui.fleet.by_role": "按工作流角色",
+ "ui.fleet.col_repo": "仓库",
+ "ui.fleet.state_red": "失败",
+ "ui.fleet.state_running": "运行中",
+ "ui.fleet.state_ok": "正常",
+ "ui.fleet.state_unknown": "未知"
+}

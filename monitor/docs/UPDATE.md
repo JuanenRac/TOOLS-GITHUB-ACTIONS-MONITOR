@@ -22,7 +22,23 @@ The Complete edition has the same updater inside its page: **System > Updates**.
 
 Under a service manager the page does not apply updates by default. If the monitor runs as a systemd USER service (`systemctl --user`), you can switch on `updates.systemd_helper` (off by default): the page then offers the update and the process that applies it stops that service, applies the update and starts the service again, always with `systemctl --user` and never with `sudo`. A system service (one that needs the administrator) is not touched and stays "use the command line". The same works from the command line with `--systemd-unit UNIT` (`apply` and `rollback`); if the service cannot be stopped nothing is started, and if the new version does not start the previous one is put back and the service started again.
 
-**Trust.** The check compares the zip with SHA256SUMS, and both come from the same GitHub release: it detects a damaged or incomplete download, not a release that was replaced at its source. Trust in the release rests on GitHub and on your own account there.
+**Trust.** SHA256SUMS comes from the same GitHub release as the zip, so on its own it only detects a damaged or incomplete download. What proves the origin of a release from 2.2.0 on is its signature (below).
+
+## Signed releases
+
+From version 2.2.0 every release is signed: SHA256SUMS has a detached Ed25519 signature, the file `SHA256SUMS.ed25519.sig`, made with the key of the project, whose public half travels inside the updater. The updater checks it before it unpacks anything. A release from 2.2.0 on without a valid signature is refused, and so is a signed zip offered under another version. Going back to an older version, published without a signature, is allowed with a warning. For a zip you downloaded by hand, put `SHA256SUMS` and `SHA256SUMS.ed25519.sig` next to it (with `--zip`). The number a download is offered under does not decide alone: a zip without a signature that holds 2.2.0 or later is refused too.
+
+Public key (Ed25519, hex): `380c75210e444f71bc4fe4b9aa7cb451aad5ef2592711f7dc6ba2fd7adc3d272`. Its SHA-256 fingerprint: `6d6b995655147955a1c2fb8a84a02d828606de29b36583799ada6ca5524b5d1a`.
+
+Besides the zip, a release carries `monitor_updater.py`, two bills of materials (`github_actions_monitor.cdx.json` in CycloneDX and `github_actions_monitor.spdx.json` in SPDX), a signature next to each file and the attestations GitHub makes of the build, which you can check with `gh attestation verify github_actions_monitor.zip --repo JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR`. The signature proves who holds the key; the attestation proves which workflow built the file. They are two separate checks.
+
+**Key rotation.** A new key travels in a release that carries both the old and the new one during an overlap; a key that is no longer trusted is dropped (or marked revoked) in a later release. A cosign bundle (`github_actions_monitor.zip.cosign.bundle`) records the keyless signature of the workflow; check it with `cosign verify-blob --bundle github_actions_monitor.zip.cosign.bundle --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/.github/workflows/release-build.yml@refs/heads/main github_actions_monitor.zip`.
+
+## The notice of a new version and the commands
+
+When the update check (`updates.check`) finds a newer version, a window in the Complete edition shows the summary of its changes in your language, a link to the changelog and a button to the Updates page (setting `updates.notify_window`, on by default). "Later" closes it for this browser session; "Do not announce this version" silences that version only. It never appears on wall or kiosk screens. Its routes are `/api/supply/update-notice` and `/api/supply/update-dismiss`.
+
+`monitor_cli.py verify-release --folder DIR` checks, without network, a folder of downloaded release files against SHA256SUMS and its signature. `monitor_cli.py keyring list|add|revoke|verify` manages the public keys (`--key-id`, `--public-key`, `--key-scope`, `--expires`, `--document`); your own keys are kept in `keyring.json` of the configuration folder, private keys are refused and the release key of the project cannot be changed.
 
 ## What it does, step by step The routes behind it are `/api/updates/status`, `/api/updates/progress`, `/api/updates/history`, `/api/updates/log` (the last lines of the log of the process, values after token or secret hidden), `/api/updates/copies` (read only) and `/api/updates/check`, `/api/updates/plan`, `/api/updates/apply`, `/api/updates/rollback`, `/api/updates/discard` (administrator, this computer only). The progress also travels as server-sent events on `/api/updates/stream` (the page uses it while an update runs and falls back to asking every second and a half when the browser or the connection does not allow it).
 

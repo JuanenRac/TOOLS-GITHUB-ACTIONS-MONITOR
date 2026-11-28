@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-5936_passing-brightgreen.svg" alt="5936 tests">
+  <img src="https://img.shields.io/badge/Tests-6266_passing-brightgreen.svg" alt="6266 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -65,6 +65,8 @@
 - **批处理工具**：一次计划并触发多个构建；没有 `--go` 就不会触发任何东西。
 - **页面内的“关于”和“帮助”**：**i** 按钮显示版本、版本类型、链接、文件、运行状况和复制支持信息的按钮；**?** 按钮（或 `?` 键）可离线打开全部文档，支持搜索并使用你的语言。控制台提供 `--about` 和 `--help-topics`，以及分标签页的交互式终端应用（可选 `textual`）。
 - **新版本提示**：发布较新版本时显示低调的徽章；它每天只读取一次公开发布页，从不安装任何内容，可以关闭（隔离网络安装中始终关闭）。
+- **签名发布与面向较大部署的可选部分**: 每个版本带有分离签名, 更新程序会校验, 弹窗说明新版本带来什么; 插件、密钥库、外部 CI 源 (只读)、安全态势检查、协作与舰队视图、严格只读模式、网络策略和合规报告在开启前均关闭。
+- **下载与流量由你自己保存 (默认关闭)**: 每天一次读取发布文件的下载次数, 并在拥有 push 权限时读取所选仓库的访问和克隆, 保存在你的电脑上, 提供图表和 CSV (`monitor/docs/TRAFFIC_zho.md`)。“关于”中还有一个自愿的链接, 用于公开告诉大家你在使用本监视器; 除了你自己在 GitHub 上写的内容, 什么都不会发送。
 - **适用于任何账户的配额**：套餐、计费分钟数（公开仓库不计费）、从 GitHub 响应头读取的 API 配额、并发数，以及接近 6 小时上限的作业；数字保存在可编辑的文件中。
 
 ## 能节省什么
@@ -85,7 +87,7 @@
 
 | | |
 |---|---|
-| **版本** | **2.1.8** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **版本** | **2.2.0** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **需要** | Python 3.11+ 和 GitHub CLI（`gh auth login`）；不需要其他东西(终端视图使用可选的 `rich` 包) |
 | **打开** | 仅在 `127.0.0.1` 上的页面，支持八种语言 |
 | **写入 GitHub** | 绝不自行写入：只有你用明确的 `--go` 运行的批处理命令才会 |
@@ -93,13 +95,13 @@
 
 <!-- glance:begin -->
 
-**今日实测** (v2.1.8)
+**今日实测** (v2.2.0)
 
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 5936 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **设置** | 914 个设置,均有帮助 |
+| **测试** | 6266 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **设置** | 1035 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
 
@@ -172,10 +174,21 @@
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="当前" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_menu_groups_light.png"><img src="docs/screenshots/web_menu_groups_dark.png" alt="分组菜单：监视、哨兵、团队、报告与学习" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_palette_light.png"><img src="docs/screenshots/web_palette_dark.png" alt="Ctrl+K 面板：可搜索任意标签页、仓库或操作的搜索框" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_update_notice_light.png"><img src="docs/screenshots/web_update_notice_dark.png" alt="提示新版本的窗口" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_ci_light.png"><img src="docs/screenshots/web_sentinel_ci_dark.png" alt="哨兵：CI" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_external_ci_light.png"><img src="docs/screenshots/web_external_ci_dark.png" alt="外部 CI 源:各自的状态以及无法读取的原因" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_collab_light.png"><img src="docs/screenshots/web_sentinel_collab_dark.png" alt="哨兵：协作" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_delivery_light.png"><img src="docs/screenshots/web_sentinel_delivery_dark.png" alt="交付哨兵：已构建但尚未交付的内容" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_supply_light.png"><img src="docs/screenshots/web_sentinel_supply_dark.png" alt="供应链哨兵：未固定的 Action 和过宽的权限" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_security_light.png"><img src="docs/screenshots/web_sentinel_security_dark.png" alt="带有发现项的安全哨兵" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_posture_light.png"><img src="docs/screenshots/web_posture_dark.png" alt="仓库和组织相对于 OWASP 与 CIS 的安全态势报告" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_compliance_light.png"><img src="docs/screenshots/web_compliance_dark.png" alt="本安装的合规报告:每一行标明已检查或仅声明" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_collaboration_light.png"><img src="docs/screenshots/web_collaboration_dark.png" alt="协作视图：等待人处理的事项以及可以采取的操作" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_roles_groups_light.png"><img src="docs/screenshots/web_roles_groups_dark.png" alt="按工作流角色和分组查看机群" width="92%"></picture></p>
+<p align="center"><img src="docs/screenshots/web_screen_group.png" alt="单个分组的大屏" width="92%"></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_proposals_light.png"><img src="docs/screenshots/web_proposals_dark.png" alt="由人来决定的 AI 建议" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_assistant_chat_light.png"><img src="docs/screenshots/web_assistant_chat_dark.png" alt="与 AI 聊天：只读工具及其读取的来源" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_extensions_light.png"><img src="docs/screenshots/web_extensions_dark.png" alt="扩展：运行什么、拥有哪些权限、哪些部分被隔离" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_trend_light.png"><img src="docs/screenshots/web_sentinel_trend_dark.png" alt="每日趋势：每项数据一条线" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_fleet_light.png"><img src="docs/screenshots/web_fleet_dark.png" alt="车队：所有仓库一览" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_reports_light.png"><img src="docs/screenshots/web_reports_dark.png" alt="报告" width="92%"></picture></p>
@@ -352,6 +365,15 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ACCOUNTS_zho.md`](monitor/docs/ACCOUNTS_zho.md)：多个账户，每个账户一个进程
 - [`monitor/docs/QUOTAS_zho.md`](monitor/docs/QUOTAS_zho.md)：GitHub 的配额与套餐
 - [`monitor/docs/MODES_zho.md`](monitor/docs/MODES_zho.md)：工作模式：普通、快速和极速
+- [`monitor/docs/EXTERNAL_CI_zho.md`](monitor/docs/EXTERNAL_CI_zho.md): 外部 CI 来源(只读):Buildbot、GitLab CI、Jenkins、Azure Pipelines
+- [`monitor/docs/PLUGINS_zho.md`](monitor/docs/PLUGINS_zho.md): 插件（默认关闭）、软件包、隔离以及从密钥存储读取令牌
+- [`monitor/docs/POSTURE_zho.md`](monitor/docs/POSTURE_zho.md): 仓库与组织的安全态势(只读)
+- [`monitor/docs/COMPLIANCE_zho.md`](monitor/docs/COMPLIANCE_zho.md): 合规: 严格只读、网络策略、报告、保留与法律保留、签名并导出的操作日志
+- [`monitor/docs/TRAFFIC_zho.md`](monitor/docs/TRAFFIC_zho.md): 下载与流量
+- [`monitor/docs/ECOSYSTEM_TOOLS_zho.md`](monitor/docs/ECOSYSTEM_TOOLS_zho.md): 监控器周边工具及其支持程度
+- [`monitor/docs/EDITIONS_zho.md`](monitor/docs/EDITIONS_zho.md): 完整版与 Lite: 各版型包含什么
+- [`monitor/docs/COLLABORATION_zho.md`](monitor/docs/COLLABORATION_zho.md): 协作视图与可选的 GitHub 操作
+- [`monitor/docs/FLEET_APIS_zho.md`](monitor/docs/FLEET_APIS_zho.md): 按角色与分组查看机群、CCTray 与安全 API、报告摘要值、演示站点
 - [`monitor/docs/AI_CONNECTION_zho.md`](monitor/docs/AI_CONNECTION_zho.md): 连接 AI 工具:监视器说的一切,以信号形式出现在简报、端点、MCP 工具和钩子中
 - [`monitor/docs/AI_SETUP_PROMPT_zho.md`](monitor/docs/AI_SETUP_PROMPT_zho.md): 用 AI 设置监视器:粘贴到你的 AI 助手中,它会安装监视器、询问你的需求并写好配置的提示词
 - [`monitor/docs/QUOTA_zho.md`](monitor/docs/QUOTA_zho.md): 更多配额,更少消耗:节省模式、中央面板、GitHub App 以及如何共享配额

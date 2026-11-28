@@ -19,7 +19,7 @@
 | `backup` | die vollständige Sicherung der Installation (der Monitor muss nicht laufen): `backup create [DATEI] [--account ID]`, `verify DATEI [--deep]`, `restore DATEI [--account ID] [--to-dir ORDNER] [--force]`, `status`, `list`; `--encrypt` mit `--key-env NAME` verschlüsselt sie (optionale Bibliothek); siehe [OPS_deu.md](OPS_deu.md) | nein |
 | `accounts` | die Konten des Supervisors (nur bei mehreren Konten) | nein |
 | `alerts` | die Alarme aller Wächter in einer Liste: `--sentinel ci\|collab\|security\|supply\|delivery`, `--level info\|warning\|error`, `--muted show\|hide\|only`; `--since 90m|24h|7d|2w` listet die auf, die in dieser Zeit irgendwann offen waren, auch die geschlossenen (aus dem Verlauf, den der Monitor im Betrieb führt; ein Alarm gilt nach zehn Minuten Abwesenheit als geschlossen) | nein |
-| `proposals` | die Aktionen, die die KI vorgeschlagen hat (`ai.actions.enabled`): `proposals list`, `show ID`, `approve ID`, `reject ID`, `execute ID` (eine ID darf verkürzt werden). `approve` und `reject` halten nur die Entscheidung fest; `execute` führt aus, über dieselbe Tür wie die Seite, und braucht `ai.actions.execute`, mit `ai.actions.require_approval` zuvor eine Freigabe. Freigeben, Ablehnen und Ausführen gehen nur von diesem Rechner | nein |
+| `proposals` | die Aktionen, die die KI vorgeschlagen hat (`ai.actions.enabled`): `proposals list`, `show ID`, `approve ID`, `reject ID`, `execute ID` (eine ID darf verkürzt werden). `approve` und `reject` halten nur die Entscheidung fest; `execute` führt aus, über dieselbe Tür wie die Seite, und braucht `ai.actions.execute`, mit `ai.actions.require_approval` zuvor eine Freigabe. Freigeben, Ablehnen und Ausführen gehen nur von diesem Rechner Bei einem Benutzer braucht `approve` `--code` mit den ersten acht Zeichen des Fingerabdrucks; bei mehreren auf der Seite in der eigenen Sitzung genehmigen (zwei Personen). | nein |
 | `score` | die Punktzahl des Kontos: Zahl, Buchstabe, Trend, Teile, Abdeckung und die Aufteilung nach Repository; `--compare` vergleicht sie mit dem Verlauf des Fensters | nein |
 | `compare` | dieser Zeitraum gegen den davor: die Kennzahlen mit Änderung und Richtung, wer schlechter oder besser wurde; `--window 7\|30d`, `--days all\|workdays\|weekend`, `--baseline previous\|year_ago`, `--format table\|json\|ndjson\|csv`; Exit 4, wenn eine Kennzahl zu wenig Daten hat, 5 mit `--fail-on`, wenn eine schlechter wurde; `--format csv` mit einem anderen Befehl ist eine falsche Verwendung (Exit 1) | nein |
 | `api` | die Lese-API für Clients: `api openapi` gibt das OpenAPI-Dokument jeder eingefrorenen Route aus (in eine Datei umleiten), `api me` sagt, für wen der Monitor diesen Client hält (Modus, Benutzer, Rolle, was die Sitzung darf, Version des Vertrags); ein Monitor mit geschlossenem `api.v1_enabled` sagt das; `api contract-check` startet die Vertragssuite für Clients dagegen (Exit-Code 4, wenn eine Prüfung fehlschlägt) | nein |
@@ -30,6 +30,8 @@
 | `briefs` | die Briefs der Tabs, die KI-Werkzeuge lesen: `briefs index`, `briefs show TAB`, `briefs all` | ja |
 | `docs` | die Anleitungen dieser Version, aus der Installation gelesen (ohne Monitor): `docs list` nennt sie mit Titel, `docs show NAME` gibt eine in der Sprache von `--lang` aus | nein |
 | `screens` | das Menü Bildschirme der Seite: `screens list` (jede Art von Bildschirm und ob er geöffnet werden kann) und `screens urls` (die vollständigen Adressen, bereit für einen Kiosk-Befehl) | nein |
+| `keyring` | die öffentlichen Schlüssel, die signieren dürfen: `keyring list`, `add` (`--key-id`, `--public-key`, `--key-scope`, `--expires`), `revoke --key-id`, `verify --document FILE`; ohne Monitor, private Schlüssel werden abgelehnt | nein |
+| `verify-release` | ein Ordner mit heruntergeladenen Release-Dateien, netzlos gegen SHA256SUMS und die Signatur geprüft: `verify-release --folder DIR`; Exit 4, wenn ihnen nicht vertraut werden kann Außerdem `--installed` (diese Installation gegen die Stückliste), `--attestations`, `--fetch` (braucht `ops.verify_release.fetch`); `doctor --verify-release DIR` prüft die Installation; `keyring check-rotation --document FILE` prüft die Ankündigung eines neuen Schlüssels. | nein |
 | `toolbox` | die kleinen Werkzeuge des Betreibers, die auf diesem Rechner ohne laufenden Monitor arbeiten: `toolbox limits [N]` (die Einrichtung gegen ihre Obergrenzen), `toolbox workspaces` (die Arbeitsbereiche und der verwendete), `toolbox ledger [--force]` (das Verzeichnis der bereits gesendeten Benachrichtigungen; `--force` vergisst es), `toolbox summary` (die Ereignisse nach Art, Repository und Tag) und `toolbox export-events FILE` (die Ereignisse als jsonl, csv, parquet oder duckdb nach der Endung des Namens; parquet und duckdb brauchen ihr Paket, die Datei muss neu sein) | nein |
 | `credential` | ein anderer GitHub-Zugang für ein Konto, während alles läuft: `credential replace\|reload [--account ID] [--new-token-file DATEI\|-]`; gibt nie ein Token aus | nein |
 | `install-skill` | kopiert einen Skill des Monitors (`internal` oder `external`) in den Ordner, aus dem ein KI-Werkzeug seine Skills liest: `install-skill external --dest ORDNER`; der Monitor muss nicht laufen | nein |
@@ -38,6 +40,10 @@
 | `completions` | das Vervollständigungsskript für `bash`, `zsh`, `fish` oder `powershell`, aus dem echten Parser erzeugt (es gibt nur aus) | nein |
 | `kiosk` | die Adresse des Monitors für einen Fernseher oder eine Wand (`ops`, `team`, `release`, `quiet`); siehe [KIOSK_deu.md](KIOSK_deu.md) | nein |
 | `metrics` | die Zahlen als Zeilen `name=wert` für cron und Mail; mit `--if-problem` schreibt es nichts, wenn alles in Ordnung ist; siehe [CLI_OPERATOR.md](CLI_OPERATOR.md) | nein |
+| `posture` | Sicherheitslage von Repositorys und Organisation, nur lesend (`posture status|matrix|check --repo-name`); siehe [POSTURE.md](POSTURE_deu.md) | nein |
+| `traffic` | Auf diesem Rechner gespeicherter Verlauf der Downloads und Zugriffe (`traffic status|export`); siehe [TRAFFIC_deu.md](TRAFFIC_deu.md) | nein |
+| `external-ci` | Externe CI-Quellen, nur lesend (`external-ci list|status|probe --source`); siehe [EXTERNAL_CI.md](EXTERNAL_CI_deu.md) | nein |
+| `plugin` | Plugins: `plugin list|validate|pack|verify|init|install|enable|disable|uninstall|audit`; siehe [PLUGINS.md](PLUGINS_deu.md) | nein |
 
 Optionen aller Befehle: `--json` (die Antwort als ein JSON-Dokument: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (Port 8766), `--timeout SEKUNDEN` (1 bis 60), `--lang CODE`. Im Netzwerkmodus gehört das Zugriffstoken in die Umgebungsvariable `MONITOR_ACCESS_TOKEN`, die der Monitor selbst liest (`MONITOR_TOKEN` wird als Alias akzeptiert; `--token TOKEN` ist der letzte Ausweg, weil eine Option in der Prozessliste erscheint). Die Reihenfolge: `MONITOR_ACCESS_TOKEN`, dann `MONITOR_TOKEN`, dann `--token`. Es reist im Header `X-Monitor-Access`, nie in der Adresse und nie auf dem Bildschirm. Ein `--url` mit unverschlüsseltem `http` zu einem anderen Rechner gibt eine Warnung auf stderr aus (Token und Antworten würden unverschlüsselt reisen): Nutze außerhalb eines Netzes, das du kontrollierst, `https`.
 
@@ -95,3 +101,24 @@ Im Netzwerkmodus wird das Token aus `MONITOR_ACCESS_TOKEN`, dann `MONITOR_TOKEN`
 ## Sicherung und der Doctor
 
 `backup` und `doctor` arbeiten auf den Ordnern der Installation und brauchen daher keinen laufenden Monitor. `doctor` endet mit `0`, wenn alles in Ordnung ist (auch mit Warnungen), mit `1`, wenn eine Prüfung fehlschlug, mit `3`, wenn es nur Warnungen gibt und `--strict` (oder `ops.doctor.strict_exit`) aktiv ist, und mit `4`, wenn der Doctor selbst nicht laufen konnte; das sind die Codes des Doctors, die anderen Befehle behalten die oben genannten Exit-Codes. `backup` endet mit `0`, wenn es erledigt ist, und mit `1`, wenn es abgelehnt wird oder das Paket die Prüfung nicht besteht. Die Anleitung [OPS_deu.md](OPS_deu.md) enthält die Prüfungen, die Wiederherstellung und die geplante Sicherung. Der Doctor hat außerdem `compare_window` (kann der Vergleich zweier Zeiträume zwei Fenster zurückschauen, mit dem Verlauf, den er verlangt und behält) und `etag` (Anteil der bedingten Abfragen, die mit 304 beantwortet wurden, im hier laufenden Monitor, und ob Antworten von GitHub ohne ETag ankommen).
+
+## Identität eines Repositorys, mehrere Eigentümer
+
+Befehlszeile: `identity status`, `identity plan`, `identity apply`.
+
+```
+python bin/monitor_cli.py identity plan
+```
+
+## Compliance und Aktionsprotokoll
+
+`compliance report` nennt die Zusicherungen dieser Installation; `audit verify|checkpoint|purge|export` arbeitet an der Kette des Aktionsprotokolls. Siehe [COMPLIANCE_deu.md](COMPLIANCE_deu.md).
+
+## Befehle: actions, runner-hook
+
+```
+python bin/monitor_cli.py actions proposals
+python bin/monitor_cli.py runner-hook started
+```
+
+[COLLABORATION_deu.md](COLLABORATION_deu.md)

@@ -1,0 +1,72 @@
+# Rehearses, with real processes on Windows and Linux, the update from the latest published release to the version of this commit (tools/rehearse_upgrade.py): migration of real configurations,
+# start, /api/health, the way back; and the update after it with the signature required, with a key made on the runner and thrown away with it. It publishes nothing, signs nothing real,
+# uses no secret of this repository and only reads the published release.
+name: Upgrade rehearsal
+
+on:
+  workflow_dispatch:
+    inputs:
+      from:
+        description: "Published tag to update from"
+        type: string
+        default: "v2.1.8"
+  pull_request:
+    paths:
+      - "monitor/tools/monitor_updater.py"
+      - "monitor/tools/make_release.py"
+      - "monitor/tools/sign_release.py"
+      - "monitor/assets/migrations/**"
+      - "tools/rehearse_upgrade.py"
+      - ".github/workflows/upgrade-rehearsal.yml"
+
+permissions: {}
+
+concurrency:
+  group: upgrade-rehearsal-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  rehearse:
+    name: Update and way back (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    permissions:
+      contents: read        # the checkout and the published release
+    steps:
+      - name: Unix line endings in the checkout
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: The files of the published release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FROM: ${{ inputs.from || 'v2.1.8' }}
+        run: |
+          gh release download "$FROM" -R "$GITHUB_REPOSITORY" -D "$RUNNER_TEMP/published" -p github_actions_monitor.zip -p SHA256SUMS -p monitor_updater.py
+      - name: Update, start, health, way back, and the signed update after it
+        shell: bash
+        run: python tools/rehearse_upgrade.py --old "$RUNNER_TEMP/published" --work "$RUNNER_TEMP/rehearsal"
+      - name: The logs of what failed
+        if: failure()
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/logs"
+          cd "$RUNNER_TEMP/rehearsal/installs" && find . \( -name '*.log' -o -name 'report.txt' -o -name 'report.json' -o -name 'status_*.json' \) -exec cp --parents {} "$RUNNER_TEMP/logs/" \;
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: rehearsal-logs-${{ matrix.os }}
+          path: ${{ runner.temp }}/logs/
+          if-no-files-found: ignore
+          retention-days: 7

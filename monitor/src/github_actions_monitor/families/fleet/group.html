@@ -1,0 +1,41 @@
+<!doctype html>
+<!-- Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+     GPL-3.0-or-later - see LICENSE -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GitHub Actions Monitor</title>
+<style>
+:root{color-scheme:dark}
+body{margin:0;padding:2vmin;background:#0d1117;color:#e6edf3;font-family:system-ui,sans-serif;min-height:100vh;box-sizing:border-box}
+h1{margin:0 0 2vmin;font-size:max(20px,4vmin)}
+ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(max(180px,22vmin),1fr));gap:1vmin}
+li{border-radius:1vmin;padding:1.5vmin;border:2px solid #30363d;font-size:max(12px,2vmin);overflow-wrap:anywhere}
+li.red{border-color:#f85149;background:#3c1618}
+li.running{border-color:#d29922}
+li.ok{border-color:#238636}
+</style>
+</head>
+<body>
+<h1 id="title">...</h1>
+<ul id="list"></ul>
+<script>
+const MARK={red:"✖",running:"▶",ok:"✔",unknown:"?"};
+const slug=decodeURIComponent(location.pathname.split("/").filter(Boolean)[1]||"");
+async function draw(){
+  const title=document.getElementById("title"),list=document.getElementById("list");
+  try{
+    const r=await fetch("/api/fleet/group?slug="+encodeURIComponent(slug),{cache:"no-store"});
+    const j=await r.json();
+    if(!j.ok){title.textContent=slug+" ?";list.textContent="";return}
+    title.textContent=MARK[j.state]+" "+j.key+" - "+j.red+" / "+j.repos;
+    document.title=j.key+" - GitHub Actions Monitor";
+    list.textContent="";
+    j.rows.forEach(row=>{const li=document.createElement("li");li.className=row.state;li.textContent=MARK[row.state]+" "+row.repo;list.append(li)});
+  }catch(e){title.textContent="⚠ "+slug}
+}
+draw();setInterval(draw,30000);
+</script>
+</body>
+</html>
