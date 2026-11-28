@@ -9,6 +9,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+### Corrigé
+
+- **La vérification dans le navigateur des parties optionnelles** mesure à nouveau une page, jusqu'à trois fois, quand le navigateur n'a plus de tampons de socket (`net::ERR_NO_BUFFER_SPACE`) ; tout autre problème échoue aussitôt.
+
 ## [2.2.0]
 
 ### Ajouté
@@ -1658,7 +1662,7 @@ Une version d'intégrité et de sécurité : aucune grande fonction nouvelle. Ce
 | `<signed_dir>/lotes/lote_<time>.json` | `<signed_dir>/batches/batch_<time>.json` (les anciens enregistrements sont encore lus) |
 | `parte_history_days` (réglage) | `report_history_days` (l'ancien nom est encore lu) |
 | `monitor_y_centinela.zip` et dossier | `github_actions_monitor.zip` et dossier ; `LEEME_CORREO.txt` devient `README_MAIL.txt` |
-| A8 cherchait `RECONCILIACION_TOTAL_AUDITORIAS_*.txt`, `MAPA_DE_RONDAS_*` | les noms sont `sentinel.audit_files` (valeurs neutres par défaut `RECONCILIATION_TOTAL_*.txt`, `ROUNDS_MAP_2*.txt`, `ROUNDS_MAP_EXTRA_*.txt`) ; indiquez-y les vôtres |
+| A8 cherchait des fichiers de rapport aux noms fixes | les noms sont `sentinel.audit_files` (valeurs neutres par défaut `RECONCILIATION_TOTAL_*.txt`, `ROUNDS_MAP_2*.txt`, `ROUNDS_MAP_EXTRA_*.txt`) ; indiquez-y les vôtres |
 | `ci_red.json`, son schéma et les fichiers de `--export-status` | inchangés (ils sont un contrat) |
 
 - **Anglais par défaut.** La langue du système ne décide plus : les outils démarrent en anglais tant que vous n'en choisissez pas une autre dans l'onglet Réglages, avec `language` dans `actions_monitor.json`, `MONITOR_LANG` ou `--lang`.

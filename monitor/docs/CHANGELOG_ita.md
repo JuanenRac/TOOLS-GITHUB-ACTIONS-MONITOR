@@ -9,6 +9,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+### Corretto
+
+- **La verifica nel browser delle parti facoltative** misura di nuovo una pagina, fino a tre volte, quando il browser esaurisce i buffer dei socket (`net::ERR_NO_BUFFER_SPACE`); ogni altro problema fallisce subito.
+
 ## [2.2.0]
 
 ### Aggiunto
@@ -1656,7 +1660,7 @@ Una versione di integrità e sicurezza: nessuna grande funzione nuova. Ciò che 
 | `<signed_dir>/lotes/lote_<time>.json` | `<signed_dir>/batches/batch_<time>.json` (i vecchi registri vengono ancora letti) |
 | `parte_history_days` (impostazione) | `report_history_days` (il vecchio nome viene ancora letto) |
 | `monitor_y_centinela.zip` e cartella | `github_actions_monitor.zip` e cartella; `LEEME_CORREO.txt` diventa `README_MAIL.txt` |
-| A8 cercava `RECONCILIACION_TOTAL_AUDITORIAS_*.txt`, `MAPA_DE_RONDAS_*` | i nomi sono `sentinel.audit_files` (valori neutri predefiniti `RECONCILIATION_TOTAL_*.txt`, `ROUNDS_MAP_2*.txt`, `ROUNDS_MAP_EXTRA_*.txt`); inserisci lì i tuoi |
+| A8 cercava file di rapporto con nomi fissi | i nomi sono `sentinel.audit_files` (valori neutri predefiniti `RECONCILIATION_TOTAL_*.txt`, `ROUNDS_MAP_2*.txt`, `ROUNDS_MAP_EXTRA_*.txt`); inserisci lì i tuoi |
 | `ci_red.json`, il suo schema e i file di `--export-status` | invariati (sono un contratto) |
 
 - **Inglese di default.** La lingua del sistema non decide più: gli strumenti partono in inglese finché non ne scegli un'altra nella scheda Impostazioni, con `language` in `actions_monitor.json`, `MONITOR_LANG` o `--lang`.

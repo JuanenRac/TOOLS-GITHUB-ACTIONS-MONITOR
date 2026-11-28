@@ -2,6 +2,9 @@
 # GPL-3.0-or-later - see LICENSE
 """The boxes of the optional parts in a real browser (tools/check_parts.py): on a phone and on a computer every box opens, nothing leaves it, no control is under 44 px on the phone and the browser
 reports no error; every main tab can be seen (also on a phone held sideways), the figures of the header fold on a phone and the groups of Settings are a list on the left. The CI measures the eight languages and the wall sizes in a job of its own; here two languages stand for all of them."""
+import asyncio
+import contextlib
+import io
 import json
 import os
 import sys
@@ -48,6 +51,34 @@ class TheBoxesOfTheOptionalParts(unittest.TestCase):
             self.assertIn("{running}", catalogue["ui.tiles_show"], lang)
             self.assertIn("{repos}", catalogue["ui.tiles_show"], lang)
             self.assertTrue(catalogue["ui.tiles_hide"].strip(), lang)
+
+    def test_a_page_that_met_a_lack_of_socket_buffers_is_measured_again(self):
+        lost = "chat: console: Failed to load resource: net::ERR_NO_BUFFER_SPACE /api/alerts"
+
+        def measurer(*answers):
+            queue = list(answers)
+
+            async def measure():
+                answer = queue.pop(0)
+                if isinstance(answer, Exception):
+                    raise answer
+                return {"chat": answer}
+
+            return measure, queue
+
+        def run(measure):
+            with contextlib.redirect_stderr(io.StringIO()):
+                return asyncio.run(check_parts.retried(measure, pause=0))
+
+        measure, left = measurer([lost], RuntimeError("the page did not load: net::ERR_NO_BUFFER_SPACE"), [])
+        self.assertEqual((run(measure), left), ({"chat": []}, []))
+        measure, left = measurer([lost], [lost], [lost], [])
+        self.assertEqual((run(measure), len(left)), ({"chat": [lost]}, 1), "after the last attempt the error stands")
+        measure, left = measurer(["chat: the box did not appear"], [])
+        self.assertEqual((run(measure), len(left)), ({"chat": ["chat: the box did not appear"]}, 1), "any other problem is not measured again")
+        measure, left = measurer(RuntimeError("the measuring script failed"), [])
+        self.assertRaises(RuntimeError, run, measure)
+        self.assertEqual(len(left), 1)
 
     @LOCAL_ONLY
     def test_every_box_fits_on_a_phone_and_on_a_computer_without_errors(self):

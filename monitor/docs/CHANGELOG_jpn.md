@@ -9,6 +9,10 @@
 
 ## [Unreleased]
 
+### 修正
+
+- **追加部分のブラウザー検査**は、ブラウザーのソケットバッファーが足りなくなった場合（`net::ERR_NO_BUFFER_SPACE`）、そのページを最大 3 回まで測定し直します。ほかの問題はすぐに失敗します。
+
 ## [2.2.0]
 
 ### 追加
@@ -1658,7 +1662,7 @@ Issue とプルリクエストのための 2 つ目の番人、すべての番�
 | `<signed_dir>/lotes/lote_<time>.json` | `<signed_dir>/batches/batch_<time>.json`（古い記録も引き続き読み取られます） |
 | `parte_history_days`（設定） | `report_history_days`（古い名前も引き続き読み取られます） |
 | `monitor_y_centinela.zip` とフォルダー | `github_actions_monitor.zip` とフォルダー。`LEEME_CORREO.txt` は `README_MAIL.txt` に |
-| A8 は `RECONCILIACION_TOTAL_AUDITORIAS_*.txt`、`MAPA_DE_RONDAS_*` を探していた | 名前は `sentinel.audit_files` で指定します（中立な既定値 `RECONCILIATION_TOTAL_*.txt`、`ROUNDS_MAP_2*.txt`、`ROUNDS_MAP_EXTRA_*.txt`）。自分の名前をここに設定してください |
+| A8 は固定された名前の報告ファイルを探していた | 名前は `sentinel.audit_files` で指定します（中立な既定値 `RECONCILIATION_TOTAL_*.txt`、`ROUNDS_MAP_2*.txt`、`ROUNDS_MAP_EXTRA_*.txt`）。自分の名前をここに設定してください |
 | `ci_red.json`、そのスキーマ、`--export-status` のファイル | 変更なし（規約です） |
 
 - **既定は英語。** システムの言語では決まらなくなりました。設定タブ、`actions_monitor.json` の `language`、`MONITOR_LANG`、`--lang` で別の言語を選ぶまで、ツールは英語で起動します。

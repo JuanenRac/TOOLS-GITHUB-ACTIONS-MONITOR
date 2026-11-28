@@ -9,6 +9,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+### Behoben
+
+- **Die Browserprüfung der optionalen Teile** misst eine Seite bis zu dreimal erneut, wenn dem Browser die Socket-Puffer ausgehen (`net::ERR_NO_BUFFER_SPACE`); jedes andere Problem schlägt sofort fehl.
+
 ## [2.2.0]
 
 ### Hinzugefügt
@@ -1657,7 +1661,7 @@ Eine Version für Integrität und Sicherheit: keine große neue Funktion. Was si
 | `<signed_dir>/lotes/lote_<time>.json` | `<signed_dir>/batches/batch_<time>.json` (die alten Protokolle werden weiterhin gelesen) |
 | `parte_history_days` (Einstellung) | `report_history_days` (der alte Name wird weiterhin gelesen) |
 | `monitor_y_centinela.zip` und Ordner | `github_actions_monitor.zip` und Ordner; `LEEME_CORREO.txt` heißt `README_MAIL.txt` |
-| A8 suchte `RECONCILIACION_TOTAL_AUDITORIAS_*.txt`, `MAPA_DE_RONDAS_*` | die Namen stehen in `sentinel.audit_files` (neutrale Standardwerte `RECONCILIATION_TOTAL_*.txt`, `ROUNDS_MAP_2*.txt`, `ROUNDS_MAP_EXTRA_*.txt`); trage dort deine eigenen ein |
+| A8 suchte Berichtsdateien mit festen Namen | die Namen stehen in `sentinel.audit_files` (neutrale Standardwerte `RECONCILIATION_TOTAL_*.txt`, `ROUNDS_MAP_2*.txt`, `ROUNDS_MAP_EXTRA_*.txt`); trage dort deine eigenen ein |
 | `ci_red.json`, sein Schema und die Dateien von `--export-status` | unverändert (sie sind ein Vertrag) |
 
 - **Standardmäßig Englisch.** Die Systemsprache entscheidet nicht mehr: Die Werkzeuge starten auf Englisch, bis du im Reiter Einstellungen, mit `language` in `actions_monitor.json`, `MONITOR_LANG` oder `--lang` eine andere wählst.

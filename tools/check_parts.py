@@ -266,6 +266,26 @@ def problems(report):
     return lines + [f"{step}: {e}" for e in report.get("errors", []) if e not in EXPECTED]
 
 
+#: a busy runner can run out of socket buffers for a moment and a request of the page is lost: that page is measured again
+TRANSIENT = "net::ERR_NO_BUFFER_SPACE"
+ATTEMPTS = 3
+
+
+async def retried(measure, attempts=ATTEMPTS, pause=5.0):
+    """What `measure()` returns ({key: [problem, ...]}); measured again, after a pause, while something could not be loaded for lack of socket buffers. The last attempt stands as it is."""
+    for attempt in range(1, attempts + 1):
+        try:
+            found = await measure()
+        except RuntimeError as error:
+            if TRANSIENT not in str(error) or attempt == attempts:
+                raise
+        else:
+            if attempt == attempts or not any(TRANSIENT in line for lines in found.values() for line in lines):
+                return found
+        print(f"{TRANSIENT}: measuring again ({attempt + 1} of {attempts})", file=sys.stderr, flush=True)
+        await asyncio.sleep(pause * attempt)
+
+
 class Session:
     """One headless browser and one tab, driven through the DevTools protocol."""
 
@@ -331,7 +351,9 @@ class Session:
 
     async def open(self, url, notes):
         self.errors.clear()
-        await self.call("Page.navigate", url=url)
+        answer = await self.call("Page.navigate", url=url)
+        if TRANSIENT in str(answer.get("errorText", "")):
+            raise RuntimeError("the page did not load: " + TRANSIENT)
         for _ in range(150):
             await asyncio.sleep(0.2)
             try:
@@ -388,20 +410,28 @@ async def _run(browser, base, jobs, shots, quiet):
             for url, steps in ((f"{base}/?lang={lang}&theme={theme}&nowizard=1", STEPS), (f"{base}/g/alpha", (GROUP,))):
                 if steps == (GROUP,) and lang != jobs[0][0]:
                     continue      # the screen of a group has no translated text: one language is enough for each size
-                await session.open(url, summaries.get(lang, summaries["en"]))
-                for name in steps:
-                    report = await session.step(name, phone)
-                    found = problems(report)
-                    if name != GROUP and report.get("width") not in (None, width):
-                        found.append(f"{name}: the window is {report.get('width')} px wide, not {width}")
-                    results[(lang, size, name)] = found
-                    if name in PAGE_STEPS and shots:
-                        await session.evaluate(PICTURE[name])
-                        await asyncio.sleep(0.4)
-                    if shots and not report.get("missing"):
-                        await session.picture(Path(shots) / f"{name}_{lang}_{size}.png")
+                async def page(url=url, steps=steps):
+                    await session.open(url, summaries.get(lang, summaries["en"]))
+                    measured = {}
+                    for name in steps:
+                        report = await session.step(name, phone)
+                        found = problems(report)
+                        if name != GROUP and report.get("width") not in (None, width):
+                            found.append(f"{name}: the window is {report.get('width')} px wide, not {width}")
+                        measured[(lang, size, name)] = found
+                        if name in PAGE_STEPS and shots:
+                            await session.evaluate(PICTURE[name])
+                            await asyncio.sleep(0.4)
+                        if shots and not report.get("missing"):
+                            await session.picture(Path(shots) / f"{name}_{lang}_{size}.png")
+                    return measured
+
+                results.update(await retried(page))
             if lang == jobs[0][0] and (phone or size.startswith("land")):
-                results[(lang, size, "header_fold_remembered")] = await _remembered(session, f"{base}/?lang={lang}&theme={theme}&nowizard=1")
+                async def remembered():
+                    return {(lang, size, "header_fold_remembered"): await _remembered(session, f"{base}/?lang={lang}&theme={theme}&nowizard=1")}
+
+                results.update(await retried(remembered))
             if not quiet:
                 print(lang, size, sum(len(v) for k, v in results.items() if k[:2] == (lang, size)), "problems", flush=True)
     finally:
