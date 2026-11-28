@@ -12,6 +12,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 ### Corretto
 
 - **La verifica nel browser delle parti facoltative** misura di nuovo una pagina, fino a tre volte, quando il browser esaurisce i buffer dei socket (`net::ERR_NO_BUFFER_SPACE`); ogni altro problema fallisce subito.
+- Il controllo dei workflow non diventa più verde quando una lettura a lotti accorcia un elenco che era pieno: resta «sconosciuto».
+- Un orario impossibile da un server di CI esterno segna come degradata solo quella fonte; le altre vengono ancora lette.
 
 ## [2.2.0]
 

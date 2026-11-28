@@ -12,6 +12,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 ### Behoben
 
 - **Die Browserprüfung der optionalen Teile** misst eine Seite bis zu dreimal erneut, wenn dem Browser die Socket-Puffer ausgehen (`net::ERR_NO_BUFFER_SPACE`); jedes andere Problem schlägt sofort fehl.
+- Die Workflow-Prüfung wird nicht mehr grün, wenn ein gebündeltes Lesen eine volle Liste kürzer macht: Sie bleibt „unbekannt“.
+- Ein unmöglicher Zeitstempel eines externen CI-Servers markiert nur diese Quelle als eingeschränkt; die anderen werden weiter gelesen.
 
 ## [2.2.0]
 

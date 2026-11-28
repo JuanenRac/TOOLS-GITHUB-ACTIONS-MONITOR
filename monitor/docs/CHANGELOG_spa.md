@@ -12,6 +12,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 ### Corregido
 
 - **La comprobación en el navegador de las partes opcionales** vuelve a medir una página, hasta tres veces, cuando el navegador se queda sin búferes de socket (`net::ERR_NO_BUFFER_SPACE`); cualquier otro problema falla enseguida.
+- La comprobación de flujos ya no se pone en verde cuando una lectura por lotes deja más corta una lista que estaba llena: sigue como «desconocido».
+- Una marca de tiempo imposible de un servidor de CI externo marca como degradada solo esa fuente; las demás se siguen leyendo.
 
 ## [2.2.0]
 

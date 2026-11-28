@@ -14,6 +14,8 @@ when this file and `tool_version.py` disagree.
 ### Fixed
 
 - **The browser check of the optional parts** measures a page again, up to three times, when the browser runs out of socket buffers (`net::ERR_NO_BUFFER_SPACE`); any other problem fails at once.
+- A workflow check no longer turns green after a batched read leaves a list that was full shorter than before: it stays "unknown".
+- An impossible timestamp from one external CI server marks only that source as degraded; the other sources are still read.
 
 ## [2.2.0]
 

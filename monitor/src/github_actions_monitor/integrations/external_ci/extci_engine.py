@@ -9,6 +9,7 @@ import time
 from urllib.parse import urlsplit
 
 from github_actions_monitor import families, i18n
+from github_actions_monitor.app import degraded
 from github_actions_monitor.data_pipeline import redrule, repo_identity
 from github_actions_monitor.integrations.external_ci import extci_adapters as adapters
 from github_actions_monitor.integrations.external_ci.extci_fetch import Failed, Reader
@@ -161,7 +162,7 @@ def read(source, cfg, use_proxy=False, opener=None, cache=None):
         reader.cache = cache
     try:
         runs, missing = adapters.ADAPTERS[source["kind"]](reader, source, cfg)
-    except (AttributeError, KeyError, TypeError, ValueError, OverflowError):      # an answer with another shape
+    except (AttributeError, KeyError, TypeError, ValueError, OverflowError, OSError):      # an answer with another shape, or a time no calendar holds
         raise Failed("not_json") from None
     return reader, runs, missing
 
@@ -185,14 +186,20 @@ def refresh(config, now=None, opener=None, jitter=random.random):
         done += 1
         entry["last_try"] = now
         try:
-            reader, runs, missing = read(source, cfg, _use_proxy(config), opener, entry["reader_cache"])
+            try:
+                reader, runs, missing = read(source, cfg, _use_proxy(config), opener, entry["reader_cache"])
+                reds, judged = verdicts(runs)
+            except Failed:
+                raise
+            except Exception as error:   # noqa: BLE001 - one source never stops the reading of the others
+                degraded.note("loop.extra", error)
+                raise Failed("not_json") from None
         except Failed as error:
             entry["failures"] += 1
             entry["reason"] = error.reason
             over = entry["failures"] - cfg["breaker"]["failures"]
             entry["next"] = now + every * (min(8, 2 ** (over + 1)) if over >= 0 else 1)      # the circuit of this source: it waits longer, never shorter than the interval
             continue
-        reds, judged = verdicts(runs)
         with LOCK:
             entry.update(failures=0, last_ok=now, reason="", runs=runs, judged=judged, missing=missing, next=now + every * (1 + 0.1 * jitter()), reds=[row_of(source, item) for item in reds])
         if cfg["logs"]["enabled"]:

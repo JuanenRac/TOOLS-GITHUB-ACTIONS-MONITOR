@@ -1040,6 +1040,16 @@ def rate_block_state(rate=None, now=None):
 REFRESH_COUNT = [0]      # repositories the last cycle read (the metric ghamon_tick_reads_last)
 
 
+def keep_sample_full(repo, held, merged, config):
+    """A list that was full (older workflows may be hidden beyond it) stays full when a batch read leaves it shorter: only a read of the runs themselves can say that all of them were seen."""
+    info = SAMPLE_INFO.get(repo) or {}
+    own = len([r for r in held if not r.get("probe")])
+    asked, total = info.get("asked"), info.get("total")
+    limit = asked or config.get("cold_runs_per_repo") or 0
+    if own and ((limit and own >= limit) or (total or 0) > own):
+        SAMPLE_INFO[repo] = dict(info, asked=max(1, len([r for r in merged if not r.get("probe")])), total=total, probe=info.get("probe", 0))
+
+
 def refresh_runs(repos, config, progress=None):
     """Hot repositories every cycle with the full run list, cold ones only now and then with a short list."""
     now = time.time()
@@ -1080,8 +1090,11 @@ def refresh_runs(repos, config, progress=None):
         BUDGET.record(1)
         for repo, runs in batched.items():
             named = {redrule.workflow_key(r) for r in runs}
-            kept = [r for r in ((RUN_CACHE.get(repo) or {}).get("runs") or []) if redrule.workflow_key(r) not in named]      # the batch only sees the last commit of the branch: what it does not name (a cron, a workflow with a path filter) is kept
-            note_read(repo, list(runs) + kept, None)
+            held = (RUN_CACHE.get(repo) or {}).get("runs") or []
+            kept = [r for r in held if redrule.workflow_key(r) not in named]      # the batch only sees the last commit of the branch: what it does not name (a cron, a workflow with a path filter) is kept
+            merged = list(runs) + kept
+            keep_sample_full(repo, held, merged, config)
+            note_read(repo, merged, None)
         todo = [item for item in todo if item[0] not in batched]
     limit = sampling.settings(config)["api_budget_per_hour"]
     probing = sampling.settings(config)["default_branch_probe"]

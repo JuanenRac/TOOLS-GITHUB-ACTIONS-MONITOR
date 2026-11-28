@@ -12,6 +12,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 ### Corrigido
 
 - **A verificação no navegador das partes opcionais** volta a medir uma página, até três vezes, quando o navegador fica sem memória intermédia de sockets (`net::ERR_NO_BUFFER_SPACE`); qualquer outro problema falha de imediato.
+- A verificação de workflows já não fica verde quando uma leitura em lote encurta uma lista que estava cheia: mantém-se «desconhecido».
+- Uma data impossível de um servidor de CI externo marca como degradada apenas essa fonte; as outras continuam a ser lidas.
 
 ## [2.2.0]
 

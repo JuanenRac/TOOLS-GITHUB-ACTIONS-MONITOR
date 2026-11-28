@@ -12,6 +12,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 ### Corrigé
 
 - **La vérification dans le navigateur des parties optionnelles** mesure à nouveau une page, jusqu'à trois fois, quand le navigateur n'a plus de tampons de socket (`net::ERR_NO_BUFFER_SPACE`) ; tout autre problème échoue aussitôt.
+- La vérification des workflows ne passe plus au vert lorsqu'une lecture groupée raccourcit une liste qui était pleine : elle reste « inconnue ».
+- Un horodatage impossible d'un serveur de CI externe ne marque comme dégradée que cette source ; les autres sont toujours lues.
 
 ## [2.2.0]
 
